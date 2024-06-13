@@ -59,7 +59,8 @@ class TilbakekrevingService(
                 sakDao.hentSak(kravgrunnlag.sakId.value)
                     ?: throw TilbakekrevingHarMangelException("Tilbakekreving mangler sak")
 
-            tilbakekrevingDao.hentTilbakekrevinger(sak.id)
+            tilbakekrevingDao
+                .hentTilbakekrevinger(sak.id)
                 .find { it.underBehandlingEllerFattetVedtak() }
                 ?.let {
                     throw TilbakekrevingUnderBehandlingFinnesAlleredeException(
@@ -74,7 +75,8 @@ class TilbakekrevingService(
                 )
 
             val oppgaveFraBehandlingMedFeilutbetaling =
-                oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sakId.value.toString())
+                oppgaveService
+                    .hentOppgaverForReferanse(kravgrunnlag.sakId.value.toString())
                     .filter { it.type == OppgaveType.TILBAKEKREVING }
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }
@@ -88,11 +90,11 @@ class TilbakekrevingService(
                 )
             } else {
                 logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = tilbakekreving.id.toString(),
                     sakId = tilbakekreving.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Kravgrunnlag mottatt",
                 )
             }
@@ -118,7 +120,8 @@ class TilbakekrevingService(
             sjekkAtTilbakekrevingIkkeErFerdigstiltEllerAvbrutt(tilbakekreving)
 
             val oppgave =
-                oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString())
+                oppgaveService
+                    .hentOppgaverForReferanse(tilbakekreving.id.toString())
                     .firstOrNull { it.type == OppgaveType.TILBAKEKREVING } ?: throw TilbakekrevingFeilTilstandException(
                     "Fant ingen oppgave tilknyttet ${tilbakekreving.id}",
                 )
@@ -445,6 +448,7 @@ class TilbakekrevingService(
         tilbakekreving: TilbakekrevingBehandling,
         vedtak: TilbakekrevingVedtakLagretDto,
     ) = TilbakekrevingVedtak(
+        sakId = tilbakekreving.sak.id,
         vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
         fattetVedtak =
             FattetVedtak(
@@ -454,7 +458,9 @@ class TilbakekrevingService(
             ),
         aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),
         hjemmel = hjemmelFraVurdering(requireNotNull(tilbakekreving.tilbakekreving.vurdering)),
-        kravgrunnlagId = tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
+        kravgrunnlagId =
+            tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value
+                .toString(),
         kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
         perioder =
             tilbakekreving.tilbakekreving.perioder.map {
@@ -466,13 +472,12 @@ class TilbakekrevingService(
             },
     )
 
-    private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel {
-        return if (vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+    private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel =
+        if (vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
             TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
         } else {
             requireNotNull(vurdering.rettsligGrunnlag)
         }
-    }
 
     private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling): StatistikkTilbakekrevingDto {
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(tilbakekreving.sak.id)?.type

@@ -12,18 +12,20 @@ val sikkerLogg = sikkerlogger()
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val ab = AppBuilder(Miljoevariabler(rapidEnv))
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            val ab = AppBuilder(Miljoevariabler(rapidEnv))
 
-        NySoeknadRiver(
-            rapidsConnection = rapidsConnection,
-            behandlingKlient = ab.behandlingKlient,
-            journalfoerSoeknadService = ab.journalfoerSoeknadService,
-        )
+            NySoeknadRiver(
+                rapidsConnection = rapidsConnection,
+                behandlingKlient = ab.behandlingKlient,
+                journalfoerSoeknadService = ab.journalfoerSoeknadService,
+            )
 
-        OpprettBehandlingRiver(
-            rapidsConnection,
-            ab.behandlingKlient,
-        )
-    }.start()
+            OpprettBehandlingRiver(
+                rapidsConnection,
+                ab.behandlingKlient,
+            )
+        }.start()
 }

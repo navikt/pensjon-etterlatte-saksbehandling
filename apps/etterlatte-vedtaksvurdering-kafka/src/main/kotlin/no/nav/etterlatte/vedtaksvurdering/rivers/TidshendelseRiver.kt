@@ -142,7 +142,8 @@ class TidshendelseRiver(
             logger.info("Dryrun: Fatter ikke vedtak for behandling=$behandlingIdForOpphoer")
         } else {
             logger.info("Fatter opphørsvedtak for behandling=$behandlingIdForOpphoer")
-            vedtakService.opprettVedtakFattOgAttester(sakId, behandlingIdForOpphoer)
+            vedtakService
+                .opprettVedtakFattOgAttester(sakId, behandlingIdForOpphoer)
                 .let {
                     RapidUtsender.sendUt(it, JsonMessage.newMessage(emptyMap()), context)
                 }

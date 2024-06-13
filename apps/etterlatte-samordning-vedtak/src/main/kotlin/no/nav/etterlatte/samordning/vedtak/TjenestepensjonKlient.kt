@@ -18,7 +18,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) {
+class TjenestepensjonKlient(
+    config: Config,
+    private val httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(TjenestepensjonKlient::class.java)
     private val sikkerLogg = sikkerlogger()
 
@@ -33,10 +36,11 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
         val tpNumre: TpNumre =
             handleFeil(fnr, tpnr, fomDato) {
-                httpClient.get {
-                    url("$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato")
-                    header("fnr", fnr)
-                }.let { deserialize<TpNumre>(it.body()) }
+                httpClient
+                    .get {
+                        url("$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato")
+                        header("fnr", fnr)
+                    }.let { deserialize<TpNumre>(it.body()) }
             }
 
         return tpNumre.tpNr.contains(tpnr.value)

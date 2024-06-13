@@ -44,8 +44,8 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     private var sakId: Long = 0L
 
-    fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
-        return inTransaction {
+    fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
+        inTransaction {
             val sak =
                 applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
@@ -61,7 +61,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     )?.behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }
-    }
 
     private fun iverksettFoerstegangsbehandling(
         sak: Sak,
@@ -85,7 +84,8 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         val virkningstidspunkt = virkningstidspunktVurdering()
 
         val iverksattBehandling =
-            behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
+            behandling
+                .copy(kommerBarnetTilgode = kommerBarnetTilgode)
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert()
@@ -110,32 +110,34 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 val (sak, behandling) = opprettSakMedFoerstegangsbehandling(i.toString())
                 iverksettFoerstegangsbehandling(sak, behandling)
                 val (omregning) =
-                    client.post("/omregning") {
-                        addAuthToken(this@OmregningIntegrationTest.systemBruker)
+                    client
+                        .post("/omregning") {
+                            addAuthToken(this@OmregningIntegrationTest.systemBruker)
+                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            setBody(
+                                Omregningshendelse(
+                                    sakId,
+                                    LocalDate.now(),
+                                    null,
+                                    Prosesstype.AUTOMATISK,
+                                ),
+                            )
+                        }.let {
+                            Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                            it.body<OpprettOmregningResponse>()
+                        }
+
+                client
+                    .get("/behandlinger/$omregning") {
+                        addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(
-                            Omregningshendelse(
-                                sakId,
-                                LocalDate.now(),
-                                null,
-                                Prosesstype.AUTOMATISK,
-                            ),
-                        )
                     }.let {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                        it.body<OpprettOmregningResponse>()
+                        it.body<DetaljertBehandling>().also { behandling ->
+                            Assertions.assertEquals(omregning, behandling.id)
+                            Assertions.assertEquals(sakId, behandling.sak)
+                        }
                     }
-
-                client.get("/behandlinger/$omregning") {
-                    addAuthToken(tokenSaksbehandler)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body<DetaljertBehandling>().also { behandling ->
-                        Assertions.assertEquals(omregning, behandling.id)
-                        Assertions.assertEquals(sakId, behandling.sak)
-                    }
-                }
             }
         }
     }
@@ -149,13 +151,14 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     module(applicationContext)
                 }
 
-            client.post("/omregning") {
-                addAuthToken(this@OmregningIntegrationTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Omregningshendelse(sak.id, LocalDate.now(), null, Prosesstype.AUTOMATISK))
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
-            }
+            client
+                .post("/omregning") {
+                    addAuthToken(this@OmregningIntegrationTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(Omregningshendelse(sak.id, LocalDate.now(), null, Prosesstype.AUTOMATISK))
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
+                }
         }
     }
 }

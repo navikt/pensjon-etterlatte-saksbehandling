@@ -5,11 +5,10 @@ import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Info } from '../Info'
-import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { HStack } from '@navikt/ds-react'
+import { Button, HStack } from '@navikt/ds-react'
 
 interface AdresseProps {
   label: string
@@ -81,7 +80,9 @@ export const OversiktKommerBarnetTilgode = ({
           />
         )}
         {!vurdert && redigerbar && (
-          <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+          <Button variant="secondary" onClick={() => setVurdert(true)}>
+            Legg til vurdering
+          </Button>
         )}
       </Vurdering>
     </LovtekstMedLenke>

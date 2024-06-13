@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
@@ -41,8 +40,9 @@ import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class KunneIkkeLukkeOppgaveForhendelse(message: String) :
-    UgyldigForespoerselException(
+class KunneIkkeLukkeOppgaveForhendelse(
+    message: String,
+) : UgyldigForespoerselException(
         code = "FEIL_MED_OPPGAVE_UNDER_LUKKING",
         detail = message,
     )
@@ -91,13 +91,6 @@ class GrunnlagsendringshendelseService(
         inTransaction {
             grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
             try {
-                val oppgaveForReferanse =
-                    oppgaveService.hentOppgaverForReferanse(hendelse.id.toString()).singleOrNull()
-                        ?: throw BadRequestException("Ugyldig antall oppgaver med referanse: ${hendelse.id}")
-
-                if (oppgaveForReferanse.manglerSaksbehandler()) {
-                    oppgaveService.tildelSaksbehandler(oppgaveForReferanse.id, saksbehandler.ident)
-                }
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
                     referanse = hendelse.id.toString(),
                     type = OppgaveType.VURDER_KONSEKVENS,
@@ -119,9 +112,10 @@ class GrunnlagsendringshendelseService(
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
-    private fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
-        return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
-    }
+    private fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> =
+        inTransaction {
+            opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
+        }
 
     fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
         if (doedshendelseService.kanBrukeDeodshendelserJob()) {
@@ -137,46 +131,42 @@ class GrunnlagsendringshendelseService(
         return emptyList()
     }
 
-    fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction {
+    fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> =
+        inTransaction {
             opprettHendelseAvTypeForPerson(
                 utflyttingsHendelse.fnr,
                 GrunnlagsendringsType.UTFLYTTING,
             )
         }
-    }
 
-    fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction {
+    fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> =
+        inTransaction {
             opprettHendelseAvTypeForPerson(
                 forelderBarnRelasjonHendelse.fnr,
                 GrunnlagsendringsType.FORELDER_BARN_RELASJON,
             )
         }
-    }
 
     fun opprettVergemaalEllerFremtidsfullmakt(
         vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt,
-    ): List<Grunnlagsendringshendelse> {
-        return inTransaction {
+    ): List<Grunnlagsendringshendelse> =
+        inTransaction {
             opprettHendelseAvTypeForPerson(
                 vergeMaalEllerFremtidsfullmakt.fnr,
                 GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
             )
         }
-    }
 
-    fun opprettSivilstandHendelse(sivilstandHendelse: SivilstandHendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction {
+    fun opprettSivilstandHendelse(sivilstandHendelse: SivilstandHendelse): List<Grunnlagsendringshendelse> =
+        inTransaction {
             opprettHendelseAvTypeForPerson(
                 sivilstandHendelse.fnr,
                 GrunnlagsendringsType.SIVILSTAND,
             )
         }
-    }
 
-    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> {
-        return opprettHendelseInstitusjonsoppholdForPerson(
+    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
+        opprettHendelseInstitusjonsoppholdForPerson(
             fnr = oppholdsHendelse.norskident,
             samsvar =
                 SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
@@ -185,30 +175,38 @@ class GrunnlagsendringshendelseService(
                     oppholdBeriket = oppholdsHendelse,
                 ),
         )
-    }
 
-    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
-        return inTransaction {
+    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> =
+        inTransaction {
             opprettHendelseAvTypeForSak(
                 sakId,
                 GrunnlagsendringsType.GRUNNBELOEP,
             )
         }
-    }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
-
         inTransaction {
-            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
+            val (eksisterendeSaker, manglendeSaker) =
+                sakIder
+                    .map { it to sakService.finnSak(it) }
+                    .partition { it.second != null }
 
-            sakIder.forEach { sakId ->
+            val faktiskeSaker = eksisterendeSaker.map { it.second!! }
+
+            if (manglendeSaker.isNotEmpty()) {
+                logger.error("Sakider som ikke finnes lenger ${manglendeSaker.map { it.first }.joinToString { "," }}")
+            }
+
+            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = faktiskeSaker)
+
+            faktiskeSaker.forEach { sak ->
                 sakService.oppdaterAdressebeskyttelse(
-                    sakId,
+                    sak.id,
                     gradering,
                 )
-                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sak med gradering=$gradering")
             }
         }
 
@@ -225,10 +223,10 @@ class GrunnlagsendringshendelseService(
     private fun oppdaterEnheterForsaker(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
+        saker: List<Sak>,
     ) {
-        val finnSaker = sakService.finnSaker(fnr)
         val sakerMedNyEnhet =
-            finnSaker.map {
+            saker.map {
                 SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
@@ -239,8 +237,8 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
         sakType: SakType,
-    ): String {
-        return when (gradering) {
+    ): String =
+        when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
@@ -251,7 +249,6 @@ class GrunnlagsendringshendelseService(
                 brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
         }
-    }
 
     fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
@@ -290,11 +287,11 @@ class GrunnlagsendringshendelseService(
                             gjelderPerson = fnr,
                             samsvarMellomKildeOgGrunnlag = samsvar,
                         )
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    oppgaveService.opprettOppgave(
                         referanse = hendelseId.toString(),
                         sakId = rolleOgSak.sakId,
-                        oppgaveKilde = OppgaveKilde.HENDELSE,
-                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.VURDER_KONSEKVENS,
                         merknad = hendelse.beskrivelse(),
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
@@ -327,8 +324,7 @@ class GrunnlagsendringshendelseService(
                 } else {
                     true
                 }
-            }
-            .filter { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(it.sak.id, grunnlagendringType) }
+            }.filter { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(it.sak.id, grunnlagendringType) }
             .map { rolleOgSak ->
                 val hendelse =
                     Grunnlagsendringshendelse(
@@ -435,17 +431,17 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern {
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = hendelse.id.toString(),
-            sakId = hendelse.sakId,
-            oppgaveKilde = OppgaveKilde.HENDELSE,
-            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-            merknad = hendelse.beskrivelse(),
-        ).also {
-            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-        }
-    }
+    private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern =
+        oppgaveService
+            .opprettOppgave(
+                referanse = hendelse.id.toString(),
+                sakId = hendelse.sakId,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse(),
+            ).also {
+                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
+            }
 
     internal fun forkastHendelse(
         hendelse: Grunnlagsendringshendelse,
@@ -469,12 +465,13 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {
         val relevanteHendelser =
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
-            ).filter {
-                it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
-            }
+            grunnlagsendringshendelseDao
+                .hentGrunnlagsendringshendelserMedStatuserISak(
+                    sakId,
+                    listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                ).filter {
+                    it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
+                }
         logger.info(
             "Hendelser på samme sakid $sakId antall ${relevanteHendelser.size} " +
                 "fnr: ${grunnlagsendringshendelse.gjelderPerson.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}",

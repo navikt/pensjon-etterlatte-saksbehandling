@@ -22,7 +22,12 @@ open class LeaderElection(
         if (electorPath != null) {
             val leader =
                 runBlocking {
-                    httpClient.get("http://$electorPath/").bodyAsText().let(objectMapper::readTree).get("name").asText()
+                    httpClient
+                        .get("http://$electorPath/")
+                        .bodyAsText()
+                        .let(objectMapper::readTree)
+                        .get("name")
+                        .asText()
                 }
             val isLeader = leader == hostName()
             logger.info("Current pod: ${hostName()?.sanitize()}. Leader: ${leader.sanitize()}. Current pod is leader: $isLeader")

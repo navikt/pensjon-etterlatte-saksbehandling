@@ -74,7 +74,7 @@ class TidshendelseRiver(
 
             is TidshendelseResult.OpprettRevurderingForAktivitetsplikt -> {
                 packetUpdates[ALDERSOVERGANG_STEG_KEY] = "AKTIVITETSPLIKT_REVURDERING_OPPRETTET"
-                result.behandlingId?.let { packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId }
+                packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId
             }
 
             is TidshendelseResult.Skipped -> {

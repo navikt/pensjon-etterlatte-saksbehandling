@@ -58,7 +58,9 @@ import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(GrunnlagDbExtension::class)
-internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
+internal class GrunnlagDaoIntegrationTest(
+    private val dataSource: DataSource,
+) {
     private lateinit var opplysningRepo: OpplysningDao
 
     @BeforeAll
@@ -88,11 +90,21 @@ internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
 
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(2).size)
-        assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(2).first().opplysning.id)
+        assertEquals(
+            uuid,
+            opplysningRepo
+                .finnHendelserIGrunnlag(2)
+                .first()
+                .opplysning.id,
+        )
         assertEquals(
             datoMottat,
-            opplysningRepo.finnHendelserIGrunnlag(1)
-                .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }.mottattDato,
+            opplysningRepo
+                .finnHendelserIGrunnlag(1)
+                .first()
+                .opplysning
+                .let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }
+                .mottattDato,
         )
     }
 
@@ -109,10 +121,19 @@ internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it, fnr) }
 
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
-        assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.id)
+        assertEquals(
+            uuid,
+            opplysningRepo
+                .finnHendelserIGrunnlag(1)
+                .first()
+                .opplysning.id,
+        )
         assertEquals(
             fnr,
-            opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.fnr,
+            opplysningRepo
+                .finnHendelserIGrunnlag(1)
+                .first()
+                .opplysning.fnr,
         )
     }
 
@@ -437,8 +458,10 @@ internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
 
         val versjoner =
             dataSource.connection.use {
-                it.prepareStatement("SELECT * FROM behandling_versjon WHERE sak_id = $sakId")
-                    .executeQuery().toList {
+                it
+                    .prepareStatement("SELECT * FROM behandling_versjon WHERE sak_id = $sakId")
+                    .executeQuery()
+                    .toList {
                         BehandlingGrunnlagVersjon(
                             getObject("behandling_id") as UUID,
                             getLong("sak_id"),
@@ -456,7 +479,27 @@ internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
 
     private fun opprettMockPerson(fnr: Folkeregisteridentifikator): Person =
         Person(
-            UUID.randomUUID().toString(), null, UUID.randomUUID().toString(), fnr, null, 1234, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null, null, null,
+            UUID.randomUUID().toString(),
+            null,
+            UUID.randomUUID().toString(),
+            fnr,
+            null,
+            1234,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
         )
 }

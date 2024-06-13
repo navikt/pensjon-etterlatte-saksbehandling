@@ -13,7 +13,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
@@ -41,6 +43,8 @@ fun Route.brevRoute(
     pdfService: PDFService,
     distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
+    grunnlagKlient: GrunnlagKlient,
+    behandlingKlient: BehandlingKlient,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
@@ -161,11 +165,12 @@ fun Route.brevRoute(
         }
 
         post {
+            // TODO: sjekk om unused, erstattet med /spesifikk?
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {
-                    service.opprettBrev(
+                    service.opprettNyttManueltBrev(
                         sakId,
                         brukerTokenInfo,
                         Brevkoder.TOMT_INFORMASJONSBREV.redigering,
@@ -181,9 +186,10 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
                 val brevParametre = call.receive<BrevParametre>()
-
+                val sak = behandlingKlient.hentSak(sakId, brukerTokenInfo)
+                grunnlagKlient.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
                 measureTimedValue {
-                    service.opprettBrev(
+                    service.opprettNyttManueltBrev(
                         sakId,
                         brukerTokenInfo,
                         brevParametre.brevkode,

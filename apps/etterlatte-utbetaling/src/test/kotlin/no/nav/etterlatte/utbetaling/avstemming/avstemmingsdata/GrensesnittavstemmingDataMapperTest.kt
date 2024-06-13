@@ -273,82 +273,93 @@ internal class GrensesnittavstemmingDataMapperTest {
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalinger`() {
         val fraOgMed =
-            LocalDateTime.of(
-                2020,
-                Month.APRIL,
-                10,
-                14,
-                0,
-                0,
-            ).minusDays(1).toNorskTidspunkt()
+            LocalDateTime
+                .of(
+                    2020,
+                    Month.APRIL,
+                    10,
+                    14,
+                    0,
+                    0,
+                ).minusDays(1)
+                .toNorskTidspunkt()
 
         val til =
-            LocalDateTime.of(
-                2022,
-                Month.JANUARY,
-                24,
-                22,
-                0,
-                0,
-            ).plusHours(1).toNorskTidspunkt()
+            LocalDateTime
+                .of(
+                    2022,
+                    Month.JANUARY,
+                    24,
+                    22,
+                    0,
+                    0,
+                ).plusHours(1)
+                .toNorskTidspunkt()
 
         val utbetalinger =
             listOf(
                 utbetaling(
                     avstemmingsnoekkel =
-                        LocalDateTime.of(
-                            2020,
-                            Month.APRIL,
-                            10,
-                            14,
-                            0,
-                            0,
-                        ).toNorskTidspunkt(),
+                        LocalDateTime
+                            .of(
+                                2020,
+                                Month.APRIL,
+                                10,
+                                14,
+                                0,
+                                0,
+                            ).toNorskTidspunkt(),
                 ),
                 utbetaling(
                     avstemmingsnoekkel =
-                        LocalDateTime.of(
-                            2020,
-                            Month.APRIL,
-                            10,
-                            14,
-                            0,
-                            0,
-                        ).plusDays(1).toNorskTidspunkt(),
+                        LocalDateTime
+                            .of(
+                                2020,
+                                Month.APRIL,
+                                10,
+                                14,
+                                0,
+                                0,
+                            ).plusDays(1)
+                            .toNorskTidspunkt(),
                 ),
                 utbetaling(
                     avstemmingsnoekkel =
-                        LocalDateTime.of(
-                            2022,
-                            Month.JANUARY,
-                            24,
-                            22,
-                            0,
-                            0,
-                        ).toNorskTidspunkt(),
+                        LocalDateTime
+                            .of(
+                                2022,
+                                Month.JANUARY,
+                                24,
+                                22,
+                                0,
+                                0,
+                            ).toNorskTidspunkt(),
                 ),
                 utbetaling(
                     avstemmingsnoekkel =
-                        LocalDateTime.of(
-                            2020,
-                            Month.APRIL,
-                            10,
-                            14,
-                            0,
-                            0,
-                        ).plusHours(1).toNorskTidspunkt(),
+                        LocalDateTime
+                            .of(
+                                2020,
+                                Month.APRIL,
+                                10,
+                                14,
+                                0,
+                                0,
+                            ).plusHours(1)
+                            .toNorskTidspunkt(),
                 ),
                 utbetaling(
                     avstemmingsnoekkel =
-                        LocalDateTime.of(
-                            2020,
-                            Month.APRIL,
-                            10,
-                            14,
-                            0,
-                            0,
-                        )
-                            .plusMinutes(2).toNorskTidspunkt(),
+                        LocalDateTime
+                            .of(
+                                2020,
+                                Month.APRIL,
+                                10,
+                                14,
+                                0,
+                                0,
+                            ).plusMinutes(2)
+                            .toNorskTidspunkt(),
                 ),
             )
 

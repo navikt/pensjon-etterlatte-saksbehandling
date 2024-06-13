@@ -45,7 +45,7 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
 export const PdfViewer = styled.embed`
   min-width: 680px;
   width: 100%;
-  min-height: 600px;
+  min-height: 75vh;
   height: 100%;
 `
 

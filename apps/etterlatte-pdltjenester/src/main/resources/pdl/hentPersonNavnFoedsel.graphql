@@ -44,5 +44,14 @@ query(
                 ...metadata
             }
         }
+        foedsel {
+            foedselsdato
+            foedeland
+            foedested
+            foedselsaar
+            metadata {
+                ...metadata
+            }
+        }
     }
 }

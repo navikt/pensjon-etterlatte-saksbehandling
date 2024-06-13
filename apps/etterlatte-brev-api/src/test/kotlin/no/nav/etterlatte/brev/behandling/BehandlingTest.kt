@@ -192,16 +192,17 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.SOEKER_PDL_V1 to
                             opprettOpplysning(
-                                personTestData(mapOf(soekersFoedselsnummer)).copy(
-                                    vergemaalEllerFremtidsfullmakt =
-                                        listOf(
-                                            VergemaalEllerFremtidsfullmakt(
-                                                null,
-                                                null,
-                                                VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
+                                personTestData(mapOf(soekersFoedselsnummer))
+                                    .copy(
+                                        vergemaalEllerFremtidsfullmakt =
+                                            listOf(
+                                                VergemaalEllerFremtidsfullmakt(
+                                                    null,
+                                                    null,
+                                                    VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
+                                                ),
                                             ),
-                                        ),
-                                ).toJsonNode(),
+                                    ).toJsonNode(),
                             ),
                     ),
                 familie = emptyList(),

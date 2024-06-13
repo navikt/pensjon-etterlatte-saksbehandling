@@ -1,6 +1,8 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
-enum class VilkaarType(val rekkefoelge: Int) {
+enum class VilkaarType(
+    val rekkefoelge: Int,
+) {
     // Barnepensjon gammelt regelverk
     BP_FORMAAL(10),
     BP_DOEDSFALL_FORELDER(100),

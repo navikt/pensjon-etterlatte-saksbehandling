@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOpprettetDato
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
@@ -11,7 +12,9 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.util.UUID
 
-class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class AktivitetspliktAktivitetsgradDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun opprettAktivitetsgrad(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: Long,
@@ -36,6 +39,32 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
             stmt.setString(7, kilde.toJson())
             stmt.setString(8, kilde.toJson())
             stmt.setString(9, aktivitetsgrad.beskrivelse)
+
+            stmt.executeUpdate()
+        }
+    }
+
+    fun oppdaterAktivitetsgrad(
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        kilde: Grunnlagsopplysning.Kilde,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        UPDATE aktivitetsplikt_aktivitetsgrad
+                        SET  aktivitetsgrad = ?, fom = ?, endret = ?, beskrivelse = ? 
+                        WHERE id = ? AND behandling_id = ?
+                    """.trimMargin(),
+                )
+
+            stmt.setString(1, aktivitetsgrad.aktivitetsgrad.name)
+            stmt.setDate(2, Date.valueOf(aktivitetsgrad.fom))
+            stmt.setString(3, kilde.toJson())
+            stmt.setString(4, aktivitetsgrad.beskrivelse)
+            stmt.setObject(5, requireNotNull(aktivitetsgrad.id))
+            stmt.setObject(6, behandlingId)
 
             stmt.executeUpdate()
         }
@@ -93,6 +122,25 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
             }
         }
 
+    fun slettAktivitetsgrad(
+        aktivitetId: UUID,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        DELETE FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE id = ? AND behandling_id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, aktivitetId)
+            stmt.setObject(2, behandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     private fun ResultSet.toAktivitetsgrad() =
         AktivitetspliktAktivitetsgrad(
             id = getUUID("id"),
@@ -114,10 +162,10 @@ data class AktivitetspliktAktivitetsgrad(
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val fom: LocalDate,
-    val opprettet: Grunnlagsopplysning.Kilde,
+    override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
-)
+) : AktivitetspliktVurderingOpprettetDato
 
 data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,

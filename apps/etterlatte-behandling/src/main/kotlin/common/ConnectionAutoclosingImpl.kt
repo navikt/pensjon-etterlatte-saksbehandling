@@ -17,14 +17,15 @@ abstract class ConnectionAutoclosing {
     }
 }
 
-class ConnectionAutoclosingImpl(val dataSource: DataSource) : ConnectionAutoclosing() {
-    override fun <T> hentConnection(block: (connection: Connection) -> T): T {
-        return if (manglerKontekst()) {
+class ConnectionAutoclosingImpl(
+    val dataSource: DataSource,
+) : ConnectionAutoclosing() {
+    override fun <T> hentConnection(block: (connection: Connection) -> T): T =
+        if (manglerKontekst()) {
             dataSource.connection.use {
                 block(it)
             }
         } else {
             block(databaseContext().activeTx())
         }
-    }
 }

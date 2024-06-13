@@ -30,21 +30,23 @@ class TilbakekrevingHendelserServiceImpl(
     ) {
         val correlationId = getCorrelationId()
 
-        rapid.publiser(
-            statistikkTilbakekreving.id.toString(),
-            JsonMessage.newMessage(
-                type.lagEventnameForType(),
-                mapOf(
-                    CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to LocalDateTime.now(),
-                    TILBAKEKREVING_STATISTIKK_RIVER_KEY to statistikkTilbakekreving,
-                ),
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${type.lagEventnameForType()} for TILBAKEKREVING ${statistikkTilbakekreving.id}" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                statistikkTilbakekreving.id.toString(),
+                JsonMessage
+                    .newMessage(
+                        type.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to LocalDateTime.now(),
+                            TILBAKEKREVING_STATISTIKK_RIVER_KEY to statistikkTilbakekreving,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${type.lagEventnameForType()} for TILBAKEKREVING ${statistikkTilbakekreving.id}" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 }

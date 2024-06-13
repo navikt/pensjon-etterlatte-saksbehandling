@@ -114,7 +114,12 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRe
         vedtakId = this.id,
         sakId = this.sakId,
         virkFom = innhold.virkningstidspunkt.atDay(1),
-        virkTom = innhold.utbetalingsperioder.maxByOrNull { it.periode.fom }?.periode?.tom?.atEndOfMonth(),
+        virkTom =
+            innhold.utbetalingsperioder
+                .maxByOrNull { it.periode.fom }
+                ?.periode
+                ?.tom
+                ?.atEndOfMonth(),
         fagomrade = "EYO",
         ytelseType = "OMS",
         etterbetaling = etterbetaling,
@@ -132,12 +137,18 @@ internal data class SamordneVedtakRequest(
     val etterbetaling: Boolean,
 )
 
-private class SamordneVedtakRespons(val ventPaaSvar: Boolean)
-
-class SamordneVedtakBehandlingUgyldigForespoerselException(override val message: String) : UgyldigForespoerselException(
-    "SAMORDNE_VEDTAK_UGYLDIG_FORESPOERSEL",
-    message,
+private class SamordneVedtakRespons(
+    val ventPaaSvar: Boolean,
 )
 
-class SamordneVedtakGenerellException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+class SamordneVedtakBehandlingUgyldigForespoerselException(
+    override val message: String,
+) : UgyldigForespoerselException(
+        "SAMORDNE_VEDTAK_UGYLDIG_FORESPOERSEL",
+        message,
+    )
+
+class SamordneVedtakGenerellException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)

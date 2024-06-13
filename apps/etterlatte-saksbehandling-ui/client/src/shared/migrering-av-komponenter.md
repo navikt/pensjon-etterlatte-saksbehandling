@@ -1,8 +1,20 @@
 # Migrering av hjemmesnekra komponenter til Aksel komponenter
 [Design tokens for spacing](https://aksel.nav.no/grunnleggende/styling/design-tokens#0cc9fb32f213)
 
-## Mange av "wrapperne" våres
-Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing med komponentet over, da burder man heller vurdere å wrapper komponentene i en `<VStack gap="4"/>` for å få samme effekt
+## Kort oppsumert
+Ca 98% av våres `styled-component's` går an relativt lett å byttes ut Aksel komponenter, spesielt disse 4 som har mye av funksjonaliteten til `display: flex`:
+
+### `<Box />` 
+Hvis man bare trenger litt luft rundt et komponent er det bare å wrappe det i en `<Box />`
+
+### `<VStack />`
+Hvis man skal ha komponenter i loddrett rekkefølge og muligens ha litt luft mellom komponentene, så kan man wrappe de i en `<VStack />`
+
+### `<HStack />`
+Hvis man skal ha komponenter i vannrett rekke og muligens ha litt luft mellom komponentene, så kan man wrappe de i en `<HStack />`
+
+### `<HGrid />`
+Hvis man trenger å ha komponentene strukturert som et rutenett, så kan man wrappe de i en `<HGrid />`
 
 ## ~shared/styled.tsx
 `<Content />` --> `<Box padding="8" />`

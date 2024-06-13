@@ -46,7 +46,7 @@ internal class YtelseMedGrunnlagServiceTest {
     @Test
     fun `skal hente ytelse oppdelt i perioder med alle grunnlag`() {
         val behandlingsId = UUID.randomUUID()
-        val virkningstidspunkt = YearMonth.of(2023, 2)
+        val virkningstidspunkt = YearMonth.of(2024, 2)
         coEvery {
             behandlingKlient.hentBehandling(
                 behandlingsId,
@@ -58,15 +58,15 @@ internal class YtelseMedGrunnlagServiceTest {
                 beregninger =
                     listOf(
                         beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 2),
-                            datoTOM = YearMonth.of(2023, 5),
+                            datoFOM = YearMonth.of(2024, 2),
+                            datoTOM = YearMonth.of(2024, 5),
                             utbetaltBeloep = 20000,
                             trygdetid = 40,
                             grunnbeloep = 120000,
                             grunnbeloepMnd = 10000,
                         ),
                         beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 6),
+                            datoFOM = YearMonth.of(2024, 6),
                             datoTOM = null,
                             utbetaltBeloep = 21000,
                             trygdetid = 40,
@@ -82,7 +82,7 @@ internal class YtelseMedGrunnlagServiceTest {
                         Inntektsavkorting(
                             grunnlag =
                                 avkortinggrunnlag(
-                                    periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
+                                    periode = Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3)),
                                     aarsinntekt = 300000,
                                     fratrekkInnAar = 25000,
                                 ),
@@ -90,7 +90,7 @@ internal class YtelseMedGrunnlagServiceTest {
                         Inntektsavkorting(
                             grunnlag =
                                 avkortinggrunnlag(
-                                    periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
+                                    periode = Periode(fom = YearMonth.of(2024, 4), tom = null),
                                     aarsinntekt = 350000,
                                     fratrekkInnAar = 25000,
                                 ),
@@ -99,19 +99,19 @@ internal class YtelseMedGrunnlagServiceTest {
                 avkortetYtelseAar =
                     listOf(
                         avkortetYtelse(
-                            periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
+                            periode = Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3)),
                             ytelseEtterAvkorting = 15000,
                             ytelseFoerAvkorting = 20000,
                             avkortingsbeloep = 5000,
                         ),
                         avkortetYtelse(
-                            periode = Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 5)),
+                            periode = Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 5)),
                             ytelseEtterAvkorting = 17000,
                             ytelseFoerAvkorting = 20000,
                             avkortingsbeloep = 3000,
                         ),
                         avkortetYtelse(
-                            periode = Periode(fom = YearMonth.of(2023, 6), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 6), tom = null),
                             ytelseEtterAvkorting = 17000,
                             ytelseFoerAvkorting = 21000,
                             avkortingsbeloep = 4000,
@@ -125,7 +125,7 @@ internal class YtelseMedGrunnlagServiceTest {
             }
 
         with(ytelse!!.perioder[0]) {
-            periode shouldBe Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3))
+            periode shouldBe Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3))
             ytelseEtterAvkorting shouldBe 15000
             ytelseFoerAvkorting shouldBe 20000
             avkortingsbeloep shouldBe 5000
@@ -135,7 +135,7 @@ internal class YtelseMedGrunnlagServiceTest {
             grunnbelopMnd shouldBe 10000
         }
         with(ytelse.perioder[1]) {
-            periode shouldBe Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 5))
+            periode shouldBe Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 5))
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 20000
             avkortingsbeloep shouldBe 3000
@@ -145,7 +145,7 @@ internal class YtelseMedGrunnlagServiceTest {
             grunnbelopMnd shouldBe 10000
         }
         with(ytelse.perioder[2]) {
-            periode shouldBe Periode(fom = YearMonth.of(2023, 6), tom = null)
+            periode shouldBe Periode(fom = YearMonth.of(2024, 6), tom = null)
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 21000
             avkortingsbeloep shouldBe 4000

@@ -55,7 +55,9 @@ object GrunnlagVersjonValidering {
     }
 }
 
-class UlikVersjonGrunnlag(detail: String) : UgyldigForespoerselException(
-    code = "ULIK_VERSJON_GRUNNLAG",
-    detail = detail,
-)
+class UlikVersjonGrunnlag(
+    detail: String,
+) : UgyldigForespoerselException(
+        code = "ULIK_VERSJON_GRUNNLAG",
+        detail = detail,
+    )

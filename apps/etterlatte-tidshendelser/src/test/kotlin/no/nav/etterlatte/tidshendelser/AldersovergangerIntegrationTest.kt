@@ -19,7 +19,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangerIntegrationTest(dataSource: DataSource) {
+class AldersovergangerIntegrationTest(
+    dataSource: DataSource,
+) {
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val behandlingKlient: BehandlingKlient = mockk<BehandlingKlient>()
     private val hendelseDao = HendelseDao(dataSource)
@@ -51,10 +53,11 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
 
         val sakIder: List<Long> = listOf(1, 2, 3)
         val saker =
-            sakIder.map {
-                val sakType = if (it != 3L) SakType.BARNEPENSJON else SakType.OMSTILLINGSSTOENAD
-                sak(it, sakType)
-            }.associateBy { it.id }
+            sakIder
+                .map {
+                    val sakType = if (it != 3L) SakType.BARNEPENSJON else SakType.OMSTILLINGSSTOENAD
+                    sak(it, sakType)
+                }.associateBy { it.id }
 
         every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
@@ -71,9 +74,10 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP21, behandlingsmaaned)
         val sakIder: List<Long> = listOf(1, 2, 3)
         val saker =
-            sakIder.map {
-                sak(it, SakType.BARNEPENSJON)
-            }.associateBy { it.id }
+            sakIder
+                .map {
+                    sak(it, SakType.BARNEPENSJON)
+                }.associateBy { it.id }
 
         every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker

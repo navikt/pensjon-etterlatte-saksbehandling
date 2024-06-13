@@ -12,7 +12,8 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 
 val objectMapper: ObjectMapper =
-    JsonMapper.builder()
+    JsonMapper
+        .builder()
         .addModule(JavaTimeModule())
         .addModule(KotlinModule.Builder().build())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

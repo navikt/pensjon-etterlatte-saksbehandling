@@ -27,7 +27,11 @@ val AuthorizationPlugin =
                 // If issuers are set and current authenticated user is not authenticated by one
                 // of the issuers, then skip authorization - authorization should be handled elsewhere then.
                 // If no issuers are set, then always perform authorization
-                if (issuers.isEmpty() || principal.context.issuers.intersect(issuers).isNotEmpty()) {
+                if (issuers.isEmpty() ||
+                    principal.context.issuers
+                        .intersect(issuers)
+                        .isNotEmpty()
+                ) {
                     val roller = call.brukerTokenInfo.roller
                     if (roller.intersect(roles).isEmpty()) {
                         application.log.info("Request avslått pga manglende rolle (gyldige: $roles)")

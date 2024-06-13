@@ -16,7 +16,8 @@ class UtbetalingMapper(
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling.sortedBy { it.periode.fom }
 
     fun opprettUtbetaling(): Utbetaling {
-        if (tidligereUtbetalinger.isEmpty() && utbetalingsperioder.size == 1 &&
+        if (tidligereUtbetalinger.isEmpty() &&
+            utbetalingsperioder.size == 1 &&
             utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER
         ) {
             throw IngenEksisterendeUtbetalingException()
@@ -87,25 +88,28 @@ class UtbetalingMapper(
             )
         }
 
-    private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? {
-        return if (indeksForUtbetalingslinje(utbetalingslinjeId) == 0) {
+    private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? =
+        if (indeksForUtbetalingslinje(utbetalingslinjeId) == 0) {
             utbetalingslinjeIdForForrigeUtbetalingslinje()
         } else {
             utbetalingslinjeIdForForrigeUtbetalingslinje(utbetalingslinjeId)
         }
-    }
 
     private fun utbetalingslinjeIdForForrigeUtbetalingslinje(utbetalingslinjeId: Long) =
         UtbetalingslinjeId(utbetalingsperioder[indeksForUtbetalingslinje(utbetalingslinjeId) - 1].id)
 
     private fun utbetalingslinjeIdForForrigeUtbetalingslinje() =
-        tidligereUtbetalinger.filter {
-            it.status() in
-                listOf(
-                    UtbetalingStatus.GODKJENT,
-                    UtbetalingStatus.GODKJENT_MED_FEIL,
-                )
-        }.maxByOrNull { it.opprettet }?.utbetalingslinjer?.last()?.id
+        tidligereUtbetalinger
+            .filter {
+                it.status() in
+                    listOf(
+                        UtbetalingStatus.GODKJENT,
+                        UtbetalingStatus.GODKJENT_MED_FEIL,
+                    )
+            }.maxByOrNull { it.opprettet }
+            ?.utbetalingslinjer
+            ?.last()
+            ?.id
 
     private fun indeksForUtbetalingslinje(utbetalingslinjeId: Long) = utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId }
 }

@@ -112,330 +112,354 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
-            client.get("/saker/1") {
-                addAuthToken(tokenSaksbehandler)
-            }.apply {
-                assertEquals(HttpStatusCode.NotFound, status)
-            }
-            val sak: Sak =
-                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
+            client
+                .get("/saker/1") {
                     addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
                 }.apply {
-                    assertEquals(HttpStatusCode.OK, status)
-                }.body()
+                    assertEquals(HttpStatusCode.NotFound, status)
+                }
+            val sak: Sak =
+                client
+                    .post("/personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                    }.apply {
+                        assertEquals(HttpStatusCode.OK, status)
+                    }.body()
 
-            client.get("/saker/${sak.id}") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val lestSak: Sak = it.body()
-                assertEquals(fnr, lestSak.ident)
-                assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
-            }
+            client
+                .get("/saker/${sak.id}") {
+                    addAuthToken(tokenSaksbehandler)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val lestSak: Sak = it.body()
+                    assertEquals(fnr, lestSak.ident)
+                    assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
+                }
 
             val behandlingId =
-                client.post("/behandlinger/opprettbehandling") {
-                    addAuthToken(this@VerdikjedeTest.systemBruker)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        BehandlingsBehov(
-                            1,
-                            Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                        ),
-                    )
-                }.let {
-                    assertEquals(HttpStatusCode.OK, it.status)
-                    UUID.fromString(it.body())
-                }
+                client
+                    .post("/behandlinger/opprettbehandling") {
+                        addAuthToken(this@VerdikjedeTest.systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            BehandlingsBehov(
+                                1,
+                                Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                            ),
+                        )
+                    }.let {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                        UUID.fromString(it.body())
+                    }
             behandlingOpprettet = behandlingId
 
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                it.body<DetaljertBehandling>()
-            }
-
-            val oppgaver: List<OppgaveIntern> =
-                client.get("/api/oppgaver") {
+            client
+                .get("/behandlinger/$behandlingId") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
-                }.body()
+                    it.body<DetaljertBehandling>()
+                }
+
+            val oppgaver: List<OppgaveIntern> =
+                client
+                    .get("/api/oppgaver") {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.also {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                    }.body()
 
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
-            client.post("/api/oppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/api/oppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(SaksbehandlerEndringDto("Saksbehandler01"))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/behandlinger/$behandlingId/gyldigfremsatt") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    GyldighetsResultat(
-                        VurderingsResultat.OPPFYLT,
-                        listOf(
-                            VurdertGyldighet(
-                                GyldighetsTyper.INNSENDER_ER_FORELDER,
-                                VurderingsResultat.OPPFYLT,
-                                "innsenderFnr",
+            client
+                .post("/behandlinger/$behandlingId/gyldigfremsatt") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        GyldighetsResultat(
+                            VurderingsResultat.OPPFYLT,
+                            listOf(
+                                VurdertGyldighet(
+                                    GyldighetsTyper.INNSENDER_ER_FORELDER,
+                                    VurderingsResultat.OPPFYLT,
+                                    "innsenderFnr",
+                                ),
                             ),
+                            Tidspunkt.now().toLocalDatetimeUTC(),
                         ),
-                        Tidspunkt.now().toLocalDatetimeUTC(),
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val behandling: DetaljertBehandling = it.body()
-                assertNotNull(behandling.id)
-                assertEquals("soeker", behandling.soeker)
-            }
-
-            client.post("/api/behandling/$behandlingId/utlandstilknytning") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(UtlandstilknytningRequest(UtlandstilknytningType.NASJONAL, "begrunnelse"))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val expected =
-                    FastsettVirkningstidspunktResponse(
-                        YearMonth.of(2022, 2),
-                        Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
-                        "En begrunnelse",
-                        null,
                     )
-                assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
-                assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
-                assertEquals(expected.begrunnelse, it.body<FastsettVirkningstidspunktResponse>().begrunnelse)
-            }
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/api/behandling/$behandlingId/kommerbarnettilgode") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .get("/behandlinger/$behandlingId") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val behandling: DetaljertBehandling = it.body()
+                    assertNotNull(behandling.id)
+                    assertEquals("soeker", behandling.soeker)
+                }
+
+            client
+                .post("/api/behandling/$behandlingId/utlandstilknytning") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(UtlandstilknytningRequest(UtlandstilknytningType.NASJONAL, "begrunnelse"))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
+
+            client
+                .post("/api/behandling/$behandlingId/virkningstidspunkt") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
+                    )
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val expected =
+                        FastsettVirkningstidspunktResponse(
+                            YearMonth.of(2022, 2),
+                            Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+                            "En begrunnelse",
+                            null,
+                        )
+                    assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
+                    assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
+                    assertEquals(expected.begrunnelse, it.body<FastsettVirkningstidspunktResponse>().begrunnelse)
+                }
+
+            client
+                .post("/api/behandling/$behandlingId/kommerbarnettilgode") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
             val dataSource = applicationContext.dataSource
 
-            client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.OPPRETTET, actual.status)
+            client
+                .get("/behandlinger/$behandlingId/vilkaarsvurder") {
+                    addAuthToken(tokenSaksbehandler)
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.OPPRETTET, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/behandlinger/$behandlingId/vilkaarsvurder") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("{}")
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
+            client
+                .post("/behandlinger/$behandlingId/vilkaarsvurder") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("{}")
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/behandlinger/$behandlingId/oppdaterTrygdetid") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("{}")
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
+            client
+                .post("/behandlinger/$behandlingId/oppdaterTrygdetid") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("{}")
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/behandlinger/$behandlingId/beregn") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.BEREGNET, actual.status)
+            client
+                .post("/behandlinger/$behandlingId/beregn") {
+                    addAuthToken(tokenSaksbehandler)
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.BEREGNET, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/fattvedtak") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakEndringDTO(
-                        sakIdOgReferanse =
-                            SakIdOgReferanse(
-                                sakId = sak.id,
-                                referanse = behandlingId.toString(),
-                            ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
-                        vedtakType = VedtakType.INNVILGELSE,
-                    ),
-                )
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
+            client
+                .post("/fattvedtak") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        VedtakEndringDTO(
+                            sakIdOgReferanse =
+                                SakIdOgReferanse(
+                                    sakId = sak.id,
+                                    referanse = behandlingId.toString(),
+                                ),
+                            vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                            vedtakType = VedtakType.INNVILGELSE,
+                        ),
+                    )
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
             val oppgaveroppgaveliste: List<OppgaveIntern> =
-                client.get("/api/oppgaver") {
-                    addAuthToken(tokenAttestant)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }.also {
-                    assertEquals(HttpStatusCode.OK, it.status)
-                }.body()
+                client
+                    .get("/api/oppgaver") {
+                        addAuthToken(tokenAttestant)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.also {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                    }.body()
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
             val saksbehandler02 = "Saksbehandler02"
-            client.post("/api/oppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
-                addAuthToken(tokenAttestant)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto(saksbehandler02))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/api/oppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
+                    addAuthToken(tokenAttestant)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(SaksbehandlerEndringDto(saksbehandler02))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/attestervedtak") {
-                addAuthToken(tokenAttestant)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakEndringDTO(
-                        sakIdOgReferanse =
-                            SakIdOgReferanse(
-                                sakId = sak.id,
-                                referanse = behandlingId.toString(),
-                            ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
-                        vedtakType = VedtakType.INNVILGELSE,
-                    ),
-                )
-            }.also {
-                val actual =
-                    BehandlingDao(
-                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
-                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                        ConnectionAutoclosingTest(dataSource),
-                    ).hentBehandling(behandlingId)!!
-                assertEquals(BehandlingStatus.ATTESTERT, actual.status)
+            client
+                .post("/attestervedtak") {
+                    addAuthToken(tokenAttestant)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        VedtakEndringDTO(
+                            sakIdOgReferanse =
+                                SakIdOgReferanse(
+                                    sakId = sak.id,
+                                    referanse = behandlingId.toString(),
+                                ),
+                            vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                            vedtakType = VedtakType.INNVILGELSE,
+                        ),
+                    )
+                }.also {
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                            RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                            ConnectionAutoclosingTest(dataSource),
+                        ).hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.ATTESTERT, actual.status)
 
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/behandlinger/$behandlingId/iverksett") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakHendelse(
-                        12L,
-                        Tidspunkt.now(),
-                        null,
-                        null,
-                        null,
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/behandlinger/$behandlingId/iverksett") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        VedtakHendelse(
+                            12L,
+                            Tidspunkt.now(),
+                            null,
+                            null,
+                            null,
+                        ),
+                    )
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                val behandling = it.body<DetaljertBehandling>()
+            client
+                .get("/behandlinger/$behandlingId") {
+                    addAuthToken(tokenSaksbehandler)
+                }.also {
+                    val behandling = it.body<DetaljertBehandling>()
 
-                assertEquals(HttpStatusCode.OK, it.status)
-                assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
-            }
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
+                }
 
             // KLAGE
             // Sniker seg inn her siden vi trenger en sak med en iverksatt behandling
             val klage: Klage =
-                client.post("/api/klage/opprett/${sak.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        InnkommendeKlageDto(
-                            mottattDato = OffsetDateTime.now().toString(),
-                            journalpostId = "123546",
-                            innsender = "en innsender",
-                        ),
-                    )
-                }.body()
-            val medOppdatertFormkrav: Klage =
-                client.put("/api/klage/${klage.id}/formkrav") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        VurdereFormkravDto(
-                            Formkrav(
-                                vedtaketKlagenGjelder =
-                                    VedtaketKlagenGjelder(
-                                        123L.toString(),
-                                        UUID.randomUUID().toString(),
-                                        datoAttestert = null,
-                                        vedtakType = VedtakType.INNVILGELSE,
-                                    ),
-                                erKlagerPartISaken = JaNei.JA,
-                                erKlagenSignert = JaNei.JA,
-                                gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                                erKlagenFramsattInnenFrist = JaNei.JA,
-                                erFormkraveneOppfylt = JaNei.JA,
+                client
+                    .post("/api/klage/opprett/${sak.id}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            InnkommendeKlageDto(
+                                mottattDato = OffsetDateTime.now().toString(),
+                                journalpostId = "123546",
+                                innsender = "en innsender",
                             ),
-                        ),
-                    )
-                }.body()
+                        )
+                    }.body()
+            val medOppdatertFormkrav: Klage =
+                client
+                    .put("/api/klage/${klage.id}/formkrav") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            VurdereFormkravDto(
+                                Formkrav(
+                                    vedtaketKlagenGjelder =
+                                        VedtaketKlagenGjelder(
+                                            123L.toString(),
+                                            UUID.randomUUID().toString(),
+                                            datoAttestert = null,
+                                            vedtakType = VedtakType.INNVILGELSE,
+                                        ),
+                                    erKlagerPartISaken = JaNei.JA,
+                                    erKlagenSignert = JaNei.JA,
+                                    gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                                    erKlagenFramsattInnenFrist = JaNei.JA,
+                                    erFormkraveneOppfylt = JaNei.JA,
+                                ),
+                            ),
+                        )
+                    }.body()
             client.put("/api/klage/${medOppdatertFormkrav.id}/initieltutfall") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
@@ -444,145 +468,157 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 )
             }
             val medUtfall =
-                client.put("/api/klage/${medOppdatertFormkrav.id}/utfall") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        VurdertUtfallDto(
-                            KlageUtfallUtenBrev.DelvisOmgjoering(
-                                omgjoering =
-                                    KlageOmgjoering(
-                                        grunnForOmgjoering = GrunnForOmgjoering.FEIL_LOVANVENDELSE,
-                                        begrunnelse = "Vi skjønte ikke",
-                                    ),
-                                innstilling =
-                                    InnstillingTilKabalUtenBrev(
-                                        lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
-                                        internKommentar = "En tekst",
-                                        innstillingTekst = "En ekstra tekst",
-                                    ),
+                client
+                    .put("/api/klage/${medOppdatertFormkrav.id}/utfall") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            VurdertUtfallDto(
+                                KlageUtfallUtenBrev.DelvisOmgjoering(
+                                    omgjoering =
+                                        KlageOmgjoering(
+                                            grunnForOmgjoering = GrunnForOmgjoering.FEIL_LOVANVENDELSE,
+                                            begrunnelse = "Vi skjønte ikke",
+                                        ),
+                                    innstilling =
+                                        InnstillingTilKabalUtenBrev(
+                                            lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
+                                            internKommentar = "En tekst",
+                                            innstillingTekst = "En ekstra tekst",
+                                        ),
+                                ),
                             ),
-                        ),
-                    )
-                }.body<Klage>()
+                        )
+                    }.body<Klage>()
 
             val oppgaverKlage: List<OppgaveIntern> =
-                client.get("/api/oppgaver") {
+                client
+                    .get("/api/oppgaver") {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.also {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                    }.body()
+            val oppgaverforbehandlingKlage = oppgaverKlage.filter { it.referanse == klage.id.toString() }
+            client
+                .post("/api/oppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(SaksbehandlerEndringDto("Saksbehandler01"))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
-                }.body()
-            val oppgaverforbehandlingKlage = oppgaverKlage.filter { it.referanse == klage.id.toString() }
-            client.post("/api/oppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+                }
 
             val ferdigstiltKlage =
-                client.post("/api/klage/${medUtfall.id}/ferdigstill") {
-                    addAuthToken(tokenSaksbehandler)
-                }.body<Klage>()
+                client
+                    .post("/api/klage/${medUtfall.id}/ferdigstill") {
+                        addAuthToken(tokenSaksbehandler)
+                    }.body<Klage>()
 
             assertNotNull(ferdigstiltKlage.resultat?.opprettetOppgaveOmgjoeringId)
             assertNotNull(ferdigstiltKlage.resultat?.sendtInnstillingsbrev)
 
-            client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(this@VerdikjedeTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/doedshendelse") {
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(this@VerdikjedeTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/doedshendelse") {
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/grunnlagsendringshendelse/utflyttingshendelse") {
-                addAuthToken(this@VerdikjedeTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    UtflyttingsHendelse(
-                        hendelseId = "1",
-                        endringstype = Endringstype.OPPRETTET,
-                        fnr = fnr,
-                        tilflyttingsLand = null,
-                        tilflyttingsstedIUtlandet = null,
-                        utflyttingsdato = null,
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
-                addAuthToken(this@VerdikjedeTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    ForelderBarnRelasjonHendelse(
-                        hendelseId = "1",
-                        endringstype = Endringstype.OPPRETTET,
-                        fnr = fnr,
-                        relatertPersonsIdent = null,
-                        relatertPersonsRolle = "",
-                        minRolleForPerson = "",
-                        relatertPersonUtenFolkeregisteridentifikator = null,
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            val behandlingIdNyFoerstegangsbehandling =
-                client.post("/behandlinger/opprettbehandling") {
+            client
+                .post("/grunnlagsendringshendelse/utflyttingshendelse") {
                     addAuthToken(this@VerdikjedeTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
-                        BehandlingsBehov(
-                            1,
-                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        UtflyttingsHendelse(
+                            hendelseId = "1",
+                            endringstype = Endringstype.OPPRETTET,
+                            fnr = fnr,
+                            tilflyttingsLand = null,
+                            tilflyttingsstedIUtlandet = null,
+                            utflyttingsdato = null,
                         ),
                     )
-                }.let {
+                }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
-                    UUID.fromString(it.body())
                 }
 
-            client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
-                addAuthToken(systemBruker)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        ForelderBarnRelasjonHendelse(
+                            hendelseId = "1",
+                            endringstype = Endringstype.OPPRETTET,
+                            fnr = fnr,
+                            relatertPersonsIdent = null,
+                            relatertPersonsRolle = "",
+                            minRolleForPerson = "",
+                            relatertPersonUtenFolkeregisteridentifikator = null,
+                        ),
+                    )
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(this@VerdikjedeTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Adressebeskyttelse(
-                        hendelseId = "1",
-                        endringstype = Endringstype.OPPRETTET,
-                        fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            val behandlingIdNyFoerstegangsbehandling =
+                client
+                    .post("/behandlinger/opprettbehandling") {
+                        addAuthToken(this@VerdikjedeTest.systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            BehandlingsBehov(
+                                1,
+                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                            ),
+                        )
+                    }.let {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                        UUID.fromString(it.body())
+                    }
 
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                assertEquals(HttpStatusCode.NotFound, it.status) // 404 pga adressebeskyttelse
-            }
+            client
+                .post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
+                    addAuthToken(systemBruker)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
+
+            client
+                .post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Adressebeskyttelse(
+                            hendelseId = "1",
+                            endringstype = Endringstype.OPPRETTET,
+                            fnr = fnr,
+                            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        ),
+                    )
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
+
+            client
+                .get("/behandlinger/$behandlingId") {
+                    addAuthToken(tokenSaksbehandler)
+                }.also {
+                    assertEquals(HttpStatusCode.NotFound, it.status) // 404 pga adressebeskyttelse
+                }
         }
 
         kotlin.runCatching { sleep(3000) }

@@ -1,9 +1,10 @@
-import { StegMenyWrapper } from '~components/behandling/StegMeny/stegmeny'
+import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
 import React from 'react'
 import { KlageNavLenke } from '~components/klage/stegmeny/KlageNavLenke'
 import { useKlage } from '~components/klage/useKlage'
 import { Klage, KlageStatus, Utfall } from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
+import { HStack } from '@navikt/ds-react'
 
 export function kanVurdereUtfall(klage: Klage | null): boolean {
   return (
@@ -50,12 +51,19 @@ export function KlageStegmeny() {
   const klage = useKlage()
 
   return (
-    <StegMenyWrapper>
-      <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
-      <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage)} />
-      <KlageNavLenke path="brev" description="Brev" enabled={klageKanSeBrev(klage)} />
-      <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage)} />
-    </StegMenyWrapper>
+    <StegMenyBox>
+      <HStack gap="6" align="center">
+        <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
+        <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage)} />
+        <KlageNavLenke path="brev" description="Brev" enabled={klageKanSeBrev(klage)} />
+        <KlageNavLenke
+          path="oppsummering"
+          description="Oppsummering"
+          enabled={kanSeOppsummering(klage)}
+          erSisteRoute={true}
+        />
+      </HStack>
+    </StegMenyBox>
   )
 }
 

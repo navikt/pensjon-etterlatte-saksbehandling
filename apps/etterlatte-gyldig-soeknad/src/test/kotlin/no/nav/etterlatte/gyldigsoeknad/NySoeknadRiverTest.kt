@@ -204,10 +204,11 @@ internal class NySoeknadRiverTest {
     }
 
     private fun testRapid(block: TestRapid.() -> Unit) =
-        TestRapid().apply {
-            NySoeknadRiver(this, behandlingKlientMock, journalfoerSoeknadService)
-            block()
-        }.inspektør
+        TestRapid()
+            .apply {
+                NySoeknadRiver(this, behandlingKlientMock, journalfoerSoeknadService)
+                block()
+            }.inspektør
 
     companion object {
         val BARNEPENSJON_SOEKNAD = readFile("/innsendtsoeknad/barnepensjon.json")

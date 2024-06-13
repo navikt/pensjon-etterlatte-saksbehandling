@@ -135,8 +135,7 @@ class DelvilkaarRepository {
             WHERE vilkaar_id = :vilkaar_id
         """,
             mapOf("vilkaar_id" to vilkaarId),
-        )
-            .let { tx.run(it.asUpdate) }
+        ).let { tx.run(it.asUpdate) }
     }
 }
 

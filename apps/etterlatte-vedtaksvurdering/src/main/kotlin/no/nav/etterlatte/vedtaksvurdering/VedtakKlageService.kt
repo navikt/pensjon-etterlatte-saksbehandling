@@ -142,8 +142,8 @@ class VedtakKlageService(
             ),
         )
 
-    private fun vedtakOgRapidAttestert(attestertVedtak: Vedtak): VedtakOgRapid {
-        return VedtakOgRapid(
+    private fun vedtakOgRapidAttestert(attestertVedtak: Vedtak): VedtakOgRapid =
+        VedtakOgRapid(
             attestertVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
@@ -153,7 +153,6 @@ class VedtakKlageService(
                 extraParams = mapOf(SKAL_SENDE_BREV to true),
             ),
         )
-    }
 
     private fun vedtakOgRapidUnderkjent(vedtak: Vedtak) =
         VedtakOgRapid(

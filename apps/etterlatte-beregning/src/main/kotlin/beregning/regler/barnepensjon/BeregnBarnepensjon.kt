@@ -21,7 +21,8 @@ data class PeriodisertBarnepensjonGrunnlag(
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         val soeskenkullKnekkpunkter =
-            soeskenKull.finnAlleKnekkpunkter()
+            soeskenKull
+                .finnAlleKnekkpunkter()
                 .filter { it.isBefore(BP_2024_DATO) }
                 .toSet()
 
@@ -30,13 +31,12 @@ data class PeriodisertBarnepensjonGrunnlag(
             institusjonsopphold.finnAlleKnekkpunkter()
     }
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag {
-        return BarnepensjonGrunnlag(
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag =
+        BarnepensjonGrunnlag(
             soeskenKull.finnGrunnlagForPeriode(datoIPeriode),
             avdoedesTrygdetid.finnGrunnlagForPeriode(datoIPeriode),
             institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
         )
-    }
 }
 
 data class BarnepensjonGrunnlag(

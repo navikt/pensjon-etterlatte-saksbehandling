@@ -47,7 +47,8 @@ internal class DistribusjonServiceImpl(
                     dokumentProdApp = "etterlatte-brev-api",
                 )
 
-            klient.distribuerJournalpost(request)
+            klient
+                .distribuerJournalpost(request)
                 .also { db.settBrevDistribuert(brevId, it) }
                 .bestillingsId
         }

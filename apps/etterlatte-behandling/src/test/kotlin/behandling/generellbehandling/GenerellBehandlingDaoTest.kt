@@ -19,7 +19,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class GenerellBehandlingDaoTest(val dataSource: DataSource) {
+internal class GenerellBehandlingDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var dao: GenerellBehandlingDao
 
     @BeforeAll

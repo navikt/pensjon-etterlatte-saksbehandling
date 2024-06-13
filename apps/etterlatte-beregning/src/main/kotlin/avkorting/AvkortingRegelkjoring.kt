@@ -38,27 +38,28 @@ object AvkortingRegelkjoring {
             PeriodisertInntektAvkortingGrunnlag(
                 periodisertInntektAvkortingGrunnlag =
                     PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                        avkortingGrunnlag.map {
-                            GrunnlagMedPeriode(
-                                data = it,
-                                fom = it.periode.fom.atDay(1),
-                                tom = it.periode.tom?.atEndOfMonth(),
-                            )
-                        }.mapVerdier {
-                            FaktumNode(
-                                verdi =
-                                    InntektAvkortingGrunnlag(
-                                        inntekt = Beregningstall(it.aarsinntekt),
-                                        fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
-                                        inntektUtland = Beregningstall(it.inntektUtland),
-                                        fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                        relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
-                                        it.id,
-                                    ),
-                                kilde = it.kilde,
-                                beskrivelse = "Forventet årsinntekt",
-                            )
-                        },
+                        avkortingGrunnlag
+                            .map {
+                                GrunnlagMedPeriode(
+                                    data = it,
+                                    fom = it.periode.fom.atDay(1),
+                                    tom = it.periode.tom?.atEndOfMonth(),
+                                )
+                            }.mapVerdier {
+                                FaktumNode(
+                                    verdi =
+                                        InntektAvkortingGrunnlag(
+                                            inntekt = Beregningstall(it.aarsinntekt),
+                                            fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
+                                            inntektUtland = Beregningstall(it.inntektUtland),
+                                            fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
+                                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
+                                            it.id,
+                                        ),
+                                    kilde = it.kilde,
+                                    beskrivelse = "Forventet årsinntekt",
+                                )
+                            },
                     ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") },
             )
 
@@ -85,9 +86,10 @@ object AvkortingRegelkjoring {
                                 versjon = periodisertResultat.reglerVersjon,
                             ),
                         inntektsgrunnlag =
-                            grunnlag.finnGrunnlagForPeriode(
-                                periodisertResultat.periode.fraDato,
-                            ).inntektAvkortingGrunnlag.verdi.grunnlagId,
+                            grunnlag
+                                .finnGrunnlagForPeriode(
+                                    periodisertResultat.periode.fraDato,
+                                ).inntektAvkortingGrunnlag.verdi.grunnlagId,
                     )
                 }
             }
@@ -150,36 +152,38 @@ object AvkortingRegelkjoring {
 
     private fun periodiserteBeregninger(beregninger: List<YtelseFoerAvkorting>): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            beregninger.map {
-                GrunnlagMedPeriode(
-                    data = it,
-                    fom = it.periode.fom.atDay(1),
-                    tom = it.periode.tom?.atEndOfMonth(),
-                )
-            }.mapVerdier {
-                FaktumNode(
-                    verdi = it.beregning,
-                    kilde = it.beregningsreferanse,
-                    beskrivelse = "Beregnet ytelse før avkorting for periode",
-                )
-            },
+            beregninger
+                .map {
+                    GrunnlagMedPeriode(
+                        data = it,
+                        fom = it.periode.fom.atDay(1),
+                        tom = it.periode.tom?.atEndOfMonth(),
+                    )
+                }.mapVerdier {
+                    FaktumNode(
+                        verdi = it.beregning,
+                        kilde = it.beregningsreferanse,
+                        beskrivelse = "Beregnet ytelse før avkorting for periode",
+                    )
+                },
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
 
     private fun periodiserteAvkortinger(avkortingGrunnlag: List<Avkortingsperiode>): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            avkortingGrunnlag.map {
-                GrunnlagMedPeriode(
-                    data = it,
-                    fom = it.periode.fom.atDay(1),
-                    tom = it.periode.tom?.atEndOfMonth(),
-                )
-            }.mapVerdier {
-                FaktumNode(
-                    verdi = it.avkorting,
-                    kilde = "Avkorting:${it.id}",
-                    beskrivelse = "Beregnet avkorting for periode",
-                )
-            },
+            avkortingGrunnlag
+                .map {
+                    GrunnlagMedPeriode(
+                        data = it,
+                        fom = it.periode.fom.atDay(1),
+                        tom = it.periode.tom?.atEndOfMonth(),
+                    )
+                }.mapVerdier {
+                    FaktumNode(
+                        verdi = it.avkorting,
+                        kilde = "Avkorting:${it.id}",
+                        beskrivelse = "Beregnet avkorting for periode",
+                    )
+                },
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
 
     private fun restansegrunnlag(restanse: Restanse?): KonstantGrunnlag<FaktumNode<Int>> =
@@ -230,7 +234,10 @@ object AvkortingRegelkjoring {
             )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
-                val (totalRestanse, fordeltRestanse) = resultat.periodiserteResultater.first().resultat.verdi
+                val (totalRestanse, fordeltRestanse) =
+                    resultat.periodiserteResultater
+                        .first()
+                        .resultat.verdi
                 val tidspunkt = Tidspunkt.now()
                 Restanse(
                     id = UUID.randomUUID(),

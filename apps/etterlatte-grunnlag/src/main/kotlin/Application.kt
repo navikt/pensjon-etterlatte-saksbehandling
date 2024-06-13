@@ -60,16 +60,6 @@ class ApplicationBuilder {
         )
     }
 
-    // TODO: Slette så fort grunnlag er mappet
-    private val behandlingSystemClient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = config.getString("azure.app.client.id"),
-            azureAppJwk = config.getString("azure.app.jwk"),
-            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
-        )
-    }
     val persondataKlient =
         PersondataKlient(
             httpClient =
@@ -94,7 +84,8 @@ class ApplicationBuilder {
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
     private val rapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
+        RapidApplication
+            .Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
@@ -104,8 +95,8 @@ class ApplicationBuilder {
                         aldersovergangRoutes(aldersovergangService)
                     }
                 }
-            }
-            .build().apply {
+            }.build()
+            .apply {
                 GrunnlagsversjoneringRiver(this, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
             }

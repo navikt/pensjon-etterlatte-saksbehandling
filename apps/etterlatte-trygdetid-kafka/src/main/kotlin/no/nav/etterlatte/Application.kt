@@ -8,12 +8,14 @@ import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        KopierTrygdetidRiver(
-            rapidsConnection,
-            AppBuilder(
-                Miljoevariabler(rapidEnv),
-            ).createTrygdetidService(),
-        )
-    }.start()
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            KopierTrygdetidRiver(
+                rapidsConnection,
+                AppBuilder(
+                    Miljoevariabler(rapidEnv),
+                ).createTrygdetidService(),
+            )
+        }.start()
 }

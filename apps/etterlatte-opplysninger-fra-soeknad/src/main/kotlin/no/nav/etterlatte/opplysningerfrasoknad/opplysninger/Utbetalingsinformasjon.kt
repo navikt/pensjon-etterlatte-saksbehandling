@@ -11,5 +11,6 @@ data class Utbetalingsinformasjon(
     val iban: String?,
     val swift: String?,
     val oenskerSkattetrekk: JaNeiVetIkke?,
-    val oensketSkattetrekkProsent: String?,
+    val oensketSkattetrekk: String?,
+    val beskrivelse: String?,
 )

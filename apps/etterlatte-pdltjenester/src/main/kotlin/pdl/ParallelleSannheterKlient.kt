@@ -20,7 +20,9 @@ import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ParallelleSannheterException(override val message: String) : RuntimeException(message)
+class ParallelleSannheterException(
+    override val message: String,
+) : RuntimeException(message)
 
 class ParallelleSannheterKlient(
     val httpClient: HttpClient,
@@ -102,10 +104,9 @@ class ParallelleSannheterKlient(
     private suspend inline fun <reified T> avklar(
         list: List<T>,
         avklaring: Avklaring,
-    ): T {
-        return avklarNullable(list, avklaring)
+    ): T =
+        avklarNullable(list, avklaring)
             ?: throw ParallelleSannheterException("Forventet verdi for feltet ${avklaring.feltnavn}, men var null")
-    }
 
     private suspend inline fun <reified T> avklarNullable(
         list: List<T>,
@@ -120,10 +121,11 @@ class ParallelleSannheterKlient(
                 logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
                 val responseAsJsonNode =
                     retry {
-                        httpClient.post("$apiUrl/api/${avklaring.feltnavn}") {
-                            accept(Json)
-                            setBody(TextContent(nodeWithFieldName.toJson(), Json))
-                        }.body<JsonNode>()
+                        httpClient
+                            .post("$apiUrl/api/${avklaring.feltnavn}") {
+                                accept(Json)
+                                setBody(TextContent(nodeWithFieldName.toJson(), Json))
+                            }.body<JsonNode>()
                     }.let {
                         when (it) {
                             is RetryResult.Success -> it.content
@@ -141,7 +143,9 @@ class ParallelleSannheterKlient(
         }
     }
 
-    private enum class Avklaring(val feltnavn: String) {
+    private enum class Avklaring(
+        val feltnavn: String,
+    ) {
         FOLKEREGISTERIDENTIFIKATOR("folkeregisteridentifikator"),
         NAVN("navn"),
         ADRESSEBESKYTTELSE("adressebeskyttelse"),
@@ -160,7 +164,9 @@ class ParallelleSannheterKlient(
     }
 }
 
-enum class NavnFeatureToggles(private val key: String) : FeatureToggle {
+enum class NavnFeatureToggles(
+    private val key: String,
+) : FeatureToggle {
     AksepterManglendeNavn("aksepter-manglende-navn"),
     ;
 

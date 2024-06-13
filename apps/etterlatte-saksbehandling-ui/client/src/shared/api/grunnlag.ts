@@ -7,7 +7,7 @@ import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
 import { SakType } from '~shared/types/sak'
 
-export const getPerson = async (fnr: string): Promise<ApiResponse<IPersonResult>> => {
+export const getPersonNavn = async (fnr: string): Promise<ApiResponse<IPersonResult>> => {
   return apiClient.post(`/grunnlag/person/navn`, {
     foedselsnummer: fnr,
   })

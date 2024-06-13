@@ -17,7 +17,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import org.slf4j.LoggerFactory
 
-class DokarkivKlient(private val client: HttpClient, private val url: String) {
+class DokarkivKlient(
+    private val client: HttpClient,
+    private val url: String,
+) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(
@@ -32,14 +35,16 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             }
 
         return if (response.status.isSuccess()) {
-            response.body<OpprettJournalpostResponse>()
+            response
+                .body<OpprettJournalpostResponse>()
                 .also {
                     logger.info(
                         "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
                     )
                 }
         } else if (response.status == HttpStatusCode.Conflict) {
-            response.body<OpprettJournalpostResponse>()
+            response
+                .body<OpprettJournalpostResponse>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
             logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")
@@ -159,10 +164,15 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
     }
 }
 
-data class FerdigstillJournalpostRequest(val journalfoerendeEnhet: String)
-
-class KunneIkkeFerdigstilleJournalpost(journalpostId: String, melding: String? = null) : UgyldigForespoerselException(
-    code = "KUNNE_IKKE_FERDIGSTILLE_JOURNALPOST",
-    detail = melding ?: "Kunne ikke ferdigstille journalpost med id=$journalpostId",
-    meta = mapOf("journalpostId" to journalpostId),
+data class FerdigstillJournalpostRequest(
+    val journalfoerendeEnhet: String,
 )
+
+class KunneIkkeFerdigstilleJournalpost(
+    journalpostId: String,
+    melding: String? = null,
+) : UgyldigForespoerselException(
+        code = "KUNNE_IKKE_FERDIGSTILLE_JOURNALPOST",
+        detail = melding ?: "Kunne ikke ferdigstille journalpost med id=$journalpostId",
+        meta = mapOf("journalpostId" to journalpostId),
+    )

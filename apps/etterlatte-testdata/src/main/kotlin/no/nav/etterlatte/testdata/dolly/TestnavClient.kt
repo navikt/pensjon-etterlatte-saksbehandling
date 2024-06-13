@@ -19,9 +19,10 @@ class TestnavClient(
     private val url = config.getString("testnav.resource.url")
 
     suspend fun hentPersonInfo(identer: List<String>): List<DollyPersonResponse> =
-        httpClient.get("$url/personer/identer?identer=${identer.joinToString(",")}") {
-            header(HttpHeaders.Authorization, "Bearer ${getTestnavAccessToken()}")
-        }.let {
-            objectMapper.readValue(it.body<JsonNode>()["data"]["hentPersonBolk"].toJson())
-        }
+        httpClient
+            .get("$url/personer/identer?identer=${identer.joinToString(",")}") {
+                header(HttpHeaders.Authorization, "Bearer ${getTestnavAccessToken()}")
+            }.let {
+                objectMapper.readValue(it.body<JsonNode>()["data"]["hentPersonBolk"].toJson())
+            }
 }

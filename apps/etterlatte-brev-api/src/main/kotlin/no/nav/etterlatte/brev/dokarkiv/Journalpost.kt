@@ -2,9 +2,20 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
-import java.time.LocalDateTime
 
-interface OpprettJournalpost
+interface OpprettJournalpost {
+    val avsenderMottaker: AvsenderMottaker?
+    val bruker: Bruker
+    val dokumenter: List<JournalpostDokument>
+    val eksternReferanseId: String
+    val journalfoerendeEnhet: String
+    val journalposttype: JournalPostType
+    val kanal: String?
+    val sak: JournalpostSak
+    val tema: String
+    val tittel: String
+    val tilleggsopplysninger: Map<String, String>
+}
 
 /**
  * Requestobjekt for å opprette ny Journalpost
@@ -15,22 +26,26 @@ interface OpprettJournalpost
  *  https://confluence.adeo.no/display/BOA/Utsendingskanal
  **/
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-data class OpprettJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker,
-    val behandlingstema: String? = null,
-    val bruker: Bruker,
-    val datoDokument: LocalDateTime? = null,
-    val datoMottatt: LocalDateTime? = null,
-    val dokumenter: List<JournalpostDokument>,
-    val eksternReferanseId: String,
-    val journalfoerendeEnhet: String,
-    val journalposttype: JournalPostType,
-    val kanal: String,
-    val sak: JournalpostSak,
-    val tema: String,
-    val tilleggsopplysninger: Map<String, String> = emptyMap(),
-    val tittel: String,
-) : OpprettJournalpost
+data class JournalpostRequest(
+    override val avsenderMottaker: AvsenderMottaker,
+    override val bruker: Bruker,
+    override val dokumenter: List<JournalpostDokument>,
+    override val eksternReferanseId: String,
+    override val journalfoerendeEnhet: String,
+    override val journalposttype: JournalPostType,
+    override val kanal: String,
+    override val sak: JournalpostSak,
+    override val tema: String,
+    override val tilleggsopplysninger: Map<String, String> = emptyMap(),
+    override val tittel: String,
+) : OpprettJournalpost {
+    init {
+        check(journalposttype != JournalPostType.NOTAT) {
+            "${this::class.simpleName} skal ikke brukes til opprettelse av Notat. " +
+                "Bruk ${OpprettNotatJournalpostRequest::class.simpleName} i stedet."
+        }
+    }
+}
 
 /**
  * Requestobjekt for å opprette journalpost av typen NOTAT
@@ -45,18 +60,19 @@ data class OpprettJournalpostRequest(
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OpprettNotatJournalpostRequest(
-    val behandlingstema: String? = null,
-    val bruker: Bruker,
-    val dokumenter: List<JournalpostDokument>,
-    val datoDokument: LocalDateTime? = null,
-    val eksternReferanseId: String,
-    val journalfoerendeEnhet: String,
-    val sak: JournalpostSak,
-    val tema: String,
-    val tilleggsopplysninger: Map<String, String> = emptyMap(),
-    val tittel: String,
+    override val bruker: Bruker,
+    override val dokumenter: List<JournalpostDokument>,
+    override val eksternReferanseId: String,
+    override val journalfoerendeEnhet: String,
+    override val sak: JournalpostSak,
+    override val tema: String,
+    override val tittel: String,
 ) : OpprettJournalpost {
-    val journalposttype: String = "NOTAT"
+    override val journalposttype = JournalPostType.NOTAT
+
+    override val kanal = null
+    override val avsenderMottaker = null
+    override val tilleggsopplysninger = emptyMap<String, String>()
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -145,12 +161,17 @@ sealed class DokumentVariant {
     }
 }
 
-enum class JournalPostType(val type: String) {
+enum class JournalPostType(
+    val type: String,
+) {
+    NOTAT("NOTAT"),
     INNGAAENDE("INNGAAENDE"),
     UTGAAENDE("UTGAAENDE"),
 }
 
-enum class DokumentKategori(val type: String) {
+enum class DokumentKategori(
+    val type: String,
+) {
     SOK("SOK"),
     VB("VB"),
     IB("IB"),

@@ -166,9 +166,9 @@
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: `type=${type}&antall=${antall}&antallDagerSidenDoedsfall=${antallDagerSidenDoedsfall}&behandlingssteg=${steg}&gruppeId={{gruppeId}}`
-        }).then(res => res.json()).then(data => {
-            if ((data.status === 200)) {
-                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert`
+        }).then(res => {
+            if (res.ok) {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad(er) er innsendt og registrert`
                 soeknadInnsendtAlert.style.display = "block"
             }
         });

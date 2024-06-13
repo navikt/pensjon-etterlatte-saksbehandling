@@ -45,7 +45,8 @@ class MaanedligStatistikkJobTest {
         every { statistikkService.statistikkProdusertForMaaned(maanedProdusert) } returns KjoertStatus.INGEN_FEIL
 
         val clockMaanedEtterProdusert: Clock =
-            maanedProdusert.plusMonths(1)
+            maanedProdusert
+                .plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
                 .toNorskTidspunkt()
@@ -74,7 +75,8 @@ class MaanedligStatistikkJobTest {
         every { statistikkService.statistikkProdusertForMaaned(maanedFeil) } returns KjoertStatus.FEIL
 
         val clockMaanedEtterProdusert: Clock =
-            maanedFeil.plusMonths(1)
+            maanedFeil
+                .plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
                 .toNorskTidspunkt()
@@ -106,7 +108,8 @@ class MaanedligStatistikkJobTest {
         every { statistikkService.lagreMaanedsstatistikk(mockMaanedStatistikk) } returns Unit
 
         val clockMaanedEtterProdusert: Clock =
-            maanedIkkeKjoert.plusMonths(1)
+            maanedIkkeKjoert
+                .plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
                 .toNorskTidspunkt()

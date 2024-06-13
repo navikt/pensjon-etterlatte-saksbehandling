@@ -34,7 +34,13 @@ internal class OmregningsHendelserBehandlingRiverTest {
 
         Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
-        Assertions.assertEquals(behandlingId.toString(), inspector.inspektør.message(1).get(BEHANDLING_ID_KEY).asText())
+        Assertions.assertEquals(
+            behandlingId.toString(),
+            inspector.inspektør
+                .message(1)
+                .get(BEHANDLING_ID_KEY)
+                .asText(),
+        )
     }
 
     companion object {

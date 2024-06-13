@@ -9,7 +9,11 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.readValue
 import java.util.UUID
 
-class GrunnlagService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class GrunnlagService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     suspend fun hentGrunnlagForBehandling(behandlingId: UUID): Grunnlag =
         retryOgPakkUt {
             klient.get(Resource(clientId, "$url/api/grunnlag/behandling/$behandlingId"), Systembruker.testdata).mapBoth(

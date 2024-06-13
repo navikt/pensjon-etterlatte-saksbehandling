@@ -9,15 +9,17 @@ import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val beregningService = AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService()
-        OmregningHendelserBeregningRiver(
-            rapidsConnection,
-            beregningService,
-        )
-        SjekkOmOverstyrtBeregningRiver(
-            rapidsConnection,
-            beregningService,
-        )
-    }.start()
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            val beregningService = AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService()
+            OmregningHendelserBeregningRiver(
+                rapidsConnection,
+                beregningService,
+            )
+            SjekkOmOverstyrtBeregningRiver(
+                rapidsConnection,
+                beregningService,
+            )
+        }.start()
 }

@@ -33,7 +33,8 @@ class Familieoppretter(
             )
 
         logger.info("Oppretter bestilling for gruppeid $gruppeid")
-        return dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+        return dollyService
+            .opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
             .also { bestilling ->
                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
             }

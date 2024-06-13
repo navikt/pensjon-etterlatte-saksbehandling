@@ -30,7 +30,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
+class SaksbehandlerServiceImplTest(
+    val dataSource: DataSource,
+) {
     private lateinit var dao: SaksbehandlerInfoDao
     private val axsysKlient: AxsysKlient = mockk<AxsysKlient>()
     private val navansattKlient: NavAnsattKlient = mockk<NavAnsattKlient>()

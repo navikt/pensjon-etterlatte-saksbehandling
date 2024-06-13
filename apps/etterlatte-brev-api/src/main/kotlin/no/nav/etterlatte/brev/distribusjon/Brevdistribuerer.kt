@@ -37,22 +37,26 @@ class Brevdistribuerer(
                 "Mottaker må være satt for å kunne distribuere brevet (id: $id)"
             }
 
-        return distribusjonService.distribuerJournalpost(
-            brevId = brev.id,
-            journalpostId = journalpostId,
-            type = distribusjonsType,
-            tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-            adresse = mottaker.adresse,
-        ).also { logger.info("Distribuerte brev $id") }
+        return distribusjonService
+            .distribuerJournalpost(
+                brevId = brev.id,
+                journalpostId = journalpostId,
+                type = distribusjonsType,
+                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
+                adresse = mottaker.adresse,
+            ).also { logger.info("Distribuerte brev $id") }
     }
 }
 
-class FeilStatusForDistribusjon(brevID: BrevID, status: Status) : UgyldigForespoerselException(
-    code = "FEIL_STATUS_FOR_DISTRIBUSJON",
-    detail = "Kan ikke distribuere brev med status ${status.name.lowercase()}",
-    meta =
-        mapOf(
-            "brevId" to brevID,
-            "status" to status,
-        ),
-)
+class FeilStatusForDistribusjon(
+    brevID: BrevID,
+    status: Status,
+) : UgyldigForespoerselException(
+        code = "FEIL_STATUS_FOR_DISTRIBUSJON",
+        detail = "Kan ikke distribuere brev med status ${status.name.lowercase()}",
+        meta =
+            mapOf(
+                "brevId" to brevID,
+                "status" to status,
+            ),
+    )

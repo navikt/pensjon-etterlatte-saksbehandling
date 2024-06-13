@@ -48,7 +48,8 @@ class BehandlingPaaVentHendelseRiver(
         val behandlingId = UUID.fromString(packet[BEHANDLING_ID_PAA_VENT_RIVER_KEY].textValue())
         val aarsak: PaaVentAarsak = PaaVentAarsak.valueOf(packet[PAA_VENT_AARSAK_KEY].textValue())
 
-        service.registrerStatistikkBehandlingPaaVentHendelse(behandlingId, hendelse, tekniskTid, aarsak)
+        service
+            .registrerStatistikkBehandlingPaaVentHendelse(behandlingId, hendelse, tekniskTid, aarsak)
             ?.also {
                 context.publish(
                     mapOf(

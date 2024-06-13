@@ -33,7 +33,9 @@ class YtelseMedGrunnlagService(
                         .maxBy { it.datoFOM }
 
                 val avkortingsgrunnlagIPeriode =
-                    avkorting.aarsoppgjoer.inntektsavkorting
+                    avkorting.aarsoppgjoer
+                        .single()
+                        .inntektsavkorting
                         .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
                         .maxBy { it.grunnlag.periode.fom }
 
@@ -63,7 +65,9 @@ class YtelseMedGrunnlagService(
     }
 }
 
-class BeregningFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
-    code = "BEREGNING_IKKE_FUNNET",
-    detail = "Mangler beregning for behandling $behandlingId",
-)
+class BeregningFinnesIkkeException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "BEREGNING_IKKE_FUNNET",
+        detail = "Mangler beregning for behandling $behandlingId",
+    )

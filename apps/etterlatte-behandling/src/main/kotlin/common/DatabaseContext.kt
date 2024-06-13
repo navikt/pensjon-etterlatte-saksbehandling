@@ -7,7 +7,9 @@ import java.sql.Connection
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
 
-class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
+class DatabaseContext(
+    private val ds: DataSource,
+) : DatabaseKontekst {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(DatabaseContext::class.java)
     }
@@ -16,9 +18,7 @@ class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
 
     private var transactionalConnection: Connection? = null
 
-    override fun harIntransaction(): Boolean {
-        return transaktionOpen.get()
-    }
+    override fun harIntransaction(): Boolean = transaktionOpen.get()
 
     override fun activeTx(): Connection =
         transactionalConnection ?: throw IllegalStateException(

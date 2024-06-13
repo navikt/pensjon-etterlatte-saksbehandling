@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkont
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
@@ -48,7 +49,11 @@ class TilbakekrevingKlient(
         val request = toTilbakekrevingsvedtakRequest(vedtak)
         val requestAsJson = vedtakObjectMapper.writeValueAsString(request)
 
-        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = vedtak.sakId,
+            payload = requestAsJson,
+            type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT,
+        )
 
         val response =
             runBlocking {
@@ -61,13 +66,17 @@ class TilbakekrevingKlient(
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
             }
 
-        hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(vedtak.kravgrunnlagId, response.toJson())
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = vedtak.sakId,
+            payload = response.toJson(),
+            type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
+        )
 
         return kontrollerResponse(response)
     }
 
-    private fun toTilbakekrevingsvedtakRequest(vedtak: TilbakekrevingVedtak): TilbakekrevingsvedtakRequest {
-        return TilbakekrevingsvedtakRequest().apply {
+    private fun toTilbakekrevingsvedtakRequest(vedtak: TilbakekrevingVedtak): TilbakekrevingsvedtakRequest =
+        TilbakekrevingsvedtakRequest().apply {
             tilbakekrevingsvedtak =
                 TilbakekrevingsvedtakDto().apply {
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
@@ -110,7 +119,6 @@ class TilbakekrevingKlient(
                     )
                 }
         }
-    }
 
     private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
@@ -124,12 +132,11 @@ class TilbakekrevingKlient(
             kodeSkyld = skyld.name
         }
 
-    private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String {
-        return when (aarsak) {
+    private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
+        when (aarsak) {
             TilbakekrevingAarsak.UTBFEILMOT -> aarsak.name
             else -> TilbakekrevingAarsak.ANNET.name
         }
-    }
 
     private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {
@@ -140,8 +147,8 @@ class TilbakekrevingKlient(
             belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
         }
 
-    private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) {
-        return when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
+    private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) =
+        when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
             Alvorlighetsgrad.OK,
             Alvorlighetsgrad.OK_MED_VARSEL,
             -> Unit
@@ -154,9 +161,10 @@ class TilbakekrevingKlient(
                 throw Exception(err)
             }
         }
-    }
 
-    enum class Alvorlighetsgrad(val value: String) {
+    enum class Alvorlighetsgrad(
+        val value: String,
+    ) {
         OK("00"),
 
         /** En varselmelding følger med */
@@ -170,17 +178,19 @@ class TilbakekrevingKlient(
         override fun toString() = value
 
         companion object {
-            fun fromString(string: String): Alvorlighetsgrad {
-                return enumValues<Alvorlighetsgrad>().first { it.value == string }
-            }
+            fun fromString(string: String): Alvorlighetsgrad = enumValues<Alvorlighetsgrad>().first { it.value == string }
         }
     }
 
-    private enum class KodeAksjon(val kode: String) {
+    private enum class KodeAksjon(
+        val kode: String,
+    ) {
         FATTE_VEDTAK("8"),
     }
 
-    private enum class RenterBeregnes(val kode: String) {
+    private enum class RenterBeregnes(
+        val kode: String,
+    ) {
         NEI("N"),
     }
 
@@ -188,9 +198,7 @@ class TilbakekrevingKlient(
         const val ANSVARLIG_ENHET = "4819"
     }
 
-    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
-    }
+    private fun LocalDate.toXMLDate(): XMLGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
 
     private fun Int.medToDesimaler() = this.toBigDecimal().setScale(2)
 }
@@ -206,7 +214,13 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
                     ser: SerializerProvider?,
                 ) {
                     if (value != null) {
-                        gen?.writeString(value.toGregorianCalendar().toZonedDateTime().toLocalDate().toString())
+                        gen?.writeString(
+                            value
+                                .toGregorianCalendar()
+                                .toZonedDateTime()
+                                .toLocalDate()
+                                .toString(),
+                        )
                     }
                 }
             },

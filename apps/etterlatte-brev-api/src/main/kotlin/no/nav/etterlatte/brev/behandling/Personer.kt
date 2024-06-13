@@ -14,7 +14,9 @@ data class PersonerISak(
     fun soekerOgEventuellVerge(): SoekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
 }
 
-data class Innsender(val fnr: Foedselsnummer)
+data class Innsender(
+    val fnr: Foedselsnummer,
+)
 
 data class Soeker(
     val fornavn: String,

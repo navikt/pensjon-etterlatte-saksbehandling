@@ -12,7 +12,9 @@ import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import javax.sql.DataSource
 
-class AvstemmingDao(private val dataSource: DataSource) {
+class AvstemmingDao(
+    private val dataSource: DataSource,
+) {
     fun opprettKonsistensavstemming(konsistensavstemming: Konsistensavstemming): Int =
         using(sessionOf(dataSource)) { session ->
             queryOf(
@@ -72,8 +74,14 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     mapOf(
                         "id" to grensesnittavstemming.id.value.param(),
                         "opprettet" to grensesnittavstemming.opprettet.toTimestamp().param(),
-                        "periode_fra" to grensesnittavstemming.periode.fraOgMed.toTimestamp().param(),
-                        "periode_til" to grensesnittavstemming.periode.til.toTimestamp().param(),
+                        "periode_fra" to
+                            grensesnittavstemming.periode.fraOgMed
+                                .toTimestamp()
+                                .param(),
+                        "periode_til" to
+                            grensesnittavstemming.periode.til
+                                .toTimestamp()
+                                .param(),
                         "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param(),
                         "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param(),
                         "avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name.param(),

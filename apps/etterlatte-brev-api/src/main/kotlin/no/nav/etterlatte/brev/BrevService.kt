@@ -24,28 +24,25 @@ class BrevService(
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
-    fun hentBrev(id: BrevID): Brev {
-        return db.hentBrev(id)
-    }
+    fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 
-    fun hentBrevForSak(sakId: Long): List<Brev> {
-        return db.hentBrevForSak(sakId)
-    }
+    fun hentBrevForSak(sakId: Long): List<Brev> = db.hentBrevForSak(sakId)
 
-    suspend fun opprettBrev(
+    suspend fun opprettNyttManueltBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
-        brevoppretter.opprettBrev(
-            sakId = sakId,
-            behandlingId = null,
-            bruker = bruker,
-            brevKode = { brevkode },
-            brevtype = brevkode.brevtype,
-            brevDataMapping = brevDataMapping,
-        ).first
+        brevoppretter
+            .opprettBrev(
+                sakId = sakId,
+                behandlingId = null,
+                bruker = bruker,
+                brevKode = { brevkode },
+                brevtype = brevkode.brevtype,
+                brevDataMapping = brevDataMapping,
+            ).first
 
     data class BrevPayload(
         val hoveddel: Slate?,
@@ -54,11 +51,13 @@ class BrevService(
 
     fun hentBrevPayload(id: BrevID): BrevPayload {
         val hoveddel =
-            db.hentBrevPayload(id)
+            db
+                .hentBrevPayload(id)
                 .also { logger.info("Hentet payload for brev (id=$id)") }
 
         val vedlegg =
-            db.hentBrevPayloadVedlegg(id)
+            db
+                .hentBrevPayloadVedlegg(id)
                 .also { logger.info("Hentet payload til vedlegg for brev (id=$id)") }
 
         return BrevPayload(hoveddel, vedlegg)
@@ -69,7 +68,8 @@ class BrevService(
         payload: Slate,
     ): Int {
         sjekkOmBrevKanEndres(id)
-        return db.oppdaterPayload(id, payload)
+        return db
+            .oppdaterPayload(id, payload)
             .also { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 
@@ -78,7 +78,8 @@ class BrevService(
         payload: List<BrevInnholdVedlegg>,
     ): Int {
         sjekkOmBrevKanEndres(id)
-        return db.oppdaterPayloadVedlegg(id, payload)
+        return db
+            .oppdaterPayloadVedlegg(id, payload)
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
@@ -87,7 +88,8 @@ class BrevService(
         mottaker: Mottaker,
     ): Int {
         sjekkOmBrevKanEndres(id)
-        return db.oppdaterMottaker(id, mottaker)
+        return db
+            .oppdaterMottaker(id, mottaker)
             .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
     }
 
@@ -96,7 +98,8 @@ class BrevService(
         tittel: String,
     ): Int {
         sjekkOmBrevKanEndres(id)
-        return db.oppdaterTittel(id, tittel)
+        return db
+            .oppdaterTittel(id, tittel)
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
@@ -106,7 +109,8 @@ class BrevService(
     ) {
         sjekkOmBrevKanEndres(id)
 
-        db.oppdaterSpraak(id, spraak)
+        db
+            .oppdaterSpraak(id, spraak)
             .also { logger.info("Språk i brev (id=$id) endret til $spraak") }
     }
 
@@ -167,12 +171,14 @@ class BrevService(
     }
 }
 
-class BrevKanIkkeEndres(brev: Brev) : UgyldigForespoerselException(
-    code = "BREV_KAN_IKKE_ENDRES",
-    detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}",
-    meta =
-        mapOf(
-            "brevId" to brev.id,
-            "status" to brev.status,
-        ),
-)
+class BrevKanIkkeEndres(
+    brev: Brev,
+) : UgyldigForespoerselException(
+        code = "BREV_KAN_IKKE_ENDRES",
+        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}",
+        meta =
+            mapOf(
+                "brevId" to brev.id,
+                "status" to brev.status,
+            ),
+    )

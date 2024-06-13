@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.NotatService
+import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
@@ -44,7 +45,9 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
-import no.nav.etterlatte.brev.notatRoute
+import no.nav.etterlatte.brev.notat.NotatRepository
+import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
+import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
@@ -132,8 +135,9 @@ class ApplicationBuilder {
             sakService,
             trygdetidKlient,
             adresseService,
-            vilkaarsvurderingKlient
+            vilkaarsvurderingKlient,
         )
+
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
@@ -215,25 +219,27 @@ class ApplicationBuilder {
             behandlingKlient = behandlingKlient,
         )
 
+    private val notatRepository = NotatRepository(datasource)
+    private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
+    private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, sakService)
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     private val rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        )
-            .withKtorModule {
+        RapidApplication
+            .Builder(
+                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+            ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingKlient)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
-                    notatRoute(notatService, tilgangssjekker)
+                    notatRoute(notatService, nyNotatService, tilgangssjekker)
                     oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
-            }
-            .build()
+            }.build()
             .apply {
                 val brevgenerering =
                     StartInformasjonsbrevgenereringRiver(
@@ -282,7 +288,8 @@ class ApplicationBuilder {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.toMutableMap()
+                            env
+                                .toMutableMap()
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }

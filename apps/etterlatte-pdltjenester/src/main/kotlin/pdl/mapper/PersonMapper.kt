@@ -14,16 +14,16 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.PdlHentPersonNavn
+import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
 import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -109,8 +109,8 @@ object PersonMapper {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
         personRolle: PersonRolle,
-    ): Familiemedlem {
-        return runBlocking {
+    ): Familiemedlem =
+        runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val (statsborgerskap, pdlStatsborgerskap) =
                 kanskjeAvklarStatsborgerskap(
@@ -155,21 +155,25 @@ object PersonMapper {
                         )
                     },
                 familierelasjon =
-                    FamilieRelasjonMapper.mapFamilieRelasjon(
-                        hentPerson,
-                        personRolle,
-                    ).let {
-                        Familierelasjon(it.ansvarligeForeldre, it.barn)
-                    },
+                    FamilieRelasjonMapper
+                        .mapFamilieRelasjon(
+                            hentPerson,
+                            personRolle,
+                        ).let {
+                            Familierelasjon(
+                                ansvarligeForeldre = it.ansvarligeForeldre,
+                                foreldre = it.foreldre,
+                                barn = it.barn,
+                            )
+                        },
             )
         }
-    }
 
-    fun mapPersonNavn(
+    fun mapPersonNavnFoedsel(
         ppsKlient: ParallelleSannheterKlient,
         ident: String,
-        hentPerson: PdlHentPersonNavn,
-    ): PersonNavn =
+        hentPerson: PdlHentPersonNavnFoedselsdato,
+    ): PersonNavnFoedselsaar =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
@@ -177,15 +181,19 @@ object PersonMapper {
                 if (Folkeregisteridentifikator.isValid(ident)) {
                     ident
                 } else {
-                    ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                    ppsKlient
+                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
                         .identifikasjonsnummer
                 }
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
 
-            PersonNavn(
+            PersonNavnFoedselsaar(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
+                foedselsdato = foedsel.foedselsdato,
+                foedselsaar = foedsel.foedselsaar,
             )
         }
 
@@ -236,17 +244,21 @@ object PersonMapper {
                     } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
                 // Finn ut hva opplysningsid:n er for data fra pps
                 bostedsadresse =
-                    hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
+                    hentPerson.bostedsadresse
+                        ?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 oppholdsadresse =
-                    hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
+                    hentPerson.oppholdsadresse
+                        ?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 deltBostedsadresse =
-                    hentPerson.deltBostedsadresse?.let {
-                        AdresseMapper.mapDeltBostedsadresse(ppsKlient, it)
-                    }?.map { OpplysningDTO(it, null) },
+                    hentPerson.deltBostedsadresse
+                        ?.let {
+                            AdresseMapper.mapDeltBostedsadresse(ppsKlient, it)
+                        }?.map { OpplysningDTO(it, null) },
                 kontaktadresse =
-                    hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
+                    hentPerson.kontaktadresse
+                        ?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 statsborgerskap = statsborgerskap?.let { OpplysningDTO(it.land, it.metadata.opplysningsId) },
                 pdlStatsborgerskap = statsborgerskapPdl?.let { OpplysningDTO(it, null) },
@@ -258,7 +270,8 @@ object PersonMapper {
                         )
                     },
                 sivilstand =
-                    hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
+                    hentPerson.sivilstand
+                        ?.let { SivilstandMapper.mapSivilstand(it) }
                         ?.map { OpplysningDTO(it, null) },
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
                 // TODO ai: tre opplysninger i en
@@ -269,7 +282,8 @@ object PersonMapper {
                     ),
                 avdoedesBarn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
-                    hentPerson.vergemaalEllerFremtidsfullmakt?.let { VergeMapper.mapVerge(it) }
+                    hentPerson.vergemaalEllerFremtidsfullmakt
+                        ?.let { VergeMapper.mapVerge(it) }
                         ?.map { OpplysningDTO(it, null) },
             )
         }
@@ -290,10 +304,9 @@ object PersonMapper {
     }
 }
 
-fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap {
-    return Statsborgerskap(
+fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap =
+    Statsborgerskap(
         land = this.land,
         gyldigFraOgMed = this.gyldigFraOgMed,
         gyldigTilOgMed = this.gyldigTilOgMed,
     )
-}

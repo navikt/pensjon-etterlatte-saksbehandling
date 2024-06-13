@@ -6,6 +6,7 @@ import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
+import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
@@ -107,6 +108,8 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       )
     case Oppgavetype.AKTIVITETSPLIKT:
       return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal oppgave={oppgave} />
+    case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
+      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktRevurderingModal oppgave={oppgave} />
     default:
       return null
   }

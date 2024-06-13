@@ -19,7 +19,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class VedtakMetricsTest(private val dataSource: DataSource) {
+class VedtakMetricsTest(
+    private val dataSource: DataSource,
+) {
     private lateinit var vedtakRepo: VedtaksvurderingRepository
 
     private lateinit var vedtakMetrikkerDao: VedtakMetrikkerDao
@@ -40,13 +42,21 @@ class VedtakMetricsTest(private val dataSource: DataSource) {
 
     @Test
     fun `Metrikker for loepende vedtak skal ha labels`() {
-        val metrikker = vedtakMetrics.loependeVedtak.collect().first().samples
+        val metrikker =
+            vedtakMetrics.loependeVedtak
+                .collect()
+                .first()
+                .samples
         metrikker.first().labelNames shouldContainExactly listOf("saktype")
     }
 
     @Test
     fun `Metrikker for loepende vedtak skal ha riktig antall`() {
-        val metrikker = vedtakMetrics.loependeVedtak.collect().first().samples
+        val metrikker =
+            vedtakMetrics.loependeVedtak
+                .collect()
+                .first()
+                .samples
         metrikker.first { it.labelValues[0] == SakType.BARNEPENSJON.name }.value shouldBe 2
         metrikker.first { it.labelValues[0] == SakType.OMSTILLINGSSTOENAD.name }.value shouldBe 1
     }

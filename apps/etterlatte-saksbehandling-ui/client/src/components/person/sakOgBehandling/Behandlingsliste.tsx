@@ -1,8 +1,7 @@
-import { Alert, Link, Table } from '@navikt/ds-react'
+import { Alert, HStack, Link, Table } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
@@ -20,12 +19,6 @@ import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
-
-const BehandlingstypeWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 0.5em;
-`
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
@@ -81,13 +74,13 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                   <Table.Row key={behandling.id}>
                     <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
                     <Table.DataCell>
-                      <BehandlingstypeWrapper>
+                      <HStack gap="2" align="center">
                         {formaterBehandlingstype(behandling.behandlingType)}
                         {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
                           sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
                           <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                         )}
-                      </BehandlingstypeWrapper>
+                      </HStack>
                     </Table.DataCell>
                     <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
                     <Table.DataCell>
@@ -106,11 +99,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                 return (
                   <Table.Row key={behandling.id}>
                     <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
-                    <Table.DataCell>
-                      <BehandlingstypeWrapper>
-                        {genbehandlingTypeTilLesbartNavn(behandling.type)}
-                      </BehandlingstypeWrapper>
-                    </Table.DataCell>
+                    <Table.DataCell>{genbehandlingTypeTilLesbartNavn(behandling.type)}</Table.DataCell>
                     <Table.DataCell>-</Table.DataCell>
                     <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>
                     <Table.DataCell>-</Table.DataCell>

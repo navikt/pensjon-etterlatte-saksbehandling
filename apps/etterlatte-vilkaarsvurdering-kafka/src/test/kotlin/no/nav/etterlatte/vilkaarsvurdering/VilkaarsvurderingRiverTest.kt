@@ -29,14 +29,15 @@ internal class VilkaarsvurderingRiverTest {
         val behandlingViOmregnerFra = UUID.randomUUID()
 
         val melding =
-            JsonMessage.newMessage(
-                mapOf(
-                    ReguleringHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
-                    SAK_ID_KEY to 1,
-                    BEHANDLING_ID_KEY to behandlingId,
-                    BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        ReguleringHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
+                        SAK_ID_KEY to 1,
+                        BEHANDLING_ID_KEY to behandlingId,
+                        BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,
+                    ),
+                ).toJson()
         testRapid.sendTestMessage(melding)
 
         coVerify(exactly = 1) {

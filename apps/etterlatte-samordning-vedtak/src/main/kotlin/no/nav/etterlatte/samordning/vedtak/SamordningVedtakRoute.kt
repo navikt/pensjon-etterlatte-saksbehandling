@@ -10,6 +10,7 @@ import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
@@ -117,9 +118,10 @@ fun Route.samordningVedtakRoute(
 
             val harLoependeOmsPaaDato =
                 try {
-                    samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                    samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
+                        sakType = SakType.OMSTILLINGSSTOENAD,
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
@@ -144,7 +146,8 @@ fun Route.samordningVedtakRoute(
 inline val ApplicationCall.orgNummer: String
     get() {
         val claims =
-            this.hentTokenClaims("maskinporten")
+            this
+                .hentTokenClaims("maskinporten")
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]

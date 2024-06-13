@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
+import no.nav.etterlatte.libs.common.tilbakekreving.KravOgVedtakstatus
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
@@ -34,6 +35,14 @@ object KravgrunnlagMapper {
                 grunnlag.tilbakekrevingsPeriode.map { periode ->
                     toGrunnlagsperiode(periode)
                 },
+        )
+
+    fun toKravOgVedtakstatus(kravOgVedtakstatus: no.nav.tilbakekreving.status.v1.KravOgVedtakstatus) =
+        KravOgVedtakstatus(
+            sakId = SakId(kravOgVedtakstatus.fagsystemId.toLong()),
+            vedtakId = VedtakId(kravOgVedtakstatus.vedtakId.toLong()),
+            status = KravgrunnlagStatus.valueOf(kravOgVedtakstatus.kodeStatusKrav),
+            referanse = UUID30(kravOgVedtakstatus.referanse),
         )
 
     private fun toGrunnlagsperiode(periode: DetaljertKravgrunnlagPeriodeDto) =

@@ -13,23 +13,23 @@ import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import java.time.LocalDate
 
-data class Avdoed(val trygdetid: SamletTrygdetidMedBeregningsMetode)
+data class Avdoed(
+    val trygdetid: SamletTrygdetidMedBeregningsMetode,
+)
 
 data class PeriodisertOmstillingstoenadGrunnlag(
     val avdoed: PeriodisertGrunnlag<FaktumNode<Avdoed>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
 ) : PeriodisertGrunnlag<OmstillingstoenadGrunnlag> {
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return avdoed.finnAlleKnekkpunkter() +
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> =
+        avdoed.finnAlleKnekkpunkter() +
             institusjonsopphold.finnAlleKnekkpunkter()
-    }
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): OmstillingstoenadGrunnlag {
-        return OmstillingstoenadGrunnlag(
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): OmstillingstoenadGrunnlag =
+        OmstillingstoenadGrunnlag(
             avdoed.finnGrunnlagForPeriode(datoIPeriode),
             institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
         )
-    }
 }
 
 data class OmstillingstoenadGrunnlag(

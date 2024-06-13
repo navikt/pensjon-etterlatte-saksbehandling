@@ -11,7 +11,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class SanksjonRepository(private val dataSource: DataSource) {
+class SanksjonRepository(
+    private val dataSource: DataSource,
+) {
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? =
         dataSource.transaction { tx ->
             queryOf(

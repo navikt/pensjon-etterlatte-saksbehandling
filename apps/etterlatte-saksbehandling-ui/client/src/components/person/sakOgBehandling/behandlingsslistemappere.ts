@@ -73,6 +73,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Utsendelse av kravpakke'
     case Revurderingaarsak.UTSENDELSE_AV_SED:
       return 'Utsendelse av SED'
+    case Revurderingaarsak.AKTIVITETSPLIKT:
+      return 'Aktivitetsplikt'
   }
 }
 

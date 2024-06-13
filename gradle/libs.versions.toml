@@ -13,7 +13,7 @@ bcpkix-version = "1.78.1"
 navfelles-token-version = "4.1.8"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.8"
-tjenestespesifikasjoner-version = "1.d27898d"
+tjenestespesifikasjoner-version = "1.9c76d3b"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
@@ -69,14 +69,14 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.04.23-10.02.2af15a63eeb5"}
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.06.05-14.02.b8abba8596b3"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.12.5" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus-simpleclient", version = "1.13.0" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

@@ -42,35 +42,40 @@ enum class SamordningVedtakAarsak {
 
 fun YearMonth.atStartOfMonth(): LocalDate = this.atDay(1)
 
-class VedtakFeilSakstypeException : UgyldigForespoerselException(
-    code = "004-FEIL_SAKSTYPE",
-    detail = "Forespurt informasjon gjeldende ikke-støttet sakstype",
-    meta = getMeta(),
-)
+class VedtakFeilSakstypeException :
+    UgyldigForespoerselException(
+        code = "004-FEIL_SAKSTYPE",
+        detail = "Forespurt informasjon gjeldende ikke-støttet sakstype",
+        meta = getMeta(),
+    )
 
-class ManglerTpNrException : UgyldigForespoerselException(
-    code = "001-TPNR-MANGLER",
-    detail = "Forespørselen mangler 'tpnr' header",
-    meta = getMeta(),
-)
+class ManglerTpNrException :
+    UgyldigForespoerselException(
+        code = "001-TPNR-MANGLER",
+        detail = "Forespørselen mangler 'tpnr' header",
+        meta = getMeta(),
+    )
 
-class ManglerFoedselsnummerException : UgyldigForespoerselException(
-    code = "002-FNR-MANGLER",
-    detail = "fnr ikke angitt",
-    meta = getMeta(),
-)
+class ManglerFoedselsnummerException :
+    UgyldigForespoerselException(
+        code = "002-FNR-MANGLER",
+        detail = "fnr ikke angitt",
+        meta = getMeta(),
+    )
 
-class ManglerFomDatoException : UgyldigForespoerselException(
-    code = "003-FOMDATO-MANGLER",
-    detail = "fomDato ikke angitt",
-    meta = getMeta(),
-)
+class ManglerFomDatoException :
+    UgyldigForespoerselException(
+        code = "003-FOMDATO-MANGLER",
+        detail = "fomDato ikke angitt",
+        meta = getMeta(),
+    )
 
-class ManglerPaaDatoException : UgyldigForespoerselException(
-    code = "005-PAAMDATO-MANGLER",
-    detail = "paaDato ikke angitt",
-    meta = getMeta(),
-)
+class ManglerPaaDatoException :
+    UgyldigForespoerselException(
+        code = "005-PAAMDATO-MANGLER",
+        detail = "paaDato ikke angitt",
+        meta = getMeta(),
+    )
 
 fun getMeta() =
     mapOf(

@@ -7,7 +7,9 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 
-class BehandlingRequestLogger(private val sporingslogg: Sporingslogg) {
+class BehandlingRequestLogger(
+    private val sporingslogg: Sporingslogg,
+) {
     fun loggRequest(
         brukerTokenInfo: BrukerTokenInfo,
         fnr: Folkeregisteridentifikator,

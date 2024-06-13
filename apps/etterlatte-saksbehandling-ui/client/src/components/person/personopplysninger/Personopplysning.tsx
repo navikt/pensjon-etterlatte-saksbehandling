@@ -10,15 +10,19 @@ interface Props {
 
 export const Personopplysning = ({ heading, children, icon }: Props): ReactNode => {
   return (
-    <Box background="bg-subtle" padding="3">
+    <PersonopplysningBox padding="3">
       <PersonopplysningHeader>
         {icon}
         <Heading size="small">{heading}</Heading>
       </PersonopplysningHeader>
       <PersonopplysningContent>{children}</PersonopplysningContent>
-    </Box>
+    </PersonopplysningBox>
   )
 }
+
+const PersonopplysningBox = styled(Box)`
+  background-color: var(--a-gray-50);
+`
 
 const PersonopplysningHeader = styled.div`
   display: flex;

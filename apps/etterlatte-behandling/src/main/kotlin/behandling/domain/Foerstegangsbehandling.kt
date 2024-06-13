@@ -63,9 +63,7 @@ data class Foerstegangsbehandling(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
         }
 
-    override fun tilOpprettet(): Foerstegangsbehandling {
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
-    }
+    override fun tilOpprettet(): Foerstegangsbehandling = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 
     override fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt()) {

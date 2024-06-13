@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react'
 import { BulletListIcon } from '@navikt/aksel-icons'
 import isHotkey from 'is-hotkey'
 import styled from 'styled-components'
-import { BodyLong, Heading } from '@navikt/ds-react'
+import { BodyLong, HStack, Heading, Box } from '@navikt/ds-react'
 import { Format, Keybind, SLATE_HOTKEYS } from '~components/behandling/brev/slate/slate-types'
 import { isBlockActive, isMarkActive, toggleBlock, toggleMark } from '~components/behandling/brev/slate/toggles'
 
@@ -22,16 +22,24 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
   const [editor] = useState(() => withReact(withHistory(createEditor())))
 
   return (
-    <BrevEditor>
+    <EditorBox borderColor="border-subtle" borderWidth="1">
       <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
-          <Toolbar>
-            <BlockButton format="heading-two" icon="H2" />
-            <BlockButton format="heading-three" icon="H3" />
-            <BlockButton format="bulleted-list" icon={<BulletListIcon title="a11y-title" fontSize="1.5rem" />} />
+          <Box
+            background="bg-subtle"
+            paddingInline="4"
+            paddingBlock="2"
+            borderWidth="0 0 1 0"
+            borderColor="border-subtle"
+          >
+            <HStack gap="4">
+              <BlockButton format="heading-two" icon="H2" />
+              <BlockButton format="heading-three" icon="H3" />
+              <BlockButton format="bulleted-list" icon={<BulletListIcon title="a11y-title" fontSize="1.5rem" />} />
 
-            <MarkButton format="placeholder" icon="<P/>" />
-          </Toolbar>
+              <MarkButton format="placeholder" icon="<P/>" />
+            </HStack>
+          </Box>
         )}
 
         <SlateEditable
@@ -51,7 +59,7 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
           }}
         />
       </Slate>
-    </BrevEditor>
+    </EditorBox>
   )
 }
 
@@ -141,21 +149,6 @@ const StyleButton = styled.span<{ $reversed?: boolean; $active: boolean }>`
   color: ${(props) => (props.$reversed ? (props.$active ? 'white' : '#aaa') : props.$active ? 'black' : '#ccc')};
 `
 
-const Toolbar = styled.div`
-  width: 100%;
-  position: relative;
-  padding: 1px 18px 17px;
-  border-bottom: 2px solid #eee;
-
-  & > * {
-    display: inline-block;
-  }
-
-  & > * + * {
-    margin-left: 15px;
-  }
-`
-
 const SlateEditable = styled(Editable)`
   padding: 10px;
   height: 100%;
@@ -167,10 +160,7 @@ const SlateEditable = styled(Editable)`
   overflow: auto scroll;
 `
 
-const BrevEditor = styled.div`
-  border: 1px solid #eee;
-  background-color: #f7f7f7;
-
+const EditorBox = styled(Box)`
   ul {
     list-style: disc !important;
     padding-left: 1.5rem;

@@ -31,7 +31,8 @@ class UnleashFeatureToggleService(
 
     private val defaultUnleash =
         DefaultUnleash(
-            UnleashConfig.builder()
+            UnleashConfig
+                .builder()
                 .appName(properties.applicationName)
                 .unleashAPI(properties.uri())
                 .unleashContextProvider(lagUnleashContextProvider(brukerIdent))
@@ -43,7 +44,8 @@ class UnleashFeatureToggleService(
 
     private fun lagUnleashContextProvider(brukerIdentResolver: () -> String?) =
         UnleashContextProvider {
-            UnleashContext.builder()
+            UnleashContext
+                .builder()
                 .appName(properties.applicationName)
                 .also { builder -> brukerIdentResolver()?.let { userId -> builder.userId(userId) } }
                 .build()
@@ -61,11 +63,11 @@ class UnleashFeatureToggleService(
         defaultValue
     }
 
-    private fun merge(other: UnleashContext): UnleashContext {
-        return UnleashContext.builder()
+    private fun merge(other: UnleashContext): UnleashContext =
+        UnleashContext
+            .builder()
             .appName(other.appName.orElse(properties.applicationName))
             .userId(other.userId.orElse(brukerIdent()))
             .sessionId(other.sessionId.orElse(null))
             .build()
-    }
 }

@@ -2,10 +2,11 @@ import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-rea
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { differenceInYears, format, parse } from 'date-fns'
+import { format } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
+import { hentAlderForDato } from '~components/behandling/felles/utils'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -80,8 +81,8 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.Row>
     )
   }
-  const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
-  const alder = differenceInYears(new Date(), foedselsdato)
+
+  const alder = hentAlderForDato(barn.foedselsdato)
   const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`

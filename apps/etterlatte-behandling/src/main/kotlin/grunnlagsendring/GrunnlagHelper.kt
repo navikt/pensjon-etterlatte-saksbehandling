@@ -10,7 +10,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 
-class GrunnlagRolleException(override val message: String) : Exception(message)
+class GrunnlagRolleException(
+    override val message: String,
+) : Exception(message)
 
 fun Grunnlag.doedsdato(
     saksrolle: Saksrolle,
@@ -70,8 +72,11 @@ fun Grunnlag.ansvarligeForeldre(
     }
 
     Saksrolle.SOESKEN -> {
-        hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }
-            ?.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
+        hentSoesken()
+            .find { it.hentFoedselsnummer()?.verdi?.value == fnr }
+            ?.hentFamilierelasjon()
+            ?.verdi
+            ?.ansvarligeForeldre
     }
     else -> throw GrunnlagRolleException(
         "Proevde aa finne ansvarligeForeldre for $saksrolle, men det skal ikke kunne skje",

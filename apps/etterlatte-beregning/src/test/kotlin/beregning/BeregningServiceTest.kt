@@ -188,7 +188,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
 
         runBlocking {
-            val overstyrBeregning = beregningService.hentOverstyrBeregning(behandling.id, bruker)
+            val overstyrBeregning = beregningService.hentOverstyrBeregningPaaBehandlingId(behandling.id, bruker)
 
             overstyrBeregning shouldBe null
 
@@ -209,7 +209,7 @@ internal class BeregningServiceTest {
             )
 
         runBlocking {
-            val overstyrBeregning = beregningService.hentOverstyrBeregning(behandling.id, bruker)
+            val overstyrBeregning = beregningService.hentOverstyrBeregningPaaBehandlingId(behandling.id, bruker)
 
             overstyrBeregning shouldNotBe null
 
@@ -234,8 +234,8 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning.sakId shouldBe behandling.sak
-            overstyrBeregning.beskrivelse shouldBe "Test"
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
 
             verify(exactly = 1) {
                 beregningRepository.opprettOverstyrBeregning(any())
@@ -262,8 +262,8 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning.sakId shouldBe behandling.sak
-            overstyrBeregning.beskrivelse shouldBe "Test"
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }

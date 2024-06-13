@@ -12,7 +12,9 @@ import java.util.UUID
 @JsonSubTypes(
     JsonSubTypes.Type(value = Opplysning.Konstant::class, name = "konstant"),
 )
-sealed class Opplysning<T>(val type: String) {
+sealed class Opplysning<T>(
+    val type: String,
+) {
     data class Konstant<T>(
         val id: UUID,
         val kilde: Grunnlagsopplysning.Kilde,

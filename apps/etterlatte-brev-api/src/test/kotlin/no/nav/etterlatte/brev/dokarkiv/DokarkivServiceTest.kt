@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.dokarkiv
 
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKSettings.relaxed
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -36,7 +35,7 @@ internal class DokarkivServiceTest {
 
         coEvery { mockKlient.opprettJournalpost(any<OpprettJournalpost>(), any()) } returns forventetResponse
 
-        val request = mockk<OpprettJournalpostRequest>(relaxed = true)
+        val request = mockk<JournalpostRequest>(relaxed = true)
         val response = runBlocking { service.journalfoer(request) }
 
         response.journalpostId shouldBe forventetResponse.journalpostId

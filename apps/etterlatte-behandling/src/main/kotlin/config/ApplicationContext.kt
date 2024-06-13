@@ -357,14 +357,6 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
         )
-
-    val aktivitetspliktService =
-        AktivitetspliktService(
-            aktivitetspliktDao = aktivitetspliktDao,
-            aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
-            aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
-            behandlingService = behandlingService,
-        )
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
@@ -377,9 +369,20 @@ internal class ApplicationContext(
             revurderingDao = revurderingDao,
             klageService = klageService,
             behandlingService = behandlingService,
-            aktivitetspliktService = aktivitetspliktService,
+            aktivitetspliktDao = aktivitetspliktDao,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
+
+    val aktivitetspliktService =
+        AktivitetspliktService(
+            aktivitetspliktDao = aktivitetspliktDao,
+            aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
+            aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
+            behandlingService = behandlingService,
+            grunnlagKlient = grunnlagKlientObo,
+            automatiskRevurderingService = automatiskRevurderingService,
+            oppgaveService = oppgaveService,
+        )
 
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(

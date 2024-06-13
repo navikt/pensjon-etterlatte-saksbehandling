@@ -203,36 +203,47 @@ class VedtaksbrevService(
     }
 }
 
-class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigForespoerselException(
-    code = "UGYLDIG_STATUS_BREV",
-    detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
-    meta =
-        mapOf(
-            "id" to id,
-            "status" to status,
-        ),
-)
+class UgyldigStatusKanIkkeFerdigstilles(
+    id: BrevID,
+    status: Status,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_STATUS_BREV",
+        detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
+        meta =
+            mapOf(
+                "id" to id,
+                "status" to status,
+            ),
+    )
 
-class VedtaksbrevKanIkkeSlettes(brevId: BrevID, detalj: String) : IkkeTillattException(
-    code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
-    detail = "Vedtaksbrevet kan ikke slettes: $detalj",
-    meta =
-        mapOf(
-            "id" to brevId,
-        ),
-)
+class VedtaksbrevKanIkkeSlettes(
+    brevId: BrevID,
+    detalj: String,
+) : IkkeTillattException(
+        code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
+        detail = "Vedtaksbrevet kan ikke slettes: $detalj",
+        meta =
+            mapOf(
+                "id" to brevId,
+            ),
+    )
 
-class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
-    code = "UGYLDIG_MOTTAKER_BREV",
-    detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
-    meta =
-        mapOf(
-            "id" to id,
-        ),
-)
+class UgyldigMottakerKanIkkeFerdigstilles(
+    id: BrevID,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_MOTTAKER_BREV",
+        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
+        meta =
+            mapOf(
+                "id" to id,
+            ),
+    )
 
-class SaksbehandlerOgAttestantSammePerson(saksbehandler: String, attestant: String) : UgyldigForespoerselException(
-    code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
-    detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
-    meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
-)
+class SaksbehandlerOgAttestantSammePerson(
+    saksbehandler: String,
+    attestant: String,
+) : UgyldigForespoerselException(
+        code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
+        detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
+        meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
+    )

@@ -14,9 +14,11 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
 
-class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
-        return connectionAutoclosing.hentConnection {
+class GenerellBehandlingDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -37,10 +39,9 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
                 statement.executeQuery().single { toGenerellBehandling() }
             }
         }
-    }
 
-    fun oppdaterGenerellBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
-        return connectionAutoclosing.hentConnection {
+    fun oppdaterGenerellBehandling(generellBehandling: GenerellBehandling): GenerellBehandling =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -60,10 +61,9 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
                 statement.executeQuery().single { toGenerellBehandling() }
             }
         }
-    }
 
-    fun hentGenerellBehandlingMedId(id: UUID): GenerellBehandling? {
-        return connectionAutoclosing.hentConnection {
+    fun hentGenerellBehandlingMedId(id: UUID): GenerellBehandling? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -79,10 +79,9 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
                 }
             }
         }
-    }
 
-    fun hentGenerellBehandlingForSak(sakId: Long): List<GenerellBehandling> {
-        return connectionAutoclosing.hentConnection {
+    fun hentGenerellBehandlingForSak(sakId: Long): List<GenerellBehandling> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -98,10 +97,9 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
                 }
             }
         }
-    }
 
-    fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
-        return connectionAutoclosing.hentConnection {
+    fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -118,10 +116,9 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
                 }
             }
         }
-    }
 
-    private fun ResultSet.toGenerellBehandling(): GenerellBehandling {
-        return GenerellBehandling(
+    private fun ResultSet.toGenerellBehandling(): GenerellBehandling =
+        GenerellBehandling(
             id = getUUID("id"),
             sakId = getLong("sak_id"),
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
@@ -133,5 +130,4 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
             attestant = getString("attestant")?.let { objectMapper.readValue(it) },
             returnertKommenar = getString("kommentar"),
         )
-    }
 }

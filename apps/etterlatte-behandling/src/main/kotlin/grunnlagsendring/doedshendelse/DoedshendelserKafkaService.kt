@@ -74,17 +74,19 @@ class DoedshendelserKafkaServiceImpl(
                 CORRELATION_ID_KEY to correlationId,
             )
         val altInnhold = defaultInnhold + innhold
-        rapid.publiser(
-            brevmal,
-            JsonMessage.newMessage(
-                BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(),
-                altInnhold,
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType()} for sak ${sak.id}" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                brevmal,
+                JsonMessage
+                    .newMessage(
+                        BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(),
+                        altInnhold,
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType()} for sak ${sak.id}" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 }

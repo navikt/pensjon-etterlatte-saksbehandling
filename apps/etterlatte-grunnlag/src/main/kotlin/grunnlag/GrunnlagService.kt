@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
@@ -95,7 +96,9 @@ interface GrunnlagService {
         opplysningsbehov: Opplysningsbehov,
     )
 
-    suspend fun opprettGrunnlagForSak(
+    suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest)
+
+    suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
     )
@@ -187,8 +190,7 @@ class RealGrunnlagService(
                         GJENLEVENDE_FORELDER_PDL_V1,
                         INNSENDER_PDL_V1,
                     ).contains(it.opplysning.opplysningType)
-                }
-                .filter { persongalleri.inkluderer(it.opplysning) }
+                }.filter { persongalleri.inkluderer(it.opplysning) }
                 .groupBy { it.opplysning.fnr to it.opplysning.opplysningType }
                 .map {
                     it.value.maxBy { opplysning -> opplysning.hendelseNummer }
@@ -219,7 +221,8 @@ class RealGrunnlagService(
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         val result =
-            opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
+            opplysningDao
+                .finnAllePersongalleriHvorPersonFinnes(fnr)
                 .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
                 .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
                 .let { PersonMedSakerOgRoller(fnr.value, it) }
@@ -236,16 +239,17 @@ class RealGrunnlagService(
         val grunnlag = hentOpplysningsgrunnlagForSak(sakId) ?: return null
 
         val personer = listOf(grunnlag.soeker) + grunnlag.familie
-        return personer.mapNotNull {
-            val navn = it.hentNavn()?.verdi ?: return@mapNotNull null
-            val fnr = it.hentFoedselsnummer()?.verdi ?: return@mapNotNull null
-            PersonMedNavn(
-                fnr = fnr,
-                fornavn = navn.fornavn,
-                etternavn = navn.etternavn,
-                mellomnavn = navn.mellomnavn,
-            )
-        }.associateBy { it.fnr }
+        return personer
+            .mapNotNull {
+                val navn = it.hentNavn()?.verdi ?: return@mapNotNull null
+                val fnr = it.hentFoedselsnummer()?.verdi ?: return@mapNotNull null
+                PersonMedNavn(
+                    fnr = fnr,
+                    fornavn = navn.fornavn,
+                    etternavn = navn.etternavn,
+                    mellomnavn = navn.mellomnavn,
+                )
+            }.associateBy { it.fnr }
     }
 
     override suspend fun opprettGrunnlag(
@@ -302,12 +306,12 @@ class RealGrunnlagService(
         val grunnlag = hentOpplysningsgrunnlag(behandlingId)
         val soekerFnr = grunnlag?.soeker?.hentFoedselsnummer()?.verdi ?: return null
         val historiskForeldreansvar =
-            pdltjenesterKlient.hentHistoriskForeldreansvar(
-                soekerFnr,
-                PersonRolle.BARN,
-                SakType.BARNEPENSJON,
-            )
-                .tilGrunnlagsopplysning(soekerFnr)
+            pdltjenesterKlient
+                .hentHistoriskForeldreansvar(
+                    soekerFnr,
+                    PersonRolle.BARN,
+                    SakType.BARNEPENSJON,
+                ).tilGrunnlagsopplysning(soekerFnr)
 
         val hendelsenummer =
             opplysningDao.leggOpplysningTilGrunnlag(grunnlag.metadata.sakId, historiskForeldreansvar, soekerFnr)
@@ -446,9 +450,7 @@ class RealGrunnlagService(
     override fun hentGrunnlagAvType(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
-    ): Grunnlagsopplysning<JsonNode>? {
-        return opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
-    }
+    ): Grunnlagsopplysning<JsonNode>? = opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
 
     override fun hentOpplysningstypeNavnFraFnr(
         fnr: Folkeregisteridentifikator,
@@ -505,7 +507,22 @@ class RealGrunnlagService(
         oppdaterGrunnlagForSak(sakId = sakId, nyeOpplysninger = nyeOpplysninger, fnr = null)
     }
 
-    override suspend fun opprettGrunnlagForSak(
+    override suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest) {
+        val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlagForSak(oppdaterGrunnlagRequest.sakId, PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Klarte ikke å hente ut grunnlag for sak ${oppdaterGrunnlagRequest.sakId}. Fant ikke persongalleri")
+            throw IllegalStateException("Fant ikke grunnlag for sak ${oppdaterGrunnlagRequest.sakId}. Fant ikke persongalleri")
+        }
+
+        val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
+        opprettEllerOppdaterGrunnlagForSak(
+            oppdaterGrunnlagRequest.sakId,
+            Opplysningsbehov(oppdaterGrunnlagRequest.sakId, oppdaterGrunnlagRequest.sakType, persongalleri, persongalleriJsonNode.kilde),
+        )
+    }
+
+    override suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
     ) {
@@ -531,17 +548,18 @@ class RealGrunnlagService(
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sakId).map { it.opplysning.id }
 
         val hendelsenummer =
-            nyeOpplysninger.mapNotNull { opplysning ->
-                if (opplysning.id in gjeldendeGrunnlag) {
-                    logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sakId men den er allerede gjeldende")
-                    null
-                } else {
-                    opplysningDao.leggOpplysningTilGrunnlag(sakId, opplysning, fnr)
-                }
-            }.maxOrNull()
+            nyeOpplysninger
+                .mapNotNull { opplysning ->
+                    if (opplysning.id in gjeldendeGrunnlag) {
+                        logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sakId men den er allerede gjeldende")
+                        null
+                    } else {
+                        opplysningDao.leggOpplysningTilGrunnlag(sakId, opplysning, fnr)
+                    }
+                }.maxOrNull()
 
         if (hendelsenummer == null) {
-            logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$sakId)")
+            logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for sak (id=$sakId)")
         }
     }
 
@@ -559,14 +577,15 @@ class RealGrunnlagService(
         }
 
         val hendelsenummer =
-            nyeOpplysninger.mapNotNull { opplysning ->
-                if (opplysning.id in gjeldendeGrunnlag) {
-                    logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sakId men den er allerede gjeldende")
-                    null
-                } else {
-                    opplysningDao.leggOpplysningTilGrunnlag(sakId, opplysning, fnr)
-                }
-            }.maxOrNull()
+            nyeOpplysninger
+                .mapNotNull { opplysning ->
+                    if (opplysning.id in gjeldendeGrunnlag) {
+                        logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sakId men den er allerede gjeldende")
+                        null
+                    } else {
+                        opplysningDao.leggOpplysningTilGrunnlag(sakId, opplysning, fnr)
+                    }
+                }.maxOrNull()
 
         if (hendelsenummer == null) {
             logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$behandlingId)")
@@ -608,8 +627,8 @@ class RealGrunnlagService(
     )
 }
 
-private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteridentifikator): Grunnlagsopplysning<JsonNode> {
-    return Grunnlagsopplysning(
+private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteridentifikator): Grunnlagsopplysning<JsonNode> =
+    Grunnlagsopplysning(
         id = UUID.randomUUID(),
         kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
         opplysningType = Opplysningstype.HISTORISK_FORELDREANSVAR,
@@ -619,16 +638,14 @@ private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteride
         fnr = fnr,
         periode = null,
     )
-}
 
-private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning {
-    return Personopplysning(
+private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning =
+    Personopplysning(
         id = this.id,
         kilde = this.kilde.tilGenerellKilde(),
         opplysningType = this.opplysningType,
         opplysning = objectMapper.treeToValue(opplysning, Person::class.java),
     )
-}
 
 private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
     when (this) {
@@ -681,8 +698,9 @@ data class NavnOpplysningDTO(
     val foedselsnummer: String,
 )
 
-class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
-    IkkeTillattException(
+class LaastGrunnlagKanIkkeEndres(
+    val behandlingId: UUID,
+) : IkkeTillattException(
         code = "LAAST_GRUNNLAG_KAN_IKKE_ENDRES",
         detail = """
             Kan ikke sette ny grunnlagsversjon på behandling som er
@@ -710,4 +728,7 @@ data class GenerellKilde(
     val detalj: String? = null,
 )
 
-data class ForskjellMellomPersoner(val kunSak: List<String>, val kunPdl: List<String>)
+data class ForskjellMellomPersoner(
+    val kunSak: List<String>,
+    val kunPdl: List<String>,
+)

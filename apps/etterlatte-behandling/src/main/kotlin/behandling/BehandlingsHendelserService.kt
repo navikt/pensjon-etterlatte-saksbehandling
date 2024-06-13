@@ -45,22 +45,24 @@ class BehandlingsHendelserKafkaProducerImpl(
     ) {
         val correlationId = getCorrelationId()
 
-        rapid.publiser(
-            statistikkBehandling.id.toString(),
-            JsonMessage.newMessage(
-                hendelseType.lagEventnameForType(),
-                mapOf(
-                    CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to Tidspunkt.now(),
-                    STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
-                ),
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                statistikkBehandling.id.toString(),
+                JsonMessage
+                    .newMessage(
+                        hendelseType.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 
     override fun sendMeldingForHendelsePaaVent(
@@ -70,23 +72,25 @@ class BehandlingsHendelserKafkaProducerImpl(
     ) {
         val correlationId = getCorrelationId()
 
-        rapid.publiser(
-            behandlingId.toString(),
-            JsonMessage.newMessage(
-                hendelseType.lagEventnameForType(),
-                mapOf(
-                    CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to Tidspunkt.now(),
-                    BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
-                    PAA_VENT_AARSAK_KEY to aarsak.name,
-                ),
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                behandlingId.toString(),
+                JsonMessage
+                    .newMessage(
+                        hendelseType.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
+                            PAA_VENT_AARSAK_KEY to aarsak.name,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 
     override fun sendMeldingForHendelseAvVent(
@@ -95,21 +99,23 @@ class BehandlingsHendelserKafkaProducerImpl(
     ) {
         val correlationId = getCorrelationId()
 
-        rapid.publiser(
-            behandlingId.toString(),
-            JsonMessage.newMessage(
-                hendelseType.lagEventnameForType(),
-                mapOf(
-                    CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to Tidspunkt.now(),
-                    BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
-                ),
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                behandlingId.toString(),
+                JsonMessage
+                    .newMessage(
+                        hendelseType.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 }

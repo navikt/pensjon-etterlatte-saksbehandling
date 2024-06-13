@@ -102,33 +102,39 @@ class RestModuleTest {
                 tilgangTestRoute()
             }.also { setReady() }
 
-            client.get("/behandling/${UUID.randomUUID()}") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(OK, it.status) }
-            client.get("/sak/1") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(OK, it.status) }
-            client.post("/person") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("27458328671").toJson())
-            }.let { assertEquals(OK, it.status) }
+            client
+                .get("/behandling/${UUID.randomUUID()}") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(OK, it.status) }
+            client
+                .get("/sak/1") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(OK, it.status) }
+            client
+                .post("/person") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO("27458328671").toJson())
+                }.let { assertEquals(OK, it.status) }
 
             coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any(), any()) } returns false
             coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any(), any()) } returns false
             coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns false
 
-            client.get("/behandling/${UUID.randomUUID()}") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(NotFound, it.status) }
-            client.get("/sak/1") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(NotFound, it.status) }
-            client.post("/person") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("27458328671").toJson())
-            }.let { assertEquals(NotFound, it.status) }
+            client
+                .get("/behandling/${UUID.randomUUID()}") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(NotFound, it.status) }
+            client
+                .get("/sak/1") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(NotFound, it.status) }
+            client
+                .post("/person") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO("27458328671").toJson())
+                }.let { assertEquals(NotFound, it.status) }
         }
     }
 
@@ -236,46 +242,51 @@ class RestModuleTest {
                     routesMedForskjelligeFeil()
                 }
 
-            client.get("ikke_funnet/exception") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, ContentType.Application.Json)
-            }.also {
-                val body = it.body<ExceptionResponse>()
-                assertEquals("IKKE_FUNNET", body.code)
-                assertEquals(NotFound.value, body.status)
-            }
+            client
+                .get("ikke_funnet/exception") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val body = it.body<ExceptionResponse>()
+                    assertEquals("IKKE_FUNNET", body.code)
+                    assertEquals(NotFound.value, body.status)
+                }
 
-            client.get("ikke_funnet/status") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, ContentType.Application.Json)
-            }.also {
-                val body = it.body<ExceptionResponse>()
-                assertEquals(NotFound.value, body.status)
-                assertEquals("NOT_FOUND", body.code)
-            }
-            client.get("intern/vilkaarlig") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, ContentType.Application.Json)
-            }.also {
-                val bodyMapped = it.body<ExceptionResponse>()
-                assertEquals(InternalServerError.value, bodyMapped.status)
-            }
+            client
+                .get("ikke_funnet/status") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val body = it.body<ExceptionResponse>()
+                    assertEquals(NotFound.value, body.status)
+                    assertEquals("NOT_FOUND", body.code)
+                }
+            client
+                .get("intern/vilkaarlig") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val bodyMapped = it.body<ExceptionResponse>()
+                    assertEquals(InternalServerError.value, bodyMapped.status)
+                }
 
-            client.get("intern/exception") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, ContentType.Application.Json)
-            }.also {
-                val bodyMapped = it.body<ExceptionResponse>()
-                assertEquals(InternalServerError.value, bodyMapped.status)
-            }
+            client
+                .get("intern/exception") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val bodyMapped = it.body<ExceptionResponse>()
+                    assertEquals(InternalServerError.value, bodyMapped.status)
+                }
 
-            client.get("intern/status") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, ContentType.Application.Json)
-            }.also {
-                val bodyMapped = it.body<ExceptionResponse>()
-                assertEquals(InternalServerError.value, bodyMapped.status)
-            }
+            client
+                .get("intern/status") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val bodyMapped = it.body<ExceptionResponse>()
+                    assertEquals(InternalServerError.value, bodyMapped.status)
+                }
         }
     }
 
@@ -345,5 +356,8 @@ class RestModuleTest {
         }
     }
 
-    private data class TestObjektDto(val verdi1: String, val verdi2: Int)
+    private data class TestObjektDto(
+        val verdi1: String,
+        val verdi2: Int,
+    )
 }

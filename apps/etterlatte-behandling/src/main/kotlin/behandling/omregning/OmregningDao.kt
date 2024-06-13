@@ -3,7 +3,9 @@ package no.nav.etterlatte.behandling.omregning
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 
-class OmregningDao(private val connection: ConnectionAutoclosing) {
+class OmregningDao(
+    private val connection: ConnectionAutoclosing,
+) {
     fun oppdaterKjoering(request: KjoeringRequest) {
         connection.hentConnection { connection ->
             with(connection) {

@@ -18,7 +18,8 @@ val MaskinportenScopeAuthorizationPlugin =
             on(AuthenticationChecked) { call ->
                 call.firstValidTokenClaims()?.let { token ->
                     val userScopes =
-                        token.getStringClaim("scope")
+                        token
+                            .getStringClaim("scope")
                             ?.split(" ")
                             ?: emptyList()
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { Box, Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, HStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
@@ -153,28 +153,31 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             ))}
           </UstiletListe>
           {behandles && (
-            <NyPeriodeButton
-              type="button"
-              onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
-            >
-              Legg til periode
-            </NyPeriodeButton>
+            <Box paddingBlock="4" paddingInline="16">
+              <HStack gap="4" align="center">
+                <Button
+                  size="small"
+                  variant="secondary"
+                  type="button"
+                  onClick={() =>
+                    append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))
+                  }
+                >
+                  Legg til periode
+                </Button>
+
+                <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
+                  Lagre søskenjustering
+                </Button>
+                {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+              </HStack>
+            </Box>
           )}
-          {behandles && (
-            <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
-              Lagre søskenjustering
-            </Button>
-          )}
-          {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
         </form>
       </Box>
     </>
   )
 }
-
-const NyPeriodeButton = styled(Button).attrs({ size: 'small' })`
-  margin: 1em 6em 1em 6em;
-`
 
 const validerSoeskenjustering = (grunnlag: SoeskengrunnlagUtfylling): grunnlag is Soeskengrunnlag => {
   return grunnlag.every(

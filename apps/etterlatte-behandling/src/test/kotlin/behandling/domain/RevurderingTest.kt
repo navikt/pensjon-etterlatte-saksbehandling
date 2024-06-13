@@ -22,31 +22,38 @@ internal class RevurderingTest {
     @Test
     fun `regulering kan endre tilstander`() {
         val id = UUID.randomUUID()
-        Revurdering.opprett(
-            id = id,
-            sak =
-                Sak(
-                    ident = "",
-                    sakType = SakType.BARNEPENSJON,
-                    id = 1,
-                    enhet = Enheter.defaultEnhet.enhetNr,
-                ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
-            virkningstidspunkt = virkningstidspunktVurdering(),
-            utlandstilknytning = null,
-            boddEllerArbeidetUtlandet = null,
-            revurderingsaarsak = Revurderingaarsak.REGULERING,
-            prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.GJENNY,
-            revurderingInfo = null,
-            begrunnelse = null,
-            relatertBehandlingId = null,
-            sendeBrev = true,
-        ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
-            .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak().tilAttestert()
+        Revurdering
+            .opprett(
+                id = id,
+                sak =
+                    Sak(
+                        ident = "",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+                status = BehandlingStatus.OPPRETTET,
+                kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
+                virkningstidspunkt = virkningstidspunktVurdering(),
+                utlandstilknytning = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsaarsak = Revurderingaarsak.REGULERING,
+                prosesstype = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingInfo = null,
+                begrunnelse = null,
+                relatertBehandlingId = null,
+                sendeBrev = true,
+            ).tilVilkaarsvurdert()
+            .tilTrygdetidOppdatert()
+            .tilBeregnet()
+            .tilVilkaarsvurdert()
+            .tilTrygdetidOppdatert()
+            .tilBeregnet()
+            .tilFattetVedtak()
+            .tilAttestert()
             .tilIverksatt()
     }
 
@@ -74,8 +81,15 @@ internal class RevurderingTest {
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt - samordning`() {
             val actual =
-                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
-                    .tilAttestert().tilTilSamordning().tilSamordnet().tilIverksatt()
+                revurdering
+                    .tilVilkaarsvurdert()
+                    .tilTrygdetidOppdatert()
+                    .tilBeregnet()
+                    .tilFattetVedtak()
+                    .tilAttestert()
+                    .tilTilSamordning()
+                    .tilSamordnet()
+                    .tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
         }
@@ -164,7 +178,12 @@ internal class RevurderingTest {
 
         @Test
         fun fattet() {
-            val fattet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
+            val fattet =
+                revurdering
+                    .tilVilkaarsvurdert()
+                    .tilTrygdetidOppdatert()
+                    .tilBeregnet()
+                    .tilFattetVedtak()
             assertKanGaaTilAlleStatuser(fattet)
         }
 

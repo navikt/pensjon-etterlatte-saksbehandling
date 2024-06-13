@@ -1,64 +1,82 @@
-import { BodyShort, Detail, HStack, Label, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Label, VStack } from '@navikt/ds-react'
 import React from 'react'
 import {
   IAktivitetspliktVurdering,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
-import styled from 'styled-components'
 import { formaterStringDato } from '~utils/formattering'
+import { PencilIcon } from '@navikt/aksel-icons'
 
-export const AktivitetspliktVurderingVisning = ({ vurdering }: { vurdering: IAktivitetspliktVurdering }) => {
+export const AktivitetspliktVurderingVisning = ({
+  vurdering,
+  visForm,
+  erRedigerbar,
+}: {
+  vurdering?: IAktivitetspliktVurdering
+  visForm: () => void
+  erRedigerbar: boolean
+}) => {
   return (
-    <AktivitetspliktVurderingWrapper>
-      <div>
-        <HStack gap="12">
-          {vurdering && (
-            <VStack gap="4">
-              {vurdering.unntak && (
-                <>
-                  <Label>Unntak</Label>
-                  <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
+    <VStack gap="4">
+      <>
+        {vurdering ? (
+          <>
+            {vurdering.unntak && (
+              <>
+                <Label>Unntak</Label>
+                <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
 
-                  {vurdering.unntak.tom && (
-                    <>
-                      <Label>Sluttdato</Label>
-                      <BodyShort>{vurdering.unntak.tom}</BodyShort>
-                    </>
-                  )}
+                {vurdering.unntak.tom && (
+                  <>
+                    <Label>Sluttdato</Label>
+                    <BodyShort>{vurdering.unntak.tom}</BodyShort>
+                  </>
+                )}
 
-                  <Label>Vurdering</Label>
-                  <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
+                <Label>Vurdering</Label>
+                <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
 
-                  <Detail>
-                    Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
-                    {vurdering.unntak.opprettet.ident}
-                  </Detail>
-                </>
-              )}
+                <Detail>
+                  Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
+                  {vurdering.unntak.opprettet.ident}
+                </Detail>
+              </>
+            )}
 
-              {vurdering.aktivitet && (
-                <>
-                  <Label>Aktivitetsgrad</Label>
-                  <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
+            {vurdering.aktivitet && (
+              <>
+                <Label>Aktivitetsgrad</Label>
+                <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
 
-                  <Label>Vurdering</Label>
-                  <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
+                <Label>Vurdering</Label>
+                <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
 
-                  <Detail>
-                    Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av saksbehandler{' '}
-                    {vurdering.aktivitet.opprettet.ident}
-                  </Detail>
-                </>
-              )}
-            </VStack>
-          )}
-        </HStack>
-      </div>
-    </AktivitetspliktVurderingWrapper>
+                <Detail>
+                  Vurdering ble utført {formaterStringDato(vurdering.aktivitet.endret.tidspunkt)} av saksbehandler{' '}
+                  {vurdering.aktivitet.endret.ident}
+                </Detail>
+              </>
+            )}
+          </>
+        ) : (
+          <BodyShort>Ingen vurdering</BodyShort>
+        )}
+
+        {erRedigerbar && (
+          <div>
+            <Button
+              size="small"
+              variant="tertiary"
+              icon={<PencilIcon aria-hidden />}
+              iconPosition="right"
+              onClick={() => visForm()}
+            >
+              Rediger
+            </Button>
+          </div>
+        )}
+      </>
+    </VStack>
   )
 }
-
-const AktivitetspliktVurderingWrapper = styled.div`
-  max-width: 500px;
-`

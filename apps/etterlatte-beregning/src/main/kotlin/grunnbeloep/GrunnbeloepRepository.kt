@@ -13,16 +13,19 @@ object GrunnbeloepRepository {
         GrunnbeloepRepository::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
-    fun hentGjeldendeGrunnbeloep(dato: YearMonth): Grunnbeloep {
-        return historiskeGrunnbeloep.first {
+    fun hentGjeldendeGrunnbeloep(dato: YearMonth): Grunnbeloep =
+        historiskeGrunnbeloep.first {
             it.dato.isBefore(dato) || it.dato == dato && beregnTom(it)?.isAfter(dato) ?: true
         }
-    }
 
-    private fun beregnTom(grunnbeloep: Grunnbeloep): YearMonth? {
-        return historiskeGrunnbeloep.sortedBy { it.dato }.zipWithNext()
-            .find { it.first.dato == grunnbeloep.dato }?.second?.dato?.minusMonths(1)
-    }
+    private fun beregnTom(grunnbeloep: Grunnbeloep): YearMonth? =
+        historiskeGrunnbeloep
+            .sortedBy { it.dato }
+            .zipWithNext()
+            .find { it.first.dato == grunnbeloep.dato }
+            ?.second
+            ?.dato
+            ?.minusMonths(1)
 }
 
 data class GrunnbeloepListe(

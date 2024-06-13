@@ -12,7 +12,9 @@ fun main() {
     Server(ApplicationContext()).run()
 }
 
-class Server(private val context: ApplicationContext) {
+class Server(
+    private val context: ApplicationContext,
+) {
     private val engine =
         initEmbeddedServerUtenRest(
             httpPort = context.httpPort,

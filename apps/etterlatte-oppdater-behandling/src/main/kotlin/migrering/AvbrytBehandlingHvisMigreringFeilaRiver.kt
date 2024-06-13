@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory
 internal class AvbrytBehandlingHvisMigreringFeilaRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) :
-    ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

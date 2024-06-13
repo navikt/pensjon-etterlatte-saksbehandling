@@ -52,8 +52,8 @@ class BehandlingDao(
         INNER JOIN sak s ON b.sak_id = s.id
         """.trimIndent()
 
-    fun hentBehandling(id: UUID): Behandling? {
-        return connectionAutoclosing.hentConnection {
+    fun hentBehandling(id: UUID): Behandling? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -69,10 +69,9 @@ class BehandlingDao(
                 }
             }
         }
-    }
 
-    fun alleBehandlingerISak(sakid: Long): List<Behandling> {
-        return connectionAutoclosing.hentConnection {
+    fun alleBehandlingerISak(sakid: Long): List<Behandling> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -86,13 +85,12 @@ class BehandlingDao(
                 stmt.executeQuery().behandlingsListe()
             }
         }
-    }
 
     fun hentAlleRevurderingerISakMedAarsak(
         sakid: Long,
         revurderingaarsak: Revurderingaarsak,
-    ): List<Revurdering> {
-        return connectionAutoclosing.hentConnection {
+    ): List<Revurdering> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -110,10 +108,9 @@ class BehandlingDao(
                 stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
             }
         }
-    }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
                     prepareStatement(
@@ -131,10 +128,9 @@ class BehandlingDao(
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
             }
         }
-    }
 
-    fun hentAapneBehandlinger(saker: Saker): List<BehandlingOgSak> {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun hentAapneBehandlinger(saker: Saker): List<BehandlingOgSak> =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
                     prepareStatement(
@@ -150,7 +146,6 @@ class BehandlingDao(
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
             }
         }
-    }
 
     private fun asFoerstegangsbehandling(rs: ResultSet): Foerstegangsbehandling {
         val id = rs.getUUID("id")
@@ -164,10 +159,12 @@ class BehandlingDao(
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utlandstilknytning =
-                rs.getString("utlandstilknytning")
+                rs
+                    .getString("utlandstilknytning")
                     ?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
-                rs.getString("bodd_eller_arbeidet_utlandet")
+                rs
+                    .getString("bodd_eller_arbeidet_utlandet")
                     ?.let { objectMapper.readValue(it) },
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
@@ -190,8 +187,8 @@ class BehandlingDao(
             enhet = rs.getString("enhet"),
         )
 
-    fun opprettBehandling(behandling: OpprettBehandling) {
-        return connectionAutoclosing.hentConnection {
+    fun opprettBehandling(behandling: OpprettBehandling) =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -227,10 +224,9 @@ class BehandlingDao(
                 require(stmt.executeUpdate() == 1)
             }
         }
-    }
 
-    fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) {
-        return connectionAutoclosing.hentConnection {
+    fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -247,7 +243,6 @@ class BehandlingDao(
                 require(stmt.executeUpdate() == 1)
             }
         }
-    }
 
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
@@ -257,45 +252,39 @@ class BehandlingDao(
         behandlingId: UUID,
         status: BehandlingStatus,
         sistEndret: LocalDateTime,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt = prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt = prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
 
-                stmt.setString(1, status.name)
-                stmt.setTidspunkt(2, sistEndret.toTidspunkt())
-                stmt.setObject(3, behandlingId)
-                require(stmt.executeUpdate() == 1)
-            }
+            stmt.setString(1, status.name)
+            stmt.setTidspunkt(2, sistEndret.toTidspunkt())
+            stmt.setObject(3, behandlingId)
+            require(stmt.executeUpdate() == 1)
         }
     }
 
     fun lagreBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt = prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt = prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
 
-                stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
-                stmt.setObject(2, behandlingId)
-                require(stmt.executeUpdate() == 1)
-            }
+            stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+            stmt.setObject(2, behandlingId)
+            require(stmt.executeUpdate() == 1)
         }
     }
 
     fun lagreUtlandstilknytning(
         behandlingId: UUID,
         utlandstilknytning: Utlandstilknytning,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
-                statement.setJsonb(1, utlandstilknytning)
-                statement.setObject(2, behandlingId)
-                require(statement.executeUpdate() == 1)
-            }
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
+            statement.setJsonb(1, utlandstilknytning)
+            statement.setObject(2, behandlingId)
+            require(statement.executeUpdate() == 1)
         }
     }
 
@@ -332,14 +321,12 @@ class BehandlingDao(
     fun lagreNyttVirkningstidspunkt(
         behandlingId: UUID,
         virkningstidspunkt: Virkningstidspunkt,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement = prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
-                statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
-                statement.setObject(2, behandlingId)
-                statement.executeUpdate()
-            }
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+            statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
+            statement.setObject(2, behandlingId)
+            statement.executeUpdate()
         }
     }
 

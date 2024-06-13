@@ -4,8 +4,7 @@ import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
-import { StatusBar } from '~shared/statusbar/Statusbar'
-import { getPerson } from '~shared/api/grunnlag'
+import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -29,11 +28,6 @@ export default function NyttBrev() {
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
-  const [personStatus, hentPerson] = useApiCall(getPerson)
-
-  useEffect(() => {
-    hentPerson(fnr!!)
-  }, [])
 
   useEffect(() => {
     apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
@@ -47,7 +41,7 @@ export default function NyttBrev() {
 
   return (
     <>
-      <StatusBar result={personStatus} />
+      <StatusBarPersonHenter ident={fnr} />
       <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}?fane=BREV`} />
 
       {mapApiResult(

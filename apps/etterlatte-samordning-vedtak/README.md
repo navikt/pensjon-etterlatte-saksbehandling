@@ -101,10 +101,16 @@ Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk d
      }
     ```
     
-### Barnepensjon
-- `GET /api/barnepensjon/vedtak?fomDato=YYYY-MM-DD`
-  - Ikke-påkrevd query param `tomDato` for å avgrense søket
-  - samme responsformat som for samordningsvedtak
+### Løpende barnepensjon
+Som for omstillingsstønad.
+- `GET /api/barnepensjon/har-loepende-bp?paaDato=YYYY-MM-DD`
+  - fnr i header
+  - svarformat:
+     ```
+     {
+       "barnepensjon": true
+     }
+    ```
 
 ## Kom i gang
 

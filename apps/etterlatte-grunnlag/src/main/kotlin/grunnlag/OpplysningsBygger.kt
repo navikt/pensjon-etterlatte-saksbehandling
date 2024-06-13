@@ -57,7 +57,10 @@ fun lagEnkelopplysningerFraPDL(
     return opplysningsbolk.hentOpplysninger() + gammalGrunnlagsopplysning
 }
 
-class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val innhentetTidspunkt: Tidspunkt) {
+class Opplysningsbolk(
+    private val fnr: Folkeregisteridentifikator,
+    private val innhentetTidspunkt: Tidspunkt,
+) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<JsonNode>>()
 
     fun leggTilOpplysninger(
@@ -100,15 +103,14 @@ fun lagPdlOpplysning(
     opplysningsType: Opplysningstype,
     opplysning: Person,
     tidspunktForInnhenting: Tidspunkt,
-): Grunnlagsopplysning<JsonNode> {
-    return Grunnlagsopplysning(
+): Grunnlagsopplysning<JsonNode> =
+    Grunnlagsopplysning(
         UUID.randomUUID(),
         Grunnlagsopplysning.Pdl(tidspunktForInnhenting, null, null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning.toJsonNode(),
     )
-}
 
 fun <T> lagPdlPersonopplysning(
     tidspunktForInnhenting: Tidspunkt,
@@ -116,8 +118,8 @@ fun <T> lagPdlPersonopplysning(
     opplysning: OpplysningDTO<T>,
     fnr: Folkeregisteridentifikator,
     periode: Periode? = null,
-): Grunnlagsopplysning<JsonNode> {
-    return Grunnlagsopplysning(
+): Grunnlagsopplysning<JsonNode> =
+    Grunnlagsopplysning(
         id = UUID.randomUUID(),
         kilde =
             Grunnlagsopplysning.Pdl(
@@ -131,4 +133,3 @@ fun <T> lagPdlPersonopplysning(
         fnr = fnr,
         periode = periode,
     )
-}

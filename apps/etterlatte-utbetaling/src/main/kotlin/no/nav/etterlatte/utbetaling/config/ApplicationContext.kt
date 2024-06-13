@@ -191,15 +191,14 @@ class ApplicationContext(
         )
 
     val rapidsConnection =
-        rapidConnection ?: RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        )
-            .withKtorModule {
+        rapidConnection ?: RapidApplication
+            .Builder(
+                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+            ).withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     utbetalingRoutes(simuleringOsService, behandlingKlient)
                 }
-            }
-            .build()
+            }.build()
 
     val oppgavetriggerRiver by lazy {
         OppgavetriggerRiver(

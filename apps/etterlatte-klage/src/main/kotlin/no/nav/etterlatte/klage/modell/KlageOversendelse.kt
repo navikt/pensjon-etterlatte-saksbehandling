@@ -43,16 +43,13 @@ data class KabalFagsak(
     val fagsystem: Fagsystem,
 )
 
-fun SakType.tilYtelse(): Ytelse {
-    return when (this) {
+fun SakType.tilYtelse(): Ytelse =
+    when (this) {
         SakType.BARNEPENSJON -> Ytelse.PEN_BAR
         SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_GJE
     }
-}
 
-fun KabalHjemmel.tilHjemmel(): Hjemmel {
-    return enumValueOf(this.name)
-}
+fun KabalHjemmel.tilHjemmel(): Hjemmel = enumValueOf(this.name)
 
 /**
  * Har det subsettet av datamodellen for ovesendelse til Kabal som vi kommer til å bruke

@@ -13,7 +13,7 @@ import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
@@ -21,7 +21,9 @@ import no.nav.etterlatte.testdata.dolly.DollyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
+class DollyFeature(
+    private val dollyService: DollyService,
+) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
     override val beskrivelse: String
         get() = "Opprett søknad automatisk via Dolly"
@@ -86,7 +88,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                                 1,
                             )
 
-                        dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+                        dollyService
+                            .opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
                             .also { bestilling ->
                                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
                                 call.respond(bestilling.toJson())
@@ -116,8 +119,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                             )
                         }
 
-                    val navIdent = navIdentFraToken()
-                    val noekkel = dollyService.sendSoeknad(request, navIdent, Behandlingssteg.BEHANDLING_OPPRETTA)
+                    val noekkel = dollyService.sendSoeknad(request, brukerTokenInfo.ident(), Behandlingssteg.BEHANDLING_OPPRETTA)
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {

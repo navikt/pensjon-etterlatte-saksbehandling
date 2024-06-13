@@ -17,11 +17,15 @@ object Etterbetaling {
                     val oppdatertListe = list.toMutableList()
 
                     // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
+                    oppdatertListe
+                        .firstOrNull()
+                        ?.copy(datoTOM = dto.datoTom)
                         ?.let { oppdatertListe[0] = it }
 
                     // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
+                    oppdatertListe
+                        .lastOrNull()
+                        ?.copy(datoFOM = dto.datoFom)
                         ?.let { oppdatertListe[list.lastIndex] = it }
 
                     oppdatertListe.toList()
@@ -42,11 +46,15 @@ object Etterbetaling {
                     val oppdatertListe = list.toMutableList()
 
                     // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
+                    oppdatertListe
+                        .firstOrNull()
+                        ?.copy(datoTOM = dto.datoTom)
                         ?.let { oppdatertListe[0] = it }
 
                     // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
+                    oppdatertListe
+                        .lastOrNull()
+                        ?.copy(datoFOM = dto.datoFom)
                         ?.let { oppdatertListe[list.lastIndex] = it }
 
                     oppdatertListe.toList()

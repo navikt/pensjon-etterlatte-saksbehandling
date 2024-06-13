@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { getPerson } from '~shared/api/grunnlag'
-import { StatusBar } from '~shared/statusbar/Statusbar'
+import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
 import { hentKlage } from '~shared/api/klage'
@@ -29,7 +28,6 @@ export function Klagebehandling() {
   const match = useMatch('/klage/:klageId/*')
   const dispatch = useAppDispatch()
   const [fetchKlageStatus, fetchKlage] = useApiCall(hentKlage)
-  const [personStatus, hentPerson] = useApiCall(getPerson)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [kanRedigere, setKanRedigere] = useState(false)
 
@@ -53,10 +51,6 @@ export function Klagebehandling() {
   }, [klageIdFraUrl, viHarLastetRiktigKlage])
 
   useEffect(() => {
-    if (klage?.sak.ident) {
-      hentPerson(klage.sak.ident)
-    }
-
     if (klage?.sak.enhet) {
       setKanRedigere(
         (klageRedigerbar && enhetErSkrivbar(klage.sak.enhet, innloggetSaksbehandler.skriveEnheter)) ?? false
@@ -66,7 +60,7 @@ export function Klagebehandling() {
 
   return (
     <>
-      <StatusBar result={personStatus} />
+      <StatusBarPersonHenter ident={klage?.sak.ident} />
       <KlageStegmeny />
       {isPending(fetchKlageStatus) && <Spinner visible label="Henter klagebehandling" />}
 

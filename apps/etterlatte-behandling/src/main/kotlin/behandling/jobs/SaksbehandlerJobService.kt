@@ -77,16 +77,15 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                     // SupervisorJob så noen kall kan feile uten å cancle parent job
                     val scope = CoroutineScope(SupervisorJob())
                     val alleIdenterMedEnheter =
-                        sbidenter.filter {
-                            it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
-                        }
-                            .map {
+                        sbidenter
+                            .filter {
+                                it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
+                            }.map {
                                 it to
                                     scope.async(
                                         subCoroutineExceptionHandler,
                                     ) { axsysKlient.hentEnheterForIdent(it) }
-                            }
-                            .mapNotNull { (ident, enheter) ->
+                            }.mapNotNull { (ident, enheter) ->
                                 try {
                                     val enheterAwait = enheter.await()
                                     if (enheterAwait.isNotEmpty()) {
@@ -133,23 +132,23 @@ internal suspend fun oppdaterSaksbehandlerNavn(
                     logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
 
                     val egneIdenter =
-                        filtrerteIdenter.filter { it in ugyldigeIdenter }
+                        filtrerteIdenter
+                            .filter { it in ugyldigeIdenter }
                             .map { it to SaksbehandlerInfo(it, it) }
 
                     logger.info("Mappet egne ${sbidenter.size}")
 
                     val hentedeIdenter =
                         coroutineScope {
-                            filtrerteIdenter.filter {
-                                it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
-                            }
-                                .map {
+                            filtrerteIdenter
+                                .filter {
+                                    it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
+                                }.map {
                                     it to
                                         async(subCoroutineExceptionHandler) {
                                             navAnsattKlient.hentSaksbehanderNavn(it)
                                         }
-                                }
-                                .map { it.first to it.second.await() }
+                                }.map { it.first to it.second.await() }
                         }
 
                     val alleIdenterMedNavn = hentedeIdenter + egneIdenter

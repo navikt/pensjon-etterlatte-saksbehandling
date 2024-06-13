@@ -4,7 +4,9 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
-data class InstitusjonsoppholdService(private val institusjonsoppholdDao: InstitusjonsoppholdDao) {
+data class InstitusjonsoppholdService(
+    private val institusjonsoppholdDao: InstitusjonsoppholdDao,
+) {
     fun leggInnInstitusjonsoppholdBegrunnelse(
         sakId: Long,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
@@ -15,11 +17,10 @@ data class InstitusjonsoppholdService(private val institusjonsoppholdDao: Instit
         }
     }
 
-    fun hentInstitusjonsoppholdBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? {
-        return inTransaction {
+    fun hentInstitusjonsoppholdBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? =
+        inTransaction {
             institusjonsoppholdDao.hentBegrunnelse(grunnlagsEndringshendelseId)
         }
-    }
 }
 
 data class InstitusjonsoppholdBegrunnelse(

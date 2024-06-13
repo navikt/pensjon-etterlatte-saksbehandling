@@ -55,7 +55,10 @@ object OppdragMapper {
                 )
 
                 if (erGRegulering) {
-                    val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
+                    val fraOgMed =
+                        utbetaling.utbetalingslinjer
+                            .first()
+                            .periode.fra
 
                     listOf(
                         // Ta høyde for maks lengde på 40 chars
@@ -128,6 +131,10 @@ fun Saktype.tilKodeklassifikasjon(): String =
         Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
     }
 
-fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId.toLong()
+fun Oppdrag.vedtakId() =
+    oppdrag110.oppdragsLinje150
+        .first()
+        .vedtakId
+        .toLong()
 
 fun Oppdrag.sakId() = oppdrag110.fagsystemId

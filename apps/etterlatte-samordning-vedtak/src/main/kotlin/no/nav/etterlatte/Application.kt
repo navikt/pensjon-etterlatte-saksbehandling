@@ -15,7 +15,9 @@ fun main() {
     Server(ApplicationContext(Miljoevariabler(System.getenv()))).run()
 }
 
-class Server(applicationContext: ApplicationContext) {
+class Server(
+    applicationContext: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-samordning-vedtak")
     }

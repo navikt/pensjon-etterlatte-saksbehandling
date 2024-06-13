@@ -20,10 +20,15 @@ interface VilkaarsvurderingKlient {
     ): VilkaarsvurderingDto?
 }
 
-class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+class VilkaarsvurderingKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : VilkaarsvurderingKlient {
+class VilkaarsvurderingKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : VilkaarsvurderingKlient {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlientImpl::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -45,8 +50,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                             url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { json -> json.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

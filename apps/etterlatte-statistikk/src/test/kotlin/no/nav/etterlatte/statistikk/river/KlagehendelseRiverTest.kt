@@ -39,33 +39,34 @@ internal class KlagehendelseRiverTest {
     @Test
     fun `Skal ta i mot klagemeldinger`() {
         val message =
-            JsonMessage.newMessage(
-                mapOf(
-                    KlageHendelseType.OPPRETTET.lagParMedEventNameKey(),
-                    CORRELATION_ID_KEY to UUID.randomUUID(),
-                    TEKNISK_TID_KEY to LocalDateTime.now(),
-                    KLAGE_STATISTIKK_RIVER_KEY to
-                        StatistikkKlage(
-                            UUID.randomUUID(),
-                            Klage(
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        KlageHendelseType.OPPRETTET.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        TEKNISK_TID_KEY to LocalDateTime.now(),
+                        KLAGE_STATISTIKK_RIVER_KEY to
+                            StatistikkKlage(
                                 UUID.randomUUID(),
-                                Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr),
+                                Klage(
+                                    UUID.randomUUID(),
+                                    Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr),
+                                    Tidspunkt.now(),
+                                    KlageStatus.OPPRETTET,
+                                    kabalResultat = null,
+                                    kabalStatus = null,
+                                    formkrav = null,
+                                    innkommendeDokument = null,
+                                    resultat = null,
+                                    utfall = null,
+                                    aarsakTilAvbrytelse = null,
+                                    initieltUtfall = null,
+                                ),
                                 Tidspunkt.now(),
-                                KlageStatus.OPPRETTET,
-                                kabalResultat = null,
-                                kabalStatus = null,
-                                formkrav = null,
-                                innkommendeDokument = null,
-                                resultat = null,
-                                utfall = null,
-                                aarsakTilAvbrytelse = null,
-                                initieltUtfall = null,
+                                null,
                             ),
-                            Tidspunkt.now(),
-                            null,
-                        ),
-                ),
-            ).toJson()
+                    ),
+                ).toJson()
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
         Assertions.assertEquals(0, inspector.size) // kjører ingen STATISTIKK:REGISTRERT melding da null i mock
 

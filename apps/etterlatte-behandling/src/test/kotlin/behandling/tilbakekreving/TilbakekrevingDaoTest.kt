@@ -22,7 +22,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class TilbakekrevingDaoTest(val dataSource: DataSource) {
+class TilbakekrevingDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var sakDao: SakDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
 

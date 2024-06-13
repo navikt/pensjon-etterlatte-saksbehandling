@@ -10,7 +10,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.sql.DataSource
 
-class AldersovergangDao(private val datasource: DataSource) : Transactions<AldersovergangDao> {
+class AldersovergangDao(
+    private val datasource: DataSource,
+) : Transactions<AldersovergangDao> {
     override fun <R> inTransaction(block: AldersovergangDao.(TransactionalSession) -> R): R =
         datasource.transaction {
             this.block(it)

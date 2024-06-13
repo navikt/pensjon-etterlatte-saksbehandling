@@ -210,7 +210,11 @@ internal class GrunnlagServiceTest {
                     testData.soeker.foedselsnummer.value,
                     testData.soeker.foedselsnummer.value,
                     emptyList(),
-                    listOf(testData.avdoede.first().foedselsnummer.value),
+                    listOf(
+                        testData.avdoede
+                            .first()
+                            .foedselsnummer.value,
+                    ),
                     listOf(testData.gjenlevende.foedselsnummer.value),
                 )
             val sakId = 1L
@@ -241,7 +245,7 @@ internal class GrunnlagServiceTest {
 
             val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, galleri)
 
-            runBlocking { grunnlagService.opprettGrunnlagForSak(sakId, opplysningsbehov) }
+            runBlocking { grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov) }
 
             every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId) } returns grunnlagshendelser
             every { opplysningDaoMock.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1) } returns grunnlagshendelser.first()
@@ -250,12 +254,18 @@ internal class GrunnlagServiceTest {
             assertNotNull(grunnlag)
             if (grunnlag != null) {
                 val hentetGalleriPaaSoeker =
-                    grunnlag.sak.hentKonstantOpplysning<Persongalleri>(
-                        PERSONGALLERI_V1,
-                    )?.verdi ?: throw RuntimeException("failure")
+                    grunnlag.sak
+                        .hentKonstantOpplysning<Persongalleri>(
+                            PERSONGALLERI_V1,
+                        )?.verdi ?: throw RuntimeException("failure")
                 assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.soeker)
                 assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.innsender)
-                assertEquals(testData.avdoede.first().foedselsnummer.value, hentetGalleriPaaSoeker.avdoed.first())
+                assertEquals(
+                    testData.avdoede
+                        .first()
+                        .foedselsnummer.value,
+                    hentetGalleriPaaSoeker.avdoed.first(),
+                )
                 assertEquals(testData.gjenlevende.foedselsnummer.value, hentetGalleriPaaSoeker.gjenlevende.first())
             }
         }
@@ -346,7 +356,9 @@ internal class GrunnlagServiceTest {
 
             assertEquals(
                 1,
-                grunnlagService.hentOpplysningsgrunnlagForSak(1)!!.soeker.values.size,
+                grunnlagService
+                    .hentOpplysningsgrunnlagForSak(1)!!
+                    .soeker.values.size,
             )
         }
 
@@ -608,7 +620,8 @@ internal class GrunnlagServiceTest {
                     PERSONGALLERI_V1,
                     id = statiskUuid,
                     verdi =
-                        testData.hentPersonGalleri()
+                        testData
+                            .hentPersonGalleri()
                             .copy(innsender = INNSENDER_FOEDSELSNUMMER.value)
                             .toJsonNode(),
                     kilde = kilde,

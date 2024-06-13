@@ -74,7 +74,7 @@ export function avsluttKlage(avsluttKlageRequest: AvsluttKlageRequest): Promise<
 }
 
 export function forhaandsvisBlankettKa(args: { klage: Klage }): Promise<ApiResponse<ArrayBuffer>> {
-  return apiClient.post<ArrayBuffer>(`/notat/${args.klage.sak.id}/forhaandsvis`, {
+  return apiClient.post<ArrayBuffer>(`/notat/sak/${args.klage.sak.id}/forhaandsvis`, {
     data: {
       type: 'KLAGE_BLANKETT',
       klage: args.klage,

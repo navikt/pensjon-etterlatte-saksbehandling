@@ -18,14 +18,17 @@ interface PdfGenerator {
     ): ByteArray
 }
 
-class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: String) : PdfGenerator {
+class PdfGeneratorKlient(
+    private val client: HttpClient,
+    private val apiUrl: String,
+) : PdfGenerator {
     override suspend fun genererPdf(
         input: JsonNode,
         template: String,
-    ): ByteArray {
-        return client.post("$apiUrl/$template") {
-            header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
-            setBody(TextContent(input.toPrettyString(), ContentType.Application.Json))
-        }.body()
-    }
+    ): ByteArray =
+        client
+            .post("$apiUrl/$template") {
+                header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+                setBody(TextContent(input.toPrettyString(), ContentType.Application.Json))
+            }.body()
 }

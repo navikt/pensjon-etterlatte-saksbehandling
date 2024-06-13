@@ -11,7 +11,10 @@ object ReguleringEvents {
 
 var JsonMessage.saker: List<Long>
     get() =
-        this[ReguleringEvents.SPESIFIKKE_SAKER].asText().trim().split(";")
+        this[ReguleringEvents.SPESIFIKKE_SAKER]
+            .asText()
+            .trim()
+            .split(";")
             .filter { it.isNotEmpty() }
             .map { it.toLong() }
     set(name) {

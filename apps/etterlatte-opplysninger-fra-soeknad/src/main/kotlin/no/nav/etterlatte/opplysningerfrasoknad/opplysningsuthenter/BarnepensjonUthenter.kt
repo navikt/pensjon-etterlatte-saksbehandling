@@ -48,8 +48,14 @@ internal object BarnepensjonUthenter {
                     opplysning =
                         Utenlandsadresse(
                             it.svar.verdi,
-                            it.opplysning?.land?.svar?.innhold,
-                            it.opplysning?.adresse?.svar?.innhold,
+                            it.opplysning
+                                ?.land
+                                ?.svar
+                                ?.innhold,
+                            it.opplysning
+                                ?.adresse
+                                ?.svar
+                                ?.innhold,
                         ),
                     periode = null,
                 )
@@ -73,7 +79,13 @@ internal object BarnepensjonUthenter {
                                     ),
                                 periode =
                                     it.fraDato?.svar?.innhold?.let { fom ->
-                                        Periode(YearMonth.from(fom), it.tilDato?.svar?.innhold?.let { tom -> YearMonth.from(tom) })
+                                        Periode(
+                                            YearMonth.from(fom),
+                                            it.tilDato
+                                                ?.svar
+                                                ?.innhold
+                                                ?.let { tom -> YearMonth.from(tom) },
+                                        )
                                     },
                             )
                         }
@@ -113,8 +125,8 @@ internal object BarnepensjonUthenter {
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
         data: T,
-    ): Grunnlagsopplysning<T> {
-        return Grunnlagsopplysning(
+    ): Grunnlagsopplysning<T> =
+        Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Privatperson(
                 barnepensjon.innsender.foedselsnummer.svar.value,
@@ -124,29 +136,29 @@ internal object BarnepensjonUthenter {
             objectMapper.createObjectNode(),
             data,
         )
-    }
 
-    private fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? {
-        return barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.let { it as Avdoed }
-    }
+    private fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? =
+        barnepensjon.foreldre
+            .find {
+                it.type === PersonType.AVDOED
+            }?.let { it as Avdoed }
 
-    private fun hentGjenlevendeForelder(barnepensjon: Barnepensjon): GjenlevendeForelder? {
-        return barnepensjon.foreldre.find { it.type === PersonType.GJENLEVENDE_FORELDER }
+    private fun hentGjenlevendeForelder(barnepensjon: Barnepensjon): GjenlevendeForelder? =
+        barnepensjon.foreldre
+            .find { it.type === PersonType.GJENLEVENDE_FORELDER }
             ?.let { it as GjenlevendeForelder }
-    }
 
     private fun avdoed(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out AvdoedSoeknad>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
+    ): Grunnlagsopplysning<out AvdoedSoeknad>? =
+        hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon,
                 opplysningsType,
                 avdoedOpplysning(avdoed),
             )
         }
-    }
 
     private fun soeker(
         barnepensjon: Barnepensjon,
@@ -161,13 +173,23 @@ internal object BarnepensjonUthenter {
                 type = PersonType.BARN,
                 fornavn = barnepensjon.soeker.fornavn.svar,
                 etternavn = barnepensjon.soeker.etternavn.svar,
-                foedselsnummer = barnepensjon.soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
+                foedselsnummer =
+                    barnepensjon.soeker.foedselsnummer.svar
+                        .toFolkeregisteridentifikator(),
                 statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
                 utenlandsadresse =
                     UtenlandsadresseBarn(
                         adresse?.svar?.verdi,
-                        adresse?.opplysning?.land?.svar?.innhold,
-                        adresse?.opplysning?.adresse?.svar?.innhold,
+                        adresse
+                            ?.opplysning
+                            ?.land
+                            ?.svar
+                            ?.innhold,
+                        adresse
+                            ?.opplysning
+                            ?.adresse
+                            ?.svar
+                            ?.innhold,
                     ),
                 foreldre =
                     barnepensjon.soeker.foreldre.map {
@@ -180,12 +202,27 @@ internal object BarnepensjonUthenter {
                     },
                 verge =
                     Verge(
-                        barnepensjon.soeker.verge?.svar?.verdi,
-                        barnepensjon.soeker.verge?.opplysning?.fornavn?.svar,
-                        barnepensjon.soeker.verge?.opplysning?.etternavn?.svar,
-                        barnepensjon.soeker.verge?.opplysning?.foedselsnummer?.svar?.toFolkeregisteridentifikator(),
+                        barnepensjon.soeker.verge
+                            ?.svar
+                            ?.verdi,
+                        barnepensjon.soeker.verge
+                            ?.opplysning
+                            ?.fornavn
+                            ?.svar,
+                        barnepensjon.soeker.verge
+                            ?.opplysning
+                            ?.etternavn
+                            ?.svar,
+                        barnepensjon.soeker.verge
+                            ?.opplysning
+                            ?.foedselsnummer
+                            ?.svar
+                            ?.toFolkeregisteridentifikator(),
                     ),
-                omsorgPerson = barnepensjon.soeker.dagligOmsorg?.svar?.verdi,
+                omsorgPerson =
+                    barnepensjon.soeker.dagligOmsorg
+                        ?.svar
+                        ?.verdi,
             ),
         )
     }
@@ -193,8 +230,8 @@ internal object BarnepensjonUthenter {
     private fun gjenlevendeForelder(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? {
-        return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
+    ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? =
+        hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
             setBehandlingsopplysninger(
                 barnepensjon,
                 opplysningsType,
@@ -209,30 +246,28 @@ internal object BarnepensjonUthenter {
                 ),
             )
         }
-    }
 
     fun innsender(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out InnsenderSoeknad> {
-        return setBehandlingsopplysninger(
+    ): Grunnlagsopplysning<out InnsenderSoeknad> =
+        setBehandlingsopplysninger(
             barnepensjon,
             opplysningsType,
             InnsenderSoeknad(
                 PersonType.INNSENDER,
                 barnepensjon.innsender.fornavn.svar,
                 barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar.toFolkeregisteridentifikator(),
+                barnepensjon.innsender.foedselsnummer.svar
+                    .toFolkeregisteridentifikator(),
             ),
         )
-    }
 
     fun samtykke(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out Samtykke> {
-        return setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
-    }
+    ): Grunnlagsopplysning<out Samtykke> =
+        setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
 
     fun spraak(
         barnepensjon: Barnepensjon,
@@ -242,31 +277,28 @@ internal object BarnepensjonUthenter {
     fun utbetalingsinformasjon(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out Utbetalingsinformasjon>? {
-        return barnepensjon.utbetalingsInformasjon?.let {
+    ): Grunnlagsopplysning<out Utbetalingsinformasjon>? =
+        barnepensjon.utbetalingsInformasjon?.let {
             setBehandlingsopplysninger(
                 barnepensjon,
                 opplysningsType,
                 utbetalingsinformasjonOpplysning(it),
             )
         }
-    }
 
     private fun soeknadMottattDato(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out SoeknadMottattDato> {
-        return setBehandlingsopplysninger(
+    ): Grunnlagsopplysning<out SoeknadMottattDato> =
+        setBehandlingsopplysninger(
             barnepensjon,
             opplysningsType,
             SoeknadMottattDato(barnepensjon.mottattDato),
         )
-    }
 
     private fun soeknadsType(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype,
-    ): Grunnlagsopplysning<out SoeknadstypeOpplysning> {
-        return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
-    }
+    ): Grunnlagsopplysning<out SoeknadstypeOpplysning> =
+        setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
 }

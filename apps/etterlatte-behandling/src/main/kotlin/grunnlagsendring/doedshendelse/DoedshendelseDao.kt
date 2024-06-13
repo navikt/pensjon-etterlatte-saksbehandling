@@ -14,7 +14,9 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
 
-class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class DoedshendelseDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -79,8 +81,8 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> {
-        return connectionAutoclosing.hentConnection {
+    fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -90,13 +92,13 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     """.trimIndent(),
                 ).apply {
                     setArray(1, createArrayOf("text", status.toTypedArray()))
-                }.executeQuery().toList { asDoedshendelse() }
+                }.executeQuery()
+                    .toList { asDoedshendelse() }
             }
         }
-    }
 
-    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseReminder> {
-        return connectionAutoclosing.hentConnection {
+    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseReminder> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -119,13 +121,13 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                             ).toTypedArray(),
                         ),
                     )
-                }.executeQuery().toList { asDoedshendelseReminder() }
+                }.executeQuery()
+                    .toList { asDoedshendelseReminder() }
             }
         }
-    }
 
-    fun hentDoedshendelserForPerson(avdoedFnr: String): List<DoedshendelseInternal> {
-        return connectionAutoclosing.hentConnection {
+    fun hentDoedshendelserForPerson(avdoedFnr: String): List<DoedshendelseInternal> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -135,10 +137,10 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     """.trimIndent(),
                 ).apply {
                     setString(1, avdoedFnr)
-                }.executeQuery().toList { asDoedshendelse() }
+                }.executeQuery()
+                    .toList { asDoedshendelse() }
             }
         }
-    }
 }
 
 private fun ResultSet.asDoedshendelseReminder(): DoedshendelseReminder =

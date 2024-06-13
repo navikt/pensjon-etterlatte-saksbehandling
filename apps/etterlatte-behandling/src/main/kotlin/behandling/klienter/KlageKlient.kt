@@ -22,7 +22,10 @@ interface KlageKlient : Pingable {
     )
 }
 
-class KlageKlientImpl(private val client: HttpClient, private val url: String) : KlageKlient {
+class KlageKlientImpl(
+    private val client: HttpClient,
+    private val url: String,
+) : KlageKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun sendKlageTilKabal(
@@ -51,15 +54,16 @@ class KlageKlientImpl(private val client: HttpClient, private val url: String) :
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return client.ping(
+    override suspend fun ping(konsument: String?): PingResult =
+        client.ping(
             pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
-    }
 }
 
-class KlageOversendelseException(klage: Klage, statusCode: HttpStatusCode) :
-    Exception("Kunne ikke oversende klagen med id=${klage.id} til etterlatte-klage, fikk statuskode=$statusCode")
+class KlageOversendelseException(
+    klage: Klage,
+    statusCode: HttpStatusCode,
+) : Exception("Kunne ikke oversende klagen med id=${klage.id} til etterlatte-klage, fikk statuskode=$statusCode")

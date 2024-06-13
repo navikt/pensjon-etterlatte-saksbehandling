@@ -16,8 +16,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-class OppdaterDoedshendelseException(override val detail: String, override val cause: Throwable?) :
-    InternfeilException(detail, cause)
+class OppdaterDoedshendelseException(
+    override val detail: String,
+    override val cause: Throwable?,
+) : InternfeilException(detail, cause)
 
 internal class OppdaterDoedshendelseBrevDistribuert(
     rapidsConnection: RapidsConnection,

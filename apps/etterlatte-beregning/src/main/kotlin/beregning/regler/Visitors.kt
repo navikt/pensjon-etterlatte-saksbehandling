@@ -6,7 +6,9 @@ import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode
 import no.nav.etterlatte.libs.regler.Visitor
 
-class FinnAnvendtGrunnbeloepVisitor(private val grunnbeloepRegel: Regel<*, *>) : Visitor {
+class FinnAnvendtGrunnbeloepVisitor(
+    private val grunnbeloepRegel: Regel<*, *>,
+) : Visitor {
     var anvendtGrunnbeloep: Grunnbeloep? = null
 
     override fun visit(node: Node<*>) {}
@@ -24,7 +26,9 @@ fun SubsumsjonsNode<*>.finnAnvendtGrunnbeloep(grunnbeloepRegel: Regel<*, *>): Gr
         anvendtGrunnbeloep
     }
 
-class FinnAnvendtTrygdetidVisitor(private val trygdetidRegel: Regel<*, *>) : Visitor {
+class FinnAnvendtTrygdetidVisitor(
+    private val trygdetidRegel: Regel<*, *>,
+) : Visitor {
     var anvendtTrygdetid: AnvendtTrygdetid? = null
 
     override fun visit(node: Node<*>) {}
@@ -42,7 +46,9 @@ fun SubsumsjonsNode<*>.finnAnvendtTrygdetid(trygdetidRegel: Regel<*, *>): Anvend
         anvendtTrygdetid
     }
 
-class FinnAvdodeForeldre2024Visitor(private val avdodeForeldre2024Regel: Regel<*, *>) : Visitor {
+class FinnAvdodeForeldre2024Visitor(
+    private val avdodeForeldre2024Regel: Regel<*, *>,
+) : Visitor {
     var avdodeForeldre: List<String?>? = null
 
     override fun visit(node: Node<*>) {}

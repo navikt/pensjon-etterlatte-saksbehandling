@@ -19,13 +19,17 @@ import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.UUID
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
-class AktivitetspliktUnntakDaoTest(ds: DataSource) {
+class AktivitetspliktUnntakDaoTest(
+    ds: DataSource,
+) {
     private val dao = AktivitetspliktUnntakDao(ConnectionAutoclosingTest(ds))
     private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
@@ -122,6 +126,103 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
             it.beskrivelse shouldBe unntak.beskrivelse
+        }
+    }
+
+    @Nested
+    inner class OppdaterUnntak {
+        @Test
+        fun `Oppdatere unntak`() {
+            val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+            val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+            val opprettBehandling =
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    sakId = sak.id,
+                )
+            behandlingDao.opprettBehandling(opprettBehandling)
+            val lagreUnntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now().plusMonths(6),
+                )
+
+            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
+
+            val lagreUnntakMedId =
+                LagreAktivitetspliktUnntak(
+                    id = unntak!!.id,
+                    unntak = AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM,
+                    beskrivelse = "Beskrivelse er oppdatert",
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now().plusMonths(6),
+                )
+
+            dao.oppdaterUnntak(lagreUnntakMedId, kilde, opprettBehandling.id)
+
+            dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+                it.sakId shouldBe sak.id
+                it.behandlingId shouldBe opprettBehandling.id
+                it.unntak shouldBe lagreUnntakMedId.unntak
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe lagreUnntakMedId.beskrivelse
+            }
+        }
+    }
+
+    @Nested
+    inner class SlettAktivitet {
+        private val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        private val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        private val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+        private val lagreUnntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+
+        @Test
+        fun `skal slette unntak`() {
+            behandlingDao.opprettBehandling(opprettBehandling)
+
+            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
+            dao.slettUnntak(unntak!!.id, opprettBehandling.id)
+
+            dao.hentUnntakForBehandling(opprettBehandling.id) shouldBe null
+        }
+
+        @Test
+        fun `skal ikke slette unntak hvis behandling id ikke stemmer`() {
+            behandlingDao.opprettBehandling(opprettBehandling)
+
+            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
+            dao.slettUnntak(unntak!!.id, UUID.randomUUID())
+
+            dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+                it.id shouldBe unntak.id
+                it.sakId shouldBe sak.id
+                it.behandlingId shouldBe opprettBehandling.id
+                it.unntak shouldBe unntak.unntak
+                it.fom shouldBe unntak.fom
+                it.tom shouldBe unntak.tom
+                it.opprettet shouldBe kilde
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe unntak.beskrivelse
+            }
         }
     }
 }

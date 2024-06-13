@@ -25,7 +25,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
+data class KunneIkkeLeseVedtakException(
+    val e: Exception,
+) : RuntimeException(e)
 
 class VedtakMottakRiver(
     rapidsConnection: RapidsConnection,
@@ -124,9 +126,7 @@ class VedtakMottakRiver(
             throw KunneIkkeLeseVedtakException(e)
         }
 
-    private fun feilSkalKastesVidere(e: Exception): Boolean {
-        return e !is KunneIkkeLeseVedtakException
-    }
+    private fun feilSkalKastesVidere(e: Exception): Boolean = e !is KunneIkkeLeseVedtakException
 
     private fun sendUtbetalingFeiletEvent(
         context: MessageContext,

@@ -53,7 +53,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
+internal class VilkaarsvurderingRoutesTest(
+    private val ds: DataSource,
+) {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -84,7 +86,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlagMock
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlagMock
     }
 
     @AfterEach
@@ -146,7 +148,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            coEvery { grunnlagKlient.hentGrunnlag(any(), behandlingId, any()) } returns
+            coEvery { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, any()) } returns
                 grunnlagMedVersjon(nyGrunnlagVersjon)
 
             val response =
@@ -288,7 +290,8 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)
+                            ?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
                             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
@@ -304,8 +307,10 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaar =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
-                    .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                vilkaarsvurderingServiceImpl
+                    .hentVilkaarsvurdering(behandlingId)!!
+                    .vilkaar
+                    .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
             assertNotNull(vurdertVilkaar.vurdering)
@@ -316,7 +321,8 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)
+                            ?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
                             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
@@ -339,8 +345,10 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaarPaaUnntak =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
-                    .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                vilkaarsvurderingServiceImpl
+                    .hentVilkaarsvurdering(behandlingId)!!
+                    .vilkaar
+                    .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak.hovedvilkaar.resultat)
             assertNotNull(vurdertVilkaarPaaUnntak.vurdering)
@@ -382,8 +390,10 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaar =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
-                    .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                vilkaarsvurderingServiceImpl
+                    .hentVilkaarsvurdering(behandlingId)!!
+                    .vilkaar
+                    .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
             assertNotNull(vurdertVilkaar.vurdering)
@@ -397,7 +407,9 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                     }
 
             val vurdertVilkaarSlettet =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!.vilkaar
+                vilkaarsvurderingServiceImpl
+                    .hentVilkaarsvurdering(behandlingId)!!
+                    .vilkaar
                     .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -484,16 +496,18 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                     kommentar = "Søker oppfyller vilkåret",
                 )
 
-            client.post("/api/vilkaarsvurdering/$behandlingId") {
-                setBody(vurdertVilkaarDto.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
-            client.delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.vilkaarId}") {
-                setBody(vurdertVilkaarDto.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+            client
+                .post("/api/vilkaarsvurdering/$behandlingId") {
+                    setBody(vurdertVilkaarDto.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+            client
+                .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.vilkaarId}") {
+                    setBody(vurdertVilkaarDto.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
         }
     }
 
@@ -719,7 +733,8 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)
+                            ?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
                             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,

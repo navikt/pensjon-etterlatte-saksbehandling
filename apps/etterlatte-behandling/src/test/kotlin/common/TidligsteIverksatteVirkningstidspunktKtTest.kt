@@ -90,8 +90,8 @@ class TidligsteIverksatteVirkningstidspunktKtTest {
     private fun mockBehandlingMedStatusOgVirkdato(
         behandlingStatus: BehandlingStatus,
         virkDato: YearMonth? = null,
-    ): Behandling {
-        return mockk<Behandling> {
+    ): Behandling =
+        mockk<Behandling> {
             every { status } returns behandlingStatus
             if (virkDato != null) {
                 every { virkningstidspunkt } returns
@@ -102,5 +102,4 @@ class TidligsteIverksatteVirkningstidspunktKtTest {
                 every { virkningstidspunkt } returns null
             }
         }
-    }
 }

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.tilgangsstyring
 
-enum class AzureGroup(val envKey: String) {
+enum class AzureGroup(
+    val envKey: String,
+) {
     ATTESTANT("AZUREAD_ATTESTANT_GROUPID"),
     ATTESTANT_GJENNY("AZUREAD_ATTESTANT_GJENNY_GROUPID"),
     SAKSBEHANDLER("AZUREAD_SAKSBEHANDLER_GROUPID"),

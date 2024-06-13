@@ -15,8 +15,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class Avkorting(
-    // TODO skal bli List<Aarsoppgjoer> når vi implementerer revurdering tilbake til tidligere år og etteroppgjør
-    val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
+    val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
     val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(),
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
 ) {
@@ -32,16 +31,21 @@ data class Avkorting(
     ): Avkorting =
         this.copy(
             avkortetYtelseFraVirkningstidspunkt =
-                aarsoppgjoer.avkortetYtelseAar
-                    .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
-                    .map {
-                        if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
-                            it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
-                        } else {
-                            it
+                aarsoppgjoer.filter { virkningstidspunkt.year <= it.aar }.flatMap { aarsoppgjoer ->
+                    aarsoppgjoer.avkortetYtelseAar
+                        .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
+                        .map {
+                            if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
+                                it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
+                            } else {
+                                it
+                            }
                         }
-                    },
-            avkortetYtelseForrigeVedtak = forrigeAvkorting?.aarsoppgjoer?.avkortetYtelseAar ?: emptyList(),
+                },
+            avkortetYtelseForrigeVedtak =
+                forrigeAvkorting?.aarsoppgjoer?.flatMap {
+                    it.avkortetYtelseAar
+                } ?: emptyList(),
         )
 
 	/*
@@ -50,13 +54,15 @@ data class Avkorting(
     fun kopierAvkorting(): Avkorting =
         Avkorting(
             aarsoppgjoer =
-                aarsoppgjoer.copy(
-                    ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
-                    inntektsavkorting =
-                        aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                            inntektsavkorting.copy(grunnlag = inntektsavkorting.grunnlag.copy(id = UUID.randomUUID()))
-                        },
-                ),
+                aarsoppgjoer.map {
+                    it.copy(
+                        id = UUID.randomUUID(),
+                        inntektsavkorting =
+                            it.inntektsavkorting.map { inntektsavkorting ->
+                                inntektsavkorting.copy(grunnlag = inntektsavkorting.grunnlag.copy(id = UUID.randomUUID()))
+                            },
+                    )
+                },
         )
 
     fun beregnAvkortingMedNyttGrunnlag(
@@ -76,6 +82,8 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
     ): Avkorting {
+        // TODO kreve at det er inneværende år?
+        val aarsoppgjoer = hentAarsoppgjoer(virkningstidspunkt)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
@@ -97,15 +105,19 @@ data class Avkorting(
                             ),
                     ),
                 )
+
+        val oppdatertAarsoppjoer =
+            aarsoppgjoer.copy(
+                inntektsavkorting = oppdatert,
+            )
         return this.copy(
-            aarsoppgjoer =
-                aarsoppgjoer.copy(
-                    inntektsavkorting = oppdatert,
-                ),
+            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppjoer),
         )
     }
 
     private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
+        val aarsoppgjoer = aarsoppgjoer.single()
+
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
         val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
 
@@ -120,87 +132,105 @@ data class Avkorting(
                 periode = grunnlag.periode,
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingsperioder,
-                type = AvkortetYtelseType.FORVENTET_INNTEKT,
+                type = FORVENTET_INNTEKT,
             )
 
+        val oppdatertAarsoppgjoer =
+            aarsoppgjoer.copy(
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                inntektsavkorting =
+                    aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
+                        inntektsavkorting.copy(
+                            avkortingsperioder = avkortingsperioder,
+                        )
+                    },
+                avkortetYtelseAar =
+                    beregnetAvkortetYtelse.map { avkortetYtelse ->
+                        avkortetYtelse.copy(
+                            id = UUID.randomUUID(),
+                            type = AARSOPPGJOER,
+                        )
+                    },
+            )
         return this.copy(
-            aarsoppgjoer =
-                this.aarsoppgjoer.copy(
-                    ytelseFoerAvkorting = ytelseFoerAvkorting,
-                    inntektsavkorting =
-                        this.aarsoppgjoer.inntektsavkorting.map {
-                            it.copy(
-                                avkortingsperioder = avkortingsperioder,
-                            )
-                        },
-                    avkortetYtelseAar =
-                        beregnetAvkortetYtelse.map {
-                            it.copy(
-                                id = UUID.randomUUID(),
-                                type = AvkortetYtelseType.AARSOPPGJOER,
-                            )
-                        },
-                ),
+            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
         )
     }
 
     fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
-        val ytelseFoerAvkorting = this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
+        val virkningstidspunktAar =
+            beregning.beregningsperioder
+                .first()
+                .datoFOM.year
 
-        val reberegnetInntektsavkorting =
-            this.aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                val periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntektsavkorting.grunnlag.periode.tom)
+        val oppdaterteOppgjoer =
+            this.aarsoppgjoer.map { aarsoppgjoer ->
 
-                val avkortinger =
-                    AvkortingRegelkjoring.beregnInntektsavkorting(
-                        periode = periode,
-                        avkortingGrunnlag = listOf(inntektsavkorting.grunnlag.copy(periode = periode)),
-                    )
-
-                val avkortetYtelseForventetInntekt =
-                    if (this.aarsoppgjoer.inntektsavkorting.size > 1) {
-                        AvkortingRegelkjoring.beregnAvkortetYtelse(
-                            periode = periode,
-                            ytelseFoerAvkorting = ytelseFoerAvkorting,
-                            avkortingsperioder = avkortinger,
-                            type = AvkortetYtelseType.FORVENTET_INNTEKT,
-                        )
+                val ytelseFoerAvkorting =
+                    if (aarsoppgjoer.aar >= virkningstidspunktAar) {
+                        aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
                     } else {
-                        emptyList()
+                        aarsoppgjoer.ytelseFoerAvkorting
                     }
 
-                inntektsavkorting.copy(
-                    avkortingsperioder = avkortinger,
-                    avkortetYtelseForventetInntekt =
-                        avkortetYtelseForventetInntekt.map {
-                            it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id)
-                        },
-                )
-            }
+                val reberegnetInntektsavkorting =
+                    aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
+                        val periode =
+                            Periode(
+                                fom = aarsoppgjoer.foersteMaanedDetteAar(),
+                                tom = inntektsavkorting.grunnlag.periode.tom,
+                            )
 
-        val avkortetYtelse =
-            if (this.aarsoppgjoer.inntektsavkorting.size > 1) {
-                beregnAvkortetYtelseMedRestanse(ytelseFoerAvkorting, reberegnetInntektsavkorting)
-            } else {
-                reberegnetInntektsavkorting.first().let {
-                    AvkortingRegelkjoring.beregnAvkortetYtelse(
-                        periode = it.grunnlag.periode,
-                        ytelseFoerAvkorting = ytelseFoerAvkorting,
-                        avkortingsperioder = it.avkortingsperioder,
-                        type = AvkortetYtelseType.AARSOPPGJOER,
-                        restanse = null,
-                    )
-                }
-            }
+                        val avkortinger =
+                            AvkortingRegelkjoring.beregnInntektsavkorting(
+                                periode = periode,
+                                avkortingGrunnlag = listOf(inntektsavkorting.grunnlag.copy(periode = periode)),
+                            )
 
-        return this.copy(
-            aarsoppgjoer =
-                this.aarsoppgjoer.copy(
+                        val avkortetYtelseForventetInntekt =
+                            if (aarsoppgjoer.inntektsavkorting.size > 1) {
+                                AvkortingRegelkjoring.beregnAvkortetYtelse(
+                                    periode = periode,
+                                    ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                    avkortingsperioder = avkortinger,
+                                    type = FORVENTET_INNTEKT,
+                                )
+                            } else {
+                                emptyList()
+                            }
+
+                        inntektsavkorting.copy(
+                            avkortingsperioder = avkortinger,
+                            avkortetYtelseForventetInntekt =
+                                avkortetYtelseForventetInntekt.map {
+                                    it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id)
+                                },
+                        )
+                    }
+
+                val avkortetYtelse =
+                    if (aarsoppgjoer.inntektsavkorting.size > 1) {
+                        beregnAvkortetYtelseMedRestanse(aarsoppgjoer, ytelseFoerAvkorting, reberegnetInntektsavkorting)
+                    } else {
+                        reberegnetInntektsavkorting.first().let {
+                            AvkortingRegelkjoring.beregnAvkortetYtelse(
+                                periode = it.grunnlag.periode,
+                                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                avkortingsperioder = it.avkortingsperioder,
+                                type = AARSOPPGJOER,
+                                restanse = null,
+                            )
+                        }
+                    }
+
+                aarsoppgjoer.copy(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     inntektsavkorting = reberegnetInntektsavkorting,
                     avkortetYtelseAar = avkortetYtelse,
-                ),
-        )
+                )
+            }
+
+        return this.copy(aarsoppgjoer = oppdaterteOppgjoer)
     }
 
     /**
@@ -210,6 +240,7 @@ data class Avkorting(
      * For hver forventet inntekt som sammenlignes så akkumuleres det mer eller mindre restanse.
      */
     private fun beregnAvkortetYtelseMedRestanse(
+        aarsoppgjoer: Aarsoppgjoer,
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
     ): List<AvkortetYtelse> {
@@ -220,7 +251,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            this.foersteMaanedDetteAar(),
+                            aarsoppgjoer.foersteMaanedDetteAar(),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                         )
@@ -239,11 +270,17 @@ data class Avkorting(
         return avkortetYtelseMedAllForventetInntekt
     }
 
-	/*
-	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
-	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
-	 */
-    private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
+    fun hentAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
+        val funnet = aarsoppgjoer.find { it.aar == fom.year }
+        return funnet ?: Aarsoppgjoer(UUID.randomUUID(), aar = fom.year)
+    }
+
+    private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
+        if (aarsoppgjoer.any { it.aar == nytt.aar }) {
+            return aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it }
+        }
+        return aarsoppgjoer + listOf(nytt)
+    }
 }
 
 /**
@@ -262,6 +299,8 @@ data class AvkortingGrunnlag(
 )
 
 data class Aarsoppgjoer(
+    val id: UUID,
+    val aar: Int,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
@@ -274,11 +313,24 @@ data class Aarsoppgjoer(
 	 */
     fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth): Int {
         val aaretsFoersteForventaInntekt =
-            inntektsavkorting.sortedBy { it.grunnlag.periode.fom }.firstOrNull {
-                it.grunnlag.periode.fom.year == virkningstidspunkt.year
-            }?.grunnlag
+            inntektsavkorting
+                .sortedBy { it.grunnlag.periode.fom }
+                .firstOrNull {
+                    it.grunnlag.periode.fom.year == virkningstidspunkt.year
+                }?.grunnlag
         return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
     }
+
+	/*
+	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
+	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
+	 */
+    fun foersteMaanedDetteAar(): YearMonth =
+        if (ytelseFoerAvkorting.isEmpty()) {
+            YearMonth.of(aar, 1)
+        } else {
+            ytelseFoerAvkorting.first().periode.fom
+        }
 }
 
 /**

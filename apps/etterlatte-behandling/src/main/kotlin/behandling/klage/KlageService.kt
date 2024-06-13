@@ -112,10 +112,12 @@ interface KlageService {
     ): Klage
 }
 
-class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
-    detail = msg,
-)
+class ManglerSaksbehandlerException(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+        detail = msg,
+    )
 
 class KlageServiceImpl(
     private val klageDao: KlageDao,
@@ -143,11 +145,11 @@ class KlageServiceImpl(
 
         klageDao.lagreKlage(klage)
 
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveService.opprettOppgave(
             referanse = klage.id.toString(),
             sakId = sakId,
-            oppgaveKilde = OppgaveKilde.EKSTERN,
-            oppgaveType = OppgaveType.KLAGE,
+            kilde = OppgaveKilde.EKSTERN,
+            type = OppgaveType.KLAGE,
             merknad = null,
         )
 
@@ -161,13 +163,9 @@ class KlageServiceImpl(
         return klage
     }
 
-    override fun hentKlage(id: UUID): Klage? {
-        return klageDao.hentKlage(id)
-    }
+    override fun hentKlage(id: UUID): Klage? = klageDao.hentKlage(id)
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> {
-        return klageDao.hentKlagerISak(sakId)
-    }
+    override fun hentKlagerISak(sakId: Long): List<Klage> = klageDao.hentKlagerISak(sakId)
 
     override fun lagreFormkravIKlage(
         klageId: UUID,
@@ -617,11 +615,11 @@ class KlageServiceImpl(
         val vedtaketKlagenGjelder =
             klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
 
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+        return oppgaveService.opprettOppgave(
             referanse = klage.id.toString(),
             sakId = klage.sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.OMGJOERING,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.OMGJOERING,
             merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
                 vedtaketKlagenGjelder.datoAttestert?.format(
                     DateTimeFormatter.ISO_LOCAL_DATE,
@@ -642,14 +640,16 @@ class KlageServiceImpl(
         }
 }
 
-class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
-    UgyldigForespoerselException(
+class OmgjoeringMaaGjeldeEtVedtakException(
+    klage: Klage,
+) : UgyldigForespoerselException(
         code = "OMGJOERING_MAA_GJELDE_ET_VEDTAK",
         detail = "Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder",
     )
 
-class KlageIkkeFunnetException(klageId: UUID) :
-    IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")
+class KlageIkkeFunnetException(
+    klageId: UUID,
+) : IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")
 
 data class FerdigstillResultat(
     val oversendelsesbrev: OpprettetBrevDto,

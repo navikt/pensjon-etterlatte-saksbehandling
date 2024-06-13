@@ -9,7 +9,8 @@ class OmstillingsstoenadInformasjonDoedsfall(
     override val innhold: List<Slate.Element>,
     val avdoedNavn: String,
     val borIutland: Boolean,
-) : BrevDataRedigerbar, BrevdataMedInnhold {
+) : BrevDataRedigerbar,
+    BrevdataMedInnhold {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -17,7 +18,10 @@ class OmstillingsstoenadInformasjonDoedsfall(
         ): OmstillingsstoenadInformasjonDoedsfall =
             OmstillingsstoenadInformasjonDoedsfall(
                 innhold = emptyList(),
-                avdoedNavn = generellBrevData.personerISak.avdoede.first().navn,
+                avdoedNavn =
+                    generellBrevData.personerISak.avdoede
+                        .first()
+                        .navn,
                 borIutland = borIutland,
             )
     }

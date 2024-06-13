@@ -43,8 +43,8 @@ data class Vedtak(
     val attestasjon: Attestasjon? = null,
     val innhold: VedtakInnhold,
 ) {
-    fun toDto(): VedtakDto {
-        return VedtakDto(
+    fun toDto(): VedtakDto =
+        VedtakDto(
             id = id,
             behandlingId = behandlingId,
             status = status,
@@ -79,11 +79,8 @@ data class Vedtak(
                     }
                 },
         )
-    }
 
-    fun underArbeid(): Boolean {
-        return status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
-    }
+    fun underArbeid(): Boolean = status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
 }
 
 sealed interface VedtakInnhold {
@@ -116,8 +113,9 @@ data class LoependeYtelse(
     val sisteLoependeBehandlingId: UUID? = null,
 )
 
-class UgyldigAttestantException(ident: String) :
-    IkkeTillattException(
+class UgyldigAttestantException(
+    ident: String,
+) : IkkeTillattException(
         code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
         detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
     )

@@ -12,7 +12,8 @@ class VedtakMetrics(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     val loependeVedtak by lazy {
-        Gauge.build("etterlatte_vedtak_loepende", "Løpende vedtak for etterlatte ytelser")
+        Gauge
+            .build("etterlatte_vedtak_loepende", "Løpende vedtak for etterlatte ytelser")
             .labelNames("saktype")
             .register(registry)
     }

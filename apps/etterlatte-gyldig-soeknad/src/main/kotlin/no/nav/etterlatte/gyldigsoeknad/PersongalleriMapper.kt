@@ -26,14 +26,13 @@ object PersongalleriMapper {
         }
     }
 
-    private fun opprettPersongalleriOMS(soeknad: Omstillingsstoenad): Persongalleri {
-        return Persongalleri(
+    private fun opprettPersongalleriOMS(soeknad: Omstillingsstoenad): Persongalleri =
+        Persongalleri(
             soeker = soeknad.soeker.foedselsnummer.svar.value,
             innsender = soeknad.innsender.foedselsnummer.svar.value,
             avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
             soesken = soeknad.barn.map { it.foedselsnummer.svar.value },
         )
-    }
 
     private fun opprettPersongalleriBP(soeknad: Barnepensjon): Persongalleri {
         logger.info("Hent persongalleri fra søknad")
@@ -44,7 +43,8 @@ object PersongalleriMapper {
             soesken = soeknad.soesken.map { it.foedselsnummer.svar.value },
             avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
             gjenlevende =
-                soeknad.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+                soeknad.foreldre
+                    .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
                     .map { it.foedselsnummer.svar.value },
         )
     }

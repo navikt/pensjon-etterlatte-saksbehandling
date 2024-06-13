@@ -93,7 +93,10 @@ interface BrevApiKlient {
     ): OpprettetBrevDto?
 }
 
-class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
+class BrevApiKlientObo(
+    config: Config,
+    client: HttpClient,
+) : BrevApiKlient {
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, client)
 
@@ -103,8 +106,8 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return post(
+    ): OpprettetBrevDto =
+        post(
             url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse",
             onSuccess = { resource ->
                 resource.response?.let { objectMapper.readValue(it.toJson()) }
@@ -112,19 +115,17 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return post(
+    ): OpprettetBrevDto =
+        post(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -155,92 +156,88 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): JournalpostIdDto {
-        return post(
+    ): JournalpostIdDto =
+        post(
             url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun distribuerBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BestillingsIdDto {
-        return post(
+    ): BestillingsIdDto =
+        post(
             url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun hentBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return get(
+    ): OpprettetBrevDto =
+        get(
             url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto? {
-        return get(
+    ): OpprettetBrevDto? =
+        get(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto? {
-        return get(
+    ): OpprettetBrevDto? =
+        get(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/oversendelse",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
             brukerTokenInfo = brukerTokenInfo,
         )
-    }
 
     override suspend fun slettVedtaksbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        downstreamResourceClient.delete(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/vedtak"),
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = "",
-        ).mapError { error -> throw error }
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/vedtak"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
     }
 
     override suspend fun journalfoerNotatKa(
         klage: Klage,
         brukerInfoToken: BrukerTokenInfo,
-    ): OpprettJournalpostDto {
-        return post(
-            url = "$resourceUrl/api/notat/${klage.sak.id}/journalfoer",
+    ): OpprettJournalpostDto =
+        post(
+            url = "$resourceUrl/api/notat/sak/${klage.sak.id}/journalfoer",
             postBody = mapOf("data" to KlageNotatRequest(klage)),
             onSuccess = { response -> deserialize(response.response!!.toJson()) },
             brukerTokenInfo = brukerInfoToken,
         )
-    }
 
     override suspend fun slettOversendelsesbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        downstreamResourceClient.delete(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse"),
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = "",
-        ).mapError { error -> throw error }
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
     }
 
     private suspend fun <T> post(
@@ -248,30 +245,30 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         postBody: Any = Unit,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
-    ): T {
-        return downstreamResourceClient.post(
-            resource = Resource(clientId = clientId, url = url),
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = postBody,
-        ).mapBoth(
-            success = onSuccess,
-            failure = { errorResponse -> throw errorResponse },
-        )
-    }
+    ): T =
+        downstreamResourceClient
+            .post(
+                resource = Resource(clientId = clientId, url = url),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = postBody,
+            ).mapBoth(
+                success = onSuccess,
+                failure = { errorResponse -> throw errorResponse },
+            )
 
     private suspend fun <T> get(
         url: String,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
-    ): T {
-        return downstreamResourceClient.get(
-            resource = Resource(clientId = clientId, url = url),
-            brukerTokenInfo = brukerTokenInfo,
-        ).mapBoth(
-            success = onSuccess,
-            failure = { throwableErrorMessage -> throw throwableErrorMessage },
-        )
-    }
+    ): T =
+        downstreamResourceClient
+            .get(
+                resource = Resource(clientId = clientId, url = url),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = onSuccess,
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
 }
 
 enum class BrevStatus {
@@ -283,17 +280,11 @@ enum class BrevStatus {
     SLETTET,
     ;
 
-    fun ikkeFerdigstilt(): Boolean {
-        return this in listOf(OPPRETTET, OPPDATERT)
-    }
+    fun ikkeFerdigstilt(): Boolean = this in listOf(OPPRETTET, OPPDATERT)
 
-    fun ikkeJournalfoert(): Boolean {
-        return this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
-    }
+    fun ikkeJournalfoert(): Boolean = this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
 
-    fun ikkeDistribuert(): Boolean {
-        return this != DISTRIBUERT
-    }
+    fun ikkeDistribuert(): Boolean = this != DISTRIBUERT
 }
 
 data class KlageNotatRequest(

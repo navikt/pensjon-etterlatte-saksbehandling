@@ -22,27 +22,32 @@ class Context(
     val databasecontxt: DatabaseKontekst,
     val sakTilgangDao: SakTilgangDao,
 ) {
-    fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
-        return this.AppUser as SaksbehandlerMedEnheterOgRoller
-    }
+    fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller = this.AppUser as SaksbehandlerMedEnheterOgRoller
 }
 
 interface User {
     fun name(): String
 }
 
-abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
+abstract class ExternalUser(
+    val identifiedBy: TokenValidationContext,
+) : User
 
-class Self(private val prosess: String) : User {
+class Self(
+    private val prosess: String,
+) : User {
     override fun name() = prosess
 }
 
-class SystemUser(identifiedBy: TokenValidationContext, val brukerTokenInfo: BrukerTokenInfo) : ExternalUser(identifiedBy) {
-    override fun name(): String {
-        return identifiedBy.hentTokenClaims(AZURE_ISSUER)
+class SystemUser(
+    identifiedBy: TokenValidationContext,
+    val brukerTokenInfo: BrukerTokenInfo,
+) : ExternalUser(identifiedBy) {
+    override fun name(): String =
+        identifiedBy
+            .hentTokenClaims(AZURE_ISSUER)
             ?.getStringClaim("azp_name") // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
-    }
 }
 
 class SaksbehandlerMedEnheterOgRoller(
@@ -56,9 +61,7 @@ class SaksbehandlerMedEnheterOgRoller(
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
 
-    override fun name(): String {
-        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
-    }
+    override fun name(): String = identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
 
     private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
@@ -97,8 +100,8 @@ fun decideUser(
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     saksbehandlerService: SaksbehandlerService,
     brukerTokenInfo: BrukerTokenInfo,
-): ExternalUser {
-    return if (principal.context.issuers.contains(AZURE_ISSUER)) {
+): ExternalUser =
+    if (principal.context.issuers.contains(AZURE_ISSUER)) {
         if (brukerTokenInfo is Systembruker) {
             SystemUser(principal.context, brukerTokenInfo)
         } else {
@@ -112,7 +115,6 @@ fun decideUser(
     } else {
         throw IllegalStateException("no token from preapproved issuers")
     }
-}
 
 interface DatabaseKontekst {
     fun activeTx(): Connection

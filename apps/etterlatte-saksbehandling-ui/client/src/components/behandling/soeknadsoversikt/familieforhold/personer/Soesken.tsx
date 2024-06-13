@@ -1,8 +1,7 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import React from 'react'
-import { differenceInYears } from 'date-fns'
-import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
+import { hentAdresserEtterDoedsdato, hentAlderForDato } from '~components/behandling/felles/utils'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import { BodyShort, HStack, Label, VStack } from '@navikt/ds-react'
 
@@ -19,7 +18,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
           <BodyShort>
             {person.fornavn} {person.etternavn}
           </BodyShort>
-          <BodyShort>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</BodyShort>
+          <BodyShort>({hentAlderForDato(person.foedselsdato)} år)</BodyShort>
         </HStack>
         <BodyShort>{erHelsoesken(person.foedselsnummer) ? 'Helsøsken' : 'Halvsøsken'}</BodyShort>
       </VStack>

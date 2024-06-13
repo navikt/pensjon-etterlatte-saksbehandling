@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -7,14 +6,26 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { Alert, BodyShort, Button, Detail, Heading, HStack, Select, Table, Textarea, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Box,
+  Button,
+  Detail,
+  Heading,
+  HStack,
+  Select,
+  Table,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
-import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
+import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
 
 interface SanksjonDefaultValue {
@@ -129,7 +140,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
-    <SanksjonWrapper>
+    <Box paddingBlock="4">
       {mapApiResult(
         hentSanksjonStatus,
         <Spinner visible label="Henter sanksjoner" />,
@@ -143,7 +154,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
             </Heading>
             <BodyShort>Her kommer det informasjon om sanksjoner.</BodyShort>
 
-            <TableWrapper marginBottom="1rem">
+            <TableBox>
               <Table className="table" zebraStripes size="medium">
                 <Table.Header>
                   <Table.Row>
@@ -225,7 +236,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                   )}
                 </Table.Body>
               </Table>
-            </TableWrapper>
+            </TableBox>
 
             {isFailure(slettSanksjonStatus) && (
               <Alert variant="error">
@@ -323,10 +334,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
           </VStack>
         )
       )}
-    </SanksjonWrapper>
+    </Box>
   )
 }
-
-const SanksjonWrapper = styled.div`
-  margin: 2em 0 1em 0;
-`

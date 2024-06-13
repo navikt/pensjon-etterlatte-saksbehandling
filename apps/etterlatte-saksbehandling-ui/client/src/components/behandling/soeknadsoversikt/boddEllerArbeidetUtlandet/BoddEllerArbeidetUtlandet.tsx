@@ -2,9 +2,8 @@ import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
-import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
-import { BodyShort, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, VStack } from '@navikt/ds-react'
 
 const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null) => {
   if (boddEllerArbeidetUtlandet) {
@@ -53,7 +52,9 @@ export const BoddEllerArbeidetUtlandet = ({
           />
         )}
         {!vurdert && redigerbar && (
-          <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+          <Button variant="secondary" onClick={() => setVurdert(true)}>
+            Legg til vurdering
+          </Button>
         )}
       </Vurdering>
     </LovtekstMedLenke>

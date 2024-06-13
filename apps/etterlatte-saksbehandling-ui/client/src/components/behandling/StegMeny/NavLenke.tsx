@@ -1,10 +1,9 @@
-import { NavLink } from 'react-router-dom'
-import styled from 'styled-components'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
-import classNames from 'classnames'
 import { hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { BehandlingRouteTypes } from '~components/behandling/BehandlingRoutes'
+import { Label, Link } from '@navikt/ds-react'
+import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
 
 export const NavLenke = (props: {
   pathInfo: BehandlingRouteTypes
@@ -17,17 +16,24 @@ export const NavLenke = (props: {
   const routeErDisabled =
     pathInfo.kreverBehandlingsstatus &&
     !hentGyldigeNavigeringsStatuser(status).includes(pathInfo.kreverBehandlingsstatus(props.behandling))
-
   return (
     <>
-      <li className={classNames({ disabled: routeErDisabled })}>
-        <NavLink to={pathInfo.path}>{pathInfo.description}</NavLink>
-      </li>
-      {separator && <Separator aria-hidden="true" />}
+      {routeErDisabled ? (
+        <DisabledLabel>{pathInfo.description}</DisabledLabel>
+      ) : (
+        <>
+          {location.pathname.split('/')[3] === pathInfo.path ? (
+            <Label>{pathInfo.description}</Label>
+          ) : (
+            <Label>
+              <Link href={pathInfo.path} underline={false}>
+                {pathInfo.description}
+              </Link>
+            </Label>
+          )}
+        </>
+      )}
+      {separator && <ChevronRightIcon aria-hidden />}
     </>
   )
 }
-
-export const Separator = styled(ChevronRightIcon)`
-  vertical-align: middle;
-`

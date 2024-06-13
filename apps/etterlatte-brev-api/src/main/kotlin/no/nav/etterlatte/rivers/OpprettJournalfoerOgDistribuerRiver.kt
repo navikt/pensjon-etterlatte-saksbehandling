@@ -29,8 +29,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-class OpprettJournalfoerOgDistribuerRiverException(override val detail: String, override val cause: Throwable?) :
-    InternfeilException(detail, cause)
+class OpprettJournalfoerOgDistribuerRiverException(
+    override val detail: String,
+    override val cause: Throwable?,
+) : InternfeilException(detail, cause)
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val rapidsConnection: RapidsConnection,
@@ -131,14 +133,15 @@ class OpprettJournalfoerOgDistribuerRiver(
 
         publish(
             sakId.toString(),
-            JsonMessage.newMessage(
-                BrevHendelseType.DISTRIBUERT.lagEventnameForType(),
-                mapOf(
-                    BREV_ID_KEY to brevID,
-                    SAK_ID_KEY to sakId,
-                    BREV_KODE to brevkode.name,
-                ),
-            ).toJson(),
+            JsonMessage
+                .newMessage(
+                    BrevHendelseType.DISTRIBUERT.lagEventnameForType(),
+                    mapOf(
+                        BREV_ID_KEY to brevID,
+                        SAK_ID_KEY to sakId,
+                        BREV_KODE to brevkode.name,
+                    ),
+                ).toJson(),
         )
     }
 

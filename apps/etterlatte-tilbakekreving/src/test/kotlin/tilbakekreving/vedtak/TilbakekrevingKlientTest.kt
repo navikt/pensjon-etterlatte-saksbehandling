@@ -15,6 +15,7 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
@@ -38,10 +39,15 @@ internal class TilbakekrevingKlientTest {
         tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
 
         verify {
-            hendelseRepository.lagreTilbakekrevingsvedtakSendt(tilbakekrevingsvedtak.kravgrunnlagId, any())
-            hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(
-                tilbakekrevingsvedtak.kravgrunnlagId,
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                tilbakekrevingsvedtak.sakId,
                 any(),
+                TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT,
+            )
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                tilbakekrevingsvedtak.sakId,
+                any(),
+                TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
             )
         }
     }
@@ -63,10 +69,15 @@ internal class TilbakekrevingKlientTest {
         }
 
         verify {
-            hendelseRepository.lagreTilbakekrevingsvedtakSendt(tilbakekrevingsvedtak.kravgrunnlagId, any())
-            hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(
-                tilbakekrevingsvedtak.kravgrunnlagId,
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                tilbakekrevingsvedtak.sakId,
                 any(),
+                TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT,
+            )
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                tilbakekrevingsvedtak.sakId,
+                any(),
+                TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
             )
         }
     }

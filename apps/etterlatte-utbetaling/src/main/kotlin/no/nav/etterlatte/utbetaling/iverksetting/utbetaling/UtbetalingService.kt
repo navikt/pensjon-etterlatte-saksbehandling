@@ -42,19 +42,21 @@ class UtbetalingService(
                     )
                 val utbetaling = utbetalingMapper.opprettUtbetaling()
 
-                oppdragMapper.oppdragFraUtbetaling(
-                    utbetaling = utbetaling,
-                    erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty(),
-                    erGRegulering = vedtak.behandling.revurderingsaarsak == Revurderingaarsak.REGULERING,
-                ).also {
-                    utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
-                    oppdragSender.sendOppdrag(it, vedtak.finnPrioritet())
-                }.let {
-                    utbetalingDao.nyUtbetalingshendelse(
-                        utbetaling.vedtakId.value,
-                        utbetaling.sendtUtbetalingshendelse(clock),
-                    ).let { SendtTilOppdrag(it) }
-                }
+                oppdragMapper
+                    .oppdragFraUtbetaling(
+                        utbetaling = utbetaling,
+                        erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty(),
+                        erGRegulering = vedtak.behandling.revurderingsaarsak == Revurderingaarsak.REGULERING,
+                    ).also {
+                        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
+                        oppdragSender.sendOppdrag(it, vedtak.finnPrioritet())
+                    }.let {
+                        utbetalingDao
+                            .nyUtbetalingshendelse(
+                                utbetaling.vedtakId.value,
+                                utbetaling.sendtUtbetalingshendelse(clock),
+                            ).let { SendtTilOppdrag(it) }
+                    }
             }
         }
     }
@@ -86,13 +88,14 @@ class UtbetalingService(
 
     fun settKvitteringManuelt(vedtakId: Long) =
         utbetalingDao.hentUtbetaling(vedtakId)?.let { utbetaling ->
-            utbetaling.oppdrag?.apply {
-                mmel =
-                    Mmel().apply {
-                        systemId = "231-OPPD"
-                        alvorlighetsgrad = "00"
-                    }
-            }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
+            utbetaling.oppdrag
+                ?.apply {
+                    mmel =
+                        Mmel().apply {
+                            systemId = "231-OPPD"
+                            alvorlighetsgrad = "00"
+                        }
+                }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
         }
 
     private fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) =
@@ -117,20 +120,31 @@ class UtbetalingService(
 }
 
 sealed class IverksettResultat {
-    class SendtTilOppdrag(val utbetaling: Utbetaling) : IverksettResultat()
+    class SendtTilOppdrag(
+        val utbetaling: Utbetaling,
+    ) : IverksettResultat()
 
     class UtbetalingslinjerForVedtakEksisterer(
         val utbetaling: Utbetaling?,
         val utbetalingslinjer: List<Utbetalingslinje>,
     ) : IverksettResultat()
 
-    class UtbetalingForVedtakEksisterer(val eksisterendeUtbetaling: Utbetaling) : IverksettResultat()
+    class UtbetalingForVedtakEksisterer(
+        val eksisterendeUtbetaling: Utbetaling,
+    ) : IverksettResultat()
 }
 
 sealed class OppdaterKvitteringResultat {
-    class KvitteringOppdatert(val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
+    class KvitteringOppdatert(
+        val utbetaling: Utbetaling,
+    ) : OppdaterKvitteringResultat()
 
-    class UtbetalingFinnesIkke(val vedtakId: Long) : OppdaterKvitteringResultat()
+    class UtbetalingFinnesIkke(
+        val vedtakId: Long,
+    ) : OppdaterKvitteringResultat()
 
-    class UgyldigStatus(val status: UtbetalingStatus, val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
+    class UgyldigStatus(
+        val status: UtbetalingStatus,
+        val utbetaling: Utbetaling,
+    ) : OppdaterKvitteringResultat()
 }

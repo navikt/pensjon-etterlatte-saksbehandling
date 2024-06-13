@@ -10,7 +10,11 @@ import java.util.Timer
 import java.util.UUID
 import kotlin.concurrent.fixedRateTimer
 
-data class LoggerInfo(val logger: Logger, val sikkerLogg: Logger? = null, val loggTilSikkerLogg: Boolean = false)
+data class LoggerInfo(
+    val logger: Logger,
+    val sikkerLogg: Logger? = null,
+    val loggTilSikkerLogg: Boolean = false,
+)
 
 fun fixedRateCancellableTimer(
     name: String?,
@@ -19,8 +23,8 @@ fun fixedRateCancellableTimer(
     loggerInfo: LoggerInfo,
     openingHours: OpeningHours? = null,
     action: (correlationId: String) -> Unit,
-): Timer {
-    return fixedRateTimer(
+): Timer =
+    fixedRateTimer(
         name = name,
         daemon = true,
         initialDelay = initialDelay,
@@ -30,7 +34,6 @@ fun fixedRateCancellableTimer(
             run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
         }
     }
-}
 
 fun fixedRateCancellableTimer(
     name: String?,

@@ -4,7 +4,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
-class VedtaksvurderingService(private val vedtaksvurderingKlient: VedtaksvurderingKlient) {
+class VedtaksvurderingService(
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+) {
     suspend fun hentVedtakSaksbehandlerOgStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

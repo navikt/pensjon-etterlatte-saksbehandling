@@ -6,10 +6,9 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Button, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -72,7 +71,9 @@ export const GyldigFramsattVurdering = ({
   return (
     <>
       {!vurdert && redigerbar && (
-        <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+        <Button variant="secondary" onClick={() => setVurdert(true)}>
+          Legg til vurdering
+        </Button>
       )}
       {vurdert && (
         <VurderingsboksWrapper

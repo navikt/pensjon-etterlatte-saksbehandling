@@ -1,4 +1,4 @@
-import { Alert, Button, Dropdown, Heading, HStack, Modal } from '@navikt/ds-react'
+import { Alert, Box, Button, Dropdown, Heading, HStack, Modal } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
@@ -53,9 +53,11 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
                     {dok.tittel}
                   </Dropdown.Menu.GroupedList.Item>
                   {!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang && (
-                    <IkkeTilgangAlert variant="warning" size="small">
-                      Ikke tilgang
-                    </IkkeTilgangAlert>
+                    <Box padding="4">
+                      <Alert variant="warning" size="small">
+                        Ikke Tilgang
+                      </Alert>
+                    </Box>
                   )}
                 </HStack>
               ))}
@@ -111,7 +113,4 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
 
 const DropdownMenu = styled(Dropdown.Menu)`
   width: 50ch;
-`
-const IkkeTilgangAlert = styled(Alert)`
-  padding: 0.5rem;
 `

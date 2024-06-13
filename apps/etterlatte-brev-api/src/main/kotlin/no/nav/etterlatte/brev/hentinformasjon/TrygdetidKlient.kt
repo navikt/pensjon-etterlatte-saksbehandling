@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class TrygdetidKlient(config: Config, httpClient: HttpClient) {
+class TrygdetidKlient(
+    config: Config,
+    httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(TrygdetidKlient::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -28,13 +31,14 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
     ): List<TrygdetidDto> {
         try {
             logger.info("Henter trygdetid med behandlingid $behandlingId")
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/trygdetid_v2/$behandlingId"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response.let { deserialize(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/trygdetid_v2/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
         } catch (re: ResponseException) {
             logger.error("Henting av trygdetid for sak med behandlingsid=$behandlingId feilet", re)
 

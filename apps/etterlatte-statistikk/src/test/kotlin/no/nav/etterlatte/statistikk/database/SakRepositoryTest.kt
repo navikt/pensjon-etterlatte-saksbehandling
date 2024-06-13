@@ -27,7 +27,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SakRepositoryTest(private val dataSource: DataSource) {
+class SakRepositoryTest(
+    private val dataSource: DataSource,
+) {
     val mockBeregning =
         Beregning(
             beregningId = UUID.randomUUID(),

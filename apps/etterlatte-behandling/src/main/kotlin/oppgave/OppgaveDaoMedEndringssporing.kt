@@ -69,8 +69,8 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
-    override fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring> {
-        return connectionAutoclosing.hentConnection {
+    override fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -87,49 +87,37 @@ class OppgaveDaoMedEndringssporingImpl(
                 }
             }
         }
-    }
 
-    private fun ResultSet.asOppgaveEndring(): OppgaveEndring {
-        return OppgaveEndring(
+    private fun ResultSet.asOppgaveEndring(): OppgaveEndring =
+        OppgaveEndring(
             id = getObject("id") as UUID,
             oppgaveId = getObject("oppgaveId") as UUID,
             oppgaveFoer = getString("oppgaveFoer").let { objectMapper.readValue(it) },
             oppgaveEtter = getString("oppgaveEtter").let { objectMapper.readValue(it) },
             tidspunkt = getTidspunkt("tidspunkt"),
         )
-    }
 
     override fun opprettOppgave(oppgaveIntern: OppgaveIntern) {
         oppgaveDao.opprettOppgave(oppgaveIntern)
     }
 
-    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? {
-        return oppgaveDao.hentOppgave(oppgaveId)
-    }
+    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? = oppgaveDao.hentOppgave(oppgaveId)
 
-    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaverForReferanse(referanse)
-    }
+    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaverForSak(sakId)
-    }
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
 
     override fun hentOppgaver(
         enheter: List<String>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
-    ): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
-    }
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
 
-    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
-        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
-    }
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
+        oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> {
-        return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
-    }
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> =
+        oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
 
     override fun settNySaksbehandler(
         oppgaveId: UUID,

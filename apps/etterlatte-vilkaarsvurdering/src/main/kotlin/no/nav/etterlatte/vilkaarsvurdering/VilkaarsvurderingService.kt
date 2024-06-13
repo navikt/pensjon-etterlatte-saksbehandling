@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -28,8 +29,9 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
-    RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
+class VirkningstidspunktIkkeSattException(
+    behandlingId: UUID,
+) : RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
@@ -38,31 +40,29 @@ class VilkaarsvurderingService(
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? {
-        return vilkaarsvurderingRepository.hent(behandlingId)
-    }
+    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 
-    fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.vilkaar
+    fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean =
+        vilkaarsvurderingRepository
+            .hent(behandlingId)
+            ?.vilkaar
             ?.filter { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
             ?.filter { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
             ?.any { it.vurdering?.saksbehandler?.equals(Vedtaksloesning.PESYS.name, true) == true }
             ?: false
-    }
 
-    fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.vilkaar
+    fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean =
+        vilkaarsvurderingRepository
+            .hent(behandlingId)
+            ?.vilkaar
             ?.filter { it.hovedvilkaar.type == VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING }
             ?.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
             ?: false
-    }
 
     suspend fun hentBehandlingensGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag {
-        return hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
-    }
+    ): Grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
 
     suspend fun oppdaterTotalVurdering(
         behandlingId: UUID,
@@ -176,7 +176,8 @@ class VilkaarsvurderingService(
                 )
 
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
-            if (!kopierResultat || (
+            if (!kopierResultat ||
+                (
                     behandling.revurderingsaarsak != Revurderingaarsak.REGULERING &&
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
@@ -204,11 +205,13 @@ class VilkaarsvurderingService(
             )
 
         val nyeHovedvilkaarTyper =
-            gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }
+            gjeldendeVilkaarForVirkningstidspunkt
+                .map { it.hovedvilkaar.type }
                 .subtract(kopierteVilkaar.map { it.hovedvilkaar.type }.toSet())
 
         val slettetHovedvilkaarTyper =
-            kopierteVilkaar.map { it.hovedvilkaar.type }
+            kopierteVilkaar
+                .map { it.hovedvilkaar.type }
                 .subtract(gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }.toSet())
 
         val nyeVilkaar =
@@ -328,11 +331,10 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            val behandling = oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
             val vilkaarsvurdering =
                 vilkaarsvurderingRepository.hent(behandlingId)
                     ?: throw VilkaarsvurderingIkkeFunnet()
-
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val virkningstidspunktFraBehandling =
                 behandling.virkningstidspunkt?.dato
@@ -355,15 +357,16 @@ class VilkaarsvurderingService(
             }
         }
 
-    suspend fun oppdaterGrunnlagsversjon(
+    private suspend fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
+    ): DetaljertBehandling {
+        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
         vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,
         )
+        return behandling
     }
 
     private suspend fun <T> tilstandssjekkFoerKjoering(
@@ -383,36 +386,41 @@ class VilkaarsvurderingService(
     private suspend fun hentDataForVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<DetaljertBehandling, Grunnlag> {
-        return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, behandlingId, brukerTokenInfo) }
+    ): Pair<DetaljertBehandling, Grunnlag> =
+        coroutineScope {
+            val behandling = async { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) }
+            val grunnlag = async { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, brukerTokenInfo) }
 
-            Pair(behandling, grunnlag.await())
+            Pair(behandling.await(), grunnlag.await())
         }
-    }
 }
 
 class BehandlingstilstandException : IllegalStateException()
 
-class VilkaarsvurderingTilstandException(message: String) : IllegalStateException(message)
+class VilkaarsvurderingTilstandException(
+    message: String,
+) : IllegalStateException(message)
 
-class VilkaarsvurderingIkkeFunnet : IkkeFunnetException(
-    code = "VILKAARSVURDERING_IKKE_FUNNET",
-    detail = "Vilkårsvurdering ikke funnet",
-)
+class VilkaarsvurderingIkkeFunnet :
+    IkkeFunnetException(
+        code = "VILKAARSVURDERING_IKKE_FUNNET",
+        detail = "Vilkårsvurdering ikke funnet",
+    )
 
-class VilkaarsvurderingManglerResultat : UgyldigForespoerselException(
-    code = "VILKAARSVURDERING_MANGLER_RESULTAT",
-    detail = "Vilkårsvurderingen har ikke et resultat",
-)
+class VilkaarsvurderingManglerResultat :
+    UgyldigForespoerselException(
+        code = "VILKAARSVURDERING_MANGLER_RESULTAT",
+        detail = "Vilkårsvurderingen har ikke et resultat",
+    )
 
-class VirkningstidspunktSamsvarerIkke : UgyldigForespoerselException(
-    code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_SAMSVARER_IKKE",
-    detail = "Vilkårsvurderingen har et virkningstidspunkt som ikke samsvarer med behandling",
-)
+class VirkningstidspunktSamsvarerIkke :
+    UgyldigForespoerselException(
+        code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_SAMSVARER_IKKE",
+        detail = "Vilkårsvurderingen har et virkningstidspunkt som ikke samsvarer med behandling",
+    )
 
-class BehandlingVirkningstidspunktIkkeFastsatt : UgyldigForespoerselException(
-    code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
-    detail = "Virkningstidspunkt for behandlingen er ikke satt",
-)
+class BehandlingVirkningstidspunktIkkeFastsatt :
+    UgyldigForespoerselException(
+        code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
+        detail = "Virkningstidspunkt for behandlingen er ikke satt",
+    )

@@ -31,8 +31,7 @@ import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppga
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
-import { hentPersonNavn } from '~shared/api/pdltjenester'
-import { StatusBar } from '~shared/statusbar/Statusbar'
+import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Box } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
@@ -46,7 +45,6 @@ export default function BehandleJournalfoeringOppgave() {
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
   const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
-  const [personResult, hentPerson] = useApiCall(hentPersonNavn)
 
   const { id: oppgaveId } = useParams()
 
@@ -72,10 +70,6 @@ export default function BehandleJournalfoeringOppgave() {
         } else {
           throw Error(`Oppgave id=${oppgaveId} mangler referanse til journalposten`)
         }
-
-        if (oppgave.fnr) {
-          hentPerson(oppgave.fnr)
-        }
       })
     }
   }, [oppgaveId])
@@ -89,7 +83,7 @@ export default function BehandleJournalfoeringOppgave() {
   return (
     <>
       <StickyToppMeny>
-        <StatusBar result={personResult} />
+        <StatusBarPersonHenter ident={oppgave?.fnr} />
         <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
       </StickyToppMeny>
       <GridContainer>
@@ -105,10 +99,7 @@ export default function BehandleJournalfoeringOppgave() {
               />
             ) : (
               <Routes>
-                <Route
-                  index
-                  element={<StartOppgavebehandling antallBehandlinger={sakMedBehandlinger.behandlinger.length} />}
-                />
+                <Route index element={<StartOppgavebehandling />} />
 
                 <Route path="nybehandling">
                   <Route index element={<OpprettNyBehandling />} />

@@ -2,7 +2,7 @@ import { BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from 
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
-import { TemaTag } from '~components/oppgavebenk/components/Tags'
+import { TemaTag } from '~components/oppgavebenk/components/tags/Tags'
 import { formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -134,7 +134,8 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
                         Ferdigstill oppgave
                       </Dropdown.Menu.List.Item>
 
-                      {!!journalpostId && (
+                      {/* Vi støtter foreløpig KUN flytting av journalføringsoppgaver */}
+                      {!!journalpostId && oppgavetype.includes('JFR') && (
                         <Dropdown.Menu.List.Item onClick={() => setToggle({ konverter: true })}>
                           Overfør til Gjenny
                         </Dropdown.Menu.List.Item>

@@ -68,7 +68,8 @@ class OmregningService(
     }
 }
 
-class StoetterIkkeProsesstypeManuell : UgyldigForespoerselException(
-    code = "StoetterIkkeProsesstypeManuell",
-    detail = "Støtter ikke omregning for manuell behandling",
-)
+class StoetterIkkeProsesstypeManuell :
+    UgyldigForespoerselException(
+        code = "StoetterIkkeProsesstypeManuell",
+        detail = "Støtter ikke omregning for manuell behandling",
+    )

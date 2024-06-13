@@ -47,7 +47,9 @@ interface GrunnlagService {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
 }
 
-class GrunnlagServiceImpl(private val grunnlagKlient: GrunnlagKlientImpl) : GrunnlagService {
+class GrunnlagServiceImpl(
+    private val grunnlagKlient: GrunnlagKlientImpl,
+) : GrunnlagService {
     override fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
@@ -95,38 +97,34 @@ class GrunnlagServiceImpl(private val grunnlagKlient: GrunnlagKlientImpl) : Grun
         grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
     }
 
-    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
-        return grunnlagKlient.hentPersongalleri(behandlingId)
+    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri =
+        grunnlagKlient
+            .hentPersongalleri(behandlingId)
             ?.opplysning
             ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
-    }
 
     override fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
-    ) {
-        return runBlocking { grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling) }
-    }
+    ) = runBlocking { grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling) }
 
     private fun grunnlagsbehovSak(
         sak: Sak,
         persongalleri: Persongalleri,
-    ): Opplysningsbehov {
-        return Opplysningsbehov(
+    ): Opplysningsbehov =
+        Opplysningsbehov(
             sakId = sak.id,
             sakType = sak.sakType,
             persongalleri = persongalleri,
         )
-    }
 
     private fun grunnlagsbehov(
         behandling: Behandling,
         persongalleri: Persongalleri,
-    ): Opplysningsbehov {
-        return Opplysningsbehov(
+    ): Opplysningsbehov =
+        Opplysningsbehov(
             sakId = behandling.sak.id,
             sakType = behandling.sak.sakType,
             persongalleri = persongalleri,
         )
-    }
 }

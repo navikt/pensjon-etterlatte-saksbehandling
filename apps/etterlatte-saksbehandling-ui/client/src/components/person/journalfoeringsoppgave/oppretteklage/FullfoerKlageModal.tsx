@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
-import { SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useNavigate } from 'react-router-dom'
@@ -9,6 +8,7 @@ import { opprettNyKlage } from '~shared/api/klage'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
 import { Journalpost } from '~shared/types/Journalpost'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
 
 interface ModalProps {
   oppgave: OppgaveDTO
@@ -53,7 +53,7 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
             Ferdigstill og opprett ny klage
           </Heading>
           <BodyShort spacing>
-            <SaktypeTag sakType={oppgave.sakType} />
+            <SakTypeTag sakType={oppgave.sakType} />
           </BodyShort>
 
           <BodyLong spacing>

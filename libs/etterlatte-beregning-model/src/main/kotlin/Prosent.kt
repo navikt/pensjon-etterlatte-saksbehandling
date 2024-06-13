@@ -1,6 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-data class Prosent(val verdi: Int) {
+data class Prosent(
+    val verdi: Int,
+) {
     init {
         require(verdi in 0..100)
     }

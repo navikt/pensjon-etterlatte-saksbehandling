@@ -8,9 +8,11 @@ import no.nav.etterlatte.libs.database.single
 import java.sql.ResultSet
 import java.util.UUID
 
-class VedtaksbehandlingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun erBehandlingRedigerbar(behandlingId: UUID): Boolean {
-        return connectionAutoclosing.hentConnection {
+class VedtaksbehandlingDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun erBehandlingRedigerbar(behandlingId: UUID): Boolean =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -24,12 +26,12 @@ class VedtaksbehandlingDao(private val connectionAutoclosing: ConnectionAutoclos
                 statement.setObject(2, behandlingId)
                 statement.setObject(3, behandlingId)
 
-                statement.executeQuery()
+                statement
+                    .executeQuery()
                     .single { toVedtaksbehandling() }
                     .erRedigerbar()
             }
         }
-    }
 
     private fun ResultSet.toVedtaksbehandling(): Vedtaksbehandling {
         val type = BehandlingType.valueOf(getString(1))
@@ -40,7 +42,11 @@ class VedtaksbehandlingDao(private val connectionAutoclosing: ConnectionAutoclos
     }
 }
 
-private data class Vedtaksbehandling(val id: UUID, val type: BehandlingType, val status: String) {
+private data class Vedtaksbehandling(
+    val id: UUID,
+    val type: BehandlingType,
+    val status: String,
+) {
     fun erRedigerbar(): Boolean =
         when (type) {
             BehandlingType.BEHANDLING -> BehandlingStatus.valueOf(status).kanEndres()

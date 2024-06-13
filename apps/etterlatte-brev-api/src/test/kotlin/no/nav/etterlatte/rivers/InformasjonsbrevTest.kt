@@ -35,7 +35,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InformasjonsbrevTest(private val dataSource: DataSource) {
+class InformasjonsbrevTest(
+    private val dataSource: DataSource,
+) {
     private val behandlingId = UUID.randomUUID()
 
     @Test
@@ -101,29 +103,31 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
             val fnr = get(FNR_KEY).also { assertEquals(SOEKER_FOEDSELSNUMMER.value, it.asText()) }
             val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
-            JsonMessage.newMessage(
-                mapOf(
-                    BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
-                    FNR_KEY to fnr,
-                    BREVMAL_RIVER_KEY to brevmal,
-                    SAK_TYPE_KEY to sakstype,
-                    SAK_ID_KEY to saksnr,
-                ),
-            ).also { testRapid.sendTestMessage(it.toJson()) }
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
+                        FNR_KEY to fnr,
+                        BREVMAL_RIVER_KEY to brevmal,
+                        SAK_TYPE_KEY to sakstype,
+                        SAK_ID_KEY to saksnr,
+                    ),
+                ).also { testRapid.sendTestMessage(it.toJson()) }
         }
         with(testRapid.inspektør.message(1)) {
             val behandling = get(BEHANDLING_ID_KEY).also { assertEquals(behandlingId.toString(), it.asText()) }
             val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
-            JsonMessage.newMessage(
-                mapOf(
-                    BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
-                    BEHANDLING_ID_KEY to behandling,
-                    BREVMAL_RIVER_KEY to brevmal,
-                    SAK_TYPE_KEY to sakstype,
-                    SAK_ID_KEY to saksnr,
-                ),
-            ).also { testRapid.sendTestMessage(it.toJson()) }
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
+                        BEHANDLING_ID_KEY to behandling,
+                        BREVMAL_RIVER_KEY to brevmal,
+                        SAK_TYPE_KEY to sakstype,
+                        SAK_ID_KEY to saksnr,
+                    ),
+                ).also { testRapid.sendTestMessage(it.toJson()) }
         }
         verify { brevdistribuerer.distribuer(brevId) }
     }
@@ -138,8 +142,7 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
                     "(${Databasetabell.FNR}, ${Databasetabell.BREVMAL}, ${Databasetabell.SAKTYPE}) " +
                     "VALUES" +
                     "('${SOEKER_FOEDSELSNUMMER.value}', '${brevkode.name}', '${saktype.name}');",
-            )
-                .let { query -> tx.run(query.asUpdate) }
+            ).let { query -> tx.run(query.asUpdate) }
         }
         dataSource.transaction { tx ->
             queryOf(
@@ -147,8 +150,7 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
                     "(${Databasetabell.BEHANDLING_ID}, ${Databasetabell.BREVMAL}, ${Databasetabell.SAKTYPE}) " +
                     "VALUES" +
                     "('$behandlingId', '${brevkode.name}', '${saktype.name}');",
-            )
-                .let { query -> tx.run(query.asUpdate) }
+            ).let { query -> tx.run(query.asUpdate) }
         }
     }
 }

@@ -63,10 +63,11 @@ internal class OpprettBehandlingRiver(
             logger.info("Behandling $behandlingId startet på sak ${sak.id}")
 
             context.publish(
-                packet.apply {
-                    set(GyldigSoeknadVurdert.sakIdKey, sak.id)
-                    set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
-                }.toJson(),
+                packet
+                    .apply {
+                        set(GyldigSoeknadVurdert.sakIdKey, sak.id)
+                        set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
+                    }.toJson(),
             )
             logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
         } catch (e: Exception) {

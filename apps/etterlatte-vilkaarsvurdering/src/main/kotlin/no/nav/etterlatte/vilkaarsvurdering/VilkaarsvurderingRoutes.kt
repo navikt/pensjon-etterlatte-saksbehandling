@@ -177,7 +177,6 @@ fun Route.vilkaarsvurdering(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
                 val statusOppdatert =
                     vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
@@ -292,7 +291,9 @@ fun Route.vilkaarsvurdering(
     }
 }
 
-data class StatusOppdatertDto(val statusOppdatert: Boolean)
+data class StatusOppdatertDto(
+    val statusOppdatert: Boolean,
+)
 
 private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(
@@ -337,8 +338,8 @@ fun toDto(
 private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
     vilkaarsvurderingService: VilkaarsvurderingService,
     behandlingId: UUID,
-): Long {
-    return vilkaarsvurderingService.hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
+): Long =
+    vilkaarsvurderingService
+        .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
         .metadata
         .versjon
-}

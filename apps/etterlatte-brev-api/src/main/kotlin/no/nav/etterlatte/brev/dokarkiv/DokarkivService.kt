@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.dokarkiv
 import org.slf4j.LoggerFactory
 
 interface DokarkivService {
-    suspend fun journalfoer(request: OpprettJournalpostRequest): OpprettJournalpostResponse
+    suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse
 
     suspend fun oppdater(
         journalpostId: String,
@@ -27,10 +27,12 @@ interface DokarkivService {
     ): KnyttTilAnnenSakResponse
 }
 
-internal class DokarkivServiceImpl(private val client: DokarkivKlient) : DokarkivService {
+internal class DokarkivServiceImpl(
+    private val client: DokarkivKlient,
+) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(request: OpprettJournalpostRequest): OpprettJournalpostResponse {
+    override suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse {
         logger.info("Oppretter journalpost med eksternReferanseId: ${request.eksternReferanseId}")
 
         return client.opprettJournalpost(request, ferdigstill = true)
@@ -81,9 +83,8 @@ internal class DokarkivServiceImpl(private val client: DokarkivKlient) : Dokarki
     override suspend fun knyttTilAnnenSak(
         journalpostId: String,
         request: KnyttTilAnnenSakRequest,
-    ): KnyttTilAnnenSakResponse {
-        return client.knyttTilAnnenSak(journalpostId, request).also {
+    ): KnyttTilAnnenSakResponse =
+        client.knyttTilAnnenSak(journalpostId, request).also {
             logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
         }
-    }
 }

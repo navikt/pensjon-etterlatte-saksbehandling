@@ -18,8 +18,7 @@ import org.slf4j.LoggerFactory
 internal class VilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
-) :
-    ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRiver::class.java)
 
     init {

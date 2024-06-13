@@ -13,7 +13,9 @@ fun main() {
     Server(ApplicationContext()).run()
 }
 
-class Server(private val context: ApplicationContext) {
+class Server(
+    private val context: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-klage")
     }

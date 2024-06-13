@@ -7,11 +7,11 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
-
 import { mapApiResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { Box, HStack, Label } from '@navikt/ds-react'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -43,72 +43,42 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
           <ApiErrorAlert>Kunne ikke laste stegmeny</ApiErrorAlert>
         ),
         () => (
-          <StegMenyWrapper role="navigation">
-            {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-              soeknadRoutes_.map((pathInfo, index) => (
-                <NavLenke
-                  key={pathInfo.path}
-                  pathInfo={pathInfo}
-                  behandling={props.behandling}
-                  separator={erSisteRoute(index, soeknadRoutes_)}
-                />
-              ))}
-            {behandlingType === IBehandlingsType.REVURDERING &&
-              revurderingRoutes_.map((pathInfo, index) => (
-                <NavLenke
-                  key={pathInfo.path}
-                  pathInfo={pathInfo}
-                  behandling={props.behandling}
-                  separator={erSisteRoute(index, revurderingRoutes_)}
-                />
-              ))}
-          </StegMenyWrapper>
+          <StegMenyBox>
+            <HStack gap="6" align="center">
+              {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+                soeknadRoutes_.map((pathInfo, index) => (
+                  <NavLenke
+                    key={pathInfo.path}
+                    pathInfo={pathInfo}
+                    behandling={props.behandling}
+                    separator={erSisteRoute(index, soeknadRoutes_)}
+                  />
+                ))}
+              {behandlingType === IBehandlingsType.REVURDERING &&
+                revurderingRoutes_.map((pathInfo, index) => (
+                  <NavLenke
+                    key={pathInfo.path}
+                    pathInfo={pathInfo}
+                    behandling={props.behandling}
+                    separator={erSisteRoute(index, revurderingRoutes_)}
+                  />
+                ))}
+            </HStack>
+          </StegMenyBox>
         )
       )}
     </>
   )
 }
 
-export const StegMenyWrapper = styled.ul`
-  display: block;
-  list-style: none;
-  padding: 1em 0;
+export const StegMenyBox = styled(Box)`
+  padding: var(--a-spacing-4) 0 var(--a-spacing-4) var(--a-spacing-4);
+  border-left: 0.4rem solid var(--a-border-action);
+  border-bottom: 1px solid var(--a-border-subtle);
   background: #f8f8f8;
-  border-bottom: 1px solid #c6c2bf;
-  box-shadow: var(--a-shadow-xsmall);
+`
 
-  li {
-    display: inline-block;
-
-    a {
-      padding: 1em 1em 1em;
-      margin-bottom: 0.4em;
-      font-weight: 600;
-      color: #0067c5;
-      text-decoration: none;
-      border-left: 8px solid transparent;
-
-      &:hover {
-        text-decoration: underline;
-      }
-
-      &.active {
-        color: #262626;
-      }
-    }
-
-    &:first-child a {
-      border-left: 8px solid #0067c5;
-    }
-  }
-
-  .disabled {
-    cursor: not-allowed;
-
-    a {
-      color: #b0b0b0;
-      text-decoration: none;
-      pointer-events: none;
-    }
-  }
+export const DisabledLabel = styled(Label)`
+  color: var(--a-gray-400);
+  cursor: not-allowed;
 `

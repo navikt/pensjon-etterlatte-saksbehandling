@@ -7,6 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 
 fun Route.testKravgrunnlagRoutes(service: KravgrunnlagService) {
     route("kravgrunnlag") {
@@ -14,6 +15,14 @@ fun Route.testKravgrunnlagRoutes(service: KravgrunnlagService) {
             val dto = call.receive<DetaljertKravgrunnlagDto>()
             val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(dto)
             service.haandterKravgrunnlag(kravgrunnlag)
+            call.respond(dto)
+        }
+    }
+    route("status") {
+        post {
+            val dto = call.receive<KravOgVedtakstatus>()
+            val status = KravgrunnlagMapper.toKravOgVedtakstatus(dto)
+            service.haandterKravOgVedtakStatus(status)
             call.respond(dto)
         }
     }

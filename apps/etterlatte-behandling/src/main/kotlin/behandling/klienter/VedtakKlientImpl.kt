@@ -74,9 +74,15 @@ interface VedtakKlient {
     ): LoependeYtelseDTO
 }
 
-class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class VedtakKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
+class VedtakKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : VedtakKlient {
     private val logger = LoggerFactory.getLogger(VedtakKlientImpl::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -110,8 +116,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             soeker = Folkeregisteridentifikator.of(tilbakekrevingBehandling.sak.ident),
                             tilbakekreving = tilbakekrevingBehandling.tilbakekreving.toObjectNode(),
                         ),
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -143,8 +148,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             tilbakekrevingId = tilbakekrevingId,
                             enhet = enhet,
                         ),
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -176,8 +180,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             tilbakekrevingId = tilbakekrevingId,
                             enhet = enhet,
                         ),
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -204,8 +207,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = tilbakekrevingId,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -234,8 +236,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -259,8 +260,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -287,8 +287,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -315,8 +314,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = { },
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -343,8 +341,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             url = "$resourceUrl/api/vedtak/loepende/$sakId?dato=$dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )

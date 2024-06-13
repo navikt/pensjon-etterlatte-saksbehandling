@@ -27,7 +27,9 @@ class ClientCredentialAuthConfig {
     lateinit var config: Map<String, String>
 }
 
-class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
+class ClientCredentialAuthProvider(
+    config: Map<String, String>,
+) : AuthProvider {
     @Deprecated("Please use sendWithoutRequest function instead")
     override val sendWithoutRequest: Boolean = true
 
@@ -39,11 +41,11 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
             grantType = GrantType.CLIENT_CREDENTIALS,
             scope = config["AZURE_APP_OUTBOUND_SCOPE"]?.split(",") ?: emptyList(),
             authentication =
-                ClientAuthenticationProperties.builder(
-                    clientId = config.getOrThrow("AZURE_APP_CLIENT_ID"),
-                    clientAuthMethod = ClientAuthenticationMethod.PRIVATE_KEY_JWT,
-                )
-                    .clientJwk(config.getOrThrow("AZURE_APP_JWK"))
+                ClientAuthenticationProperties
+                    .builder(
+                        clientId = config.getOrThrow("AZURE_APP_CLIENT_ID"),
+                        clientAuthMethod = ClientAuthenticationMethod.PRIVATE_KEY_JWT,
+                    ).clientJwk(config.getOrThrow("AZURE_APP_JWK"))
                     .build(),
             // conf["resource_url"]?.let { URI(it) },
             resourceUrl = null,
@@ -57,9 +59,7 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
     private val httpClient = DefaultOAuth2HttpClient()
     private val accessTokenService = setupOAuth2AccessTokenService(httpClient = httpClient)
 
-    override fun isApplicable(auth: HttpAuthHeader): Boolean {
-        return true
-    }
+    override fun isApplicable(auth: HttpAuthHeader): Boolean = true
 
     override suspend fun addRequestHeaders(
         request: HttpRequestBuilder,
@@ -71,8 +71,8 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
     }
 }
 
-internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient): OAuth2AccessTokenService {
-    return OAuth2AccessTokenService(
+internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient): OAuth2AccessTokenService =
+    OAuth2AccessTokenService(
         tokenResolver = { throw IllegalArgumentException("Skal ikke kalle denne") },
         onBehalfOfTokenClient = OnBehalfOfTokenClient(httpClient),
         clientCredentialsTokenClient = ClientCredentialsTokenClient(httpClient),
@@ -83,4 +83,3 @@ internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient):
             ),
         tokenExchangeClient = TokenExchangeClient(httpClient),
     )
-}

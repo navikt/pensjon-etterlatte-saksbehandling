@@ -28,8 +28,11 @@ class DollyService(
                 dollyClient.hentDollyBruker(brukerId, accessToken)
                     ?: throw IllegalStateException("Bruker finnes ikke i Dolly.")
 
-            dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken).contents
-                .find { it.navn == testdataGruppe.navn }?.id
+            dollyClient
+                .hentBrukersGrupper(bruker.brukerId!!, accessToken)
+                .contents
+                .find { it.navn == testdataGruppe.navn }
+                ?.id
         }
 
     /**
@@ -60,13 +63,16 @@ class DollyService(
     ): List<ForenkletFamilieModell> =
         runBlocking {
             dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
-                testnavClient.hentPersonInfo(bestillinger.identer.map { it.ident })
+                testnavClient
+                    .hentPersonInfo(bestillinger.identer.map { it.ident })
                     .mapNotNull { personResponse ->
                         val avdoed = personResponse.ident
                         val ibruk = bestillinger.identer.any { avdoed == it.ident && it.ibruk }
 
                         val gjenlevendeEktefelle =
-                            personResponse.person.sivilstand.firstOrNull { it.type == "GIFT" }?.relatertVedSivilstand
+                            personResponse.person.sivilstand
+                                .firstOrNull { it.type == "GIFT" }
+                                ?.relatertVedSivilstand
 
                         when (gjenlevendeEktefelle) {
                             null -> null
@@ -94,13 +100,14 @@ class DollyService(
         val (partisjon, offset) =
             producer.publiser(
                 noekkel,
-                SoeknadMapper.opprettJsonMessage(
-                    type = request.type,
-                    gjenlevendeFnr = request.gjenlevende,
-                    avdoedFnr = request.avdoed,
-                    barn = request.barn,
-                    behandlingssteg = behandlingssteg,
-                ).toJson(),
+                SoeknadMapper
+                    .opprettJsonMessage(
+                        type = request.type,
+                        gjenlevendeFnr = request.gjenlevende,
+                        avdoedFnr = request.avdoed,
+                        barn = request.barn,
+                        behandlingssteg = behandlingssteg,
+                    ).toJson(),
                 mapOf("NavIdent" to (navIdent!!.toByteArray())),
             )
         logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
@@ -116,7 +123,8 @@ class DollyService(
         try {
             logger.info("Forsøker å markere testident $ident som 'i bruk'")
 
-            dollyClient.markerIdentIBruk(ident, accessToken)
+            dollyClient
+                .markerIdentIBruk(ident, accessToken)
                 .also { logger.info("Test ident $ident markert med 'iBruk=${it.ibruk}'") }
         } catch (e: Exception) {
             logger.warn("Klart ikke markere testident $ident som 'i bruk'", e)

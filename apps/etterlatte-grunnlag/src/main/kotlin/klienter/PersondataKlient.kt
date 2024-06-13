@@ -19,7 +19,10 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
-class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
+class PersondataKlient(
+    private val httpClient: HttpClient,
+    private val apiUrl: String,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentAdresseGittFnr(foedselsnummer: String): PersondataAdresse? {
@@ -49,17 +52,18 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
     private fun hentKontaktadresse(
         foedselsnummer: String,
         seEtterVerge: Boolean,
-    ): PersondataAdresse {
-        return runBlocking {
+    ): PersondataAdresse =
+        runBlocking {
             retry(times = 3) {
                 val jsonResponse: String =
-                    httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                        parameter("checkForVerge", seEtterVerge)
-                        header("pid", foedselsnummer)
-                        accept(Json)
-                        contentType(Json)
-                        setBody("")
-                    }.body<String>()
+                    httpClient
+                        .get("$apiUrl/api/adresse/kontaktadresse") {
+                            parameter("checkForVerge", seEtterVerge)
+                            header("pid", foedselsnummer)
+                            accept(Json)
+                            contentType(Json)
+                            setBody("")
+                        }.body<String>()
                 objectMapper.readValue<PersondataAdresse>(jsonResponse)
             }.let {
                 when (it) {
@@ -68,7 +72,6 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
                 }
             }
         }
-    }
 
     private fun erVergesAdresse(adresse: PersondataAdresse) =
         listOf("VERGE_PERSON_POSTADRESSE", "VERGE_SAMHANDLER_POSTADRESSE").contains(adresse.type)

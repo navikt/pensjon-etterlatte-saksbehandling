@@ -4,7 +4,9 @@ import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.statistikk.domain.SoeknadStatistikk
 import javax.sql.DataSource
 
-class SoeknadStatistikkRepository(private val datasource: DataSource) {
+class SoeknadStatistikkRepository(
+    private val datasource: DataSource,
+) {
     fun lagreNedSoeknadStatistikk(soeknadStatistikk: SoeknadStatistikk): SoeknadStatistikk {
         datasource.connection.use {
             val statement =
@@ -25,8 +27,8 @@ class SoeknadStatistikkRepository(private val datasource: DataSource) {
         return soeknadStatistikk
     }
 
-    fun hentAntallSoeknader(): Long {
-        return datasource.connection.use {
+    fun hentAntallSoeknader(): Long =
+        datasource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
@@ -36,14 +38,13 @@ class SoeknadStatistikkRepository(private val datasource: DataSource) {
             val result = statement.executeQuery()
             result.single { getLong(1) }
         }
-    }
 
     fun hentAntallSoeknaderGyldigForBehandling() = hentSoeknaderMedGyldigForBehandling(true)
 
     fun hentAntallSoeknaderIkkeGyldigForBehandling() = hentSoeknaderMedGyldigForBehandling(false)
 
-    private fun hentSoeknaderMedGyldigForBehandling(gyldig: Boolean): Long {
-        return datasource.connection.use {
+    private fun hentSoeknaderMedGyldigForBehandling(gyldig: Boolean): Long =
+        datasource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
@@ -55,11 +56,8 @@ class SoeknadStatistikkRepository(private val datasource: DataSource) {
             val result = statement.executeQuery()
             result.single { getLong(1) }
         }
-    }
 
     companion object {
-        fun using(datasource: DataSource): SoeknadStatistikkRepository {
-            return SoeknadStatistikkRepository(datasource)
-        }
+        fun using(datasource: DataSource): SoeknadStatistikkRepository = SoeknadStatistikkRepository(datasource)
     }
 }

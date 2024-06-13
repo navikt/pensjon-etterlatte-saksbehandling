@@ -17,7 +17,7 @@ export const hentInnvilgelseVedtak = (vedtak: VedtakSammendrag[]): VedtakSammend
 
 export const ytelseErOpphoert = (loependeVedtak: VedtakSammendrag) => {
   const opphoerFraOgMed = vedtakDatoStrengTilDate(loependeVedtak.opphoerFraOgMed)
-  return loependeVedtak?.vedtakType === VedtakType.OPPHOER || (opphoerFraOgMed && opphoerFraOgMed < new Date())
+  return opphoerFraOgMed && opphoerFraOgMed < new Date()
 }
 
 export const ytelseErLoependeMedOpphoerFremITid = (loependeVedtak: VedtakSammendrag) => {

@@ -6,7 +6,9 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 
-class AppBuilder(props: Miljoevariabler) {
+class AppBuilder(
+    props: Miljoevariabler,
+) {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient =
         httpClientClientCredentials(
@@ -17,7 +19,6 @@ class AppBuilder(props: Miljoevariabler) {
         )
     private val vilkaarsvurderingUrl = requireNotNull(props["ETTERLATTE_VILKAARSVURDERING_URL"])
 
-    fun lagVilkaarsvurderingKlient(): VilkaarsvurderingServiceImpl {
-        return VilkaarsvurderingServiceImpl(vilkaarsvurderingHttpKlient, vilkaarsvurderingUrl)
-    }
+    fun lagVilkaarsvurderingKlient(): VilkaarsvurderingServiceImpl =
+        VilkaarsvurderingServiceImpl(vilkaarsvurderingHttpKlient, vilkaarsvurderingUrl)
 }

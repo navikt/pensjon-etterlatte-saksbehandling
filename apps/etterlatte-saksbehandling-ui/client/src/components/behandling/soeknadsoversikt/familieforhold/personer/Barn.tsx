@@ -1,7 +1,6 @@
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
-import { differenceInYears } from 'date-fns'
-import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
+import { hentAdresserEtterDoedsdato, hentAlderForDato } from '~components/behandling/felles/utils'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { BodyShort, HStack, Label, VStack } from '@navikt/ds-react'
 
@@ -22,7 +21,7 @@ export const Barn = ({ person, doedsdato }: Props) => {
         <BodyShort>
           {person.fornavn} {person.etternavn}
         </BodyShort>
-        <BodyShort>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</BodyShort>
+        <BodyShort>({hentAlderForDato(person.foedselsdato)} år)</BodyShort>
       </HStack>
       <VStack>
         <Label>Fødselsnummer</Label>

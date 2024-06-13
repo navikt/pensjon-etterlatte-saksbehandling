@@ -305,7 +305,8 @@ class BehandlingStatusServiceImpl(
             logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
 
             val oppgaveFraBehandlingMedFeilutbetaling =
-                oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                oppgaveService
+                    .hentOppgaverForSak(behandling.sak.id)
                     .filter { it.type == OppgaveType.TILBAKEKREVING }
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }
@@ -321,11 +322,11 @@ class BehandlingStatusServiceImpl(
                     ),
                 )
             } else {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = behandling.sak.id.toString(),
                     sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Venter på kravgrunnlag",
                 )
             }

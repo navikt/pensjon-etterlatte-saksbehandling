@@ -47,7 +47,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
       <Box paddingInline="16 4" paddingBlock="4" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="space-between">
           <VStack gap="1">
-            <HStack align="center">
+            <HStack align="center" gap="4">
               <StatusIcon status={status()} aria-hidden />
               <Heading size="small" level="3">
                 {vilkaar.hovedvilkaar.tittel}

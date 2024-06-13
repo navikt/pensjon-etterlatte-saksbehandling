@@ -27,10 +27,11 @@ class PdlTjenesterKlient(
         logger.info("Henter ident fra PDL for fnr=${ident.maskerFnr()}")
 
         return retry<PdlIdentifikator?> {
-            httpClient.post("$url/pdlident") {
-                contentType(ContentType.Application.Json)
-                setBody(HentPdlIdentRequest(PersonIdent(ident)))
-            }.body()
+            httpClient
+                .post("$url/pdlident") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentPdlIdentRequest(PersonIdent(ident)))
+                }.body()
         }.let { result ->
             when (result) {
                 is RetryResult.Success -> result.content
@@ -49,10 +50,11 @@ class PdlTjenesterKlient(
         logger.info("Henter adressebeskyttelse/gradering fra PDL for fnr=${fnr.maskerFnr()}")
 
         return retry<AdressebeskyttelseGradering> {
-            httpClient.post("$url/person/adressebeskyttelse") {
-                contentType(ContentType.Application.Json)
-                setBody(HentAdressebeskyttelseRequest(PersonIdent(fnr), sakType))
-            }.body()
+            httpClient
+                .post("$url/person/adressebeskyttelse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentAdressebeskyttelseRequest(PersonIdent(fnr), sakType))
+                }.body()
         }.let { result ->
             when (result) {
                 is RetryResult.Success -> result.content

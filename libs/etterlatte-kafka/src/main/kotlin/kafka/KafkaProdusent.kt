@@ -34,25 +34,30 @@ class KafkaProdusentImpl<K, V>(
         noekkel: K,
         verdi: V,
         headers: Map<String, ByteArray>?,
-    ): Pair<Int, Long> {
-        return kafka.send(
-            ProducerRecord(topic, noekkel, verdi).also {
-                headers?.forEach { h ->
-                    it.headers().add(h.key, h.value)
-                }
-            },
-        ).get().let {
-            it.partition() to it.offset()
-        }
-    }
+    ): Pair<Int, Long> =
+        kafka
+            .send(
+                ProducerRecord(topic, noekkel, verdi).also {
+                    headers?.forEach { h ->
+                        it.headers().add(h.key, h.value)
+                    }
+                },
+            ).get()
+            .let {
+                it.partition() to it.offset()
+            }
 
     override fun close() {
         kafka.close()
     }
 }
 
-class TestProdusent<K, V>() : KafkaProdusent<K, V> {
-    data class Record<K, V>(val noekkel: K, val verdi: V, val headers: Map<String, ByteArray>?)
+class TestProdusent<K, V> : KafkaProdusent<K, V> {
+    data class Record<K, V>(
+        val noekkel: K,
+        val verdi: V,
+        val headers: Map<String, ByteArray>?,
+    )
 
     var closed = false
         private set

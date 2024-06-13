@@ -4,6 +4,10 @@ plugins {
     id("etterlatte.postgres")
 }
 
+tasks.jar.configure {
+    dependsOn(":libs:etterlatte-mq:jar")
+}
+
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-jobs"))

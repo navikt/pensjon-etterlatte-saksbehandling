@@ -20,8 +20,10 @@ interface TilbakekrevingKlient : Pingable {
     )
 }
 
-class TilbakekrevingKlientImpl(private val client: HttpClient, private val url: String) :
-    TilbakekrevingKlient {
+class TilbakekrevingKlientImpl(
+    private val client: HttpClient,
+    private val url: String,
+) : TilbakekrevingKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun sendTilbakekrevingsvedtak(
@@ -50,14 +52,15 @@ class TilbakekrevingKlientImpl(private val client: HttpClient, private val url: 
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return client.ping(
+    override suspend fun ping(konsument: String?): PingResult =
+        client.ping(
             pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
-    }
 }
 
-class TilbakekrevingKlientException(override val message: String) : Exception(message)
+class TilbakekrevingKlientException(
+    override val message: String,
+) : Exception(message)

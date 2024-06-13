@@ -8,9 +8,7 @@ class SamordningVedtakHendelse {
     var artTypeKode: String? = null
     var vedtakId: Long? = null
 
-    override fun toString(): String {
-        return "SamordningVedtakHendelse[fagomrade=$fagomrade, artTypeKode=$artTypeKode, vedtakId=$vedtakId]"
-    }
+    override fun toString(): String = "SamordningVedtakHendelse[fagomrade=$fagomrade, artTypeKode=$artTypeKode, vedtakId=$vedtakId]"
 }
 
 const val FAGOMRADE_OMS = "EYO"

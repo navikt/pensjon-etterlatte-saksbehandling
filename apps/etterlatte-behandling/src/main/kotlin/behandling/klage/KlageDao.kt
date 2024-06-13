@@ -30,9 +30,11 @@ interface KlageDao {
     )
 }
 
-class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : KlageDao {
+class KlageDaoImpl(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) : KlageDao {
     override fun lagreKlage(klage: Klage) {
-        return connectionAutoclosing.hentConnection {
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -64,8 +66,8 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
         }
     }
 
-    override fun hentKlage(id: UUID): Klage? {
-        return connectionAutoclosing.hentConnection {
+    override fun hentKlage(id: UUID): Klage? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -82,10 +84,9 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
                 }
             }
         }
-    }
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> {
-        return connectionAutoclosing.hentConnection {
+    override fun hentKlagerISak(sakId: Long): List<Klage> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -102,13 +103,12 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
                 }
             }
         }
-    }
 
     override fun oppdaterKabalStatus(
         klageId: UUID,
         kabalrespons: Kabalrespons,
     ) {
-        return connectionAutoclosing.hentConnection {
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -126,8 +126,8 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
         }
     }
 
-    private fun ResultSet.somKlage(): Klage {
-        return Klage(
+    private fun ResultSet.somKlage(): Klage =
+        Klage(
             id = getString("id").let { UUID.fromString(it) },
             sak =
                 Sak(
@@ -147,5 +147,4 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
             aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbrytelse>(it) },
             initieltUtfall = getString("initielt_utfall")?.let { objectMapper.readValue(it) },
         )
-    }
 }

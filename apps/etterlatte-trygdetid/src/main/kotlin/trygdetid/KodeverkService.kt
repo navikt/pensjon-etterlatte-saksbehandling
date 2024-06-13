@@ -7,9 +7,12 @@ import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
 import java.util.concurrent.TimeUnit
 
-class KodeverkService(private val klient: KodeverkKlient) {
+class KodeverkService(
+    private val klient: KodeverkKlient,
+) {
     private val cache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build<CacheKey, KodeverkResponse>()
 
@@ -29,15 +32,15 @@ class KodeverkService(private val klient: KodeverkKlient) {
                         isolandkode = isoLandkode,
                     )
                 }
-            }
-            .mapNotNull { betydningMedIsoKode ->
+            }.mapNotNull { betydningMedIsoKode ->
                 betydningMedIsoKode.beskrivelser["nb"]?.let { beskrivelse ->
                     Land(
                         isoLandkode = betydningMedIsoKode.isolandkode,
                         gyldigFra = betydningMedIsoKode.gyldigFra,
                         gyldigTil = betydningMedIsoKode.gyldigTil,
                         beskrivelse =
-                            LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
+                            LandNormalisert
+                                .hentBeskrivelse(betydningMedIsoKode.isolandkode)
                                 ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse,
                     )
                 }

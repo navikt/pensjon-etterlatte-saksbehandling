@@ -32,7 +32,7 @@ class NavPersonIdentTest {
     }
 
     @Test
-    fun `jsonproperty fungerer?`() {
+    fun `jsonproperty fungerer`() {
         val npid: NavPersonIdent = objectMapper.readValue("\"01729000000\"")
         Assertions.assertEquals("01729000000", npid.ident)
     }

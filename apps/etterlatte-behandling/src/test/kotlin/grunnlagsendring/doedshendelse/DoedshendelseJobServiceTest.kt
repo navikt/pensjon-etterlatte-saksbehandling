@@ -137,13 +137,14 @@ class DoedshendelseJobServiceTest {
     @Test
     fun `skal avbryte hendelse hvis avdoed er ikke er registert doed i PDL`() {
         val doedshendelseInternal =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
-                avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
-                relasjon = Relasjon.BARN,
-                endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
@@ -161,13 +162,14 @@ class DoedshendelseJobServiceTest {
     @Test
     fun `skal ferdigstille doedshendelse med status ferdig og sette oppgaveId`() {
         val doedshendelseInternal =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
-                avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
-                relasjon = Relasjon.BARN,
-                endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
@@ -192,13 +194,14 @@ class DoedshendelseJobServiceTest {
     @Test
     fun `skal ikke opprette oppgave for doedshendelse dersom feature-toggle er av`() {
         val doedshendelseInternal =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
-                avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
-                relasjon = Relasjon.BARN,
-                endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
@@ -224,13 +227,14 @@ class DoedshendelseJobServiceTest {
     @Test
     fun `Skal sjekke sende med bor i utlandet til brev`() {
         val doedshendelseInternal =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
-                avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
-                relasjon = Relasjon.BARN,
-                endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit

@@ -1,9 +1,13 @@
-import { isAfter } from 'date-fns'
+import { differenceInYears, isAfter, parse } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { IHendelse, IHendelseType } from '~shared/types/IHendelse'
+import { DatoFormat } from '~utils/formattering'
+
+export const hentAlderForDato = (dato: Date) =>
+  differenceInYears(new Date(), parse(String(dato), DatoFormat.AAR_MAANED_DAG, new Date()))
 
 export function soeknadsoversiktErFerdigUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(

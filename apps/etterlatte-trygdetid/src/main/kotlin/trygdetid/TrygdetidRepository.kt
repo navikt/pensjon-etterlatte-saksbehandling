@@ -21,17 +21,15 @@ import java.time.Period
 import java.util.UUID
 import javax.sql.DataSource
 
-class TrygdetidRepository(private val dataSource: DataSource) {
+class TrygdetidRepository(
+    private val dataSource: DataSource,
+) {
     fun hentTrygdetidMedId(
         behandlingId: UUID,
         trygdetidId: UUID,
-    ): Trygdetid? {
-        return hentTrygdetiderForBehandling(behandlingId).find { it.id == trygdetidId }
-    }
+    ): Trygdetid? = hentTrygdetiderForBehandling(behandlingId).find { it.id == trygdetidId }
 
-    fun hentTrygdetid(behandlingId: UUID): Trygdetid? {
-        return hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
-    }
+    fun hentTrygdetid(behandlingId: UUID): Trygdetid? = hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
 
     fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
         using(sessionOf(dataSource)) { session ->
@@ -72,84 +70,87 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 paramMap = mapOf("behandlingId" to behandlingId),
             ).let { query ->
                 session.run(
-                    query.map { row ->
-                        val trygdetidId = row.uuid("id")
-                        val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
-                        val opplysninger = hentGrunnlagOpplysninger(trygdetidId)
-                        row.toTrygdetid(trygdetidGrunnlag, opplysninger)
-                    }.asList,
+                    query
+                        .map { row ->
+                            val trygdetidId = row.uuid("id")
+                            val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
+                            val opplysninger = hentGrunnlagOpplysninger(trygdetidId)
+                            row.toTrygdetid(trygdetidGrunnlag, opplysninger)
+                        }.asList,
                 )
             }
         }
 
     fun opprettTrygdetid(trygdetid: Trygdetid): Trygdetid =
-        dataSource.transaction { tx ->
-            opprettTrygdetid(trygdetid, tx)
-            opprettOpplysningsgrunnlag(trygdetid.id, trygdetid.opplysninger, tx)
-            trygdetid.trygdetidGrunnlag.forEach { opprettTrygdetidGrunnlag(trygdetid.id, it, tx) }
+        dataSource
+            .transaction { tx ->
+                opprettTrygdetid(trygdetid, tx)
+                opprettOpplysningsgrunnlag(trygdetid.id, trygdetid.opplysninger, tx)
+                trygdetid.trygdetidGrunnlag.forEach { opprettTrygdetidGrunnlag(trygdetid.id, it, tx) }
 
-            if (trygdetid.beregnetTrygdetid != null) {
-                oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.id, trygdetid.beregnetTrygdetid, tx)
-            }
-        }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
+                if (trygdetid.beregnetTrygdetid != null) {
+                    oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.id, trygdetid.beregnetTrygdetid, tx)
+                }
+            }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
     fun oppdaterTrygdetid(
         oppdatertTrygdetid: Trygdetid,
         overstyrt: Boolean = false,
     ): Trygdetid =
-        dataSource.transaction { tx ->
-            val gjeldendeTrygdetid =
-                hentTrygdetidMedIdNotNull(
-                    behandlingId = oppdatertTrygdetid.behandlingId,
-                    trygdetidId = oppdatertTrygdetid.id,
-                )
+        dataSource
+            .transaction { tx ->
+                val gjeldendeTrygdetid =
+                    hentTrygdetidMedIdNotNull(
+                        behandlingId = oppdatertTrygdetid.behandlingId,
+                        trygdetidId = oppdatertTrygdetid.id,
+                    )
 
-            oppdaterOverstyrtPoengaar(
-                gjeldendeTrygdetid.id,
-                gjeldendeTrygdetid.behandlingId,
-                oppdatertTrygdetid.overstyrtNorskPoengaar,
-                tx,
-            )
-
-            oppdaterYrkesskade(
-                gjeldendeTrygdetid.id,
-                gjeldendeTrygdetid.behandlingId,
-                oppdatertTrygdetid.yrkesskade,
-                tx,
-            )
-
-            // opprett grunnlag
-            oppdatertTrygdetid.trygdetidGrunnlag
-                .filter { gjeldendeTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
-                .forEach { opprettTrygdetidGrunnlag(oppdatertTrygdetid.id, it, tx) }
-
-            // oppdater grunnlag
-            oppdatertTrygdetid.trygdetidGrunnlag.forEach { trygdetidGrunnlag ->
-                gjeldendeTrygdetid.trygdetidGrunnlag
-                    .find { it.id == trygdetidGrunnlag.id && it != trygdetidGrunnlag }
-                    ?.let { oppdaterTrygdetidGrunnlag(trygdetidGrunnlag, tx) }
-            }
-
-            // slett grunnlag
-            gjeldendeTrygdetid.trygdetidGrunnlag
-                .filter { oppdatertTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
-                .forEach { slettTrygdetidGrunnlag(it.id, tx) }
-
-            // overskriv opplysningsgrunnlag
-            oppdaterOpplysningsgrunnlag(oppdatertTrygdetid.id, oppdatertTrygdetid.opplysninger, tx)
-
-            if (oppdatertTrygdetid.beregnetTrygdetid != null) {
-                oppdaterBeregnetTrygdetid(
-                    oppdatertTrygdetid.behandlingId,
-                    oppdatertTrygdetid.id,
-                    oppdatertTrygdetid.beregnetTrygdetid,
+                oppdaterOverstyrtPoengaar(
+                    gjeldendeTrygdetid.id,
+                    gjeldendeTrygdetid.behandlingId,
+                    oppdatertTrygdetid.overstyrtNorskPoengaar,
                     tx,
-                    overstyrt,
                 )
-            } else {
-                nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
-            }
-        }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
+
+                oppdaterYrkesskade(
+                    gjeldendeTrygdetid.id,
+                    gjeldendeTrygdetid.behandlingId,
+                    oppdatertTrygdetid.yrkesskade,
+                    tx,
+                )
+
+                // opprett grunnlag
+                oppdatertTrygdetid.trygdetidGrunnlag
+                    .filter { gjeldendeTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
+                    .forEach { opprettTrygdetidGrunnlag(oppdatertTrygdetid.id, it, tx) }
+
+                // oppdater grunnlag
+                oppdatertTrygdetid.trygdetidGrunnlag.forEach { trygdetidGrunnlag ->
+                    gjeldendeTrygdetid.trygdetidGrunnlag
+                        .find { it.id == trygdetidGrunnlag.id && it != trygdetidGrunnlag }
+                        ?.let { oppdaterTrygdetidGrunnlag(trygdetidGrunnlag, tx) }
+                }
+
+                // slett grunnlag
+                gjeldendeTrygdetid.trygdetidGrunnlag
+                    .filter { oppdatertTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
+                    .forEach { slettTrygdetidGrunnlag(it.id, tx) }
+
+                // overskriv opplysningsgrunnlag
+                oppdaterOpplysningsgrunnlag(oppdatertTrygdetid.id, oppdatertTrygdetid.opplysninger, tx)
+
+                if (oppdatertTrygdetid.beregnetTrygdetid != null) {
+                    oppdaterBeregnetTrygdetid(
+                        oppdatertTrygdetid.behandlingId,
+                        oppdatertTrygdetid.id,
+                        oppdatertTrygdetid.beregnetTrygdetid,
+                        tx,
+                        overstyrt,
+                    )
+                } else {
+                    nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
+                }
+            }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
     fun slettTrygdetid(trygdetidId: UUID) =
         dataSource.transaction { tx ->
@@ -635,12 +636,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             prorata = boolean("prorata"),
         )
 
-    private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {
-        return Opplysningsgrunnlag(
+    private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag =
+        Opplysningsgrunnlag(
             id = uuid("id"),
             type = string("type").let { TrygdetidOpplysningType.valueOf(it) },
             opplysning = string("opplysning").let { objectMapper.readValue(it) },
             kilde = string("kilde").let { objectMapper.readValue(it) },
         )
-    }
 }

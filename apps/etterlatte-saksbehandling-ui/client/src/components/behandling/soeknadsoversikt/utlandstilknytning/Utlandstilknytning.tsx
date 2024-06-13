@@ -2,8 +2,8 @@ import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetalj
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
-import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
+import { Button } from '@navikt/ds-react'
 
 const statusIkon = (utlandstilknytning: IUtlandstilknytning | null) => {
   if (utlandstilknytning === null) {
@@ -39,7 +39,9 @@ export const Utlandstilknytning = ({
           />
         )}
         {!vurdert && redigerbar && (
-          <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+          <Button variant="secondary" onClick={() => setVurdert(true)}>
+            Legg til vurdering
+          </Button>
         )}
       </Vurdering>
     </LovtekstMedLenke>

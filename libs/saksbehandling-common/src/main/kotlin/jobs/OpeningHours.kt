@@ -2,11 +2,18 @@ package no.nav.etterlatte.libs.common
 
 import java.time.Clock
 
-class FeilAntallTiderException(message: String) : Exception(message)
+class FeilAntallTiderException(
+    message: String,
+) : Exception(message)
 
-class UgyldigTidException(message: String) : Exception(message)
+class UgyldigTidException(
+    message: String,
+) : Exception(message)
 
-data class OpeningHours(val start: Int, val slutt: Int) {
+data class OpeningHours(
+    val start: Int,
+    val slutt: Int,
+) {
     companion object {
         fun of(openingHours: String): OpeningHours {
             val startOgSlutt = openingHours.split("-").toList()

@@ -8,15 +8,18 @@ data class PeriodisertResultat<S>(
     val reglerVersjon: String,
 )
 
-sealed class RegelkjoeringResultat<S>(open val reglerVersjon: String) {
+sealed class RegelkjoeringResultat<S>(
+    open val reglerVersjon: String,
+) {
     data class Suksess<S>(
         val periodiserteResultater: List<PeriodisertResultat<S>>,
         override val reglerVersjon: String,
-    ) :
-        RegelkjoeringResultat<S>(reglerVersjon)
+    ) : RegelkjoeringResultat<S>(reglerVersjon)
 
-    data class UgyldigPeriode<S>(val ugyldigeReglerForPeriode: List<Regel<*, *>>, override val reglerVersjon: String) :
-        RegelkjoeringResultat<S>(reglerVersjon)
+    data class UgyldigPeriode<S>(
+        val ugyldigeReglerForPeriode: List<Regel<*, *>>,
+        override val reglerVersjon: String,
+    ) : RegelkjoeringResultat<S>(reglerVersjon)
 }
 
 object Regelkjoering {
@@ -30,7 +33,8 @@ object Regelkjoering {
         val ugyldigePerioder = regel.finnUgyldigePerioder(periode)
 
         return if (ugyldigePerioder.isEmpty()) {
-            regel.finnAlleKnekkpunkter()
+            regel
+                .finnAlleKnekkpunkter()
                 .asSequence()
                 .plus(grunnlag.finnKnekkpunkterInnenforPeriode(periode))
                 .filter { knekkpunktGyldigForPeriode(it, periode) }
@@ -43,8 +47,7 @@ object Regelkjoering {
                         fraDato = periodeFra,
                         tilDato = nestePeriodeFra.takeIf { it.isBefore(LocalDate.MAX) }?.minusDays(1) ?: periode.tilDato,
                     )
-                }
-                .toList()
+                }.toList()
                 .associateWith { p -> regel.anvend(grunnlag.finnGrunnlagForPeriode(p.fraDato), p) }
                 .let {
                     RegelkjoeringResultat.Suksess(

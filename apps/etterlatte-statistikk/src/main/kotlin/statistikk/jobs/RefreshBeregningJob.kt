@@ -66,23 +66,24 @@ class RefreshBeregningJob(
         private fun hentNyBeregning() {
             val behandlingerMedManglendeUtland =
                 oppdaterBeregningDao.hentBehandlingerUtenOppdatertBeregning(sakerAvGangen)
-            behandlingerMedManglendeUtland.map {
-                it to
-                    try {
-                        runBlocking { beregningKlient.hentBeregningForBehandling(it) }
-                    } catch (e: Exception) {
-                        logger.warn(
-                            "Kunne ikke hente beregning på nytt for for behandlingId=$it. " +
-                                "Setter at vi ikke fikk hentet ny beregning.",
-                        )
-                        null
-                    }
-            }.forEach { (behandlingId, beregning) ->
-                oppdaterBeregningDao.lagreBeregning(
-                    behandlingId,
-                    beregning,
-                )
-            }
+            behandlingerMedManglendeUtland
+                .map {
+                    it to
+                        try {
+                            runBlocking { beregningKlient.hentBeregningForBehandling(it) }
+                        } catch (e: Exception) {
+                            logger.warn(
+                                "Kunne ikke hente beregning på nytt for for behandlingId=$it. " +
+                                    "Setter at vi ikke fikk hentet ny beregning.",
+                            )
+                            null
+                        }
+                }.forEach { (behandlingId, beregning) ->
+                    oppdaterBeregningDao.lagreBeregning(
+                        behandlingId,
+                        beregning,
+                    )
+                }
         }
 
         private fun oppdaterMedNyBeregning() {

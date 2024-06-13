@@ -20,9 +20,15 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class BehandlingKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilgangsSjekk {
+class BehandlingKlient(
+    config: Config,
+    httpClient: HttpClient,
+) : BehandlingTilgangsSjekk {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
@@ -44,7 +50,8 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan oppdatere trygdetid")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
 
-        return downstreamResourceClient.get(resource, brukerTokenInfo)
+        return downstreamResourceClient
+            .get(resource, brukerTokenInfo)
             .mapBoth(
                 success = { true },
                 failure = {
@@ -111,8 +118,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                             url = "$resourceUrl/behandlinger/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

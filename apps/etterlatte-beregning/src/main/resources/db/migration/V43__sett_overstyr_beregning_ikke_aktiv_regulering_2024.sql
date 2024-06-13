@@ -1,0 +1,1 @@
+UPDATE overstyr_beregning SET status = 'IKKE_AKTIV' WHERE sak_id=3482 OR sak_id=6323;

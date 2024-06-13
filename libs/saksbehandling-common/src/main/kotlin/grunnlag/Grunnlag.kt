@@ -48,7 +48,8 @@ class Grunnlag(
     private fun hentFamiliemedlemmer(personRolle: PersonRolle): List<Grunnlagsdata<JsonNode>> {
         val aktuellePersoner = folkMedRolle(personRolle)
 
-        return familie.filter { it.hentFoedselsnummer()?.verdi?.value in aktuellePersoner }
+        return familie
+            .filter { it.hentFoedselsnummer()?.verdi?.value in aktuellePersoner }
             .filter { it.hentPersonrolle()?.verdi == personRolle }
     }
 
@@ -66,4 +67,7 @@ fun Grunnlag.folkMedRolle(rolle: PersonRolle): List<String> {
     }
 }
 
-data class Metadata(val sakId: Long, val versjon: Long)
+data class Metadata(
+    val sakId: Long,
+    val versjon: Long,
+)

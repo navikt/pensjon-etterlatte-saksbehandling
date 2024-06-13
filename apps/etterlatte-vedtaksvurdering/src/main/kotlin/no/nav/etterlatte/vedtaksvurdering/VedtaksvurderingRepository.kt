@@ -515,6 +515,7 @@ class VedtaksvurderingRepository(
                 """
                 select behandlingId, saktype from vedtak 
                 where vedtakstatus='${VedtakStatus.IVERKSATT.name}'
+                and type!='${VedtakType.OPPHOER.name}'
                 """.trimIndent(),
             ) { row ->
                 BehandlingOgSaktype(

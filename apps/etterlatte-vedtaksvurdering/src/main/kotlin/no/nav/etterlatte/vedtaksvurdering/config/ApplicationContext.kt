@@ -3,6 +3,8 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -18,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenlignerJob
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
@@ -63,12 +66,22 @@ class ApplicationContext {
             ),
         )
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val repository = VedtaksvurderingRepository.using(dataSource)
     val vedtaksvurderingService =
-        VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
+        VedtaksvurderingService(repository = repository)
+    val beregningKlient = BeregningKlientImpl(config, httpClient())
     val vedtakBehandlingService =
         VedtakBehandlingService(
-            repository = VedtaksvurderingRepository.using(dataSource),
-            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            repository = repository,
+            featureToggleService =
+                FeatureToggleService.initialiser(
+                    FeatureToggleProperties(
+                        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                        host = config.getString("funksjonsbrytere.unleash.host"),
+                        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+                    ),
+                ),
+            beregningKlient = beregningKlient,
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
@@ -152,6 +165,14 @@ class ApplicationContext {
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(1, ChronoUnit.MINUTES),
+        )
+    }
+
+    val sammenlignerJob: VedtakOgBeregningSammenlignerJob by lazy {
+        VedtakOgBeregningSammenlignerJob(
+            beregningKlient = beregningKlient,
+            vedtaksvurderingRepository = repository,
+            erLeader = { leaderElectionKlient.isLeader() },
         )
     }
 }

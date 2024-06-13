@@ -45,12 +45,26 @@ data class BarnepensjonInnvilgelse(
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
             erGjenoppretting: Boolean,
+            sak: Long? = null,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
-                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                    barnepensjonBeregning(
+                        innhold,
+                        avdoede,
+                        utbetalingsinfo,
+                        grunnbeloep,
+                        beregningsperioder.let { periode ->
+                            if (listOf(1003026L).contains(sak)) {
+                                periode.filter { it.datoTOM != null }
+                            } else {
+                                periode
+                            }
+                        },
+                        trygdetid,
+                    ),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },

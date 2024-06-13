@@ -172,6 +172,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 generellBrevData.utlandstilknytning?.type,
                 requireNotNull(brevutfall.await()),
                 erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
+                sak = generellBrevData.sak.id,
             )
         }
     }

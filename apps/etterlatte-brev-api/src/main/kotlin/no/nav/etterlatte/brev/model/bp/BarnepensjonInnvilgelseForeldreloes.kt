@@ -42,10 +42,10 @@ data class BarnepensjonInnvilgelseForeldreloes(
             brevutfall: BrevutfallDto,
             vedtattIPesys: Boolean,
             avdoede: List<Avdoed>,
+            sak: Long? = null,
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
-
             return BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
                 beregning =
@@ -54,7 +54,13 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
-                        beregningsperioder,
+                        beregningsperioder.let { periode ->
+                            if (listOf(1003026L).contains(sak)) {
+                                periode.filter { it.datoTOM != null }
+                            } else {
+                                periode
+                            }
+                        },
                         trygdetid,
                         erForeldreloes = true,
                     ),

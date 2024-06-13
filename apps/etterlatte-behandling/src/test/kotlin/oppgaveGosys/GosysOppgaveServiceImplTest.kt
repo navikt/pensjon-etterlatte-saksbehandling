@@ -285,13 +285,13 @@ class GosysOppgaveServiceImplTest {
 
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
-                gosysOppgave.journalpostId!!,
-                sakId,
-                OppgaveKilde.SAKSBEHANDLER,
-                OppgaveType.JOURNALFOERING,
-                gosysOppgave.beskrivelse,
-                Tidspunkt.ofNorskTidssone(gosysOppgave.fristFerdigstillelse!!, LocalTime.MIDNIGHT),
-                brukerTokenInfo.ident(),
+                referanse = gosysOppgave.journalpostId!!,
+                sakId = sakId,
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = OppgaveType.JOURNALFOERING,
+                merknad = gosysOppgave.beskrivelse,
+                frist = Tidspunkt.ofNorskTidssone(gosysOppgave.fristFerdigstillelse!!, LocalTime.MIDNIGHT),
+                saksbehandler = brukerTokenInfo.ident(),
             )
         }
         coVerify(exactly = 1) {

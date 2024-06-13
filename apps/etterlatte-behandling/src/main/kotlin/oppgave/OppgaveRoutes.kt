@@ -234,12 +234,12 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 call.respond(
                     inTransaction {
                         service.opprettOppgave(
-                            nyOppgaveDto.referanse ?: "",
-                            sakId,
-                            nyOppgaveDto.oppgaveKilde,
-                            nyOppgaveDto.oppgaveType,
-                            nyOppgaveDto.merknad,
-                            nyOppgaveDto.frist,
+                            referanse = nyOppgaveDto.referanse ?: "",
+                            sakId = sakId,
+                            kilde = nyOppgaveDto.oppgaveKilde,
+                            type = nyOppgaveDto.oppgaveType,
+                            merknad = nyOppgaveDto.merknad,
+                            frist = nyOppgaveDto.frist,
                         )
                     },
                 )

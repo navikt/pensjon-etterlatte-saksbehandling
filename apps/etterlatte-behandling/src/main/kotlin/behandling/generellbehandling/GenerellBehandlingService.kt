@@ -96,11 +96,10 @@ class GenerellBehandlingService(
         val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
         val oppgaveForGenerellBehandling =
             oppgaveService.opprettOppgave(
-                opprettetbehandling.id.toString(),
-                opprettetbehandling.sakId,
-                OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.KRAVPAKKE_UTLAND,
-                null,
+                referanse = opprettetbehandling.id.toString(),
+                sakId = opprettetbehandling.sakId,
+                kilde = OppgaveKilde.GENERELL_BEHANDLING,
+                type = OppgaveType.KRAVPAKKE_UTLAND,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
         opprettHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)

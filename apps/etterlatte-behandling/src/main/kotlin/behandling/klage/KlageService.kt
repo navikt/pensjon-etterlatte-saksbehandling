@@ -150,7 +150,6 @@ class KlageServiceImpl(
             sakId = sakId,
             kilde = OppgaveKilde.EKSTERN,
             type = OppgaveType.KLAGE,
-            merknad = null,
         )
 
         opprettKlageHendelse(klage, KlageHendelseType.OPPRETTET, saksbehandler)

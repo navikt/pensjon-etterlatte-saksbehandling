@@ -120,11 +120,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -142,11 +141,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val systembruker = "systembruker"
@@ -170,11 +168,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
@@ -203,11 +200,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
@@ -235,11 +231,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -263,11 +258,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -286,7 +280,6 @@ internal class OppgaveServiceTest(
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
         val oppgaveAttestering =
             oppgaveService.opprettOppgave(
@@ -294,7 +287,6 @@ internal class OppgaveServiceTest(
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
         oppgaveService.tildelSaksbehandler(oppgaveBehandling.id, "saksbehandler")
         oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingsId)
@@ -329,7 +321,6 @@ internal class OppgaveServiceTest(
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
         val saksbehandlerforstegangs = Saksbehandler("", "forstegangssaksbehandler", null)
         oppgaveService.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
@@ -340,7 +331,6 @@ internal class OppgaveServiceTest(
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
 
         opprettAttestantKontekst()
@@ -358,11 +348,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -376,11 +365,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -406,11 +394,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -426,11 +413,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         oppgaveService.fjernSaksbehandler(nyOppgave.id)
@@ -445,11 +431,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
@@ -467,11 +452,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist =
@@ -492,11 +476,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                UUID.randomUUID().toString(),
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = UUID.randomUUID().toString(),
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
 
@@ -513,11 +496,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                UUID.randomUUID().toString(),
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = UUID.randomUUID().toString(),
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val paaVent = PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET)
@@ -549,11 +531,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist =
@@ -573,11 +554,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
@@ -602,11 +582,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
@@ -632,11 +611,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
@@ -660,11 +638,10 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val saksbehandler1 = "saksbehandler"
@@ -683,11 +660,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         oppgaveService.opprettOppgave(
-            referanse,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
+            referanse = referanse,
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
         )
 
         assertThrows<ManglerOppgaveUnderBehandling> {
@@ -716,20 +692,18 @@ internal class OppgaveServiceTest(
         val referanse = "referanse"
         val oppgaveEn =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val oppgaveTo =
             oppgaveService.opprettOppgave(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = referanse,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
         oppgaveService.tildelSaksbehandler(oppgaveEn.id, saksbehandler1.ident)
@@ -758,20 +732,18 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
-            "referanse",
-            adressebeskyttetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
+            referanse = "referanse",
+            sakId = adressebeskyttetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
         )
 
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -795,7 +767,6 @@ internal class OppgaveServiceTest(
             sakId = opprettetSak.id,
             kilde = OppgaveKilde.BEHANDLING,
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null,
         )
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
@@ -824,21 +795,19 @@ internal class OppgaveServiceTest(
     fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
+            referanse = "referanse",
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val adressebeskyttetOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                adressebeskyttetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = adressebeskyttetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -858,11 +827,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         oppgaveService.tildelSaksbehandler(oppgave.id, "saksbehandler")
@@ -893,11 +861,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = "referanse",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -923,11 +890,10 @@ internal class OppgaveServiceTest(
         val behandlingsref = UUID.randomUUID().toString()
         val oppgave =
             oppgaveService.opprettOppgave(
-                behandlingsref,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingsref,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler01", null)
@@ -943,11 +909,10 @@ internal class OppgaveServiceTest(
         val behandlingsref = UUID.randomUUID().toString()
         val oppgave =
             oppgaveService.opprettOppgave(
-                behandlingsref,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingsref,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         val saksbehandler1 = "saksbehandler01"
@@ -967,11 +932,10 @@ internal class OppgaveServiceTest(
         val behandlingsref = UUID.randomUUID().toString()
         val oppgaveSomSkalBliAvbrutt =
             oppgaveService.opprettOppgave(
-                behandlingsref,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingsref,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         oppgaveService.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
@@ -991,11 +955,10 @@ internal class OppgaveServiceTest(
         val behandlingsref = UUID.randomUUID().toString()
         val oppgaveAalesund =
             oppgaveService.opprettOppgave(
-                behandlingsref,
-                aalesundSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingsref,
+                sakId = aalesundSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val saksbehandlerid = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
@@ -1004,11 +967,10 @@ internal class OppgaveServiceTest(
         val behrefsteinkjer = UUID.randomUUID().toString()
         val oppgavesteinskjer =
             oppgaveService.opprettOppgave(
-                behrefsteinkjer,
-                saksteinskjer.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behrefsteinkjer,
+                sakId = saksteinskjer.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
 
         oppgaveService.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
@@ -1030,11 +992,10 @@ internal class OppgaveServiceTest(
         val behandlingId = UUID.randomUUID().toString()
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                behandlingId,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingId,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val saksbehandlerIdent = "saksbehandler"
 
@@ -1052,11 +1013,10 @@ internal class OppgaveServiceTest(
 
         val nyOppgave =
             oppgaveService.opprettOppgave(
-                revurderingId,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurderingId,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
             )
         val saksbehandlerIdent = "saksbehandler"
 
@@ -1073,11 +1033,10 @@ internal class OppgaveServiceTest(
         val behandlingId = UUID.randomUUID().toString()
         val foerstegangsbehandling =
             oppgaveService.opprettOppgave(
-                behandlingId,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
+                referanse = behandlingId,
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
             )
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
@@ -1098,11 +1057,10 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         oppgaveService.opprettOppgave(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
+            referanse = behandlingId,
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
         )
 
         val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(behandlingId)?.saksbehandler
@@ -1115,11 +1073,11 @@ internal class OppgaveServiceTest(
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
-                "dummy",
-                opprettetSak.id,
-                OppgaveKilde.HENDELSE,
-                OppgaveType.REVURDERING,
-                "Aldersovergang",
+                referanse = "dummy",
+                sakId = opprettetSak.id,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.REVURDERING,
+                merknad = "Aldersovergang",
             )
 
         oppgaveService.tildelSaksbehandler(oppgave.id, "Z123456")
@@ -1146,7 +1104,6 @@ internal class OppgaveServiceTest(
                 sakId = opprettetSak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
 
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident())
@@ -1185,7 +1142,6 @@ internal class OppgaveServiceTest(
                 sakId = opprettetSak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
             )
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.PAA_VENT)
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.UNDER_BEHANDLING)

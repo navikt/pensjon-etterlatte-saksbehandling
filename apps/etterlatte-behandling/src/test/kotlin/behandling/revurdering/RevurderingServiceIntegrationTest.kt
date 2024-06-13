@@ -157,11 +157,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -264,11 +263,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -334,7 +332,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     sakId = sak.id,
                     kilde = OppgaveKilde.HENDELSE,
                     type = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = null,
                 )
             }
         inTransaction {
@@ -370,11 +367,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettOppgave(
-                    behandling!!.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.FOERSTEGANGSBEHANDLING,
-                    null,
+                    referanse = behandling!!.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 )
             }
             verify {
@@ -386,11 +382,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
             verify {
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
                 )
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any()) }
@@ -455,11 +450,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -876,11 +870,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         val utlandsoppgaveref =
             inTransaction {
                 applicationContext.oppgaveService.opprettOppgave(
-                    nonNullBehandling.id.toString(),
-                    sak.id,
-                    OppgaveKilde.GENERELL_BEHANDLING,
-                    OppgaveType.KRAVPAKKE_UTLAND,
-                    merknad = null,
+                    referanse = nonNullBehandling.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.GENERELL_BEHANDLING,
+                    type = OppgaveType.KRAVPAKKE_UTLAND,
                 )
             }
         inTransaction {

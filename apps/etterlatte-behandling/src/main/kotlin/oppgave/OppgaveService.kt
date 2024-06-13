@@ -543,7 +543,7 @@ class OppgaveService(
         sakId: Long,
         kilde: OppgaveKilde?,
         type: OppgaveType,
-        merknad: String?,
+        merknad: String? = null,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
     ): OppgaveIntern {

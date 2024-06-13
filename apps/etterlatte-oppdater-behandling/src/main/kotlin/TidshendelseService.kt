@@ -102,8 +102,8 @@ class TidshendelseService(
     private fun opprettOppgave(hendelse: TidshendelsePacket): UUID {
         val oppgaveId =
             behandlingService.opprettOppgave(
-                hendelse.sakId,
-                oppgaveTypeFor(hendelse.jobbtype),
+                sakId = hendelse.sakId,
+                oppgaveType = oppgaveTypeFor(hendelse.jobbtype),
                 referanse = hendelse.behandlingId?.toString(),
                 merknad = hendelse.jobbtype.beskrivelse,
                 frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),

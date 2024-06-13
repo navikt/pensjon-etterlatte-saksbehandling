@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -60,6 +61,7 @@ internal class BrevdataFacadeImplTest {
     private val sakService = mockk<SakService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val adresseService = mockk<AdresseService>()
+    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
         BrevdataFacade(
@@ -70,6 +72,7 @@ internal class BrevdataFacadeImplTest {
             sakService,
             trygdetidKlient,
             adresseService,
+            vilkaarsvurderingKlient,
         )
 
     @BeforeEach

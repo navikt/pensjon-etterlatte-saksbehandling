@@ -58,6 +58,8 @@ export const AvkortingInntekt = ({
   const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
 
+  const [ugyldigInntektAngitt, setUgyldigInntektAngitt] = useState(false)
+
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () =>
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
@@ -91,7 +93,15 @@ export const AvkortingInntekt = ({
     defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
   })
 
-  const onSubmit = (data: IAvkortingGrunnlagLagre) =>
+  const onSubmit = (data: IAvkortingGrunnlagLagre) => {
+    const ugyldigInntekt = data.aarsinntekt! < data.fratrekkInnAar!
+    const ugyldigInntektUtland = data.inntektUtland! < data.fratrekkInnAarUtland!
+    if (ugyldigInntekt || ugyldigInntektUtland) {
+      setUgyldigInntektAngitt(true)
+      return
+    }
+    setUgyldigInntektAngitt(false)
+
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
@@ -105,6 +115,7 @@ export const AvkortingInntekt = ({
         setVisForm(false)
       }
     )
+  }
 
   return (
     <AvkortingInntektWrapper>
@@ -279,6 +290,9 @@ export const AvkortingInntekt = ({
                     }
                   />
                 </TextAreaWrapper>
+                {ugyldigInntektAngitt && (
+                  <Alert variant="error">En årsinntekt kan ikke være lavere enn fratrekk inn-år</Alert>
+                )}
               </>
             )}
             <FormKnapper>

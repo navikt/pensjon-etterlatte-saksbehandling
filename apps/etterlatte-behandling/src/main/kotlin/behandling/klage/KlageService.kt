@@ -145,11 +145,11 @@ class KlageServiceImpl(
 
         klageDao.lagreKlage(klage)
 
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveService.opprettOppgave(
             referanse = klage.id.toString(),
             sakId = sakId,
-            oppgaveKilde = OppgaveKilde.EKSTERN,
-            oppgaveType = OppgaveType.KLAGE,
+            kilde = OppgaveKilde.EKSTERN,
+            type = OppgaveType.KLAGE,
             merknad = null,
         )
 
@@ -615,11 +615,11 @@ class KlageServiceImpl(
         val vedtaketKlagenGjelder =
             klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
 
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+        return oppgaveService.opprettOppgave(
             referanse = klage.id.toString(),
             sakId = klage.sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.OMGJOERING,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.OMGJOERING,
             merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
                 vedtaketKlagenGjelder.datoAttestert?.format(
                     DateTimeFormatter.ISO_LOCAL_DATE,

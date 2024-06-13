@@ -15,6 +15,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -91,6 +92,7 @@ internal class VedtakBehandlingServiceTest(
         service =
             VedtakBehandlingService(
                 repository = repository,
+                featureToggleService = DummyFeatureToggleService().also { it.settBryter(VedtakFeatureToggle.VerifiserPerioder, true) },
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,
@@ -898,7 +900,26 @@ internal class VedtakBehandlingServiceTest(
                 YearMonth.now(),
                 behandlingId,
             )
-        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            mockk<BeregningOgAvkorting>(relaxed = true).also {
+                every { it.beregning } returns
+                    mockk<BeregningDTO>(relaxed = true).also {
+                        every {
+                            it.beregningsperioder
+                        } returns
+                            listOf(
+                                Beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, Month.JANUARY),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 100,
+                                    grunnbelopMnd = 0,
+                                    grunnbelop = 0,
+                                    trygdetid = 40,
+                                ),
+                            )
+                    }
+            }
+
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
@@ -1183,7 +1204,31 @@ internal class VedtakBehandlingServiceTest(
                 YearMonth.now(),
                 behandlingId,
             )
-        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery {
+            beregningKlientMock.hentBeregningOgAvkorting(
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            mockk<BeregningOgAvkorting>(relaxed = true).also {
+                every { it.beregning } returns
+                    mockk<BeregningDTO>(relaxed = true).also {
+                        every {
+                            it.beregningsperioder
+                        } returns
+                            listOf(
+                                Beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, Month.JANUARY),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 100,
+                                    grunnbelopMnd = 0,
+                                    grunnbelop = 0,
+                                    trygdetid = 40,
+                                ),
+                            )
+                    }
+            }
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {

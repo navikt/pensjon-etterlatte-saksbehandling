@@ -82,7 +82,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk<DetaljertBehandling>().apply {
@@ -203,7 +203,7 @@ internal class VilkaarsvurderingServiceTest(
                 opplysningsmapSakOverrides = mapOf(SOEKNAD_MOTTATT_DATO to soeknadMottattDatoOpplysning),
             ).hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
 
         val vilkaarsvurdering =
             runBlocking {
@@ -360,7 +360,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = UUID.randomUUID()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
 
         runBlocking {
@@ -413,7 +413,7 @@ internal class VilkaarsvurderingServiceTest(
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val revurderingId = UUID.randomUUID()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns
             mockk {
@@ -468,7 +468,7 @@ internal class VilkaarsvurderingServiceTest(
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val revurderingId = UUID.randomUUID()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns
             mockk {
@@ -673,7 +673,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal sjekke gyldighet og oppdatere status hvis vilkaarsvurdering er oppfylt men status er OPPRETTET`() {
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             detaljertBehandling(behandlingStatus = BehandlingStatus.OPPRETTET)
@@ -702,7 +702,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering mangler totalvurdering`() {
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
 
         runBlocking {
@@ -718,7 +718,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering har virk som avviker fra behandling`() {
         val virkBehandling = YearMonth.of(2023, 1)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag()
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             detaljertBehandling(virk = virkBehandling) andThen // opprettelse

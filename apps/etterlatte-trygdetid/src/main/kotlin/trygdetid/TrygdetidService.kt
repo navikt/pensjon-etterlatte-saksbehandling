@@ -179,7 +179,8 @@ class TrygdetidServiceImpl(
                 if (forrigeTrygdetider.isEmpty()) {
                     opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 } else {
-                    val kopierteTrygdetider = kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
+                    val kopierteTrygdetider =
+                        kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider, eksisterendeTrygdetider)
                     opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
                 }
             }
@@ -342,33 +343,41 @@ class TrygdetidServiceImpl(
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
+        val eksisterendeTrygdetider = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
 
-        return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid)
+        return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
     }
 
     private fun kopierSisteTrygdetidberegninger(
         behandling: DetaljertBehandling,
         forrigeTrygdetider: List<Trygdetid>,
+        eksisterendeTrygdetider: List<Trygdetid>,
     ): List<Trygdetid> {
         logger.info(
             "Kopierer trygdetid for behandling ${behandling.id} fra " +
                 "trygdetider med id ${forrigeTrygdetider.joinToString { it.id.toString() }}",
         )
 
-        return forrigeTrygdetider.map { forrigeTrygdetid ->
-            val kopiertTrygdetid =
-                Trygdetid(
-                    sakId = behandling.sak,
-                    behandlingId = behandling.id,
-                    opplysninger = forrigeTrygdetid.opplysninger.map { it.copy(id = UUID.randomUUID()) },
-                    trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag.map { it.copy(id = UUID.randomUUID()) },
-                    beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
-                    ident = forrigeTrygdetid.ident,
-                    yrkesskade = forrigeTrygdetid.yrkesskade,
-                )
+        val opprettetTrygdetider =
+            forrigeTrygdetider
+                .filter { forrigeTrygdetid ->
+                    eksisterendeTrygdetider.none { it.ident == forrigeTrygdetid.ident }
+                }.map { forrigeTrygdetid ->
+                    val kopiertTrygdetid =
+                        Trygdetid(
+                            sakId = behandling.sak,
+                            behandlingId = behandling.id,
+                            opplysninger = forrigeTrygdetid.opplysninger.map { it.copy(id = UUID.randomUUID()) },
+                            trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag.map { it.copy(id = UUID.randomUUID()) },
+                            beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
+                            ident = forrigeTrygdetid.ident,
+                            yrkesskade = forrigeTrygdetid.yrkesskade,
+                        )
 
-            return@map trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
-        }
+                    trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
+                }
+
+        return eksisterendeTrygdetider + opprettetTrygdetider
     }
 
     private fun kildeFoedselsnummer(): Grunnlagsopplysning.RegelKilde =

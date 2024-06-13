@@ -39,6 +39,15 @@ class KravgrunnlagConsumerTest {
     }
 
     @Test
+    fun `skal motta kravOgVedtakStatus`() {
+        simulerKravOgVedtakStatusMeldingFraTilbakekrevingskomponenten()
+
+        verify(exactly = 1) {
+            kravgrunnlagService.haandterKravOgVedtakStatus(any())
+        }
+    }
+
+    @Test
     fun `skal motta kravgrunnlag paa nytt dersom noe feiler`() {
         every { kravgrunnlagService.haandterKravgrunnlag(any()) } throws Exception("Noe feilet") andThen Unit
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()
@@ -50,6 +59,10 @@ class KravgrunnlagConsumerTest {
 
     private fun simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten() {
         connectionFactory.send(queue = QUEUE, xml = readFile("/kravgrunnlag.xml"))
+    }
+
+    private fun simulerKravOgVedtakStatusMeldingFraTilbakekrevingskomponenten() {
+        connectionFactory.send(queue = QUEUE, xml = readFile("/krav_og_vedtak_status.xml"))
     }
 
     companion object {

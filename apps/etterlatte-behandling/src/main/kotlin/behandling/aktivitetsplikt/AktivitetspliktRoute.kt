@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -47,20 +46,18 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
 
         post {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
+                val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
 
-                    try {
-                        val result =
-                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingId,
-                                oppfolging,
-                                navIdent,
-                            )
-                        call.respond(result)
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                    }
+                try {
+                    val result =
+                        aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                            behandlingId,
+                            oppfolging,
+                            brukerTokenInfo.ident(),
+                        )
+                    call.respond(result)
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                 }
             }
         }

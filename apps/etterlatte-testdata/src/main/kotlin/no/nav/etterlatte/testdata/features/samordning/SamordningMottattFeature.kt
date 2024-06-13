@@ -11,8 +11,8 @@ import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.logger
-import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
 
@@ -38,7 +38,7 @@ object SamordningMottattFeature : TestDataFeature {
             post {
                 try {
                     val navIdent =
-                        requireNotNull(navIdentFraToken()) {
+                        requireNotNull(brukerTokenInfo.ident()) {
                             "Nav ident mangler. Du må være innlogget for å sende samordningsmelding."
                         }
 

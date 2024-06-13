@@ -66,3 +66,10 @@ data class Grunnlagsbeloep(
     val skyld: String?,
     val aarsak: String?,
 )
+
+data class KravOgVedtakstatus(
+    val sakId: SakId,
+    val vedtakId: VedtakId,
+    val status: KravgrunnlagStatus,
+    val referanse: UUID30,
+)

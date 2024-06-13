@@ -55,7 +55,7 @@ class DoedshendelseReminderServiceTest {
             )
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP2mndGammel)
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns mockOppgave
         every { oppgaveService.hentOppgaverForSak(sakId) } returns emptyList()
 
         val service =
@@ -69,7 +69,7 @@ class DoedshendelseReminderServiceTest {
 
         verify { behandlingService.hentBehandlingerForSak(sakId) }
         verify { oppgaveService.hentOppgaverForSak(sakId) }
-        verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) }
+        verify { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -105,6 +105,6 @@ class DoedshendelseReminderServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify { behandlingService.hentBehandlingerForSak(sakId) }
-        verify(exactly = 0) { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 }

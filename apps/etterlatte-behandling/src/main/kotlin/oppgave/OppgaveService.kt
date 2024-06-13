@@ -24,8 +24,6 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakDao
@@ -531,53 +529,42 @@ class OppgaveService(
             oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
         }
 
-        return opprettNyOppgaveMedSakOgReferanse(
+        return opprettOppgave(
             referanse = referanse,
             sakId = sakId,
-            oppgaveKilde = oppgaveKilde,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            kilde = oppgaveKilde,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
         )
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(
+    fun opprettOppgave(
         referanse: String,
         sakId: Long,
-        oppgaveKilde: OppgaveKilde?,
-        oppgaveType: OppgaveType,
+        kilde: OppgaveKilde?,
+        type: OppgaveType,
         merknad: String?,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
-        return opprettOppgave(
+
+        val oppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
-                oppgaveKilde = oppgaveKilde,
-                oppgaveType = oppgaveType,
+                kilde = kilde,
+                type = type,
                 merknad = merknad,
                 frist = frist,
-            ),
-        ).also {
-            if (saksbehandler != null) {
-                tildelSaksbehandler(it.id, saksbehandler)
-            }
-        }
-    }
+            )
+        oppgaveDao.opprettOppgave(oppgave)
 
-    private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
-        var oppgaveLagres = oppgaveIntern
-        if (oppgaveIntern.frist === null) {
-            val enMaanedFrem =
-                oppgaveIntern.opprettet
-                    .toLocalDatetimeUTC()
-                    .plusMonths(1L)
-                    .toTidspunkt()
-            oppgaveLagres = oppgaveIntern.copy(frist = enMaanedFrem)
+        if (saksbehandler != null) {
+            tildelSaksbehandler(oppgave.id, saksbehandler)
         }
-        oppgaveDao.opprettOppgave(oppgaveLagres)
-        return oppgaveDao.hentOppgave(oppgaveLagres.id)!!
+
+        return hentOppgave(oppgave.id)
     }
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern =

@@ -90,11 +90,11 @@ class TilbakekrevingService(
                 )
             } else {
                 logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = tilbakekreving.id.toString(),
                     sakId = tilbakekreving.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Kravgrunnlag mottatt",
                 )
             }
@@ -448,6 +448,7 @@ class TilbakekrevingService(
         tilbakekreving: TilbakekrevingBehandling,
         vedtak: TilbakekrevingVedtakLagretDto,
     ) = TilbakekrevingVedtak(
+        sakId = tilbakekreving.sak.id,
         vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
         fattetVedtak =
             FattetVedtak(

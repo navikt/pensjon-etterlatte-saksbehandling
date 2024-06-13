@@ -26,7 +26,6 @@ import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -41,6 +40,7 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.ktor.X_USER
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -58,7 +58,6 @@ import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeatu
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.samordning.SamordningMottattFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
-import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -127,14 +126,7 @@ fun main() {
                         )
                     }
 
-                    mdc(X_USER) { call ->
-                        call.request.header("Authorization")?.let {
-                            val token = JwtToken(it.substringAfterLast("Bearer "))
-                            val jwtTokenClaims = token.jwtTokenClaims
-                            jwtTokenClaims.get("NAVident") as? String // human
-                                ?: token.jwtTokenClaims.get("azp_name") as? String // system/app-user
-                        }
-                    }
+                    mdc(X_USER) { call -> call.brukerTokenInfo.ident() }
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
@@ -177,8 +169,6 @@ private fun Route.api() {
         }
     }
 }
-
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
 fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
 

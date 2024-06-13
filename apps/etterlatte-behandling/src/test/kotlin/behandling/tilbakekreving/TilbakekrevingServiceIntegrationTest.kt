@@ -129,11 +129,11 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         val oppgaveFraBehandlingMedFeilutbetaling =
             inTransaction {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = sak.id.toString(),
                     sakId = sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Venter på kravgrunnlag",
                 )
             }

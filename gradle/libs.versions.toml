@@ -13,7 +13,7 @@ bcpkix-version = "1.78.1"
 navfelles-token-version = "4.1.8"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.8"
-tjenestespesifikasjoner-version = "1.d27898d"
+tjenestespesifikasjoner-version = "1.9c76d3b"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }

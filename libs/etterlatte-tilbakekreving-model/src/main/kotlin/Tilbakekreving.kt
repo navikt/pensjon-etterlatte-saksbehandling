@@ -213,6 +213,7 @@ enum class TilbakekrevingResultat(
 * N.B Inneholder ikke alle vedtaksinfo kun det som er nødvendig for Tilbakekrevingskomponent.
 */
 data class TilbakekrevingVedtak(
+    val sakId: Long,
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,

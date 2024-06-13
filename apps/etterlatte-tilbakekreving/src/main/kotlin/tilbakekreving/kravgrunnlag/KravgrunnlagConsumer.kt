@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toKravOgVedtakstatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
@@ -34,22 +36,42 @@ class KravgrunnlagConsumer(
         withLogContext {
             var payload: String? = null
             try {
-                logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
+                logger.info("Melding (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
                 payload = message.getBody(String::class.java)
 
-                val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
+                when {
+                    payload.contains("detaljertKravgrunnlagMelding") -> {
+                        logger.info("Mottok melding av type detaljertKravgrunnlagMelding")
+                        val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
 
-                hendelseRepository.lagreMottattKravgrunnlag(
-                    detaljertKravgrunnlag.kravgrunnlagId.toString(),
-                    payload,
-                )
+                        hendelseRepository.lagreTilbakekrevingHendelse(
+                            sakId = detaljertKravgrunnlag.fagsystemId.toLong(),
+                            payload = payload,
+                            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
+                        )
 
-                val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag)
+                        val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag)
+                        kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
+                    }
+                    payload.contains("endringKravOgVedtakstatus") -> {
+                        logger.info("Mottok melding av type endringKravOgVedtakstatus")
+                        val kravOgVedtakstatusDto = toKravOgVedtakstatus(payload)
 
-                kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
+                        hendelseRepository.lagreTilbakekrevingHendelse(
+                            sakId = kravOgVedtakstatusDto.fagsystemId.toLong(),
+                            payload = payload,
+                            type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
+                        )
+
+                        val kravOgVedtakstatus = KravgrunnlagMapper.toKravOgVedtakstatus(kravOgVedtakstatusDto)
+                        kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
+                    }
+
+                    else -> throw Exception("Ukjent meldingstype, sjekk sikkerlogg og feilkø")
+                }
             } catch (t: Throwable) {
-                logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
-                sikkerLogg.error("Feilet under mottak av kravgrunnlag: ${kv("kravgrunnlag", payload)}", t)
+                logger.error("Feilet under mottak av melding (Sjekk sikkerlogg for payload)", t)
+                sikkerLogg.error("Feilet under mottak av melding ${kv("melding", payload)}", t)
 
                 // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
                 throw t

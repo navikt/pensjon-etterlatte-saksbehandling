@@ -633,11 +633,11 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
             every {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     sakId = sakId,
                     referanse = any(),
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                     merknad = JobbType.OMS_DOED_6MND.beskrivelse,
                     frist = frist,
                 )

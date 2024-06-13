@@ -287,11 +287,11 @@ class GrunnlagsendringshendelseService(
                             gjelderPerson = fnr,
                             samsvarMellomKildeOgGrunnlag = samsvar,
                         )
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    oppgaveService.opprettOppgave(
                         referanse = hendelseId.toString(),
                         sakId = rolleOgSak.sakId,
-                        oppgaveKilde = OppgaveKilde.HENDELSE,
-                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.VURDER_KONSEKVENS,
                         merknad = hendelse.beskrivelse(),
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
@@ -433,11 +433,11 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern =
         oppgaveService
-            .opprettNyOppgaveMedSakOgReferanse(
+            .opprettOppgave(
                 referanse = hendelse.id.toString(),
                 sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.VURDER_KONSEKVENS,
                 merknad = hendelse.beskrivelse(),
             ).also {
                 logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")

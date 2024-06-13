@@ -11,10 +11,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -30,18 +30,16 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
             route("revurderinginfo") {
                 post {
                     kunSkrivetilgang {
-                        hentNavidentFraToken { navIdent ->
-                            logger.info("Lagrer revurderinginfo på behandling $behandlingId")
-                            medBody<RevurderingInfoDto> {
-                                inTransaction {
-                                    revurderingService.lagreRevurderingInfo(
-                                        behandlingId,
-                                        RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
-                                        navIdent,
-                                    )
-                                }
-                                call.respond(HttpStatusCode.NoContent)
+                        logger.info("Lagrer revurderinginfo på behandling $behandlingId")
+                        medBody<RevurderingInfoDto> {
+                            inTransaction {
+                                revurderingService.lagreRevurderingInfo(
+                                    behandlingId,
+                                    RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
+                                    brukerTokenInfo.ident(),
+                                )
                             }
+                            call.respond(HttpStatusCode.NoContent)
                         }
                     }
                 }

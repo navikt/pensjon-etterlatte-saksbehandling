@@ -25,6 +25,8 @@ internal class AvkortingTest {
                 aarsoppgjoer =
                     listOf(
                         Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2024,
                             avkortetYtelseAar =
                                 listOf(
                                     avkortetYtelse(
@@ -46,25 +48,42 @@ internal class AvkortingTest {
                                     ),
                                 ),
                         ),
+                        Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2025,
+                            avkortetYtelseAar =
+                                listOf(
+                                    avkortetYtelse(
+                                        periode =
+                                            Periode(
+                                                fom = YearMonth.of(2025, Month.JANUARY),
+                                                tom = null,
+                                            ),
+                                    ),
+                                ),
+                        ),
                     ),
             )
 
         @Test
         fun `fyller ut avkortet ytelse foer virkningstidspunkt ved aa kutte aarsoppgjoer fra virkningstidspunkt`() {
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.MAY)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
-                it.avkortetYtelseFraVirkningstidspunkt[0] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[1]
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
+
+                it.avkortetYtelseFraVirkningstidspunkt[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
+
+                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0]
             }
         }
 
         @Test
         fun `kutter periode fra aarsoppgjoer hvis virkningstidspunkt begynner midt i periode `() {
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.APRIL)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 4
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer.single().avkortetYtelseAar[0],
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[0],
                         AvkortetYtelse::periode,
                     )
                     periode shouldBe
@@ -73,33 +92,63 @@ internal class AvkortingTest {
                             tom = YearMonth.of(2024, Month.APRIL),
                         )
                 }
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[1]
-                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
             }
 
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.JUNE)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer.single().avkortetYtelseAar[1],
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[1],
                         AvkortetYtelse::periode,
                     )
                     periode shouldBe Periode(fom = YearMonth.of(2024, Month.JUNE), tom = YearMonth.of(2024, Month.JULY))
                 }
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
             }
 
             avkorting
                 .medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER))
                 .asClue {
-                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
+                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
                     with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer.single().avkortetYtelseAar[2],
+                            avkorting.aarsoppgjoer[0].avkortetYtelseAar[2],
                             AvkortetYtelse::periode,
                         )
                         periode shouldBe Periode(fom = YearMonth.of(2024, Month.SEPTEMBER), tom = null)
                     }
+                }
+
+            avkorting
+                .medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2025, Month.JANUARY))
+                .asClue {
+                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
+                    with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
+                        shouldBeEqualToIgnoringFields(
+                            avkorting.aarsoppgjoer[1].avkortetYtelseAar[0],
+                            AvkortetYtelse::periode,
+                        )
+                        periode shouldBe Periode(fom = YearMonth.of(2025, Month.JANUARY), tom = null)
+                    }
+                }
+        }
+
+        @Test
+        fun `fyller ut avkortetYtelseForrigeVedtak`() {
+            avkorting
+                .medYtelseFraOgMedVirkningstidspunkt(
+                    virkningstidspunkt = YearMonth.of(2024, Month.MAY),
+                    forrigeAvkorting = avkorting,
+                ).asClue {
+                    it.avkortetYtelseForrigeVedtak.size shouldBe 4
+
+                    it.avkortetYtelseForrigeVedtak[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0]
+                    it.avkortetYtelseForrigeVedtak[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                    it.avkortetYtelseForrigeVedtak[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
+
+                    it.avkortetYtelseForrigeVedtak[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0]
                 }
         }
     }
@@ -114,6 +163,8 @@ internal class AvkortingTest {
                 aarsoppgjoer =
                     listOf(
                         Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2024,
                             ytelseFoerAvkorting =
                                 listOf(
                                     YtelseFoerAvkorting(
@@ -136,7 +187,9 @@ internal class AvkortingTest {
         @Test
         fun `Skal kopiere tidligere inntekt men erstatte id`() {
             with(nyAvkorting) {
-                aarsoppgjoer.single().inntektsavkorting.asClue {
+                val aarsoppgjoer = aarsoppgjoer.single()
+                aarsoppgjoer.id shouldNotBe eksisterendeAvkorting.aarsoppgjoer.single().id
+                aarsoppgjoer.inntektsavkorting.asClue {
                     it.size shouldBe 2
                     it[0].grunnlag.id shouldNotBe
                         eksisterendeAvkorting.aarsoppgjoer
@@ -289,6 +342,56 @@ internal class AvkortingTest {
                         last().grunnlag.relevanteMaanederInnAar shouldBe 12
                     }
                 }
+        }
+
+        @Test
+        fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
+            val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
+            val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
+
+            val oppdatertAvkorting =
+                avkorting.oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag,
+                    virkningstidspunkt,
+                    bruker,
+                )
+
+            oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
+            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2024, 1))) {
+                shouldBeEqualToIgnoringFields(
+                    avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)),
+                    Aarsoppgjoer::inntektsavkorting,
+                    Aarsoppgjoer::id,
+                )
+                with(inntektsavkorting) {
+                    size shouldBe 2
+                    get(0).grunnlag shouldBe foersteInntekt
+                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                    get(1).grunnlag.periode shouldBe
+                        Periode(
+                            fom = YearMonth.of(2024, Month.APRIL),
+                            tom = null,
+                            // tom = YearMonth.of(2024, Month.DECEMBER), TODO er dette nødvendig?
+                        )
+                }
+            }
+            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2025, 1))) {
+                shouldBeEqualToIgnoringFields(
+                    avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)),
+                    Aarsoppgjoer::inntektsavkorting,
+                    Aarsoppgjoer::id,
+                )
+                with(inntektsavkorting) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
+                        fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
+                        inntektUtland shouldBe nyttGrunnlag.inntektUtland
+                        fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
+                        spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
+                    }
+                }
+            }
         }
     }
 }

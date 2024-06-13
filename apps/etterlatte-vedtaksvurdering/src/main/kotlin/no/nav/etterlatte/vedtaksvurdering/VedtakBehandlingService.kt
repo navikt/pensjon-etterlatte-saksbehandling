@@ -2,6 +2,8 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenligner
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -42,6 +45,7 @@ import java.util.UUID
 
 class VedtakBehandlingService(
     private val repository: VedtaksvurderingRepository,
+    private val featureToggleService: FeatureToggleService,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
@@ -96,7 +100,7 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
@@ -109,8 +113,6 @@ class VedtakBehandlingService(
             beregningOgAvkorting = beregningOgAvkorting,
             vilkaarsvurdering = vilkaarsvurdering,
         )
-
-        val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
         val fattetVedtak =
             repository.inTransaction { tx ->
@@ -146,6 +148,12 @@ class VedtakBehandlingService(
                     }
                 }
             }
+
+        if (featureToggleService.isEnabled(VedtakFeatureToggle.VerifiserPerioder, false)) {
+            beregningOgAvkorting?.let {
+                VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
+            }
+        }
 
         return VedtakOgRapid(
             fattetVedtak.toDto(),
@@ -647,7 +655,6 @@ class VedtakBehandlingService(
         coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-
             val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
@@ -708,3 +715,12 @@ class ForeldreloesTrygdetid(
         code = "FORELDRELOES_TRYGDETID",
         detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
     )
+
+enum class VedtakFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    VerifiserPerioder("verifiser-perioder"),
+    ;
+
+    override fun key() = key
+}

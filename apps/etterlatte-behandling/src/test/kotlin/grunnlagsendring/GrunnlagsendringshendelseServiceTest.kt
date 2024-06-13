@@ -625,7 +625,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER))))
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
 
         every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
@@ -672,7 +672,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagKlient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)))
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
 
         every { behandlingService.hentBehandlingerForSak(sakId) } returns
@@ -774,7 +774,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagKlient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)))
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
 
         every { behandlingService.hentBehandlingerForSak(sakId) } returns
@@ -863,7 +863,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagKlient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)))
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
 
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
@@ -936,7 +936,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagKlient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)))
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
 
         every { behandlingService.hentBehandlingerForSak(sakId) } returns
@@ -987,7 +987,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         } returns Unit
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 any(),
                 any(),
                 any(),
@@ -1168,7 +1168,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, any())
         } returns emptyList()
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
         every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()

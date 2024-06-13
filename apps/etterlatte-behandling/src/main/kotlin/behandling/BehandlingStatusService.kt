@@ -322,11 +322,11 @@ class BehandlingStatusServiceImpl(
                     ),
                 )
             } else {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = behandling.sak.id.toString(),
                     sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Venter på kravgrunnlag",
                 )
             }

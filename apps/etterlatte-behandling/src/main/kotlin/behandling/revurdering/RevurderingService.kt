@@ -370,11 +370,11 @@ class RevurderingService(
                         )
                     } else {
                         val oppgave =
-                            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            oppgaveService.opprettOppgave(
                                 referanse = it.id.toString(),
                                 sakId = sakId,
-                                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                                oppgaveType = OppgaveType.REVURDERING,
+                                kilde = OppgaveKilde.BEHANDLING,
+                                type = OppgaveType.REVURDERING,
                                 merknad = begrunnelse,
                                 frist = frist,
                             )

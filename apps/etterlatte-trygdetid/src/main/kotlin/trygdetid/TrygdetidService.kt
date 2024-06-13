@@ -47,7 +47,7 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
-    suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+    suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
         behandlingId: UUID,
         trygdetidId: UUID,
         trygdetidGrunnlag: TrygdetidGrunnlag,
@@ -283,26 +283,35 @@ class TrygdetidServiceImpl(
         }
     }
 
-    override suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+    override suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
         behandlingId: UUID,
         trygdetidId: UUID,
         trygdetidGrunnlag: TrygdetidGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
-            val gjeldendeTrygdetid: Trygdetid =
-                trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
-
-            val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag =
-                trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                    beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag),
-                )
-
-            val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
-                gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
-
-            oppdaterBeregnetTrygdetid(behandlingId, trygdetidMedOppdatertTrygdetidGrunnlag, brukerTokenInfo)
+            lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(behandlingId, trygdetidId, trygdetidGrunnlag, brukerTokenInfo)
         }
+
+    private suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        trygdetidGrunnlag: TrygdetidGrunnlag,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid {
+        val gjeldendeTrygdetid: Trygdetid =
+            trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
+
+        val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag =
+            trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag),
+            )
+
+        val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
+            gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
+
+        return oppdaterBeregnetTrygdetid(behandlingId, trygdetidMedOppdatertTrygdetidGrunnlag, brukerTokenInfo)
+    }
 
     private data class DatoerForBehandling(
         val foedselsDato: LocalDate,

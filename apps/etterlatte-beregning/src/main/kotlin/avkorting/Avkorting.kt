@@ -241,7 +241,12 @@ data class Avkorting(
 
                 val avkortetYtelse =
                     if (aarsoppgjoer.inntektsavkorting.size > 1) {
-                        beregnAvkortetYtelseMedRestanse(aarsoppgjoer, ytelseFoerAvkorting, reberegnetInntektsavkorting, sanksjoner)
+                        beregnAvkortetYtelseMedRestanse(
+                            aarsoppgjoer,
+                            ytelseFoerAvkorting,
+                            reberegnetInntektsavkorting,
+                            sanksjoner,
+                        )
                     } else {
                         reberegnetInntektsavkorting.first().let {
                             AvkortingRegelkjoring.beregnAvkortetYtelse(
@@ -277,19 +282,19 @@ data class Avkorting(
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
         sanksjoner: List<Sanksjon>,
     ): List<AvkortetYtelse> {
-        val sorterteSanksjoner = sanksjoner.sortedBy { it.fom }
+        val sorterteSanksjonerInnenforAarsoppgjoer =
+            aarsoppgjoer
+                .sanksjonerInnenforAarsoppjoer(sanksjoner)
+                .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             // Kun de sanksjonene som er lagt inn fom <= denne inntektsavkortingen er tidligere beregnet med
             // så hvis vi ikke ekskluderer senere sanksjoner endrer vi restanseutregning tilbake i tid og
             // omfordeler i perioder før sanksjonen blir lagt inn
+            val sisteFomForDenneInntektsavkorting = inntektsavkorting.avkortingsperioder.maxOf { it.periode.fom }
             val kjenteSanksjonerForInntektsavkorting =
-                sorterteSanksjoner.filter {
-                    it.fom <= (
-                        inntektsavkorting.avkortingsperioder
-                            .last()
-                            .periode.fom
-                    )
+                sorterteSanksjonerInnenforAarsoppgjoer.filter {
+                    it.fom <= sisteFomForDenneInntektsavkorting
                 }
 
             val restanse =
@@ -316,21 +321,21 @@ data class Avkorting(
         }
         val senesteInntektsjusteringFom =
             reberegnetInntektsavkorting.maxOf { inntektsavkorting -> inntektsavkorting.avkortingsperioder.maxOf { it.periode.fom } }
-        val senesteSanksjonFom = sorterteSanksjoner.maxOfOrNull { it.fom }
+        val senesteSanksjonFom = sorterteSanksjonerInnenforAarsoppgjoer.maxOfOrNull { it.fom }
 
         // Hvis vi har sanksjoner som ikke er tatt høyde for i beregningen av ytelse opp mot restanse over, må vi
         // ta høyde for de til slutt
         if (senesteSanksjonFom != null && senesteSanksjonFom > senesteInntektsjusteringFom) {
             val restanse =
                 AvkortingRegelkjoring.beregnRestanse(
-                    this.foersteMaanedDetteAar(),
+                    aarsoppgjoer.foersteMaanedDetteAar(),
                     reberegnetInntektsavkorting.last(),
                     avkortetYtelseMedAllForventetInntekt,
-                    sorterteSanksjoner,
+                    sorterteSanksjonerInnenforAarsoppgjoer,
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
-                requireNotNull(sorterteSanksjoner.firstOrNull { it.fom > senesteInntektsjusteringFom }?.fom) {
+                requireNotNull(sorterteSanksjonerInnenforAarsoppgjoer.firstOrNull { it.fom > senesteInntektsjusteringFom }?.fom) {
                     "Fant tidligere at vi har en sanksjon som er etter siste inntektsjustering, men finner ingen nå"
                 }
             val ytelseMedAlleSanksjoner =
@@ -339,7 +344,7 @@ data class Avkorting(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = reberegnetInntektsavkorting.last().avkortingsperioder,
                     type = AARSOPPGJOER,
-                    sanksjoner = sorterteSanksjoner,
+                    sanksjoner = sorterteSanksjonerInnenforAarsoppgjoer,
                     restanse = restanse,
                 )
 
@@ -411,15 +416,33 @@ data class Aarsoppgjoer(
         return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
     }
 
-	/*
-	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
-	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
-	 */
+    /*
+     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
+     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
+     */
     fun foersteMaanedDetteAar(): YearMonth =
         if (ytelseFoerAvkorting.isEmpty()) {
             YearMonth.of(aar, 1)
         } else {
             ytelseFoerAvkorting.first().periode.fom
+        }
+
+    /**
+     * Gir kun de sanksjonene som har en periode som overlapper med dette årsoppgjøret.
+     *
+     * En sanksjon overlapper hvis:
+     *  1. fra og med er i dette året
+     *  2. fra og med er før dette året og til og med er ikke satt, eller dette året eller større
+     *
+     * @param sanksjoner - alle sanksjoner i ytelsen
+     *
+     * @return sanksjoner innenfor årsoppgjøres
+     */
+    fun sanksjonerInnenforAarsoppjoer(sanksjoner: List<Sanksjon>): List<Sanksjon> =
+        sanksjoner.filter { sanksjon ->
+            val erFomDetteAaret = sanksjon.fom.year == aar
+            val overlapperTom = sanksjon.fom.year <= aar && (sanksjon.tom == null || sanksjon.tom.year >= aar)
+            erFomDetteAaret || overlapperTom
         }
 }
 

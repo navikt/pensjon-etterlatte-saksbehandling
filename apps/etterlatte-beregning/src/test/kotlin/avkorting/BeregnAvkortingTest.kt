@@ -2010,6 +2010,7 @@ class BeregnAvkortingTest {
                                 ),
                             ),
                     ),
+                sanksjoner = emptyList(),
             )
 
     private fun `Revurdering med virk tilbake i tidligere år`() =
@@ -2025,6 +2026,7 @@ class BeregnAvkortingTest {
                             ),
                         ),
                 ),
+                sanksjoner = emptyList(),
             )
 
     private fun `Revurdering enda en ny inntekt nytt år`() =
@@ -2050,5 +2052,6 @@ class BeregnAvkortingTest {
                                 ),
                             ),
                     ),
+                sanksjoner = emptyList(),
             )
 }

@@ -100,7 +100,7 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
@@ -113,8 +113,6 @@ class VedtakBehandlingService(
             beregningOgAvkorting = beregningOgAvkorting,
             vilkaarsvurdering = vilkaarsvurdering,
         )
-
-        val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
         val fattetVedtak =
             repository.inTransaction { tx ->
@@ -657,7 +655,6 @@ class VedtakBehandlingService(
         coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-
             val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {

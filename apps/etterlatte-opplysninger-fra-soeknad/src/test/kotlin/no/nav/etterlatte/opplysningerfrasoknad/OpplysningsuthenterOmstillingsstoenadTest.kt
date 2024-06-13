@@ -44,7 +44,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 assertEquals("Bernt", fornavn)
                 assertEquals("Jakobsen", etternavn)
                 assertEquals(PersonType.AVDOED, type)
-                assertEquals("08498224343", foedselsnummer.value)
+                assertEquals("08498224343", foedselsnummer?.value)
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)

@@ -6,23 +6,30 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import java.util.UUID
 
 sealed class BrevutfallException {
-    class BehandlingKanIkkeEndres(behandlingId: UUID, status: BehandlingStatus) : IkkeTillattException(
-        code = "KAN_IKKE_ENDRES",
-        detail = "Behandling $behandlingId har status $status og kan ikke endres.",
-    )
+    class BehandlingKanIkkeEndres(
+        behandlingId: UUID,
+        status: BehandlingStatus,
+    ) : IkkeTillattException(
+            code = "KAN_IKKE_ENDRES",
+            detail = "Behandling $behandlingId har status $status og kan ikke endres.",
+        )
 
-    class VirkningstidspunktIkkeSatt(behandlingId: UUID) : UgyldigForespoerselException(
-        code = "VIRKNINGSTIDSPUNKT_IKKE_SATT",
-        detail = "Behandling $behandlingId har ikke satt virkningstidspunkt.",
-    )
+    class VirkningstidspunktIkkeSatt(
+        behandlingId: UUID,
+    ) : UgyldigForespoerselException(
+            code = "VIRKNINGSTIDSPUNKT_IKKE_SATT",
+            detail = "Behandling $behandlingId har ikke satt virkningstidspunkt.",
+        )
 
-    class AldergruppeIkkeSatt : IkkeTillattException(
-        code = "ALDERGRUPPE_IKKE_SATT",
-        detail = "Aldersgruppe må være satt for behandling av barnepensjon.",
-    )
+    class AldergruppeIkkeSatt :
+        IkkeTillattException(
+            code = "ALDERGRUPPE_IKKE_SATT",
+            detail = "Aldersgruppe må være satt for behandling av barnepensjon.",
+        )
 
-    class FeilutbetalingIkkeSatt : IkkeTillattException(
-        code = "FEILUTBETALING_IKKE_SATT",
-        detail = "Feilutbetaling må være satt for behandling av omstillingsstønad ved revurderinger.",
-    )
+    class FeilutbetalingIkkeSatt :
+        IkkeTillattException(
+            code = "FEILUTBETALING_IKKE_SATT",
+            detail = "Feilutbetaling må være satt for behandling av omstillingsstønad ved revurderinger.",
+        )
 }

@@ -188,7 +188,7 @@ data class Avkorting(
                     aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
                         val periode =
                             Periode(
-                                fom = aarsoppgjoer.foersteMaanedDetteAar(),
+                                fom = aarsoppgjoer.foersteInnvilgedeMaaned(),
                                 tom = inntektsavkorting.grunnlag.periode.tom,
                             )
 
@@ -285,7 +285,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            aarsoppgjoer.foersteMaanedDetteAar(),
+                            aarsoppgjoer.foersteInnvilgedeMaaned(),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
@@ -311,7 +311,7 @@ data class Avkorting(
         if (senesteSanksjonFom != null && senesteSanksjonFom >= senesteInntektsjusteringFom) {
             val restanse =
                 AvkortingRegelkjoring.beregnRestanse(
-                    aarsoppgjoer.foersteMaanedDetteAar(),
+                    aarsoppgjoer.foersteInnvilgedeMaaned(),
                     reberegnetInntektsavkorting.last(),
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
@@ -398,16 +398,7 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
 
-    /*
-     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
-     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
-     */
-    fun foersteMaanedDetteAar(): YearMonth =
-        if (ytelseFoerAvkorting.isEmpty()) {
-            YearMonth.of(aar, 1)
-        } else {
-            ytelseFoerAvkorting.minOf { it.periode.fom }
-        }
+    fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
 
     /**
      * Gir kun de sanksjonene som har en periode som overlapper med dette årsoppgjøret.

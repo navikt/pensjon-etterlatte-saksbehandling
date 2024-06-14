@@ -119,6 +119,7 @@ class AvkortingRoutesTest {
                             spesifikasjon = "Spesifikasjon",
                             inntektUtland = 0,
                             fratrekkInnAarUtland = 0,
+                            forventaInnvilgaMaaneder = 12,
                             kilde =
                                 AvkortingGrunnlagKildeDto(
                                     tidspunkt = tidspunkt.toString(),

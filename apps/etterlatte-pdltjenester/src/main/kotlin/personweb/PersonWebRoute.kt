@@ -30,7 +30,7 @@ fun Route.personWebRoute(
             }
         }
 
-        post("/soekperson") {
+        post("/soek") {
             kunSaksbehandler {
                 val request = call.receive<SoekPerson>()
                 val personerFunnet = service.soekPerson(request, brukerTokenInfo)

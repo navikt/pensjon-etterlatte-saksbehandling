@@ -38,7 +38,7 @@ data class SoekPerson(
             }
         }
 
-        require(fornavn != null && etternavn != null && foedselsdato != null) {
+        require(fornavn == null && etternavn == null && foedselsdato == null) {
             "Må søke med enten fornavn, etternavn eller fødselsdato"
         }
     }

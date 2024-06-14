@@ -148,17 +148,16 @@ data class Avkorting(
             )
 
         val avkortetYtelseMedSanksjon =
-            when (sanksjoner.isNotEmpty()) {
-                true ->
-                    AvkortingRegelkjoring.beregnAvkortetYtelse(
-                        periode = grunnlag.periode,
-                        ytelseFoerAvkorting = ytelseFoerAvkorting,
-                        avkortingsperioder = avkortingsperioder,
-                        type = AARSOPPGJOER,
-                        sanksjoner = sanksjoner,
-                    )
-
-                false -> null
+            if (sanksjoner.isNotEmpty()) {
+                AvkortingRegelkjoring.beregnAvkortetYtelse(
+                    periode = grunnlag.periode,
+                    ytelseFoerAvkorting = ytelseFoerAvkorting,
+                    avkortingsperioder = avkortingsperioder,
+                    type = AARSOPPGJOER,
+                    sanksjoner = sanksjoner,
+                )
+            } else {
+                null
             }
 
         val oppdatertAarsoppgjoer =

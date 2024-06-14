@@ -16,13 +16,9 @@ enum class BehandlingStatus {
     AVBRUTT,
     ;
 
-    fun kanAvbrytes(): Boolean {
-        return this !in iverksattEllerAttestert() && this != AVBRUTT
-    }
+    fun kanAvbrytes(): Boolean = this !in iverksattEllerAttestert() && this != AVBRUTT
 
-    fun aapenBehandling(): Boolean {
-        return this in underBehandling() + ATTESTERT
-    }
+    fun aapenBehandling(): Boolean = this in underBehandling() + ATTESTERT
 
     fun kanEndres() = this in BehandlingStatus.kanEndres()
 

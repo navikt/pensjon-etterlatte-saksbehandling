@@ -62,7 +62,5 @@ enum class TilbakekrevingStatus {
     AVBRUTT,
     ;
 
-    fun kanEndres(): Boolean {
-        return this in listOf(OPPRETTET, UNDER_ARBEID, VALIDERT, UNDERKJENT)
-    }
+    fun kanEndres(): Boolean = this in listOf(OPPRETTET, UNDER_ARBEID, VALIDERT, UNDERKJENT)
 }

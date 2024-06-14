@@ -75,7 +75,7 @@ fun Route.vilkaarsvurdering(
                             ?: true
 
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
-                    val vilkaarsvurdering =
+                    val (vilkaarsvurdering, behandlingGrunnlagsversjon) =
                         vilkaarsvurderingService.opprettVilkaarsvurdering(
                             behandlingId,
                             brukerTokenInfo,
@@ -85,7 +85,7 @@ fun Route.vilkaarsvurdering(
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            behandlingGrunnlagsversjon,
                         ),
                     )
                 } catch (e: VirkningstidspunktIkkeSattException) {
@@ -107,7 +107,7 @@ fun Route.vilkaarsvurdering(
 
                 try {
                     logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
-                    val vilkaarsvurdering =
+                    val (vilkaarsvurdering, behandlingGrunnversjon) =
                         vilkaarsvurderingService.kopierVilkaarsvurdering(
                             behandlingId = behandlingId,
                             kopierFraBehandling = forrigeBehandling,
@@ -117,7 +117,7 @@ fun Route.vilkaarsvurdering(
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            behandlingGrunnversjon,
                         ),
                     )
                 } catch (e: VirkningstidspunktIkkeSattException) {
@@ -177,7 +177,6 @@ fun Route.vilkaarsvurdering(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
                 val statusOppdatert =
                     vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
@@ -242,7 +241,7 @@ fun Route.vilkaarsvurdering(
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                     try {
-                        val vilkaarsvurdering =
+                        val (vilkaarsvurdering, behandlingGrunnlagversjon) =
                             vilkaarsvurderingService.oppdaterTotalVurdering(
                                 behandlingId,
                                 brukerTokenInfo,
@@ -251,7 +250,7 @@ fun Route.vilkaarsvurdering(
                         call.respond(
                             toDto(
                                 vilkaarsvurdering,
-                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                                behandlingGrunnlagversjon,
                             ),
                         )
                     } catch (e: BehandlingstilstandException) {

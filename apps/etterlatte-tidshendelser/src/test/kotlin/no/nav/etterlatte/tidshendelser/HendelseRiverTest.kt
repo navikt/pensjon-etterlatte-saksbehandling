@@ -2,12 +2,12 @@ package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -35,11 +35,11 @@ class HendelseRiverTest(
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
-                    ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE",
-                    ALDERSOVERGANG_TYPE_KEY to "BP20",
-                    ALDERSOVERGANG_ID_KEY to hendelseId.toString(),
+                    TIDSHENDELSE_STEG_KEY to "VURDERT_LOEPENDE_YTELSE",
+                    TIDSHENDELSE_TYPE_KEY to "BP20",
+                    TIDSHENDELSE_ID_KEY to hendelseId.toString(),
                     SAK_ID_KEY to 8763L,
                     HENDELSE_DATA_KEY to mapOf("loependeYtelse" to true),
                 ),
@@ -62,11 +62,11 @@ class HendelseRiverTest(
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
-                    ALDERSOVERGANG_STEG_KEY to "OPPGAVE_OPPRETTET",
-                    ALDERSOVERGANG_TYPE_KEY to "BP20",
-                    ALDERSOVERGANG_ID_KEY to hendelseId.toString(),
+                    TIDSHENDELSE_STEG_KEY to "OPPGAVE_OPPRETTET",
+                    TIDSHENDELSE_TYPE_KEY to "BP20",
+                    TIDSHENDELSE_ID_KEY to hendelseId.toString(),
                     SAK_ID_KEY to 4735L,
                 ),
             )

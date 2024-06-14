@@ -86,6 +86,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             BarnepensjonForeldreloesRedigerbar.fra(
                 generellBrevData,
                 etterbetaling.await(),
+                utbetalingsinfo = utbetalingsinfo.await(),
             )
         } else {
             BarnepensjonInnvilgelseRedigerbartUtfall.fra(

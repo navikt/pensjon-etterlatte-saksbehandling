@@ -99,10 +99,7 @@ export default function BehandleJournalfoeringOppgave() {
               />
             ) : (
               <Routes>
-                <Route
-                  index
-                  element={<StartOppgavebehandling antallBehandlinger={sakMedBehandlinger.behandlinger.length} />}
-                />
+                <Route index element={<StartOppgavebehandling />} />
 
                 <Route path="nybehandling">
                   <Route index element={<OpprettNyBehandling />} />

@@ -7,8 +7,8 @@ internal fun buildTestApplicationConfigurationForOauth(
     port: Int,
     issuerId: String,
     clientId: String,
-): HoconApplicationConfig {
-    return HoconApplicationConfig(
+): HoconApplicationConfig =
+    HoconApplicationConfig(
         ConfigFactory.parseMap(
             mapOf(
                 "no.nav.security.jwt.issuers" to
@@ -22,4 +22,3 @@ internal fun buildTestApplicationConfigurationForOauth(
             ),
         ),
     )
-}

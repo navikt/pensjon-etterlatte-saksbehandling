@@ -2,9 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -13,6 +10,9 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -29,15 +29,15 @@ class TidshendelseRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
+        initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
             validate {
                 it.requireAny(
-                    ALDERSOVERGANG_STEG_KEY,
+                    TIDSHENDELSE_STEG_KEY,
                     listOf("VURDERT_LOEPENDE_YTELSE", "BEHANDLING_OPPRETTET"),
                 )
             }
-            validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
-            validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
+            validate { it.requireKey(TIDSHENDELSE_TYPE_KEY) }
+            validate { it.requireKey(TIDSHENDELSE_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(DRYRUN) }
@@ -51,9 +51,9 @@ class TidshendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val steg = packet[ALDERSOVERGANG_STEG_KEY].asText()
-        val type = packet[ALDERSOVERGANG_TYPE_KEY].asText()
-        val hendelseId = packet[ALDERSOVERGANG_ID_KEY].asText()
+        val steg = packet[TIDSHENDELSE_STEG_KEY].asText()
+        val type = packet[TIDSHENDELSE_TYPE_KEY].asText()
+        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asText()
         val dryrun = packet[DRYRUN].asBoolean()
         val sakId = packet.sakId
 
@@ -100,7 +100,7 @@ class TidshendelseRiver(
             packet["oms_rett_uten_tidsbegrensning"] = result
         }
 
-        packet[ALDERSOVERGANG_STEG_KEY] = "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+        packet[TIDSHENDELSE_STEG_KEY] = "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
         return true
     }
 
@@ -118,7 +118,7 @@ class TidshendelseRiver(
             vilkaarsvurderingService.opphoerAldersovergang(behandlingId, forrigeBehandlingId)
         }
 
-        packet[ALDERSOVERGANG_STEG_KEY] = "VILKAARSVURDERT"
+        packet[TIDSHENDELSE_STEG_KEY] = "VILKAARSVURDERT"
         return true
     }
 }

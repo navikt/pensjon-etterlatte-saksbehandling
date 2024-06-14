@@ -71,7 +71,7 @@ class JournalfoerSoeknadService(
                     dokumenter = listOf(dokument),
                 )
 
-            runBlocking { dokarkivKlient.opprettJournalpost(request, forsoekFerdistill = false) }
+            runBlocking { dokarkivKlient.opprettJournalpost(request, forsoekFerdigstill = false) }
         } catch (e: Exception) {
             logger.error("Feil oppsto ved journalføring av søknad (id=$soeknadId)", e)
             null

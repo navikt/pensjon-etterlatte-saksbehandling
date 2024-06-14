@@ -423,7 +423,7 @@ data class Aarsoppgjoer(
         if (ytelseFoerAvkorting.isEmpty()) {
             YearMonth.of(aar, 1)
         } else {
-            ytelseFoerAvkorting.first().periode.fom
+            ytelseFoerAvkorting.minOf { it.periode.fom }
         }
 
     /**

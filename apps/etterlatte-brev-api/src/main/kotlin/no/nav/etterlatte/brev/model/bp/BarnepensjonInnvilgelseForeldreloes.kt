@@ -12,10 +12,13 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class BarnepensjonInnvilgelseForeldreloes(
@@ -25,8 +28,8 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
-    val flerePerioder: Boolean,
     val harUtbetaling: Boolean,
+    val erGjenoppretting: Boolean,
     val vedtattIPesys: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -42,6 +45,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             brevutfall: BrevutfallDto,
             vedtattIPesys: Boolean,
             avdoede: List<Avdoed>,
+            erGjenoppretting: Boolean,
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
@@ -67,8 +71,8 @@ data class BarnepensjonInnvilgelseForeldreloes(
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                flerePerioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                erGjenoppretting = erGjenoppretting,
                 vedtattIPesys = vedtattIPesys,
             )
         }
@@ -76,17 +80,43 @@ data class BarnepensjonInnvilgelseForeldreloes(
 }
 
 data class BarnepensjonForeldreloesRedigerbar(
+    val virkningsdato: LocalDate,
+    val sisteBeregningsperiodeBeloep: Kroner,
+    val sisteBeregningsperiodeDatoFom: LocalDate,
     val erEtterbetaling: Boolean,
+    val flerePerioder: Boolean,
+    val harUtbetaling: Boolean,
+    val erGjenoppretting: Boolean,
     val vedtattIPesys: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             etterbetaling: EtterbetalingDTO?,
-        ): BarnepensjonForeldreloesRedigerbar =
-            BarnepensjonForeldreloesRedigerbar(
+            utbetalingsinfo: Utbetalingsinfo,
+        ): BarnepensjonForeldreloesRedigerbar {
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+
+            return BarnepensjonForeldreloesRedigerbar(
+                virkningsdato = utbetalingsinfo.virkningsdato,
+                sisteBeregningsperiodeDatoFom =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
+                        ?: throw UgyldigForespoerselException(
+                            code = "INGEN_BEREGNINGSPERIODE_MED_FOM",
+                            detail = "Ingen beregningsperiode med dato FOM",
+                        ),
+                sisteBeregningsperiodeBeloep =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
+                        ?: throw UgyldigForespoerselException(
+                            code = "INTET_UTBETALT_BELOEP",
+                            detail = "Intet utbetalt beløp i siste beregningsperiode",
+                        ),
                 erEtterbetaling = etterbetaling != null,
+                flerePerioder = utbetalingsinfo.beregningsperioder.size > 1,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 vedtattIPesys = generellBrevData.loependeIPesys(),
             )
+        }
     }
 }

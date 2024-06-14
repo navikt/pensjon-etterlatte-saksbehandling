@@ -22,10 +22,10 @@ class DokarkivKlient(
 
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpostRequest,
-        forsoekFerdistill: Boolean = true,
+        forsoekFerdigstill: Boolean = true,
     ): OpprettJournalpostResponse {
         val response =
-            client.post("$url?forsoekFerdigstill=$forsoekFerdistill") {
+            client.post("$url?forsoekFerdigstill=$forsoekFerdigstill") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)

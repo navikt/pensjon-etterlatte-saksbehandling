@@ -7,7 +7,7 @@ interface DokarkivService {
 
     suspend fun oppdater(
         journalpostId: String,
-        forsoekFerdistill: Boolean,
+        forsoekFerdigstill: Boolean,
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
@@ -40,7 +40,7 @@ internal class DokarkivServiceImpl(
 
     override suspend fun oppdater(
         journalpostId: String,
-        forsoekFerdistill: Boolean,
+        forsoekFerdigstill: Boolean,
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse {
@@ -55,7 +55,7 @@ internal class DokarkivServiceImpl(
 
         logger.info("Journalpost med id=$journalpostId oppdatert OK!")
 
-        if (forsoekFerdistill) {
+        if (forsoekFerdigstill) {
             if (journalfoerendeEnhet.isNullOrBlank()) {
                 logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
             } else {

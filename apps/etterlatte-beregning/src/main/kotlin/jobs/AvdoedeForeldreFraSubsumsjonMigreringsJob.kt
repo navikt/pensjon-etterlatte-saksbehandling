@@ -101,7 +101,7 @@ class AvdoedeForeldreFraSubsumsjonMigreringsJob(
         ) {
             if (erLeader()) {
                 finnBeregningsGrunnlagMedFlereAvdoede().forEach { behandlingsId ->
-                    logger.info("Nehandling $behandlingsId")
+                    logger.info("Behandling $behandlingsId")
 
                     beregningRepository.hent(behandlingsId)?.let { beregning ->
                         logger.info(

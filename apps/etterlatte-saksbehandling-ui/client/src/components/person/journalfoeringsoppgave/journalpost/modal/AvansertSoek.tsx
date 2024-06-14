@@ -7,6 +7,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { soekPerson } from '~shared/api/pdltjenester'
 
 interface ModalProps {
   open: boolean
@@ -14,23 +15,28 @@ interface ModalProps {
 }
 
 export interface SoekPerson {
-  fornavn: string
-  etternavn: string
+  fornavn?: string
+  etternavn?: string
   statsborgerskap?: string
   foedselsdato?: Date
-  doedsdato?: string
 }
 
 export default function AvansertSoek({ open, setOpen }: ModalProps) {
   const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
+  const [, soekperson] = useApiCall(soekPerson)
+
   useEffect(() => {
     landListeFetch(null)
   }, [])
 
-  const navnErGyldig = (navn: string): boolean => {
-    const utenMellomrom = navn.trim()
-    const spesicalCharacters = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
-    return utenMellomrom.match(/\d+/) == null && utenMellomrom.match(spesicalCharacters) == null
+  const navnErGyldig = (navn: string | undefined): boolean => {
+    if (navn) {
+      const utenMellomrom = navn.trim()
+      const spesicalCharacters = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+      return utenMellomrom.match(/\d+/) == null && utenMellomrom.match(spesicalCharacters) == null
+    } else {
+      return false
+    }
   }
 
   const {
@@ -41,8 +47,10 @@ export default function AvansertSoek({ open, setOpen }: ModalProps) {
     handleSubmit,
     watch,
   } = useForm<SoekPerson>({ defaultValues: { statsborgerskap: undefined }, mode: 'all' })
+
   console.log('formstate: ', getValues())
   console.log('errors: ', errors)
+
   watch()
   return (
     <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)} width="medium">
@@ -83,7 +91,6 @@ export default function AvansertSoek({ open, setOpen }: ModalProps) {
           ),
         })}
         <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} />
-        <ControlledDatoVelger name="doedsdato" label="Dødsdato" control={control} />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setOpen(false)}>
@@ -92,8 +99,11 @@ export default function AvansertSoek({ open, setOpen }: ModalProps) {
         <Button
           variant="primary"
           onClick={() => {
+            console.log('onclick')
+            soekperson(getValues())
             handleSubmit(
               (person) => {
+                soekperson(person)
                 console.log('person: ', person)
               },
               (errors) => {

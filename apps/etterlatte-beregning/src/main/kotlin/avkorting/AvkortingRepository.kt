@@ -30,6 +30,7 @@ class AvkortingRepository(
                                 Aarsoppgjoer(
                                     id = row.uuid("id"),
                                     aar = row.int("aar"),
+                                    forventaInnvilgaMaaneder = row.string("innvilga_maaneder").toInt(),
                                 )
                             }.asList,
                     )
@@ -122,9 +123,7 @@ class AvkortingRepository(
                                 )
                             }
 
-                        Aarsoppgjoer(
-                            id = aarsoppgjoer.id,
-                            aar = aarsoppgjoer.aar,
+                        aarsoppgjoer.copy(
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             inntektsavkorting = inntektsavkorting,
                             avkortetYtelseAar = avkortetYtelseAar,
@@ -214,9 +213,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkorting_aarsoppgjoer(
-            	id, behandling_id, sak_id, aar
+            	id, behandling_id, sak_id, aar, innvilga_maaneder
             ) VALUES (
-            	:id, :behandling_id, :sak_id, :aar
+            	:id, :behandling_id, :sak_id, :aar, :innvilga_maaneder
             )
             """.trimIndent(),
         paramMap =
@@ -225,6 +224,7 @@ class AvkortingRepository(
                 "behandling_id" to behandlingId,
                 "sak_id" to sakId,
                 "aar" to aarsoppgjoer.aar,
+                "innvilga_maaneder" to aarsoppgjoer.forventaInnvilgaMaaneder,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -238,10 +238,10 @@ class AvkortingRepository(
             """
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
-                relevante_maaneder, spesifikasjon, kilde, aarsoppgjoer_id
+                spesifikasjon, kilde, aarsoppgjoer_id
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
-                :relevanteMaanederInnAar, :spesifikasjon, :kilde, :aarsoppgjoerId
+                :spesifikasjon, :kilde, :aarsoppgjoerId
             )
             """.trimIndent(),
         paramMap =
@@ -255,7 +255,6 @@ class AvkortingRepository(
                 "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
                 "inntektUtland" to avkortingsgrunnlag.inntektUtland,
                 "fratrekkInnAarUtland" to avkortingsgrunnlag.fratrekkInnAarUtland,
-                "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
             ),
@@ -399,7 +398,6 @@ class AvkortingRepository(
                 ),
             aarsinntekt = int("aarsinntekt"),
             fratrekkInnAar = int("fratrekk_inn_ut"),
-            relevanteMaanederInnAar = int("relevante_maaneder"),
             inntektUtland = int("inntekt_utland"),
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
             spesifikasjon = string("spesifikasjon"),

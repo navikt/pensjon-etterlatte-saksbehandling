@@ -116,7 +116,6 @@ class AvkortingRoutesTest {
                             tom = dato,
                             aarsinntekt = 100000,
                             fratrekkInnAar = 10000,
-                            relevanteMaanederInnAar = 12,
                             spesifikasjon = "Spesifikasjon",
                             inntektUtland = 0,
                             fratrekkInnAarUtland = 0,

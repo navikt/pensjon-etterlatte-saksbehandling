@@ -2,13 +2,11 @@ package no.nav.etterlatte.avkorting
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -18,70 +16,32 @@ class AvkortingRegelkjoringTest {
     fun `skal beregne avkorting for inntekt til en foerstegangsbehandling`() {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.JANUARY))
         val avkortingGrunnlag =
-            listOf(
-                avkortinggrunnlag(
-                    aarsinntekt = 300000,
-                    fratrekkInnAar = 50000,
-                    relevanteMaanederInnAar = 10,
-                    periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = YearMonth.of(2024, Month.FEBRUARY)),
-                ),
-                avkortinggrunnlag(
-                    aarsinntekt = 600000,
-                    fratrekkInnAar = 100000,
-                    relevanteMaanederInnAar = 10,
-                    periode = Periode(fom = YearMonth.of(2024, Month.MARCH), tom = null),
-                ),
+            avkortinggrunnlag(
+                aarsinntekt = 300000,
+                fratrekkInnAar = 50000,
+                periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
             )
 
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 Periode(fom = virkningstidspunkt.dato, tom = null),
                 avkortingGrunnlag,
+                12,
             )
 
         with(avkortingsperioder[0]) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
             periode.fom shouldBe YearMonth.of(2024, Month.JANUARY)
-            periode.tom shouldBe YearMonth.of(2024, Month.FEBRUARY)
-            avkorting shouldBe 9026
+            periode.tom shouldBe YearMonth.of(2024, Month.APRIL)
+            avkorting shouldBe 7151
         }
         with(avkortingsperioder[1]) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
-            periode.fom shouldBe YearMonth.of(2024, Month.MARCH)
-            periode.tom shouldBe YearMonth.of(2024, Month.APRIL)
-            avkorting shouldBe 20276
-        }
-        with(avkortingsperioder[2]) {
-            regelResultat shouldNotBe null
-            tidspunkt shouldNotBe null
             periode.fom shouldBe YearMonth.of(2024, Month.MAY)
             periode.tom shouldBe null
-            avkorting shouldBe 20174
-        }
-    }
-
-    @Test
-    fun `skal ikke tillate aa beregne avkorting for inntekt med feil perioder`() {
-        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, Month.JANUARY))
-        val avkortingGrunnlag =
-            listOf(
-                avkortinggrunnlag(
-                    aarsinntekt = 300000,
-                    periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
-                ),
-                avkortinggrunnlag(
-                    aarsinntekt = 500000,
-                    periode = Periode(fom = YearMonth.of(2024, Month.APRIL), tom = null),
-                ),
-            )
-
-        assertThrows<PeriodiseringAvGrunnlagFeil> {
-            AvkortingRegelkjoring.beregnInntektsavkorting(
-                Periode(fom = virkningstidspunkt.dato, tom = null),
-                avkortingGrunnlag,
-            )
+            avkorting shouldBe 7049
         }
     }
 

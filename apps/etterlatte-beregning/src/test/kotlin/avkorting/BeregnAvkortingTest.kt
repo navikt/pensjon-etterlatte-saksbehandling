@@ -1320,7 +1320,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring nytt år`() {
         val avkorting = `Revurdering ny inntekt for nytt år`()
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1452,7 +1452,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1483,7 +1483,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering på tvers av år`() {
         val avkorting = `Revurdering med virk tilbake i tidligere år`()
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
             size shouldBe 6
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1651,7 +1651,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1682,7 +1682,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering enda en inntektsendring nytt år`() {
         val avkorting = `Revurdering enda en ny inntekt nytt år`()
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
             size shouldBe 6
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1850,7 +1850,7 @@ class BeregnAvkortingTest {
                 )
             }
         }
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[1].avkortetYtelseAar) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -1876,7 +1876,7 @@ class BeregnAvkortingTest {
                 it.restanse shouldBe null
             }
         }
-        with(avkorting.hentAarsoppgjoer(YearMonth.of(2026, 1)).avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer[2].avkortetYtelseAar) {
             size shouldBe 1
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(

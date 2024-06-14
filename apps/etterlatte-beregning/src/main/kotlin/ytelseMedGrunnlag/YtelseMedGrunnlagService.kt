@@ -32,10 +32,10 @@ class YtelseMedGrunnlagService(
                         .filter { it.datoFOM <= avkortetYtelse.periode.fom }
                         .maxBy { it.datoFOM }
 
+                // TODO erstatt single..
+                val aarsoppgjoer = avkorting.aarsoppgjoer.single()
                 val avkortingsgrunnlagIPeriode =
-                    avkorting.aarsoppgjoer
-                        .single()
-                        .inntektsavkorting
+                    aarsoppgjoer.inntektsavkorting
                         .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
                         .maxBy { it.grunnlag.periode.fom }
 
@@ -52,7 +52,7 @@ class YtelseMedGrunnlagService(
                     trygdetid = beregningIPeriode.trygdetid,
                     aarsinntekt = aarsinntekt,
                     fratrekkInnAar = fratrekkInnAar,
-                    relevanteMaanederInnAar = grunnlag.relevanteMaanederInnAar,
+                    relevanteMaanederInnAar = aarsoppgjoer.forventaInnvilgaMaaneder,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,

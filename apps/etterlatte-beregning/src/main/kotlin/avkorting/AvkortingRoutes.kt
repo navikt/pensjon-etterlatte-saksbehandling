@@ -80,6 +80,7 @@ fun Route.avkorting(
 
 fun Avkorting.toDto() =
     AvkortingDto(
+        // TODO erstatt single
         avkortingGrunnlag = aarsoppgjoer.single().inntektsavkorting.map { it.grunnlag.toDto() },
         avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
         tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() },
@@ -92,7 +93,6 @@ fun AvkortingGrunnlag.toDto() =
         tom = periode.tom,
         aarsinntekt = aarsinntekt,
         fratrekkInnAar = fratrekkInnAar,
-        relevanteMaanederInnAar = relevanteMaanederInnAar,
         inntektUtland = inntektUtland,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
         spesifikasjon = spesifikasjon,

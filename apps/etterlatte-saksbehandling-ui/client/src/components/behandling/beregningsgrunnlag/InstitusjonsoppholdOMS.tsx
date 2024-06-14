@@ -36,7 +36,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   )
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
-  const { control, register, watch, handleSubmit, formState, getValues } = useForm<{
+  const { control, register, watch, handleSubmit, formState } = useForm<{
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
@@ -56,7 +56,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   ]
 
   useEffect(() => {
-    if (getValues().institusjonsOppholdForm.length == 0) {
+    if (heleSkjemaet.length == 0) {
       onSubmit([])
     }
   }, [heleSkjemaet])

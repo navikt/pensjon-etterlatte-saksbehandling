@@ -1,5 +1,5 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
@@ -36,7 +36,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   )
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
-  const { control, register, watch, handleSubmit, formState } = useForm<{
+  const { control, register, watch, handleSubmit, formState, getValues } = useForm<{
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
@@ -54,7 +54,14 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   const feilOverlappendePerioder: [number, FeilIPeriode][] = [
     ...feilIKomplettePerioderOverIntervallInstitusjonsopphold(heleSkjemaet),
   ]
-  const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }) => {
+
+  useEffect(() => {
+    if (getValues().institusjonsOppholdForm.length == 0) {
+      onSubmit([])
+    }
+  }, [heleSkjemaet])
+
+  const lagreSkjema = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }) => {
     if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder?.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
@@ -153,7 +160,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
         </Button>
       )}
       {behandles && (
-        <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
+        <Button type="submit" onClick={handleSubmit(lagreSkjema)}>
           Lagre institusjonsopphold
         </Button>
       )}

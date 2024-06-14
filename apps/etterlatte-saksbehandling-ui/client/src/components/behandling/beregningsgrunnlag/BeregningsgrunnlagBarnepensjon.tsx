@@ -143,6 +143,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     }
     if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalViseSoeskenjustering) {
       dispatch(resetBeregning())
+      console.log(institusjonsoppholdsGrunnlagData)
       const beregningsgrunnlag = {
         soeskenMedIBeregning: soeskenGrunnlagsData
           ? mapListeTilDto(soeskenGrunnlagsData)
@@ -159,6 +160,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           ? mapListeTilDto(beregningsmetodeForAvdoede)
           : behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede ?? [],
       }
+      console.log('beregningsgrunnlag: ', beregningsgrunnlag)
 
       postBeregningsgrunnlag(
         {

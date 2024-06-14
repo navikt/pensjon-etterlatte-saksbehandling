@@ -28,6 +28,7 @@ class Server(
             initEmbeddedServer(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
+                cronJobs = listOf(avdoedeForeldreFraSubsumsjonMigreringsJob),
             ) {
                 beregning(beregningService, behandlingKlient)
                 beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)

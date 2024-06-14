@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -31,7 +33,7 @@ class GrunnlagmapperTest {
     private val adresseService = mockk<AdresseService>()
 
     @Test
-    fun `mapVerge henter vergemaal hvis definert i grunnlag for sak og søker`() {
+    fun `mapVerge henter ukjent vergemaal hvis flere verger i grunnlag for søker`() {
         val soeker =
             personTestData(mapOf(FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())))
                 .copy(
@@ -53,10 +55,38 @@ class GrunnlagmapperTest {
         coEvery {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
+        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!!
+
+        Assertions.assertTrue(verge is UkjentVergemaal)
+    }
+
+    @Test
+    fun `mapVerge henter vergemaal hvis det finnes en verge i grunnlag for søker`() {
+        val soeker =
+            personTestData(mapOf(FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())))
+                .copy(
+                    vergemaalEllerFremtidsfullmakt =
+                        listOf(
+                            vergemaal(pdlVergeOekonomiskFnr, "", "personligeOgOekonomiskeInteresser"),
+                        ),
+                )
+        val opplysningsgrunnlag =
+            GrunnlagTestData(
+                opplysningsmapSoekerOverrides =
+                    mapOf(
+                        SOEKER_PDL_V1 to opprettOpplysning(soeker.toJsonNode()),
+                    ),
+                opplysningsmapSakOverrides = emptyMap(),
+            ).hentOpplysningsgrunnlag()
+
+        coEvery {
+            adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
+        } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
         val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!! as Vergemaal
 
         verge.navn() shouldBe "Vera Verge"
-        verge.foedselsnummer shouldBe Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr)
+        verge.navn shouldBe "Vera Verge"
+        verge.foedselsnummer.value shouldBe pdlVergeOekonomiskFnr
     }
 
     private fun vergemaal(

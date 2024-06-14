@@ -1,0 +1,75 @@
+package no.nav.etterlatte.brev.brevbaker
+
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import no.nav.etterlatte.brev.EtterlatteBrevKode
+import no.nav.etterlatte.brev.adresse.Avsender
+import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
+import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import org.junit.jupiter.api.Test
+
+class BrevbakerRequestTest {
+    @Test
+    fun `skal sette verges navn naar den finnes`() {
+        val request =
+            brevbakerRequest(
+                soekerOgEventuellVerge =
+                    SoekerOgEventuellVerge(
+                        Soeker("", "", "", Foedselsnummer("08498224343"), null, true, true),
+                        Vergemaal("Palle Poulsen", Folkeregisteridentifikator.of("09498230323")),
+                    ),
+            )
+        request.felles.vergeNavn shouldBe "Palle Poulsen"
+    }
+
+    @Test
+    fun `skal sette verges navn til søkers navn ved verge hvis verge ikke finnes`() {
+        val request =
+            brevbakerRequest(
+                soekerOgEventuellVerge =
+                    SoekerOgEventuellVerge(
+                        Soeker("", "", "", Foedselsnummer("08498224343"), null, true, true),
+                        null,
+                    ),
+            )
+        request.felles.vergeNavn shouldBe "Palle Poulsen"
+    }
+
+    @Test
+    fun `skal sette verges navn til søkers navn ved verge hvis ukjent vergemaal`() {
+        val request =
+            brevbakerRequest(
+                soekerOgEventuellVerge =
+                    SoekerOgEventuellVerge(
+                        Soeker("Terje", "André", "Vigen", Foedselsnummer("08498224343"), null, true, true),
+                        UkjentVergemaal(),
+                    ),
+            )
+        request.felles.vergeNavn shouldBe "Terje André Vigen ved verge"
+    }
+
+    private fun brevbakerRequest(
+        brevKode: EtterlatteBrevKode = mockk(),
+        brevData: BrevData = mockk(),
+        avsender: Avsender = Avsender("", Telefonnummer("123"), "", ""),
+        soekerOgEventuellVerge: SoekerOgEventuellVerge = mockk(),
+        sakId: Long = 2L,
+        spraak: Spraak = Spraak.NB,
+        sakType: SakType = SakType.BARNEPENSJON,
+    ) = BrevbakerRequest.fra(
+        brevKode = brevKode,
+        brevData = brevData,
+        avsender = avsender,
+        soekerOgEventuellVerge = soekerOgEventuellVerge,
+        sakId = sakId,
+        spraak = spraak,
+        sakType = sakType,
+    )
+}

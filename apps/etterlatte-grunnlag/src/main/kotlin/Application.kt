@@ -9,7 +9,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
-import no.nav.etterlatte.grunnlag.VergeService
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
@@ -75,10 +74,9 @@ class ApplicationBuilder {
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val vergeService = VergeService(persondataKlient)
-    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, vergeService)
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
     private val grunnlagService =
-        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter, vergeService)
+        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter)
 
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)

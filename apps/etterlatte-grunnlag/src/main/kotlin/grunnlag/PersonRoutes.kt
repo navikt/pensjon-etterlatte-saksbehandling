@@ -65,14 +65,5 @@ fun Route.personRoute(
                 )
             }
         }
-
-        post("vergeadresse") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
-                when (val adresse = grunnlagService.hentVergeadresse(fnr.value)) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(adresse)
-                }
-            }
-        }
     }
 }

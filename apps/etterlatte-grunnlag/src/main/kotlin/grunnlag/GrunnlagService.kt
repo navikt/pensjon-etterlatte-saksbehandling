@@ -29,7 +29,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -111,8 +110,6 @@ interface GrunnlagService {
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
-
     fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar
 
     fun laasTilVersjonForBehandling(
@@ -126,7 +123,6 @@ class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
     private val grunnlagHenter: GrunnlagHenter,
-    private val vergeService: VergeService,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -319,12 +315,6 @@ class RealGrunnlagService(
         opplysningDao.oppdaterVersjonForBehandling(behandlingId, grunnlag.metadata.sakId, hendelsenummer)
 
         return historiskForeldreansvar
-    }
-
-    override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
-        val pdlPerson =
-            pdltjenesterKlient.hentPerson(folkeregisteridentifikator, PersonRolle.BARN, SakType.BARNEPENSJON)
-        return vergeService.hentGrunnlagsopplysningVergesAdresse(pdlPerson)?.opplysning
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {

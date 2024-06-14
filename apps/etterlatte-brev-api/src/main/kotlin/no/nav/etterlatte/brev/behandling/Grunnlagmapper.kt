@@ -21,10 +21,12 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.ForelderVerge
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.hentRelevantVerge
+import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -90,34 +92,35 @@ fun Grunnlag.mapVerge(
     adresseService: AdresseService,
 ): Verge? =
     with(this) {
-        val relevantVerge =
-            hentRelevantVerge(
-                soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt,
+        val verger =
+            hentVerger(
+                soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
                 soeker.hentFoedselsnummer()?.verdi,
             )
-        if (relevantVerge != null) {
-            val mottakerAdresse =
-                runBlocking {
-                    adresseService.hentMottakerAdresse(
-                        sakType,
-                        relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value,
-                    )
-                }
-            return Vergemaal(
-                mottakerAdresse.navn,
-                relevantVerge.vergeEllerFullmektig.motpartsPersonident!!,
+        return if (verger.size == 1) {
+            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident!!
+            Vergemaal(
+                navnViaAdresse(adresseService, sakType, vergeFnr),
+                vergeFnr,
             )
-        }
-
-        if (sakType == SakType.BARNEPENSJON) {
-            if (erOver18(brevutfallDto)) {
-                null
-            } else {
-                hentForelderVerge()
-            }
+        } else if (verger.size > 1) {
+            UkjentVergemaal()
+        } else if (sakType == SakType.BARNEPENSJON && !erOver18(brevutfallDto)) {
+            hentForelderVerge()
         } else {
             null
         }
+    }
+
+private fun navnViaAdresse(
+    adresseService: AdresseService,
+    sakType: SakType,
+    vergeFnr: Folkeregisteridentifikator,
+): String =
+    runBlocking {
+        adresseService
+            .hentMottakerAdresse(sakType, vergeFnr.value)
+            .navn
     }
 
 private fun Grunnlag.hentForelderVerge(): ForelderVerge? {

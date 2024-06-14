@@ -64,7 +64,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagServiceTest {
-    private val vergeService = mockk<VergeService>()
     private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
@@ -75,7 +74,6 @@ internal class GrunnlagServiceTest {
             opplysningDao = opplysningDaoMock,
             sporingslogg = mockk(),
             grunnlagHenter = grunnlagHenter,
-            vergeService = vergeService,
         )
 
     private val testData = GrunnlagTestData()

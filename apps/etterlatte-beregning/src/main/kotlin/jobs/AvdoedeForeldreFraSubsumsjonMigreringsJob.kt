@@ -29,13 +29,13 @@ class AvdoedeForeldreFraSubsumsjonMigreringsJob(
         SELECT
             behandlings_id
         FROM beregningsgrunnlag
-        WHERE beregnings_metode_flere_avdoede = IS NOT NULL
+        WHERE beregnings_metode_flere_avdoede IS NOT NULL
         """.trimIndent()
 
     private val oppdaterBeregningsPeriode =
         """
         UPDATE beregningsperiode
-        SET avdoedeForeldre = :avdoedeForeldre
+        SET avdoede_foreldre = :avdoedeForeldre::JSONB
         WHERE id = :id
         """.trimIndent()
 
@@ -67,13 +67,14 @@ class AvdoedeForeldreFraSubsumsjonMigreringsJob(
     }
 
     private fun finnBeregningsGrunnlagMedFlereAvdoede() =
-        dataSource.transaction { tx ->
-            queryOf(
-                statement = finnKandidaterBeregningsGrunnlag,
-            ).let { query ->
-                tx.run(query.map { it.uuid("behandlings_id") }.asList)
-            }
-        }
+        dataSource
+            .transaction { tx ->
+                queryOf(
+                    statement = finnKandidaterBeregningsGrunnlag,
+                ).let { query ->
+                    tx.run(query.map { it.uuid("behandlings_id") }.asList)
+                }
+            }.also { logger.info("Fant ${it.size} beregningsgrunnlag med flere avøded") }
 
     private fun oppdaterBeregningsPeriodeMedAvdoedeForeldre(
         id: UUID,
@@ -100,15 +101,23 @@ class AvdoedeForeldreFraSubsumsjonMigreringsJob(
         ) {
             if (erLeader()) {
                 finnBeregningsGrunnlagMedFlereAvdoede().forEach { behandlingsId ->
+                    logger.info("Nehandling $behandlingsId")
+
                     beregningRepository.hent(behandlingsId)?.let { beregning ->
+                        logger.info(
+                            "Behandling $behandlingsId for beregning ${beregning.beregningId} med ${beregning.beregningsperioder.size} perioder",
+                        )
+
                         beregning.beregningsperioder
                             .filter { it.id != null } // Må vite hvilken vi skal oppdater
-                            .filterNot { it.avdodeForeldre.isNullOrEmpty() } // Allerede satt
+                            .filter { it.avdodeForeldre.isNullOrEmpty() } // Ta vekk allerede satt
                             .filter { it.regelResultat != null } // Ikke noe å sette fra
                             .forEach { periode ->
                                 periode.regelResultat?.let { json ->
                                     // Les med readValue - gir en nested kotlin map
                                     val subsumsjon: Map<String, Any?> = objectMapper.readValue(json.toJson())
+
+                                    logger.info("Skal prosessere subsumsjon for beregningsperiode ${periode.id}")
 
                                     val avdoedeForeldre =
                                         processSubsumsjonsNode(
@@ -116,6 +125,7 @@ class AvdoedeForeldreFraSubsumsjonMigreringsJob(
                                         ).toSet().toList()
 
                                     if (avdoedeForeldre.isNotEmpty()) {
+                                        logger.info("Fant ${avdoedeForeldre.size} avdøde for beregningsperiode ${periode.id}")
                                         oppdaterBeregningsPeriodeMedAvdoedeForeldre(periode.id!!, avdoedeForeldre)
                                     }
                                 }

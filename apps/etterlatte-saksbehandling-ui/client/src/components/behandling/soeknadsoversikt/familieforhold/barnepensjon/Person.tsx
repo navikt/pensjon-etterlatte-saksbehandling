@@ -53,6 +53,7 @@ export const Person = ({
       return 'Gjenlevende forelder'
     }
   }
+
   return (
     <PersonBorder>
       <IconWrapper>

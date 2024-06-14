@@ -65,6 +65,80 @@ class BeregnAvkortingTest {
     }
 
     @Test
+    fun `Førstegangsbehandling med sanksjon beregner riktig ytelse`() {
+        val avkorting = `Avkorting foerstegangsbehandling med sanksjon`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 4
+            get(0).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MARCH), tom = YearMonth.of(2024, Month.APRIL)),
+                    ytelseEtterAvkorting = 6650,
+                    ytelseEtterAvkortingFoerRestanse = 6650,
+                    restanse = null,
+                    avkortingsbeloep = 9026,
+                    ytelseFoerAvkorting = 15676,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(1).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.JULY)),
+                    ytelseEtterAvkorting = 7758,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(2).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST)),
+                    ytelseEtterAvkorting = 0,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+                AvkortetYtelse::sanksjon,
+            )
+            get(2).sanksjon?.sanksjonType shouldBe SanksjonType.BORTFALL
+            get(3).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.SEPTEMBER), tom = null),
+                    ytelseEtterAvkorting = 7758,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+        }
+    }
+
+    @Test
     fun `Revurdering legger inn sanksjon beregner 0 i sanksjonsperioden`() {
         val avkorting = `Avkorting revurdering med en sanksjon åpen periode`()
         with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
@@ -1764,6 +1838,42 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+            )
+
+    private fun `Avkorting foerstegangsbehandling med sanksjon`() =
+        Avkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 300000,
+                        fratrekkInnAar = 50000,
+                    ),
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = YearMonth.of(2024, Month.APRIL),
+                                    utbetaltBeloep = 15676,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    utbetaltBeloep = 16682,
+                                ),
+                            ),
+                    ),
+                sanksjoner =
+                    listOf(
+                        sanksjon(
+                            fom = YearMonth.of(2024, Month.AUGUST),
+                            tom = YearMonth.of(2024, Month.AUGUST),
+                            type = SanksjonType.BORTFALL,
+                        ),
+                    ),
             )
 
     private fun `Avkorting revurdering med en sanksjon åpen periode`() =

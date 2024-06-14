@@ -50,10 +50,10 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 
 ## Integrasjon
 
-| Miljø | Ingress                                                 |
-|:------|:--------------------------------------------------------|
-| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
-| prod  | https://etterlatte-samordning-vedtak.nav.no             |    
+| Miljø | Ingress                                         |
+|:------|:------------------------------------------------|
+| dev   | etterlatte-samordning-vedtak.ekstern.dev.nav.no |
+| prod  | etterlatte-samordning-vedtak.nav.no             |    
 
 ## Feilkoder
 

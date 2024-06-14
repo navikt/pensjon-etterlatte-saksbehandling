@@ -21,6 +21,7 @@ data class BeregningDTO(
 )
 
 data class Beregningsperiode(
+    val id: UUID? = null,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth? = null,
     val utbetaltBeloep: Int,

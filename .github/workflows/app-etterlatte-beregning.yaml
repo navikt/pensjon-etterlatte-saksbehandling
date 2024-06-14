@@ -25,7 +25,6 @@ on:
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/etterlatte-jobs/**
       - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
@@ -43,7 +42,6 @@ on:
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/etterlatte-jobs/**
       - libs/testdata/**
       - gradle/libs.versions.toml
 

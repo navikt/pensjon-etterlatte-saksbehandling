@@ -2,7 +2,6 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.HttpClient
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
@@ -16,24 +15,18 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
-import no.nav.etterlatte.jobs.AvdoedeForeldreFraSubsumsjonMigreringsJob
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 private fun featureToggleProperties(config: Config) =
     FeatureToggleProperties(
@@ -56,13 +49,6 @@ class ApplicationContext {
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(properties)
-
-    private val leaderElectionHttpClient: HttpClient = httpClient()
-    private val leaderElectionKlient =
-        LeaderElection(
-            Miljoevariabler(env).maybeEnvValue("ELECTOR_PATH"),
-            leaderElectionHttpClient,
-        )
 
     private val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(
@@ -135,14 +121,4 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
-
-    val avdoedeForeldreFraSubsumsjonMigreringsJob: AvdoedeForeldreFraSubsumsjonMigreringsJob by lazy {
-        AvdoedeForeldreFraSubsumsjonMigreringsJob(
-            dataSource,
-            beregningRepository,
-            { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(5, ChronoUnit.MINUTES),
-        )
-    }
 }

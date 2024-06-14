@@ -20,8 +20,29 @@ import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.utils.toPdlSearchVariables
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
+
+data class SoekPerson(
+    val fornavn: String?,
+    val etternavn: String?,
+    val foedselsdato: String?,
+    // søk kommer
+    val statsborgerskap: String?,
+) {
+    init {
+        if (statsborgerskap != null) {
+            require(statsborgerskap.length == 3) {
+                "Statsborgerskap må være på ISO 3166-1 alpha-3 code format"
+            }
+        }
+
+        require(fornavn != null && etternavn != null && foedselsdato != null) {
+            "Må søke med enten fornavn, etternavn eller fødselsdato"
+        }
+    }
+}
 
 class PdlOboKlient(
     private val httpClient: HttpClient,
@@ -84,6 +105,39 @@ class PdlOboKlient(
                 .post(apiUrl) {
                     bearerAuth(getOboToken(bruker))
                     behandlingsnummer(sakType)
+                    header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success ->
+                    it.content.also { result ->
+                        result.errors?.joinToString(",")?.let { feil ->
+                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
+                        }
+                    }
+
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    suspend fun soekPerson(
+        soekPerson: SoekPerson,
+        bruker: BrukerTokenInfo,
+    ): PdlPersonResponseSoek {
+        val request =
+            PdlGraphSoekRequest(
+                query = getQuery("/pdl/soekPerson.graphql"),
+                variables = toPdlSearchVariables(soekPerson),
+            )
+
+        return retry<PdlPersonResponseSoek>(times = 3) {
+            httpClient
+                .post(apiUrl) {
+                    bearerAuth(getOboToken(bruker))
                     header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)

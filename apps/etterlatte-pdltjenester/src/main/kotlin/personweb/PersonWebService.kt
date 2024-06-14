@@ -7,10 +7,13 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
+import no.nav.etterlatte.pdl.PersonSearchHit
+import no.nav.etterlatte.pdl.SoekPerson
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
@@ -54,6 +57,30 @@ class PersonWebService(
                     ident = ident,
                     hentPerson = it.data.hentPerson,
                 )
+            }
+        }
+    }
+
+    suspend fun soekPerson(
+        soekPerson: SoekPerson,
+        bruker: BrukerTokenInfo,
+    ): List<PersonSearchHit> {
+        logger.info("Søker etter person fra PDL")
+
+        return pdlOboKlient.soekPerson(soekPerson, bruker).let {
+            if (it.errors?.isNotEmpty() != null) {
+                logger.error("Fikk feil i PDL søk feil: {}", it.errors.toJson())
+                throw PdlForesporselFeilet("Kunne ikke søke mot pdl")
+            } else {
+                if (it.data != null) {
+                    if (it.data.sokPerson.hits != null) {
+                        return it.data.sokPerson.hits
+                    } else {
+                        emptyList()
+                    }
+                } else {
+                    emptyList()
+                }
             }
         }
     }

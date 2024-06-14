@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.pdl.SoekPerson
 
 fun Route.personWebRoute(
     service: PersonWebService,
@@ -26,6 +27,15 @@ fun Route.personWebRoute(
                 sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
 
                 call.respond(person)
+            }
+        }
+
+        post("/soekperson") {
+            kunSaksbehandler {
+                val request = call.receive<SoekPerson>()
+                val personerFunnet = service.soekPerson(request, brukerTokenInfo)
+                call.respond(personerFunnet)
+                // sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
             }
         }
 

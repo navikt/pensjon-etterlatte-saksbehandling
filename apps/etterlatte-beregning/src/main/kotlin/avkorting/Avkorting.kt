@@ -138,27 +138,14 @@ data class Avkorting(
                 avkortingGrunnlag = listOf(grunnlag),
             )
 
-        val beregnetAvkortetYtelse =
+        val avkortetYtelseAar =
             AvkortingRegelkjoring.beregnAvkortetYtelse(
                 periode = grunnlag.periode,
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingsperioder,
-                type = FORVENTET_INNTEKT,
-                sanksjoner = emptyList(),
+                type = AARSOPPGJOER,
+                sanksjoner = sanksjoner,
             )
-
-        val avkortetYtelseMedSanksjon =
-            if (sanksjoner.isNotEmpty()) {
-                AvkortingRegelkjoring.beregnAvkortetYtelse(
-                    periode = grunnlag.periode,
-                    ytelseFoerAvkorting = ytelseFoerAvkorting,
-                    avkortingsperioder = avkortingsperioder,
-                    type = AARSOPPGJOER,
-                    sanksjoner = sanksjoner,
-                )
-            } else {
-                null
-            }
 
         val oppdatertAarsoppgjoer =
             aarsoppgjoer.copy(
@@ -169,13 +156,7 @@ data class Avkorting(
                             avkortingsperioder = avkortingsperioder,
                         )
                     },
-                avkortetYtelseAar =
-                    avkortetYtelseMedSanksjon ?: beregnetAvkortetYtelse.map { avkortetYtelse ->
-                        avkortetYtelse.copy(
-                            id = UUID.randomUUID(),
-                            type = AARSOPPGJOER,
-                        )
-                    },
+                avkortetYtelseAar = avkortetYtelseAar,
             )
         return this.copy(
             aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
@@ -293,7 +274,7 @@ data class Avkorting(
             val sisteFomForDenneInntektsavkorting = inntektsavkorting.avkortingsperioder.maxOf { it.periode.fom }
             val kjenteSanksjonerForInntektsavkorting =
                 sorterteSanksjonerInnenforAarsoppgjoer.filter {
-                    it.fom <= sisteFomForDenneInntektsavkorting
+                    it.fom < sisteFomForDenneInntektsavkorting
                 }
 
             val restanse =
@@ -324,7 +305,7 @@ data class Avkorting(
 
         // Hvis vi har sanksjoner som ikke er tatt høyde for i beregningen av ytelse opp mot restanse over, må vi
         // ta høyde for de til slutt
-        if (senesteSanksjonFom != null && senesteSanksjonFom > senesteInntektsjusteringFom) {
+        if (senesteSanksjonFom != null && senesteSanksjonFom >= senesteInntektsjusteringFom) {
             val restanse =
                 AvkortingRegelkjoring.beregnRestanse(
                     aarsoppgjoer.foersteMaanedDetteAar(),
@@ -334,7 +315,7 @@ data class Avkorting(
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
-                requireNotNull(sorterteSanksjonerInnenforAarsoppgjoer.firstOrNull { it.fom > senesteInntektsjusteringFom }?.fom) {
+                requireNotNull(sorterteSanksjonerInnenforAarsoppgjoer.firstOrNull { it.fom >= senesteInntektsjusteringFom }?.fom) {
                     "Fant tidligere at vi har en sanksjon som er etter siste inntektsjustering, men finner ingen nå"
                 }
             val ytelseMedAlleSanksjoner =

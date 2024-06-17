@@ -100,7 +100,7 @@ fun toPdlSearchVariables(soekPerson: SoekPerson): PdlSoekVariables {
     val criterias =
         listOf(
             Criteria("fritekst.navn", SearchRule.CONTAINS.keyName, soekPerson.navn),
-            Criteria("person.foedseldato.foedselsdato", SearchRule.EQUALS.keyName, soekPerson.foedselsdato.toString()),
+            Criteria("person.foedsel.foedselsdato", SearchRule.EQUALS.keyName, soekPerson.foedselsdato.toString()),
         )
 
     return PdlSoekVariables(

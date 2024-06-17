@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import SanksjonertYtelse
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -87,6 +88,7 @@ data class AvkortetYtelseDto(
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
+    val sanksjon: SanksjonertYtelse?,
 )
 
 data class YtelseMedGrunnlagDto(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import SanksjonertYtelse
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
@@ -12,7 +13,6 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
-import no.nav.etterlatte.sanksjon.SanksjonType
 import java.time.YearMonth
 import java.util.UUID
 
@@ -511,11 +511,6 @@ data class AvkortetYtelse(
     val kilde: Grunnlagsopplysning.RegelKilde,
     val inntektsgrunnlag: UUID? = null,
     val sanksjon: SanksjonertYtelse? = null,
-)
-
-data class SanksjonertYtelse(
-    val sanksjonId: UUID,
-    val sanksjonType: SanksjonType,
 )
 
 /**

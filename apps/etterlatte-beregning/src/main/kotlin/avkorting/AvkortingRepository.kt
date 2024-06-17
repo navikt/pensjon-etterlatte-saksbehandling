@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import SanksjonertYtelse
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -72,7 +73,13 @@ internal class ReguleringsforespoerselRiver(
             val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
             val sakerTilOmregning =
-                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakerViIkkeRegulererAutomatiskNaa, sakType)
+                behandlingService.hentAlleSaker(
+                    kjoering,
+                    antallIDenneRunden,
+                    spesifikkeSaker,
+                    sakerViIkkeRegulererAutomatiskNaa,
+                    sakType,
+                )
             logger.info("Henta ${sakerTilOmregning.saker.size} saker")
 
             if (sakerTilOmregning.saker.isEmpty()) {
@@ -80,15 +87,7 @@ internal class ReguleringsforespoerselRiver(
                 break
             }
 
-            val sakListe =
-                behandlingService
-                    .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
-                    .also { sakIdListe ->
-                        logger.info(
-                            "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
-                                sakIdListe.tilbakestileBehandlinger.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
-                        )
-                    }
+            val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
 
             sakerTilOmregning.saker.forEach {
                 publiserSak(it, kjoering, packet, sakListe, context)
@@ -109,6 +108,16 @@ internal class ReguleringsforespoerselRiver(
             is MissingNode -> null
             else -> SakType.valueOf(node.asText())
         }
+
+    private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning: Saker): SakIDListe =
+        behandlingService
+            .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+            .also { sakIdListe ->
+                logger.info(
+                    "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
+                        sakIdListe.tilbakestileBehandlinger.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
+                )
+            }
 
     private fun publiserSak(
         it: Sak,

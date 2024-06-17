@@ -27,7 +27,7 @@ class SanksjonService(
     private val logger = LoggerFactory.getLogger(SanksjonService::class.java)
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
-        if (featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {
+        if (!featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {
             return null
         }
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")

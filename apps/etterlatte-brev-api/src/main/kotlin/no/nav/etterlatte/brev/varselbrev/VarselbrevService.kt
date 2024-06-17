@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.varselbrev
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
@@ -10,6 +11,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
@@ -29,7 +31,7 @@ internal class VarselbrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): VarselbrevResponse {
         val sakType = behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType
-        val brevkode = hentBrevkode(sakType)
+        val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
 
         return brevoppretter
             .opprettBrev(
@@ -49,12 +51,24 @@ internal class VarselbrevService(
             }
     }
 
-    private fun hentBrevkode(sakType: SakType) =
-        if (sakType == SakType.BARNEPENSJON) {
-            Brevkoder.BP_VARSEL
+    private suspend fun hentBrevkode(
+        sakType: SakType,
+        behandlingId: UUID?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = if (sakType == SakType.BARNEPENSJON) {
+        Brevkoder.BP_VARSEL
+    } else {
+        val erAktivitetsplikt =
+            behandlingId
+                ?.let { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) }
+                ?.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
+
+        if (erAktivitetsplikt) {
+            Brevkoder.OMS_VARSEL_AKTIVITETSPLIKT
         } else {
             Brevkoder.OMS_VARSEL
         }
+    }
 
     suspend fun ferdigstillOgGenererPDF(
         brevId: BrevID,
@@ -65,7 +79,10 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKode = { hentBrevkode(it.sakType) },
+        brevKode = {
+            val brev = db.hentBrev(brevId)
+            runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
+        },
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 
@@ -78,7 +95,10 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKode = { hentBrevkode(it.sakType) },
+        brevKode = {
+            val brev = db.hentBrev(brevId)
+            runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
+        },
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }

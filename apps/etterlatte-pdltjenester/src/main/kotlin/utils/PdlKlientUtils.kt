@@ -97,16 +97,11 @@ fun toPdlVariables(
 }
 
 fun toPdlSearchVariables(soekPerson: SoekPerson): PdlSoekVariables {
-    val criterias = mutableListOf<Criteria>()
-    soekPerson.fornavn?.let {
-        criterias.add(Criteria("person.navn.fornavn", SearchRule.EQUALS.keyName, it))
-    }
-    soekPerson.etternavn?.let {
-        criterias.add(Criteria("person.navn.etternavn", SearchRule.EQUALS.keyName, it))
-    }
-    soekPerson.foedselsdato?.let {
-        criterias.add(Criteria("person.foedseldato.foedselsdato", SearchRule.EQUALS.keyName, it))
-    }
+    val criterias =
+        listOf(
+            Criteria("fritekst.navn", SearchRule.CONTAINS.keyName, soekPerson.navn),
+            Criteria("person.foedseldato.foedselsdato", SearchRule.EQUALS.keyName, soekPerson.foedselsdato.toString()),
+        )
 
     return PdlSoekVariables(
         paging = Paging(),

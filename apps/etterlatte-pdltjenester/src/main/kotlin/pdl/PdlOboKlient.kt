@@ -1,6 +1,5 @@
 package no.nav.etterlatte.pdl
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -14,7 +13,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
@@ -25,32 +23,12 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utils.toPdlSearchVariables
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
-
-fun main() {
-    val personsoek = """{"statsborgerskap":"NZL"}"""
-    val personsoeffk = objectMapper.readValue<SoekPerson>(personsoek)
-    println(personsoeffk)
-}
+import java.time.LocalDate
 
 data class SoekPerson(
-    val fornavn: String?,
-    val etternavn: String?,
-    val foedselsdato: String?,
-    // søk kommer
-    val statsborgerskap: String?,
-) {
-    init {
-        if (statsborgerskap != null) {
-            require(statsborgerskap.length == 3) {
-                "Statsborgerskap må være på ISO 3166-1 alpha-3 code format"
-            }
-        }
-
-        require(!(fornavn == null && etternavn == null && foedselsdato == null)) {
-            "Må søke med enten fornavn, etternavn eller fødselsdato"
-        }
-    }
-}
+    val navn: String,
+    val foedselsdato: LocalDate,
+)
 
 class PdlOboKlient(
     private val httpClient: HttpClient,
@@ -135,14 +113,14 @@ class PdlOboKlient(
     suspend fun soekPerson(
         soekPerson: SoekPerson,
         bruker: BrukerTokenInfo,
-    ): PdlPersonResponseSoek {
+    ): PdlPersonSoekResponse {
         val request =
             PdlGraphSoekRequest(
                 query = getQuery("/pdl/soekPerson.graphql"),
                 variables = toPdlSearchVariables(soekPerson),
             )
 
-        return retry<PdlPersonResponseSoek>(times = 3) {
+        return retry<PdlPersonSoekResponse>(times = 3) {
             httpClient
                 .post(apiUrl) {
                     bearerAuth(getOboToken(bruker))

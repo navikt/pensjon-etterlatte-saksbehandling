@@ -43,7 +43,7 @@ enum class SearchRule(
     AFTER("after"),
 }
 
-data class PdlPersonResponseSoek(
+data class PdlPersonSoekResponse(
     val data: PdlSoekPerson? = null,
     val errors: List<PdlResponseError>? = null,
 )

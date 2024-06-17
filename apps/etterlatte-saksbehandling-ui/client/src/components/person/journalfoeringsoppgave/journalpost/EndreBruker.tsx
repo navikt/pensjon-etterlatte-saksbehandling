@@ -108,7 +108,7 @@ export const EndreBruker = ({
             ),
           })}
           <br />
-          <SoekPersonPdl open={open} setOpen={setOpen} />
+          <SoekPersonPdl open={open} setOpen={setOpen} oppdaterBruker={oppdaterBruker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">

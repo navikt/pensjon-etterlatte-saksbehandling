@@ -15,7 +15,7 @@ import { SoekPerson } from '~components/person/journalfoeringsoppgave/journalpos
 export const hentPersonNavnogFoedsel = async (ident: string): Promise<ApiResponse<IPdlPersonNavnFoedsel>> =>
   apiClient.post(`/pdltjenester/person/navn-foedsel`, { ident })
 
-export const soekPerson = async (soekPerson: SoekPerson): Promise<ApiResponse<IPdlPersonSoek>> =>
+export const soekPerson = async (soekPerson: SoekPerson): Promise<ApiResponse<IPdlPersonSoek[]>> =>
   apiClient.post('/pdltjenester/person/soek', { ...soekPerson })
 
 export const hentFamilieOpplysninger = async (args: {

@@ -73,7 +73,7 @@ class PersonWebService(
                 throw PdlForesporselFeilet("Kunne ikke søke mot pdl")
             } else {
                 if (it.data != null) {
-                    if (it.data.sokPerson.hits != null) {
+                    if (it.data.sokPerson?.hits != null) {
                         return it.data.sokPerson.hits
                     } else {
                         emptyList()

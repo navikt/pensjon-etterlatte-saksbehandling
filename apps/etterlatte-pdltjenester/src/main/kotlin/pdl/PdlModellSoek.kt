@@ -49,7 +49,7 @@ data class PdlPersonSoekResponse(
 )
 
 data class PdlSoekPerson(
-    val sokPerson: PersonSearchResult,
+    val sokPerson: PersonSearchResult? = null,
 )
 
 data class PersonSearchResult(

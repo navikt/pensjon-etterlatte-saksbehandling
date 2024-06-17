@@ -190,7 +190,7 @@ internal class ReguleringsforespoerselRiverTest {
         val kjoering = "Regulering2023"
         every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
             Saker(
-                (0..ReguleringsforespoerselRiver.MAKS_BATCHSTOERRELSE).map {
+                (0..MAKS_BATCHSTOERRELSE).map {
                     Sak("saksbehandler1", SakType.BARNEPENSJON, it.toLong(), "4808")
                 },
             ) andThen

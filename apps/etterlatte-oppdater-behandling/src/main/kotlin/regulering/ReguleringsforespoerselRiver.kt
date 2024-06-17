@@ -27,9 +27,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import kotlin.math.max
-import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -67,6 +64,7 @@ internal class ReguleringsforespoerselRiver(
         val sakType = packet.optionalSakType()
 
         kjoerIBatch(
+            logger = logger,
             antall = antall,
             finnSaker = { antallIDenneRunden ->
                 behandlingService.hentAlleSaker(
@@ -77,47 +75,13 @@ internal class ReguleringsforespoerselRiver(
                     sakType,
                 )
             },
-            sendTilOmregning = { sakerTilOmregning ->
+            haandterSaker = { sakerTilOmregning ->
                 val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                 sakerTilOmregning.saker.forEach {
                     publiserSak(it, kjoering, packet, sakListe, context)
                 }
             },
         )
-    }
-
-    private fun kjoerIBatch(
-        finnSaker: (Int) -> Saker,
-        antall: Int,
-        sendTilOmregning: (Saker) -> Unit,
-    ) {
-        val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
-        var tatt = 0
-
-        while (tatt < antall) {
-            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
-            logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-
-            val sakerTilOmregning = finnSaker(antallIDenneRunden)
-
-            logger.info("Henta ${sakerTilOmregning.saker.size} saker")
-
-            if (sakerTilOmregning.saker.isEmpty()) {
-                logger.debug("Ingen saker i denne runden. Returnerer")
-                return
-            }
-
-            sendTilOmregning(sakerTilOmregning)
-
-            tatt += sakerTilOmregning.saker.size
-            logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
-                return
-            }
-            val venteperiode = Duration.ofSeconds(5)
-            logger.info("Venter $venteperiode før neste runde.")
-            Thread.sleep(venteperiode)
-        }
     }
 
     private fun JsonMessage.optionalSakType(): SakType? =
@@ -137,25 +101,21 @@ internal class ReguleringsforespoerselRiver(
             }
 
     private fun publiserSak(
-        it: Sak,
+        sak: Sak,
         kjoering: String,
         packet: JsonMessage,
         sakListe: SakIDListe,
         context: MessageContext,
     ) {
-        logger.debug("Lagrer kjøring starta for sak ${it.id}")
-        behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
-        logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
+        logger.debug("Lagrer kjøring starta for sak ${sak.id}")
+        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
+        logger.debug("Ferdig lagra kjøring starta for sak ${sak.id}")
         packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(it.id)
-        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(it.id)
-        packet.sakId = it.id
-        logger.debug("Sender til omregning for sak ${it.id}")
+        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(sak.id)
+        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(sak.id)
+        packet.sakId = sak.id
+        logger.debug("Sender til omregning for sak ${sak.id}")
         context.publish(packet.toJson())
-    }
-
-    companion object {
-        const val MAKS_BATCHSTOERRELSE = 100
     }
 }
 

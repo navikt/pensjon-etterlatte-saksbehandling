@@ -15,6 +15,11 @@ Denne appen styrer jobber som kjører med jevne mellomrom for å håndtere netto
     - NB: Mangler sjekk for utvidelse med 2 år (sannsynligvis nytt vilkår) 
   - `OMS_DOED_5AAR` Opphør utvidet omstillingsstønad, (3 + 2) år etter dødsfall
     - Unntak: har rett uten tidsbegrensning  
+- Regulering
+  - For å trigge denne jobben gjøres følgende:
+  1. Gå inn i Unleash og aktiver flagget start-regulering
+  2. Restart applikasjonen, for eksempel ved å slette podden (kubectl delete pod) eller redeploye 
+  3. Etter endt kjøring, skru av reguleringsflagget igjen
 
 ## Oversikt
 

@@ -158,7 +158,6 @@ updates:
   - package-ecosystem: "docker"
     directories:
       - /docker
-      - /jobs/start-regulering
       - /apps/etterlatte-saksbehandling-ui
     schedule:
       interval: "monthly"

@@ -55,6 +55,4 @@ include(
     "libs:etterlatte-vedtaksvurdering-model",
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
-    "jobs:start-regulering",
-    "jobs:start-grunnlagsversjonering",
 )

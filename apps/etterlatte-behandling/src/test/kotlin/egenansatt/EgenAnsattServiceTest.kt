@@ -62,24 +62,24 @@ internal class EgenAnsattServiceTest(
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
-    private val krrKlient =
-        mockk<KrrKlient> {
-            coEvery { hentDigitalKontaktinformasjon(any()) } returns
-                DigitalKontaktinformasjon(
-                    personident = "",
-                    aktiv = true,
-                    kanVarsles = true,
-                    reservert = false,
-                    spraak = "nb",
-                    epostadresse = null,
-                    mobiltelefonnummer = null,
-                    sikkerDigitalPostkasse = null,
-                )
-        }
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
 
     @BeforeAll
     fun beforeAll() {
+        val krrKlient =
+            mockk<KrrKlient> {
+                coEvery { hentDigitalKontaktinformasjon(any()) } returns
+                    DigitalKontaktinformasjon(
+                        personident = "",
+                        aktiv = true,
+                        kanVarsles = true,
+                        reservert = false,
+                        spraak = "nb",
+                        epostadresse = null,
+                        mobiltelefonnummer = null,
+                        sikkerDigitalPostkasse = null,
+                    )
+            }
         val norg2Klient = mockk<Norg2Klient>()
         val grunnlagservice =
             mockk<GrunnlagService> {

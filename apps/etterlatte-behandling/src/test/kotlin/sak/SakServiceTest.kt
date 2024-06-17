@@ -50,37 +50,38 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
 
 internal class SakServiceTest {
-    private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
-    private val sakDao = mockk<SakDao>()
-    private val norg2Klient = mockk<Norg2Klient>()
-    private val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
-    private val saksbehandlerService = mockk<SaksbehandlerService>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
-    private val grunnlagservice =
-        mockk<GrunnlagService> {
-            every { leggInnNyttGrunnlagSak(any(), any()) } just runs
-            every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
-        }
-    private val krrKlient =
-        mockk<KrrKlient> {
-            coEvery { hentDigitalKontaktinformasjon(any()) } returns
-                DigitalKontaktinformasjon(
-                    personident = "",
-                    aktiv = true,
-                    kanVarsles = true,
-                    reservert = false,
-                    spraak = "nb",
-                    epostadresse = null,
-                    mobiltelefonnummer = null,
-                    sikkerDigitalPostkasse = null,
-                )
-        }
-
-    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+    private lateinit var service: SakService
+    val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    val norg2Klient = mockk<Norg2Klient>()
+    val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+    val saksbehandlerService = mockk<SaksbehandlerService>()
+    val skjermingKlient = mockk<SkjermingKlient>()
+    val sakDao = mockk<SakDao>()
 
     @BeforeEach
     fun before() {
         clearAllMocks()
+        val grunnlagservice =
+            mockk<GrunnlagService> {
+                every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+                every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+            }
+        val krrKlient =
+            mockk<KrrKlient> {
+                coEvery { hentDigitalKontaktinformasjon(any()) } returns
+                    DigitalKontaktinformasjon(
+                        personident = "",
+                        aktiv = true,
+                        kanVarsles = true,
+                        reservert = false,
+                        spraak = "nb",
+                        epostadresse = null,
+                        mobiltelefonnummer = null,
+                        sikkerDigitalPostkasse = null,
+                    )
+            }
+        service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+
         every {
             sakDao.finnSakMedGraderingOgSkjerming(
                 any(),

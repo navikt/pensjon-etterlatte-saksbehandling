@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 
-fun Route.tilbakekrevingRoutes(tilbakekrevingVedtakService: TilbakekrevingService) {
+fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
     val logger = routeLogger
 
     route("/api/tilbakekreving/{sakId}") {
@@ -20,7 +20,7 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingVedtakService: TilbakekrevingServic
             kunSystembruker {
                 logger.info("Sender tilbakekrevingsvedtak")
                 val vedtak = call.receive<TilbakekrevingVedtak>()
-                tilbakekrevingVedtakService.sendTilbakekrevingsvedtak(vedtak)
+                tilbakekrevingService.sendTilbakekrevingsvedtak(vedtak)
                 call.respond(HttpStatusCode.Created)
             }
         }
@@ -32,7 +32,7 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingVedtakService: TilbakekrevingServic
                 val kravgrunnlagId = requireNotNull(call.parameters["kravgrunnlagId"]).toLong()
 
                 val oppdatertKravgrunnlag =
-                    tilbakekrevingVedtakService.hentKravgrunnlag(
+                    tilbakekrevingService.hentKravgrunnlag(
                         kravgrunnlagId = kravgrunnlagId,
                         sakId = sakId,
                     )

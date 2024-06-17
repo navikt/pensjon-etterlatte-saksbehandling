@@ -107,6 +107,28 @@ internal class TilbakekrevingRoutesTest {
         }
     }
 
+    @Test
+    fun `skal returnere 500 hvis henting av kravgrunnlag feiler`() {
+        val oppdatertKravgrunnlag = kravgrunnlag()
+        val sakId = oppdatertKravgrunnlag.sakId.value
+        val kravgrunnlagId = oppdatertKravgrunnlag.kravgrunnlagId.value
+        coEvery { service.hentKravgrunnlag(kravgrunnlagId, sakId) } throws Exception("Noe feilet")
+
+        testApplication {
+            val response =
+                client.get("/api/tilbakekreving/$sakId/kravgrunnlag/$kravgrunnlagId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.InternalServerError
+        }
+
+        coVerify(exactly = 1) {
+            service.hentKravgrunnlag(any(), any())
+        }
+    }
+
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
             runServer(server) {

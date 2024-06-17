@@ -16,7 +16,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
+internal class InstitusjonsoppholdDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var institusjonsoppholdDao: InstitusjonsoppholdDao
 
     @BeforeAll

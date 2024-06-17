@@ -164,7 +164,8 @@ fun Route.brevRoute(
             }
         }
 
-        post { // TODO: sjekk om unused, erstattet med /spesifikk?
+        post {
+            // TODO: sjekk om unused, erstattet med /spesifikk?
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 

@@ -20,25 +20,25 @@ class BehandlingKlientImpl(
     private val behandlingHttpClient: HttpClient,
     private val behandlingUrl: String,
 ) : BehandlingKlient {
-    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
-        return hentStatistikkBehandling(behandlingId).toPersongalleri()
-    }
+    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri = hentStatistikkBehandling(behandlingId).toPersongalleri()
 
-    override suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling {
-        return try {
-            behandlingHttpClient.get("$behandlingUrl/behandlinger/statistikk/$behandlingId")
+    override suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling =
+        try {
+            behandlingHttpClient
+                .get("$behandlingUrl/behandlinger/statistikk/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
         }
-    }
 
-    override suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning? {
-        return hentStatistikkBehandling(behandlingId).utlandstilknytning
-    }
+    override suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning? =
+        hentStatistikkBehandling(behandlingId).utlandstilknytning
 }
 
-class KunneIkkeHenteFraBehandling(message: String, cause: Exception) : Exception(message, cause)
+class KunneIkkeHenteFraBehandling(
+    message: String,
+    cause: Exception,
+) : Exception(message, cause)
 
 fun StatistikkBehandling.toPersongalleri() =
     Persongalleri(

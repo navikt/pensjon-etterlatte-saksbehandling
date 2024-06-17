@@ -21,7 +21,9 @@ data class OpprettRevurderingForAktivitetspliktDto(
     val behandlingsmaaned: YearMonth,
     val jobbType: JobbType,
 ) {
-    enum class JobbType(val beskrivelse: String) {
+    enum class JobbType(
+        val beskrivelse: String,
+    ) {
         OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
         OMS_DOED_12MND("Vurdering av aktivitetsplikt OMS etter 12 mnd"),
     }

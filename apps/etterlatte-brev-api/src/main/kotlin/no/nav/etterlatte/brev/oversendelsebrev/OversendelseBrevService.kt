@@ -68,16 +68,16 @@ class OversendelseBrevServiceImpl(
     private val brevdataFacade: BrevdataFacade,
     private val behandlingKlient: BehandlingKlient,
 ) : OversendelseBrevService {
-    override fun hentOversendelseBrev(behandlingId: UUID): Brev? {
-        return brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
-    }
+    override fun hentOversendelseBrev(behandlingId: UUID): Brev? =
+        brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
 
     override suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         val eksisterendeBrev =
-            brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
+            brevRepository
+                .hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
                 .singleOrNull()
         if (eksisterendeBrev != null) {
             return eksisterendeBrev
@@ -211,7 +211,8 @@ class OversendelseBrevServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val brev =
-            brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
+            brevRepository
+                .hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
                 .singleOrNull() ?: return
         if (!brev.kanEndres()) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
@@ -260,7 +261,13 @@ data class OversendelseBrevFerdigstillingData(
                 sakType = request.generellBrevData.sak.sakType,
                 klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 vedtakDato =
-                    checkNotNull(klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate()) {
+                    checkNotNull(
+                        klage.formkrav
+                            ?.formkrav
+                            ?.vedtaketKlagenGjelder
+                            ?.datoAttestert
+                            ?.toLocalDate(),
+                    ) {
                         "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
                     },
                 innstillingTekst = innstilling.innstillingTekst,
@@ -273,7 +280,10 @@ data class OversendelseBrevFerdigstillingData(
     }
 }
 
-class MismatchSakOgBrevException(brevId: BrevID, sakId: Long) : UgyldigForespoerselException(
-    code = "SAKID_MATCHER_IKKE",
-    detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",
-)
+class MismatchSakOgBrevException(
+    brevId: BrevID,
+    sakId: Long,
+) : UgyldigForespoerselException(
+        code = "SAKID_MATCHER_IKKE",
+        detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",
+    )

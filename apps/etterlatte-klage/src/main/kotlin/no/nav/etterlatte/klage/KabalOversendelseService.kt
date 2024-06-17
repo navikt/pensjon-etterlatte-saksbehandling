@@ -13,7 +13,9 @@ interface KabalOversendelseService {
     )
 }
 
-class KabalOversendelseServiceImpl(private val kabalKlient: KabalKlient) : KabalOversendelseService {
+class KabalOversendelseServiceImpl(
+    private val kabalKlient: KabalKlient,
+) : KabalOversendelseService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun sendTilKabal(

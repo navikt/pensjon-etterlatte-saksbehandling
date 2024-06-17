@@ -31,7 +31,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class KlageDaoImplTest(val dataSource: DataSource) {
+internal class KlageDaoImplTest(
+    val dataSource: DataSource,
+) {
     private lateinit var sakRepo: SakDao
     private lateinit var klageDao: KlageDaoImpl
 

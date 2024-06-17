@@ -123,12 +123,13 @@ class DoedshendelseKontrollpunktService(
         }
 
         val duplikatHendelse =
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                sakId = sak.id,
-                statuser = listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
-            ).filter {
-                it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL
-            }
+            grunnlagsendringshendelseDao
+                .hentGrunnlagsendringshendelserMedStatuserISak(
+                    sakId = sak.id,
+                    statuser = listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                ).filter {
+                    it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL
+                }
 
         return when {
             duplikatHendelse.isNotEmpty() -> {

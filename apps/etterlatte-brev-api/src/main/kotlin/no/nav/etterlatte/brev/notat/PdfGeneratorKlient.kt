@@ -21,17 +21,21 @@ import org.slf4j.LoggerFactory
  *
  * @see: <a href="https://github.com/navikt/pensjonsbrev">Pensjonsbrev - Brevbaker</a>
  **/
-class PdfGeneratorKlient(private val klient: HttpClient, private val apiUrl: String) {
+class PdfGeneratorKlient(
+    private val klient: HttpClient,
+    private val apiUrl: String,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(request: PdfGenRequest): ByteArray {
         logger.info("Genererer PDF med ey-pdfgen")
 
-        return klient.post("$apiUrl/notat/tom_mal") {
-            header(CORRELATION_ID, getCorrelationId())
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
+        return klient
+            .post("$apiUrl/notat/tom_mal") {
+                header(CORRELATION_ID, getCorrelationId())
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
     }
 }
 

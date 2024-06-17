@@ -28,7 +28,9 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
+interface BehandlingKlient :
+    BehandlingTilgangsSjekk,
+    SakTilgangsSjekk {
     suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -105,10 +107,15 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     ): TilbakekrevingBehandling
 }
 
-class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
-    Exception(message, cause)
+class BehandlingKlientException(
+    override val message: String,
+    override val cause: Throwable? = null,
+) : Exception(message, cause)
 
-class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
+class BehandlingKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -133,8 +140,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                             url = "$resourceUrl/behandlinger/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
@@ -157,8 +163,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                             url = "$resourceUrl/saker/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
@@ -181,8 +186,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                             url = "$resourceUrl/oppgaver/sak/$sakId/oppgaver",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
@@ -309,64 +313,61 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun kanFatteVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
-        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
-    }
+    ): Boolean = statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
 
     override suspend fun kanAttestereVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse?,
-    ): Boolean {
-        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT)
-    }
+    ): Boolean = statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT)
 
     override suspend fun kanUnderkjenneVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse?,
-    ): Boolean {
-        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
-    }
+    ): Boolean = statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
 
     override suspend fun tilSamordning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakId: Long,
-    ) = downstreamResourceClient.post(
-        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/tilsamordning"),
-        brukerTokenInfo,
-        VedtakHendelse(
-            vedtakId = vedtakId,
-            inntruffet = Tidspunkt.now(),
-        ),
-    ).mapBoth({ true }, { false })
+    ) = downstreamResourceClient
+        .post(
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/tilsamordning"),
+            brukerTokenInfo,
+            VedtakHendelse(
+                vedtakId = vedtakId,
+                inntruffet = Tidspunkt.now(),
+            ),
+        ).mapBoth({ true }, { false })
 
     override suspend fun samordnet(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakId: Long,
-    ) = downstreamResourceClient.post(
-        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/samordnet"),
-        brukerTokenInfo,
-        VedtakHendelse(
-            vedtakId = vedtakId,
-            inntruffet = Tidspunkt.now(),
-        ),
-    ).mapBoth({ true }, { false })
+    ) = downstreamResourceClient
+        .post(
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/samordnet"),
+            brukerTokenInfo,
+            VedtakHendelse(
+                vedtakId = vedtakId,
+                inntruffet = Tidspunkt.now(),
+            ),
+        ).mapBoth({ true }, { false })
 
     override suspend fun iverksett(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakId: Long,
-    ) = downstreamResourceClient.post(
-        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/iverksett"),
-        brukerTokenInfo,
-        VedtakHendelse(
-            vedtakId = vedtakId,
-            inntruffet = Tidspunkt.now(),
-        ),
-    ).mapBoth({ true }, { false })
+    ) = downstreamResourceClient
+        .post(
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/iverksett"),
+            brukerTokenInfo,
+            VedtakHendelse(
+                vedtakId = vedtakId,
+                inntruffet = Tidspunkt.now(),
+            ),
+        ).mapBoth({ true }, { false })
 
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
@@ -426,8 +427,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                             url = "$resourceUrl/api/tilbakekreving/$tilbakekrevingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

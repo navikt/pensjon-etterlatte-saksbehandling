@@ -262,6 +262,51 @@ internal class VedtakstidslinjeTest {
 
     /**
      *   Jan  Feb  Mar  Apr  Mai   Jun  Jul  Aug  Sep  Okt  Nov  Dec
+     * |----|----|----|----|-----|--*-|----|----|----|----|----|----|
+     * |------------Innvilget----------|
+     *                           |---Opphør----------------------|
+     *                     |-----| Revurdert
+     * */
+    @Test
+    fun `opphør med senere attestasjonsdato på endring(regulering) enn seg selv`() {
+        val attesteringsdato = Tidspunkt.now()
+        val iverksattDato =
+            lagVedtak(
+                id = 1,
+                virkningsDato = LocalDate.of(2024, 1, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                vedtakType = VedtakType.INNVILGELSE,
+                datoAttestert = attesteringsdato,
+            )
+
+        val endring =
+            lagVedtak(
+                id = 2,
+                virkningsDato = LocalDate.of(2024, 5, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                behandlingType = BehandlingType.REVURDERING,
+                vedtakType = VedtakType.ENDRING,
+                datoAttestert = attesteringsdato.plus(2, DAYS),
+                opphoerFraOgMed = YearMonth.of(2024, 6),
+            )
+
+        val opphoertDato =
+            lagVedtak(
+                id = 3,
+                virkningsDato = LocalDate.of(2024, 6, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                behandlingType = BehandlingType.REVURDERING,
+                vedtakType = VedtakType.OPPHOER,
+                datoAttestert = attesteringsdato.plus(1, DAYS),
+                opphoerFraOgMed = YearMonth.of(2024, 6),
+            )
+
+        val actual = Vedtakstidslinje(listOf(iverksattDato, endring, opphoertDato)).harLoependeVedtakPaaEllerEtter(LocalDate.of(2024, 6, 4))
+        assertEquals(false, actual.erLoepende)
+    }
+
+    /**
+     *   Jan  Feb  Mar  Apr  Mai   Jun  Jul  Aug  Sep  Okt  Nov  Dec
      * |----|----|----|----|--*--|----|----|----|----|----|----|----|
      *                           |-----------Iverksatt--------------|
      *                           |------------Revurdering-----------|
@@ -385,7 +430,7 @@ internal class VedtakstidslinjeTest {
         val opphoer = LocalDate.of(2023, 5, 1)
         val iverksattDato =
             lagVedtak(
-                id = 1,
+                id = 3,
                 virkningsDato = LocalDate.of(2023, 4, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.INNVILGELSE,
@@ -412,7 +457,7 @@ internal class VedtakstidslinjeTest {
 
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato, revurdertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
-        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertEquals(fraOgMed, actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
     }
 
@@ -770,8 +815,8 @@ private fun lagVedtak(
     vedtakFattetDato: Tidspunkt = Tidspunkt.now(),
     utbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
     opphoerFraOgMed: YearMonth? = null,
-): Vedtak {
-    return Vedtak(
+): Vedtak =
+    Vedtak(
         id = id,
         sakId = 1L,
         sakType = SakType.BARNEPENSJON,
@@ -807,7 +852,6 @@ private fun lagVedtak(
                     },
             ),
     )
-}
 
 private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
     id: Long,

@@ -65,18 +65,21 @@ data class Utbetalingsvedtak(
         }
     }
 
-    fun finnPrioritet(): Prioritet {
-        return if (SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER == vedtakFattet.ansvarligSaksbehandler &&
+    fun finnPrioritet(): Prioritet =
+        if (SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER == vedtakFattet.ansvarligSaksbehandler &&
             behandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
         ) {
             Prioritet.LAV
         } else {
             Prioritet.NORMAL
         }
-    }
 }
 
-data class Sak(val ident: String, val id: Long, val sakType: Saktype)
+data class Sak(
+    val ident: String,
+    val id: Long,
+    val sakType: Saktype,
+)
 
 enum class Saktype {
     BARNEPENSJON,

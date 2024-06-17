@@ -85,7 +85,8 @@ internal fun Route.sakSystemRoutes(
 
                 val sisteIverksatteBehandling =
                     inTransaction {
-                        behandlingService.hentSisteIverksatte(sakId)
+                        behandlingService
+                            .hentSisteIverksatte(sakId)
                             ?.let { SisteIverksatteBehandling(it.id) }
                     }
 
@@ -117,13 +118,15 @@ internal fun Route.sakSystemRoutes(
     }
 }
 
-class PersonManglerSak : IkkeFunnetException(
-    code = "PERSON_MANGLER_SAK",
-    detail = "Personen har ingen saker i Gjenny",
-)
+class PersonManglerSak :
+    IkkeFunnetException(
+        code = "PERSON_MANGLER_SAK",
+        detail = "Personen har ingen saker i Gjenny",
+    )
 
-class SakIkkeFunnetException(message: String) :
-    UgyldigForespoerselException(
+class SakIkkeFunnetException(
+    message: String,
+) : UgyldigForespoerselException(
         code = "FANT_INGEN_SAK",
         detail = message,
     )
@@ -280,7 +283,10 @@ data class EnhetRequest(
     val enhet: String,
 )
 
-data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
+data class FoersteVirkDto(
+    val foersteIverksatteVirkISak: LocalDate,
+    val sakId: Long,
+)
 
 data class SakerDto(
     val saker: Map<Long, Sak>,

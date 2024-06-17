@@ -61,7 +61,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertEquals("fn", fornavn)
                 assertEquals("en", etternavn)
                 assertEquals(PersonType.AVDOED, type)
-                assertEquals("08498224343", foedselsnummer.value)
+                assertEquals("08498224343", foedselsnummer?.value)
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)
@@ -76,11 +76,11 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertEquals(PersonType.BARN, type)
                 assertEquals("kirsten", fornavn)
                 assertEquals("jakobsen", etternavn)
-                assertEquals("25478323363", foedselsnummer.value)
+                assertEquals("25478323363", foedselsnummer?.value)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsadresse.adresseIUtlandet)
                 assertEquals("GØYAL", foreldre[0].fornavn)
-                assertEquals("08498224343", foreldre[1].foedselsnummer.value)
+                assertEquals("08498224343", foreldre[1].foedselsnummer?.value)
                 assertEquals(JaNeiVetIkke.NEI, verge.barnHarVerge)
                 assertNull(omsorgPerson)
             }
@@ -159,7 +159,8 @@ internal class OpplysningsuthenterBarnepensjonTest {
     }
 
     private inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
-        opplysninger.filter { it.opplysningType == opplysningType }
+        opplysninger
+            .filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()
             .let {

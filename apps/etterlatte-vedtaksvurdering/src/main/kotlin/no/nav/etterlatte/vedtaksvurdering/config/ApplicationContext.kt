@@ -3,6 +3,8 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -63,12 +65,22 @@ class ApplicationContext {
             ),
         )
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val repository = VedtaksvurderingRepository.using(dataSource)
     val vedtaksvurderingService =
-        VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
+        VedtaksvurderingService(repository = repository)
+    val beregningKlient = BeregningKlientImpl(config, httpClient())
     val vedtakBehandlingService =
         VedtakBehandlingService(
-            repository = VedtaksvurderingRepository.using(dataSource),
-            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            repository = repository,
+            featureToggleService =
+                FeatureToggleService.initialiser(
+                    FeatureToggleProperties(
+                        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                        host = config.getString("funksjonsbrytere.unleash.host"),
+                        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+                    ),
+                ),
+            beregningKlient = beregningKlient,
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,

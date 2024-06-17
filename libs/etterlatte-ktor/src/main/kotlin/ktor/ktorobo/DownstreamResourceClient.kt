@@ -89,7 +89,8 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         action: suspend (token: AccessToken) -> HttpResponse,
-    ) = azureAdClient.hentTokenFraAD(brukerTokenInfo, listOf("api://${resource.clientId}/.default"))
+    ) = azureAdClient
+        .hentTokenFraAD(brukerTokenInfo, listOf("api://${resource.clientId}/.default"))
         .andThen { runCatching { action(it) }.fold(resource) }
         .andThen { response ->
             when (response) {

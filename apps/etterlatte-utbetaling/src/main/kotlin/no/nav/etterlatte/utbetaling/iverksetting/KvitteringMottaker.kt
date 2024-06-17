@@ -191,12 +191,12 @@ class KvitteringMottaker(
         return utbetalingResponse
     }
 
-    private fun UtbetalingEventDto.toMessage(): String {
-        return JsonMessage.newMessage(
-            mapOf(
-                UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
-                UTBETALING_RESPONSE to this.utbetalingResponse.toMessage(),
-            ),
-        ).toJson()
-    }
+    private fun UtbetalingEventDto.toMessage(): String =
+        JsonMessage
+            .newMessage(
+                mapOf(
+                    UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
+                    UTBETALING_RESPONSE to this.utbetalingResponse.toMessage(),
+                ),
+            ).toJson()
 }

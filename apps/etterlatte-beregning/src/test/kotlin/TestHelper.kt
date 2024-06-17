@@ -123,7 +123,7 @@ fun avkortinggrunnlag(
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
     relevanteMaanederInnAar: Int = 12,
-    periode: Periode = Periode(fom = YearMonth.now(), tom = null),
+    periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
 ) = AvkortingGrunnlag(
     id = id,
@@ -177,6 +177,8 @@ fun aarsoppgjoer(
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Aarsoppgjoer(
+    id = UUID.randomUUID(),
+    aar = 2024,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
     avkortetYtelseAar = avkortetYtelseAar,
@@ -193,7 +195,7 @@ fun ytelseFoerAvkorting(
 )
 
 fun avkortingsperiode(
-    fom: YearMonth = YearMonth.now(),
+    fom: YearMonth = YearMonth.of(2024, 1),
     tom: YearMonth? = null,
     avkorting: Int = 10000,
     inntektsgrunnlag: UUID = UUID.randomUUID(),
@@ -239,7 +241,7 @@ fun avkortetYtelse(
     ytelseFoerAvkorting: Int = 300,
     periode: Periode =
         Periode(
-            fom = YearMonth.now(),
+            fom = YearMonth.of(2024, 1),
             tom = null,
         ),
     inntektsgrunnlag: UUID? = UUID.randomUUID(),

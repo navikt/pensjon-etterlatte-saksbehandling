@@ -36,15 +36,12 @@ data class InntektAvkortingGrunnlagWrapper(
 data class PeriodisertInntektAvkortingGrunnlag(
     val periodisertInntektAvkortingGrunnlag: PeriodisertGrunnlag<FaktumNode<InntektAvkortingGrunnlag>>,
 ) : PeriodisertGrunnlag<InntektAvkortingGrunnlagWrapper> {
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return periodisertInntektAvkortingGrunnlag.finnAlleKnekkpunkter()
-    }
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> = periodisertInntektAvkortingGrunnlag.finnAlleKnekkpunkter()
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): InntektAvkortingGrunnlagWrapper {
-        return InntektAvkortingGrunnlagWrapper(
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): InntektAvkortingGrunnlagWrapper =
+        InntektAvkortingGrunnlagWrapper(
             periodisertInntektAvkortingGrunnlag.finnGrunnlagForPeriode(datoIPeriode),
         )
-    }
 }
 
 val historiskeGrunnbeloep =
@@ -77,7 +74,7 @@ val maanedsinntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT"),
+        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.1"),
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
         val (inntekt, fratrekkInnAar, inntektutland, fratrekkInnAarUtland, relevanteMaaneder) = inntektavkortingsgrunnlag
         inntekt

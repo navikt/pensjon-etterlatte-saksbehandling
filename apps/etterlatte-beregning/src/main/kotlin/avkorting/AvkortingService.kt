@@ -32,7 +32,7 @@ class AvkortingService(
             return eksisterendeAvkorting?.let {
                 if (behandling.status == BehandlingStatus.BEREGNET) {
                     val reberegnetAvkorting =
-                        reberegnOgLagreAvkorting(behandling.id, eksisterendeAvkorting, brukerTokenInfo)
+                        reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
                     avkortingMedTillegg(reberegnetAvkorting, behandling)
                 } else {
                     avkortingMedTillegg(eksisterendeAvkorting, behandling)
@@ -42,10 +42,10 @@ class AvkortingService(
 
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
-            val nyAvkorting = kopierOgReberegnAvkorting(behandling.id, forrigeAvkorting, brukerTokenInfo)
+            val nyAvkorting = kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
-            val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, eksisterendeAvkorting, brukerTokenInfo)
+            val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
@@ -86,7 +86,7 @@ class AvkortingService(
                 beregning,
             )
 
-        avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
         val lagretAvkorting =
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 avkortingMedTillegg(hentAvkortingNonNull(behandling.id), behandling)
@@ -117,27 +117,29 @@ class AvkortingService(
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierOgReberegnAvkorting(behandling.id, forrigeAvkorting, brukerTokenInfo)
+        return kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
     }
 
     private suspend fun kopierOgReberegnAvkorting(
         behandlingId: UUID,
+        sakId: Long,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting()
-        return reberegnOgLagreAvkorting(behandlingId, kopiertAvkorting, brukerTokenInfo)
+        return reberegnOgLagreAvkorting(behandlingId, sakId, kopiertAvkorting, brukerTokenInfo)
     }
 
     private suspend fun reberegnOgLagreAvkorting(
         behandlingId: UUID,
+        sakId: Long,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning)
-        avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandlingId)
         behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
         return lagretAvkorting
@@ -184,17 +186,23 @@ class AvkortingService(
     }
 }
 
-class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
-    code = "AVKORTING_IKKE_FUNNET",
-    detail = "Uthenting av avkorting for behandling $behandlingId finnes ikke",
-)
+class AvkortingFinnesIkkeException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "AVKORTING_IKKE_FUNNET",
+        detail = "Uthenting av avkorting for behandling $behandlingId finnes ikke",
+    )
 
-class TidligereAvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
-    code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
-    detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
-)
+class TidligereAvkortingFinnesIkkeException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
+        detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
+    )
 
-class AvkortingBehandlingFeilStatus(behandlingId: UUID) : IkkeTillattException(
-    code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
-    detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
-)
+class AvkortingBehandlingFeilStatus(
+    behandlingId: UUID,
+) : IkkeTillattException(
+        code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
+        detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
+    )

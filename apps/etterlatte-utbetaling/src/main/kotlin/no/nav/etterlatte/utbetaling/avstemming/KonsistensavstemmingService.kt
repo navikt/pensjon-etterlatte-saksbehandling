@@ -82,33 +82,38 @@ class KonsistensavstemmingService(
             relevanteUtbetalinger
                 .filter { it.opprettet <= registrertFoerTom } // 1
                 .groupBy { it.sakId } // 2
-                .mapValues { entry -> // 3
-                    entry.value.map { utbetaling ->
-                        UtbetalingslinjerPerSak(
-                            sakId = 0,
-                            saktype = saktype,
-                            fnr = utbetaling.stoenadsmottaker.value,
-                            utbetalingslinjer = utbetaling.utbetalingslinjer,
-                            utbetalingslinjerTilAttestanter =
-                                utbetaling.utbetalingslinjer.map { it.id }
-                                    .associateWith { listOf(utbetaling.attestant) },
-                        )
-                    }.reduce { acc, next ->
-                        acc.copy(
-                            utbetalingslinjer = acc.utbetalingslinjer + next.utbetalingslinjer,
-                            utbetalingslinjerTilAttestanter =
-                                acc.utbetalingslinjerTilAttestanter +
-                                    next.utbetalingslinjerTilAttestanter,
-                        )
-                    }
+                .mapValues { entry ->
+                    // 3
+                    entry.value
+                        .map { utbetaling ->
+                            UtbetalingslinjerPerSak(
+                                sakId = 0,
+                                saktype = saktype,
+                                fnr = utbetaling.stoenadsmottaker.value,
+                                utbetalingslinjer = utbetaling.utbetalingslinjer,
+                                utbetalingslinjerTilAttestanter =
+                                    utbetaling.utbetalingslinjer
+                                        .map { it.id }
+                                        .associateWith { listOf(utbetaling.attestant) },
+                            )
+                        }.reduce { acc, next ->
+                            acc.copy(
+                                utbetalingslinjer = acc.utbetalingslinjer + next.utbetalingslinjer,
+                                utbetalingslinjerTilAttestanter =
+                                    acc.utbetalingslinjerTilAttestanter +
+                                        next.utbetalingslinjerTilAttestanter,
+                            )
+                        }
                 } // 3
-                .mapValues { entry -> // 4
+                .mapValues { entry ->
+                    // 4
                     val gjeldendeForKonsistensavstemming = gjeldendeLinjerForEnDato(entry.value.utbetalingslinjer, dag)
                     entry.value.copy(
                         utbetalingslinjer = gjeldendeForKonsistensavstemming,
                     )
                 } // 4
-                .mapNotNull { (sakid, utbetalingslinjerPerSak) -> // 5
+                .mapNotNull { (sakid, utbetalingslinjerPerSak) ->
+                    // 5
                     when (utbetalingslinjerPerSak.utbetalingslinjer.size) {
                         0 -> null
                         else ->
@@ -208,20 +213,22 @@ fun gjeldendeLinjerForEnDato(
         linjerSomErOpprettetOgIkkeAvsluttetPaaDato
             .associateBy { it.erstatterId }
 
-    return linjerSomErOpprettetOgIkkeAvsluttetPaaDato.filter { utbetalingslinje -> // 3
-        var tidligsteStartForEnErstatter: LocalDate? = null
-        var naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[utbetalingslinje.id]
+    return linjerSomErOpprettetOgIkkeAvsluttetPaaDato
+        .filter { utbetalingslinje ->
+            // 3
+            var tidligsteStartForEnErstatter: LocalDate? = null
+            var naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[utbetalingslinje.id]
 
-        while (naavaerendeLinje != null) {
-            tidligsteStartForEnErstatter =
-                listOfNotNull(tidligsteStartForEnErstatter, naavaerendeLinje.periode.fra).min()
-            naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[naavaerendeLinje.id]
-        }
-        if (tidligsteStartForEnErstatter == null) {
-            return@filter true
-        }
-        return@filter tidligsteStartForEnErstatter > dato
-    }.filter { it.type != Utbetalingslinjetype.OPPHOER } // 4
+            while (naavaerendeLinje != null) {
+                tidligsteStartForEnErstatter =
+                    listOfNotNull(tidligsteStartForEnErstatter, naavaerendeLinje.periode.fra).min()
+                naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[naavaerendeLinje.id]
+            }
+            if (tidligsteStartForEnErstatter == null) {
+                return@filter true
+            }
+            return@filter tidligsteStartForEnErstatter > dato
+        }.filter { it.type != Utbetalingslinjetype.OPPHOER } // 4
 }
 
 data class UtbetalingslinjerPerSak(

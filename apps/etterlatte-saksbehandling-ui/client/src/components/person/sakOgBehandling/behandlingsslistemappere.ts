@@ -55,6 +55,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Etteroppgjør'
     case Revurderingaarsak.FORELDRELOES:
       return 'Fra en til to døde foreldre'
+    case Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING:
+      return 'Fra 0-utbetaling til utbetaling etter regulering'
     case Revurderingaarsak.OMGJOERING_ETTER_ANKE:
       return 'Omgjøring etter anke'
     case Revurderingaarsak.OMGJOERING_PAA_EGET_INITIATIV:

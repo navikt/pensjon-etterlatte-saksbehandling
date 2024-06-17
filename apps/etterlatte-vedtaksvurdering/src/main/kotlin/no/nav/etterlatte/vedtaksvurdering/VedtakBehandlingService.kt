@@ -2,6 +2,8 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenligner
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -42,6 +45,7 @@ import java.util.UUID
 
 class VedtakBehandlingService(
     private val repository: VedtaksvurderingRepository,
+    private val featureToggleService: FeatureToggleService,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
@@ -96,7 +100,7 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
@@ -109,8 +113,6 @@ class VedtakBehandlingService(
             beregningOgAvkorting = beregningOgAvkorting,
             vilkaarsvurdering = vilkaarsvurdering,
         )
-
-        val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
         val fattetVedtak =
             repository.inTransaction { tx ->
@@ -146,6 +148,12 @@ class VedtakBehandlingService(
                     }
                 }
             }
+
+        if (featureToggleService.isEnabled(VedtakFeatureToggle.VerifiserPerioder, false)) {
+            beregningOgAvkorting?.let {
+                VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
+            }
+        }
 
         return VedtakOgRapid(
             fattetVedtak.toDto(),
@@ -283,7 +291,8 @@ class VedtakBehandlingService(
 
         val tilSamordningVedtakLocal =
             repository.inTransaction { tx ->
-                repository.tilSamordningVedtak(behandlingId, tx = tx)
+                repository
+                    .tilSamordningVedtak(behandlingId, tx = tx)
                     .also {
                         runBlocking {
                             behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
@@ -314,13 +323,14 @@ class VedtakBehandlingService(
             return false
         }
 
-        return samordningsKlient.samordneVedtak(
-            vedtak = vedtak,
-            etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
-            brukerTokenInfo = brukerTokenInfo,
-        ).also {
-            logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
-        }
+        return samordningsKlient
+            .samordneVedtak(
+                vedtak = vedtak,
+                etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
+                brukerTokenInfo = brukerTokenInfo,
+            ).also {
+                logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
+            }
     }
 
     fun samordnetVedtak(
@@ -334,7 +344,8 @@ class VedtakBehandlingService(
             VedtakStatus.TIL_SAMORDNING -> {
                 val samordnetVedtakLocal =
                     repository.inTransaction { tx ->
-                        repository.samordnetVedtak(behandlingId, tx = tx)
+                        repository
+                            .samordnetVedtak(behandlingId, tx = tx)
                             .also {
                                 runBlocking {
                                     behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
@@ -368,14 +379,16 @@ class VedtakBehandlingService(
     suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
         val vedtaksliste = repository.hentVedtakForSak(sakId)
         return vedtaksliste.firstOrNull()?.let { vedtak ->
-            return samordningsKlient.hentSamordningsdata(vedtak, alleVedtak = true)
+            return samordningsKlient
+                .hentSamordningsdata(vedtak, alleVedtak = true)
                 .map { supplementSamordningsinfo(it, vedtaksliste) }
         } ?: emptyList()
     }
 
     suspend fun samordningsinfo(behandlingId: UUID): List<SamordningsvedtakWrapper> {
         val vedtak = hentVedtakNonNull(behandlingId)
-        return samordningsKlient.hentSamordningsdata(vedtak, alleVedtak = false)
+        return samordningsKlient
+            .hentSamordningsdata(vedtak, alleVedtak = false)
             .map { supplementSamordningsinfo(it, listOf(vedtak)) }
     }
 
@@ -422,9 +435,10 @@ class VedtakBehandlingService(
         )
     }
 
-    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
-        return requireNotNull(repository.hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
-    }
+    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
+        requireNotNull(repository.hentVedtak(behandlingId)) {
+            "Vedtak for behandling $behandlingId finnes ikke"
+        }
 
     private fun verifiserGyldigBehandlingStatus(
         gyldigForOperasjon: Boolean,
@@ -546,8 +560,8 @@ class VedtakBehandlingService(
     private fun vedtakType(
         behandlingType: BehandlingType,
         vilkaarsvurdering: VilkaarsvurderingDto?,
-    ): VedtakType {
-        return when (behandlingType) {
+    ): VedtakType =
+        when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
@@ -562,7 +576,6 @@ class VedtakBehandlingService(
                 }
             }
         }
-    }
 
     private fun opprettUtbetalingsperioder(
         vedtakType: VedtakType,
@@ -638,11 +651,10 @@ class VedtakBehandlingService(
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakData {
-        return coroutineScope {
+    ): VedtakData =
+        coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-
             val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
@@ -665,28 +677,30 @@ class VedtakBehandlingService(
                 }
             }
         }
-    }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> {
-        return repository.hentVedtakForSak(sakId)
+    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> =
+        repository
+            .hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }
-    }
 
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 }
 
-class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :
-    Exception("Vedtak har status $gjeldendeStatus, men forventet status $forventetStatus")
+class VedtakTilstandException(
+    gjeldendeStatus: VedtakStatus,
+    forventetStatus: List<VedtakStatus>,
+) : Exception("Vedtak har status $gjeldendeStatus, men forventet status $forventetStatus")
 
-class BehandlingstilstandException(vedtak: Vedtak) :
-    IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
+class BehandlingstilstandException(
+    vedtak: Vedtak,
+) : IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(
@@ -695,7 +709,18 @@ class ManglerAvkortetYtelse :
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
     )
 
-class ForeldreloesTrygdetid(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "FORELDRELOES_TRYGDETID",
-    detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
-)
+class ForeldreloesTrygdetid(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "FORELDRELOES_TRYGDETID",
+        detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
+    )
+
+enum class VedtakFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    VerifiserPerioder("verifiser-perioder"),
+    ;
+
+    override fun key() = key
+}

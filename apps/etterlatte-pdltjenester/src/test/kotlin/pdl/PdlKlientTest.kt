@@ -39,7 +39,14 @@ internal class PdlKlientTest {
 
             assertEquals("LITEN", hentPerson?.navn?.first()?.fornavn)
             assertEquals("HEST", hentPerson?.navn?.first()?.etternavn)
-            assertEquals("2007-08-29", hentPerson?.foedsel?.first()?.foedselsdato?.toString())
+            assertEquals(
+                "2007-08-29",
+                hentPerson
+                    ?.foedsel
+                    ?.first()
+                    ?.foedselsdato
+                    ?.toString(),
+            )
             assertEquals("NIC", hentPerson?.foedsel?.first()?.foedeland)
             // TODO sjekk flere relevante felter
         }
@@ -53,10 +60,43 @@ internal class PdlKlientTest {
             val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), listOf(SakType.BARNEPENSJON))
             val hentPerson = personResponse.data?.hentPersonBolk
 
-            assertEquals("TRIVIELL", hentPerson?.first()?.person?.navn?.first()?.fornavn)
-            assertEquals("SKILPADDE", hentPerson?.first()?.person?.navn?.first()?.etternavn)
-            assertEquals("1987-07-30", hentPerson?.first()?.person?.foedsel?.first()?.foedselsdato?.toString())
-            assertEquals("FJI", hentPerson?.first()?.person?.foedsel?.first()?.foedeland)
+            assertEquals(
+                "TRIVIELL",
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.navn
+                    ?.first()
+                    ?.fornavn,
+            )
+            assertEquals(
+                "SKILPADDE",
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.navn
+                    ?.first()
+                    ?.etternavn,
+            )
+            assertEquals(
+                "1987-07-30",
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.foedsel
+                    ?.first()
+                    ?.foedselsdato
+                    ?.toString(),
+            )
+            assertEquals(
+                "FJI",
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.foedsel
+                    ?.first()
+                    ?.foedeland,
+            )
             // TODO sjekk flere relevante felter
         }
     }
@@ -85,9 +125,30 @@ internal class PdlKlientTest {
                 pdlKlient.hentPdlIdentifikator(
                     HentPdlIdentRequest(PersonIdent(AVDOED_FOEDSELSNUMMER.value)),
                 )
-            assertEquals("09508229892", identResponse.data?.hentIdenter?.identer?.first()?.ident)
-            assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
-            assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
+            assertEquals(
+                "09508229892",
+                identResponse.data
+                    ?.hentIdenter
+                    ?.identer
+                    ?.first()
+                    ?.ident,
+            )
+            assertEquals(
+                false,
+                identResponse.data
+                    ?.hentIdenter
+                    ?.identer
+                    ?.first()
+                    ?.historisk,
+            )
+            assertEquals(
+                "FOLKEREGISTERIDENT",
+                identResponse.data
+                    ?.hentIdenter
+                    ?.identer
+                    ?.first()
+                    ?.gruppe,
+            )
         }
     }
 
@@ -116,9 +177,30 @@ internal class PdlKlientTest {
                     HentFolkeregisterIdenterForAktoerIdBolkRequest(setOf("2082995739063")),
                 )
             assertEquals("2082995739063", identResponse.first().ident)
-            assertEquals("03486048831", identResponse.first().identer!!.first().ident)
-            assertEquals(false, identResponse.first().identer!!.first().historisk)
-            assertEquals("FOLKEREGISTERIDENT", identResponse.first().identer!!.first().gruppe.name)
+            assertEquals(
+                "03486048831",
+                identResponse
+                    .first()
+                    .identer!!
+                    .first()
+                    .ident,
+            )
+            assertEquals(
+                false,
+                identResponse
+                    .first()
+                    .identer!!
+                    .first()
+                    .historisk,
+            )
+            assertEquals(
+                "FOLKEREGISTERIDENT",
+                identResponse
+                    .first()
+                    .identer!!
+                    .first()
+                    .gruppe.name,
+            )
         }
     }
 
@@ -147,7 +229,14 @@ internal class PdlKlientTest {
                     HentAdressebeskyttelseRequest(PersonIdent(STOR_SNERK.value), SakType.BARNEPENSJON),
                 )
 
-            assertEquals(PdlGradering.FORTROLIG, response.data?.hentPerson?.adressebeskyttelse?.single()?.gradering)
+            assertEquals(
+                PdlGradering.FORTROLIG,
+                response.data
+                    ?.hentPerson
+                    ?.adressebeskyttelse
+                    ?.single()
+                    ?.gradering,
+            )
         }
     }
 

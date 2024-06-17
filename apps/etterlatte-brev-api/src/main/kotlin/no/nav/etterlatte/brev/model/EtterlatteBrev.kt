@@ -157,7 +157,9 @@ fun TrygdetidDto.fromDto(
     prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
     mindreEnnFireFemtedelerAvOpptjeningstiden =
         beregnetTrygdetid
-            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
+            ?.resultat
+            ?.fremtidigTrygdetidNorge
+            ?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
     beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
     beregningsMetodeAnvendt = beregningsMetodeAnvendt,
 )
@@ -169,27 +171,32 @@ enum class FeilutbetalingType {
 }
 
 // Brukes der mangler med trygdetid ikke skal kunne skje men felt likevel er nullable
-class ManglerMedTrygdetidVeBrukIBrev : UgyldigForespoerselException(
-    code = "MANGLER_TRYGDETID_VED_BREV",
-    detail = "Trygdetid har mangler ved bruk til brev",
-)
+class ManglerMedTrygdetidVeBrukIBrev :
+    UgyldigForespoerselException(
+        code = "MANGLER_TRYGDETID_VED_BREV",
+        detail = "Trygdetid har mangler ved bruk til brev",
+    )
 
-class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
-    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
-)
+class ManglerAvdoedBruktTilTrygdetid :
+    UgyldigForespoerselException(
+        code = "MANGLER_AVDOED_INFO_I_BEREGNING",
+        detail = "Det mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
+    )
 
-class FantIkkeIdentTilTrygdetidBlantAvdoede : UgyldigForespoerselException(
-    code = "FANT_IKKE_TRYGDETID_IDENT_BLANT_AVDOEDE",
-    detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak",
-)
+class FantIkkeIdentTilTrygdetidBlantAvdoede :
+    UgyldigForespoerselException(
+        code = "FANT_IKKE_TRYGDETID_IDENT_BLANT_AVDOEDE",
+        detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak",
+    )
 
-class OverstyrtTrygdetidManglerAvdoed : UgyldigForespoerselException(
-    code = "OVERSTYRT_TRYGDETID_MANGLER_AVDOED",
-    detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
-)
+class OverstyrtTrygdetidManglerAvdoed :
+    UgyldigForespoerselException(
+        code = "OVERSTYRT_TRYGDETID_MANGLER_AVDOED",
+        detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
+    )
 
-class IngenStoetteForUkjentAvdoed : UgyldigForespoerselException(
-    code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
-    detail = "Brevløsningen støtter ikke ukjent avdød",
-)
+class IngenStoetteForUkjentAvdoed :
+    UgyldigForespoerselException(
+        code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
+        detail = "Brevløsningen støtter ikke ukjent avdød",
+    )

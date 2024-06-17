@@ -22,10 +22,11 @@ import java.util.UUID
 
 val REFORM_TIDSPUNKT_BP = YearMonth.of(2024, 1)
 
-class ManglerVirkningstidspunktBP : UgyldigForespoerselException(
-    code = "MANGLER_VIRK_BP",
-    detail = "Mangler virkningstidspunkt for barnepensjon.",
-)
+class ManglerVirkningstidspunktBP :
+    UgyldigForespoerselException(
+        code = "MANGLER_VIRK_BP",
+        detail = "Mangler virkningstidspunkt for barnepensjon.",
+    )
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
@@ -51,7 +52,8 @@ class BeregningsGrunnlagService(
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
                         // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
                         val sisteIverksatteBehandling =
-                            vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                            vedtaksvurderingKlient
+                                .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
                                 .sortedByDescending { it.datoFattet }
                                 .first { it.vedtakType != VedtakType.OPPHOER }
 
@@ -115,7 +117,8 @@ class BeregningsGrunnlagService(
         val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
 
         val soeskensFoedselsnummere =
-            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
+            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning
+                .flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
                 .map { it.foedselsnummer.value }
 
         if (soeskensFoedselsnummere.isNotEmpty()) {
@@ -244,30 +247,31 @@ class BeregningsGrunnlagService(
     fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlag {
         logger.info("Henter overstyr beregning grunnlag $behandlingId")
 
-        return beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
-            behandlingId,
-        ).let { overstyrBeregningGrunnlagDaoListe ->
-            OverstyrBeregningGrunnlag(
-                perioder =
-                    overstyrBeregningGrunnlagDaoListe.map { periode ->
-                        GrunnlagMedPeriode(
-                            data =
-                                OverstyrBeregningGrunnlagData(
-                                    utbetaltBeloep = periode.utbetaltBeloep,
-                                    trygdetid = periode.trygdetid,
-                                    trygdetidForIdent = periode.trygdetidForIdent,
-                                    prorataBroekTeller = periode.prorataBroekTeller,
-                                    prorataBroekNevner = periode.prorataBroekNevner,
-                                    beskrivelse = periode.beskrivelse,
-                                    aarsak = periode.aarsak,
-                                ),
-                            fom = periode.datoFOM,
-                            tom = periode.datoTOM,
-                        )
-                    },
-                kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
-            )
-        }
+        return beregningsGrunnlagRepository
+            .finnOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+            ).let { overstyrBeregningGrunnlagDaoListe ->
+                OverstyrBeregningGrunnlag(
+                    perioder =
+                        overstyrBeregningGrunnlagDaoListe.map { periode ->
+                            GrunnlagMedPeriode(
+                                data =
+                                    OverstyrBeregningGrunnlagData(
+                                        utbetaltBeloep = periode.utbetaltBeloep,
+                                        trygdetid = periode.trygdetid,
+                                        trygdetidForIdent = periode.trygdetidForIdent,
+                                        prorataBroekTeller = periode.prorataBroekTeller,
+                                        prorataBroekNevner = periode.prorataBroekNevner,
+                                        beskrivelse = periode.beskrivelse,
+                                        aarsak = periode.aarsak,
+                                    ),
+                                fom = periode.datoFOM,
+                                tom = periode.datoTOM,
+                            )
+                        },
+                    kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
+                )
+            }
     }
 
     suspend fun lagreOverstyrBeregningGrunnlag(
@@ -359,14 +363,18 @@ class BeregningsGrunnlagService(
     }
 }
 
-class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "BP_BEREGNING_SOESKEN_IKKE_AVDOEDES_BARN",
-    detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn",
-    meta = mapOf("behandlingId" to behandlingId),
-)
+class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_SOESKEN_IKKE_AVDOEDES_BARN",
+        detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
 
-class BPBeregningsgrunnlagSoeskenMarkertDoedException(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "BP_BEREGNING_SOESKEN_MARKERT_DOED",
-    detail = "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen",
-    meta = mapOf("behandlingId" to behandlingId),
-)
+class BPBeregningsgrunnlagSoeskenMarkertDoedException(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_SOESKEN_MARKERT_DOED",
+        detail = "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen",
+        meta = mapOf("behandlingId" to behandlingId),
+    )

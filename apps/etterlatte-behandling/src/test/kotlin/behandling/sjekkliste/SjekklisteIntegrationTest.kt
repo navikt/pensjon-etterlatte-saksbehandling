@@ -27,7 +27,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class SjekklisteIntegrationTest(val dataSource: DataSource) {
+class SjekklisteIntegrationTest(
+    val dataSource: DataSource,
+) {
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller>().apply {
             every { this@apply.name() } returns "Z123456"

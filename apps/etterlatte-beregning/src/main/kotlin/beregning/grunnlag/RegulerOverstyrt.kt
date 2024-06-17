@@ -26,43 +26,44 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
 ): OverstyrBeregningGrunnlagDao {
     val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunnbeloep(reguleringsmaaned)
     val resultat =
-        regulerOverstyrtKroneavrundet.eksekver(
-            grunnlag =
-                KonstantGrunnlag(
-                    RegulerManuellBeregningGrunnlag(
-                        manueltBeregnetBeloep =
-                            FaktumNode(
-                                verdi = Beregningstall(forrigeBeregningsgrunnlag.utbetaltBeloep.toInt()),
-                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
-                                beskrivelse = "Forrige manuelt overstyrte beregning",
-                            ),
-                        forrigeGrunnbeloep =
-                            FaktumNode(
-                                verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloep),
-                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
-                                beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
-                            ),
-                        nyttGrunnbeloep =
-                            FaktumNode(
-                                verdi = Beregningstall(nyttGrunnbeloep.grunnbeloep),
-                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
-                                beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
-                            ),
+        regulerOverstyrtKroneavrundet
+            .eksekver(
+                grunnlag =
+                    KonstantGrunnlag(
+                        RegulerManuellBeregningGrunnlag(
+                            manueltBeregnetBeloep =
+                                FaktumNode(
+                                    verdi = Beregningstall(forrigeBeregningsgrunnlag.utbetaltBeloep.toInt()),
+                                    Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                    beskrivelse = "Forrige manuelt overstyrte beregning",
+                                ),
+                            forrigeGrunnbeloep =
+                                FaktumNode(
+                                    verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloep),
+                                    Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                    beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
+                                ),
+                            nyttGrunnbeloep =
+                                FaktumNode(
+                                    verdi = Beregningstall(nyttGrunnbeloep.grunnbeloep),
+                                    Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                    beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
+                                ),
+                        ),
                     ),
-                ),
-            periode =
-                RegelPeriode(
-                    fraDato = fom,
-                ),
-        ).let {
-            when (it) {
-                is RegelkjoeringResultat.Suksess -> {
-                    it.periodiserteResultater.single()
+                periode =
+                    RegelPeriode(
+                        fraDato = fom,
+                    ),
+            ).let {
+                when (it) {
+                    is RegelkjoeringResultat.Suksess -> {
+                        it.periodiserteResultater.single()
+                    }
+                    is RegelkjoeringResultat.UgyldigPeriode ->
+                        throw RuntimeException("Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}")
                 }
-                is RegelkjoeringResultat.UgyldigPeriode ->
-                    throw RuntimeException("Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}")
             }
-        }
     return forrigeBeregningsgrunnlag.copy(
         id = UUID.randomUUID(),
         behandlingId = behandlingId,
@@ -76,33 +77,34 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
 }
 
 private fun utledGrunnbeloep(reguleringsmaaned: YearMonth) =
-    grunnbeloepUtenGrunnlag.eksekver(
-        grunnlag = KonstantGrunnlag(""),
-        periode =
-            RegelPeriode(
-                fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
-                tilDato = reguleringsmaaned.atEndOfMonth(),
-            ),
-    ).let { resultat ->
-        when (resultat) {
-            is RegelkjoeringResultat.Suksess -> {
-                check(resultat.periodiserteResultater.size == 2) {
-                    "Fikk uventet antall perioder for utleding av grunnlag: ${resultat.periodiserteResultater.size}"
-                }
-                resultat.periodiserteResultater.let {
-                    val gammelG: Grunnbeloep = it[0].resultat.verdi
-                    val forrigeGrunnbeloepDato = reguleringsmaaned.minusYears(1)
-                    check(gammelG.dato == forrigeGrunnbeloepDato) {
-                        "Dato til utledet forrige grunnbeløp er ikke forventet dato $forrigeGrunnbeloepDato"
+    grunnbeloepUtenGrunnlag
+        .eksekver(
+            grunnlag = KonstantGrunnlag(""),
+            periode =
+                RegelPeriode(
+                    fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
+                    tilDato = reguleringsmaaned.atEndOfMonth(),
+                ),
+        ).let { resultat ->
+            when (resultat) {
+                is RegelkjoeringResultat.Suksess -> {
+                    check(resultat.periodiserteResultater.size == 2) {
+                        "Fikk uventet antall perioder for utleding av grunnlag: ${resultat.periodiserteResultater.size}"
                     }
-                    val nyG: Grunnbeloep = it[1].resultat.verdi
-                    check(nyG.dato == reguleringsmaaned) {
-                        "Dato til utledet nytt grunnbeløp er ikke forventet dato $reguleringsmaaned"
+                    resultat.periodiserteResultater.let {
+                        val gammelG: Grunnbeloep = it[0].resultat.verdi
+                        val forrigeGrunnbeloepDato = reguleringsmaaned.minusYears(1)
+                        check(gammelG.dato == forrigeGrunnbeloepDato) {
+                            "Dato til utledet forrige grunnbeløp er ikke forventet dato $forrigeGrunnbeloepDato"
+                        }
+                        val nyG: Grunnbeloep = it[1].resultat.verdi
+                        check(nyG.dato == reguleringsmaaned) {
+                            "Dato til utledet nytt grunnbeløp er ikke forventet dato $reguleringsmaaned"
+                        }
+                        Pair(gammelG, nyG)
                     }
-                    Pair(gammelG, nyG)
                 }
+                is RegelkjoeringResultat.UgyldigPeriode ->
+                    throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
             }
-            is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
-    }

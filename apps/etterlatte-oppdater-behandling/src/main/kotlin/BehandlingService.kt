@@ -179,23 +179,23 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse {
-        return runBlocking {
-            behandlingKlient.post("$url/omregning") {
-                contentType(ContentType.Application.Json)
-                setBody(omregningshendelse)
-            }.body()
+    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
+        runBlocking {
+            behandlingKlient
+                .post("$url/omregning") {
+                    contentType(ContentType.Application.Json)
+                    setBody(omregningshendelse)
+                }.body()
         }
-    }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe {
-        return runBlocking {
-            behandlingKlient.post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
-                contentType(ContentType.Application.Json)
-                setBody(saker)
-            }.body()
+    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe =
+        runBlocking {
+            behandlingKlient
+                .post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
+                    contentType(ContentType.Application.Json)
+                    setBody(saker)
+                }.body()
         }
-    }
 
     override fun hentAlleSaker(
         kjoering: String,
@@ -205,10 +205,11 @@ class BehandlingServiceImpl(
         sakType: SakType?,
     ): Saker =
         runBlocking {
-            behandlingKlient.post("$url/saker/$kjoering/$antall") {
-                contentType(ContentType.Application.Json)
-                setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
-            }.body()
+            behandlingKlient
+                .post("$url/saker/$kjoering/$antall") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
+                }.body()
         }
 
     override fun avbryt(behandlingId: UUID) =
@@ -222,10 +223,11 @@ class BehandlingServiceImpl(
         sakType: SakType,
         foedselsNummerDTO: FoedselsnummerDTO,
     ) = runBlocking {
-        behandlingKlient.post("$url/personer/saker/${sakType.name}") {
-            contentType(ContentType.Application.Json)
-            setBody(foedselsNummerDTO)
-        }.body<Sak>()
+        behandlingKlient
+            .post("$url/personer/saker/${sakType.name}") {
+                contentType(ContentType.Application.Json)
+                setBody(foedselsNummerDTO)
+            }.body<Sak>()
     }
 
     override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
@@ -239,45 +241,46 @@ class BehandlingServiceImpl(
         referanse: String?,
         merknad: String?,
         frist: Tidspunkt?,
-    ): UUID {
-        return runBlocking {
-            behandlingKlient.post("$url/oppgaver/sak/$sakId/opprett") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    NyOppgaveDto(
-                        OppgaveKilde.HENDELSE,
-                        oppgaveType,
-                        merknad,
-                        referanse,
-                        frist,
-                    ),
-                )
-            }.body<ObjectNode>().let {
-                UUID.fromString(it["id"].textValue())
-            }
+    ): UUID =
+        runBlocking {
+            behandlingKlient
+                .post("$url/oppgaver/sak/$sakId/opprett") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        NyOppgaveDto(
+                            OppgaveKilde.HENDELSE,
+                            oppgaveType,
+                            merknad,
+                            referanse,
+                            frist,
+                        ),
+                    )
+                }.body<ObjectNode>()
+                .let {
+                    UUID.fromString(it["id"].textValue())
+                }
         }
-    }
 
     override fun opprettRevurderingAktivitetsplikt(
         sakId: Long,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
-    ): OpprettRevurderingForAktivitetspliktResponse {
-        return runBlocking {
-            behandlingKlient.post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    OpprettRevurderingForAktivitetspliktDto(
-                        sakId = sakId,
-                        frist = frist,
-                        behandlingsmaaned = behandlingsmaaned,
-                        jobbType = jobbType,
-                    ),
-                )
-            }.body<OpprettRevurderingForAktivitetspliktResponse>()
+    ): OpprettRevurderingForAktivitetspliktResponse =
+        runBlocking {
+            behandlingKlient
+                .post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        OpprettRevurderingForAktivitetspliktDto(
+                            sakId = sakId,
+                            frist = frist,
+                            behandlingsmaaned = behandlingsmaaned,
+                            jobbType = jobbType,
+                        ),
+                    )
+                }.body<OpprettRevurderingForAktivitetspliktResponse>()
         }
-    }
 
     override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
         runBlocking {

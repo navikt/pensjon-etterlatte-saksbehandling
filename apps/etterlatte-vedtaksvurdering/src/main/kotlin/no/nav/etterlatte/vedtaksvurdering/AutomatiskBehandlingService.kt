@@ -47,7 +47,8 @@ class AutomatiskBehandlingService(
 
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =
-            behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
+            behandlingKlient
+                .hentOppgaverForSak(sakId, brukerTokenInfo)
                 .filter { it.referanse == behandlingId.toString() }
                 .filter { it.status == Status.ATTESTERING }
                 .first()

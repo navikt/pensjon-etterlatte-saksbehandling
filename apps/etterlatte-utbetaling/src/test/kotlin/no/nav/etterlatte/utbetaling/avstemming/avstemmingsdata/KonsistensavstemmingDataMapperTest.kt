@@ -39,14 +39,33 @@ internal class KonsistensavstemmingDataMapperTest {
         assertDoesNotThrow { `liste av konsistensavstemmingsdata har rett struktur`(opprettetAvstemmingsmelding) }
         assertEquals(1, opprettetAvstemmingsmelding[1].oppdragsdataListe.size)
         assertEquals(oppdrag.fnr.value, opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragGjelderId)
-        assertEquals(1, opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.size)
         assertEquals(
-            oppdragslinjer.first().id.value.toString(),
-            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().delytelseId,
+            1,
+            opprettetAvstemmingsmelding[1]
+                .oppdragsdataListe
+                .first()
+                .oppdragslinjeListe.size,
+        )
+        assertEquals(
+            oppdragslinjer
+                .first()
+                .id.value
+                .toString(),
+            opprettetAvstemmingsmelding[1]
+                .oppdragsdataListe
+                .first()
+                .oppdragslinjeListe
+                .first()
+                .delytelseId,
         )
         assertEquals(
             BigDecimal.valueOf(10000L),
-            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().sats,
+            opprettetAvstemmingsmelding[1]
+                .oppdragsdataListe
+                .first()
+                .oppdragslinjeListe
+                .first()
+                .sats,
         )
     }
 
@@ -115,7 +134,8 @@ fun `liste av konsistensavstemmingsdata har rett struktur`(konsistensavstemmings
         throw IllegalArgumentException("Aksjonstypen til siste datamelding var ikke AVSL")
     }
 
-    if (konsistensavstemmingsdata.subList(1, konsistensavstemmingsdata.size - 1)
+    if (konsistensavstemmingsdata
+            .subList(1, konsistensavstemmingsdata.size - 1)
             .any { it.aksjonsdata.aksjonsType != "DATA" }
     ) {
         throw IllegalArgumentException(

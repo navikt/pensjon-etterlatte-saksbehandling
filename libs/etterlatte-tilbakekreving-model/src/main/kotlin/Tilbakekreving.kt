@@ -151,8 +151,8 @@ data class Tilbakekrevingsbelop(
         )
 }
 
-fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> {
-    return map { periode ->
+fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> =
+    map { periode ->
         val ytelse =
             requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
 
@@ -165,7 +165,6 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
             feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
         )
     }
-}
 
 enum class TilbakekrevingAarsak {
     OMGJOERING,
@@ -175,7 +174,9 @@ enum class TilbakekrevingAarsak {
     ANNET,
 }
 
-enum class TilbakekrevingHjemmel(val kode: String) {
+enum class TilbakekrevingHjemmel(
+    val kode: String,
+) {
     TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM("22-15-1-1"),
     TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM("22-15-1-2"),
 
@@ -192,7 +193,9 @@ enum class TilbakekrevingSkyld {
     SKYLDDELING,
 }
 
-enum class TilbakekrevingResultat(private val gradAvTilbakekreving: Int) {
+enum class TilbakekrevingResultat(
+    private val gradAvTilbakekreving: Int,
+) {
     FEILREGISTRERT(0),
     FORELDET(1),
     INGEN_TILBAKEKREV(2),
@@ -210,6 +213,7 @@ enum class TilbakekrevingResultat(private val gradAvTilbakekreving: Int) {
 * N.B Inneholder ikke alle vedtaksinfo kun det som er nødvendig for Tilbakekrevingskomponent.
 */
 data class TilbakekrevingVedtak(
+    val sakId: Long,
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,

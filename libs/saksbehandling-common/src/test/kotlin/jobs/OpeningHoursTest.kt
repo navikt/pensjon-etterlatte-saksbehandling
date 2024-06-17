@@ -21,13 +21,25 @@ class OpeningHoursTest {
 
         @Test
         fun `kl bittelitt over 16 er utenfor aapningstida 8-16`() {
-            val sekstenish = ZonedDateTime.now().withHour(16).withMinute(0).withSecond(1).toInstant()
+            val sekstenish =
+                ZonedDateTime
+                    .now()
+                    .withHour(16)
+                    .withMinute(0)
+                    .withSecond(1)
+                    .toInstant()
             openingHours08to16.isOpen(Clock.fixed(sekstenish, norskTidssone)) shouldBe false
         }
 
         @Test
         fun `midnatt er utenfor aapningstida 8-16`() {
-            val midnatt = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(1).toInstant()
+            val midnatt =
+                ZonedDateTime
+                    .now()
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(1)
+                    .toInstant()
             openingHours08to16.isOpen(Clock.fixed(midnatt, norskTidssone)) shouldBe false
         }
 

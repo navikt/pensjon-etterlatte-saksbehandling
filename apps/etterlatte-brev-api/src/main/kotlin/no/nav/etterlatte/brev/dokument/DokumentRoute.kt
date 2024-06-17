@@ -52,12 +52,12 @@ fun Route.dokumentRoute(
             }
 
             put {
-                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
+                val forsoekFerdigstill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
                 val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
                 val request = call.receive<OppdaterJournalpostRequest>()
 
-                val response = dokarkivService.oppdater(journalpostId, forsoekFerdistill, journalfoerendeEnhet, request)
+                val response = dokarkivService.oppdater(journalpostId, forsoekFerdigstill, journalfoerendeEnhet, request)
 
                 call.respond(response)
             }

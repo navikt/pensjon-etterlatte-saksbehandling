@@ -128,12 +128,13 @@ internal class BeregningRoutesTest {
                 beregning(beregningService, behandlingKlient)
             }
 
-            client.get("/api/beregning/${beregning.behandlingId}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.NotFound
-            }
+            client
+                .get("/api/beregning/${beregning.behandlingId}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.NotFound
+                }
         }
     }
 
@@ -233,7 +234,9 @@ internal class BeregningRoutesTest {
         behandlingId = behandlingId,
         type = Beregningstype.BP,
         beregnetDato = Tidspunkt.now(),
-        grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
+        grunnlagMetadata =
+            no.nav.etterlatte.libs.common.grunnlag
+                .Metadata(1, 1),
         beregningsperioder =
             listOf(
                 Beregningsperiode(

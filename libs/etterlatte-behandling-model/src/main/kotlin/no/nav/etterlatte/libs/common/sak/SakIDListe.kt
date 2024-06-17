@@ -12,7 +12,10 @@ data class SakIDListe(
     fun aapneBehandlingerForSak(id: Long): List<UUID> = aapneBehandlinger.filter { it.sakId == id }.map { it.behandlingId }
 }
 
-data class BehandlingOgSak(val behandlingId: UUID, val sakId: Long)
+data class BehandlingOgSak(
+    val behandlingId: UUID,
+    val sakId: Long,
+)
 
 data class HentSakerRequest(
     val spesifikkeSaker: List<Long>,

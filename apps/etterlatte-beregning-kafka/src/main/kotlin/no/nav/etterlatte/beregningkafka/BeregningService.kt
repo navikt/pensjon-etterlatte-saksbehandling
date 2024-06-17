@@ -52,7 +52,8 @@ class BeregningService(
         }
 
     suspend fun hentGrunnbeloep(): Grunnbeloep =
-        beregningApp.get("$url/api/beregning/grunnbeloep")
+        beregningApp
+            .get("$url/api/beregning/grunnbeloep")
             .also { require(it.status.isSuccess()) }
             .body<Grunnbeloep>()
 }

@@ -56,5 +56,7 @@ enum class DistribusjonsTidspunktType {
     KJERNETID, // KJERNETID (07:00-23:00)
 }
 
-data class DistribuerJournalpostResponse(val bestillingsId: BestillingsID)
+data class DistribuerJournalpostResponse(
+    val bestillingsId: BestillingsID,
+)
 typealias BestillingsID = String

@@ -74,12 +74,11 @@ internal fun Vedtak.typeToEksternApi(): String {
     }
 }
 
-internal fun SakType.toEksternApi(): String {
-    return when (this) {
+internal fun SakType.toEksternApi(): String =
+    when (this) {
         SakType.BARNEPENSJON -> "BP"
         SakType.OMSTILLINGSSTOENAD -> "OMS"
     }
-}
 
 internal data class Vedtakshendelse(
     val ident: String,

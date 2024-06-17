@@ -29,7 +29,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
+internal class UtbetalingDaoIntegrationTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -118,14 +120,20 @@ internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
-                        it.periode.fra == utbetaling.utbetalingslinjer.first().periode.fra
+                        it.periode.fra ==
+                            utbetaling.utbetalingslinjer
+                                .first()
+                                .periode.fra
                     },
                 )
             },
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
-                        it.periode.til == utbetaling.utbetalingslinjer.first().periode.til
+                        it.periode.til ==
+                            utbetaling.utbetalingslinjer
+                                .first()
+                                .periode.til
                     },
                 )
             },
@@ -212,7 +220,9 @@ internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
             oppdrag.apply {
                 oppdrag110.oppdragsId = 1
                 mmel =
-                    Mmel().also { it.alvorlighetsgrad = "08" }.also { it.beskrMelding = "beskrivende melding" }
+                    Mmel()
+                        .also { it.alvorlighetsgrad = "08" }
+                        .also { it.beskrMelding = "beskrivende melding" }
                         .also { it.kodeMelding = "1234" }
             }
 
@@ -233,7 +243,11 @@ internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
             {
                 assertEquals(
                     oppdragMedKvittering.mmel?.alvorlighetsgrad,
-                    utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad,
+                    utbetalingOppdatert
+                        ?.kvittering
+                        ?.oppdrag
+                        ?.mmel
+                        ?.alvorlighetsgrad,
                 )
             },
         )

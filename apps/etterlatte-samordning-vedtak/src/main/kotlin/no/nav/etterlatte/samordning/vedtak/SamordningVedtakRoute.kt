@@ -146,7 +146,8 @@ fun Route.samordningVedtakRoute(
 inline val ApplicationCall.orgNummer: String
     get() {
         val claims =
-            this.hentTokenClaims("maskinporten")
+            this
+                .hentTokenClaims("maskinporten")
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]

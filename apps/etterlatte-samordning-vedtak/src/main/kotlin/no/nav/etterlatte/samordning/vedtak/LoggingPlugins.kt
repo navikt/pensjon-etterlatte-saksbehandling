@@ -116,13 +116,16 @@ val serverRequestLoggerPlugin =
  * - "/api/vedtak/123" -> "/api/vedtak/{vedtakId}"
  * - "/api/vedtak?fomdato=2024-01-01&noe=annet" -> "/api/vedtak?fomdato,noe"
  */
-private fun extractUrlTemplate(call: ApplicationCall): String? {
-    return when (call) {
+private fun extractUrlTemplate(call: ApplicationCall): String? =
+    when (call) {
         is RoutingApplicationCall ->
             (call.route.parent ?: call.route) // Drop METHOD part
                 .toString()
                 .replace("/(authenticate \"default\")", "", true) // Alle sikrede endepunkter wrappes av authenticate
-                .plus(call.request.queryParameters.entries().joinToString(prefix = "?", separator = ",") { it.key })
+                .plus(
+                    call.request.queryParameters
+                        .entries()
+                        .joinToString(prefix = "?", separator = ",") { it.key },
+                )
         else -> null
     }
-}

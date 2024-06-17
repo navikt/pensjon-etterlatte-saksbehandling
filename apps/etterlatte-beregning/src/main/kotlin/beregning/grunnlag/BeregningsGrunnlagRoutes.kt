@@ -97,9 +97,10 @@ fun Route.beregningsGrunnlag(
                 val grunnlag =
                     OverstyrBeregningGrunnlagDTO(
                         perioder =
-                            beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(
-                                behandlingId,
-                            ).perioder,
+                            beregningsGrunnlagService
+                                .hentOverstyrBeregningGrunnlag(
+                                    behandlingId,
+                                ).perioder,
                     )
 
                 call.respond(HttpStatusCode.OK, grunnlag)

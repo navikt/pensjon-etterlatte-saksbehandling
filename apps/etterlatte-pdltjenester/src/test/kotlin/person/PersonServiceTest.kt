@@ -149,9 +149,27 @@ internal class PersonServiceTest {
         val expectedForeldreFnr = listOf("18498248795", "16478313601")
 
         assertNotNull(person.familieRelasjon?.verdi?.foreldre)
-        assertEquals(2, person.familieRelasjon?.verdi?.foreldre?.size)
-        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(0)?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(1)?.value in expectedForeldreFnr)
+        assertEquals(
+            2,
+            person.familieRelasjon
+                ?.verdi
+                ?.foreldre
+                ?.size,
+        )
+        assertTrue(
+            person.familieRelasjon
+                ?.verdi
+                ?.foreldre
+                ?.get(0)
+                ?.value in expectedForeldreFnr,
+        )
+        assertTrue(
+            person.familieRelasjon
+                ?.verdi
+                ?.foreldre
+                ?.get(1)
+                ?.value in expectedForeldreFnr,
+        )
     }
 
     @Test
@@ -166,9 +184,27 @@ internal class PersonServiceTest {
         val expectedForeldreFnr = listOf("18498248795", "16478313601")
 
         assertNotNull(person.familieRelasjon?.verdi?.ansvarligeForeldre)
-        assertEquals(2, person.familieRelasjon?.verdi?.ansvarligeForeldre?.size)
-        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(0)?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(1)?.value in expectedForeldreFnr)
+        assertEquals(
+            2,
+            person.familieRelasjon
+                ?.verdi
+                ?.ansvarligeForeldre
+                ?.size,
+        )
+        assertTrue(
+            person.familieRelasjon
+                ?.verdi
+                ?.foreldre
+                ?.get(0)
+                ?.value in expectedForeldreFnr,
+        )
+        assertTrue(
+            person.familieRelasjon
+                ?.verdi
+                ?.foreldre
+                ?.get(1)
+                ?.value in expectedForeldreFnr,
+        )
     }
 
     @Test
@@ -180,9 +216,30 @@ internal class PersonServiceTest {
                 )
             }
 
-        assertEquals(2, person.utland?.verdi?.innflyttingTilNorge?.size)
-        assertEquals("NIC", person.utland?.verdi?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
-        assertEquals("1970-09-14", person.utland?.verdi?.innflyttingTilNorge?.get(0)?.dato.toString())
+        assertEquals(
+            2,
+            person.utland
+                ?.verdi
+                ?.innflyttingTilNorge
+                ?.size,
+        )
+        assertEquals(
+            "NIC",
+            person.utland
+                ?.verdi
+                ?.innflyttingTilNorge
+                ?.get(0)
+                ?.fraflyttingsland,
+        )
+        assertEquals(
+            "1970-09-14",
+            person.utland
+                ?.verdi
+                ?.innflyttingTilNorge
+                ?.get(0)
+                ?.dato
+                .toString(),
+        )
     }
 
     @Test
@@ -194,9 +251,30 @@ internal class PersonServiceTest {
                 )
             }
 
-        assertEquals(1, person.utland?.verdi?.utflyttingFraNorge?.size)
-        assertEquals("FRA", person.utland?.verdi?.utflyttingFraNorge?.get(0)?.tilflyttingsland)
-        assertEquals("2021-07-01", person.utland?.verdi?.utflyttingFraNorge?.get(0)?.dato.toString())
+        assertEquals(
+            1,
+            person.utland
+                ?.verdi
+                ?.utflyttingFraNorge
+                ?.size,
+        )
+        assertEquals(
+            "FRA",
+            person.utland
+                ?.verdi
+                ?.utflyttingFraNorge
+                ?.get(0)
+                ?.tilflyttingsland,
+        )
+        assertEquals(
+            "2021-07-01",
+            person.utland
+                ?.verdi
+                ?.utflyttingFraNorge
+                ?.get(0)
+                ?.dato
+                .toString(),
+        )
     }
 
     @Test

@@ -7,7 +7,8 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun ApplicationCall.hentTokenClaims(issuerName: String): JwtTokenClaims? =
-    this.principal<TokenValidationContextPrincipal>()
+    this
+        .principal<TokenValidationContextPrincipal>()
         ?.context
         ?.let { it.hentTokenClaims(issuerName) }
 

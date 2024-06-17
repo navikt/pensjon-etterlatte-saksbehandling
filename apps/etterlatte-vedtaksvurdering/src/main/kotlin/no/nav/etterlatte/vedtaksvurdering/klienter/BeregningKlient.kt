@@ -24,10 +24,15 @@ interface BeregningKlient {
     ): BeregningOgAvkorting
 }
 
-class BeregningKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+class BeregningKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKlient {
+class BeregningKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : BeregningKlient {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -40,8 +45,8 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         saktype: SakType,
-    ): BeregningOgAvkorting {
-        return BeregningOgAvkorting(
+    ): BeregningOgAvkorting =
+        BeregningOgAvkorting(
             beregning = hentBeregning(behandlingId, brukerTokenInfo),
             avkorting =
                 if (saktype == SakType.OMSTILLINGSSTOENAD) {
@@ -50,7 +55,6 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                     null
                 },
         )
-    }
 
     private suspend fun hentBeregning(
         behandlingId: UUID,
@@ -66,8 +70,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                             url = "$resourceUrl/api/beregning/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
@@ -93,8 +96,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                             url = "$resourceUrl/api/beregning/avkorting/$behandlingId/ferdig",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

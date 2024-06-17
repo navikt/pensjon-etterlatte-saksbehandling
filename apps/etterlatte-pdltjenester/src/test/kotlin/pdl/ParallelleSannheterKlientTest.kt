@@ -59,14 +59,14 @@ internal class ParallelleSannheterKlientTest {
     private fun <T> mockResponse(
         feltnavn: String,
         verdi: T,
-    ): String {
-        return objectMapper.createObjectNode()
+    ): String =
+        objectMapper
+            .createObjectNode()
             .set<JsonNode?>(feltnavn, objectMapper.readValue(listOf(verdi).toJson(), JsonNode::class.java))
             .toJson()
-    }
 
-    private fun mockNavn(master: String): PdlNavn {
-        return PdlNavn(
+    private fun mockNavn(master: String): PdlNavn =
+        PdlNavn(
             fornavn = "Ola",
             etternavn = "Nordmann",
             metadata =
@@ -77,7 +77,6 @@ internal class ParallelleSannheterKlientTest {
                     opplysningsId = "1",
                 ),
         )
-    }
 
     companion object {
         const val PDL = "PDL"

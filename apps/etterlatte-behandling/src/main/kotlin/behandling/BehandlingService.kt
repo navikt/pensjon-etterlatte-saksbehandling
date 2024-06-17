@@ -57,34 +57,43 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class BehandlingFinnesIkkeException(message: String) : Exception(message)
+class BehandlingFinnesIkkeException(
+    message: String,
+) : Exception(message)
 
-class KravdatoMaaFinnesHvisBosattutland(message: String) :
-    UgyldigForespoerselException(code = "BOSATTUTLAND_MÅ_HA_KRAVDATO", detail = message)
+class KravdatoMaaFinnesHvisBosattutland(
+    message: String,
+) : UgyldigForespoerselException(code = "BOSATTUTLAND_MÅ_HA_KRAVDATO", detail = message)
 
-class VirkningstidspunktMaaHaUtenlandstilknytning(message: String) :
-    UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
+class VirkningstidspunktMaaHaUtenlandstilknytning(
+    message: String,
+) : UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
 
-class BehandlingNotFoundException(behandlingId: UUID) :
-    IkkeFunnetException(
+class BehandlingNotFoundException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
         code = "FANT_IKKE_BEHANDLING",
         detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
     )
 
-class BehandlingKanIkkeAvbrytesException(behandlingStatus: BehandlingStatus) : UgyldigForespoerselException(
-    code = "BEHANDLING_KAN_IKKE_AVBRYTES",
-    detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
-)
+class BehandlingKanIkkeAvbrytesException(
+    behandlingStatus: BehandlingStatus,
+) : UgyldigForespoerselException(
+        code = "BEHANDLING_KAN_IKKE_AVBRYTES",
+        detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
+    )
 
-class PersongalleriFinnesIkkeException : IkkeFunnetException(
-    code = "FANT_IKKE_PERSONGALLERI",
-    detail = "Kunne ikke finne persongalleri",
-)
+class PersongalleriFinnesIkkeException :
+    IkkeFunnetException(
+        code = "FANT_IKKE_PERSONGALLERI",
+        detail = "Kunne ikke finne persongalleri",
+    )
 
-class KanIkkeEndreSendeBrevForFoerstegangsbehandling : UgyldigForespoerselException(
-    "KAN_IKKE_ENDRE_SEND_BREV",
-    "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
-)
+class KanIkkeEndreSendeBrevForFoerstegangsbehandling :
+    UgyldigForespoerselException(
+        "KAN_IKKE_ENDRE_SEND_BREV",
+        "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
+    )
 
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
@@ -199,13 +208,9 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
 
-    override fun hentBehandling(behandlingId: UUID): Behandling? {
-        return hentBehandlingForId(behandlingId)
-    }
+    override fun hentBehandling(behandlingId: UUID): Behandling? = hentBehandlingForId(behandlingId)
 
-    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> {
-        return hentBehandlingerForSakId(sakId)
-    }
+    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> = hentBehandlingerForSakId(sakId)
 
     /**
      * Funksjon for uthenting av [SakMedUtlandstilknytning] og tilknyttede [Behandling]er.
@@ -239,11 +244,10 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentSisteIverksatte(sakId: Long): Behandling? {
-        return hentBehandlingerForSakId(sakId)
+    override fun hentSisteIverksatte(sakId: Long): Behandling? =
+        hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
-    }
 
     override fun avbrytBehandling(
         behandlingId: UUID,
@@ -262,28 +266,29 @@ internal class BehandlingServiceImpl(
             oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
             hendelserKnyttetTilBehandling.forEach { hendelse ->
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.VURDER_KONSEKVENS,
                     merknad = hendelse.beskrivelse(),
                 )
             }
 
             if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                 val omgjoeringsoppgaveForKlage =
-                    oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                    oppgaveService
+                        .hentOppgaverForSak(behandling.sak.id)
                         .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
                         ?: throw InternfeilException(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
                         )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = omgjoeringsoppgaveForKlage.referanse,
                     sakId = omgjoeringsoppgaveForKlage.sakId,
-                    oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
-                    oppgaveType = omgjoeringsoppgaveForKlage.type,
+                    kilde = omgjoeringsoppgaveForKlage.kilde,
+                    type = omgjoeringsoppgaveForKlage.type,
                     merknad = omgjoeringsoppgaveForKlage.merknad,
                     frist = omgjoeringsoppgaveForKlage.frist,
                 )
@@ -305,30 +310,30 @@ internal class BehandlingServiceImpl(
     override suspend fun hentStatistikkBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): StatistikkBehandling? {
-        return inTransaction { hentBehandling(behandlingId) }?.let {
+    ): StatistikkBehandling? =
+        inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)
+                grunnlagKlient
+                    .hentPersongalleri(behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toStatistikkBehandling(persongalleri)
         }
-    }
 
     override suspend fun hentDetaljertBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): DetaljertBehandling? {
-        return inTransaction { hentBehandling(behandlingId) }?.let {
+    ): DetaljertBehandling? =
+        inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)
+                grunnlagKlient
+                    .hentPersongalleri(behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)
         }
-    }
 
     override suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
@@ -430,15 +435,15 @@ internal class BehandlingServiceImpl(
     private suspend fun hentDoedsdato(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        return grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+    ): LocalDate? =
+        grunnlagKlient
+            .finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
             .also {
-                it?.fnr?.let {
-                        fnr ->
+                it?.fnr?.let { fnr ->
                     behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
                 }
-            }?.opplysning?.doedsdato
-    }
+            }?.opplysning
+            ?.doedsdato
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
         val behandlinger = hentBehandlingerForSak(sakId)
@@ -476,10 +481,11 @@ internal class BehandlingServiceImpl(
                                 opplysningsType = Opplysningstype.PERSONGALLERI_V1,
                                 kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                                 opplysning =
-                                    forrigePersonGalleri.copy(
-                                        avdoed = redigertFamilieforhold.avdoede,
-                                        gjenlevende = redigertFamilieforhold.gjenlevende,
-                                    ).toJsonNode(),
+                                    forrigePersonGalleri
+                                        .copy(
+                                            avdoed = redigertFamilieforhold.avdoede,
+                                            gjenlevende = redigertFamilieforhold.gjenlevende,
+                                        ).toJsonNode(),
                                 periode = null,
                             ),
                         )
@@ -512,9 +518,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {
-        return hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
-    }
+    override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? = hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
 
     override fun lagreOpphoerFom(
         behandlingId: UUID,
@@ -541,7 +545,8 @@ internal class BehandlingServiceImpl(
 
                 val hendelserIBehandling = hendelseDao.finnHendelserIBehandling(behandlingId)
                 val kommerBarnetTilgode =
-                    kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
+                    kommerBarnetTilGodeDao
+                        .hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
                 BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling)
             }
@@ -627,7 +632,8 @@ internal class BehandlingServiceImpl(
                 },
             )
         try {
-            behandling.oppdaterVirkningstidspunkt(virkningstidspunktData)
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunktData)
                 .also {
                     behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunktData)
                     behandlingDao.lagreStatus(it)
@@ -660,7 +666,8 @@ internal class BehandlingServiceImpl(
             }
 
         try {
-            behandling.oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+            behandling
+                .oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
                 .also {
                     behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
                     behandlingDao.lagreStatus(it)
@@ -682,18 +689,20 @@ internal class BehandlingServiceImpl(
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere utlandstilknytning fordi behandlingen ikke finnes")
 
-        behandling.oppdaterUtlandstilknytning(utlandstilknytning)
+        behandling
+            .oppdaterUtlandstilknytning(utlandstilknytning)
             .also {
                 behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
                 behandlingDao.lagreStatus(it)
             }
     }
 
-    override fun hentAapenRegulering(sakId: Long): UUID? {
-        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull {
-            it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
-        }?.id
-    }
+    override fun hentAapenRegulering(sakId: Long): UUID? =
+        behandlingDao
+            .hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING)
+            .singleOrNull {
+                it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
+            }?.id
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
@@ -718,7 +727,5 @@ internal class BehandlingServiceImpl(
     private fun filterBehandlingerForEnheter(
         enheterSomSkalFiltreres: List<String>,
         behandlinger: List<Behandling>,
-    ): List<Behandling> {
-        return behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
-    }
+    ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
 }

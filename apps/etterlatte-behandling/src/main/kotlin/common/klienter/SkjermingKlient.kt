@@ -19,21 +19,22 @@ class SkjermingKlient(
 ) : Pingable {
     val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun personErSkjermet(fnr: String): Boolean {
-        return httpClient.post("$url/skjermet") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(SkjermetDataRequestDTO(personident = fnr))
-        }.body()
-    }
+    suspend fun personErSkjermet(fnr: String): Boolean =
+        httpClient
+            .post("$url/skjermet") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(SkjermetDataRequestDTO(personident = fnr))
+            }.body()
 
     override suspend fun ping(konsument: String?): PingResult {
         try {
-            httpClient.post("$url/skjermet") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
-            }.body<Boolean>()
+            httpClient
+                .post("$url/skjermet") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
+                }.body<Boolean>()
         } catch (e: Exception) {
             return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, description = beskrivelse)
                 .also {

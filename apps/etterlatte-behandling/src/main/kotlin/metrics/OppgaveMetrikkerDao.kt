@@ -6,7 +6,9 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-class OppgaveMetrikkerDao(private val dataSource: DataSource) {
+class OppgaveMetrikkerDao(
+    private val dataSource: DataSource,
+) {
     fun hentOppgaveAntall(): List<OppgaveAntall> =
         dataSource.connection.use {
             val statement =
@@ -22,42 +24,45 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
             }
         }
 
-    private fun ResultSet.asOppgaveAntall(): OppgaveAntall {
-        return OppgaveAntall(
+    private fun ResultSet.asOppgaveAntall(): OppgaveAntall =
+        OppgaveAntall(
             antall = getInt("count"),
             status = Status.valueOf(getString("status")),
             enhet = getString("enhet"),
             saktype = SakType.valueOf(getString("saktype")),
         )
-    }
 
     fun hentDistinkteSaksbehandlere(): List<SaksbehandlerAntall> =
         dataSource.connection.use {
             val antallTotalt =
-                it.prepareStatement(
-                    """
-                    SELECT count(distinct saksbehandler) antall
-                    FROM oppgave
-                    """.trimIndent(),
-                ).executeQuery().toList {
-                    SaksbehandlerAntall(
-                        antall = getInt("antall"),
-                        enhet = "Totalt",
-                    )
-                }
+                it
+                    .prepareStatement(
+                        """
+                        SELECT count(distinct saksbehandler) antall
+                        FROM oppgave
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        SaksbehandlerAntall(
+                            antall = getInt("antall"),
+                            enhet = "Totalt",
+                        )
+                    }
             val antallPerEnhet =
-                it.prepareStatement(
-                    """
-                    SELECT count(distinct saksbehandler) antall, enhet
-                    FROM oppgave
-                    group by enhet;
-                    """.trimIndent(),
-                ).executeQuery().toList {
-                    SaksbehandlerAntall(
-                        antall = getInt("antall"),
-                        enhet = getString("enhet"),
-                    )
-                }
+                it
+                    .prepareStatement(
+                        """
+                        SELECT count(distinct saksbehandler) antall, enhet
+                        FROM oppgave
+                        group by enhet;
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        SaksbehandlerAntall(
+                            antall = getInt("antall"),
+                            enhet = getString("enhet"),
+                        )
+                    }
             antallTotalt + antallPerEnhet
         }
 }

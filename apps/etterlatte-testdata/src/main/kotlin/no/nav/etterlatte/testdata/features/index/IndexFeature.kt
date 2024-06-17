@@ -7,7 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.features
-import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 object IndexFeature : TestDataFeature {
     override val beskrivelse: String
@@ -21,7 +21,7 @@ object IndexFeature : TestDataFeature {
                     MustacheContent(
                         "index.hbs",
                         mapOf(
-                            "navIdent" to (navIdentFraToken() ?: "Anonym"),
+                            "navIdent" to (brukerTokenInfo.ident()),
                             "features" to
                                 features.filter { it != IndexFeature }.map {
                                     mapOf(

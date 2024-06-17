@@ -4,11 +4,14 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.requireEnvValue
 
-class ApplicationContext(env: Map<String, String> = System.getenv()) {
+class ApplicationContext(
+    env: Map<String, String> = System.getenv(),
+) {
     private val handler =
         SamordningHendelseHandler(
             kafkaProduser =
-                GcpKafkaConfig.fromEnv(env)
+                GcpKafkaConfig
+                    .fromEnv(env)
                     .rapidsAndRiversProducer(env.getValue("KAFKA_RAPID_TOPIC")),
         )
 

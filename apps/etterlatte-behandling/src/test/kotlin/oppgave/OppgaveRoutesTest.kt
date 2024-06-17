@@ -58,76 +58,82 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 }
 
             val sak: Sak =
-                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }.apply {
-                    assertEquals(HttpStatusCode.OK, status)
-                }.body()
+                client
+                    .post("/personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                    }.apply {
+                        assertEquals(HttpStatusCode.OK, status)
+                    }.body()
 
             val referanse = UUID.randomUUID().toString()
             val oppgave =
-                client.post("/oppgaver/sak/${sak.id}/opprett") {
-                    val dto =
-                        NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
+                client
+                    .post("/oppgaver/sak/${sak.id}/opprett") {
+                        val dto =
+                            NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
 
-                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(dto)
-                }.let {
-                    assertEquals(HttpStatusCode.OK, it.status)
-                    val lestOppgave: OppgaveIntern = it.body()
-                    assertEquals(fnr, lestOppgave.fnr)
-                    assertEquals(referanse, lestOppgave.referanse)
-                    assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
-                    lestOppgave
-                }
+                        addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(dto)
+                    }.let {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                        val lestOppgave: OppgaveIntern = it.body()
+                        assertEquals(fnr, lestOppgave.fnr)
+                        assertEquals(referanse, lestOppgave.referanse)
+                        assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
+                        lestOppgave
+                    }
 
             hentOppgave(client, oppgave.id)
 
-            client.post("/api/oppgaver/${oppgave.id}/tildel-saksbehandler") {
-                val dto = SaksbehandlerEndringDto(this@OppgaveRoutesTest.systemBruker)
-                addAuthToken(this@OppgaveRoutesTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(dto)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/api/oppgaver/${oppgave.id}/tildel-saksbehandler") {
+                    val dto = SaksbehandlerEndringDto(this@OppgaveRoutesTest.systemBruker)
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(dto)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.put("/api/oppgaver/${oppgave.id}/frist") {
-                val dto = RedigerFristRequest(Tidspunkt.now().plus(28, ChronoUnit.DAYS))
-                addAuthToken(this@OppgaveRoutesTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(dto)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .put("/api/oppgaver/${oppgave.id}/frist") {
+                    val dto = RedigerFristRequest(Tidspunkt.now().plus(28, ChronoUnit.DAYS))
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(dto)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
-                val dto = EndrePaaVentRequest(PaaVentAarsak.OPPLYSNING_FRA_ANDRE, "", true)
-                addAuthToken(this@OppgaveRoutesTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(dto)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
+                    val dto = EndrePaaVentRequest(PaaVentAarsak.OPPLYSNING_FRA_ANDRE, "", true)
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(dto)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
             assertEquals(hentOppgave(client, oppgave.id).status, Status.PAA_VENT)
 
-            client.put("/oppgaver/ventefrist-gaar-ut") {
-                val dto =
-                    VentefristGaarUtRequest(
-                        dato = LocalDate.now().plusMonths(3),
-                        type = setOf(OppgaveType.JOURNALFOERING),
-                        oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
-                        oppgaver = listOf(),
-                    )
-                addAuthToken(this@OppgaveRoutesTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(dto)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .put("/oppgaver/ventefrist-gaar-ut") {
+                    val dto =
+                        VentefristGaarUtRequest(
+                            dato = LocalDate.now().plusMonths(3),
+                            type = setOf(OppgaveType.JOURNALFOERING),
+                            oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
+                            oppgaver = listOf(),
+                        )
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(dto)
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
             assertEquals(hentOppgave(client, oppgave.id).status, Status.UNDER_BEHANDLING)
         }
     }
@@ -136,10 +142,11 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
         client: HttpClient,
         oppgaveId: UUID,
     ): OppgaveIntern =
-        client.get("/api/oppgaver/$oppgaveId") {
-            addAuthToken(this@OppgaveRoutesTest.systemBruker)
-        }.let {
-            assertEquals(HttpStatusCode.OK, it.status)
-            it.body()
-        }
+        client
+            .get("/api/oppgaver/$oppgaveId") {
+                addAuthToken(this@OppgaveRoutesTest.systemBruker)
+            }.let {
+                assertEquals(HttpStatusCode.OK, it.status)
+                it.body()
+            }
 }

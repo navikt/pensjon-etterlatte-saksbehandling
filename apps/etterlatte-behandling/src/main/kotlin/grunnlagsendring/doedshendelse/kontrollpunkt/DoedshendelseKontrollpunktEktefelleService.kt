@@ -27,8 +27,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
     private fun kontrollerEpsVarighet(
         avdoed: PersonDTO,
         eps: PersonDTO,
-    ): List<DoedshendelseKontrollpunkt> {
-        return if (varEktefelleVedDoedsfall(avdoed, eps.foedselsnummer.verdi.value)) {
+    ): List<DoedshendelseKontrollpunkt> =
+        if (varEktefelleVedDoedsfall(avdoed, eps.foedselsnummer.verdi.value)) {
             when (val antallAarGiftVedDoedsfall = finnAntallAarGiftVedDoedsfall(avdoed, eps)) {
                 null ->
                     listOf(
@@ -42,7 +42,6 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         } else {
             listOf(kontrollerTidligereEktefelle(avdoed, eps))
         }
-    }
 
     private fun kontrollerEktefelle(
         antallAarGift: Long,
@@ -85,7 +84,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
             sivilstanderMedEps
                 .filter { it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER) }
                 .sortedBy { it.gyldigFraOgMed }
-                .firstOrNull()?.gyldigFraOgMed
+                .firstOrNull()
+                ?.gyldigFraOgMed
                 ?: return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
                     doedsdato = avdoed.doedsdato!!.verdi,
                     fnr = avdoed.foedselsnummer.verdi.value,
@@ -96,7 +96,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
                 .filter { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }
                 .filterNot { it.gyldigFraOgMed != null && it.gyldigFraOgMed!! < gift }
                 .sortedByDescending { it.gyldigFraOgMed }
-                .firstOrNull()?.gyldigFraOgMed
+                .firstOrNull()
+                ?.gyldigFraOgMed
                 ?: return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
                     doedsdato = avdoed.doedsdato!!.verdi,
                     fnr = avdoed.foedselsnummer.verdi.value,

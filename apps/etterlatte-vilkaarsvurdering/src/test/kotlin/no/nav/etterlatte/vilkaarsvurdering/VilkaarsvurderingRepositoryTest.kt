@@ -20,7 +20,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
+internal class VilkaarsvurderingRepositoryTest(
+    ds: DataSource,
+) {
     private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
 
     @AfterEach
@@ -141,7 +143,8 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
                 saksbehandler shouldBe vurdertVilkaar.vurdering.saksbehandler
             }
             it.hovedvilkaar.resultat shouldBe Utfall.IKKE_VURDERT
-            it.unntaksvilkaar.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
+            it.unntaksvilkaar
+                .first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
                 .resultat shouldBe Utfall.IKKE_VURDERT
         }
     }
@@ -182,7 +185,8 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
         oppdatertVilkaarsvurdering.vilkaar.first { it.id == vilkaar.id }.let {
             it.vurdering shouldBe null
             it.hovedvilkaar.resultat shouldBe null
-            it.unntaksvilkaar.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
+            it.unntaksvilkaar
+                .first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
                 .resultat shouldBe null
         }
     }
@@ -230,7 +234,8 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+            vilkaarsvurderingRepository
+                .hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
@@ -260,7 +265,8 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+            vilkaarsvurderingRepository
+                .hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 

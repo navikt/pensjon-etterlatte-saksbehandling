@@ -161,13 +161,17 @@ sealed class DokumentVariant {
     }
 }
 
-enum class JournalPostType(val type: String) {
+enum class JournalPostType(
+    val type: String,
+) {
     NOTAT("NOTAT"),
     INNGAAENDE("INNGAAENDE"),
     UTGAAENDE("UTGAAENDE"),
 }
 
-enum class DokumentKategori(val type: String) {
+enum class DokumentKategori(
+    val type: String,
+) {
     SOK("SOK"),
     VB("VB"),
     IB("IB"),

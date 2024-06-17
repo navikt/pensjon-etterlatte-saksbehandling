@@ -7,7 +7,7 @@ interface DokarkivService {
 
     suspend fun oppdater(
         journalpostId: String,
-        forsoekFerdistill: Boolean,
+        forsoekFerdigstill: Boolean,
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
@@ -27,7 +27,9 @@ interface DokarkivService {
     ): KnyttTilAnnenSakResponse
 }
 
-internal class DokarkivServiceImpl(private val client: DokarkivKlient) : DokarkivService {
+internal class DokarkivServiceImpl(
+    private val client: DokarkivKlient,
+) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
     override suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse {
@@ -38,7 +40,7 @@ internal class DokarkivServiceImpl(private val client: DokarkivKlient) : Dokarki
 
     override suspend fun oppdater(
         journalpostId: String,
-        forsoekFerdistill: Boolean,
+        forsoekFerdigstill: Boolean,
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse {
@@ -53,7 +55,7 @@ internal class DokarkivServiceImpl(private val client: DokarkivKlient) : Dokarki
 
         logger.info("Journalpost med id=$journalpostId oppdatert OK!")
 
-        if (forsoekFerdistill) {
+        if (forsoekFerdigstill) {
             if (journalfoerendeEnhet.isNullOrBlank()) {
                 logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
             } else {
@@ -81,9 +83,8 @@ internal class DokarkivServiceImpl(private val client: DokarkivKlient) : Dokarki
     override suspend fun knyttTilAnnenSak(
         journalpostId: String,
         request: KnyttTilAnnenSakRequest,
-    ): KnyttTilAnnenSakResponse {
-        return client.knyttTilAnnenSak(journalpostId, request).also {
+    ): KnyttTilAnnenSakResponse =
+        client.knyttTilAnnenSak(journalpostId, request).also {
             logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
         }
-    }
 }

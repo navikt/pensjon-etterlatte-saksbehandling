@@ -74,9 +74,10 @@ open class JsonMessage(
                     compute("image") { _, _ -> serviceImage }
                 }
             if (node.path(PARTICIPATING_SERVICES_KEY).isMissingOrNull()) {
-                (node as ObjectNode).putArray(
-                    PARTICIPATING_SERVICES_KEY,
-                ).add(objectMapper.valueToTree<ObjectNode>(entry))
+                (node as ObjectNode)
+                    .putArray(
+                        PARTICIPATING_SERVICES_KEY,
+                    ).add(objectMapper.valueToTree<ObjectNode>(entry))
             } else {
                 (node.path(PARTICIPATING_SERVICES_KEY) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
             }

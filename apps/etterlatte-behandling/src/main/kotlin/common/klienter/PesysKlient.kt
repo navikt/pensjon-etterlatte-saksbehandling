@@ -18,7 +18,10 @@ interface PesysKlient {
     suspend fun hentSaker(fnr: String): List<SakSammendragResponse>
 }
 
-class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
+class PesysKlientImpl(
+    config: Config,
+    pen: HttpClient,
+) : PesysKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
@@ -38,8 +41,7 @@ class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
                 brukerTokenInfo = Systembruker.doedshendelse,
-            )
-            .mapBoth(
+            ).mapBoth(
                 success = { resource -> objectMapper.readValue(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )

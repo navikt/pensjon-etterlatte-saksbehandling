@@ -30,13 +30,12 @@ enum class SakUtland {
             return fraUtlandstilknytningType(utlandstilknytning.type)
         }
 
-        fun fraUtlandstilknytningType(utlandstilknytningType: UtlandstilknytningType): SakUtland {
-            return when (utlandstilknytningType) {
+        fun fraUtlandstilknytningType(utlandstilknytningType: UtlandstilknytningType): SakUtland =
+            when (utlandstilknytningType) {
                 UtlandstilknytningType.NASJONAL -> NASJONAL
                 UtlandstilknytningType.BOSATT_UTLAND -> BOSATT_UTLAND
                 UtlandstilknytningType.UTLANDSTILSNITT -> UTLANDSTILSNITT
             }
-        }
     }
 }
 

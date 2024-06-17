@@ -16,7 +16,8 @@ class OpplysningsgrunnlagMapper(
         val hendelser: List<OpplysningDao.GrunnlagHendelse>,
     ) {
         val opplysning: Opplysning<JsonNode> =
-            hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
+            hendelser
+                .maxBy { hendelse -> hendelse.hendelseNummer }
                 .let { Opplysning.Konstant.create(it.opplysning) }
 
         val opplysningstype: Opplysningstype
@@ -36,7 +37,8 @@ class OpplysningsgrunnlagMapper(
         val soekerMap = soeker.associateBy({ it.opplysningstype }, { it.opplysning })
         val familieMap =
             familie
-                .groupBy { it.fnr }.values
+                .groupBy { it.fnr }
+                .values
                 .map { familiemedlem ->
                     familiemedlem.associateBy({ it.opplysningstype }, { it.opplysning })
                 }

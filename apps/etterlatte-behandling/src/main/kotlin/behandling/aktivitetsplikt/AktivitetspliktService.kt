@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -43,11 +44,10 @@ class AktivitetspliktService(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val oppgaveService: OppgaveService,
 ) {
-    fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
-        return inTransaction {
+    fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
+        inTransaction {
             aktivitetspliktDao.finnSenesteAktivitetspliktOppfolging(behandlingId)
         }
-    }
 
     fun lagreAktivitetspliktOppfolging(
         behandlingId: UUID,
@@ -67,19 +67,37 @@ class AktivitetspliktService(
     ): Boolean {
         return inTransaction {
             val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-            if (aktivitetsgrad?.aktivitetsgrad in listOf(AKTIVITET_OVER_50, AKTIVITET_100)) {
-                logger.info("Aktivitetsgrad er over 50% eller 100%, ingen revurdering opprettes for sak $sakId")
-                return@inTransaction true
-            }
-
             val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-            if (unntak != null && (unntak.tom == null || unntak.tom.isAfter(aktivitetspliktDato))) {
-                logger.info("Det er unntak for aktivitetsplikt, ingen revurdering opprettes for sak $sakId")
-                return@inTransaction true
-            }
+            val nyesteVurdering = listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
 
-            logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
-            false
+            return@inTransaction when (nyesteVurdering) {
+                is AktivitetspliktAktivitetsgrad -> oppfyllerAktivitet(nyesteVurdering)
+                is AktivitetspliktUnntak -> harUnntakPaaDato(nyesteVurdering, aktivitetspliktDato)
+                else -> {
+                    logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
+                    false
+                }
+            }
+        }
+    }
+
+    private fun oppfyllerAktivitet(aktivitetsgrad: AktivitetspliktAktivitetsgrad) =
+        (aktivitetsgrad.aktivitetsgrad in listOf(AKTIVITET_OVER_50, AKTIVITET_100)).also {
+            if (it) {
+                logger.info("Aktivitetsgrad er over 50% eller 100%, ingen revurdering opprettes for sak ${aktivitetsgrad.sakId}")
+            } else {
+                logger.info("Aktivitetsgrad er under 50%, revurdering skal opprettes for sak ${aktivitetsgrad.sakId}")
+            }
+        }
+
+    private fun harUnntakPaaDato(
+        unntak: AktivitetspliktUnntak,
+        dato: LocalDate,
+    ) = (unntak.tom == null || unntak.tom.isAfter(dato)).also {
+        if (it) {
+            logger.info("Det er unntak for aktivitetsplikt, ingen revurdering opprettes for sak ${unntak.sakId}")
+        } else {
+            logger.info("Det er ikke unntak for aktivitetsplikt i perioden, revurdering skal opprettes for sak ${unntak.sakId}")
         }
     }
 
@@ -271,10 +289,11 @@ class AktivitetspliktService(
         val persongalleri =
             runBlocking {
                 requireNotNull(
-                    grunnlagKlient.hentPersongalleri(
-                        forrigeBehandling.id,
-                        Systembruker.automatiskJobb,
-                    )?.opplysning,
+                    grunnlagKlient
+                        .hentPersongalleri(
+                            forrigeBehandling.id,
+                            Systembruker.automatiskJobb,
+                        )?.opplysning,
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
                 }
@@ -299,20 +318,21 @@ class AktivitetspliktService(
         forrigeBehandling: Behandling,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            sakId = request.sakId,
-            referanse = forrigeBehandling.id.toString(),
-            oppgaveKilde = OppgaveKilde.HENDELSE,
-            oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
-            merknad = request.jobbType.beskrivelse,
-            frist = request.frist,
-        ).let { oppgave ->
-            OpprettRevurderingForAktivitetspliktResponse(
-                opprettetOppgave = true,
-                oppgaveId = oppgave.id,
-                forrigeBehandlingId = forrigeBehandling.id,
-            )
-        }
+        return oppgaveService
+            .opprettOppgave(
+                sakId = request.sakId,
+                referanse = forrigeBehandling.id.toString(),
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                merknad = request.jobbType.beskrivelse,
+                frist = request.frist,
+            ).let { oppgave ->
+                OpprettRevurderingForAktivitetspliktResponse(
+                    opprettetOppgave = true,
+                    oppgaveId = oppgave.id,
+                    forrigeBehandlingId = forrigeBehandling.id,
+                )
+            }
     }
 
     private fun opprettRevurdering(
@@ -322,28 +342,31 @@ class AktivitetspliktService(
         persongalleri: Persongalleri,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter behandling for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return automatiskRevurderingService.opprettAutomatiskRevurdering(
-            sakId = request.sakId,
-            forrigeBehandling = forrigeBehandling,
-            revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-            virkningstidspunkt = aktivitetspliktDato,
-            kilde = Vedtaksloesning.GJENNY,
-            persongalleri = persongalleri,
-            frist = request.frist,
-            begrunnelse = request.jobbType.beskrivelse,
-        ).oppdater().let { revurdering ->
-            fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
-            OpprettRevurderingForAktivitetspliktResponse(
-                opprettetRevurdering = true,
-                nyBehandlingId = revurdering.id,
-                forrigeBehandlingId = forrigeBehandling.id,
-            )
-        }
+        return automatiskRevurderingService
+            .opprettAutomatiskRevurdering(
+                sakId = request.sakId,
+                forrigeBehandling = forrigeBehandling,
+                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                virkningstidspunkt = aktivitetspliktDato,
+                kilde = Vedtaksloesning.GJENNY,
+                persongalleri = persongalleri,
+                frist = request.frist,
+                begrunnelse = request.jobbType.beskrivelse,
+            ).oppdater()
+            .let { revurdering ->
+                fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
+                OpprettRevurderingForAktivitetspliktResponse(
+                    opprettetRevurdering = true,
+                    nyBehandlingId = revurdering.id,
+                    forrigeBehandlingId = forrigeBehandling.id,
+                )
+            }
     }
 
     private fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
         val revurderingsOppgave =
-            oppgaveService.hentOppgaverForReferanse(revurdering.id.toString())
+            oppgaveService
+                .hentOppgaverForReferanse(revurdering.id.toString())
                 .find { it.type == OppgaveType.REVURDERING }
 
         if (revurderingsOppgave != null) {
@@ -366,4 +389,13 @@ class TomErFoerFomException :
         detail = "Til og med dato er kan ikke være før fra og med dato",
     )
 
-data class AktivitetspliktVurdering(val aktivitet: AktivitetspliktAktivitetsgrad?, val unntak: AktivitetspliktUnntak?)
+data class AktivitetspliktVurdering(
+    val aktivitet: AktivitetspliktAktivitetsgrad?,
+    val unntak: AktivitetspliktUnntak?,
+)
+
+interface AktivitetspliktVurderingOpprettetDato {
+    val opprettet: Grunnlagsopplysning.Kilde
+}
+
+fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null

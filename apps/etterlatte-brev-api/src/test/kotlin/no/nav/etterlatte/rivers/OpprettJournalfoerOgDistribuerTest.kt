@@ -66,14 +66,15 @@ internal class OpprettJournalfoerOgDistribuer {
             }
 
         testRapid.sendTestMessage(
-            JsonMessage.newMessage(
-                mapOf(
-                    CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
-                    "vedtak" to lagVedtakDto(behandlingId),
-                    KILDE_KEY to Vedtaksloesning.GJENNY.name,
-                ),
-            ).toJson(),
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        CORRELATION_ID_KEY to UUID.randomUUID().toString(),
+                        VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
+                        "vedtak" to lagVedtakDto(behandlingId),
+                        KILDE_KEY to Vedtaksloesning.GJENNY.name,
+                    ),
+                ).toJson(),
         )
 
         val distribuermelding = testRapid.hentMelding(0)

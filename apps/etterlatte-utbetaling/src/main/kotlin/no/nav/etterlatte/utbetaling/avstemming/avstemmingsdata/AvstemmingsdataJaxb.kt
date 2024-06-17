@@ -13,12 +13,14 @@ object GrensesnittavstemmingsdataJaxb {
 
     fun toXml(avstemmingsdata: Avstemmingsdata): String {
         val stringWriter = StringWriter()
-        jaxbContext.createMarshaller().apply {
-            setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-        }.marshal(
-            JAXBElement(QName("", "Avstemmingsdata"), Avstemmingsdata::class.java, avstemmingsdata),
-            stringWriter,
-        )
+        jaxbContext
+            .createMarshaller()
+            .apply {
+                setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+            }.marshal(
+                JAXBElement(QName("", "Avstemmingsdata"), Avstemmingsdata::class.java, avstemmingsdata),
+                stringWriter,
+            )
         return stringWriter.toString()
     }
 }
@@ -28,12 +30,14 @@ object KonsistensavstemmingsdataJaxb {
 
     fun toXml(avstemmingsdata: Konsistensavstemmingsdata): String {
         val stringWriter = StringWriter()
-        jaxbContext.createMarshaller().apply {
-            setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-        }.marshal(
-            JAXBElement(QName("", "Konsistensavstemmingsdata"), Konsistensavstemmingsdata::class.java, avstemmingsdata),
-            stringWriter,
-        )
+        jaxbContext
+            .createMarshaller()
+            .apply {
+                setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+            }.marshal(
+                JAXBElement(QName("", "Konsistensavstemmingsdata"), Konsistensavstemmingsdata::class.java, avstemmingsdata),
+                stringWriter,
+            )
         return stringWriter.toString()
     }
 }

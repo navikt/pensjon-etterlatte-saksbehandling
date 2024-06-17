@@ -35,7 +35,9 @@ import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class NyNotatServiceTest(dataSource: DataSource) {
+internal class NyNotatServiceTest(
+    dataSource: DataSource,
+) {
     private val pdfGeneratorKlientMock = mockk<PdfGeneratorKlient>()
     private val dokarkivServiceMock = mockk<DokarkivService>()
     private val sakServiceMock = mockk<SakService>()

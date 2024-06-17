@@ -24,15 +24,12 @@ data class OverstyrGrunnlag(
 data class PeriodisertOverstyrGrunnlag(
     val overstyrGrunnlag: PeriodisertGrunnlag<FaktumNode<OverstyrBeregningGrunnlagData>>,
 ) : PeriodisertGrunnlag<OverstyrGrunnlag> {
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return overstyrGrunnlag.finnAlleKnekkpunkter()
-    }
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> = overstyrGrunnlag.finnAlleKnekkpunkter()
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): OverstyrGrunnlag {
-        return OverstyrGrunnlag(
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): OverstyrGrunnlag =
+        OverstyrGrunnlag(
             overstyrGrunnlag.finnGrunnlagForPeriode(datoIPeriode),
         )
-    }
 }
 
 val historiskeGrunnbeloep =

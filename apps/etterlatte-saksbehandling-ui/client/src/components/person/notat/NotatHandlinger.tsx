@@ -6,14 +6,16 @@ import { journalfoerNotat } from '~shared/api/notat'
 import { NotatRedigeringFane } from '~components/person/notat/NotatRedigeringModal'
 import { formaterTidspunktTimeMinutterSekunder } from '~utils/formattering'
 
-export const JournalfoerNotat = ({
+export const NotatHandlinger = ({
   notatId,
   setFane,
+  lagre,
   sistLagret,
   lukkModal,
 }: {
   notatId: number
   setFane: (fane: NotatRedigeringFane) => void
+  lagre: () => void
   sistLagret: Date | undefined
   lukkModal: () => void
 }) => {
@@ -31,7 +33,7 @@ export const JournalfoerNotat = ({
     <VStack gap="4">
       <Alert variant="warning">Er du sikker på at du vil journalføre notatet? Handlingen kan ikke angres.</Alert>
 
-      <HStack gap="4" align="center">
+      <HStack gap="4" align="center" justify="end">
         <Button variant="tertiary" onClick={() => setToggleJournalfoer(false)}>
           Nei, avbryt
         </Button>
@@ -41,24 +43,30 @@ export const JournalfoerNotat = ({
       </HStack>
     </VStack>
   ) : (
-    <HStack gap="4" align="center">
-      {!!sistLagret && (
-        <Alert variant="success" size="small" inline>
-          Sist lagret kl. {formaterTidspunktTimeMinutterSekunder(sistLagret)}
-        </Alert>
-      )}
-
+    <HStack justify="space-between">
       <Button variant="tertiary" onClick={lukkModal}>
         Lukk
       </Button>
-      <Button
-        onClick={() => {
-          setFane(NotatRedigeringFane.FORHAANDSVIS)
-          setToggleJournalfoer(true)
-        }}
-      >
-        Journalfør
-      </Button>
+
+      <HStack gap="4" align="center">
+        {!!sistLagret && (
+          <Alert variant="success" size="small" inline>
+            Sist lagret kl. {formaterTidspunktTimeMinutterSekunder(sistLagret)}
+          </Alert>
+        )}
+
+        <Button variant="secondary" onClick={lagre}>
+          Lagre
+        </Button>
+        <Button
+          onClick={() => {
+            setFane(NotatRedigeringFane.FORHAANDSVIS)
+            setToggleJournalfoer(true)
+          }}
+        >
+          Journalfør
+        </Button>
+      </HStack>
     </HStack>
   )
 }

@@ -212,17 +212,18 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         sak: Sak,
     ): Klage {
         val klage: Klage =
-            client.post("/api/klage/opprett/${sak.id}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    InnkommendeKlageDto(
-                        mottattDato = OffsetDateTime.now().toString(),
-                        journalpostId = "",
-                        innsender = "En klager",
-                    ),
-                )
-            }.body()
+            client
+                .post("/api/klage/opprett/${sak.id}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InnkommendeKlageDto(
+                            mottattDato = OffsetDateTime.now().toString(),
+                            journalpostId = "",
+                            innsender = "En klager",
+                        ),
+                    )
+                }.body()
         return klage
     }
 

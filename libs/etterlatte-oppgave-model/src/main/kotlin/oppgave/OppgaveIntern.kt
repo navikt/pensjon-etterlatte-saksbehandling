@@ -4,6 +4,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.time.YearMonth
@@ -30,9 +32,7 @@ data class OppgaveIntern(
     val fnr: String? = null,
     val frist: Tidspunkt?,
 ) {
-    fun manglerSaksbehandler(): Boolean {
-        return saksbehandler == null
-    }
+    fun manglerSaksbehandler(): Boolean = saksbehandler == null
 
     fun erAvsluttet(): Boolean = status.erAvsluttet()
 
@@ -51,7 +51,10 @@ data class OppgaveIntern(
             )
 }
 
-data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
+data class OppgavebenkStats(
+    val antallOppgavelistaOppgaver: Long,
+    val antallMinOppgavelisteOppgaver: Long,
+)
 
 enum class Status {
     NY,
@@ -64,8 +67,8 @@ enum class Status {
     AVBRUTT,
     ;
 
-    fun erAvsluttet(): Boolean {
-        return when (this) {
+    fun erAvsluttet(): Boolean =
+        when (this) {
             NY,
             UNDER_BEHANDLING,
             PAA_VENT,
@@ -78,7 +81,6 @@ enum class Status {
             AVBRUTT,
             -> true
         }
-    }
 
     // TODO: Gå gjennom navngiving her. Gir det mening med "under behandling" som status OG samlebegrep...?
     fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
@@ -173,24 +175,33 @@ data class NyOppgaveDto(
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
-    oppgaveKilde: OppgaveKilde?,
-    oppgaveType: OppgaveType,
+    kilde: OppgaveKilde?,
+    type: OppgaveType,
     merknad: String?,
     frist: Tidspunkt? = null,
+    saksbehandler: String? = null,
 ): OppgaveIntern {
+    val opprettet = Tidspunkt.now()
+
+    val oppgaveFrist =
+        frist ?: opprettet
+            .toLocalDatetimeUTC()
+            .plusMonths(1L)
+            .toTidspunkt()
+
     return OppgaveIntern(
         id = UUID.randomUUID(),
         status = Status.NY,
         enhet = sak.enhet,
         sakId = sak.id,
-        kilde = oppgaveKilde,
-        saksbehandler = null,
+        kilde = kilde,
+        saksbehandler = saksbehandler?.let { OppgaveSaksbehandler(ident = it) },
         referanse = referanse,
         merknad = merknad,
-        opprettet = Tidspunkt.now(),
+        opprettet = opprettet,
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = frist,
-        type = oppgaveType,
+        frist = oppgaveFrist,
+        type = type,
     )
 }

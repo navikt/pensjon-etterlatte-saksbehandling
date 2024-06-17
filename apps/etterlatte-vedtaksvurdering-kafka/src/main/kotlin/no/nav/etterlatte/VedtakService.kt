@@ -44,7 +44,10 @@ interface VedtakService {
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
 
-class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
+class VedtakServiceImpl(
+    private val vedtakKlient: HttpClient,
+    private val url: String,
+) : VedtakService {
     override fun harLoependeYtelserFra(
         sakId: Long,
         dato: LocalDate,
@@ -66,10 +69,11 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
-                contentType(ContentType.Application.Json)
-                setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
-            }.body()
+            vedtakKlient
+                .post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
+                    contentType(ContentType.Application.Json)
+                    setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
+                }.body()
         }
 
     override fun tilbakestillVedtak(behandlingId: UUID) {
@@ -80,31 +84,34 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 
     override fun tilSamordningVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$behandlingId/tilsamordning") {
-                contentType(ContentType.Application.Json)
-            }.body()
+            vedtakKlient
+                .post("$url/api/vedtak/$behandlingId/tilsamordning") {
+                    contentType(ContentType.Application.Json)
+                }.body()
         }
 
-    override fun samordneVedtak(behandlingId: UUID): SamordneResponse {
-        return runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$behandlingId/samordne") {
-                contentType(ContentType.Application.Json)
-            }.body<SamordneResponse>()
+    override fun samordneVedtak(behandlingId: UUID): SamordneResponse =
+        runBlocking {
+            vedtakKlient
+                .post("$url/api/vedtak/$behandlingId/samordne") {
+                    contentType(ContentType.Application.Json)
+                }.body<SamordneResponse>()
         }
-    }
 
     override fun samordnetVedtak(vedtakId: String): VedtakDto? =
         runBlocking {
-            vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
-                contentType(ContentType.Application.Json)
-            }.body()
+            vedtakKlient
+                .post("$url/vedtak/samordnet/$vedtakId") {
+                    contentType(ContentType.Application.Json)
+                }.body()
         }
 
     override fun iverksattVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
-                contentType(ContentType.Application.Json)
-            }.body()
+            vedtakKlient
+                .post("$url/api/vedtak/$behandlingId/iverksett") {
+                    contentType(ContentType.Application.Json)
+                }.body()
         }
 }
 

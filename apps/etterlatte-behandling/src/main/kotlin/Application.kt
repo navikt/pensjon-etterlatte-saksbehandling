@@ -59,7 +59,9 @@ fun main() {
     Server(ApplicationContext()).run()
 }
 
-private class Server(private val context: ApplicationContext) {
+private class Server(
+    private val context: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
     }

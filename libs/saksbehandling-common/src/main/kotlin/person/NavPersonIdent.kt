@@ -16,9 +16,7 @@ data class NavPersonIdent(
         }
     }
 
-    override fun toString(): String {
-        return ident.replaceRange(6 until 11, "*****")
-    }
+    override fun toString(): String = ident.replaceRange(6 until 11, "*****")
 
     companion object {
         @JvmStatic

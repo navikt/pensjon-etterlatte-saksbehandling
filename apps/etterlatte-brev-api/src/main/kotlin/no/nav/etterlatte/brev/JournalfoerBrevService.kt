@@ -89,7 +89,8 @@ class JournalfoerBrevService(
             db.settBrevJournalfoert(brev.id, response)
         } else {
             logger.info("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
-            dokarkivService.ferdigstillJournalpost(response.journalpostId, sak.enhet)
+            dokarkivService
+                .ferdigstillJournalpost(response.journalpostId, sak.enhet)
                 .also { db.settBrevJournalfoert(brev.id, response.copy(journalpostferdigstilt = it)) }
         }
 
@@ -140,12 +141,15 @@ class JournalfoerBrevService(
     }
 }
 
-class FeilStatusForJournalfoering(brevID: BrevID, status: Status) : UgyldigForespoerselException(
-    code = "FEIL_STATUS_FOR_JOURNALFOERING",
-    detail = "Kan ikke journalføre brev $brevID med status ${status.name.lowercase()}",
-    meta =
-        mapOf(
-            "brevId" to brevID,
-            "status" to status,
-        ),
-)
+class FeilStatusForJournalfoering(
+    brevID: BrevID,
+    status: Status,
+) : UgyldigForespoerselException(
+        code = "FEIL_STATUS_FOR_JOURNALFOERING",
+        detail = "Kan ikke journalføre brev $brevID med status ${status.name.lowercase()}",
+        meta =
+            mapOf(
+                "brevId" to brevID,
+                "status" to status,
+            ),
+    )

@@ -16,7 +16,9 @@ import java.util.UUID
 internal class TilSamordningRiverTest {
     companion object {
         val melding =
-            Companion::class.java.getResource("/attestertVedtakOms.json")?.readText()
+            Companion::class.java
+                .getResource("/attestertVedtakOms.json")
+                ?.readText()
                 ?.replace("ATTESTERT", "TIL_SAMORDNING")
                 ?: throw FileNotFoundException("Fant ikke filen")
     }

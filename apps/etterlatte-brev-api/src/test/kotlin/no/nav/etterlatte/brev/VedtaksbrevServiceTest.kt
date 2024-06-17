@@ -253,7 +253,11 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, null, any())
-                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(
+                    sakType,
+                    behandling.personerISak.innsender!!
+                        .fnr.value,
+                )
             }
 
             verify {
@@ -313,7 +317,11 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, null, any())
-                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(
+                    sakType,
+                    behandling.personerISak.innsender!!
+                        .fnr.value,
+                )
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(any())
             }
 
@@ -813,4 +821,6 @@ internal class VedtaksbrevServiceTest {
         )
 }
 
-data class ManueltBrevDataTest(override val innhold: List<Slate.Element> = emptyList()) : BrevDataFerdigstilling
+data class ManueltBrevDataTest(
+    override val innhold: List<Slate.Element> = emptyList(),
+) : BrevDataFerdigstilling

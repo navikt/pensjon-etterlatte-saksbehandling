@@ -7,7 +7,9 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
 
-class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class SjekklisteDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun opprettSjekkliste(
         behandlingId: UUID,
         sjekklisteItems: List<String>,
@@ -54,40 +56,38 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun oppdaterSjekkliste(
         sjekklisteId: UUID,
         oppdatering: OppdatertSjekkliste,
-    ) {
-        return connectionAutoclosing.hentConnection { connection ->
-            with(connection) {
-                val stmt =
-                    prepareStatement(
-                        """
-                        UPDATE sjekkliste 
-                         SET kommentar = ?,
-                             kontonr_reg = ?,
-                             onsket_skattetrekk = ?,
-                             bekreftet = ?,
-                             endret = CURRENT_TIMESTAMP,
-                             endret_av = ?,
-                             versjon = versjon + 1
-                        WHERE id = ?
-                        """.trimIndent(),
-                    )
-                stmt.setObject(1, oppdatering.kommentar)
-                stmt.setObject(2, oppdatering.kontonrRegistrert)
-                stmt.setObject(3, oppdatering.onsketSkattetrekk)
-                stmt.setObject(4, oppdatering.bekreftet)
-                stmt.setObject(5, Kontekst.get().AppUser.name())
-                stmt.setObject(6, sjekklisteId)
-                stmt.executeUpdate().also {
-                    if (it != 1) {
-                        throw IllegalStateException("Feil under oppdatering av sjekkliste $sjekklisteId")
-                    }
+    ) = connectionAutoclosing.hentConnection { connection ->
+        with(connection) {
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE sjekkliste 
+                     SET kommentar = ?,
+                         kontonr_reg = ?,
+                         onsket_skattetrekk = ?,
+                         bekreftet = ?,
+                         endret = CURRENT_TIMESTAMP,
+                         endret_av = ?,
+                         versjon = versjon + 1
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+            stmt.setObject(1, oppdatering.kommentar)
+            stmt.setObject(2, oppdatering.kontonrRegistrert)
+            stmt.setObject(3, oppdatering.onsketSkattetrekk)
+            stmt.setObject(4, oppdatering.bekreftet)
+            stmt.setObject(5, Kontekst.get().AppUser.name())
+            stmt.setObject(6, sjekklisteId)
+            stmt.executeUpdate().also {
+                if (it != 1) {
+                    throw IllegalStateException("Feil under oppdatering av sjekkliste $sjekklisteId")
                 }
             }
         }
     }
 
-    fun hentSjekkliste(id: UUID): Sjekkliste? {
-        return connectionAutoclosing.hentConnection {
+    fun hentSjekkliste(id: UUID): Sjekkliste? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -103,23 +103,24 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                         """.trimIndent(),
                     )
                 stmt.setObject(1, id)
-                stmt.executeQuery().toList {
-                    Sjekkliste(
-                        id = getUUID("id"),
-                        kommentar = getString("kommentar"),
-                        kontonrRegistrert = getString("kontonr_reg"),
-                        onsketSkattetrekk = getInt("onsket_skattetrekk"),
-                        bekreftet = getBoolean("bekreftet"),
-                        sjekklisteItems = hentSjekklisteItems(id),
-                        versjon = getLong("versjon"),
-                    )
-                }.firstOrNull()
+                stmt
+                    .executeQuery()
+                    .toList {
+                        Sjekkliste(
+                            id = getUUID("id"),
+                            kommentar = getString("kommentar"),
+                            kontonrRegistrert = getString("kontonr_reg"),
+                            onsketSkattetrekk = getInt("onsket_skattetrekk"),
+                            bekreftet = getBoolean("bekreftet"),
+                            sjekklisteItems = hentSjekklisteItems(id),
+                            versjon = getLong("versjon"),
+                        )
+                    }.firstOrNull()
             }
         }
-    }
 
-    private fun hentSjekklisteItems(sjekklisteId: UUID): List<SjekklisteItem> {
-        return connectionAutoclosing.hentConnection { connection ->
+    private fun hentSjekklisteItems(sjekklisteId: UUID): List<SjekklisteItem> =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
                     prepareStatement(
@@ -136,10 +137,9 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 stmt.executeQuery().toList { sjekklisteItem() }.sortedBy { it.id }
             }
         }
-    }
 
-    fun hentSjekklisteItem(sjekklisteItemId: Long): SjekklisteItem {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun hentSjekklisteItem(sjekklisteItemId: Long): SjekklisteItem =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
                     prepareStatement(
@@ -153,12 +153,13 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                         """.trimIndent(),
                     )
                 stmt.setObject(1, sjekklisteItemId)
-                stmt.executeQuery().toList { sjekklisteItem() }
+                stmt
+                    .executeQuery()
+                    .toList { sjekklisteItem() }
                     .also { if (it.isEmpty()) throw IllegalStateException("Fant ingen sjekklisterad id=$sjekklisteItemId") }
                     .first()
             }
         }
-    }
 
     private fun ResultSet.sjekklisteItem() =
         SjekklisteItem(
@@ -171,27 +172,25 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun oppdaterSjekklisteItem(
         itemId: Long,
         oppdatering: OppdaterSjekklisteItem,
-    ) {
-        return connectionAutoclosing.hentConnection { connection ->
-            with(connection) {
-                val stmt =
-                    prepareStatement(
-                        """
-                        UPDATE sjekkliste_item 
-                         SET avkrysset = ?,
-                             endret = CURRENT_TIMESTAMP,
-                             endret_av = ?,
-                             versjon = versjon + 1
-                        WHERE id = ?
-                        """.trimIndent(),
-                    )
-                stmt.setObject(1, oppdatering.avkrysset)
-                stmt.setObject(2, Kontekst.get().AppUser.name())
-                stmt.setObject(3, itemId)
-                stmt.executeUpdate().also {
-                    if (it != 1) {
-                        throw IllegalStateException("Feil under oppdatering av sjekklisterad $itemId")
-                    }
+    ) = connectionAutoclosing.hentConnection { connection ->
+        with(connection) {
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE sjekkliste_item 
+                     SET avkrysset = ?,
+                         endret = CURRENT_TIMESTAMP,
+                         endret_av = ?,
+                         versjon = versjon + 1
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+            stmt.setObject(1, oppdatering.avkrysset)
+            stmt.setObject(2, Kontekst.get().AppUser.name())
+            stmt.setObject(3, itemId)
+            stmt.executeUpdate().also {
+                if (it != 1) {
+                    throw IllegalStateException("Feil under oppdatering av sjekklisterad $itemId")
                 }
             }
         }

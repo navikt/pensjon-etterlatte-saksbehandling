@@ -97,7 +97,8 @@ class Tidspunkt
 
         fun medTimeMinuttSekund(tid: LocalTime): Tidspunkt =
             Tidspunkt(
-                ZonedDateTime.ofInstant(instant, standardTidssoneUTC)
+                ZonedDateTime
+                    .ofInstant(instant, standardTidssoneUTC)
                     .withHour(tid.hour)
                     .withMinute(tid.minute)
                     .withSecond(tid.second)

@@ -18,7 +18,5 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    fun hentVedtakISak(sakId: Long): List<Vedtak> {
-        return repository.hentVedtakForSak(sakId)
-    }
+    fun hentVedtakISak(sakId: Long): List<Vedtak> = repository.hentVedtakForSak(sakId)
 }

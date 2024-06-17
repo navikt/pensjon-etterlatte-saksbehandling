@@ -16,7 +16,9 @@ import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import javax.sql.DataSource
 
-class NotatRepository(private val ds: DataSource) {
+class NotatRepository(
+    private val ds: DataSource,
+) {
     fun hent(id: NotatID): Notat =
         using(sessionOf(ds)) {
             it.run(
@@ -132,17 +134,18 @@ class NotatRepository(private val ds: DataSource) {
         tittel: String,
         bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                "UPDATE notat SET tittel = :tittel WHERE id = :id",
-                mapOf(
-                    "id" to id,
-                    "tittel" to tittel,
-                ),
-            ).asUpdate,
-        ).also { oppdatert ->
-            require(oppdatert == 1)
-        }
+        tx
+            .run(
+                queryOf(
+                    "UPDATE notat SET tittel = :tittel WHERE id = :id",
+                    mapOf(
+                        "id" to id,
+                        "tittel" to tittel,
+                    ),
+                ).asUpdate,
+            ).also { oppdatert ->
+                require(oppdatert == 1)
+            }
 
         tx.lagreHendelse(id, tittel.toJson(), bruker)
     }

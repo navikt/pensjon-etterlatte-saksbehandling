@@ -17,12 +17,11 @@ internal class DoedshendelseKontrollpunktBarnService(
         avdoed: PersonDTO,
         sak: Sak?,
         barn: PersonDTO,
-    ): List<DoedshendelseKontrollpunkt> {
-        return listOfNotNull(
+    ): List<DoedshendelseKontrollpunkt> =
+        listOfNotNull(
             kontrollerBarnOgHarBP(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
         )
-    }
 
     private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
         if (sak == null) {
@@ -46,19 +45,23 @@ internal class DoedshendelseKontrollpunktBarnService(
     ): DoedshendelseKontrollpunkt? =
         avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
             val annenForelderFnr =
-                barn.familieRelasjon?.verdi?.foreldre
+                barn.familieRelasjon
+                    ?.verdi
+                    ?.foreldre
                     ?.map { it.value }
                     ?.firstOrNull { it != hendelse.avdoedFnr }
 
             if (annenForelderFnr == null) {
                 DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
             } else {
-                pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                    foedselsnummer = annenForelderFnr,
-                    rolle = PersonRolle.GJENLEVENDE,
-                    saktype = SakType.BARNEPENSJON,
-                )
-                    .doedsdato?.verdi?.let { annenForelderDoedsdato ->
+                pdlTjenesterKlient
+                    .hentPdlModellFlereSaktyper(
+                        foedselsnummer = annenForelderFnr,
+                        rolle = PersonRolle.GJENLEVENDE,
+                        saktype = SakType.BARNEPENSJON,
+                    ).doedsdato
+                    ?.verdi
+                    ?.let { annenForelderDoedsdato ->
                         if (annenForelderDoedsdato == avdoedDoedsdato) {
                             DoedshendelseKontrollpunkt.SamtidigDoedsfall
                         } else {

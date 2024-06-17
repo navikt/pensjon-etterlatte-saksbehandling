@@ -20,7 +20,9 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshendelse
 
-enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
+enum class DoedshendelseFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
     KanLagreDoedshendelseForEPS("pensjon-etterlatte.kan-lage-doedhendelse-for-eps"),
     KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
@@ -123,7 +125,8 @@ class DoedshendelseService(
     ) {
         val eksisterendeBeroerte = doedshendelserForAvdoed.map { it.beroertFnr }
         val nyeBeroerte =
-            beroerte.map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
+            beroerte
+                .map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
                 .filter { !eksisterendeBeroerte.contains(it.fnr) }
         nyeBeroerte.forEach { person ->
             doedshendelseDao.opprettDoedshendelse(
@@ -167,10 +170,15 @@ class DoedshendelseService(
     }
 
     private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
-        val maanedenEtterDoedsfall = avdoed.doedsdato!!.verdi.plusMonths(1).withDayOfMonth(1)
+        val maanedenEtterDoedsfall =
+            avdoed.doedsdato!!
+                .verdi
+                .plusMonths(1)
+                .withDayOfMonth(1)
 
         return with(avdoed.avdoedesBarn ?: emptyList()) {
-            this.filter { barn -> barn.doedsdato == null }
+            this
+                .filter { barn -> barn.doedsdato == null }
                 .filter { barn -> barn.under20PaaDato(maanedenEtterDoedsfall) }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
@@ -182,12 +190,13 @@ class DoedshendelseService(
             avdoedesBarn
                 ?.mapNotNull { barn ->
                     val annenForelder =
-                        barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                        barn.familieRelasjon
+                            ?.foreldre
+                            ?.filter { it.value != avdoed.foedselsnummer.verdi.value }
                             ?.map { it.value }
                     logger.info("Fant annen forelder til barn ${barn.foedselsnummer.value}: $annenForelder")
                     annenForelder
-                }
-                ?.flatten()
+                }?.flatten()
                 ?.distinct()
                 ?.filterNot {
                     varEktefelleVedDoedsfall(avdoed, it).also { varEktefelle ->
@@ -203,26 +212,30 @@ class DoedshendelseService(
     private fun harSammeAdresseSomAvdoed(
         avdoed: PersonDTO,
         andreForeldreForAvdoedesBarn: List<String>?,
-    ): List<PersonFnrMedRelasjon> {
-        return andreForeldreForAvdoedesBarn?.map {
-            val annenForelder =
-                runBlocking {
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
-                }
-            AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
-        }
-            ?.filter { erSamboere(it) }
+    ): List<PersonFnrMedRelasjon> =
+        andreForeldreForAvdoedesBarn
+            ?.map {
+                val annenForelder =
+                    runBlocking {
+                        pdlTjenesterKlient.hentPdlModellFlereSaktyper(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
+                    }
+                AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
+            }?.filter { erSamboere(it) }
             ?.map { PersonFnrMedRelasjon(it.gjenlevendeForelder.foedselsnummer.verdi.value, Relasjon.SAMBOER) }
             ?: emptyList()
-    }
 
     private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
         val gjenlevendeBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.firstOrNull { it.aktiv }
+                .gjenlevendeForelder.bostedsadresse
+                ?.map { it.verdi }
+                ?.firstOrNull { it.aktiv }
         val avdoedBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }?.firstOrNull()
+                .avdoedPerson.bostedsadresse
+                ?.map { it.verdi }
+                ?.sortedByDescending { it.gyldigFraOgMed }
+                ?.firstOrNull()
 
         val adresserLike = gjenlevendeBosted != null && avdoedBosted != null && isAdresserLike(gjenlevendeBosted, avdoedBosted)
         logger.info(
@@ -246,7 +259,8 @@ class DoedshendelseService(
     ): List<PersonFnrMedRelasjon> {
         val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()
 
-        return avdoedesSivilstander.asSequence()
+        return avdoedesSivilstander
+            .asSequence()
             .filter { it.verdi.relatertVedSiviltilstand?.value != null }
             .filter {
                 it.verdi.sivilstatus in
@@ -258,8 +272,7 @@ class DoedshendelseService(
                         Sivilstatus.SEPARERT_PARTNER,
                         Sivilstatus.SKILT_PARTNER,
                     )
-            }
-            .map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+            }.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
             .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
             .distinct()
             .toList()

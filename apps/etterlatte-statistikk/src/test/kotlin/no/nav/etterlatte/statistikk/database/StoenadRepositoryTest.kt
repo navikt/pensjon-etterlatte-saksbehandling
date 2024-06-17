@@ -29,7 +29,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class StoenadRepositoryTest(private val dataSource: DataSource) {
+class StoenadRepositoryTest(
+    private val dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -211,9 +213,19 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
     fun `hentRaderInnenforMaaned ignorerer rader som er fattet etter maaneden`() {
         val repo = StoenadRepository.using(dataSource)
         val maaned = YearMonth.of(2022, 8)
-        val tekniskTidEtterMaaned = maaned.plusMonths(1).atDay(1).atStartOfDay().toNorskTidspunkt()
+        val tekniskTidEtterMaaned =
+            maaned
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay()
+                .toNorskTidspunkt()
         val tekniskTidInnenforMaaned = maaned.atDay(1).atStartOfDay().toNorskTidspunkt()
-        val tekniskTidFoerMaaned = maaned.minusMonths(1).atDay(1).atStartOfDay().toNorskTidspunkt()
+        val tekniskTidFoerMaaned =
+            maaned
+                .minusMonths(1)
+                .atDay(1)
+                .atStartOfDay()
+                .toNorskTidspunkt()
 
         repo.lagreStoenadsrad(
             stoenadRad(
@@ -249,7 +261,12 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
     fun `hentRaderInnenforMaaned gir alle rader som har et vedtak løpende innenfor måneden`() {
         val repo = StoenadRepository.using(dataSource)
         val maaned = YearMonth.of(2022, 8)
-        val tekniskTidFoerMaaned = maaned.minusMonths(1).atDay(1).atStartOfDay().toNorskTidspunkt()
+        val tekniskTidFoerMaaned =
+            maaned
+                .minusMonths(1)
+                .atDay(1)
+                .atStartOfDay()
+                .toNorskTidspunkt()
 
         repo.lagreStoenadsrad(
             stoenadRad(

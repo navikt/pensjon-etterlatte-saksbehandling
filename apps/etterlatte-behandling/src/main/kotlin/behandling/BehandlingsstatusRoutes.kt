@@ -182,7 +182,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     }
 }
 
-data class OperasjonGyldig(val gyldig: Boolean)
+data class OperasjonGyldig(
+    val gyldig: Boolean,
+)
 
 private suspend fun haandterStatusEndring(
     call: ApplicationCall,
@@ -195,8 +197,9 @@ private suspend fun haandterStatusEndring(
         )
 }
 
-class BehandlingKanIkkeBytteStatusException : ForespoerselException(
-    status = HttpStatusCode.Conflict.value,
-    code = "BEHANDLING_HAR_UGYLDIG_STATUS",
-    detail = "Behandlingen kan ikke bytte til ønsket status",
-)
+class BehandlingKanIkkeBytteStatusException :
+    ForespoerselException(
+        status = HttpStatusCode.Conflict.value,
+        code = "BEHANDLING_HAR_UGYLDIG_STATUS",
+        detail = "Behandlingen kan ikke bytte til ønsket status",
+    )

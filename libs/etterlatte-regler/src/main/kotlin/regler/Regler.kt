@@ -3,13 +3,19 @@ package no.nav.etterlatte.libs.regler
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDate
 
-data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
+data class RegelPeriode(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate? = null,
+) {
     init {
         check(tilDato == null || tilDato >= fraDato) { "Tildato må være større eller lik fradato" }
     }
 }
 
-data class RegelReferanse(val id: String, val versjon: String = "1")
+data class RegelReferanse(
+    val id: String,
+    val versjon: String = "1",
+)
 
 abstract class Regel<G, S>(
     open val gjelderFra: LocalDate,
@@ -236,5 +242,6 @@ open class KonstantRegel<G, S>(
         )
 }
 
-data class IngenGyldigeReglerForTidspunktException(val periode: RegelPeriode) :
-    Exception("Ingen gyldige regler er konfigurert for tidsrommet: ${periode.fraDato} - ${periode.tilDato}")
+data class IngenGyldigeReglerForTidspunktException(
+    val periode: RegelPeriode,
+) : Exception("Ingen gyldige regler er konfigurert for tidsrommet: ${periode.fraDato} - ${periode.tilDato}")

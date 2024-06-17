@@ -42,7 +42,8 @@ class SafKlient(
 
     private fun opprettHentJournalpostRequest(journalpostId: Long): GraphqlRequest {
         val query =
-            javaClass.getResource("/graphql/journalpost.id.graphql")!!
+            javaClass
+                .getResource("/graphql/journalpost.id.graphql")!!
                 .readText()
                 .replace(Regex("[\n\t]"), "")
 

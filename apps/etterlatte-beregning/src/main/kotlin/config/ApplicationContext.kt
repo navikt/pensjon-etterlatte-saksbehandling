@@ -35,7 +35,9 @@ private fun featureToggleProperties(config: Config) =
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
 
-enum class BeregningFeatureToggle(private val key: String) : FeatureToggle {
+enum class BeregningFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     Foreldreloes("foreldreloes"),
     ;
 

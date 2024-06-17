@@ -26,9 +26,7 @@ fun JsonMessage.setEventNameForHendelseType(eventnameHendelseType: EventnameHend
     this[EVENT_NAME_KEY] = eventnameHendelseType.lagEventnameForType()
 }
 
-fun EventnameHendelseType.lagParMedEventNameKey(): Pair<String, String> {
-    return Pair(EVENT_NAME_KEY, this.lagEventnameForType())
-}
+fun EventnameHendelseType.lagParMedEventNameKey(): Pair<String, String> = Pair(EVENT_NAME_KEY, this.lagEventnameForType())
 
 var JsonMessage.eventName: String
     get() = this[EVENT_NAME_KEY].textValue()

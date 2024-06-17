@@ -95,17 +95,15 @@ class StatistikkService(
         vedtak: VedtakDto,
         hendelse: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
-    ): SakRad? {
-        return vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid)?.let { sakRad ->
+    ): SakRad? =
+        vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid)?.let { sakRad ->
             sakRepository.lagreRad(sakRad)
         }
-    }
 
-    private fun hentBeregningForBehandling(behandlingId: UUID): Beregning? {
-        return runBlocking {
+    private fun hentBeregningForBehandling(behandlingId: UUID): Beregning? =
+        runBlocking {
             beregningKlient.hentBeregningForBehandling(behandlingId)
         }
-    }
 
     private fun hentAvkortingForBehandling(vedtak: VedtakDto): Avkorting? {
         if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
@@ -252,7 +250,11 @@ class StatistikkService(
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
             // TODO  Bør utbedres?
-            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep?.toString(),
+            nettoYtelse =
+                vedtakInnhold.utbetalingsperioder
+                    .firstOrNull()
+                    ?.beloep
+                    ?.toString(),
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtakInnhold.behandling.id,
@@ -322,9 +324,12 @@ class StatistikkService(
         relatertTil = null,
     )
 
-    private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? {
-        return TilbakekrevingResultat.hoyesteGradAvTilbakekreving(tilbakekreving.perioder.mapNotNull { it.ytelse.resultat })
-    }
+    private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? =
+        TilbakekrevingResultat.hoyesteGradAvTilbakekreving(
+            tilbakekreving.perioder.mapNotNull {
+                it.ytelse.resultat
+            },
+        )
 
     private fun klageTilSakRad(
         statistikkKlage: StatistikkKlage,
@@ -341,7 +346,10 @@ class StatistikkService(
         resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
-        ansvarligBeslutter = statistikkKlage.klage.formkrav?.saksbehandler?.ident,
+        ansvarligBeslutter =
+            statistikkKlage.klage.formkrav
+                ?.saksbehandler
+                ?.ident,
         aktorId = statistikkKlage.klage.sak.ident,
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkKlage.klage.sak.sakType.name,
@@ -365,7 +373,11 @@ class StatistikkService(
         sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
-        relatertTil = statistikkKlage.klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId,
+        relatertTil =
+            statistikkKlage.klage.formkrav
+                ?.formkrav
+                ?.vedtaketKlagenGjelder
+                ?.behandlingId,
     )
 
     private fun resultatKlage(statistikkKlage: StatistikkKlage): String? {
@@ -448,9 +460,7 @@ class StatistikkService(
         statistikkBehandling: StatistikkBehandling,
         hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
-    ): SakRad? {
-        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
-    }
+    ): SakRad? = sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
 
     fun registrerStatistikkBehandlingPaaVentHendelse(
         behandlingId: UUID,
@@ -477,21 +487,15 @@ class StatistikkService(
         statistikkKlage: StatistikkKlage,
         tekniskTid: LocalDateTime,
         hendelse: KlageHendelseType,
-    ): SakRad? {
-        return sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
-    }
+    ): SakRad? = sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
 
     fun registrerStatistikkFortilbakkrevinghendelse(
         statistikkTilbakekreving: StatistikkTilbakekrevingDto,
         tekniskTid: LocalDateTime,
         hendelse: TilbakekrevingHendelseType,
-    ): SakRad? {
-        return sakRepository.lagreRad(tilbakekrevingTilSakRad(statistikkTilbakekreving, tekniskTid, hendelse))
-    }
+    ): SakRad? = sakRepository.lagreRad(tilbakekrevingTilSakRad(statistikkTilbakekreving, tekniskTid, hendelse))
 
-    fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus {
-        return stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
-    }
+    fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus = stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
 
     fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk) {
         var raderMedFeil = 0L

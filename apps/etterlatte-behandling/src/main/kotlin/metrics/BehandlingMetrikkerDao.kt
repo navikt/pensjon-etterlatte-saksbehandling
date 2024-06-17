@@ -9,7 +9,9 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-class BehandlingMetrikkerDao(private val dataSource: DataSource) {
+class BehandlingMetrikkerDao(
+    private val dataSource: DataSource,
+) {
     fun hent(): List<BehandlingAntall> {
         dataSource.connection.use {
             val statement =
@@ -30,8 +32,8 @@ class BehandlingMetrikkerDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun ResultSet.asBehandlingAntall(): BehandlingAntall {
-        return BehandlingAntall(
+    private fun ResultSet.asBehandlingAntall(): BehandlingAntall =
+        BehandlingAntall(
             antall = getInt("antall"),
             saktype = SakType.valueOf(getString("saktype")),
             behandlingstype = BehandlingType.valueOf(getString("behandlingstype")),
@@ -40,7 +42,6 @@ class BehandlingMetrikkerDao(private val dataSource: DataSource) {
             kilde = Vedtaksloesning.valueOf(getString("kilde")),
             automatiskMigrering = getString("automatisk"),
         )
-    }
 }
 
 data class BehandlingAntall(

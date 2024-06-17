@@ -39,7 +39,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class VedtakKlageServiceTest(dataSource: DataSource) {
+internal class VedtakKlageServiceTest(
+    dataSource: DataSource,
+) {
     private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
     private val vedtaksvurderingRapidService = mockk<VedtaksvurderingRapidService>()
     private val vedtakKlageService = VedtakKlageService(vedtaksvurderingRepository, vedtaksvurderingRapidService)
@@ -234,8 +236,8 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
             brev = KlageVedtaksbrev(brevId = 1L),
         )
 
-    private fun klage(utfall: KlageUtfallMedData? = null): Klage {
-        return Klage(
+    private fun klage(utfall: KlageUtfallMedData? = null): Klage =
+        Klage(
             UUID.randomUUID(),
             Sak(FNR_1, SakType.BARNEPENSJON, 1L, ENHET_1),
             Tidspunkt.now(),
@@ -249,7 +251,6 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
             aarsakTilAvbrytelse = null,
             initieltUtfall = null,
         )
-    }
 
     private fun vedtakInnholdToKlage(vedtak: Vedtak) = deserialize<Klage>((vedtak.innhold as VedtakInnhold.Klage).klage.toJson())
 }

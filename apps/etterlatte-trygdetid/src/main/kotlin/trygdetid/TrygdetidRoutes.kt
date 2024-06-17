@@ -40,8 +40,8 @@ import java.util.UUID
 
 private const val TRYGDETIDID_CALL_PARAMETER = "trygdetidId"
 
-fun PipelineContext<*, ApplicationCall>.trygdetidId(): UUID {
-    return try {
+fun PipelineContext<*, ApplicationCall>.trygdetidId(): UUID =
+    try {
         this.call.parameters[TRYGDETIDID_CALL_PARAMETER]?.let { UUID.fromString(it) }!!
     } catch (e: Exception) {
         throw UgyldigForespoerselException(
@@ -49,7 +49,6 @@ fun PipelineContext<*, ApplicationCall>.trygdetidId(): UUID {
             "Kunne ikke lese ut parameteret trygdetidId",
         )
     }
-}
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
@@ -75,7 +74,8 @@ fun Route.trygdetid(
                 logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
                 trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
                 call.respond(
-                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                    trygdetidService
+                        .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                         .map { it.toDto() },
                 )
             }
@@ -87,7 +87,8 @@ fun Route.trygdetid(
 
                 trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
                 call.respond(
-                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                    trygdetidService
+                        .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                         .minBy { it.ident }
                         .toDto(),
                 )
@@ -106,11 +107,13 @@ fun Route.trygdetid(
                     brukerTokenInfo,
                 )
                 call.respond(
-                    trygdetidService.hentTrygdetidIBehandlingMedId(
-                        behandlingId,
-                        trygdetidOverstyringDto.id,
-                        brukerTokenInfo,
-                    )!!.toDto(),
+                    trygdetidService
+                        .hentTrygdetidIBehandlingMedId(
+                            behandlingId,
+                            trygdetidOverstyringDto.id,
+                            brukerTokenInfo,
+                        )!!
+                        .toDto(),
                 )
             }
         }
@@ -128,11 +131,13 @@ fun Route.trygdetid(
                 )
 
                 call.respond(
-                    trygdetidService.hentTrygdetidIBehandlingMedId(
-                        behandlingId,
-                        trygdetidYrkesskadeDto.id,
-                        brukerTokenInfo,
-                    )!!.toDto(),
+                    trygdetidService
+                        .hentTrygdetidIBehandlingMedId(
+                            behandlingId,
+                            trygdetidYrkesskadeDto.id,
+                            brukerTokenInfo,
+                        )!!
+                        .toDto(),
                 )
             }
         }
@@ -143,18 +148,20 @@ fun Route.trygdetid(
                     logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
                     val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
 
-                    trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                    trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                         behandlingId,
                         trygdetidId(),
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                         brukerTokenInfo,
                     )
                     call.respond(
-                        trygdetidService.hentTrygdetidIBehandlingMedId(
-                            behandlingId,
-                            trygdetidId(),
-                            brukerTokenInfo,
-                        )!!.toDto(),
+                        trygdetidService
+                            .hentTrygdetidIBehandlingMedId(
+                                behandlingId,
+                                trygdetidId(),
+                                brukerTokenInfo,
+                            )!!
+                            .toDto(),
                     )
                 }
             }
@@ -170,11 +177,13 @@ fun Route.trygdetid(
                             brukerTokenInfo,
                         )
                         call.respond(
-                            trygdetidService.hentTrygdetidIBehandlingMedId(
-                                behandlingId,
-                                trygdetidId(),
-                                brukerTokenInfo,
-                            )!!.toDto(),
+                            trygdetidService
+                                .hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId(),
+                                    brukerTokenInfo,
+                                )!!
+                                .toDto(),
                         )
                     }
                 }
@@ -209,7 +218,8 @@ fun Route.trygdetid(
                         overstyringDto.detaljertBeregnetTrygdetidResultat,
                     )
                     call.respond(
-                        trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                        trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                             .first { trygdetid -> trygdetid.ident == overstyringDto.ident }
                             .toDto(),
                     )
@@ -249,11 +259,13 @@ fun Route.trygdetid(
                         behandlingKlient.settBehandlingStatusTrygdetidOppdatert(trygdetid.behandlingId, brukerTokenInfo)
 
                         call.respond(
-                            trygdetidService.hentTrygdetidIBehandlingMedId(
-                                behandlingId,
-                                trygdetidId(),
-                                brukerTokenInfo,
-                            )!!.toDto(),
+                            trygdetidService
+                                .hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId(),
+                                    brukerTokenInfo,
+                                )!!
+                                .toDto(),
                         )
                     }
                 }
@@ -272,11 +284,13 @@ fun Route.trygdetid(
                                 brukerTokenInfo,
                             )
                             call.respond(
-                                trygdetidService.hentTrygdetidIBehandlingMedId(
-                                    behandlingId,
-                                    trygdetidId(),
-                                    brukerTokenInfo,
-                                )!!.toDto(),
+                                trygdetidService
+                                    .hentTrygdetidIBehandlingMedId(
+                                        behandlingId,
+                                        trygdetidId(),
+                                        brukerTokenInfo,
+                                    )!!
+                                    .toDto(),
                             )
                         } else {
                             call.respond(HttpStatusCode.NoContent)
@@ -325,8 +339,8 @@ fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): 
         prorata = prorata,
     )
 
-private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
-    return TrygdetidGrunnlagDto(
+private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
+    TrygdetidGrunnlagDto(
         id = id,
         type = type.name,
         bosted = bosted,
@@ -357,4 +371,3 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         poengUtAar = poengUtAar,
         prorata = prorata,
     )
-}

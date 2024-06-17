@@ -41,7 +41,8 @@ class KlagehendelseRiver(
             val klage: StatistikkKlage = objectMapper.treeToValue(packet[KLAGE_STATISTIKK_RIVER_KEY])
             val tekniskTid = parseTekniskTid(packet, logger)
             val hendelse: KlageHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
-            return service.registrerStatistikkForKlagehendelse(klage, tekniskTid, hendelse)
+            return service
+                .registrerStatistikkForKlagehendelse(klage, tekniskTid, hendelse)
                 ?.also {
                     context.publish(
                         mapOf(

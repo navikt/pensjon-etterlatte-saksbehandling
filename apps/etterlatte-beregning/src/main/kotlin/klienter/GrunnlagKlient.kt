@@ -22,9 +22,15 @@ interface GrunnlagKlient {
     ): Grunnlag
 }
 
-class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class GrunnlagKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
+class GrunnlagKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -48,8 +54,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                             url = "$resourceUrl/api/grunnlag/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

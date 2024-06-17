@@ -21,12 +21,13 @@ class AldersovergangService(
     ): Vilkaarsvurdering {
         val vilkaarsvurdering =
             vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-                ?: vilkaarsvurderingService.kopierVilkaarsvurdering(
-                    behandlingId = behandlingId,
-                    kopierFraBehandling = loependeBehandlingId,
-                    brukerTokenInfo = brukerTokenInfo,
-                    kopierResultat = false,
-                )
+                ?: vilkaarsvurderingService
+                    .kopierVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        kopierFraBehandling = loependeBehandlingId,
+                        brukerTokenInfo = brukerTokenInfo,
+                        kopierResultat = false,
+                    ).vilkaarsvurdering
 
         val aldersvilkaar =
             vilkaarsvurdering.vilkaar.single {
@@ -59,15 +60,16 @@ class AldersovergangService(
         )
 
         // Resultat på hele vurderingen => ikke oppfylt
-        return vilkaarsvurderingService.oppdaterTotalVurdering(
-            behandlingId,
-            brukerTokenInfo,
-            VilkaarsvurderingResultat(
-                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-                kommentar = "Automatisk aldersovergang",
-                tidspunkt = tidspunkt(),
-                saksbehandler = Fagsaksystem.EY.navn,
-            ),
-        )
+        return vilkaarsvurderingService
+            .oppdaterTotalVurdering(
+                behandlingId,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+                    kommentar = "Automatisk aldersovergang",
+                    tidspunkt = tidspunkt(),
+                    saksbehandler = Fagsaksystem.EY.navn,
+                ),
+            ).vilkaarsvurdering
     }
 }

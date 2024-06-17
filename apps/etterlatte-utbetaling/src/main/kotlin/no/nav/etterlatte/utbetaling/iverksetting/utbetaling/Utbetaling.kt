@@ -7,17 +7,30 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-data class VedtakId(val value: Long)
+data class VedtakId(
+    val value: Long,
+)
 
-data class SakId(val value: Long)
+data class SakId(
+    val value: Long,
+)
 
-data class BehandlingId(val value: UUID, val shortValue: UUID30)
+data class BehandlingId(
+    val value: UUID,
+    val shortValue: UUID30,
+)
 
-data class UtbetalingslinjeId(val value: Long)
+data class UtbetalingslinjeId(
+    val value: Long,
+)
 
-data class Foedselsnummer(val value: String)
+data class Foedselsnummer(
+    val value: String,
+)
 
-data class NavIdent(val value: String)
+data class NavIdent(
+    val value: String,
+)
 
 enum class UtbetalingStatus {
     GODKJENT,
@@ -103,7 +116,9 @@ data class UtbetalingForKonsistensavstemming(
     val utbetalingshendelser: List<Utbetalingshendelse>,
 )
 
-enum class Kjoereplan(private val oppdragVerdi: String) {
+enum class Kjoereplan(
+    private val oppdragVerdi: String,
+) {
     // ref. https://confluence.adeo.no/display/OKSY/Inputdata+fra+fagrutinen+til+Oppdragssystemet:
     // "Bruk-kjoreplan gjør det mulig å velge om delytelsen skal beregnes/utbetales i henhold til kjøreplanen eller om
     // dette skal skje idag. Verdien 'N' medfører at beregningen kjøres idag. Beregningen vil bare gjelde
@@ -112,9 +127,7 @@ enum class Kjoereplan(private val oppdragVerdi: String) {
     MED_EN_GANG("N"),
     ;
 
-    override fun toString(): String {
-        return oppdragVerdi
-    }
+    override fun toString(): String = oppdragVerdi
 
     companion object {
         fun fraKode(kode: String): Kjoereplan =
@@ -126,14 +139,14 @@ enum class Kjoereplan(private val oppdragVerdi: String) {
     }
 }
 
-enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
+enum class OppdragKlassifikasjonskode(
+    private val oppdragVerdi: String,
+) {
     BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),
     OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR"),
     ;
 
-    override fun toString(): String {
-        return oppdragVerdi
-    }
+    override fun toString(): String = oppdragVerdi
 
     companion object {
         fun fraString(string: String): OppdragKlassifikasjonskode =

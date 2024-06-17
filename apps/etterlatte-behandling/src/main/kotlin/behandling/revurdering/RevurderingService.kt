@@ -45,22 +45,30 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-class MaksEnAktivOppgavePaaBehandling(sakId: Long) : UgyldigForespoerselException(
-    code = "MAKS_EN_AKTIV_OPPGAVE_PAA_BEHANDLING",
-    detail = "Sak $sakId har allerede en oppgave under behandling",
-)
+class MaksEnAktivOppgavePaaBehandling(
+    sakId: Long,
+) : UgyldigForespoerselException(
+        code = "MAKS_EN_AKTIV_OPPGAVE_PAA_BEHANDLING",
+        detail = "Sak $sakId har allerede en oppgave under behandling",
+    )
 
-class RevurderingaarsakIkkeStoettet(aarsak: Revurderingaarsak) : UgyldigForespoerselException(
-    code = "REVURDERINGAARSAK_IKKE_STOETTET",
-    detail = "Revurderingsårsak \"$aarsak\" er foreløpig ikke støttet",
-)
+class RevurderingaarsakIkkeStoettet(
+    aarsak: Revurderingaarsak,
+) : UgyldigForespoerselException(
+        code = "REVURDERINGAARSAK_IKKE_STOETTET",
+        detail = "Revurderingsårsak \"$aarsak\" er foreløpig ikke støttet",
+    )
 
-class RevurderingManglerIverksattBehandling(sakId: Long) : UgyldigForespoerselException(
-    code = "REVURDERING_MANGLER_IVERKSATT_BEHANDLING",
-    detail = "Sak $sakId kan ikke revurderes uten en iverksatt behandling",
-)
+class RevurderingManglerIverksattBehandling(
+    sakId: Long,
+) : UgyldigForespoerselException(
+        code = "REVURDERING_MANGLER_IVERKSATT_BEHANDLING",
+        detail = "Sak $sakId kan ikke revurderes uten en iverksatt behandling",
+    )
 
-class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(message: String) : Exception(message)
+class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(
+    message: String,
+) : Exception(message)
 
 class UgyldigBehandlingTypeForRevurdering :
     IkkeTillattException(
@@ -117,9 +125,10 @@ class RevurderingService(
 
     fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
-        if (oppgaverForSak.filter {
-                it.kilde == OppgaveKilde.BEHANDLING
-            }.any { !it.erAvsluttet() }
+        if (oppgaverForSak
+                .filter {
+                    it.kilde == OppgaveKilde.BEHANDLING
+                }.any { !it.erAvsluttet() }
         ) {
             throw MaksEnAktivOppgavePaaBehandling(sakId)
         }
@@ -321,7 +330,8 @@ class RevurderingService(
             }
 
             forrigeBehandling?.let { behandlingId ->
-                kommerBarnetTilGodeService.hentKommerBarnetTilGode(behandlingId)
+                kommerBarnetTilGodeService
+                    .hentKommerBarnetTilGode(behandlingId)
                     ?.copy(behandlingId = opprettBehandling.id)
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
@@ -360,11 +370,11 @@ class RevurderingService(
                         )
                     } else {
                         val oppgave =
-                            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            oppgaveService.opprettOppgave(
                                 referanse = it.id.toString(),
                                 sakId = sakId,
-                                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                                oppgaveType = OppgaveType.REVURDERING,
+                                kilde = OppgaveKilde.BEHANDLING,
+                                type = OppgaveType.REVURDERING,
                                 merknad = begrunnelse,
                                 frist = frist,
                             )
@@ -412,7 +422,11 @@ class RevurderingService(
                 )
 
         val behandlingSomOmgjoeresId =
-            klagenViOmgjoerPaaGrunnAv.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId?.let { UUID.fromString(it) }
+            klagenViOmgjoerPaaGrunnAv.formkrav
+                ?.formkrav
+                ?.vedtaketKlagenGjelder
+                ?.behandlingId
+                ?.let { UUID.fromString(it) }
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
         val behandlingSomOmgjoeres =
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
@@ -423,7 +437,11 @@ class RevurderingService(
             sakId = sakId,
             persongalleri = persongalleri,
             forrigeBehandling = behandlingSomOmgjoeresId,
-            mottattDato = klagenViOmgjoerPaaGrunnAv.innkommendeDokument?.mottattDato?.atStartOfDay()?.toString(),
+            mottattDato =
+                klagenViOmgjoerPaaGrunnAv.innkommendeDokument
+                    ?.mottattDato
+                    ?.atStartOfDay()
+                    ?.toString(),
             prosessType = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
@@ -466,27 +484,34 @@ sealed class FeilIOmgjoering {
     class IngenOmgjoeringsoppgave :
         UgyldigForespoerselException("INGEN_OMGJOERINGSOPPGAVE", "Mottok ikke en gyldig omgjøringsoppgave")
 
-    class OmgjoeringsOppgaveLukket(oppgave: OppgaveIntern) :
-        UgyldigForespoerselException(
+    class OmgjoeringsOppgaveLukket(
+        oppgave: OppgaveIntern,
+    ) : UgyldigForespoerselException(
             "OMGJOERINGSOPPGAVE_LUKKET",
             "Oppgaven ${oppgave.id} har status ${oppgave.status}.",
         )
 
-    class OppgaveOgSakErForskjellig(sakId: Long, oppgave: OppgaveIntern) :
-        UgyldigForespoerselException(
+    class OppgaveOgSakErForskjellig(
+        sakId: Long,
+        oppgave: OppgaveIntern,
+    ) : UgyldigForespoerselException(
             "SAK_I_OPPGAVE_MATCHER_IKKE",
             "Saken det skal omgjøres i har id=$sakId, men omgjøringsoppgaven er i sak med id=${oppgave.sakId}",
         )
 
-    class SaksbehandlerHarIkkeOppgaven(saksbehandler: Saksbehandler, omgjoeringsoppgave: OppgaveIntern) :
-        UgyldigForespoerselException(
+    class SaksbehandlerHarIkkeOppgaven(
+        saksbehandler: Saksbehandler,
+        omgjoeringsoppgave: OppgaveIntern,
+    ) : UgyldigForespoerselException(
             "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
             "Saksbehandler med ident=${saksbehandler.ident} er ikke saksbehandler i oppgaven med " +
                 "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandler?.ident}).",
         )
 
-    class ManglerBehandlingForOmgjoering(klage: Klage) : InternfeilException(
-        "Klagen med id=${klage.id} har laget en omgjøringsoppgave men vi finner ikke behandlingen som skal omgjøres." +
-            " Noe galt har skjedd i ferdigstillingen av denne klagen, eller dette er ikke et behandlingsvedtak.",
-    )
+    class ManglerBehandlingForOmgjoering(
+        klage: Klage,
+    ) : InternfeilException(
+            "Klagen med id=${klage.id} har laget en omgjøringsoppgave men vi finner ikke behandlingen som skal omgjøres." +
+                " Noe galt har skjedd i ferdigstillingen av denne klagen, eller dette er ikke et behandlingsvedtak.",
+        )
 }

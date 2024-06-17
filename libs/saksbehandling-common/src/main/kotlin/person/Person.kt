@@ -12,7 +12,9 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-enum class PDLIdentGruppeTyper(val navn: String) {
+enum class PDLIdentGruppeTyper(
+    val navn: String,
+) {
     FOLKEREGISTERIDENT("FOLKEREGISTERIDENT"), // Kan være DNR og FNR
     AKTORID("AKTORID"),
     NPID("NPID"),
@@ -193,16 +195,18 @@ interface Verge {
     fun navn(): String
 }
 
-data class Vergemaal(val navn: String, val foedselsnummer: Folkeregisteridentifikator) : Verge {
-    override fun navn(): String {
-        return navn
-    }
+data class Vergemaal(
+    val navn: String,
+    val foedselsnummer: Folkeregisteridentifikator,
+) : Verge {
+    override fun navn(): String = navn
 }
 
-data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val navn: String) : Verge {
-    override fun navn(): String {
-        return navn
-    }
+data class ForelderVerge(
+    val foedselsnummer: Folkeregisteridentifikator,
+    val navn: String,
+) : Verge {
+    override fun navn(): String = navn
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -217,7 +221,9 @@ data class BrevMottaker(
  * Denne pakker inn fødselsnummer i {value: "<fnr>"}, fordi det skal matche responsen fra brev-api...
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class MottakerFoedselsnummer(val value: String) {
+data class MottakerFoedselsnummer(
+    val value: String,
+) {
     /**
      * Skal ALLTID returnere anonymisert fødselsnummer.
      *
@@ -252,9 +258,7 @@ enum class AdressebeskyttelseGradering {
     UGRADERT,
     ;
 
-    fun erGradert(): Boolean {
-        return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
-    }
+    fun erGradert(): Boolean = this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT

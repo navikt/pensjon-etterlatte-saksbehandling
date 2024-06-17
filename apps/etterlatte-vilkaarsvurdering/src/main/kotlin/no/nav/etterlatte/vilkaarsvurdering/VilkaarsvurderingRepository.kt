@@ -24,7 +24,10 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
+class VilkaarsvurderingRepository(
+    private val ds: DataSource,
+    private val delvilkaarRepository: DelvilkaarRepository,
+) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
@@ -32,10 +35,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             queryOf(Queries.HENT_VILKAARSVURDERING, mapOf("behandling_id" to behandlingId))
                 .let { query ->
                     session.run(
-                        query.map { row ->
-                            val vilkaarsvurderingId = row.uuid("id")
-                            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
-                        }.asSingle,
+                        query
+                            .map { row ->
+                                val vilkaarsvurderingId = row.uuid("id")
+                                row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
+                            }.asSingle,
                     )
                 }
         }
@@ -171,7 +175,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                     mapOf(
                         "id" to vurdertVilkaar.vilkaarId,
                         "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                        "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
+                        "resultat_tidspunkt" to
+                            vurdertVilkaar.vurdering.tidspunkt
+                                .toTidspunkt()
+                                .toTimestamp(),
                         "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler,
                     ),
                 loggtekst = "Lagrer vilkårresultat",
@@ -185,12 +192,13 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         behandlingId: UUID,
         vilkaarId: UUID,
     ): Vilkaarsvurdering =
-        ds.transaction { tx ->
-            queryOf(Queries.SLETT_VILKAAR_RESULTAT, mapOf("id" to vilkaarId))
-                .let { tx.run(it.asUpdate) }
+        ds
+            .transaction { tx ->
+                queryOf(Queries.SLETT_VILKAAR_RESULTAT, mapOf("id" to vilkaarId))
+                    .let { tx.run(it.asUpdate) }
 
-            delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
-        }.let { hentNonNull(behandlingId) }
+                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
+            }.let { hentNonNull(behandlingId) }
 
     fun slettVilkaarvurdering(id: UUID) =
         ds.transaction { tx ->
@@ -209,10 +217,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
     ): List<Vilkaar> =
         queryOf(Queries.HENT_VILKAAR, mapOf("vilkaarsvurdering_id" to vilkaarsvurderingId))
             .let { query ->
-                session.run(
-                    query.map { row -> row.toVilkaarWrapper() }.asList,
-                )
-                    .groupBy { it.vilkaarId }
+                session
+                    .run(
+                        query.map { row -> row.toVilkaarWrapper() }.asList,
+                    ).groupBy { it.vilkaarId }
                     .map { (vilkaarId, alleDelvilkaar) ->
                         val hovedvilkaar = alleDelvilkaar.first { it.hovedvilkaar }
                         val unntaksvilkaar = alleDelvilkaar.filter { !it.hovedvilkaar }.map { it.delvilkaar }
@@ -255,7 +263,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                     "id" to vilkaar.id,
                     "vilkaarsvurdering_id" to vilkaarsvurderingId,
                     "resultat_kommentar" to vilkaar.vurdering?.kommentar,
-                    "resultat_tidspunkt" to vilkaar.vurdering?.tidspunkt?.toTidspunkt()?.toTimestamp(),
+                    "resultat_tidspunkt" to
+                        vilkaar.vurdering
+                            ?.tidspunkt
+                            ?.toTidspunkt()
+                            ?.toTimestamp(),
                     "resultat_saksbehandler" to vilkaar.vurdering?.saksbehandler,
                 ),
         ).let { tx.run(it.asUpdate) }

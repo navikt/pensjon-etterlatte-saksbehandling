@@ -15,7 +15,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(GrunnlagDbExtension::class)
-class AldersovergangServiceTest(private val dataSource: DataSource) {
+class AldersovergangServiceTest(
+    private val dataSource: DataSource,
+) {
     private val dao = AldersovergangDao(dataSource)
     private val service = AldersovergangService(dao)
 

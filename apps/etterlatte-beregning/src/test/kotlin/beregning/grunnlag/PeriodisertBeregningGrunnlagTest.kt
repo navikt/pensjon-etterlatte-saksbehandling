@@ -12,10 +12,11 @@ class PeriodisertBeregningGrunnlagTest {
     private val perioderSomErKomplett =
         listOf<Pair<LocalDate, LocalDate?>>(
             YearMonth.of(2022, Month.AUGUST).atDay(1) to
-                YearMonth.of(
-                    2022,
-                    Month.DECEMBER,
-                ).atEndOfMonth(),
+                YearMonth
+                    .of(
+                        2022,
+                        Month.DECEMBER,
+                    ).atEndOfMonth(),
             YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
         )
 
@@ -23,19 +24,21 @@ class PeriodisertBeregningGrunnlagTest {
         listOf<Pair<LocalDate, LocalDate?>>(
             YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
             YearMonth.of(2022, Month.AUGUST).atDay(1) to
-                YearMonth.of(
-                    2022,
-                    Month.DECEMBER,
-                ).atEndOfMonth(),
+                YearMonth
+                    .of(
+                        2022,
+                        Month.DECEMBER,
+                    ).atEndOfMonth(),
         )
 
     private val perioderMedHull =
         listOf<Pair<LocalDate, LocalDate?>>(
             YearMonth.of(2022, Month.AUGUST).atDay(1) to
-                YearMonth.of(
-                    2022,
-                    Month.AUGUST,
-                ).atEndOfMonth(),
+                YearMonth
+                    .of(
+                        2022,
+                        Month.AUGUST,
+                    ).atEndOfMonth(),
             YearMonth.of(2022, Month.DECEMBER).atDay(1) to YearMonth.of(2022, Month.DECEMBER).atEndOfMonth(),
         )
 
@@ -76,7 +79,12 @@ class PeriodisertBeregningGrunnlagTest {
         val fom = perioderSomErKomplett.minBy { it.first }.first
         val tom = null
         val ekstraPeriodeFoerst =
-            YearMonth.from(fom).minusYears(1).atDay(1) to YearMonth.from(fom).minusYears(1).plusMonths(2).atEndOfMonth()
+            YearMonth.from(fom).minusYears(1).atDay(1) to
+                YearMonth
+                    .from(fom)
+                    .minusYears(1)
+                    .plusMonths(2)
+                    .atEndOfMonth()
         assertDoesNotThrow {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(
@@ -136,9 +144,10 @@ class PeriodisertBeregningGrunnlagTest {
         val default = "konstant"
         Assertions.assertEquals(
             default,
-            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                emptyList(),
-            ) { _, _, _ -> default }
+            PeriodisertBeregningGrunnlag
+                .lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                    emptyList(),
+                ) { _, _, _ -> default }
                 .finnGrunnlagForPeriode(perioderMedOverlapp.minBy { it.first }.first),
         )
     }
@@ -146,9 +155,10 @@ class PeriodisertBeregningGrunnlagTest {
     @Test
     fun `lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder returnerer  hvis ingen perioder er gitt`() {
         assertDoesNotThrow {
-            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null),
-            ) { _, _, _ -> "konstant" }
+            PeriodisertBeregningGrunnlag
+                .lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                    perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null),
+                ) { _, _, _ -> "konstant" }
                 .finnGrunnlagForPeriode(perioderSomErKomplett.minBy { it.first }.first)
         }
     }
@@ -200,16 +210,14 @@ class PeriodisertBeregningGrunnlagTest {
         )
     }
 
-    private fun List<Pair<LocalDate, LocalDate?>>.somPeriodegrunnlag(): List<GrunnlagMedPeriode<String>> {
-        return perioderTilGrunnlagMedPerioder(this, "hei")
-    }
+    private fun List<Pair<LocalDate, LocalDate?>>.somPeriodegrunnlag(): List<GrunnlagMedPeriode<String>> =
+        perioderTilGrunnlagMedPerioder(this, "hei")
 
     private fun <T> perioderTilGrunnlagMedPerioder(
         perioder: List<Pair<LocalDate, LocalDate?>>,
         opplysning: T,
-    ): List<GrunnlagMedPeriode<T>> {
-        return perioder.map {
+    ): List<GrunnlagMedPeriode<T>> =
+        perioder.map {
             GrunnlagMedPeriode(data = opplysning, fom = it.first, tom = it.second)
         }
-    }
 }

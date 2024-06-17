@@ -127,8 +127,22 @@ fun revurderingVedtak(
             listOf(
                 Utbetalingsperiode(
                     id = it.utbetalingsperioder.last().id!! + 1,
-                    periode = Periode(fom = it.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
-                    beloep = BigDecimal(it.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
+                    periode =
+                        Periode(
+                            fom =
+                                it.utbetalingsperioder
+                                    .first()
+                                    .periode.fom
+                                    .plusMonths(1),
+                            null,
+                        ),
+                    beloep =
+                        BigDecimal(
+                            it.utbetalingsperioder
+                                .first()
+                                .beloep!!
+                                .longValueExact() - 1000,
+                        ),
                     type = UtbetalingsperiodeType.UTBETALING,
                 ),
             )
@@ -193,7 +207,15 @@ fun opphoersVedtak(
                     listOf(
                         Utbetalingsperiode(
                             id = it.utbetalingsperioder.last().id!! + 1,
-                            periode = Periode(fom = it.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
+                            periode =
+                                Periode(
+                                    fom =
+                                        it.utbetalingsperioder
+                                            .first()
+                                            .periode.fom
+                                            .plusMonths(1),
+                                    null,
+                                ),
                             beloep = null,
                             type = UtbetalingsperiodeType.OPPHOER,
                         ),
@@ -268,7 +290,11 @@ fun main() {
                     antall = 2,
                     intervallMnd = 6,
                     forrigeId = vedtakInnhold.utbetalingsperioder.last().id!!,
-                    startPeriode = vedtakInnhold.utbetalingsperioder.last().periode.fom.plusMonths(1),
+                    startPeriode =
+                        vedtakInnhold.utbetalingsperioder
+                            .last()
+                            .periode.fom
+                            .plusMonths(1),
                     startBelop = vedtakInnhold.utbetalingsperioder.last().beloep!!,
                 ),
         )

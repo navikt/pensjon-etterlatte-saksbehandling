@@ -11,8 +11,8 @@ import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.logger
-import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
 
@@ -38,27 +38,29 @@ object SamordningMottattFeature : TestDataFeature {
             post {
                 try {
                     val navIdent =
-                        requireNotNull(navIdentFraToken()) {
+                        requireNotNull(brukerTokenInfo.ident()) {
                             "Nav ident mangler. Du må være innlogget for å sende samordningsmelding."
                         }
 
                     val (partisjon, offset) =
                         call.receiveParameters().let {
                             val vedtakID = requireNotNull(it["vedtakIdInput"])
-                            producer.publiser(
-                                requireNotNull(it["key"]),
-                                JsonMessage.newMessage(
-                                    mapOf(
-                                        VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagParMedEventNameKey(),
-                                        "vedtakId" to vedtakID,
-                                    ),
-                                ).toJson(),
-                                mapOf("NavIdent" to navIdent.toByteArray()),
-                            ).also { (partisjon, offset) ->
-                                logger.info(
-                                    "Publiserer samordningsmelding for vedtakID=$vedtakID med partisjon: $partisjon offset: $offset",
-                                )
-                            }
+                            producer
+                                .publiser(
+                                    requireNotNull(it["key"]),
+                                    JsonMessage
+                                        .newMessage(
+                                            mapOf(
+                                                VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagParMedEventNameKey(),
+                                                "vedtakId" to vedtakID,
+                                            ),
+                                        ).toJson(),
+                                    mapOf("NavIdent" to navIdent.toByteArray()),
+                                ).also { (partisjon, offset) ->
+                                    logger.info(
+                                        "Publiserer samordningsmelding for vedtakID=$vedtakID med partisjon: $partisjon offset: $offset",
+                                    )
+                                }
                         }
 
                     call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")

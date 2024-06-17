@@ -10,7 +10,8 @@ class KommerBarnetTilGodeService(
 ) {
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         kommerBarnetTilgode.behandlingId?.let {
-            behandlingDao.hentBehandling(it)
+            behandlingDao
+                .hentBehandling(it)
                 ?.tilOpprettet()
                 ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
                 ?.also { behandling -> behandlingDao.lagreStatus(behandling) }

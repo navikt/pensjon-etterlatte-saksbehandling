@@ -5,7 +5,9 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class AppBuilder(props: Miljoevariabler) {
+class AppBuilder(
+    props: Miljoevariabler,
+) {
     private val trygdetidapp: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = props.requireEnvValue("AZURE_APP_CLIENT_ID"),

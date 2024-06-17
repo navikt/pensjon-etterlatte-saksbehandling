@@ -44,6 +44,7 @@ enum class Revurderingaarsak(
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
     FORELDRELOES(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    FRA_0UTBETALING_TIL_UTBETALING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
@@ -103,7 +104,9 @@ enum class Revurderingaarsak(
     fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
 }
 
-enum class GcpEnv(val env: String) {
+enum class GcpEnv(
+    val env: String,
+) {
     PROD("prod-gcp"),
     DEV("dev-gcp"),
 }

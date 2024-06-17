@@ -43,23 +43,24 @@ class JmsConnectionFactory(
     private val password: String,
 ) : EtterlatteJmsConnectionFactory {
     private val connectionFactory =
-        MQConnectionFactory().also {
-            it.hostName = hostname
-            it.port = port
-            it.queueManager = queueManager
-            it.channel = channel
-            it.transportType = WMQConstants.WMQ_CM_CLIENT
-            it.ccsid = UTF_8_WITH_PUA
+        MQConnectionFactory()
+            .also {
+                it.hostName = hostname
+                it.port = port
+                it.queueManager = queueManager
+                it.channel = channel
+                it.transportType = WMQConstants.WMQ_CM_CLIENT
+                it.ccsid = UTF_8_WITH_PUA
 
-            it.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
-            it.setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
-            it.setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
-        }.let {
-            val pooledConnectionFactory = JmsPoolConnectionFactory()
-            pooledConnectionFactory.connectionFactory = it
-            pooledConnectionFactory.maxConnections = 1
-            pooledConnectionFactory
-        }
+                it.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
+                it.setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
+                it.setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
+            }.let {
+                val pooledConnectionFactory = JmsPoolConnectionFactory()
+                pooledConnectionFactory.connectionFactory = it
+                pooledConnectionFactory.maxConnections = 1
+                pooledConnectionFactory
+            }
 
     private fun connection(): Connection = connectionFactory.createConnection(username, password)
 
@@ -111,7 +112,9 @@ class JmsConnectionFactory(
     }
 }
 
-enum class Prioritet(val verdi: Int) {
+enum class Prioritet(
+    val verdi: Int,
+) {
     NORMAL(4),
     LAV(1),
 }

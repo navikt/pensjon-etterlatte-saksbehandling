@@ -37,12 +37,13 @@ fun main() {
 }
 
 fun createRecord(dato: LocalDate) =
-    JsonMessage.newMessage(
-        mapOf(
-            ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
-            ReguleringEvents.DATO to dato.toString(),
-            ReguleringEvents.KJOERING to "Regulering-$year",
-            ReguleringEvents.ANTALL to 20,
-            ReguleringEvents.SPESIFIKKE_SAKER to "2912",
-        ),
-    ).toJson()
+    JsonMessage
+        .newMessage(
+            mapOf(
+                ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
+                ReguleringEvents.DATO to dato.toString(),
+                ReguleringEvents.KJOERING to "Regulering-$year",
+                ReguleringEvents.ANTALL to 20,
+                ReguleringEvents.SPESIFIKKE_SAKER to "3482;6323",
+            ),
+        ).toJson()

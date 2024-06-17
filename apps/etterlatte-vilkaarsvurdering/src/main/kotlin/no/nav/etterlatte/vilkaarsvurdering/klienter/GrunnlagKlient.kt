@@ -17,16 +17,21 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagKlient {
-    suspend fun hentGrunnlag(
-        sakId: Long,
+    suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
 }
 
-class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class GrunnlagKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
+class GrunnlagKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -35,8 +40,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun hentGrunnlag(
-        sakId: Long,
+    override suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
@@ -51,8 +55,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                             url = "$resourceUrl/grunnlag/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

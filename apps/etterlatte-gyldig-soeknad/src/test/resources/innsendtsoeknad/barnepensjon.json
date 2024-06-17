@@ -217,16 +217,6 @@
       "service": "innsendt-soeknad",
       "instance": "innsendt-soeknad-9c8466574-k8rsg",
       "time": "2022-02-10T10:53:30.809646217"
-    },
-    {
-      "service": "sjekk-adressebeskyttelse",
-      "instance": "sjekk-adressebeskyttelse-696bcbb647-g59xj",
-      "time": "2022-02-10T10:53:30.817628111"
-    },
-    {
-      "service": "journalfoer-soeknad",
-      "instance": "journalfoer-soeknad-86c4676f6f-twptd",
-      "time": "2022-02-10T10:53:31.194624485"
     }
   ]
 }

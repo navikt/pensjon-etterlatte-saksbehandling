@@ -34,7 +34,9 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource) {
+internal class VedtaksvurderingRepositoryTest(
+    private val dataSource: DataSource,
+) {
     private lateinit var repository: VedtaksvurderingRepository
 
     companion object {
@@ -370,8 +372,7 @@ internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource
                 virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 status = VedtakStatus.TIL_SAMORDNING,
             ),
-        )
-            .map { repository.opprettVedtak(it) }
+        ).map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
         val results = repository.hentFerdigstilteVedtak(soeker2, SakType.BARNEPENSJON)

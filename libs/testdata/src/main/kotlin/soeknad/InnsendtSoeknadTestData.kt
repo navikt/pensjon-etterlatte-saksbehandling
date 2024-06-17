@@ -27,8 +27,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.time.LocalDate
 
 object InnsendtSoeknadTestData {
-    fun omstillingsSoeknad(): Omstillingsstoenad {
-        return Omstillingsstoenad(
+    fun omstillingsSoeknad(): Omstillingsstoenad =
+        Omstillingsstoenad(
             imageTag = "9f1f95b2472742227b37d19dd2d735ac9001995e",
             spraak = Spraak.NB,
             innsender =
@@ -281,5 +281,4 @@ object InnsendtSoeknadTestData {
                 ),
             barn = listOf(),
         )
-    }
 }

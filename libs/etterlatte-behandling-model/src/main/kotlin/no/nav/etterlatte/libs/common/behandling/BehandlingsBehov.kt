@@ -9,8 +9,9 @@ data class BehandlingsBehov(
     val mottattDato: String,
 )
 
-class PersongalleriFeilException(message: String) :
-    UgyldigForespoerselException(code = "PERSONGALLERI_MAA_VAERE_GYLDIG", detail = message)
+class PersongalleriFeilException(
+    message: String,
+) : UgyldigForespoerselException(code = "PERSONGALLERI_MAA_VAERE_GYLDIG", detail = message)
 
 data class NyBehandlingRequest(
     val sakType: SakType,

@@ -91,15 +91,14 @@ internal class VedtaksbrevUnderkjentRiverTest {
         verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
     }
 
-    private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun opprettMelding(vedtak: VedtakDto): JsonMessage =
+        JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 VedtakKafkaHendelseHendelseType.UNDERKJENT.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
             ),
         )
-    }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         val behandlingsid = UUID.randomUUID()

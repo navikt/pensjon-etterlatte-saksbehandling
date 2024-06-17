@@ -79,7 +79,8 @@ internal class ReguleringsforespoerselRiver(
             }
 
             val sakListe =
-                behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+                behandlingService
+                    .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                     .also { sakIdListe ->
                         logger.info(
                             "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
@@ -109,30 +110,24 @@ internal class ReguleringsforespoerselRiver(
         }
     }
 
-    private fun JsonMessage.optionalSakType(): SakType? {
-        return when (val node = this[SAK_TYPE]) {
+    private fun JsonMessage.optionalSakType(): SakType? =
+        when (val node = this[SAK_TYPE]) {
             is MissingNode -> null
             else -> SakType.valueOf(node.asText())
         }
-    }
 
     companion object {
         const val MAKS_BATCHSTOERRELSE = 100
     }
 }
 
-enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
+enum class ReguleringFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     START_REGULERING("start-regulering"),
     ;
 
     override fun key() = key
 }
 
-private val sakerViIkkeRegulererAutomatiskNaa =
-    listOf<Long>(
-        // Manuelt overstyrt
-        3482, // Revurdering med overstyrt beregning åpen behandling
-        6323, // Revurdering med overstyrt beregning åpen behandling
-        11606, // Revurdering med overstyrt beregning åpen behandling
-        11848, // Revurdering med overstyrt beregning åpen behandling
-    )
+private val sakerViIkkeRegulererAutomatiskNaa: List<Long> = emptyList()

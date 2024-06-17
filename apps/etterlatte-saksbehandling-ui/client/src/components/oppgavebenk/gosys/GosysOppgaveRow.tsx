@@ -1,7 +1,7 @@
 import { formaterOppgavetype, formaterStatus, GosysOppgave } from '~shared/types/Gosys'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { TemaTag } from '~components/oppgavebenk/components/Tags'
+import { TemaTag } from '~components/oppgavebenk/components/tags/Tags'
 import { VelgSaksbehandler } from '~components/oppgavebenk/gosys/VelgSaksbehandler'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'

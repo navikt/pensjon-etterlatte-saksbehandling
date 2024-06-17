@@ -24,7 +24,11 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class BehandlingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class BehandlingService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     suspend fun hentSak(sakId: Long): Sak =
         retryOgPakkUt {
             klient.get(Resource(clientId, "$url/saker/$sakId"), Systembruker.testdata).mapBoth(
@@ -35,16 +39,16 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
 
     suspend fun settKommerBarnetTilGode(behandling: UUID) {
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"),
-                Systembruker.testdata,
-                postBody =
-                    JaNeiMedBegrunnelse(
-                        JaNei.JA,
-                        BEGRUNNELSE,
-                    ),
-            )
-                .mapBoth(
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"),
+                    Systembruker.testdata,
+                    postBody =
+                        JaNeiMedBegrunnelse(
+                            JaNei.JA,
+                            BEGRUNNELSE,
+                        ),
+                ).mapBoth(
                     success = {},
                     failure = { throw it },
                 )
@@ -53,30 +57,32 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
 
     suspend fun lagreGyldighetsproeving(behandling: UUID) {
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"),
-                Systembruker.testdata,
-                JaNeiMedBegrunnelse(JaNei.JA, BEGRUNNELSE),
-            ).mapBoth(
-                success = {},
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"),
+                    Systembruker.testdata,
+                    JaNeiMedBegrunnelse(JaNei.JA, BEGRUNNELSE),
+                ).mapBoth(
+                    success = {},
+                    failure = { throw it },
+                )
         }
     }
 
     suspend fun lagreUtlandstilknytning(behandling: UUID) {
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/behandling/$behandling/utlandstilknytning"),
-                Systembruker.testdata,
-                UtlandstilknytningRequest(
-                    utlandstilknytningType = UtlandstilknytningType.NASJONAL,
-                    begrunnelse = BEGRUNNELSE,
-                ),
-            ).mapBoth(
-                success = {},
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/utlandstilknytning"),
+                    Systembruker.testdata,
+                    UtlandstilknytningRequest(
+                        utlandstilknytningType = UtlandstilknytningType.NASJONAL,
+                        begrunnelse = BEGRUNNELSE,
+                    ),
+                ).mapBoth(
+                    success = {},
+                    failure = { throw it },
+                )
         }
     }
 
@@ -87,18 +93,19 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         val virkningstidspunkt = doedsdato.plusMonths(1)
 
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
-                Systembruker.testdata,
-                VirkningstidspunktRequest(
-                    _dato = YearMonth.of(virkningstidspunkt.year, virkningstidspunkt.month).toString(),
-                    begrunnelse = BEGRUNNELSE,
-                    kravdato = null,
-                ),
-            ).mapBoth(
-                success = {},
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
+                    Systembruker.testdata,
+                    VirkningstidspunktRequest(
+                        _dato = YearMonth.of(virkningstidspunkt.year, virkningstidspunkt.month).toString(),
+                        begrunnelse = BEGRUNNELSE,
+                        kravdato = null,
+                    ),
+                ).mapBoth(
+                    success = {},
+                    failure = { throw it },
+                )
         }
     }
 
@@ -108,7 +115,8 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
     ) {
         val oppgaver: List<OppgaveIntern> =
             retryOgPakkUt {
-                klient.get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
+                klient
+                    .get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
                     .mapBoth(
                         success = { readValue(it) },
                         failure = { throw it },
@@ -117,14 +125,15 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
 
         oppgaver.forEach {
             retryOgPakkUt {
-                klient.post(
-                    Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"),
-                    Systembruker.testdata,
-                    SaksbehandlerEndringDto(navn),
-                ).mapBoth(
-                    success = {},
-                    failure = { err -> throw err },
-                )
+                klient
+                    .post(
+                        Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"),
+                        Systembruker.testdata,
+                        SaksbehandlerEndringDto(navn),
+                    ).mapBoth(
+                        success = {},
+                        failure = { err -> throw err },
+                    )
             }
         }
     }
@@ -134,26 +143,27 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         sakType: SakType,
     ) {
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
-                Systembruker.testdata,
-                BrevutfallOgEtterbetalingDto(
-                    behandlingId = behandling,
-                    opphoer = false,
-                    etterbetaling = null,
-                    brevutfall =
-                        BrevutfallDto(
-                            behandlingId = behandling,
-                            aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
-                            lavEllerIngenInntekt = if (sakType == SakType.OMSTILLINGSSTOENAD) LavEllerIngenInntekt.NEI else null,
-                            feilutbetaling = null,
-                            kilde = null,
-                        ),
-                ),
-            ).mapBoth(
-                success = {},
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
+                    Systembruker.testdata,
+                    BrevutfallOgEtterbetalingDto(
+                        behandlingId = behandling,
+                        opphoer = false,
+                        etterbetaling = null,
+                        brevutfall =
+                            BrevutfallDto(
+                                behandlingId = behandling,
+                                aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
+                                lavEllerIngenInntekt = if (sakType == SakType.OMSTILLINGSSTOENAD) LavEllerIngenInntekt.NEI else null,
+                                feilutbetaling = null,
+                                kilde = null,
+                            ),
+                    ),
+                ).mapBoth(
+                    success = {},
+                    failure = { throw it },
+                )
         }
     }
 }

@@ -32,7 +32,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class OppgaveDaoReguleringTest(val dataSource: DataSource) {
+internal class OppgaveDaoReguleringTest(
+    val dataSource: DataSource,
+) {
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
     private lateinit var sakDao: SakDao

@@ -10,7 +10,7 @@ import ForhaandsvisningNotat from '~components/person/notat/ForhaandsvisningNota
 import { DokumentVisningModal } from '~shared/brev/pdf-visning'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { RedigerNotatTittel } from '~components/person/notat/RedigerNotatTittel'
-import { JournalfoerNotat } from '~components/person/notat/JournalfoerNotat'
+import { NotatHandlinger } from '~components/person/notat/NotatHandlinger'
 
 export enum NotatRedigeringFane {
   REDIGER = 'REDIGER',
@@ -103,21 +103,20 @@ export const NotatRedigeringModal = ({ notat }: RedigerbartNotatProps) => {
               <ForhaandsvisningNotat id={notat.id} />
             </Tabs.Panel>
           </Tabs>
-        </Modal.Body>
 
-        <Modal.Footer>
           {isFailureHandler({
             apiResult: lagrePayloadStatus,
             errorMessage: 'Feil oppsto ved lagring av notat',
           })}
 
-          <JournalfoerNotat
+          <NotatHandlinger
             notatId={notat.id}
             setFane={setFane}
+            lagre={lagre}
             sistLagret={sistLagret}
             lukkModal={() => setIsOpen(false)}
           />
-        </Modal.Footer>
+        </Modal.Body>
       </DokumentVisningModal>
     </>
   )

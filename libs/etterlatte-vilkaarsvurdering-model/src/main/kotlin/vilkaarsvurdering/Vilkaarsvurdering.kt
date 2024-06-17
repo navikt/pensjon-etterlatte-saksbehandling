@@ -14,14 +14,14 @@ data class VilkaarsvurderingDto(
     val behandlingGrunnlagVersjon: Long?,
 ) {
     fun isYrkesskade() =
-        this.vilkaar.filter {
-            VilkaarType.yrkesskadeVilkaarTyper().contains(it.hovedvilkaar.type)
-        }.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+        this.vilkaar
+            .filter {
+                VilkaarType.yrkesskadeVilkaarTyper().contains(it.hovedvilkaar.type)
+            }.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
 
-    fun isGrunnlagUtdatert(): Boolean {
-        return behandlingGrunnlagVersjon != null &&
+    fun isGrunnlagUtdatert(): Boolean =
+        behandlingGrunnlagVersjon != null &&
             grunnlagVersjon < behandlingGrunnlagVersjon
-    }
 }
 
 data class Vilkaar(

@@ -103,8 +103,8 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker OBO cachet access token ved parallele kall`() {
-        return runTest {
+    fun `bruker OBO cachet access token ved parallele kall`() =
+        runTest {
             val cache: AsyncCache<OboTokenRequest, AccessToken> =
                 Caffeine
                     .newBuilder()
@@ -119,7 +119,6 @@ internal class AzureAdClientTest {
 
             assertEquals(1, httpClient.called)
         }
-    }
 
     @Test
     fun `henter client credentials access token hvis det ikke finnes noe i cache`() {
@@ -171,8 +170,8 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker client credentials cachet access token ved parallele kall`() {
-        return runTest {
+    fun `bruker client credentials cachet access token ved parallele kall`() =
+        runTest {
             val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
                 Caffeine
                     .newBuilder()
@@ -187,7 +186,6 @@ internal class AzureAdClientTest {
 
             assertEquals(1, httpClient.called)
         }
-    }
 
     @Test
     fun `bruker client credentials viss JWT-claims sub og oid er like`() {

@@ -41,7 +41,8 @@ class TilbakekrevinghendelseRiver(
             val tilbakekreving: StatistikkTilbakekrevingDto = objectMapper.treeToValue(packet[TILBAKEKREVING_STATISTIKK_RIVER_KEY])
             val tekniskTid = parseTekniskTid(packet, logger)
             val hendelse: TilbakekrevingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
-            return service.registrerStatistikkFortilbakkrevinghendelse(tilbakekreving, tekniskTid, hendelse)
+            return service
+                .registrerStatistikkFortilbakkrevinghendelse(tilbakekreving, tekniskTid, hendelse)
                 ?.also {
                     context.publish(
                         mapOf(

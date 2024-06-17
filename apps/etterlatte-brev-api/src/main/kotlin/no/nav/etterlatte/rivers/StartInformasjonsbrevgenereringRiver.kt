@@ -51,20 +51,22 @@ class StartInformasjonsbrevgenereringRiver(
     }
 
     private fun lagMelding(brevgenereringRequest: BrevgenereringRequest) =
-        JsonMessage.newMessage(
-            listOf(
-                BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
-                FNR_KEY to (brevgenereringRequest.fnr),
-                BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
-                BREVMAL_RIVER_KEY to brevgenereringRequest.brevmal.name,
-                SAK_TYPE_KEY to brevgenereringRequest.sakType.name,
-            )
-                .filter { it.second != null }
-                .associate { it.first to it.second!! },
-        ).toJson()
+        JsonMessage
+            .newMessage(
+                listOf(
+                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
+                    FNR_KEY to (brevgenereringRequest.fnr),
+                    BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
+                    BREVMAL_RIVER_KEY to brevgenereringRequest.brevmal.name,
+                    SAK_TYPE_KEY to brevgenereringRequest.sakType.name,
+                ).filter { it.second != null }
+                    .associate { it.first to it.second!! },
+            ).toJson()
 }
 
-class StartBrevgenereringRepository(private val dataSource: DataSource) : Transactions<StartBrevgenereringRepository> {
+class StartBrevgenereringRepository(
+    private val dataSource: DataSource,
+) : Transactions<StartBrevgenereringRepository> {
     override fun <R> inTransaction(block: StartBrevgenereringRepository.(TransactionalSession) -> R): R =
         dataSource.transaction {
             this.block(it)

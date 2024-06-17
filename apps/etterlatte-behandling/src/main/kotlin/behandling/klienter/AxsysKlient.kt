@@ -21,11 +21,15 @@ interface AxsysKlient : Pingable {
     suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet>
 }
 
-class AxsysKlientImpl(private val client: HttpClient, private val url: String) : AxsysKlient {
+class AxsysKlientImpl(
+    private val client: HttpClient,
+    private val url: String,
+) : AxsysKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val enhetCache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, List<SaksbehandlerEnhet>>()
 
@@ -44,7 +48,9 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
                     contentType(ContentType.Application.Json)
                 }
 
-            response.body<EnhetslisteResponse?>()?.enheter
+            response
+                .body<EnhetslisteResponse?>()
+                ?.enheter
                 ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
                 .also { enhetCache.put(ident, it) } ?: emptyList()
         } catch (cause: Throwable) {
@@ -54,14 +60,13 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
         }
     }
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return client.ping(
+    override suspend fun ping(konsument: String?): PingResult =
+        client.ping(
             pingUrl = url.plus("/internal/isReady"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
-    }
 
     override val serviceName: String
         get() = "Axsysklient"
@@ -71,8 +76,10 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
         get() = this.url
 }
 
-class HentEnhetException(override val detail: String, override val cause: Throwable?) :
-    InternfeilException(detail, cause)
+class HentEnhetException(
+    override val detail: String,
+    override val cause: Throwable?,
+) : InternfeilException(detail, cause)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Enheter(

@@ -28,7 +28,8 @@ class BehandlingService(
 
         logger.info("Oppretter journalføringsoppgave for sak=$sakId")
 
-        return behandlingKlient.opprettOppgave(sakId, merknad, referanse = journalpostId)
+        return behandlingKlient
+            .opprettOppgave(sakId, merknad, referanse = journalpostId)
             .also { oppgaveId ->
                 logger.info("Opprettet oppgave=$oppgaveId med sakId=$sakId for journalpost=$journalpostId")
             }

@@ -23,9 +23,10 @@ class KlageKafkakonsument(
     }
 }
 
-internal class KafkaEnvironment : Kafkakonfigurasjon<StringDeserializer>(
-    groupId = "KLAGE_GROUP_ID",
-    deserializerClass = StringDeserializer::class.java,
-    userInfoConfigKey = Avrokonstanter.USER_INFO_CONFIG,
-    schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,
-)
+internal class KafkaEnvironment :
+    Kafkakonfigurasjon<StringDeserializer>(
+        groupId = "KLAGE_GROUP_ID",
+        deserializerClass = StringDeserializer::class.java,
+        userInfoConfigKey = Avrokonstanter.USER_INFO_CONFIG,
+        schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,
+    )

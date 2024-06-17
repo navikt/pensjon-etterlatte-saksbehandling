@@ -37,8 +37,8 @@ internal class KonsistensavstemmingDataMapper(
             aksjonsdata = avstemmingsdata(KodeAksjon.AVSL, saktype)
         }
 
-    private fun datameldinger(saktype: Saktype): List<Konsistensavstemmingsdata> {
-        return avstemming.loependeUtbetalinger
+    private fun datameldinger(saktype: Saktype): List<Konsistensavstemmingsdata> =
+        avstemming.loependeUtbetalinger
             .chunked(detaljerPrMelding)
             .map {
                 Konsistensavstemmingsdata().apply {
@@ -52,7 +52,6 @@ internal class KonsistensavstemmingDataMapper(
                     },
                 )
             }.leggPaaTotaldata()
-    }
 
     private fun List<Konsistensavstemmingsdata>.leggPaaTotaldata() =
         this.also {
@@ -93,8 +92,8 @@ internal class KonsistensavstemmingDataMapper(
         }
 }
 
-internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
-    return Oppdragsdata().apply {
+internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata =
+    Oppdragsdata().apply {
         fagomradeKode =
             when (sakType) {
                 Saktype.BARNEPENSJON -> "BARNEPE"
@@ -140,7 +139,6 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
             },
         )
     }
-}
 
 enum class KodeAksjon {
     START,

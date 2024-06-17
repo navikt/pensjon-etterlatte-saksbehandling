@@ -29,16 +29,17 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(private val datasource: DataSource) : Transactions<VedtaksvurderingRepository> {
+class VedtaksvurderingRepository(
+    private val datasource: DataSource,
+) : Transactions<VedtaksvurderingRepository> {
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    override fun <T> inTransaction(block: VedtaksvurderingRepository.(TransactionalSession) -> T): T {
-        return datasource.transaction(true) {
+    override fun <T> inTransaction(block: VedtaksvurderingRepository.(TransactionalSession) -> T): T =
+        datasource.transaction(true) {
             this.block(it)
         }
-    }
 
     fun opprettVedtak(
         opprettVedtak: OpprettVedtak,
@@ -82,8 +83,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     "vedtakstatus" to opprettVedtak.status.name,
                     "type" to opprettVedtak.type.name,
                 ) + innholdParams,
-            )
-                .let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
+            ).let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
                     if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
                         opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
@@ -171,8 +171,14 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             paramMap =
                 mapOf(
                     "vedtakid" to vedtakId,
-                    "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
-                    "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "datofom" to
+                        it.periode.fom
+                            .atDay(1)
+                            .let(Date::valueOf),
+                    "datotom" to
+                        it.periode.tom
+                            ?.atEndOfMonth()
+                            ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
                 ),
@@ -309,8 +315,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         "behandlingId" to behandlingId,
                     ),
                 loggtekst = "Fatter vedtak for behandling $behandlingId",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
                 .let { hentVedtakNonNull(behandlingId, this) }
         }
 
@@ -335,10 +340,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         "behandlingId" to behandlingId,
                     ),
                 loggtekst = "Attesterer vedtak $behandlingId",
-            )
-                .also {
-                    require(it == 1)
-                }
+            ).also {
+                require(it == 1)
+            }
 
             opprett(
                 query = """
@@ -368,8 +372,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             """,
                 params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
                 loggtekst = "Underkjenner vedtak for behandling $behandlingId",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
@@ -382,8 +385,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
                 params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer til_samordning vedtak",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
@@ -396,8 +398,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
                 params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer samordnet vedtak",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
@@ -410,8 +411,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
                 params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer iverksatt vedtak",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
@@ -504,8 +504,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         "behandlingId" to behandlingId,
                     ),
                 loggtekst = "Returnerer vedtak $behandlingId",
-            )
-                .also { require(it == 1) }
+            ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
     }

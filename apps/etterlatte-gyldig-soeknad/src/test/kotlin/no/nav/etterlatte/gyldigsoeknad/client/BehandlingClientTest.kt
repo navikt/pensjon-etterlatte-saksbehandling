@@ -42,9 +42,10 @@ internal class BehandlingClientTest {
         assertEquals(behandlingId, hentetSaksid)
         assertEquals(
             1,
-            objectMapper.readValue<BehandlingsBehov>(
-                (runBlocking { String(requestList[0].body.toByteArray()) }),
-            ).sakId,
+            objectMapper
+                .readValue<BehandlingsBehov>(
+                    (runBlocking { String(requestList[0].body.toByteArray()) }),
+                ).sakId,
         )
     }
 

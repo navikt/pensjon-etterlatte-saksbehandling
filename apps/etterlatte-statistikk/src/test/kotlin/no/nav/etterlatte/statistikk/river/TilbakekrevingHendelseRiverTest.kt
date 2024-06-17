@@ -106,20 +106,21 @@ internal class TilbakekrevingHendelseRiverTest {
     @Test
     fun `skal ta i mot tilbakekrevinghendelse`() {
         val message =
-            JsonMessage.newMessage(
-                mapOf(
-                    TilbakekrevingHendelseType.OPPRETTET.lagParMedEventNameKey(),
-                    CORRELATION_ID_KEY to UUID.randomUUID(),
-                    TEKNISK_TID_KEY to LocalDateTime.now(),
-                    TILBAKEKREVING_STATISTIKK_RIVER_KEY to
-                        StatistikkTilbakekrevingDto(
-                            UUID.randomUUID(),
-                            tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)),
-                            Tidspunkt.now(),
-                            null,
-                        ),
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        TilbakekrevingHendelseType.OPPRETTET.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        TEKNISK_TID_KEY to LocalDateTime.now(),
+                        TILBAKEKREVING_STATISTIKK_RIVER_KEY to
+                            StatistikkTilbakekrevingDto(
+                                UUID.randomUUID(),
+                                tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)),
+                                Tidspunkt.now(),
+                                null,
+                            ),
+                    ),
+                ).toJson()
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
         Assertions.assertEquals(0, inspector.size) // kjører ingen STATISTIKK:REGISTRERT melding da null i mock
 

@@ -75,13 +75,12 @@ class GrensesnittavstemmingDataMapper(
             }
     }
 
-    private fun avstemmingsdataLister(saktype: Saktype): List<Avstemmingsdata> {
-        return detaljdata(utbetalinger).chunked(detaljerPrMelding).map {
+    private fun avstemmingsdataLister(saktype: Saktype): List<Avstemmingsdata> =
+        detaljdata(utbetalinger).chunked(detaljerPrMelding).map {
             avstemmingsdata(AksjonType.DATA, saktype).apply {
                 this.detalj.addAll(it)
             }
         }
-    }
 
     private fun detaljdata(utbetaling: List<Utbetaling>): List<Detaljdata> =
         utbetaling.mapNotNull {
@@ -150,9 +149,7 @@ class GrensesnittavstemmingDataMapper(
                 .reduce(BigDecimal::add)
         } ?: BigDecimal.ZERO
 
-    private fun getFortegn(belop: BigDecimal): Fortegn {
-        return if (belop >= BigDecimal.ZERO) Fortegn.T else Fortegn.F
-    }
+    private fun getFortegn(belop: BigDecimal): Fortegn = if (belop >= BigDecimal.ZERO) Fortegn.T else Fortegn.F
 
     private fun totaldata() =
         Totaldata().apply {
@@ -167,8 +164,8 @@ class GrensesnittavstemmingDataMapper(
             datoAvstemtTom = periodeTil.toNorskTid().minusHours(1).format(tidsstempelTimeOppdrag)
         }
 
-    private fun periode(liste: List<Utbetaling>): ClosedRange<Tidspunkt>? {
-        return if (liste.isEmpty()) {
+    private fun periode(liste: List<Utbetaling>): ClosedRange<Tidspunkt>? =
+        if (liste.isEmpty()) {
             null
         } else {
             object : ClosedRange<Tidspunkt> {
@@ -176,5 +173,4 @@ class GrensesnittavstemmingDataMapper(
                 override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
             }
         }
-    }
 }

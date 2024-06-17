@@ -22,7 +22,9 @@ data class Notat(
     fun kanRedigeres() = journalpostId.isNullOrBlank()
 }
 
-enum class NotatMal(val navn: String) {
+enum class NotatMal(
+    val navn: String,
+) {
     TOM_MAL("tom_mal"),
     NORDISK_VEDLEGG("nordisk_vedlegg"),
 }

@@ -58,7 +58,8 @@ private fun TilbakekrevingVurdering.validerVilkaarsresultat(manglendeFelter: Mut
             listOf(
                 TilbakekrevingVilkaar.OPPFYLT,
                 TilbakekrevingVilkaar.DELVIS_OPPFYLT,
-            ) || beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+            ) ||
+            beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
         ) {
             if (reduseringAvKravet.isNullOrBlank()) manglendeFelter.add("Redusering av kravet")
             if (foreldet.isNullOrBlank()) manglendeFelter.add("Foreldet")
@@ -143,8 +144,9 @@ class UgyldigeFelterForTilbakekrevingsvurdering(
             ),
     )
 
-class ManglerTilbakekrevingsvurdering : ForespoerselException(
-    status = 400,
-    code = "MANGLER_VURDERING",
-    detail = "Tilbakekrevingen mangler vurdering",
-)
+class ManglerTilbakekrevingsvurdering :
+    ForespoerselException(
+        status = 400,
+        code = "MANGLER_VURDERING",
+        detail = "Tilbakekrevingen mangler vurdering",
+    )

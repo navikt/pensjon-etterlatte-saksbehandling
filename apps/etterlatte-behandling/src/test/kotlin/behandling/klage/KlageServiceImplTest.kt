@@ -392,8 +392,10 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
 
         inTransaction {
             val omgjoeringsOppgave =
-                oppgaveService.hentOppgaverForReferanse(klage.id.toString())
-                    .single { it.type == OppgaveType.OMGJOERING }.also {
+                oppgaveService
+                    .hentOppgaverForReferanse(klage.id.toString())
+                    .single { it.type == OppgaveType.OMGJOERING }
+                    .also {
                         it.saksbehandler shouldBe null
                         it.sakId shouldBe klage.sak.id
                         it.kilde shouldBe OppgaveKilde.BEHANDLING

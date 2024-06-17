@@ -23,7 +23,10 @@ sealed class DoedshendelseKontrollpunkt {
     abstract val oppgaveTekst: String?
 
     @JsonTypeName("AVDOED_HAR_YTELSE_I_GJENNY")
-    data class AvdoedHarYtelse(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
+    data class AvdoedHarYtelse(
+        override val sak: Sak,
+    ) : DoedshendelseKontrollpunkt(),
+        KontrollpunktMedSak {
         override val kode = "AVDOED_HAR_YTELSE_I_GJENNY"
         override val beskrivelse: String = "Avdød har ytelse i gjenny"
         override val sendBrev: Boolean = false
@@ -56,7 +59,10 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("BARN_HAR_BP")
-    data class BarnHarBarnepensjon(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
+    data class BarnHarBarnepensjon(
+        override val sak: Sak,
+    ) : DoedshendelseKontrollpunkt(),
+        KontrollpunktMedSak {
         override val kode = "BARN_HAR_BP"
         override val beskrivelse: String = "Barn har barnepensjon"
         override val sendBrev: Boolean = false
@@ -128,7 +134,10 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR")
-    data class TidligereEpsGiftMerEnn25Aar(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+    data class TidligereEpsGiftMerEnn25Aar(
+        val doedsdato: LocalDate,
+        val fnr: String,
+    ) : DoedshendelseKontrollpunkt() {
         override val kode = "TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR"
         override val beskrivelse: String = "Eps er skilt fra avdød, men har vært gift mer enn 25 år tidligere"
         override val sendBrev: Boolean = false
@@ -151,7 +160,10 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("TIDLIGERE_EPS_GIFT_MER_ENN_15_AAR_FELLES_BARN")
-    data class TidligereEpsGiftMerEnn15AarFellesBarn(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+    data class TidligereEpsGiftMerEnn15AarFellesBarn(
+        val doedsdato: LocalDate,
+        val fnr: String,
+    ) : DoedshendelseKontrollpunkt() {
         override val kode = "TIDLIGERE_EPS_GIFT_MER_ENN_15_AAR_FELLES_BARN"
         override val beskrivelse: String = "Eps er skilt fra avdød, men har vært gift mer enn 15 år tidligere og har felles barn"
         override val sendBrev: Boolean = false
@@ -174,7 +186,10 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET")
-    data class EktefelleMedUkjentGiftemaalLengde(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+    data class EktefelleMedUkjentGiftemaalLengde(
+        val doedsdato: LocalDate,
+        val fnr: String,
+    ) : DoedshendelseKontrollpunkt() {
         override val kode = "EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET"
         override val beskrivelse: String = "Eps har ukjent lengde på giftermål"
         override val sendBrev: Boolean = false
@@ -187,7 +202,11 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_ER_GIFT_PAA_NYTT")
-    data class EpsErGiftPaaNytt(val doedsdato: LocalDate, val fnr: String, val nyEktefelleFnr: String) : DoedshendelseKontrollpunkt() {
+    data class EpsErGiftPaaNytt(
+        val doedsdato: LocalDate,
+        val fnr: String,
+        val nyEktefelleFnr: String,
+    ) : DoedshendelseKontrollpunkt() {
         override val kode = "EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET"
         override val beskrivelse: String = "Tidligere ektefelle har giftet seg på nytt med en annen person"
         override val sendBrev: Boolean = false
@@ -231,7 +250,10 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
-    data class EpsHarSakMedIverksattBehandlingIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
+    data class EpsHarSakMedIverksattBehandlingIGjenny(
+        override val sak: Sak,
+    ) : DoedshendelseKontrollpunkt(),
+        KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
         override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny med iverksatt behandling"
         override val sendBrev: Boolean = false
@@ -244,8 +266,7 @@ sealed class DoedshendelseKontrollpunkt {
     data class DuplikatGrunnlagsendringsHendelse(
         val grunnlagsendringshendelseId: UUID,
         val oppgaveId: UUID?,
-    ) :
-        DoedshendelseKontrollpunkt() {
+    ) : DoedshendelseKontrollpunkt() {
         override val kode = "DUPLIKAT_GRUNNLAGSENDRINGSHENDELSE"
         override val beskrivelse: String = "Det finnes en duplikat grunnlagsendringshendelse"
         override val sendBrev: Boolean = false
@@ -278,10 +299,7 @@ sealed class DoedshendelseKontrollpunkt {
     }
 }
 
-fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? {
-    return this.filterIsInstance<KontrollpunktMedSak>().firstOrNull()?.sak
-}
+fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? = this.filterIsInstance<KontrollpunktMedSak>().firstOrNull()?.sak
 
-fun List<DoedshendelseKontrollpunkt>.finnOppgaveId(): UUID? {
-    return this.filterIsInstance<DuplikatGrunnlagsendringsHendelse>().firstOrNull()?.oppgaveId
-}
+fun List<DoedshendelseKontrollpunkt>.finnOppgaveId(): UUID? =
+    this.filterIsInstance<DuplikatGrunnlagsendringsHendelse>().firstOrNull()?.oppgaveId

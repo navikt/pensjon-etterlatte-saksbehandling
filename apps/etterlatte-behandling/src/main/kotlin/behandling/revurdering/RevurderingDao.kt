@@ -20,7 +20,9 @@ import java.sql.ResultSet
 import java.sql.Types
 import java.util.UUID
 
-class RevurderingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class RevurderingDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun lagreRevurderingInfo(
         id: UUID,
         revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
@@ -54,7 +56,8 @@ class RevurderingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     """.trimIndent(),
                 ).let { statement ->
                     statement.setObject(1, id)
-                    statement.executeQuery()
+                    statement
+                        .executeQuery()
                         .singleOrNull {
                             RevurderingInfoMedBegrunnelse(
                                 getString("info")?.let { objectMapper.readValue(it) },

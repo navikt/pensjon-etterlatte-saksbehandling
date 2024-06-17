@@ -5,7 +5,9 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
-class SakTilgangDao(private val datasource: DataSource) {
+class SakTilgangDao(
+    private val datasource: DataSource,
+) {
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use { connection ->
             val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where fnr = ?")

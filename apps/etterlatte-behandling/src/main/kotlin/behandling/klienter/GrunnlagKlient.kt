@@ -31,9 +31,15 @@ interface GrunnlagKlient {
     ): Grunnlagsopplysning<Persongalleri>?
 }
 
-class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class GrunnlagKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient {
+class GrunnlagKlientObo(
+    config: Config,
+    httpClient: HttpClient,
+) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -58,8 +64,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                             url = "$resourceUrl/grunnlag/behandling/$behandlingId/$opplysningsType",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse ->
                         if (errorResponse is ResponseException && errorResponse.response.status == HttpStatusCode.NotFound) {
@@ -92,8 +97,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                             url = "$resourceUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )

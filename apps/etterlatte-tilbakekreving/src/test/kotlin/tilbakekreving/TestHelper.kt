@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
+import no.nav.etterlatte.libs.common.tilbakekreving.KravOgVedtakstatus
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
@@ -37,6 +38,7 @@ fun readFile(file: String) =
 
 fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
     TilbakekrevingVedtak(
+        sakId = 1,
         vedtakId = vedtakId,
         fattetVedtak =
             FattetVedtak(
@@ -129,4 +131,15 @@ fun kravgrunnlag(
                     ),
             ),
         ),
+)
+
+fun kravOgVedtakStatus(
+    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, 1L, "12345"),
+    behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
+    status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
+) = KravOgVedtakstatus(
+    sakId = SakId(sak.id),
+    vedtakId = VedtakId(2L),
+    status = status,
+    referanse = behandlingId,
 )

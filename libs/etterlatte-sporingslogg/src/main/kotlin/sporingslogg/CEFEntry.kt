@@ -27,7 +27,9 @@ enum class DeviceEventClassId {
     fun format() = "audit:${name.lowercase()}"
 }
 
-enum class Name(val tekst: String) {
+enum class Name(
+    val tekst: String,
+) {
     OnBehalfOfAccess("On-behalf-of access"),
 }
 

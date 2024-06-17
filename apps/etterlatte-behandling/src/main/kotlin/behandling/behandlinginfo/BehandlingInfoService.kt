@@ -48,9 +48,7 @@ class BehandlingInfoService(
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
-    fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
-        return behandlingInfoDao.hentBrevutfall(behandlingId)
-    }
+    fun hentBrevutfall(behandlingId: UUID): Brevutfall? = behandlingInfoDao.hentBrevutfall(behandlingId)
 
     fun lagreEtterbetaling(
         behandling: Behandling,
@@ -67,9 +65,7 @@ class BehandlingInfoService(
         return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
     }
 
-    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
-        return behandlingInfoDao.hentEtterbetaling(behandlingId)
-    }
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? = behandlingInfoDao.hentEtterbetaling(behandlingId)
 
     private fun sjekkBehandlingKanEndres(
         behandling: Behandling,

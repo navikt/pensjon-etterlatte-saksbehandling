@@ -48,12 +48,14 @@ object BlockTilSlateKonverterer {
                         LetterMarkup.ParagraphContent.Type.ITEM_LIST -> {
                             opprettElementFraInnerELementsOgNullstill(innerElements, elements)
 
-                            Slate.Element(
-                                type = Slate.ElementType.BULLETED_LIST,
-                                children =
-                                    (it as LetterMarkup.ParagraphContent.ItemList).items
-                                        .map { item -> konverterListItem(item) },
-                            ).let { element -> elements.add(element) }
+                            Slate
+                                .Element(
+                                    type = Slate.ElementType.BULLETED_LIST,
+                                    children =
+                                        (it as LetterMarkup.ParagraphContent.ItemList)
+                                            .items
+                                            .map { item -> konverterListItem(item) },
+                                ).let { element -> elements.add(element) }
                         }
                         else -> {
                             throw IllegalArgumentException("Ukjent type: ${it.type}")

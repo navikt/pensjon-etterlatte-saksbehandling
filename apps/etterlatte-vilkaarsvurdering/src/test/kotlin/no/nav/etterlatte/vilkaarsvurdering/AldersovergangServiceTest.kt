@@ -94,13 +94,13 @@ class AldersovergangServiceTest {
                 brukerTokenInfo,
                 false,
             )
-        } returns vilkaarsvurdering
+        } returns VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, 1L)
         coEvery {
             vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, brukerTokenInfo, ikkeOppfyltVilkaar)
         } returns vilkaarsvurdering
         coEvery {
             vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, brukerTokenInfo, vilkaarsvurderingResultat)
-        } returns vilkaarsvurdering
+        } returns VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, 1L)
 
         runBlocking {
             val res =

@@ -77,22 +77,21 @@ object FamilieRelasjonMapper {
     private fun mapForelderBarnUtenIdent(
         forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?,
         personRolle: PersonRolle,
-    ): List<PersonUtenIdent> {
-        return forelderBarnRelasjon
+    ): List<PersonUtenIdent> =
+        forelderBarnRelasjon
             ?.filter { it.relatertPersonsIdent == null && erRelevantForPersonrolle(it, personRolle) }
             ?.mapNotNull { forelderBarnRelasjoninner ->
-                forelderBarnRelasjoninner.relatertPersonUtenFolkeregisteridentifikator?.tilRelatertPerson()
+                forelderBarnRelasjoninner.relatertPersonUtenFolkeregisteridentifikator
+                    ?.tilRelatertPerson()
                     ?.let { forelderBarnRelasjoninner.relatertPersonsRolle to it }
-            }
-            ?.map { (rolle, person) -> PersonUtenIdent(rolle = rolle.tilRelativPersonrolle(), person = person) }
+            }?.map { (rolle, person) -> PersonUtenIdent(rolle = rolle.tilRelativPersonrolle(), person = person) }
             ?: emptyList()
-    }
 
     private fun mapForeldreansvarUtenIdent(
         foreldreansvar: List<PdlForelderAnsvar>?,
         personRolle: PersonRolle,
-    ): List<PersonUtenIdent> {
-        return when (personRolle) {
+    ): List<PersonUtenIdent> =
+        when (personRolle) {
             PersonRolle.BARN ->
                 foreldreansvar
                     ?.filter { it.ansvarlig == null }
@@ -102,7 +101,6 @@ object FamilieRelasjonMapper {
 
             else -> emptyList()
         }
-    }
 
     private fun mapPersonerUtenIdenter(
         pdlPerson: PdlHentPerson,
@@ -120,29 +118,27 @@ object FamilieRelasjonMapper {
     private fun erRelevantForPersonrolle(
         forelderBarnRelasjon: PdlForelderBarnRelasjon,
         personrolle: PersonRolle,
-    ): Boolean {
-        return when (forelderBarnRelasjon.relatertPersonsRolle) {
+    ): Boolean =
+        when (forelderBarnRelasjon.relatertPersonsRolle) {
             PdlForelderBarnRelasjonRolle.BARN -> personrolle == PersonRolle.AVDOED || personrolle == PersonRolle.GJENLEVENDE
             PdlForelderBarnRelasjonRolle.FAR,
             PdlForelderBarnRelasjonRolle.MEDMOR,
             PdlForelderBarnRelasjonRolle.MOR,
             -> personrolle == PersonRolle.BARN
         }
-    }
 }
 
-fun PdlForelderBarnRelasjonRolle.tilRelativPersonrolle(): RelativPersonrolle {
-    return when (this) {
+fun PdlForelderBarnRelasjonRolle.tilRelativPersonrolle(): RelativPersonrolle =
+    when (this) {
         PdlForelderBarnRelasjonRolle.BARN -> RelativPersonrolle.BARN
         PdlForelderBarnRelasjonRolle.FAR,
         PdlForelderBarnRelasjonRolle.MEDMOR,
         PdlForelderBarnRelasjonRolle.MOR,
         -> RelativPersonrolle.FORELDER
     }
-}
 
-fun PdlRelatertBiPerson.tilRelatertPerson(): RelatertPerson {
-    return RelatertPerson(
+fun PdlRelatertBiPerson.tilRelatertPerson(): RelatertPerson =
+    RelatertPerson(
         foedselsdato = this.foedselsdato,
         kjoenn = this.kjoenn,
         navn =
@@ -151,4 +147,3 @@ fun PdlRelatertBiPerson.tilRelatertPerson(): RelatertPerson {
             },
         statsborgerskap = this.statsborgerskap,
     )
-}

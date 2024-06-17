@@ -88,10 +88,11 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             )
 
             val oppdatertTilbakekreving: TilbakekrevingBehandling =
-                client.getAndAssertOk(
-                    "/api/tilbakekreving/${tilbakekreving.id}",
-                    tokenSaksbehandler,
-                ).body()
+                client
+                    .getAndAssertOk(
+                        "/api/tilbakekreving/${tilbakekreving.id}",
+                        tokenSaksbehandler,
+                    ).body()
 
             oppdatertTilbakekreving.tilbakekreving.vurdering?.beskrivelse shouldBe "en ny beskrivelse"
         }
@@ -114,12 +115,15 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             )
 
             val oppdatertTilbakekreving: TilbakekrevingBehandling =
-                client.getAndAssertOk(
-                    "/api/tilbakekreving/${tilbakekreving.id}",
-                    tokenSaksbehandler,
-                ).body()
+                client
+                    .getAndAssertOk(
+                        "/api/tilbakekreving/${tilbakekreving.id}",
+                        tokenSaksbehandler,
+                    ).body()
 
-            oppdatertTilbakekreving.tilbakekreving.perioder.first().ytelse.nettoTilbakekreving shouldBe 100
+            oppdatertTilbakekreving.tilbakekreving.perioder
+                .first()
+                .ytelse.nettoTilbakekreving shouldBe 100
         }
     }
 
@@ -205,10 +209,11 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             )
 
             val oppdatertTilbakekreving: TilbakekrevingBehandling =
-                client.getAndAssertOk(
-                    "/api/tilbakekreving/${tilbakekreving.id}",
-                    tokenSaksbehandler,
-                ).body()
+                client
+                    .getAndAssertOk(
+                        "/api/tilbakekreving/${tilbakekreving.id}",
+                        tokenSaksbehandler,
+                    ).body()
 
             oppdatertTilbakekreving.sendeBrev shouldBe false
         }
@@ -222,10 +227,11 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekreving = opprettTilbakekreving(sak, client)
 
             val tilbakekrevinger: List<TilbakekrevingBehandling> =
-                client.getAndAssertOk(
-                    "/api/tilbakekreving/sak/${tilbakekreving.sak.id}",
-                    tokenSaksbehandler,
-                ).body()
+                client
+                    .getAndAssertOk(
+                        "/api/tilbakekreving/sak/${tilbakekreving.sak.id}",
+                        tokenSaksbehandler,
+                    ).body()
 
             tilbakekrevinger.size shouldBe 1
         }
@@ -303,24 +309,26 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         client: HttpClient,
     ): TilbakekrevingBehandling {
         val tilbakekreving: TilbakekrevingBehandling =
-            client.post("/tilbakekreving/${sak.id}") {
-                addAuthToken(systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(kravgrunnlag(sak))
-            }.body()
+            client
+                .post("/tilbakekreving/${sak.id}") {
+                    addAuthToken(systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(kravgrunnlag(sak))
+                }.body()
         return tilbakekreving
     }
 
     private suspend fun opprettSak(client: HttpClient): Sak {
         val fnr = SOEKER_FOEDSELSNUMMER.value
         val sak: Sak =
-            client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.apply {
-                assertEquals(HttpStatusCode.OK, status)
-            }.body()
+            client
+                .post("/personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                }.apply {
+                    assertEquals(HttpStatusCode.OK, status)
+                }.body()
         return sak
     }
 
@@ -328,17 +336,16 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         url: String,
         token: String,
         block: ((HttpResponse) -> Unit)? = null,
-    ): HttpResponse {
-        return get(url, token, block)
+    ): HttpResponse =
+        get(url, token, block)
             .also { assertEquals(HttpStatusCode.OK, it.status) }
-    }
 
     private fun HttpClient.get(
         url: String,
         token: String,
         block: ((HttpResponse) -> Unit)? = null,
-    ): HttpResponse {
-        return runBlocking {
+    ): HttpResponse =
+        runBlocking {
             val response =
                 get(url) {
                     addAuthToken(token)
@@ -346,31 +353,28 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             block?.invoke(response)
             response
         }
-    }
 
     private suspend fun HttpClient.postAndAssertOk(
         s: String,
         token: String,
         body: Any? = null,
-    ): HttpResponse {
-        return post(s) {
+    ): HttpResponse =
+        post(s) {
             contentType(ContentType.Application.Json)
             setBody(body)
             addAuthToken(token)
         }
-    }
 
     private suspend fun HttpClient.putAndAssertOk(
         url: String,
         token: String,
         body: Any? = null,
-    ): HttpResponse {
-        return put(url) {
+    ): HttpResponse =
+        put(url) {
             contentType(ContentType.Application.Json)
             setBody(body)
             addAuthToken(token)
         }.also { assertEquals(HttpStatusCode.OK, it.status) }
-    }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {

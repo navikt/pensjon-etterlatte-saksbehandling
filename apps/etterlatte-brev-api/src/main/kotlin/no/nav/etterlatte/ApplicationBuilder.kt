@@ -224,10 +224,10 @@ class ApplicationBuilder {
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     private val rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        )
-            .withKtorModule {
+        RapidApplication
+            .Builder(
+                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+            ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingKlient)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
@@ -236,8 +236,7 @@ class ApplicationBuilder {
                     notatRoute(notatService, nyNotatService, tilgangssjekker)
                     oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
-            }
-            .build()
+            }.build()
             .apply {
                 val brevgenerering =
                     StartInformasjonsbrevgenereringRiver(
@@ -286,7 +285,8 @@ class ApplicationBuilder {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.toMutableMap()
+                            env
+                                .toMutableMap()
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }

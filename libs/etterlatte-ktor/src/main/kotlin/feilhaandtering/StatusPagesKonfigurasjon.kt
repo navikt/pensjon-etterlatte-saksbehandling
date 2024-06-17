@@ -19,7 +19,9 @@ import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import org.slf4j.Logger
 
-class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
+class StatusPagesKonfigurasjon(
+    private val sikkerLogg: Logger,
+) {
     private val statusCodes4xx = HttpStatusCode.allStatusCodes.filter { it.value in 400..499 }.toTypedArray()
     private val statusCodes5xx = HttpStatusCode.allStatusCodes.filter { it.value in 500..599 }.toTypedArray()
 

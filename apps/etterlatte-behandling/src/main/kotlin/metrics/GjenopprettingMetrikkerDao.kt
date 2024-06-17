@@ -7,7 +7,9 @@ import no.nav.etterlatte.libs.database.toList
 import java.time.Month
 import javax.sql.DataSource
 
-class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
+class GjenopprettingMetrikkerDao(
+    private val dataSource: DataSource,
+) {
     fun gjenopprettinger(): List<Behandlinger> {
         dataSource.connection.use {
             val statement =
@@ -71,18 +73,20 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
                     ) group by s.fnr;
                     """.trimIndent(),
                 )
-            statement.executeQuery().toList {
-                getString("fnr")
-            }.filter { fnr ->
-                try {
-                    val bursdag = Folkeregisteridentifikator.of(fnr).getBirthDate()
-                    val fyller20 = 2024 - bursdag.year == 20
-                    val bursdagsmaaned = bursdag.month
-                    fyller20 && bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
-                } catch (err: InvalidFoedselsnummerException) {
-                    false
+            statement
+                .executeQuery()
+                .toList {
+                    getString("fnr")
+                }.filter { fnr ->
+                    try {
+                        val bursdag = Folkeregisteridentifikator.of(fnr).getBirthDate()
+                        val fyller20 = 2024 - bursdag.year == 20
+                        val bursdagsmaaned = bursdag.month
+                        fyller20 && bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
+                    } catch (err: InvalidFoedselsnummerException) {
+                        false
+                    }
                 }
-            }
         }
 }
 

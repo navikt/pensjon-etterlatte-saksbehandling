@@ -101,14 +101,16 @@ enum class LanguageCode {
     ;
 
     companion object {
-        fun spraakToLanguageCode(spraak: Spraak): LanguageCode {
-            return when (spraak) {
+        fun spraakToLanguageCode(spraak: Spraak): LanguageCode =
+            when (spraak) {
                 Spraak.EN -> ENGLISH
                 Spraak.NB -> BOKMAL
                 Spraak.NN -> NYNORSK
             }
-        }
     }
 }
 
-data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)
+data class SoekerOgEventuellVerge(
+    val soeker: Soeker,
+    val verge: Verge?,
+)

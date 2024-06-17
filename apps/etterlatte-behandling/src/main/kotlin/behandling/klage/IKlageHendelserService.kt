@@ -30,21 +30,23 @@ class KlageHendelserServiceImpl(
     ) {
         val correlationId = getCorrelationId()
 
-        rapid.publiser(
-            statistikkKlage.id.toString(),
-            JsonMessage.newMessage(
-                klageHendelseType.lagEventnameForType(),
-                mapOf(
-                    CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to LocalDateTime.now(),
-                    KLAGE_STATISTIKK_RIVER_KEY to statistikkKlage,
-                ),
-            ).toJson(),
-        ).also { (partition, offset) ->
-            logger.info(
-                "Posted event ${klageHendelseType.lagEventnameForType()} for KLAGE ${statistikkKlage.id}" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId",
-            )
-        }
+        rapid
+            .publiser(
+                statistikkKlage.id.toString(),
+                JsonMessage
+                    .newMessage(
+                        klageHendelseType.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to LocalDateTime.now(),
+                            KLAGE_STATISTIKK_RIVER_KEY to statistikkKlage,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Posted event ${klageHendelseType.lagEventnameForType()} for KLAGE ${statistikkKlage.id}" +
+                        " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
     }
 }

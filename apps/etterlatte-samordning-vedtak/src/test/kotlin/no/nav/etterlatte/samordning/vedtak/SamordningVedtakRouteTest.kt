@@ -182,10 +182,11 @@ class SamordningVedtakRouteTest {
             claims["consumer"] = mapOf("ID" to "0192:0123456789")
             maskinportenScope?.let { claims["scope"] = it }
 
-            return server.issueToken(
-                issuerId = ISSUER_ID_MASKINPORTEN,
-                claims = claims,
-            ).serialize()
+            return server
+                .issueToken(
+                    issuerId = ISSUER_ID_MASKINPORTEN,
+                    claims = claims,
+                ).serialize()
         }
     }
 
@@ -275,10 +276,11 @@ class SamordningVedtakRouteTest {
             claims["oid"] = "pensjon-pen"
             claims["sub"] = "pensjon-pen"
 
-            return server.issueToken(
-                issuerId = ISSUER_ID_AZURE,
-                claims = claims,
-            ).serialize()
+            return server
+                .issueToken(
+                    issuerId = ISSUER_ID_AZURE,
+                    claims = claims,
+                ).serialize()
         }
     }
 

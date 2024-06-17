@@ -268,13 +268,13 @@ data class Avkorting(
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
-            // Kun de sanksjonene som er lagt inn fom <= denne inntektsavkortingen er tidligere beregnet med
+            // Kun de sanksjonene som er lagt inn fom < denne inntektsavkortingen er tidligere beregnet med
             // så hvis vi ikke ekskluderer senere sanksjoner endrer vi restanseutregning tilbake i tid og
             // omfordeler i perioder før sanksjonen blir lagt inn
-            val sisteFomForDenneInntektsavkorting = inntektsavkorting.avkortingsperioder.maxOf { it.periode.fom }
+            val foersteFomDenneInntektsavkortingen = inntektsavkorting.avkortingsperioder.minOf { it.periode.fom }
             val kjenteSanksjonerForInntektsavkorting =
                 sorterteSanksjonerInnenforAarsoppgjoer.filter {
-                    it.fom < sisteFomForDenneInntektsavkorting
+                    it.fom < foersteFomDenneInntektsavkortingen
                 }
 
             val restanse =
@@ -300,7 +300,7 @@ data class Avkorting(
             avkortetYtelseMedAllForventetInntekt.addAll(ytelse)
         }
         val senesteInntektsjusteringFom =
-            reberegnetInntektsavkorting.maxOf { inntektsavkorting -> inntektsavkorting.avkortingsperioder.maxOf { it.periode.fom } }
+            reberegnetInntektsavkorting.maxOf { inntektsavkorting -> inntektsavkorting.avkortingsperioder.minOf { it.periode.fom } }
         val senesteSanksjonFom = sorterteSanksjonerInnenforAarsoppgjoer.maxOfOrNull { it.fom }
 
         // Hvis vi har sanksjoner som ikke er tatt høyde for i beregningen av ytelse opp mot restanse over, må vi

@@ -4,7 +4,6 @@ import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
-import { Mottaker } from '~shared/types/Brev'
 import { SakType } from '~shared/types/sak'
 
 export const getPersonNavn = async (fnr: string): Promise<ApiResponse<IPersonResult>> => {
@@ -19,12 +18,6 @@ export const getGrunnlagsAvOpplysningstype = async (args: {
   opplysningstype: string
 }): Promise<ApiResponse<Grunnlagsopplysning<IPdlPerson, KildePdl>>> => {
   return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/${args.opplysningstype}`)
-}
-
-export const getVergeadresseForPerson = async (foedselsnummer: string): Promise<ApiResponse<Mottaker>> => {
-  return apiClient.post(`/grunnlag/person/vergeadresse`, {
-    foedselsnummer: foedselsnummer,
-  })
 }
 
 export const getHistoriskForeldreansvar = (args: {

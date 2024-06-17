@@ -21,8 +21,8 @@ object VedtakOgBeregningSammenligner {
         }
         when (vedtak.innhold) {
             is VedtakInnhold.Behandling -> sammenlignBehandling(beregning, vedtak)
-            is VedtakInnhold.Klage -> sammenlignKlage(vedtak)
-            is VedtakInnhold.Tilbakekreving -> sammenlignTilbakekreving(vedtak)
+            is VedtakInnhold.Klage -> sammenlignKlage()
+            is VedtakInnhold.Tilbakekreving -> sammenlignTilbakekreving()
         }
     }
 
@@ -65,13 +65,11 @@ object VedtakOgBeregningSammenligner {
         }
     }
 
-    private fun sammenlignKlage(vedtak: Vedtak) {
-        val innhold = vedtak.innhold as VedtakInnhold.Klage
+    private fun sammenlignKlage() {
         logger.info("Sammenligning av innhold i klage er ikke implementert enno")
     }
 
-    private fun sammenlignTilbakekreving(vedtak: Vedtak) {
-        val innhold = vedtak.innhold as VedtakInnhold.Tilbakekreving
+    private fun sammenlignTilbakekreving() {
         logger.info("Sammenligning av innhold i tilbakekreving er ikke implementert enno")
     }
 }

@@ -13,6 +13,7 @@ fun kjoerIBatch(
     finnSaker: (Int) -> Saker,
     antall: Int,
     haandterSaker: (Saker) -> Unit,
+    venteperiode: Duration = Duration.ofSeconds(5),
 ) {
     val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
     var tatt = 0
@@ -37,7 +38,6 @@ fun kjoerIBatch(
         if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
             return
         }
-        val venteperiode = Duration.ofSeconds(5)
         logger.info("Venter $venteperiode før neste runde.")
         Thread.sleep(venteperiode)
     }

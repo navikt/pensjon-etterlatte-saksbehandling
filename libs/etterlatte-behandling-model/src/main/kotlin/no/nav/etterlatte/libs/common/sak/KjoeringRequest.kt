@@ -7,6 +7,7 @@ data class KjoeringRequest(
 )
 
 enum class KjoeringStatus {
+    KLAR_TIL_REGULERING,
     STARTA,
     FEILA,
     IKKE_LOEPENDE,

@@ -45,6 +45,7 @@ internal class VarselbrevService(
                     sakType,
                     brukerTokenInfo,
                     it.generellBrevData.utlandstilknytning,
+                    it.generellBrevData.revurderingsaarsak,
                 )
             }.let {
                 VarselbrevResponse(it.first, it.second, brevkode)

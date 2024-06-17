@@ -64,6 +64,11 @@ enum class JobbType(
         JobbKategori.REGULERING,
         sakType = null,
     ),
+    FINN_SAKER_TIL_REGULERING(
+        "Finner saker som skal reguleres",
+        JobbKategori.REGULERING,
+        sakType = null,
+    ),
 }
 
 enum class JobbKategori {

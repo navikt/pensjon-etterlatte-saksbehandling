@@ -20,13 +20,30 @@ class ReguleringService(
 
     fun execute(jobb: HendelserJobb): List<Long> {
         logger.info("Handling jobb ${jobb.id}, type ${jobb.type} (${jobb.type.beskrivelse})")
+        when (jobb.type) {
+            JobbType.REGULERING -> startRegulering()
+            JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering()
+            else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
+        }
+        return listOf()
+    }
+
+    private fun startRegulering() {
         logger.info("StartReguleringJob startet")
         rapidsPublisher(
             UUID.randomUUID(),
             createRecord(GRUNNBELOEP_REGULERING_DATO),
         )
         logger.info("StartReguleringJob ferdig")
-        return listOf()
+    }
+
+    private fun finnSakerTilRegulering() {
+        logger.info("Finner saker til regulering startet")
+        rapidsPublisher(
+            UUID.randomUUID(),
+            finnSakerTilRegulering(GRUNNBELOEP_REGULERING_DATO),
+        )
+        logger.info("Finner saker til regulering ferdig")
     }
 }
 
@@ -38,6 +55,15 @@ fun createRecord(dato: LocalDate) =
                 ReguleringEvents.DATO to dato.toString(),
                 ReguleringEvents.KJOERING to "Regulering-$year",
                 ReguleringEvents.ANTALL to 20,
-                ReguleringEvents.SPESIFIKKE_SAKER to "3482;6323",
+            ),
+        ).toJson()
+
+fun finnSakerTilRegulering(dato: LocalDate) =
+    JsonMessage
+        .newMessage(
+            mapOf(
+                ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
+                ReguleringEvents.DATO to dato.toString(),
+                ReguleringEvents.KJOERING to "Regulering-$year",
             ),
         ).toJson()

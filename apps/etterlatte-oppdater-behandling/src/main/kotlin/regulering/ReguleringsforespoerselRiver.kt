@@ -7,6 +7,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -89,15 +91,7 @@ internal class ReguleringsforespoerselRiver(
                     }
 
             sakerTilOmregning.saker.forEach {
-                logger.debug("Lagrer kjøring starta for sak ${it.id}")
-                behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
-                logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
-                packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-                packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(it.id)
-                packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(it.id)
-                packet.sakId = it.id
-                logger.debug("Sender til omregning for sak ${it.id}")
-                context.publish(packet.toJson())
+                publiserSak(it, kjoering, packet, sakListe, context)
             }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
@@ -115,6 +109,24 @@ internal class ReguleringsforespoerselRiver(
             is MissingNode -> null
             else -> SakType.valueOf(node.asText())
         }
+
+    private fun publiserSak(
+        it: Sak,
+        kjoering: String,
+        packet: JsonMessage,
+        sakListe: SakIDListe,
+        context: MessageContext,
+    ) {
+        logger.debug("Lagrer kjøring starta for sak ${it.id}")
+        behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
+        logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
+        packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
+        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(it.id)
+        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(it.id)
+        packet.sakId = it.id
+        logger.debug("Sender til omregning for sak ${it.id}")
+        context.publish(packet.toJson())
+    }
 
     companion object {
         const val MAKS_BATCHSTOERRELSE = 100

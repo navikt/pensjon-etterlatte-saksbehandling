@@ -10,7 +10,7 @@ import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterNavn } from '~shared/types/Person'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import AvansertSoek from '~components/person/journalfoeringsoppgave/journalpost/modal/AvansertSoek'
+import SoekPersonPdl from '~components/person/journalfoeringsoppgave/journalpost/modal/SoekPersonPdl'
 
 const formaterType = (type: BrukerIdType) => {
   switch (type) {
@@ -108,7 +108,7 @@ export const EndreBruker = ({
             ),
           })}
           <br />
-          <AvansertSoek open={open} setOpen={setOpen} />
+          <SoekPersonPdl open={open} setOpen={setOpen} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">

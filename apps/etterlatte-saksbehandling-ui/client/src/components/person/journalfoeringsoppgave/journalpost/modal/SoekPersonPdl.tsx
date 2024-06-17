@@ -1,11 +1,7 @@
-import React, { Dispatch, SetStateAction, useEffect } from 'react'
-import { Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
+import React, { Dispatch, SetStateAction } from 'react'
+import { Button, Heading, Modal, TextField } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand } from '~shared/api/trygdetid'
-import { mapResult } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { soekPerson } from '~shared/api/pdltjenester'
 
@@ -15,19 +11,12 @@ interface ModalProps {
 }
 
 export interface SoekPerson {
-  fornavn?: string
-  etternavn?: string
-  statsborgerskap?: string
+  navn?: string
   foedselsdato?: Date
 }
 
-export default function AvansertSoek({ open, setOpen }: ModalProps) {
-  const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
+export default function SoekPersonPdl({ open, setOpen }: ModalProps) {
   const [, soekperson] = useApiCall(soekPerson)
-
-  useEffect(() => {
-    landListeFetch(null)
-  }, [])
 
   const navnErGyldig = (navn: string | undefined): boolean => {
     if (navn) {
@@ -46,7 +35,7 @@ export default function AvansertSoek({ open, setOpen }: ModalProps) {
     formState: { errors },
     handleSubmit,
     watch,
-  } = useForm<SoekPerson>({ defaultValues: { statsborgerskap: undefined }, mode: 'all' })
+  } = useForm<SoekPerson>({ defaultValues: {}, mode: 'all' })
 
   console.log('formstate: ', getValues())
   console.log('errors: ', errors)
@@ -59,37 +48,13 @@ export default function AvansertSoek({ open, setOpen }: ModalProps) {
           Avansert Søk
         </Heading>
         <TextField
-          {...register('fornavn', {
+          {...register('navn', {
+            required: { value: true, message: 'Navn er påkrevd i søket' },
             validate: (fornavn) => navnErGyldig(fornavn) || 'Fornavn kan kun bestå av bokstaver',
           })}
-          label="Fornavn"
-          error={errors?.fornavn?.message}
+          label="Navn"
+          error={errors?.navn?.message}
         />
-        <TextField
-          {...register('etternavn', {
-            validate: (etternavn) => navnErGyldig(etternavn) || 'Etternavn kan kun bestå av bokstaver',
-          })}
-          label="Etternavn"
-          error={errors?.etternavn?.message}
-        />
-        {mapResult(landListeResult, {
-          pending: <Spinner label="Hent landliste" visible />,
-          error: (error) => (
-            <ApiErrorAlert>
-              {error.detail || 'Feil ved henting av landliste. Kan ikke søke med statsborgerskap.'}
-            </ApiErrorAlert>
-          ),
-          success: (landListe) => (
-            <Select label="Velg statsborgerskap" {...register('statsborgerskap', {})}>
-              <option disabled>Velg land</option>
-              {landListe.map((land) => (
-                <option key={land.isoLandkode} value={land.isoLandkode}>
-                  {land.beskrivelse.tekst}
-                </option>
-              ))}
-            </Select>
-          ),
-        })}
         <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} />
       </Modal.Body>
       <Modal.Footer>

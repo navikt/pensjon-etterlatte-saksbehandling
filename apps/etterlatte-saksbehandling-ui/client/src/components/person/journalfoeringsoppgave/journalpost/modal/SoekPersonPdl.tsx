@@ -36,7 +36,6 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
   }
 
   const {
-    getValues,
     register,
     control,
     formState: { errors },
@@ -44,10 +43,8 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
     watch,
   } = useForm<SoekPerson>({ defaultValues: {}, mode: 'all' })
 
-  console.log('formstate: ', getValues())
-  console.log('errors: ', errors)
-
   watch()
+
   return (
     <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)} width="medium">
       <Modal.Body>
@@ -71,10 +68,8 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
               <Table className="table" zebraStripes>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell />
                     <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Personidentifikator</Table.HeaderCell>
-                    <Table.HeaderCell scope="col">Fødselsdato</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Adresse</Table.HeaderCell>
                     <Table.HeaderCell scope="col"></Table.HeaderCell>
                   </Table.Row>
@@ -117,22 +112,7 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
         <Button variant="secondary" onClick={() => setOpen(false)}>
           Avbryt søk
         </Button>
-        <Button
-          variant="primary"
-          onClick={() => {
-            console.log('onclick')
-            soekperson(getValues())
-            handleSubmit(
-              (person) => {
-                soekperson(person)
-                console.log('person: ', person)
-              },
-              (errors) => {
-                console.log('errors:', errors)
-              }
-            )
-          }}
-        >
+        <Button type="submit" variant="primary" onClick={handleSubmit((person) => soekperson(person))}>
           Søk
         </Button>
       </Modal.Footer>

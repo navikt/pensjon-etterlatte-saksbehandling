@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.Sanksjon
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
+import no.nav.etterlatte.sanksjon.SanksjonToggles
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,7 +29,10 @@ import java.util.UUID
 internal class SanksjonServiceTest {
     private val sanksjonRepository: SanksjonRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+    private val featureToggleService: FeatureToggleService =
+        mockk(relaxed = true) {
+            every { isEnabled(SanksjonToggles.SANKSJON, any(), any()) } returns true
+        }
     private val service =
         SanksjonService(
             sanksjonRepository = sanksjonRepository,

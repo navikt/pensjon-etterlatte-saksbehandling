@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -27,6 +28,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
+                            forventaInnvilgaMaaneder = 10,
                             avkortetYtelseAar =
                                 listOf(
                                     avkortetYtelse(
@@ -51,6 +53,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2025,
+                            forventaInnvilgaMaaneder = 12,
                             avkortetYtelseAar =
                                 listOf(
                                     avkortetYtelse(
@@ -165,6 +168,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
+                            forventaInnvilgaMaaneder = 6,
                             ytelseFoerAvkorting =
                                 listOf(
                                     YtelseFoerAvkorting(
@@ -221,174 +225,180 @@ internal class AvkortingTest {
 
     @Nested
     inner class OppdaterMedInntektsgrunnlag {
-        private val foersteInntekt =
-            avkortinggrunnlag(
-                periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = YearMonth.of(2024, Month.MARCH)),
-                relevanteMaanederInnAar = 12,
-            )
-        private val andreInntekt =
-            avkortinggrunnlag(
-                aarsinntekt = 1000000,
-                periode = Periode(fom = YearMonth.of(2024, Month.APRIL), tom = null),
-                relevanteMaanederInnAar = 12,
-            )
-        private val avkorting =
-            avkorting(
-                inntektsavkorting =
-                    listOf(
-                        Inntektsavkorting(foersteInntekt),
-                        Inntektsavkorting(andreInntekt),
-                    ),
-            )
+        @Nested
+        inner class Foerstegangsbehandling {
+            @Test
+            fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt`() {
+                val forventetInntekt = avkortinggrunnlagLagre(aarsinntekt = 200000)
+                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
 
-        @Test
-        fun `Eksisterer det inntekt med samme id skal eksisterende inntekt oppdateres uten aa legge til nytt`() {
-            val endretInntekt = avkortinggrunnlagLagre(id = andreInntekt.id, aarsinntekt = 200000)
-            val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
-
-            val oppdatertAvkorting =
-                avkorting.oppdaterMedInntektsgrunnlag(
-                    endretInntekt,
-                    virkningstidspunkt,
-                    bruker,
-                )
-
-            oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
-            oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
-                avkorting.aarsoppgjoer.single(),
-                Aarsoppgjoer::inntektsavkorting,
-            )
-            with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
-                size shouldBe 2
-                get(0).grunnlag shouldBe foersteInntekt
-                with(get(1).grunnlag) {
-                    aarsinntekt shouldBe endretInntekt.aarsinntekt
-                    fratrekkInnAar shouldBe endretInntekt.fratrekkInnAar
-                    inntektUtland shouldBe endretInntekt.inntektUtland
-                    fratrekkInnAarUtland shouldBe endretInntekt.fratrekkInnAarUtland
-                    spesifikasjon shouldBe endretInntekt.spesifikasjon
-                }
-            }
-        }
-
-        @Test
-        fun `Eksisterer ikke inntekt skal det legges til og til og med paa periode til siste inntekt skal settes`() {
-            val nyttGrunnlag = avkortinggrunnlagLagre()
-            val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
-
-            val oppdatertAvkorting =
-                avkorting.oppdaterMedInntektsgrunnlag(
-                    nyttGrunnlag,
-                    virkningstidspunkt,
-                    bruker,
-                )
-
-            oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
-            oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
-                avkorting.aarsoppgjoer.single(),
-                Aarsoppgjoer::inntektsavkorting,
-            )
-            with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
-                size shouldBe 3
-                get(0).grunnlag shouldBe foersteInntekt
-                get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
-                get(1).grunnlag.periode shouldBe
-                    Periode(
-                        fom = YearMonth.of(2024, Month.APRIL),
-                        tom = YearMonth.of(2024, Month.JULY),
+                val opprettaAvkorting =
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        virkningstidspunkt,
+                        innvilgelse = true,
+                        bruker,
                     )
-                with(get(2).grunnlag) {
-                    aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
-                    fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
-                    inntektUtland shouldBe nyttGrunnlag.inntektUtland
-                    fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
-                    spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
-                }
-            }
-        }
 
-        @Test
-        fun `Relvante maaneder skal utledes basert paa virkningstidspunkt`() {
-            val inntektDto = avkortinggrunnlagLagre()
-            val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
-
-            avkorting(inntektsavkorting = emptyList())
-                .oppdaterMedInntektsgrunnlag(
-                    inntektDto,
-                    virkningstidspunkt,
-                    bruker,
-                ).let {
-                    it.aarsoppgjoer
-                        .single()
-                        .inntektsavkorting
-                        .single()
-                        .grunnlag.relevanteMaanederInnAar shouldBe 10
-                }
-        }
-
-        @Test
-        fun `Relvante maaneder skal skal viderfoeres fra forrige inntekt for samme aar`() {
-            val inntektDto = avkortinggrunnlagLagre()
-            val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
-
-            avkorting
-                .oppdaterMedInntektsgrunnlag(
-                    inntektDto,
-                    virkningstidspunkt,
-                    bruker,
-                ).let {
-                    with(it.aarsoppgjoer.single().inntektsavkorting) {
-                        size shouldBe 3
-                        last().grunnlag.relevanteMaanederInnAar shouldBe 12
+                opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    aarsoppgjoer(
+                        aar = 2024,
+                        forventaInnvilgaMaaneder = 10,
+                    ),
+                    Aarsoppgjoer::id,
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        aarsinntekt shouldBe forventetInntekt.aarsinntekt
+                        fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
+                        inntektUtland shouldBe forventetInntekt.inntektUtland
+                        fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
+                        spesifikasjon shouldBe forventetInntekt.spesifikasjon
                     }
                 }
+            }
         }
 
-        @Test
-        fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
-            val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
-            val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
-
-            val oppdatertAvkorting =
-                avkorting.oppdaterMedInntektsgrunnlag(
-                    nyttGrunnlag,
-                    virkningstidspunkt,
-                    bruker,
+        @Nested
+        inner class Revurdering {
+            private val foersteInntekt =
+                avkortinggrunnlag(
+                    periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = YearMonth.of(2024, Month.MARCH)),
+                )
+            private val andreInntekt =
+                avkortinggrunnlag(
+                    aarsinntekt = 1000000,
+                    periode = Periode(fom = YearMonth.of(2024, Month.APRIL), tom = null),
+                )
+            private val avkorting =
+                avkorting(
+                    inntektsavkorting =
+                        listOf(
+                            Inntektsavkorting(foersteInntekt),
+                            Inntektsavkorting(andreInntekt),
+                        ),
                 )
 
-            oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
-            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2024, 1))) {
-                shouldBeEqualToIgnoringFields(
-                    avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)),
+            @Test
+            fun `Eksisterer det inntekt med samme id skal eksisterende inntekt oppdateres uten aa legge til nytt`() {
+                val endretInntekt = avkortinggrunnlagLagre(id = andreInntekt.id, aarsinntekt = 200000)
+                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
+
+                val oppdatertAvkorting =
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        endretInntekt,
+                        virkningstidspunkt,
+                        false,
+                        bruker,
+                    )
+
+                oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
+                oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    avkorting.aarsoppgjoer.single(),
                     Aarsoppgjoer::inntektsavkorting,
-                    Aarsoppgjoer::id,
                 )
-                with(inntektsavkorting) {
+                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
                     size shouldBe 2
+                    get(0).grunnlag shouldBe foersteInntekt
+                    with(get(1).grunnlag) {
+                        aarsinntekt shouldBe endretInntekt.aarsinntekt
+                        fratrekkInnAar shouldBe endretInntekt.fratrekkInnAar
+                        inntektUtland shouldBe endretInntekt.inntektUtland
+                        fratrekkInnAarUtland shouldBe endretInntekt.fratrekkInnAarUtland
+                        spesifikasjon shouldBe endretInntekt.spesifikasjon
+                    }
+                }
+            }
+
+            @Test
+            fun `Eksisterer ikke inntekt skal det legges til og til og med paa periode til siste inntekt skal settes`() {
+                val nyttGrunnlag = avkortinggrunnlagLagre()
+                val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
+
+                val oppdatertAvkorting =
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag,
+                        virkningstidspunkt,
+                        innvilgelse = false,
+                        bruker,
+                    )
+
+                oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
+                oppdatertAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    avkorting.aarsoppgjoer.single(),
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                    size shouldBe 3
                     get(0).grunnlag shouldBe foersteInntekt
                     get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
                     get(1).grunnlag.periode shouldBe
                         Periode(
                             fom = YearMonth.of(2024, Month.APRIL),
-                            tom = null,
-                            // tom = YearMonth.of(2024, Month.DECEMBER), TODO er dette nødvendig?
+                            tom = YearMonth.of(2024, Month.JULY),
                         )
-                }
-            }
-            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2025, 1))) {
-                shouldBeEqualToIgnoringFields(
-                    avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)),
-                    Aarsoppgjoer::inntektsavkorting,
-                    Aarsoppgjoer::id,
-                )
-                with(inntektsavkorting) {
-                    size shouldBe 1
-                    with(get(0).grunnlag) {
+                    with(get(2).grunnlag) {
                         aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
                         fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
                         inntektUtland shouldBe nyttGrunnlag.inntektUtland
                         fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
                         spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
+                    }
+                }
+            }
+
+            @Test
+            fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
+                val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
+                val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
+
+                val oppdatertAvkorting =
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag,
+                        virkningstidspunkt,
+                        innvilgelse = false,
+                        bruker,
+                    )
+
+                oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
+                with(oppdatertAvkorting.aarsoppgjoer[0]) {
+                    shouldBeEqualToIgnoringFields(
+                        avkorting.aarsoppgjoer[0],
+                        Aarsoppgjoer::inntektsavkorting,
+                        Aarsoppgjoer::id,
+                    )
+                    with(inntektsavkorting) {
+                        size shouldBe 2
+                        get(0).grunnlag shouldBe foersteInntekt
+                        get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                        get(1).grunnlag.periode shouldBe
+                            Periode(
+                                fom = YearMonth.of(2024, Month.APRIL),
+                                tom = null,
+                                // tom = YearMonth.of(2024, Month.DECEMBER), TODO er dette nødvendig?
+                            )
+                    }
+                }
+                with(oppdatertAvkorting.aarsoppgjoer[1]) {
+                    shouldBeEqualToIgnoringFields(
+                        aarsoppgjoer(
+                            aar = 2025,
+                            forventaInnvilgaMaaneder = 12,
+                        ),
+                        Aarsoppgjoer::inntektsavkorting,
+                        Aarsoppgjoer::id,
+                    )
+                    with(inntektsavkorting) {
+                        size shouldBe 1
+                        with(get(0).grunnlag) {
+                            aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
+                            fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
+                            inntektUtland shouldBe nyttGrunnlag.inntektUtland
+                            fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
+                            spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
+                        }
                     }
                 }
             }

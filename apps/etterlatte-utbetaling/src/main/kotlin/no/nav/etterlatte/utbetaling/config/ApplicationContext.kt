@@ -191,7 +191,7 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 
-    val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao, vedtaksvurderingKlient)
+    val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao)
 
     val rapidsConnection =
         rapidConnection ?: RapidApplication
@@ -224,6 +224,7 @@ class ApplicationContext(
         VedtakMottakRiver(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
+            vedtaksverifiserer = vedtaksverifiserer,
         )
     }
 }

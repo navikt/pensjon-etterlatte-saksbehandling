@@ -1,23 +1,11 @@
 package no.nav.etterlatte.utbetaling.avstemming.regulering
 
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.DatabaseExtension
-import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
@@ -26,6 +14,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kjoereplan
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Periode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.PeriodeForUtbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
@@ -35,6 +24,8 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingsperiodeType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakFattet
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
@@ -59,8 +50,6 @@ class VedtaksverifisererTest(
 
     private var teller = 0L
     private var vedtakTeller = 1L
-
-    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
 
     @Test
     fun `sjekker utbetalingsperioder opp mot vedtak`() {
@@ -90,13 +79,14 @@ class VedtaksverifisererTest(
                         til = YearMonth.of(2024, Month.JUNE),
                     ),
                 ),
-            ).let { dao.opprettUtbetaling(it) }
+            ).also { dao.opprettUtbetaling(it.second) }
         val etterRegulering =
             opprettUtbetaling(
                 sak,
                 listOf(
                     UtbetalingslinjeRequest(
-                        foerRegulering.utbetalingslinjer[0].id.value,
+                        foerRegulering.second.utbetalingslinjer[0]
+                            .id.value,
                         beloep = BigDecimal(1500),
                         fra = YearMonth.of(2024, Month.JANUARY),
                         til = YearMonth.of(2024, Month.APRIL),
@@ -108,21 +98,26 @@ class VedtaksverifisererTest(
                         til = YearMonth.of(2024, Month.JUNE),
                     ),
                 ),
-            ).let { dao.opprettUtbetaling(it) }
+            ).also { dao.opprettUtbetaling(it.second) }
 
-        val verifiserer = Vedtaksverifiserer(dao, vedtaksvurderingKlient)
+        val verifiserer = Vedtaksverifiserer(dao)
         runBlocking {
-            verifiserer.verifiser(foerRegulering.vedtak.vedtakId)
-            verifiserer.verifiser(etterRegulering.vedtak.vedtakId)
+            verifiserer.verifiser(foerRegulering.first)
+            verifiserer.verifiser(etterRegulering.first)
         }
     }
 
     private fun opprettUtbetaling(
         sak: Sak,
         linjer: List<UtbetalingslinjeRequest>,
-    ): Utbetaling {
+    ): Pair<Utbetalingsvedtak, Utbetaling> {
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
+        val behandling =
+            Behandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                id = behandlingId,
+            )
         val utbetaling =
             Utbetaling(
                 id = utbetalingId,
@@ -142,10 +137,7 @@ class VedtaksverifisererTest(
                         vedtakId = vedtakTeller,
                         sak = sak,
                         behandling =
-                            Behandling(
-                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                id = behandlingId,
-                            ),
+                        behandling,
                         pensjonTilUtbetaling = listOf(),
                         vedtakFattet =
                             VedtakFattet(
@@ -177,48 +169,33 @@ class VedtaksverifisererTest(
                         )
                     },
             )
-        coEvery { vedtaksvurderingKlient.hentVedtak(behandlingId, any()) } returns
-            VedtakDto(
-                id = vedtakTeller,
-                behandlingId = behandlingId,
-                status = VedtakStatus.IVERKSATT,
-                sak = VedtakSak(ident = sak.ident, id = sak.id, sakType = SakType.valueOf(sak.sakType.name)),
-                type = VedtakType.INNVILGELSE,
+        val vedtak =
+            Utbetalingsvedtak(
+                vedtakId = vedtakTeller,
+                sak = sak,
+                behandling = behandling,
+                pensjonTilUtbetaling =
+                    linjer.map {
+                        Utbetalingsperiode(
+                            id = linjer.indexOf(it).toLong(),
+                            periode = Periode(fom = it.fra, tom = it.til),
+                            beloep = it.beloep,
+                            type = UtbetalingsperiodeType.UTBETALING,
+                        )
+                    },
                 vedtakFattet =
-                    no.nav.etterlatte.libs.common.vedtak.VedtakFattet(
+                    VedtakFattet(
                         ansvarligSaksbehandler = saksbehandler,
                         ansvarligEnhet = enhet,
-                        tidspunkt = Tidspunkt.now(),
                     ),
                 attestasjon =
-                    no.nav.etterlatte.libs.common.vedtak.Attestasjon(
+                    Attestasjon(
                         attestant = attestant,
                         attesterendeEnhet = enhet,
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-                innhold =
-                    VedtakInnholdDto.VedtakBehandlingDto(
-                        virkningstidspunkt = linjer.minOf { it.fra }.minusMonths(1),
-                        behandling =
-                            Behandling(
-                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                id = behandlingId,
-                                revurderingsaarsak = null,
-                                revurderingInfo = null,
-                            ),
-                        utbetalingsperioder =
-                            linjer.map {
-                                Utbetalingsperiode(
-                                    id = linjer.indexOf(it).toLong(),
-                                    periode = Periode(fom = it.fra, tom = it.til),
-                                    beloep = it.beloep,
-                                    type = UtbetalingsperiodeType.UTBETALING,
-                                )
-                            },
                     ),
             )
         vedtakTeller++
-        return utbetaling
+        return Pair(vedtak, utbetaling)
     }
 }
 

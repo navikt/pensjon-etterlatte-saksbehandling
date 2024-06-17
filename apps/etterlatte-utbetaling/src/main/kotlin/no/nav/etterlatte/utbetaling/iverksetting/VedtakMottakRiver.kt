@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
@@ -32,6 +33,7 @@ data class KunneIkkeLeseVedtakException(
 class VedtakMottakRiver(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
+    private val vedtaksverifiserer: Vedtaksverifiserer,
 ) : ListenerMedLogging() {
     init {
         // Barnepensjon
@@ -69,6 +71,8 @@ class VedtakMottakRiver(
             val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
             // FIXME når VedtakNyDto tas i bruk: attestert ELLER samordnet (vedtakstatus)
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
+
+            vedtaksverifiserer.verifiser(vedtak)
 
             when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
                 is SendtTilOppdrag -> {

@@ -30,7 +30,6 @@ fun jobs(applicationContext: ApplicationContext): MutableSet<TimerJob> {
     if (applicationContext.properties.konsistensavstemmingOMSEnabled) {
         jobs.add(applicationContext.konsistensavstemmingJobOMS)
     }
-    jobs.add(applicationContext.verifiserUtbetalingOgVedtakJob)
     return jobs
 }
 

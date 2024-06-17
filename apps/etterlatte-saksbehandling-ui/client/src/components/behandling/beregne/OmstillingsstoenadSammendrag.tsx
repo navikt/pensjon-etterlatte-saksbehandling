@@ -67,5 +67,5 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
 }
 
 export const TableBox = styled(Box)`
-  max-width: 63rem;
+  max-width: 70rem;
 `

@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect } from 'react'
@@ -13,6 +12,9 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { Box, VStack } from '@navikt/ds-react'
 
 export const Avkorting = ({
   behandling,
@@ -27,6 +29,7 @@ export const Avkorting = ({
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -47,27 +50,27 @@ export const Avkorting = ({
   }, [])
 
   return (
-    <AvkortingWrapper>
-      {mapApiResult(
-        avkortingStatus,
-        <Spinner visible label="Henter avkorting" />,
-        () => (
-          <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
-        ),
-        () => (
-          <AvkortingInntekt
-            behandling={behandling}
-            redigerbar={redigerbar}
-            resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-          />
-        )
-      )}
-      {avkorting && <YtelseEtterAvkorting />}
-      {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
-    </AvkortingWrapper>
+    <Box paddingBlock="8 0">
+      <VStack gap="8">
+        {mapApiResult(
+          avkortingStatus,
+          <Spinner visible label="Henter avkorting" />,
+          () => (
+            <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
+          ),
+          () => (
+            <AvkortingInntekt
+              behandling={behandling}
+              redigerbar={redigerbar}
+              resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+            />
+          )
+        )}
+
+        {visSanksjon && <Sanksjon behandling={behandling} />}
+        {avkorting && <YtelseEtterAvkorting />}
+        {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
+      </VStack>
+    </Box>
   )
 }
-
-const AvkortingWrapper = styled.div`
-  margin: 2em 0 1em 0;
-`

@@ -11,7 +11,6 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { Alert, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
-import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { Beregningstype } from '~shared/types/Beregning'
@@ -29,8 +28,6 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -43,7 +40,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
   const vedtaksresultat = useVedtaksResultat()
 
@@ -114,9 +110,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       {erOpphoer ? (
-        <BeregningWrapper>
+        <Box paddingInline="18" paddingBlock="4">
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-        </BeregningWrapper>
+        </Box>
       ) : (
         <>
           {mapApiResult(
@@ -126,7 +122,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <BeregningWrapper>
+              <Box paddingInline="18" paddingBlock="4">
                 {(() => {
                   switch (beregning.type) {
                     case Beregningstype.BP:
@@ -148,7 +144,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
                             resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
                           />
-                          {visSanksjon && <Sanksjon behandling={behandling} />}
                         </>
                       )
                   }
@@ -164,7 +159,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                     inntektsfeltene.
                   </Alert>
                 )}
-              </BeregningWrapper>
+              </Box>
             )
           )}
         </>
@@ -198,8 +193,3 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     </>
   )
 }
-
-const BeregningWrapper = styled.div`
-  padding: 0 4em;
-  margin-bottom: 4em;
-`

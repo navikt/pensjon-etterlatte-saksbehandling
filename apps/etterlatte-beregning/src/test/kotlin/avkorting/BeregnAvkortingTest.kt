@@ -1,7 +1,5 @@
 package no.nav.etterlatte.beregning.regler.avkorting
 
-import SanksjonType
-import SanksjonertYtelse
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
@@ -17,6 +15,8 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Test
 import java.time.Month

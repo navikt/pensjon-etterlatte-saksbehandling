@@ -1,3 +1,5 @@
+package no.nav.etterlatte.libs.common.beregning
+
 import java.util.UUID
 
 data class SanksjonertYtelse(

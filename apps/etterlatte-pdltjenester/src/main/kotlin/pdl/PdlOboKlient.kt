@@ -28,7 +28,6 @@ import java.time.LocalDate
 data class SoekPerson(
     val navn: String,
     val foedselsdato: LocalDate,
-    val sakType: SakType,
 )
 
 class PdlOboKlient(

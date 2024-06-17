@@ -138,6 +138,7 @@ class AvkortingRoutesTest {
                             avkortingsbeloep = 200,
                             ytelseEtterAvkorting = 50,
                             restanse = 50,
+                            sanksjon = null,
                         ),
                     ),
                 tidligereAvkortetYtelse =
@@ -151,6 +152,7 @@ class AvkortingRoutesTest {
                             avkortingsbeloep = 200,
                             ytelseEtterAvkorting = 50,
                             restanse = 50,
+                            sanksjon = null,
                         ),
                     ),
             )

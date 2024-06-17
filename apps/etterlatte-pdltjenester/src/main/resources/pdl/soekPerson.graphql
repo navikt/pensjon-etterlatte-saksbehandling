@@ -25,6 +25,13 @@ query ($paging:Paging, $criteria:[Criterion]) {
                         ...metadata
                     }
                 }
+                bostedsadresse {
+                    coAdressenavn
+                    vegadresse {...vegadresseDetails}
+                    utenlandskAdresse {...utenlandskAdresseDetails}
+                    gyldigFraOgMed
+                    gyldigTilOgMed
+                }
             }
         }
     }

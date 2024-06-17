@@ -66,4 +66,5 @@ data class PersonSearchHit(
 data class SoekPersonTreff(
     val navn: Navn,
     val foedselsnummer: Folkeregisteridentifikator,
+    val bostedsadresse: PdlBostedsadresse,
 )

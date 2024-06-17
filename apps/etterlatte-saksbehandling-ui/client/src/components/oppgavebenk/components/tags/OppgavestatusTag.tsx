@@ -5,7 +5,7 @@ import { Tag } from '@navikt/ds-react'
 export const OppgavestatusTag = ({ oppgavestatus }: { oppgavestatus: Oppgavestatus }) => {
   switch (oppgavestatus) {
     case Oppgavestatus.NY:
-      return <Tag variant="alt1">NY</Tag>
+      return <Tag variant="alt1">Ny</Tag>
     case Oppgavestatus.UNDER_BEHANDLING:
       return <Tag variant="info">Under behandling</Tag>
     case Oppgavestatus.ATTESTERING:

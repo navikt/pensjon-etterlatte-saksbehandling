@@ -1,13 +1,10 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
@@ -31,7 +28,6 @@ internal class VedtakMottakRiverTest {
             VedtakMottakRiver(
                 rapidsConnection = this,
                 utbetalingService = utbetalingService,
-                vedtaksverifiserer = mockk<Vedtaksverifiserer>().also { every { it.verifiser(any()) } just runs },
             )
         }
 

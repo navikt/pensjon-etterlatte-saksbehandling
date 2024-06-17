@@ -100,10 +100,10 @@ class VedtaksverifisererTest(
                 ),
             ).also { dao.opprettUtbetaling(it.second) }
 
-        val verifiserer = Vedtaksverifiserer(dao)
+        val verifiserer = Vedtaksverifiserer()
         runBlocking {
-            verifiserer.verifiser(foerRegulering.first)
-            verifiserer.verifiser(etterRegulering.first)
+            verifiserer.verifiser(foerRegulering.second, foerRegulering.first)
+            verifiserer.verifiser(etterRegulering.second, etterRegulering.first)
         }
     }
 

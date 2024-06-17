@@ -1,9 +1,12 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
@@ -25,12 +28,17 @@ import java.util.UUID
 internal class UtbetalingServiceTest {
     private val oppdragSender: OppdragSender = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
+    private val vedtaksverifiserer: Vedtaksverifiserer =
+        mockk<Vedtaksverifiserer>().also {
+            every { it.verifiser(any(), any()) } just runs
+        }
     private val utbetalingService: UtbetalingService =
         UtbetalingService(
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
             clock = utcKlokke(),
+            vedtaksverifiserer = vedtaksverifiserer,
         )
 
     /**

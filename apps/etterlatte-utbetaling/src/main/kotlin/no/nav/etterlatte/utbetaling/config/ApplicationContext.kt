@@ -110,12 +110,15 @@ class ApplicationContext(
 
     val utbetalingDao = UtbetalingDao(dataSource)
 
+    val vedtaksverifiserer = Vedtaksverifiserer()
+
     val utbetalingService =
         UtbetalingService(
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
             clock = clock,
+            vedtaksverifiserer = vedtaksverifiserer,
         )
 
     val avstemmingsdataSender =
@@ -191,8 +194,6 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 
-    val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao)
-
     val rapidsConnection =
         rapidConnection ?: RapidApplication
             .Builder(
@@ -224,7 +225,6 @@ class ApplicationContext(
         VedtakMottakRiver(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
-            vedtaksverifiserer = vedtaksverifiserer,
         )
     }
 }

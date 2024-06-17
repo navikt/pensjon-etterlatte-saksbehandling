@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.avstemming.vedtak
 
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -86,6 +87,9 @@ class Vedtaksverifiserer(
         fraVedtak: Utbetalingsperiode,
         korresponderendeUtbetalingslinje: Utbetalingslinje,
     ): Boolean {
+        if (fraVedtak.type == UtbetalingsperiodeType.OPPHOER) {
+            return true
+        }
         if (fraVedtak.beloep == null && korresponderendeUtbetalingslinje.beloep == null) {
             return true
         }

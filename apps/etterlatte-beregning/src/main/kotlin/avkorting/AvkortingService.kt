@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -17,6 +18,7 @@ class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
+    private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
@@ -74,6 +76,7 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 avkortingGrunnlagLagre,
@@ -84,6 +87,7 @@ class AvkortingService(
                 ),
                 brukerTokenInfo,
                 beregning,
+                sanksjoner,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
@@ -138,7 +142,8 @@ class AvkortingService(
     ): Avkorting {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning)
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
+        val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandlingId)
         behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)

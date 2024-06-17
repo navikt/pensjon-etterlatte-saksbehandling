@@ -8,6 +8,7 @@ import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.Restanse
+import no.nav.etterlatte.avkorting.SanksjonertYtelse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
@@ -225,10 +226,12 @@ fun avkortetYtelseGrunnlag(
     beregning: Int,
     avkorting: Int,
     fordeltRestanse: Int = 0,
+    sanksjon: Sanksjon? = null,
 ) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
     fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
+    sanksjon = FaktumNode(verdi = sanksjon, "", ""),
 )
 
 fun avkortetYtelse(
@@ -245,6 +248,7 @@ fun avkortetYtelse(
             tom = null,
         ),
     inntektsgrunnlag: UUID? = UUID.randomUUID(),
+    sanksjon: SanksjonertYtelse? = null,
 ) = AvkortetYtelse(
     id = id,
     type = type,
@@ -263,6 +267,7 @@ fun avkortetYtelse(
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
     inntektsgrunnlag = inntektsgrunnlag,
+    sanksjon = sanksjon,
 )
 
 fun beregning(
@@ -327,17 +332,18 @@ fun behandling(
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
 
 fun sanksjon(
-    id: UUID? = null,
+    id: UUID? = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
     sakId: Long = 123,
     fom: YearMonth = YearMonth.of(2024, 1),
-    tom: YearMonth = YearMonth.of(2024, 2),
+    tom: YearMonth? = YearMonth.of(2024, 2),
+    type: SanksjonType = SanksjonType.STANS,
     beskrivelse: String = "Ikke i jobb",
 ) = Sanksjon(
     id = id,
     behandlingId = behandlingId,
     sakId = sakId,
-    type = SanksjonType.STANS,
+    type = type,
     fom = fom,
     tom = tom,
     opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),

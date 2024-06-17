@@ -2,9 +2,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
   Alert,
@@ -27,6 +27,8 @@ import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
+import { useAppDispatch } from '~store/Store'
+import { hentAvkorting } from '~shared/api/avkorting'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -50,6 +52,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const [visForm, setVisForm] = useState(false)
   const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
+  const dispatch = useAppDispatch()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -90,6 +94,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         hentSanksjoner()
         setRedigerSanksjonId('')
         setVisForm(false)
+        fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
       }
     )
   }
@@ -238,6 +243,9 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
               </Table>
             </TableBox>
 
+            {mapResult(avkortingStatus, {
+              pending: 'Henter oppdatert avkortet ytelse',
+            })}
             {isFailure(slettSanksjonStatus) && (
               <Alert variant="error">
                 {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av sanksjon'}

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.sanksjon
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -8,13 +10,26 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
+enum class SanksjonToggles(
+    val value: String,
+) : FeatureToggle {
+    SANKSJON("sanksjon"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 class SanksjonService(
     private val behandlingKlient: BehandlingKlient,
     private val sanksjonRepository: SanksjonRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(SanksjonService::class.java)
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
+        if (featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {
+            return null
+        }
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
@@ -62,10 +77,13 @@ class SanksjonService(
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
+            settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
             return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
+        // TODO: vi vil kanskje ikke tvinge noen avkortings-reberegning her hvis det er kun beskrivelse som endrer seg
+        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
@@ -78,8 +96,19 @@ class SanksjonService(
 
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
+        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
         sanksjonRepository.slettSanksjon(sanksjonId)
+    }
+
+    private suspend fun settBehandlingTilBeregnetStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+        if (!behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)) {
+            throw BehandlingKanIkkeEndres()
+        }
     }
 }
 

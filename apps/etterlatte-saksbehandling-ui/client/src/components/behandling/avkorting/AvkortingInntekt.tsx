@@ -14,13 +14,13 @@ import {
 } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { ToolTip } from '~components/behandling/felles/ToolTip'
@@ -31,23 +31,20 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
 import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { lastDayOfMonth } from 'date-fns'
 
 export const AvkortingInntekt = ({
   behandling,
-  avkorting,
   redigerbar,
-  setAvkorting,
   resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
-  avkorting: IAvkorting | undefined
   redigerbar: boolean
-  setAvkorting: (avkorting: IAvkorting) => void
   resetInntektsavkortingValidering: () => void
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
@@ -114,7 +111,7 @@ export const AvkortingInntekt = ({
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
-        setAvkorting(respons)
+        dispatch(oppdaterAvkorting(respons))
         setVisForm(false)
       }
     )

@@ -132,6 +132,7 @@ class AvkortingRegelkjoringTest {
                 beregninger,
                 avkortingsperioder,
                 AvkortetYtelseType.FORVENTET_INNTEKT,
+                emptyList(),
             )
 
         avkortetYtelse.size shouldBe 4

@@ -1,14 +1,13 @@
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
-import React, { useEffect, useState } from 'react'
-import { IAvkorting } from '~shared/types/IAvkorting'
+import React, { useEffect } from 'react'
 import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch } from '~store/Store'
+import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapApiResult } from '~shared/api/apiUtils'
@@ -25,8 +24,8 @@ export const Avkorting = ({
   resetInntektsavkortingValidering: () => void
 }) => {
   const dispatch = useAppDispatch()
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
-  const [avkorting, setAvkorting] = useState<IAvkorting>()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
@@ -36,13 +35,13 @@ export const Avkorting = ({
   )
 
   useEffect(() => {
-    if (!avkorting) {
+    if (!avkorting || avkorting.behandlingId !== behandling.id) {
       hentAvkortingRequest(behandling.id, (res) => {
         const avkortingFinnesOgErUnderBehandling = res && redigerbar
         if (avkortingFinnesOgErUnderBehandling) {
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         }
-        setAvkorting(res)
+        dispatch(oppdaterAvkorting(res))
       })
     }
   }, [])
@@ -58,21 +57,12 @@ export const Avkorting = ({
         () => (
           <AvkortingInntekt
             behandling={behandling}
-            avkorting={avkorting}
-            setAvkorting={setAvkorting}
             redigerbar={redigerbar}
             resetInntektsavkortingValidering={resetInntektsavkortingValidering}
           />
         )
       )}
-      {avkorting && (
-        <YtelseEtterAvkorting
-          ytelser={avkorting.avkortetYtelse}
-          behandling={behandling}
-          tidligereYtelser={avkorting.tidligereAvkortetYtelse}
-          setAvkorting={setAvkorting}
-        />
-      )}
+      {avkorting && <YtelseEtterAvkorting />}
       {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
     </AvkortingWrapper>
   )

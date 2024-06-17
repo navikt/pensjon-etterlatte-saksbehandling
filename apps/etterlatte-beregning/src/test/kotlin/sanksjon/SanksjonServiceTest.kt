@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,7 +28,13 @@ import java.util.UUID
 internal class SanksjonServiceTest {
     private val sanksjonRepository: SanksjonRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val service = SanksjonService(sanksjonRepository = sanksjonRepository, behandlingKlient = behandlingKlient)
+    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+    private val service =
+        SanksjonService(
+            sanksjonRepository = sanksjonRepository,
+            behandlingKlient = behandlingKlient,
+            featureToggleService = featureToggleService,
+        )
     private val sakId = 123L
 
     @Nested
@@ -75,6 +82,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -99,6 +107,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -220,6 +229,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.slettSanksjon(behandlingId, sanksjonId, bruker) shouldBe Unit
@@ -257,6 +267,7 @@ internal class SanksjonServiceTest {
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns listOf(sanksjoner)
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns null
             every { sanksjonRepository.opprettSanksjon(forrigeBehandlingId, sakId, bruker.ident, sanksjon) } returns Unit
+            coEvery { behandlingKlient.kanBeregnes(forrigeBehandlingId, any(), any()) } returns true
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, bruker) } returns forrigeBehandling
             coEvery {

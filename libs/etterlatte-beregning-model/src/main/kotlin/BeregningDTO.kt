@@ -57,9 +57,9 @@ data class AvkortingGrunnlagDto(
     val tom: YearMonth?,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
-    val relevanteMaanederInnAar: Int,
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
+    val forventaInnvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
 )

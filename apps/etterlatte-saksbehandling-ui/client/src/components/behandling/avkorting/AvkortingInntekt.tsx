@@ -193,7 +193,7 @@ export const AvkortingInntekt = ({
                     <Table.DataCell key="InntektTotalt">
                       {NOK(forventetInntekt + forventetInntektUtland)}
                     </Table.DataCell>
-                    <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
+                    <Table.DataCell>{inntektsgrunnlag.forventaInnvilgaMaaneder}</Table.DataCell>
                     <Table.DataCell key="Periode">
                       {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -{' '}
                       {inntektsgrunnlag.tom && formaterDato(lastDayOfMonth(new Date(inntektsgrunnlag.tom)))}

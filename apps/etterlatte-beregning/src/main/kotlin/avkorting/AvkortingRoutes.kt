@@ -80,21 +80,25 @@ fun Route.avkorting(
 
 fun Avkorting.toDto() =
     AvkortingDto(
-        avkortingGrunnlag = aarsoppgjoer.single().inntektsavkorting.map { it.grunnlag.toDto() },
+        // TODO erstatt single
+        avkortingGrunnlag =
+            aarsoppgjoer.single().inntektsavkorting.map {
+                it.grunnlag.toDto(aarsoppgjoer.single().forventaInnvilgaMaaneder)
+            },
         avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
         tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() },
     )
 
-fun AvkortingGrunnlag.toDto() =
+fun AvkortingGrunnlag.toDto(forventaInnvilgaMaaneder: Int) =
     AvkortingGrunnlagDto(
         id = id,
         fom = periode.fom,
         tom = periode.tom,
         aarsinntekt = aarsinntekt,
         fratrekkInnAar = fratrekkInnAar,
-        relevanteMaanederInnAar = relevanteMaanederInnAar,
         inntektUtland = inntektUtland,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
+        forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
     )

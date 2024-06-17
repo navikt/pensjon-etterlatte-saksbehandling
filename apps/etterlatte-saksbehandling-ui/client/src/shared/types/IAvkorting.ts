@@ -11,7 +11,7 @@ export interface IAvkortingGrunnlag {
   tom?: string
   aarsinntekt: number
   fratrekkInnAar: number
-  relevanteMaanederInnAar: number
+  forventaInnvilgaMaaneder: number
   inntektUtland: number
   fratrekkInnAarUtland: number
   spesifikasjon: string

@@ -29,7 +29,7 @@ internal class AvkortingRepositoryTest(
     @Test
     fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val aarsoppgjoer = nyAvkorting(2024, avkortinggrunnlag())
+        val aarsoppgjoer = nyAvkorting(2024, grunnlag = avkortinggrunnlag())
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
@@ -58,7 +58,7 @@ internal class AvkortingRepositoryTest(
                 avkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) },
             )
 
-        val nyttArsoppgjoer = nyAvkorting(2025, avkortinggrunnlag())
+        val nyttArsoppgjoer = nyAvkorting(2025, grunnlag = avkortinggrunnlag())
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
@@ -118,10 +118,12 @@ internal class AvkortingRepositoryTest(
 
     private fun nyAvkorting(
         aar: Int,
+        forventaInnvilgaMaaneder: Int = 12,
         grunnlag: AvkortingGrunnlag,
     ) = Aarsoppgjoer(
         id = UUID.randomUUID(),
         aar = aar,
+        forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
         ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
         inntektsavkorting =
             listOf(

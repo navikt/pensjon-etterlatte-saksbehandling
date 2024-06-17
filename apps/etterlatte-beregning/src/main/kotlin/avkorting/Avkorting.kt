@@ -75,12 +75,13 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
     ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingForstegangs(
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, true, bruker).beregnAvkortingForstegangs(
             beregning,
             sanksjoner,
         )
     } else {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingRevurdering(
+        // TODO parameter innvilgelse vil ikke være tilstrekkelig når vi skal revurdere for å endre første virk..
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, false, bruker).beregnAvkortingRevurdering(
             beregning,
             sanksjoner,
         )
@@ -89,10 +90,11 @@ data class Avkorting(
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         virkningstidspunkt: YearMonth,
+        innvilgelse: Boolean,
         bruker: BrukerTokenInfo,
     ): Avkorting {
         // TODO kreve at det er inneværende år?
-        val aarsoppgjoer = hentAarsoppgjoer(virkningstidspunkt)
+        val aarsoppgjoer = hentAarsoppgjoer(virkningstidspunkt, innvilgelse)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
@@ -106,7 +108,6 @@ data class Avkorting(
                                 periode = Periode(fom = virkningstidspunkt, tom = null),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                                relevanteMaanederInnAar = aarsoppgjoer.utledRelevanteMaaneder(virkningstidspunkt),
                                 inntektUtland = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
@@ -135,7 +136,8 @@ data class Avkorting(
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 periode = grunnlag.periode,
-                avkortingGrunnlag = listOf(grunnlag),
+                avkortingGrunnlag = grunnlag,
+                aarsoppgjoer.forventaInnvilgaMaaneder,
             )
 
         val avkortetYtelseAar =
@@ -186,14 +188,15 @@ data class Avkorting(
                     aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
                         val periode =
                             Periode(
-                                fom = aarsoppgjoer.foersteMaanedDetteAar(),
+                                fom = aarsoppgjoer.foersteInnvilgedeMaaned(),
                                 tom = inntektsavkorting.grunnlag.periode.tom,
                             )
 
                         val avkortinger =
                             AvkortingRegelkjoring.beregnInntektsavkorting(
                                 periode = periode,
-                                avkortingGrunnlag = listOf(inntektsavkorting.grunnlag.copy(periode = periode)),
+                                avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
+                                aarsoppgjoer.forventaInnvilgaMaaneder,
                             )
 
                         val avkortetYtelseForventetInntekt =
@@ -282,7 +285,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            aarsoppgjoer.foersteMaanedDetteAar(),
+                            aarsoppgjoer.foersteInnvilgedeMaaned(),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
@@ -308,7 +311,7 @@ data class Avkorting(
         if (senesteSanksjonFom != null && senesteSanksjonFom >= senesteInntektsjusteringFom) {
             val restanse =
                 AvkortingRegelkjoring.beregnRestanse(
-                    aarsoppgjoer.foersteMaanedDetteAar(),
+                    aarsoppgjoer.foersteInnvilgedeMaaned(),
                     reberegnetInntektsavkorting.last(),
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
@@ -345,9 +348,23 @@ data class Avkorting(
         return avkortetYtelseMedAllForventetInntekt
     }
 
-    fun hentAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
-        val funnet = aarsoppgjoer.find { it.aar == fom.year }
-        return funnet ?: Aarsoppgjoer(UUID.randomUUID(), aar = fom.year)
+    /*
+     * Hvilket årsoppgjør som er relevant basers på virkningstidspunkt.
+     * Hvis det ikke finnes et fra før på virkningstidspunkt opprettes et nytt.
+     *
+     * Ved innvilgelse/førstegangsbehandling så skal måneder før virkningsitdspunkt trekkes i fra
+     * forventa innvilgede måneder.
+     */
+    private fun hentAarsoppgjoer(
+        virkningstidspunkt: YearMonth,
+        innvilgelse: Boolean,
+    ): Aarsoppgjoer {
+        val funnet = aarsoppgjoer.find { it.aar == virkningstidspunkt.year }
+        return funnet ?: Aarsoppgjoer(
+            id = UUID.randomUUID(),
+            aar = virkningstidspunkt.year,
+            forventaInnvilgaMaaneder = if (innvilgelse) (12 - virkningstidspunkt.monthValue + 1) else 12,
+        )
     }
 
     private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
@@ -366,7 +383,6 @@ data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
-    val relevanteMaanederInnAar: Int,
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
@@ -376,36 +392,13 @@ data class AvkortingGrunnlag(
 data class Aarsoppgjoer(
     val id: UUID,
     val aar: Int,
+    val forventaInnvilgaMaaneder: Int,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
-    /*
-     * Relevante månder (innvilga måneder i gjeldende år) viderføres i alle grunnlagsperioder. så når man skal
-     * utlede det til ny inntektsperiode kan man ta fra hvilken som helst periode i gjeldende år.
-     * Hvis det ikke finnes noen inntekt for gjeldende år enda (førstegangsbehandling) regnes den ut basert på
-     *  ny virk/innvilgelsesdato.
-     */
-    fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth): Int {
-        val aaretsFoersteForventaInntekt =
-            inntektsavkorting
-                .sortedBy { it.grunnlag.periode.fom }
-                .firstOrNull {
-                    it.grunnlag.periode.fom.year == virkningstidspunkt.year
-                }?.grunnlag
-        return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
-    }
 
-    /*
-     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
-     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
-     */
-    fun foersteMaanedDetteAar(): YearMonth =
-        if (ytelseFoerAvkorting.isEmpty()) {
-            YearMonth.of(aar, 1)
-        } else {
-            ytelseFoerAvkorting.minOf { it.periode.fom }
-        }
+    fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
 
     /**
      * Gir kun de sanksjonene som har en periode som overlapper med dette årsoppgjøret.

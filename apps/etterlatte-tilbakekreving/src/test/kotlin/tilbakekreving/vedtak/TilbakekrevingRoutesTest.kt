@@ -103,15 +103,14 @@ internal class TilbakekrevingRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            service.hentKravgrunnlag(any(), any())
+            service.hentKravgrunnlag(kravgrunnlagId, sakId)
         }
     }
 
     @Test
     fun `skal returnere 500 hvis henting av kravgrunnlag feiler`() {
-        val oppdatertKravgrunnlag = kravgrunnlag()
-        val sakId = oppdatertKravgrunnlag.sakId.value
-        val kravgrunnlagId = oppdatertKravgrunnlag.kravgrunnlagId.value
+        val sakId = 2L
+        val kravgrunnlagId = 2L
         coEvery { service.hentKravgrunnlag(kravgrunnlagId, sakId) } throws Exception("Noe feilet")
 
         testApplication {
@@ -125,7 +124,7 @@ internal class TilbakekrevingRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            service.hentKravgrunnlag(any(), any())
+            service.hentKravgrunnlag(kravgrunnlagId, sakId)
         }
     }
 

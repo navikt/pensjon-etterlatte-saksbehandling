@@ -2,7 +2,9 @@ package no.nav.etterlatte.egenansatt
 
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -30,6 +32,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -59,13 +62,30 @@ internal class EgenAnsattServiceTest(
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
-    private val krrKlient = mockk<KrrKlient>()
+    private val krrKlient =
+        mockk<KrrKlient> {
+            coEvery { hentDigitalKontaktinformasjon(any()) } returns
+                DigitalKontaktinformasjon(
+                    personident = "",
+                    aktiv = true,
+                    kanVarsles = true,
+                    reservert = false,
+                    spraak = "nb",
+                    epostadresse = null,
+                    mobiltelefonnummer = null,
+                    sikkerDigitalPostkasse = null,
+                )
+        }
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
 
     @BeforeAll
     fun beforeAll() {
         val norg2Klient = mockk<Norg2Klient>()
-        val grunnlagservice = mockk<GrunnlagService>()
+        val grunnlagservice =
+            mockk<GrunnlagService> {
+                every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+                every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+            }
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
@@ -110,9 +130,9 @@ internal class EgenAnsattServiceTest(
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
         val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

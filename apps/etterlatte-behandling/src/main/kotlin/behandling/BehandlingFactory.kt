@@ -67,7 +67,7 @@ class BehandlingFactory(
         logger.info("Oppretter sak og behandling for persongalleri: ${request.persongalleri}, saktype ${request.sakType}")
         val soeker = request.persongalleri.soeker
 
-        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
+        val sak = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(soeker, request.sakType) }
 
         if (
             sak.enhet != request.enhet &&

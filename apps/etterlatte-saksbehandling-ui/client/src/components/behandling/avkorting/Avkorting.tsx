@@ -5,11 +5,16 @@ import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInnt
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterAvkorting,
+  oppdaterBehandlingsstatus,
+  resetAvkorting,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
@@ -39,6 +44,7 @@ export const Avkorting = ({
 
   useEffect(() => {
     if (!avkorting || avkorting.behandlingId !== behandling.id) {
+      dispatch(resetAvkorting())
       hentAvkortingRequest(behandling.id, (res) => {
         const avkortingFinnesOgErUnderBehandling = res && redigerbar
         if (avkortingFinnesOgErUnderBehandling) {
@@ -52,20 +58,17 @@ export const Avkorting = ({
   return (
     <Box paddingBlock="8 0">
       <VStack gap="8">
-        {mapApiResult(
-          avkortingStatus,
-          <Spinner visible label="Henter avkorting" />,
-          () => (
-            <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
-          ),
-          () => (
+        {mapResult(avkortingStatus, {
+          pending: <Spinner visible label="Henter avkorting" />,
+          error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
+          success: () => (
             <AvkortingInntekt
               behandling={behandling}
               redigerbar={redigerbar}
               resetInntektsavkortingValidering={resetInntektsavkortingValidering}
             />
-          )
-        )}
+          ),
+        })}
 
         {visSanksjon && <Sanksjon behandling={behandling} />}
         {avkorting && <YtelseEtterAvkorting />}

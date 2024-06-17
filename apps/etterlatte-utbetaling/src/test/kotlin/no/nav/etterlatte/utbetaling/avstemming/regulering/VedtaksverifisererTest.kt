@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
@@ -49,7 +50,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
+class VedtaksverifisererTest(
+    private val dataSource: DataSource,
+) {
     private val saksbehandler = "Saksbehandler1"
     private val attestant = "Attestant1"
     private val enhet = "Enhet1"
@@ -107,7 +110,7 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
                 ),
             ).let { dao.opprettUtbetaling(it) }
 
-        val verifiserer = VerifiserReguleringssummer(dao, vedtaksvurderingKlient)
+        val verifiserer = Vedtaksverifiserer(dao, vedtaksvurderingKlient)
         runBlocking {
             verifiserer.verifiser(foerRegulering.vedtak.vedtakId)
             verifiserer.verifiser(etterRegulering.vedtak.vedtakId)
@@ -219,4 +222,9 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
     }
 }
 
-data class UtbetalingslinjeRequest(val erstatterId: Long?, val beloep: BigDecimal?, val fra: YearMonth, val til: YearMonth?)
+data class UtbetalingslinjeRequest(
+    val erstatterId: Long?,
+    val beloep: BigDecimal?,
+    val fra: YearMonth,
+    val til: YearMonth?,
+)

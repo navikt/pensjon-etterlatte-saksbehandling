@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling.avstemming.regulering
+package no.nav.etterlatte.utbetaling.avstemming.vedtak
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.jobs.LoggerInfo
@@ -11,7 +11,7 @@ import java.time.Duration
 import java.util.Timer
 
 class VerifiserUtbetalingOgVedtakJob(
-    private val verifiserer: VerifiserReguleringssummer,
+    private val verifiserer: Vedtaksverifiserer,
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
     private val periode: Duration,

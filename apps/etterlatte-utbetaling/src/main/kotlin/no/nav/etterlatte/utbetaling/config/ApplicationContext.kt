@@ -27,8 +27,8 @@ import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
-import no.nav.etterlatte.utbetaling.avstemming.regulering.VerifiserReguleringssummer
-import no.nav.etterlatte.utbetaling.avstemming.regulering.VerifiserUtbetalingOgVedtakJob
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.VerifiserUtbetalingOgVedtakJob
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
@@ -192,25 +192,24 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 
-    val verifiserReguleringssummer = VerifiserReguleringssummer(utbetalingDao, vedtaksvurderingKlient)
+    val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao, vedtaksvurderingKlient)
     val verifiserUtbetalingOgVedtakJob =
         VerifiserUtbetalingOgVedtakJob(
-            verifiserer = verifiserReguleringssummer,
+            verifiserer = vedtaksverifiserer,
             leaderElection = leaderElection,
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(12, ChronoUnit.DAYS),
         )
 
     val rapidsConnection =
-        rapidConnection ?: RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        )
-            .withKtorModule {
+        rapidConnection ?: RapidApplication
+            .Builder(
+                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+            ).withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     utbetalingRoutes(simuleringOsService, behandlingKlient)
                 }
-            }
-            .build()
+            }.build()
 
     val oppgavetriggerRiver by lazy {
         OppgavetriggerRiver(

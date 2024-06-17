@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling.avstemming.regulering
+package no.nav.etterlatte.utbetaling.avstemming.vedtak
 
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.YearMonth
 
-class VerifiserReguleringssummer(
+class Vedtaksverifiserer(
     private val repository: UtbetalingDao,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) {

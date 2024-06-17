@@ -28,6 +28,7 @@ import java.time.LocalDate
 data class SoekPerson(
     val navn: String,
     val foedselsdato: LocalDate,
+    val sakType: SakType,
 )
 
 class PdlOboKlient(
@@ -125,6 +126,7 @@ class PdlOboKlient(
                 .post(apiUrl) {
                     bearerAuth(getOboToken(bruker))
                     header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                    behandlingsnummer(SakType.entries)
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(request)

@@ -53,13 +53,14 @@ class AppContext(
     val hendelseDao = HendelseDao(dataSource)
     private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient, behandlingKlient)
     private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
+    private val reguleringService = ReguleringService(publisher)
 
     val jobbPollerTask =
         JobbPollerTask(
             initialDelaySeconds = env.requireEnvValue("JOBB_POLLER_INITIAL_DELAY").toLong(),
             periode = env.requireEnvValue("JOBB_POLLER_INTERVAL").let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             openingHours = env.requireEnvValue("JOBB_POLLER_OPENING_HOURS").let { OpeningHours.of(it) },
-            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService),
+            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService),
         )
 
     val hendelsePollerTask =

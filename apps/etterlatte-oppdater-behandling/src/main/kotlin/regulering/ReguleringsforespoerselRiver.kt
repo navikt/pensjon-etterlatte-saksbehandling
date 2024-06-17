@@ -66,13 +66,9 @@ internal class ReguleringsforespoerselRiver(
         val spesifikkeSaker = packet.saker
         val sakType = packet.optionalSakType()
 
-        val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
-        var tatt = 0
-
-        while (tatt < antall) {
-            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
-            logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning =
+        kjoerIBatch(
+            antall = antall,
+            finnSaker = { antallIDenneRunden ->
                 behandlingService.hentAlleSaker(
                     kjoering,
                     antallIDenneRunden,
@@ -80,22 +76,43 @@ internal class ReguleringsforespoerselRiver(
                     sakerViIkkeRegulererAutomatiskNaa,
                     sakType,
                 )
+            },
+            sendTilOmregning = { sakerTilOmregning ->
+                val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+                sakerTilOmregning.saker.forEach {
+                    publiserSak(it, kjoering, packet, sakListe, context)
+                }
+            },
+        )
+    }
+
+    private fun kjoerIBatch(
+        finnSaker: (Int) -> Saker,
+        antall: Int,
+        sendTilOmregning: (Saker) -> Unit,
+    ) {
+        val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
+        var tatt = 0
+
+        while (tatt < antall) {
+            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
+            logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
+
+            val sakerTilOmregning = finnSaker(antallIDenneRunden)
+
             logger.info("Henta ${sakerTilOmregning.saker.size} saker")
 
             if (sakerTilOmregning.saker.isEmpty()) {
                 logger.debug("Ingen saker i denne runden. Returnerer")
-                break
+                return
             }
 
-            val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+            sendTilOmregning(sakerTilOmregning)
 
-            sakerTilOmregning.saker.forEach {
-                publiserSak(it, kjoering, packet, sakListe, context)
-            }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
             if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
-                break
+                return
             }
             val venteperiode = Duration.ofSeconds(5)
             logger.info("Venter $venteperiode før neste runde.")

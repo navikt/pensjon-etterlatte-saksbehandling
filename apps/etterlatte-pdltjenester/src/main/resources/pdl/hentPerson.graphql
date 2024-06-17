@@ -59,7 +59,6 @@ fragment folkeregistermetadata on Folkeregistermetadata {
     kilde
     aarsak
     sekvens
-
 }
 
 fragment utenlandskAdresseIFrittFormatDetails on UtenlandskAdresseIFrittFormat{

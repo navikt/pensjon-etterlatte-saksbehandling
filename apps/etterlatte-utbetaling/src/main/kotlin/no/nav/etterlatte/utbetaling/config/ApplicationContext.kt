@@ -28,7 +28,6 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
-import no.nav.etterlatte.utbetaling.avstemming.vedtak.VerifiserUtbetalingOgVedtakJob
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
@@ -193,13 +192,6 @@ class ApplicationContext(
         )
 
     val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao, vedtaksvurderingKlient)
-    val verifiserUtbetalingOgVedtakJob =
-        VerifiserUtbetalingOgVedtakJob(
-            verifiserer = vedtaksverifiserer,
-            leaderElection = leaderElection,
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(12, ChronoUnit.DAYS),
-        )
 
     val rapidsConnection =
         rapidConnection ?: RapidApplication

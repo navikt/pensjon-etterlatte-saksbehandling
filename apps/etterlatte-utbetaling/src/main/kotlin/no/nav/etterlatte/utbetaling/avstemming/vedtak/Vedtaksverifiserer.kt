@@ -20,17 +20,6 @@ class Vedtaksverifiserer(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun verifiserAlle() {
-        repository.hentUtbetalinger().forEach {
-            try {
-                verifiser(it)
-            } catch (e: Exception) {
-                logger.warn("Klarte ikke å verifisere match mellom utbetaling og vedtak for vedtak $it", e)
-                logger.debug("Fortsetter med å verifisere neste vedtak")
-            }
-        }
-    }
-
     suspend fun verifiser(vedtakId: Long) {
         val utbetaling = repository.hentUtbetaling(vedtakId = vedtakId)
         if (utbetaling == null) {

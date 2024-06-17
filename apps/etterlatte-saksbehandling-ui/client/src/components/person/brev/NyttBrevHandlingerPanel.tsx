@@ -1,5 +1,5 @@
 import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
-import { BrevStatus, IBrev } from '~shared/types/Brev'
+import { BrevStatus, Brevtype, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
@@ -126,6 +126,9 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           <BodyLong spacing>
             Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke angres.
           </BodyLong>
+          {brev.brevtype == Brevtype.VARSEL && (
+            <BodyLong spacing>Når varselbrevet er sendt kan du sette oppgaven på vent.</BodyLong>
+          )}
           <Alert variant="info">
             Ikke glem å lagre innholdet i brev <i>før</i> du ferdigstiller!
           </Alert>

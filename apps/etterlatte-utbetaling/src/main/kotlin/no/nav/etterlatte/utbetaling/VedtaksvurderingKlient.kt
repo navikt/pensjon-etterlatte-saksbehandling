@@ -70,7 +70,7 @@ class VedtaksvurderingKlient(
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (re: ResponseException) {
-            logger.error("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
+            logger.warn("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
 
             throw ForespoerselException(
                 status = re.response.status.value,

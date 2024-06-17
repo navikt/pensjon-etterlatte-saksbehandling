@@ -2,7 +2,12 @@ package no.nav.etterlatte.utils
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.pdl.Criteria
+import no.nav.etterlatte.pdl.Paging
+import no.nav.etterlatte.pdl.PdlSoekVariables
 import no.nav.etterlatte.pdl.PdlVariables
+import no.nav.etterlatte.pdl.SearchRule
+import no.nav.etterlatte.pdl.SoekPerson
 
 fun toPdlVariables(
     fnr: Folkeregisteridentifikator,
@@ -89,4 +94,17 @@ fun toPdlVariables(
             familieRelasjon = false,
             vergemaal = false,
         )
+}
+
+fun toPdlSearchVariables(soekPerson: SoekPerson): PdlSoekVariables {
+    val criterias =
+        listOf(
+            Criteria("fritekst.navn", SearchRule.CONTAINS.keyName, soekPerson.navn),
+            Criteria("person.foedsel.foedselsdato", SearchRule.EQUALS.keyName, soekPerson.foedselsdato.toString()),
+        )
+
+    return PdlSoekVariables(
+        paging = Paging(),
+        criteria = criterias,
+    )
 }

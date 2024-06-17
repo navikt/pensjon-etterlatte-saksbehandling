@@ -34,6 +34,8 @@ enum class EtterlatteBrevKode(
     OMSTILLINGSSTOENAD_REVURDERING_UTFALL(Brevtype.VEDTAK),
     OMSTILLINGSSTOENAD_VARSEL(Brevtype.VARSEL, "Varsel - omstillingsstønad"),
     OMSTILLINGSSTOENAD_VARSEL_UTFALL(Brevtype.VARSEL, "Varsel - omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT(Brevtype.VARSEL, "Varselbrev - stans om ikke akt.plikt oppfylt"),
+    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT_UTFALL(Brevtype.VARSEL, "Varselbrev - stans om ikke akt.plikt oppfylt"),
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
     OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT, "Varsel om aktivitetsplikt for omstillingsstønad"),

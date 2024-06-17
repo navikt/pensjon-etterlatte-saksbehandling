@@ -13,14 +13,12 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -126,52 +124,6 @@ internal class PersonRoutesTest {
 
         verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
         coVerify { behandlingKlient wasNot Called }
-    }
-
-    @Test
-    fun `Hent navn på person`() {
-        val response = NavnOpplysningDTO(1, "Test", "Mellom", "Testesen", SOEKER_FOEDSELSNUMMER.value)
-        every { grunnlagService.hentOpplysningstypeNavnFraFnr(any(), any()) } returns response
-        coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns true
-
-        testApplication {
-            val httpClient = createHttpClient()
-            val actualResponse =
-                httpClient.post("api/grunnlag/person/navn") {
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
-                    }
-                }
-
-            assertEquals(HttpStatusCode.OK, actualResponse.status)
-            assertEquals(serialize(response), actualResponse.body<String>())
-        }
-
-        verify(exactly = 1) { grunnlagService.hentOpplysningstypeNavnFraFnr(SOEKER_FOEDSELSNUMMER, any()) }
-        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any(), any()) }
-    }
-
-    @Test
-    fun `Hent navn på person - saksbehandler har ikke tilgang`() {
-        coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns false
-
-        testApplication {
-            val httpClient = createHttpClient()
-            val actualResponse =
-                httpClient.post("api/grunnlag/person/navn") {
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
-                    }
-                }
-
-            assertEquals(HttpStatusCode.NotFound, actualResponse.status)
-        }
-
-        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any(), any()) }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.personweb
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
@@ -12,10 +14,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
-import no.nav.etterlatte.pdl.PersonSearchHit
 import no.nav.etterlatte.pdl.SoekPerson
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
+import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
@@ -64,17 +66,35 @@ class PersonWebService(
     suspend fun soekPerson(
         soekPerson: SoekPerson,
         bruker: BrukerTokenInfo,
-    ): List<PersonSearchHit> {
+    ): List<PersonSoekSvar> {
         logger.info("Søker etter person fra PDL")
 
-        return pdlOboKlient.soekPerson(soekPerson, bruker).let {
-            if (it.errors?.isNotEmpty() != null) {
-                logger.error("Fikk feil i PDL søk feil: {}", it.errors.toJson())
+        return pdlOboKlient.soekPerson(soekPerson, bruker).let { personSoekSvar ->
+            if (personSoekSvar.errors?.isNotEmpty() != null) {
+                logger.error("Fikk feil i PDL søk feil: {}", personSoekSvar.errors.toJson())
                 throw PdlForesporselFeilet("Kunne ikke søke mot pdl")
             } else {
-                if (it.data != null) {
-                    if (it.data.sokPerson?.hits != null) {
-                        return it.data.sokPerson.hits
+                if (personSoekSvar.data != null) {
+                    if (personSoekSvar.data.sokPerson?.hits != null) {
+                        return coroutineScope {
+                            val mappedePersoner =
+                                personSoekSvar.data.sokPerson.hits.map {
+                                    async {
+                                        PersonMapper.mapPersonSoek(
+                                            ppsKlient = ppsKlient,
+                                            ident =
+                                                it.person.folkeregisteridentifikator
+                                                    .filter { !it.metadata.historisk }
+                                                    .first()
+                                                    .identifikasjonsnummer,
+                                            soekPerson = it.person,
+                                        )
+                                    }
+                                }
+                            mappedePersoner.map {
+                                it.await()
+                            }
+                        }
                     } else {
                         emptyList()
                     }

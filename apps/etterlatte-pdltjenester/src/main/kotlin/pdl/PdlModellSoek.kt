@@ -1,8 +1,5 @@
 package no.nav.etterlatte.pdl
 
-import no.nav.etterlatte.libs.common.behandling.Navn
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-
 data class PdlGraphSoekRequest(
     val query: String,
     val variables: PdlSoekVariables,
@@ -64,7 +61,7 @@ data class PersonSearchHit(
 )
 
 data class SoekPersonTreff(
-    val navn: Navn,
-    val foedselsnummer: Folkeregisteridentifikator,
-    val bostedsadresse: PdlBostedsadresse,
+    val navn: List<PdlNavn>,
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
+    val bostedsadresse: List<PdlBostedsadresse>?,
 )

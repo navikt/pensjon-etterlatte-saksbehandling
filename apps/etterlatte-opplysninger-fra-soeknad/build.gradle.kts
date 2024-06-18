@@ -9,4 +9,5 @@ dependencies {
 
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

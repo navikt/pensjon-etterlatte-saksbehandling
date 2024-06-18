@@ -47,6 +47,7 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 
     // Avhengigheter fra patching av sårbarheter i IBM MQ.
     // Vi bør kunne ta bort alle disse og exclude-lista for neste IBM MQ-versjon

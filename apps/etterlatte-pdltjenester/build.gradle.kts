@@ -40,4 +40,5 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

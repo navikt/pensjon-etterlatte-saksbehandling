@@ -47,4 +47,5 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

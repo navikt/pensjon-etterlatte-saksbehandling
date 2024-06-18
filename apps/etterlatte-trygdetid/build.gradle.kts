@@ -25,4 +25,5 @@ dependencies {
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

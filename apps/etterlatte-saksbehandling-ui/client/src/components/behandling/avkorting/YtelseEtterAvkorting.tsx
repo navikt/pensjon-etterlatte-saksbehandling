@@ -9,6 +9,7 @@ import { lastDayOfMonth } from 'date-fns'
 import { useAppSelector } from '~store/Store'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
@@ -17,12 +18,13 @@ const restanseIKroner = (restanse: number) => (restanse < 0 ? `+ ${NOK(restanse 
 
 const restanseOgSanksjon = (ytelse: IAvkortetYtelse): string => {
   if (ytelse.sanksjon) {
-    return tekstSanksjon[ytelse.sanksjon.type]
+    return tekstSanksjon[ytelse.sanksjon.sanksjonType]
   }
   return restanseIKroner(ytelse.restanse)
 }
 
 export const YtelseEtterAvkorting = () => {
+  const sanksjonTilgjengelig = useFeatureEnabledMedDefault('sanksjon', false)
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
   const ytelser = [...(avkorting?.avkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
   const tidligereYtelser = [...(avkorting?.tidligereAvkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
@@ -38,7 +40,7 @@ export const YtelseEtterAvkorting = () => {
       {ytelser.length > 0 && (
         <TableBox>
           <Heading spacing size="small" level="2">
-            Beregning etter avkorting og sanksjon
+            {sanksjonTilgjengelig ? 'Beregning etter avkorting og sanksjon' : 'Beregning etter avkorting'}
           </Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
@@ -47,8 +49,17 @@ export const YtelseEtterAvkorting = () => {
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Beregning</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
-                <Table.HeaderCell>Restanse / sanksjon</Table.HeaderCell>
-                <Table.HeaderCell>Brutto stønad etter avkorting / sanksjon</Table.HeaderCell>
+                {sanksjonTilgjengelig ? (
+                  <>
+                    <Table.HeaderCell>Restanse / sanksjon</Table.HeaderCell>
+                    <Table.HeaderCell>Brutto stønad etter avkorting / sanksjon</Table.HeaderCell>
+                  </>
+                ) : (
+                  <>
+                    <Table.HeaderCell>Restanse</Table.HeaderCell>
+                    <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
+                  </>
+                )}
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -93,7 +104,7 @@ export const YtelseEtterAvkorting = () => {
                         <Info
                           tekst={restanseOgSanksjon(ytelse)}
                           label=""
-                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(ytelse)} (Forrige vedtak)` : ''}
+                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(tidligereYtelse)} (Forrige vedtak)` : ''}
                         />
                       </SmalCelle>
                     </Table.DataCell>

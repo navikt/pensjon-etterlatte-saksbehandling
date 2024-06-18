@@ -98,6 +98,15 @@ class BeregningService(
             )
     }
 
+    suspend fun slettOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        beregningRepository.slettOverstyrtBeregning(behandling.sak)
+    }
+
     private fun hentBeregning(behandlingId: UUID): Beregning? {
         logger.info("Henter beregning for behandlingId=$behandlingId")
 

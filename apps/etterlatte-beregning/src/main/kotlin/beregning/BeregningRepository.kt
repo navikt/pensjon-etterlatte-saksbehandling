@@ -90,11 +90,11 @@ class BeregningRepository(
         }
     }
 
-    fun slettOverstyrtBeregning(sakId: Long) {
+    fun deaktiverOverstyrtBeregning(sakId: Long) {
         dataSource.transaction { tx ->
             queryOf(
-                statement = Queries.slettOverstyrBeregning,
-                paramMap = mapOf("sakId" to sakId),
+                statement = Queries.deaktiverOverstyrtberegning,
+                paramMap = mapOf("sakId" to sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
             ).let { query ->
                 tx.run(query.asUpdate)
             }
@@ -341,9 +341,9 @@ private object Queries {
         ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status
         """.trimIndent()
 
-    val slettOverstyrBeregning =
+    val deaktiverOverstyrtberegning =
         """
-        DELETE FROM overstyr_beregning
+        UPDATE overstyr_beregning SET status = :status
         WHERE sak_id = :sakId
         """.trimIndent()
 }

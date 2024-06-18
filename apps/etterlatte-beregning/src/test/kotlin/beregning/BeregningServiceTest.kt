@@ -253,7 +253,7 @@ internal class BeregningServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
-        every { beregningRepository.slettOverstyrtBeregning(any()) } just runs
+        every { beregningRepository.deaktiverOverstyrtBeregning(any()) } just runs
 
         runBlocking {
             val overstyrBeregning =
@@ -269,7 +269,7 @@ internal class BeregningServiceTest {
                 beregningRepository.hentOverstyrBeregning(any())
             }
 
-            beregningService.slettOverstyrtBeregning(behandling.id, bruker)
+            beregningService.deaktiverOverstyrtberegning(behandling.id, bruker)
             val tomOverstyrt = beregningService.hentOverstyrBeregning(behandling)
             tomOverstyrt shouldBe null
         }

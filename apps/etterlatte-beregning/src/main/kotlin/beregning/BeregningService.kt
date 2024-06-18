@@ -98,13 +98,16 @@ class BeregningService(
             )
     }
 
-    suspend fun slettOverstyrtBeregning(
+    suspend fun deaktiverOverstyrtberegning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
-        beregningRepository.slettOverstyrtBeregning(behandling.sak)
+        if (behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false)) {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
+        } else {
+            throw KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak()
+        }
     }
 
     private fun hentBeregning(behandlingId: UUID): Beregning? {
@@ -116,6 +119,12 @@ class BeregningService(
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
         this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
 }
+
+class KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_STATUS_BEHANDLING",
+        detail = "Behandlingen kan ikke endre overstyrt beregning da den har feil status",
+    )
 
 class TrygdetidMangler(
     behandlingId: UUID,

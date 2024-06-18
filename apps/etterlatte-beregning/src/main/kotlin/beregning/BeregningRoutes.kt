@@ -66,7 +66,7 @@ fun Route.beregning(
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                beregningService.slettOverstyrtBeregning(behandlingId, brukerTokenInfo)
+                beregningService.deaktiverOverstyrtberegning(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }

@@ -137,7 +137,7 @@ internal class BeregningRepositoryTest(
         assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
         assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
 
-        beregningRepository.slettOverstyrtBeregning(sakId)
+        beregningRepository.deaktiverOverstyrtBeregning(sakId)
         val overstyrBeregningSlettet = beregningRepository.hentOverstyrBeregning(sakId)
         assertNull(overstyrBeregningSlettet)
     }

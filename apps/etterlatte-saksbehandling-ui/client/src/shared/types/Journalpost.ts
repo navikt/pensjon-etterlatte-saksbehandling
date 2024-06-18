@@ -82,6 +82,12 @@ export interface AvsenderMottaker {
   land?: string
 }
 
+export interface SoekPersonVelg {
+  id?: string
+  navn?: string
+  type?: BrukerIdType
+}
+
 export interface JournalpostSak {
   sakstype?: Sakstype
   fagsakId?: string

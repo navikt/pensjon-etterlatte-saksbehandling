@@ -9,12 +9,12 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { formaterKanskjeNavn } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
-import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
+import { BrukerIdType, SoekPersonValg } from '~shared/types/Journalpost'
 
 interface SoekPersonProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  oppdaterBruker: (bruker: Bruker) => void
+  velgPerson: (person: SoekPersonValg) => void
 }
 
 export interface SoekPerson {
@@ -22,7 +22,7 @@ export interface SoekPerson {
   foedselsdato?: Date
 }
 
-export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPersonProps) {
+export default function SoekPersonPdl({ open, setOpen, velgPerson }: SoekPersonProps) {
   const [personSoekResult, soekperson] = useApiCall(soekPerson)
 
   const navnErGyldig = (navn: string | undefined): boolean => {
@@ -90,7 +90,12 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
                         <Table.DataCell scope="row">
                           <Button
                             onClick={() => {
-                              oppdaterBruker({ id: person.foedselsnummer, type: BrukerIdType.FNR })
+                              setOpen(!open)
+                              velgPerson({
+                                id: person.foedselsnummer,
+                                type: BrukerIdType.FNR,
+                                navn: formaterKanskjeNavn(person),
+                              })
                             }}
                           >
                             Velg

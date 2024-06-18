@@ -59,7 +59,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
 
         <EndreBruker
           bruker={journalpost.bruker}
-          oppdaterBruker={(bruker) => setJournalpost({ ...journalpost, bruker })}
+          oppdaterBruker={(bruker) => setJournalpost({ ...journalpost, bruker: bruker })}
         />
 
         <EndreTittelJournalpost
@@ -68,8 +68,11 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
         />
 
         <EndreAvsenderMottaker
+          key={journalpost.avsenderMottaker.id}
           avsenderMottaker={journalpost.avsenderMottaker}
-          oppdaterAvsenderMottaker={(avsenderMottaker) => setJournalpost({ ...journalpost, avsenderMottaker })}
+          oppdaterAvsenderMottaker={(avsenderMottaker) =>
+            setJournalpost({ ...journalpost, avsenderMottaker: avsenderMottaker })
+          }
         />
 
         <EndreDokumenter

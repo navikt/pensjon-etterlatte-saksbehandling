@@ -471,5 +471,7 @@ internal class AvkortingServiceTest {
                 behandlingKlient.avkort(behandlingId, bruker, false)
             }
         }
+
+        // TODO unittest
     }
 }

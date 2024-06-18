@@ -76,8 +76,12 @@ class AvkortingService(
 
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        validerInnekt(avkortingGrunnlagLagre, avkorting, behandling)
+
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
+
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 avkortingGrunnlagLagre,

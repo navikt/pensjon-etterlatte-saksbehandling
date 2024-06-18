@@ -24,7 +24,7 @@ export const EndreAvsenderMottaker = ({
   const [rediger, setRediger] = useState(false)
   const [open, setOpen] = useState(false)
 
-  const lagreEndretMottaker = (avsenderMottaker: AvsenderMottaker) => {
+  const lagreEndretMottaker = (avsenderMottaker: SoekPersonVelg) => {
     oppdaterAvsenderMottaker(avsenderMottaker)
     setRediger(false)
   }

@@ -36,7 +36,6 @@ dependencies {
     testImplementation(libs.el.impl)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }
 

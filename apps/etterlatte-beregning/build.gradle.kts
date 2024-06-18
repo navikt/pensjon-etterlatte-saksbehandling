@@ -40,7 +40,6 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }
-    testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))

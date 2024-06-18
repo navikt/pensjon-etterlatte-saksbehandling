@@ -24,6 +24,5 @@ dependencies {
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
 }

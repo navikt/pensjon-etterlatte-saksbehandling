@@ -16,8 +16,6 @@ dependencies {
     implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:etterlatte-brev-model"))
 
-    testImplementation(project(":libs:testdata"))
-
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
     testImplementation(libs.ktor2.servertests)

@@ -48,7 +48,6 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)
-    testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))

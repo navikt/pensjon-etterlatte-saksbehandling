@@ -288,6 +288,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         // Nye perioder skal ha resatt verdiene som skal vurderes
         with(tilbakekrevingMedNyePerioder.tilbakekreving) {
+            perioder.size shouldBe tilbakekreving.tilbakekreving.perioder.size
             perioder.forEach {
                 with(it.ytelse) {
                     bruttoTilbakekreving shouldBe null

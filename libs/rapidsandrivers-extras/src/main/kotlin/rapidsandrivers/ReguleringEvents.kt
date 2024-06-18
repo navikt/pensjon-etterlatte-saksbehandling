@@ -7,6 +7,13 @@ object ReguleringEvents {
     const val KJOERING = "kjoering"
     const val ANTALL = "antall"
     const val SPESIFIKKE_SAKER = "spesifikke_saker"
+
+    const val BEREGNING_BELOEP_FOER = "beregning_beloep_foer"
+    const val BEREGNING_BELOEP_ETTER = "beregning_beloep_etter"
+    const val BEREGNING_G_FOER = "beregning_g_foer"
+    const val BEREGNING_G_ETTER = "beregning_g_etter"
+    const val BEREGNING_BRUKT_OMREGNINGSFAKTOR = "beregning_brukt_omregningsfaktor"
+    const val VEDTAK_BELOEP = "vedtak_beloep"
 }
 
 var JsonMessage.saker: List<Long>

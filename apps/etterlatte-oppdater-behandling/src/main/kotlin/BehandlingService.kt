@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -101,6 +102,8 @@ interface BehandlingService {
         status: KjoeringStatus,
         kjoering: String,
     )
+
+    fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
 }
 
 class BehandlingServiceImpl(
@@ -306,6 +309,15 @@ class BehandlingServiceImpl(
                         sakId = sakId,
                     ),
                 )
+            }
+        }
+    }
+
+    override fun lagreFullfoertKjoering(request: LagreKjoeringRequest) {
+        runBlocking {
+            behandlingKlient.post("$url/omregning/kjoeringFullfoert") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }
         }
     }

@@ -192,7 +192,7 @@ data class GeografiskTilknytning(
 }
 
 interface Verge {
-    fun navn(): String
+    fun navn(): String?
 }
 
 data class Vergemaal(
@@ -200,6 +200,10 @@ data class Vergemaal(
     val foedselsnummer: Folkeregisteridentifikator,
 ) : Verge {
     override fun navn(): String = navn
+}
+
+class UkjentVergemaal : Verge {
+    override fun navn(): String? = null
 }
 
 data class ForelderVerge(
@@ -263,20 +267,13 @@ enum class AdressebeskyttelseGradering {
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
-fun hentRelevantVerge(
-    vergeListe: List<VergemaalEllerFremtidsfullmakt>?,
+fun hentVerger(
+    vergeListe: List<VergemaalEllerFremtidsfullmakt>,
     soekersFnr: Folkeregisteridentifikator?,
-): VergemaalEllerFremtidsfullmakt? {
-    val oekonomisk =
-        vergeListe?.firstOrNull { vergemaal ->
-            vergemaal.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser &&
-                harVergensFnr(vergemaal, soekersFnr)
-        }
-
-    return oekonomisk ?: vergeListe?.firstOrNull { vergemaal ->
+): List<VergemaalEllerFremtidsfullmakt> =
+    vergeListe.filter { vergemaal ->
         harVergensFnr(vergemaal, soekersFnr)
     }
-}
 
 private fun harVergensFnr(
     vergemaal: VergemaalEllerFremtidsfullmakt,

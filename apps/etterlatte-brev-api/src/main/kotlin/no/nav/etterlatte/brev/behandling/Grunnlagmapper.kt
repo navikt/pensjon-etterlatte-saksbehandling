@@ -1,13 +1,10 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -18,13 +15,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.etterlatte.libs.common.person.Verge
-import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -84,43 +77,7 @@ fun Grunnlag.mapSpraak(): Spraak =
         }
     }
 
-fun Grunnlag.mapVerge(
-    sakType: SakType,
-    brevutfallDto: BrevutfallDto?,
-    adresseService: AdresseService,
-): Verge? =
-    with(this) {
-        val relevantVerge =
-            hentRelevantVerge(
-                soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt,
-                soeker.hentFoedselsnummer()?.verdi,
-            )
-        if (relevantVerge != null) {
-            val mottakerAdresse =
-                runBlocking {
-                    adresseService.hentMottakerAdresse(
-                        sakType,
-                        relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value,
-                    )
-                }
-            return Vergemaal(
-                mottakerAdresse.navn,
-                relevantVerge.vergeEllerFullmektig.motpartsPersonident!!,
-            )
-        }
-
-        if (sakType == SakType.BARNEPENSJON) {
-            if (erOver18(brevutfallDto)) {
-                null
-            } else {
-                hentForelderVerge()
-            }
-        } else {
-            null
-        }
-    }
-
-private fun Grunnlag.hentForelderVerge(): ForelderVerge? {
+fun Grunnlag.hentForelderVerge(): ForelderVerge? {
     val gjenlevende = hentPotensiellGjenlevende()
     return if (gjenlevende != null && erAnsvarligForelder(gjenlevende)) {
         return forelderVerge(gjenlevende)
@@ -168,7 +125,7 @@ private fun String.storForbokstavEtter(delim: String) =
         it.replaceFirstChar { c -> c.uppercase() }
     }
 
-private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
+fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
     if (brevutfallDto?.aldersgruppe == Aldersgruppe.OVER_18) {
         return true
     }

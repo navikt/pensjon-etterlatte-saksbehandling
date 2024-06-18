@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -27,15 +26,6 @@ fun Route.personRoute(
                 withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
                     val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
                     call.respond(personMedSakOgRoller)
-                }
-            }
-        }
-
-        post("vergeadresse") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
-                when (val adresse = grunnlagService.hentVergeadresse(fnr.value)) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(adresse)
                 }
             }
         }

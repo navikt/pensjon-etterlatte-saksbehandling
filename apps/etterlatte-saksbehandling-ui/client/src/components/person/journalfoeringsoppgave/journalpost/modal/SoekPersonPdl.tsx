@@ -14,7 +14,7 @@ import { BrukerIdType, SoekPersonVelg } from '~shared/types/Journalpost'
 interface SoekPersonProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  oppdaterBruker: (person: SoekPersonVelg) => void
+  velgPerson: (person: SoekPersonVelg) => void
 }
 
 export interface SoekPerson {
@@ -22,7 +22,7 @@ export interface SoekPerson {
   foedselsdato?: Date
 }
 
-export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPersonProps) {
+export default function SoekPersonPdl({ open, setOpen, velgPerson }: SoekPersonProps) {
   const [personSoekResult, soekperson] = useApiCall(soekPerson)
 
   const navnErGyldig = (navn: string | undefined): boolean => {
@@ -91,7 +91,7 @@ export default function SoekPersonPdl({ open, setOpen, oppdaterBruker }: SoekPer
                           <Button
                             onClick={() => {
                               setOpen(!open)
-                              oppdaterBruker({
+                              velgPerson({
                                 id: person.foedselsnummer,
                                 type: BrukerIdType.FNR,
                                 navn: formaterKanskjeNavn(person),

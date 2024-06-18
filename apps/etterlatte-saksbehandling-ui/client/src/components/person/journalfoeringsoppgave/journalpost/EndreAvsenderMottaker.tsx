@@ -65,7 +65,7 @@ export const EndreAvsenderMottaker = ({
           />
 
           <br />
-          <SoekPersonPdl open={open} setOpen={setOpen} oppdaterBruker={lagreEndretMottaker} />
+          <SoekPersonPdl open={open} setOpen={setOpen} velgPerson={lagreEndretMottaker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">

@@ -1,10 +1,9 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import React, { useState } from 'react'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
+import React, { useEffect, useState } from 'react'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlagData, ReduksjonOMS } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import {
@@ -18,16 +17,24 @@ import {
   FeilIPerioder,
   validerInstitusjonsopphold,
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
-import InstitusjonsoppholdTableWrapper from './InstitusjonsoppholdTableWrapper'
+import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
+import styled from 'styled-components'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+
+const ReadMoreMarginBottom = styled(ReadMore)`
+  margin-bottom: 1rem;
+`
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+  lovtekstMedLenke: React.ReactNode
+  reduksjonsTyper: Record<string, string>
   onSubmit: (data: InstitusjonsoppholdGrunnlagData) => void
 }
 
-const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
-  const { behandling, onSubmit } = props
+const InstitusjonsoppholdBeregning = (props: InstitusjonsoppholdProps) => {
+  const { behandling, onSubmit, institusjonsopphold, lovtekstMedLenke, reduksjonsTyper } = props
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
@@ -40,7 +47,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
-      institusjonsOppholdForm: mapListeFraDto(behandling.beregningsGrunnlagOMS?.institusjonsopphold ?? []),
+      institusjonsOppholdForm: mapListeFraDto(institusjonsopphold ?? []),
     },
   })
 
@@ -54,7 +61,13 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   const feilOverlappendePerioder: [number, FeilIPeriode][] = [
     ...feilIKomplettePerioderOverIntervallInstitusjonsopphold(heleSkjemaet),
   ]
-  const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }) => {
+  useEffect(() => {
+    if (heleSkjemaet.length == 0) {
+      onSubmit([])
+    }
+  }, [heleSkjemaet])
+
+  const lagreSkjema = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }) => {
     if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder?.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
@@ -70,37 +83,18 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
 
   return (
     <InstitusjonsoppholdsWrapper>
-      {(behandling.beregningsGrunnlagOMS?.institusjonsopphold &&
-        behandling.beregningsGrunnlagOMS?.institusjonsopphold?.length > 0) ||
-      behandles ? (
+      {(institusjonsopphold && institusjonsopphold?.length > 0) || behandles ? (
         <>
-          <LovtekstMedLenke
-            tittel="Institusjonsopphold"
-            hjemler={[
-              {
-                tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',
-                lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
-              },
-            ]}
-            status={null}
-          >
-            <p>
-              Omstillingsstønad kan reduseres som følge av opphold i en institusjon med fri kost og losji under statlig
-              ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske
-              sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at stønaden skal
-              bli redusert. Dersom vedkommende har faste og nødvendige utgifter til bolig, skal stønaden ikke reduseres
-              eller reduseres mindre enn hovedregelen sier. Ytelsen skal ikke reduseres når etterlatte forsørger barn.
-            </p>
-          </LovtekstMedLenke>
+          {lovtekstMedLenke}
           <Insthendelser sakid={behandling.sakId} />
           <Heading level="3" size="small">
-            Beregningsperiode institusjonsopphold
+            Beregningsperioder institusjonsopphold
           </Heading>
-          <ReadMore header="Hva skal registreres?">
+          <ReadMoreMarginBottom header="Hva skal registreres?">
             Registrer perioden da ytelsen skal reduseres, altså fom-dato fra den 1. i fjerde måneden etter innleggelse
             (fra måneden etter innleggelse hvis vedkommende innen tre måneder etter utskrivelsen på nytt kommer i
             institusjon), og siste dato i måneden før utskrivingsmåneden.
-          </ReadMore>
+          </ReadMoreMarginBottom>
         </>
       ) : null}
       {fields.length ? (
@@ -126,7 +120,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
                 setVisFeil={setVisFeil}
                 errors={errors.institusjonsOppholdForm?.[index]}
                 behandles={behandles}
-                reduksjon={ReduksjonOMS}
+                reduksjon={reduksjonsTyper}
               />
             ))}
           </Table.Body>
@@ -152,11 +146,11 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
           Legg til beregningsperiode
         </Button>
       )}
-      {behandles && (
-        <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
+      {behandles && fields.length ? (
+        <Button type="submit" onClick={handleSubmit(lagreSkjema)}>
           Lagre institusjonsopphold
         </Button>
-      )}
+      ) : null}
       {visFeil && feilOverlappendePerioder?.length > 0 && (
         <>
           <FeilIPerioder feil={feilOverlappendePerioder} />
@@ -167,4 +161,4 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   )
 }
 
-export default InstitusjonsoppholdOMS
+export default InstitusjonsoppholdBeregning

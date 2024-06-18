@@ -51,6 +51,7 @@ dependencies {
     testImplementation(project(":libs:etterlatte-funksjonsbrytere"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
+    testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }
 

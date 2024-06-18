@@ -171,11 +171,11 @@ class BehandlingFactory(
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        return if (request.iverksatteEllerAttesterteBehandlinger.isNotEmpty()) {
+        return if (request.harIverksattBehandling()) {
             if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
             }
-            val forrigeBehandling = request.iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
+            val forrigeBehandling = request.iverkSattebehandlinger().maxBy { it.behandlingOpprettet }
             revurderingService
                 .opprettAutomatiskRevurdering(
                     sakId = sakId,
@@ -225,14 +225,9 @@ class BehandlingFactory(
         val harBehandlingerForSak =
             behandlingDao.alleBehandlingerISak(sak.id)
 
-        val harIverksattEllerAttestertBehandling =
-            harBehandlingerForSak.filter { behandling ->
-                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
-            }
         return DataHentetForOpprettBehandling(
             sak = sak,
             alleBehandlingerISak = harBehandlingerForSak,
-            iverksatteEllerAttesterteBehandlinger = harIverksattEllerAttestertBehandling,
         )
     }
 
@@ -295,5 +290,11 @@ fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || th
 data class DataHentetForOpprettBehandling(
     val sak: Sak,
     val alleBehandlingerISak: List<Behandling>,
-    val iverksatteEllerAttesterteBehandlinger: List<Behandling>,
-)
+) {
+    fun harIverksattBehandling() =
+        alleBehandlingerISak.any { behandling ->
+            BehandlingStatus.IVERKSATT == behandling.status
+        }
+
+    fun iverkSattebehandlinger() = alleBehandlingerISak.filter { BehandlingStatus.IVERKSATT == it.status }
+}

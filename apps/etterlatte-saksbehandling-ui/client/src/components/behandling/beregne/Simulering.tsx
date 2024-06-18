@@ -5,7 +5,7 @@ import { isInitial, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
-import { BodyShort, Button, Heading, Table, HStack } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Table, HStack, Box } from '@navikt/ds-react'
 import { SimulertBeregning, UtbetalingAggregert } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
 import styled from 'styled-components'
@@ -25,20 +25,20 @@ export const Simulering = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <>
-      <br />
-      <br />
-      <Heading spacing size="small" level="1">
-        Simulere utbetaling
-      </Heading>
+      <Box paddingBlock="12">
+        <Heading spacing size="small" level="1">
+          Simulere utbetaling
+        </Heading>
 
-      <Button variant="secondary" size="small" onClick={() => simuler()}>
-        Simuler
-      </Button>
-      {mapResult(simuleringStatus, {
-        pending: <Spinner visible={true} label="Simulerer..." />,
-        success: (simuleringrespons) => <SimuleringBeregning data={simuleringrespons} />,
-        error: () => <ApiErrorAlert>Feil ved simulering</ApiErrorAlert>,
-      })}
+        <Button variant="secondary" size="small" onClick={() => simuler()}>
+          Simuler
+        </Button>
+        {mapResult(simuleringStatus, {
+          pending: <Spinner visible={true} label="Simulerer..." />,
+          success: (simuleringrespons) => <SimuleringBeregning data={simuleringrespons} />,
+          error: () => <ApiErrorAlert>Feil ved simulering</ApiErrorAlert>,
+        })}
+      </Box>
     </>
   )
 }

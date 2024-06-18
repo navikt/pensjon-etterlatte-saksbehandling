@@ -64,8 +64,8 @@ internal class OmregningHendelserBeregningRiver(
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         runBlocking {
             val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
-            packet[BEREGNING_KEY] = pair.first
-            pair.second?.let { packet[AVKORTING_KEY] = it }
+            packet[BEREGNING_KEY] = pair.beregning
+            pair.avkorting?.let { packet[AVKORTING_KEY] = it }
         }
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
         context.publish(packet.toJson())
@@ -77,7 +77,7 @@ internal class OmregningHendelserBeregningRiver(
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
         dato: LocalDate,
-    ): Pair<BeregningDTO, AvkortingDto?> {
+    ): BeregningOgAvkorting {
         val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
@@ -91,9 +91,17 @@ internal class OmregningHendelserBeregningRiver(
                 beregningService
                     .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
-            Pair(beregning, avkorting)
+            BeregningOgAvkorting(
+                beregning = beregning,
+                forrigeBeregning = forrigeBeregning,
+                avkorting = avkorting,
+            )
         } else {
-            Pair(beregning, null)
+            BeregningOgAvkorting(
+                beregning = beregning,
+                forrigeBeregning = forrigeBeregning,
+                avkorting = null,
+            )
         }
     }
 
@@ -182,3 +190,9 @@ class ForStorOekning(
         detail = "Ny beregning for behandling $behandlingId gir for stor økning fra forrige omregning. Endringa var $endring",
         status = HttpStatusCode.ExpectationFailed.value,
     )
+
+data class BeregningOgAvkorting(
+    val beregning: BeregningDTO,
+    val forrigeBeregning: BeregningDTO,
+    val avkorting: AvkortingDto?,
+)

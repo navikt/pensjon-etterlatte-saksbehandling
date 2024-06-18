@@ -20,6 +20,7 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
@@ -63,9 +64,10 @@ internal class OmregningHendelserBeregningRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         runBlocking {
-            val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
-            packet[BEREGNING_KEY] = pair.beregning
-            pair.avkorting?.let { packet[AVKORTING_KEY] = it }
+            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
+            packet[BEREGNING_KEY] = beregning.beregning
+            beregning.avkorting?.let { packet[AVKORTING_KEY] = it }
+            sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
         context.publish(packet.toJson())
@@ -103,6 +105,30 @@ internal class OmregningHendelserBeregningRiver(
                 avkorting = null,
             )
         }
+    }
+
+    private fun sendMedInformasjonTilKontrollsjekking(
+        beregning: BeregningOgAvkorting,
+        packet: JsonMessage,
+    ) {
+        val forrige =
+            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(packet.dato))
+                .let {
+                    Pair(it.utbetaltBeloep, it.grunnbelop)
+                }.also {
+                    packet[ReguleringEvents.BEREGNING_BELOEP_FOER] = it.first
+                    packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
+                }
+        val naavaerende =
+            requireNotNull(beregning.beregning.beregningsperioder.paaDato(packet.dato))
+                .let {
+                    Pair(it.utbetaltBeloep, it.grunnbelop)
+                }.also {
+                    packet[ReguleringEvents.BEREGNING_BELOEP_ETTER] = it.first
+                    packet[ReguleringEvents.BEREGNING_G_ETTER] = it.second
+                }
+        packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
+            BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
     }
 
     private fun verifiserToleransegrenser(

@@ -122,11 +122,8 @@ export const AvkortingInntekt = ({
       <Heading spacing size="small" level="2">
         Inntektsavkorting
       </Heading>
-      <HjemmelLenke
-        tittel="Folketrygdloven § 17-9 (mangler lenke)"
-        lenke="https://lovdata.no/lov/" // TODO lenke finnes ikke enda
-      />
-      <BodyShort>
+      <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
+      <BodyShort spacing>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
         grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
         legges til grunn.
@@ -339,8 +336,7 @@ export const AvkortingInntekt = ({
 }
 
 const AvkortingInntektWrapper = styled.div`
-  width: 57em;
-  margin-bottom: 3em;
+  max-width: 70rem;
 `
 
 const InntektAvkortingTabell = styled.div`
@@ -349,7 +345,7 @@ const InntektAvkortingTabell = styled.div`
 
 const InntektAvkortingForm = styled.form`
   display: flex;
-  margin: 1em 0 1em 0;
+  margin: 1em 0 0 0;
 `
 
 const FormWrapper = styled.div`

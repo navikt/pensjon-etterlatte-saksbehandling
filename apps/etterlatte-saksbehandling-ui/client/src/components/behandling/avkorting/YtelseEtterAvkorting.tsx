@@ -7,9 +7,20 @@ import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/Y
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { lastDayOfMonth } from 'date-fns'
 import { useAppSelector } from '~store/Store'
+import { tekstSanksjon } from '~shared/types/sanksjon'
+import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
+
+const restanseIKroner = (restanse: number) => (restanse < 0 ? `+ ${NOK(restanse * -1)}` : `- ${NOK(restanse)}`)
+
+const restanseOgSanksjon = (ytelse: IAvkortetYtelse): string => {
+  if (ytelse.sanksjon) {
+    return tekstSanksjon[ytelse.sanksjon.type]
+  }
+  return restanseIKroner(ytelse.restanse)
+}
 
 export const YtelseEtterAvkorting = () => {
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
@@ -27,7 +38,7 @@ export const YtelseEtterAvkorting = () => {
       {ytelser.length > 0 && (
         <TableBox>
           <Heading spacing size="small" level="2">
-            Beregning etter avkorting
+            Beregning etter avkorting og sanksjon
           </Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
@@ -36,15 +47,13 @@ export const YtelseEtterAvkorting = () => {
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Beregning</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
-                <Table.HeaderCell>Restanse</Table.HeaderCell>
-                <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
+                <Table.HeaderCell>Restanse / sanksjon</Table.HeaderCell>
+                <Table.HeaderCell>Brutto stønad etter avkorting / sanksjon</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {ytelser.map((ytelse, key) => {
                 const tidligereYtelse = finnTidligereTidligereYtelseIPeriode(ytelse)
-                const restanseIKroner = (restanse: number) =>
-                  restanse < 0 ? `+ ${NOK(restanse * -1)}` : `- ${NOK(restanse)}`
                 return (
                   <Table.ExpandableRow
                     key={key}
@@ -82,11 +91,9 @@ export const YtelseEtterAvkorting = () => {
                     <Table.DataCell>
                       <SmalCelle>
                         <Info
-                          tekst={restanseIKroner(ytelse.restanse)}
+                          tekst={restanseOgSanksjon(ytelse)}
                           label=""
-                          undertekst={
-                            tidligereYtelse ? `${restanseIKroner(tidligereYtelse.restanse)} (Forrige vedtak)` : ''
-                          }
+                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(ytelse)} (Forrige vedtak)` : ''}
                         />
                       </SmalCelle>
                     </Table.DataCell>
@@ -111,10 +118,6 @@ export const YtelseEtterAvkorting = () => {
     </>
   )
 }
-
-const TableBox = styled(Box)`
-  max-width: 44rem;
-`
 
 const SmalCelle = styled(Box)`
   max-width: 9.35rem;

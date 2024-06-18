@@ -29,7 +29,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
-import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { lastDayOfMonth } from 'date-fns'
@@ -83,6 +83,10 @@ export const AvkortingInntekt = ({
       return avkortingGrunnlag[0]
     }
     if (avkortingGrunnlag.length > 0) {
+      // Setter disabla felter til forventet verdi
+      if (fulltAar()) {
+        return { spesifikasjon: '', fratrekkInnAar: 0, fratrekkInnAarUtland: 0 }
+      }
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyeste = avkortingGrunnlag[0]
       return { ...nyeste, id: undefined, spesifikasjon: '' }
@@ -253,6 +257,7 @@ export const AvkortingInntekt = ({
                       size="medium"
                       type="text"
                       inputMode="numeric"
+                      disabled={fulltAar()}
                       error={errors.fratrekkInnAar?.message}
                     />
                     <TextField
@@ -274,6 +279,7 @@ export const AvkortingInntekt = ({
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
+                      disabled={fulltAar()}
                       inputMode="numeric"
                       error={errors.fratrekkInnAarUtland?.message}
                     />

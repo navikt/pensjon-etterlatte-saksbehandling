@@ -82,7 +82,7 @@ export interface AvsenderMottaker {
   land?: string
 }
 
-export interface SoekPersonVelg {
+export interface SoekPersonValg {
   id?: string
   navn?: string
   type?: BrukerIdType

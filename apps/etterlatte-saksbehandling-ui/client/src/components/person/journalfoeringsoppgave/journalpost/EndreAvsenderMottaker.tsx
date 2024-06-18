@@ -1,4 +1,4 @@
-import { AvsenderMottaker, SoekPersonVelg } from '~shared/types/Journalpost'
+import { AvsenderMottaker, SoekPersonValg } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import React, { useState } from 'react'
@@ -12,19 +12,19 @@ export const EndreAvsenderMottaker = ({
   oppdaterAvsenderMottaker,
 }: {
   avsenderMottaker: AvsenderMottaker
-  oppdaterAvsenderMottaker: (avsenderMottaker: SoekPersonVelg) => void
+  oppdaterAvsenderMottaker: (avsenderMottaker: SoekPersonValg) => void
 }) => {
   const {
     register,
     formState: { errors },
     handleSubmit,
     reset,
-  } = useForm<SoekPersonVelg>({ defaultValues: avsenderMottaker })
+  } = useForm<SoekPersonValg>({ defaultValues: avsenderMottaker })
 
   const [rediger, setRediger] = useState(false)
   const [open, setOpen] = useState(false)
 
-  const lagreEndretMottaker = (avsenderMottaker: SoekPersonVelg) => {
+  const lagreEndretMottaker = (avsenderMottaker: SoekPersonValg) => {
     oppdaterAvsenderMottaker(avsenderMottaker)
     setRediger(false)
   }

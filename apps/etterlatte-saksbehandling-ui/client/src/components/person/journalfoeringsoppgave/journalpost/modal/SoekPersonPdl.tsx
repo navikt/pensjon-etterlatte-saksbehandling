@@ -9,12 +9,12 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { formaterKanskjeNavn } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
-import { BrukerIdType, SoekPersonVelg } from '~shared/types/Journalpost'
+import { BrukerIdType, SoekPersonValg } from '~shared/types/Journalpost'
 
 interface SoekPersonProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  velgPerson: (person: SoekPersonVelg) => void
+  velgPerson: (person: SoekPersonValg) => void
 }
 
 export interface SoekPerson {

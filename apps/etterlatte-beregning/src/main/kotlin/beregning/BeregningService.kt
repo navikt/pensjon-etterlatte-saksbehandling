@@ -104,7 +104,11 @@ class BeregningService(
     ) {
         if (behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false)) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
+            if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
+            } else {
+                throw KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak()
+            }
         } else {
             throw KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak()
         }

@@ -40,7 +40,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -77,6 +77,7 @@ const OverstyrBeregningGrunnlag = (props: {
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const perioder = useAppSelector((state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder)
@@ -261,15 +262,17 @@ const OverstyrBeregningGrunnlag = (props: {
                   >
                     Lagre
                   </Button>
-                  <Button
-                    variant="tertiary"
-                    loading={isPending(slettResultat)}
-                    onClick={() => {
-                      slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
-                    }}
-                  >
-                    Slett overstyrt beregning
-                  </Button>
+                  {behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+                    <Button
+                      variant="tertiary"
+                      loading={isPending(slettResultat)}
+                      onClick={() => {
+                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
+                      }}
+                    >
+                      Slett overstyrt beregning
+                    </Button>
+                  )}
                 </HStack>
               )}
               {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}

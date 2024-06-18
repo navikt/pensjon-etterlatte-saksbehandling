@@ -9,7 +9,7 @@ import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtakService
+import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingService
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
@@ -59,7 +59,7 @@ class ApplicationContext(
             hendelseRepository = tilbakekrevingHendelseRepository,
         )
 
-    val tilbakekrevingVedtakService = TilbakekrevingVedtakService(tilbakekrevingKlient)
+    val tilbakekrevingService = TilbakekrevingService(tilbakekrevingKlient)
 
     val kravgrunnlagService = KravgrunnlagService(behandlingKlient)
 

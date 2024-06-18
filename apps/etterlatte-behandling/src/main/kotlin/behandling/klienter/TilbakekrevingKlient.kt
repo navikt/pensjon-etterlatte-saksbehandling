@@ -32,7 +32,7 @@ class TilbakekrevingKlientImpl(
     ) {
         logger.info("Sender tilbakekrevingsvedtak til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
         val response =
-            client.post("$url/api/tilbakekreving/tilbakekrevingsvedtak") {
+            client.post("$url/api/tilbakekreving/${tilbakekrevingVedtak.sakId}/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     tilbakekrevingVedtak,

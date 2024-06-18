@@ -23,7 +23,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
           </Rad>
           {ytelse.sanksjon ? (
             <Rad>
-              <Navn>{tekstSanksjon[ytelse.sanksjon.type]} i perioden</Navn>
+              <Navn>{tekstSanksjon[ytelse.sanksjon.sanksjonType]} i perioden</Navn>
               <Operasjon>*</Operasjon>
               <Verdi>0</Verdi>
             </Rad>

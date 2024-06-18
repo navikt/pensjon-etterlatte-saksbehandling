@@ -17,7 +17,7 @@ const restanseIKroner = (restanse: number) => (restanse < 0 ? `+ ${NOK(restanse 
 
 const restanseOgSanksjon = (ytelse: IAvkortetYtelse): string => {
   if (ytelse.sanksjon) {
-    return tekstSanksjon[ytelse.sanksjon.type]
+    return tekstSanksjon[ytelse.sanksjon.sanksjonType]
   }
   return restanseIKroner(ytelse.restanse)
 }
@@ -93,7 +93,7 @@ export const YtelseEtterAvkorting = () => {
                         <Info
                           tekst={restanseOgSanksjon(ytelse)}
                           label=""
-                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(ytelse)} (Forrige vedtak)` : ''}
+                          undertekst={tidligereYtelse ? `${restanseOgSanksjon(tidligereYtelse)} (Forrige vedtak)` : ''}
                         />
                       </SmalCelle>
                     </Table.DataCell>

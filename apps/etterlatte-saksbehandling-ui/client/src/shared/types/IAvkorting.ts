@@ -46,5 +46,5 @@ export interface IAvkortetYtelse {
 
 export interface SanksjonertYtelse {
   id: string
-  type: SanksjonType
+  sanksjonType: SanksjonType
 }

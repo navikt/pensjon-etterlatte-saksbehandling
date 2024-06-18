@@ -3,6 +3,7 @@ package no.nav.etterlatte.sanksjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.transaction
@@ -162,10 +163,3 @@ data class LagreSanksjon(
     val tom: LocalDate?,
     val beskrivelse: String,
 )
-
-enum class SanksjonType {
-    BORTFALL,
-    OPPHOER,
-    STANS,
-    UTESTENGING,
-}

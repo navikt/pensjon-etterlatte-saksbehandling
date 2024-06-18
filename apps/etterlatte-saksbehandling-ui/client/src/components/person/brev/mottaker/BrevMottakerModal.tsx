@@ -3,11 +3,10 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
-import { isPending, Result } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
-import { VergeadressePanel } from '~components/person/brev/mottaker/VergeadressePanel'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -17,10 +16,9 @@ enum MottakerType {
 interface Props {
   brev: IBrev
   setBrev: Dispatch<SetStateAction<IBrev>>
-  vergeadresse: Result<Mottaker>
 }
 
-export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
+export function BrevMottakerModal({ brev, setBrev }: Props) {
   const { id: brevId, sakId, mottaker: initialMottaker } = brev
 
   const [mottakerStatus, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
@@ -77,8 +75,6 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               <Heading size="large" spacing>
                 Endre mottaker
               </Heading>
-
-              <VergeadressePanel vergeadresseResult={vergeadresse} />
 
               <ToggleGroup
                 defaultValue={mottakerType}

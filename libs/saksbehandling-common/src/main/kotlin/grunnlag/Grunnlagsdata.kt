@@ -28,12 +28,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.U
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGES_ADRESSE
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
-import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -93,8 +91,6 @@ fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<Pers
 fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() = this.hentKonstantOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
 
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
-
-fun Grunnlagsdata<JsonNode>.hentVergeadresse() = this.hentKonstantOpplysning<BrevMottaker>(VERGES_ADRESSE)
 
 fun Grunnlagsdata<JsonNode>.hentErForeldreloes() = this.hentKonstantOpplysning<Boolean>(FORELDRELOES)
 

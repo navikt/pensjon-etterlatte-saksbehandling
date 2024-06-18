@@ -40,7 +40,7 @@ fun opprettVedtak(
     status: VedtakStatus = VedtakStatus.OPPRETTET,
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
-    avkorting: ObjectNode? = objectMapper.createObjectNode(),
+    avkorting: ObjectNode? = null,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     revurderingAarsak: Revurderingaarsak? = null,

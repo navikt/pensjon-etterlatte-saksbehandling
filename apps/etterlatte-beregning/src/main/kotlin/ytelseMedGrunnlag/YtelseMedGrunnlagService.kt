@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -21,32 +22,28 @@ class YtelseMedGrunnlagService(
     ): YtelseMedGrunnlagDto? {
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
-        val avkorting = avkortingUtenLoependeYtelse.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt.dato)
+        val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
 
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
 
         val avkortinger =
-            avkorting.avkortetYtelseFraVirkningstidspunkt.map { avkortetYtelse ->
+            avkorting.avkortetYtelse.map { avkortetYtelse ->
                 val beregningIPeriode =
                     beregning.beregningsperioder
-                        .filter { it.datoFOM <= avkortetYtelse.periode.fom }
+                        .filter { it.datoFOM <= avkortetYtelse.fom }
                         .maxBy { it.datoFOM }
 
-                val avkortingsgrunnlagIPeriode =
-                    avkorting.aarsoppgjoer
-                        .single()
-                        .inntektsavkorting
-                        .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
-                        .maxBy { it.grunnlag.periode.fom }
-
-                val grunnlag = avkortingsgrunnlagIPeriode.grunnlag
+                val grunnlag =
+                    avkorting.avkortingGrunnlag
+                        .filter { it.fom <= avkortetYtelse.fom }
+                        .maxBy { it.fom }
                 val aarsinntekt = grunnlag.aarsinntekt + grunnlag.inntektUtland
                 val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
                 YtelseMedGrunnlagPeriodisertDto(
-                    periode = avkortetYtelse.periode,
+                    periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
                     ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
-                    restanse = avkortetYtelse.restanse?.fordeltRestanse ?: 0,
+                    restanse = avkortetYtelse.restanse,
                     avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                     ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                     trygdetid = beregningIPeriode.trygdetid,

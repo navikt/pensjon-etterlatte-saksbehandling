@@ -4,12 +4,13 @@ import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.RestanseGrunnlag
-import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanse
+import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanseOgSanksjon
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.sanksjon.Sanksjon
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
@@ -30,7 +32,8 @@ object AvkortingRegelkjoring {
 
     fun beregnInntektsavkorting(
         periode: Periode,
-        avkortingGrunnlag: List<AvkortingGrunnlag>,
+        avkortingGrunnlag: AvkortingGrunnlag,
+        innvilgaMaaneder: Int,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 
@@ -38,7 +41,7 @@ object AvkortingRegelkjoring {
             PeriodisertInntektAvkortingGrunnlag(
                 periodisertInntektAvkortingGrunnlag =
                     PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                        avkortingGrunnlag
+                        listOf(avkortingGrunnlag)
                             .map {
                                 GrunnlagMedPeriode(
                                     data = it,
@@ -53,7 +56,7 @@ object AvkortingRegelkjoring {
                                             fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
                                             inntektUtland = Beregningstall(it.inntektUtland),
                                             fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
+                                            relevanteMaaneder = Beregningstall(innvilgaMaaneder),
                                             it.id,
                                         ),
                                     kilde = it.kilde,
@@ -104,15 +107,21 @@ object AvkortingRegelkjoring {
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
         type: AvkortetYtelseType,
+        sanksjoner: List<Sanksjon>,
         restanse: Restanse? = null,
     ): List<AvkortetYtelse> {
+        if (sanksjoner.isNotEmpty() && type == AvkortetYtelseType.FORVENTET_INNTEKT) {
+            throw IllegalArgumentException("Skal ikke regne med sanksjoner i avkorting av forventet inntekt")
+        }
+
         val regelgrunnlag =
             PeriodisertAvkortetYtelseGrunnlag(
                 beregningsperioder = periodiserteBeregninger(ytelseFoerAvkorting),
                 avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
                 fordeltRestanse = restansegrunnlag(restanse),
+                sanksjonsperioder = periodiserteSanksjoner(sanksjoner),
             )
-        val resultat = avkortetYtelseMedRestanse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
+        val resultat = avkortetYtelseMedRestanseOgSanksjon.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -120,6 +129,8 @@ object AvkortingRegelkjoring {
                     val resultatFom = periodisertResultat.periode.fraDato
                     val avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi
                     val ytelseFoerAvkortingGrunnlag = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi
+
+                    val sanksjonForPeriode = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).sanksjon.verdi
                     AvkortetYtelse(
                         id = UUID.randomUUID(),
                         type = type,
@@ -130,6 +141,13 @@ object AvkortingRegelkjoring {
                             ),
                         ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
                         restanse = restanse,
+                        sanksjon =
+                            sanksjonForPeriode?.let {
+                                SanksjonertYtelse(
+                                    it.id!!,
+                                    it.type,
+                                )
+                            },
                         ytelseEtterAvkortingFoerRestanse = ytelseFoerAvkortingGrunnlag - avkortingsbeloep,
                         avkortingsbeloep = avkortingsbeloep,
                         ytelseFoerAvkorting = ytelseFoerAvkortingGrunnlag,
@@ -148,6 +166,33 @@ object AvkortingRegelkjoring {
             is RegelkjoeringResultat.UgyldigPeriode ->
                 throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
+    }
+
+    private fun periodiserteSanksjoner(sanksjonsperioder: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> {
+        if (sanksjonsperioder.isEmpty()) {
+            return KonstantGrunnlag(
+                FaktumNode(
+                    null,
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                ),
+            )
+        }
+
+        return PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            sanksjonsperioder.map {
+                GrunnlagMedPeriode(
+                    data =
+                        FaktumNode(
+                            verdi = it,
+                            beskrivelse = "Sanksjon: ${it.type}",
+                            kilde = it.id!!,
+                        ),
+                    fom = it.fom.atDay(1),
+                    tom = it.tom?.atEndOfMonth(),
+                )
+            },
+        ) { _, _, _ -> FaktumNode(null, beskrivelse = "Ingen sanksjon i perioden", kilde = "Grunnlag") }
     }
 
     private fun periodiserteBeregninger(beregninger: List<YtelseFoerAvkorting>): PeriodisertGrunnlag<FaktumNode<Int>> =
@@ -199,8 +244,16 @@ object AvkortingRegelkjoring {
         fraOgMed: YearMonth,
         nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
+        sanksjoner: List<Sanksjon>,
     ): Restanse {
         val oppstartNyInntekt = nyInntektsavkorting.grunnlag.periode.fom
+        val maanederMedSanksjonIAar =
+            (1..12)
+                .map {
+                    YearMonth.of(fraOgMed.year, it)
+                }.map { maaned ->
+                    maaned to sanksjoner.any { it.fom <= maaned && (it.tom == null || it.tom >= maaned) }
+                }
         val grunnlag =
             RestanseGrunnlag(
                 tidligereYtelseEtterAvkorting =
@@ -224,6 +277,12 @@ object AvkortingRegelkjoring {
                         verdi = oppstartNyInntekt,
                         kilde = nyInntektsavkorting.grunnlag.id,
                         beskrivelse = "Tidspunkt ny forventet inntekt inntrer",
+                    ),
+                maanederOgSanksjon =
+                    FaktumNode(
+                        verdi = maanederMedSanksjonIAar,
+                        kilde = sanksjoner.joinToString(prefix = "[", postfix = "]") { it.id.toString() },
+                        beskrivelse = "Måneder i året og om det er en sanksjon for den måneden",
                     ),
             )
 

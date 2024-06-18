@@ -9,11 +9,12 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.behandling.erOver18
+import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
-import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -25,11 +26,21 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
+import no.nav.etterlatte.libs.common.person.Verge
+import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -43,6 +54,8 @@ class BrevdataFacade(
     private val trygdetidKlient: TrygdetidKlient,
     private val adresseService: AdresseService,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun hentBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -81,12 +94,13 @@ class BrevdataFacade(
                 }
             val sak = sakDeferred.await()
             val brevutfallDto = brevutfallDeferred?.await()
+            val verge = hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
                     soeker = grunnlag.mapSoeker(brevutfallDto),
                     avdoede = grunnlag.mapAvdoede(),
-                    verge = grunnlag.mapVerge(sak.sakType, brevutfallDto, adresseService),
+                    verge = verge,
                 )
             val vedtak = vedtakDeferred?.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -202,6 +216,46 @@ class BrevdataFacade(
                     )
             }
         }
+
+    suspend fun hentVergeForSak(
+        sakType: SakType,
+        brevutfallDto: BrevutfallDto?,
+        grunnlag: Grunnlag,
+    ): Verge? {
+        val verger =
+            hentVerger(
+                grunnlag.soeker
+                    .hentSoekerPdlV1()!!
+                    .verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
+                grunnlag.soeker.hentFoedselsnummer()?.verdi,
+            )
+        return if (verger.size == 1) {
+            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident!!
+            val vergenavn =
+                adresseService
+                    .hentMottakerAdresse(sakType, vergeFnr.value)
+                    .navn
+            Vergemaal(
+                vergenavn,
+                vergeFnr,
+            )
+        } else if (verger.size > 1) {
+            logger.info(
+                "Fant flere verger for bruker med fnr ${grunnlag.soeker.hentFoedselsnummer()?.verdi} i " +
+                    "mapping av verge til brev.",
+            )
+            sikkerLogg.info(
+                "Fant flere verger for bruker med fnr ${
+                    grunnlag.soeker.hentFoedselsnummer()?.verdi?.value
+                } i mapping av verge til brev.",
+            )
+            UkjentVergemaal()
+        } else if (sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(brevutfallDto)) {
+            grunnlag.hentForelderVerge()
+        } else {
+            null
+        }
+    }
 
     suspend fun hentKlage(
         klageId: UUID,

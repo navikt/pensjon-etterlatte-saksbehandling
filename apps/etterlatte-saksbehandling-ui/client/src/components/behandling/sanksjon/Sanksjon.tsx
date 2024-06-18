@@ -2,9 +2,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
   Alert,
@@ -14,6 +14,7 @@ import {
   Detail,
   Heading,
   HStack,
+  ReadMore,
   Select,
   Table,
   Textarea,
@@ -27,6 +28,9 @@ import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
+import { useAppDispatch } from '~store/Store'
+import { hentAvkorting } from '~shared/api/avkorting'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -50,6 +54,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const [visForm, setVisForm] = useState(false)
   const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
+  const dispatch = useAppDispatch()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -90,6 +96,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         hentSanksjoner()
         setRedigerSanksjonId('')
         setVisForm(false)
+        fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
       }
     )
   }
@@ -140,7 +147,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
-    <Box paddingBlock="4">
+    <TableBox>
       {mapApiResult(
         hentSanksjonStatus,
         <Spinner visible label="Henter sanksjoner" />,
@@ -149,10 +156,37 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         ),
         () => (
           <VStack gap="4">
-            <Heading spacing size="small" level="2">
+            <Heading size="small" level="2">
               Sanksjoner
             </Heading>
-            <BodyShort>Her kommer det informasjon om sanksjoner.</BodyShort>
+            <Box>
+              <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
+              <BodyShort spacing>
+                Når en bruker har en sanksjon for en periode, vil 0 ytelse bli utbetalt. Hvis det er restanse fra
+                endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden, men forsøkt
+                omfordelt på måneder etter sanksjon.
+              </BodyShort>
+              <ReadMore header="Når skal sanksjoner gis?">
+                <BodyShort spacing>
+                  Dersom den gjenlevende ikke følger opp aktivitetskravet i{' '}
+                  <HjemmelLenke tittel="§ 17-7" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-7" />, skal
+                  omstillingsstønaden stanses inntil vilkårene for å motta ytelsen igjen er oppfylt.
+                </BodyShort>
+                <BodyShort spacing>
+                  Dersom den gjenlevende uten rimelig grunn sier opp sin stilling, nekter å ta imot tilbudt arbeid,
+                  unnlater å gjenoppta sitt arbeidsforhold etter endt foreldrepermisjon, nekter å delta i
+                  arbeidsmarkedstiltak eller unnlater å møte ved innkalling til arbeids- og velferdsetaten, faller
+                  omstillingsstønaden bort én måned.
+                </BodyShort>
+                <BodyShort>
+                  Dersom den gjenlevende har gitt uriktige opplysninger om forhold som har betydning for retten til
+                  ytelser etter dette kapitlet, og han eller hun var klar over eller burde vært klar over dette, kan
+                  vedkommende utestenges fra rett til stønad i inntil tre måneder første gang og inntil seks måneder ved
+                  gjentakelser. Det samme gjelder dersom den gjenlevende har unnlatt å gi opplysninger av betydning for
+                  retten til ytelser.
+                </BodyShort>
+              </ReadMore>
+            </Box>
 
             <TableBox>
               <Table className="table" zebraStripes size="medium">
@@ -238,6 +272,9 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
               </Table>
             </TableBox>
 
+            {mapResult(avkortingStatus, {
+              pending: 'Henter oppdatert avkortet ytelse',
+            })}
             {isFailure(slettSanksjonStatus) && (
               <Alert variant="error">
                 {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av sanksjon'}
@@ -334,6 +371,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
           </VStack>
         )
       )}
-    </Box>
+    </TableBox>
   )
 }

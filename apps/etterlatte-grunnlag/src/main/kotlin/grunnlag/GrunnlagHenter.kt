@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -25,7 +24,6 @@ import java.util.UUID
 
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
-    private val vergeService: VergeService,
 ) {
     suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag =
         coroutineScope {
@@ -71,11 +69,6 @@ class GrunnlagHenter(
                     personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
                 }
 
-            val vergesAdresseInfo: Grunnlagsopplysning<JsonNode>? =
-                vergeService
-                    .hentGrunnlagsopplysningVergesAdresse(soekerPersonInfo.person)
-                    ?.tilGrunnlagsopplysningJson()
-
             val opplysningList =
                 listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
                     .plus(gjenlevendePersonInfo)
@@ -96,7 +89,6 @@ class GrunnlagHenter(
                 listOfNotNull(
                     opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde = opplysningsbehov.kilde),
                     persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
-                    vergesAdresseInfo,
                 )
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
@@ -143,17 +135,6 @@ class GrunnlagHenter(
                     sakType,
                 )
             },
-        )
-
-    private fun Grunnlagsopplysning<BrevMottaker>.tilGrunnlagsopplysningJson(): Grunnlagsopplysning<JsonNode> =
-        Grunnlagsopplysning(
-            id = this.id,
-            kilde = this.kilde,
-            opplysningType = this.opplysningType,
-            meta = this.meta,
-            opplysning = this.opplysning.toJsonNode(),
-            fnr = this.fnr,
-            periode = this.periode,
         )
 
     private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(

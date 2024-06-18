@@ -19,12 +19,12 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
-import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import {
   Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
+  ReduksjonOMS,
 } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import Spinner from '~shared/Spinner'
@@ -33,6 +33,8 @@ import { handlinger } from '~components/behandling/handlinger/typer'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -108,9 +110,32 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           />
         )}
         {isSuccess(beregningsgrunnlag) && (
-          <InstitusjonsoppholdOMS
+          <InstitusjonsoppholdBeregning
+            reduksjonsTyper={ReduksjonOMS}
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
+            institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
+            lovtekstMedLenke={
+              <LovtekstMedLenke
+                tittel="Institusjonsopphold"
+                hjemler={[
+                  {
+                    tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',
+                    lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
+                  },
+                ]}
+                status={null}
+              >
+                <p>
+                  Omstillingsstønad kan reduseres som følge av opphold i en institusjon med fri kost og losji under
+                  statlig ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske
+                  sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at stønaden
+                  skal bli redusert. Dersom vedkommende har faste og nødvendige utgifter til bolig, skal stønaden ikke
+                  reduseres eller reduseres mindre enn hovedregelen sier. Ytelsen skal ikke reduseres når etterlatte
+                  forsørger barn.
+                </p>
+              </LovtekstMedLenke>
+            }
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />

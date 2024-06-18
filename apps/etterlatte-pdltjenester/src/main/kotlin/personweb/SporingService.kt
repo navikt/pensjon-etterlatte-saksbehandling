@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 class SporingService(
     private val sporingslogg: Sporingslogg,
 ) {
-    fun logg(
+    fun loggFnrAudit(
         brukerTokenInfo: BrukerTokenInfo,
         fnr: Folkeregisteridentifikator,
         endepunkt: String,
@@ -21,6 +21,23 @@ class SporingService(
             oppdateringstype = HttpMethod.GET,
             brukerId = brukerTokenInfo.ident(),
             hvemBlirSlaattOpp = fnr.value,
+            endepunkt = endepunkt,
+            resultat = Decision.Permit,
+            melding = melding,
+        ),
+    )
+
+    fun loggNavnAudit(
+        brukerTokenInfo: BrukerTokenInfo,
+        navn: String,
+        endepunkt: String,
+        melding: String,
+    ) = sporingslogg.logg(
+        Sporingsrequest(
+            kallendeApplikasjon = "etterlatte-pdltjenester",
+            oppdateringstype = HttpMethod.GET,
+            brukerId = brukerTokenInfo.ident(),
+            hvemBlirSlaattOpp = navn,
             endepunkt = endepunkt,
             resultat = Decision.Permit,
             melding = melding,

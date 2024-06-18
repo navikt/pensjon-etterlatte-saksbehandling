@@ -26,7 +26,7 @@ class VedtaksvurderingKlient(
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    internal suspend fun hentVedtak(
+    internal suspend fun hentVedtakSimulering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -44,6 +44,33 @@ class VedtaksvurderingKlient(
                 )
         } catch (re: ResponseException) {
             logger.error("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
+                detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
+                meta = mapOf("behandlingId" to behandlingId),
+            )
+        }
+    }
+
+    internal suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto {
+        try {
+            logger.info("Henter vedtak for behandlingId=$behandlingId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            logger.warn("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
 
             throw ForespoerselException(
                 status = re.response.status.value,

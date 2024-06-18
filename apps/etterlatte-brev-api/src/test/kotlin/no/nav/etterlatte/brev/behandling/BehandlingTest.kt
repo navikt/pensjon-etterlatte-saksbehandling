@@ -3,7 +3,15 @@ package no.nav.etterlatte.brev.behandling
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -215,10 +223,11 @@ internal class BehandlingTest {
             adresseService.hentMottakerAdresse(any<SakType>(), vergesFnr.value)
         } returns Mottaker("Viggo Verge", null, null, mockk())
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals("Viggo Verge", vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, null, adresseService)
+        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertEquals("Viggo Verge", vergeOmstillingsstoenad!!.navn())
     }
 
@@ -280,10 +289,11 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, null, adresseService)
+        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -332,10 +342,12 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon)
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, null, adresseService)
+        val vergeOmstillingsstoenad =
+            runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -392,10 +404,16 @@ internal class BehandlingTest {
                 Feilutbetaling(FeilutbetalingValg.NEI, null),
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, brevutfallDto, adresseService)
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+
+        val vergeBarnepensjon =
+            runBlocking {
+                brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, brevutfallDto, grunnlag)
+            }
         assertNull(vergeBarnepensjon)
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, null, adresseService)
+        val vergeOmstillingsstoenad =
+            runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -434,10 +452,11 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon, "Verge skal ikke settes for barnepensjon hvis barnet er over 18 år")
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, null, adresseService)
+        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -511,4 +530,23 @@ internal class BehandlingTest {
             Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
             jsonNode,
         )
+}
+
+fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): BrevdataFacade {
+    val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
+    val grunnlagKlient: GrunnlagKlient = mockk()
+    val beregningService: BeregningService = mockk()
+    val behandlingKlient: BehandlingKlient = mockk()
+    val sakService: SakService = mockk()
+    val trygdetidKlient: TrygdetidKlient = mockk()
+
+    return BrevdataFacade(
+        vedtaksvurderingKlient,
+        grunnlagKlient,
+        beregningService,
+        behandlingKlient,
+        sakService,
+        trygdetidKlient,
+        addresseService,
+    )
 }

@@ -1,0 +1,80 @@
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+}
+
+fragment vegadresseDetails on Vegadresse {
+    husbokstav
+    husnummer
+    adressenavn
+    postnummer
+    kommunenummer
+    bydelsnummer
+}
+
+fragment utenlandskAdresseDetails on UtenlandskAdresse {
+    adressenavnNummer
+    bygningEtasjeLeilighet
+    postboksNummerNavn
+    postkode
+    bySted
+    regionDistriktOmraade
+    landkode
+}
+
+
+query ($paging:Paging, $criteria:[Criterion]) {
+    sokPerson (paging: $paging,  criteria: $criteria){
+        pageNumber,
+        totalHits,
+        totalPages,
+        hits {
+            person {
+                navn(historikk: false) {
+                    fornavn
+                    etternavn
+                    mellomnavn
+                    metadata {
+                        ...metadata
+                    }
+                }
+                folkeregisteridentifikator(historikk: false) {
+                    identifikasjonsnummer
+                    status
+                    type
+                    folkeregistermetadata {
+                        ...folkeregistermetadata
+                    }
+                    metadata {
+                        ...metadata
+                    }
+                }
+                bostedsadresse {
+                    coAdressenavn
+                    vegadresse {...vegadresseDetails}
+                    utenlandskAdresse {...utenlandskAdresseDetails}
+                    gyldigFraOgMed
+                    gyldigTilOgMed
+                    metadata {...metadata}
+                }
+            }
+        }
+    }
+}

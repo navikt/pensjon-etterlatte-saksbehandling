@@ -13,7 +13,6 @@ import { settOppgave } from '~store/reducers/OppgaveReducer'
 
 interface Props {
   oppgave: OppgaveDTO | null
-  redigerbar: boolean
 }
 
 enum PaaventAarsak {
@@ -23,7 +22,7 @@ enum PaaventAarsak {
   ANNET = 'Annet',
 }
 
-export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
+export const SettPaaVent = ({ oppgave }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   const dispatch = useAppDispatch()
@@ -128,19 +127,17 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
           )}
 
           <br />
-          {redigerbar && (
-            <HStack justify="end">
-              <Button
-                size="small"
-                variant="secondary"
-                onClick={() => setVisPaaVent(true)}
-                icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
-                iconPosition="right"
-              >
-                {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
-              </Button>
-            </HStack>
-          )}
+          <HStack justify="end">
+            <Button
+              size="small"
+              variant="secondary"
+              onClick={() => setVisPaaVent(true)}
+              icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
+              iconPosition="right"
+            >
+              {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
+            </Button>
+          </HStack>
         </>
       )}
     </div>

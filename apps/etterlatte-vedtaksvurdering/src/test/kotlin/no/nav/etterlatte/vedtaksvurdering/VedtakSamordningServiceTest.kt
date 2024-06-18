@@ -142,6 +142,7 @@ class VedtakSamordningServiceTest {
                     ytelseEtterAvkorting = ytelseEtter,
                     avkortingsbeloep = ytelseEtter - ytelseFoer,
                     restanse = 0,
+                    sanksjon = null,
                 ),
             ),
         tidligereAvkortetYtelse = emptyList(),

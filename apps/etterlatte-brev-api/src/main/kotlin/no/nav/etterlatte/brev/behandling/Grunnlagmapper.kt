@@ -1,13 +1,10 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -18,15 +15,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.etterlatte.libs.common.person.UkjentVergemaal
-import no.nav.etterlatte.libs.common.person.Verge
-import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -86,44 +77,7 @@ fun Grunnlag.mapSpraak(): Spraak =
         }
     }
 
-fun Grunnlag.mapVerge(
-    sakType: SakType,
-    brevutfallDto: BrevutfallDto?,
-    adresseService: AdresseService,
-): Verge? =
-    with(this) {
-        val verger =
-            hentVerger(
-                soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
-                soeker.hentFoedselsnummer()?.verdi,
-            )
-        return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident!!
-            Vergemaal(
-                navnViaAdresse(adresseService, sakType, vergeFnr),
-                vergeFnr,
-            )
-        } else if (verger.size > 1) {
-            UkjentVergemaal()
-        } else if (sakType == SakType.BARNEPENSJON && !erOver18(brevutfallDto)) {
-            hentForelderVerge()
-        } else {
-            null
-        }
-    }
-
-private fun navnViaAdresse(
-    adresseService: AdresseService,
-    sakType: SakType,
-    vergeFnr: Folkeregisteridentifikator,
-): String =
-    runBlocking {
-        adresseService
-            .hentMottakerAdresse(sakType, vergeFnr.value)
-            .navn
-    }
-
-private fun Grunnlag.hentForelderVerge(): ForelderVerge? {
+fun Grunnlag.hentForelderVerge(): ForelderVerge? {
     val gjenlevende = hentPotensiellGjenlevende()
     return if (gjenlevende != null && erAnsvarligForelder(gjenlevende)) {
         return forelderVerge(gjenlevende)
@@ -171,7 +125,7 @@ private fun String.storForbokstavEtter(delim: String) =
         it.replaceFirstChar { c -> c.uppercase() }
     }
 
-private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
+fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
     if (brevutfallDto?.aldersgruppe == Aldersgruppe.OVER_18) {
         return true
     }

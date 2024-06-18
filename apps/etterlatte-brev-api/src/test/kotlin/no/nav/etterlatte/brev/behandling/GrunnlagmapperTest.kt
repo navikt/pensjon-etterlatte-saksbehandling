@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -55,7 +56,8 @@ class GrunnlagmapperTest {
         coEvery {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
-        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!!
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val verge = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, opplysningsgrunnlag)!! }
 
         Assertions.assertTrue(verge is UkjentVergemaal)
     }
@@ -82,7 +84,16 @@ class GrunnlagmapperTest {
         coEvery {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
-        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!! as Vergemaal
+
+        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val verge =
+            runBlocking {
+                brevdataFacade.hentVergeForSak(
+                    SakType.BARNEPENSJON,
+                    null,
+                    opplysningsgrunnlag,
+                )!! as Vergemaal
+            }
 
         verge.navn() shouldBe "Vera Verge"
         verge.navn shouldBe "Vera Verge"

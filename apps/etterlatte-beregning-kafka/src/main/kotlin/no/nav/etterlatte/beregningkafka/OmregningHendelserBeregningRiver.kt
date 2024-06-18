@@ -30,6 +30,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import tidspunkt.erEtter
+import tidspunkt.erFoerEllerPaa
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -190,14 +192,8 @@ internal class OmregningHendelserBeregningRiver(
     }
 
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
-        filter { it.datoFOM.atDay(1) <= dato }
-            .firstOrNull {
-                it.datoTOM == null ||
-                    it.datoTOM
-                        ?.plusMonths(1)
-                        ?.atDay(1)
-                        ?.isAfter(dato) == true
-            }
+        filter { it.datoFOM.erFoerEllerPaa(dato) }
+            .firstOrNull { it.datoTOM.erEtter(dato) }
 }
 
 class MindreEnnForrigeBehandling(

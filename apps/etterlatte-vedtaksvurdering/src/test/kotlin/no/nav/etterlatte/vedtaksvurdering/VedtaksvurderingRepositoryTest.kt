@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.beInstanceOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -56,7 +57,16 @@ internal class VedtaksvurderingRepositoryTest(
 
     @Test
     fun `skal opprette vedtak for behandling`() {
-        val nyttVedtak = opprettVedtak()
+        val avkorting =
+            AvkortingDto(
+                avkortingGrunnlag = emptyList(),
+                avkortetYtelse = emptyList(),
+            ).toObjectNode()
+
+        val nyttVedtak =
+            opprettVedtak(
+                avkorting = avkorting,
+            )
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -75,7 +85,7 @@ internal class VedtaksvurderingRepositoryTest(
                 it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
                 it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
                 it.beregning shouldBe objectMapper.createObjectNode()
-                it.avkorting shouldBe objectMapper.createObjectNode()
+                it.avkorting shouldBe avkorting
                 it.utbetalingsperioder.first().let { utbetalingsperiode ->
                     utbetalingsperiode.id shouldNotBe null
                     utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)

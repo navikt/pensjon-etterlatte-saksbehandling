@@ -29,7 +29,7 @@ import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { Simulering } from '~components/behandling/beregne/Simulering'
+import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -132,7 +132,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                       return (
                         <>
                           <BarnepensjonSammendrag beregning={beregning} />
-                          {visSimulering && <Simulering behandling={behandling} />}
+                          {visSimulering && <SimulerUtbetaling behandling={behandling} />}
                           <Brevutfall
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}

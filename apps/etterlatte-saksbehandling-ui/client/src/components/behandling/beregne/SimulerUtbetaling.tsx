@@ -11,7 +11,7 @@ import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/forma
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
-export const Simulering = (props: { behandling: IBehandlingReducer }) => {
+export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const [simuleringStatus, simulerUtbetalingRequest] = useApiCall(simulerUtbetaling)
 

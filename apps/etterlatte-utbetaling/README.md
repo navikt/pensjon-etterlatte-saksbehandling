@@ -27,8 +27,9 @@ kommunisere dette med feks tjenestekall.
 Arbeidet med dette er ikke påbegynt da de ikke ble sett på som hensiktsmessig før vi har kommet lenger med utarbeidelse
 av vedtak.
 
-### Simulering
-Så langt er det ikke definert om simulering er noe vi skal støtte.
+### Simulere utbetaling
+Simulere mot økonomiløsningen for å se informasjon rundt ikke bare beregnede beløp, men forfallsdatoer, skatt/trekk,
+etterbetaling og potensiell tilbakekreving.
 
 
 ## Testing

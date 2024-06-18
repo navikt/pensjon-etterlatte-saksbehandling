@@ -20,7 +20,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { Box, VStack } from '@navikt/ds-react'
-import { Simulering } from '~components/behandling/beregne/Simulering'
+import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 
 export const Avkorting = ({
   behandling,
@@ -75,7 +75,7 @@ export const Avkorting = ({
 
         {visSanksjon && <Sanksjon behandling={behandling} />}
         {avkorting && <YtelseEtterAvkorting />}
-        {avkorting && visSimulering && <Simulering behandling={behandling} />}
+        {avkorting && visSimulering && <SimulerUtbetaling behandling={behandling} />}
         {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
       </VStack>
     </Box>

@@ -10,6 +10,7 @@ import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterNavn } from '~shared/types/Person'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import SoekPersonPdl from '~components/person/journalfoeringsoppgave/journalpost/modal/SoekPersonPdl'
 
 const formaterType = (type: BrukerIdType) => {
   switch (type) {
@@ -42,6 +43,7 @@ export const EndreBruker = ({
   } = useForm<AvsenderMottaker>({ defaultValues: bruker })
 
   const [rediger, setRediger] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const lagreEndretMottaker = (bruker: Bruker) => {
     oppdaterBruker({ ...bruker, type: BrukerIdType.FNR })
@@ -106,6 +108,7 @@ export const EndreBruker = ({
             ),
           })}
           <br />
+          <SoekPersonPdl open={open} setOpen={setOpen} oppdaterBruker={lagreEndretMottaker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
@@ -114,6 +117,7 @@ export const EndreBruker = ({
             <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
               Lagre
             </Button>
+            <Button onClick={() => setOpen(!open)}>Avansert Søk</Button>
           </HStack>
         </>
       ) : (

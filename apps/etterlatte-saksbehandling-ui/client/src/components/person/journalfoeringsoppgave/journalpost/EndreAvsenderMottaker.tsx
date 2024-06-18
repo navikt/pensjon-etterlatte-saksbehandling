@@ -12,7 +12,7 @@ export const EndreAvsenderMottaker = ({
   oppdaterAvsenderMottaker,
 }: {
   avsenderMottaker: AvsenderMottaker
-  oppdaterAvsenderMottaker: (avsenderMottaker: AvsenderMottaker) => void
+  oppdaterAvsenderMottaker: (avsenderMottaker: SoekPersonVelg) => void
 }) => {
   const {
     register,

@@ -1,4 +1,4 @@
-import { AvsenderMottaker, Bruker, BrukerIdType } from '~shared/types/Journalpost'
+import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Button, CopyButton, Heading, HStack, TextField } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
@@ -40,7 +40,7 @@ export const EndreBruker = ({
     handleSubmit,
     watch,
     reset,
-  } = useForm<AvsenderMottaker>({ defaultValues: bruker })
+  } = useForm<Bruker>({ defaultValues: bruker })
 
   const [rediger, setRediger] = useState(false)
   const [open, setOpen] = useState(false)

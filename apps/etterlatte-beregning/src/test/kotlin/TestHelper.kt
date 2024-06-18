@@ -8,7 +8,6 @@ import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.Restanse
-import no.nav.etterlatte.avkorting.SanksjonertYtelse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
@@ -31,6 +30,8 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnla
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -48,7 +49,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.LagreSanksjon
 import no.nav.etterlatte.sanksjon.Sanksjon
-import no.nav.etterlatte.sanksjon.SanksjonType
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth

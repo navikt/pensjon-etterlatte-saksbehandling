@@ -11,7 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -33,7 +32,7 @@ fun Route.avkorting(
                 logger.info("Henter avkorting med behandlingId=$it")
                 when (val avkorting = avkortingService.hentAvkorting(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NoContent)
-                    else -> call.respond(avkorting.toDto())
+                    else -> call.respond(avkorting)
                 }
             }
         }
@@ -41,7 +40,7 @@ fun Route.avkorting(
         get("ferdig") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
-                call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo).toDto())
+                call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
             }
         }
 
@@ -55,7 +54,7 @@ fun Route.avkorting(
                         brukerTokenInfo,
                         avkortingGrunnlag,
                     )
-                call.respond(avkorting.toDto())
+                call.respond(avkorting)
             }
         }
 
@@ -78,17 +77,6 @@ fun Route.avkorting(
     }
 }
 
-fun Avkorting.toDto() =
-    AvkortingDto(
-        // TODO erstatt single
-        avkortingGrunnlag =
-            aarsoppgjoer.single().inntektsavkorting.map {
-                it.grunnlag.toDto(aarsoppgjoer.single().forventaInnvilgaMaaneder)
-            },
-        avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
-        tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() },
-    )
-
 fun AvkortingGrunnlag.toDto(forventaInnvilgaMaaneder: Int) =
     AvkortingGrunnlagDto(
         id = id,
@@ -98,7 +86,7 @@ fun AvkortingGrunnlag.toDto(forventaInnvilgaMaaneder: Int) =
         fratrekkInnAar = fratrekkInnAar,
         inntektUtland = inntektUtland,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
-        forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
+        relevanteMaanederInnAar = forventaInnvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
     )
@@ -113,4 +101,5 @@ fun AvkortetYtelse.toDto() =
         avkortingsbeloep = avkortingsbeloep,
         restanse = restanse?.fordeltRestanse ?: 0,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
+        sanksjon = sanksjon,
     )

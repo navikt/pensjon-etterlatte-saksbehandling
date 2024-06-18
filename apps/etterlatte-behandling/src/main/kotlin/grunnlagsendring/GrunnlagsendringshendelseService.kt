@@ -90,21 +90,12 @@ class GrunnlagsendringshendelseService(
 
         inTransaction {
             grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
-            try {
-                oppgaveService.ferdigStillOppgaveUnderBehandling(
-                    referanse = hendelse.id.toString(),
-                    type = OppgaveType.VURDER_KONSEKVENS,
-                    saksbehandler = saksbehandler,
-                )
-            } catch (e: Exception) {
-                logger.error(
-                    "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
-                    e,
-                )
-                throw KunneIkkeLukkeOppgaveForhendelse(
-                    e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
-                )
-            }
+
+            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                referanse = hendelse.id.toString(),
+                type = OppgaveType.VURDER_KONSEKVENS,
+                saksbehandler = saksbehandler,
+            )
         }
     }
 

@@ -6,7 +6,7 @@ import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
@@ -26,21 +26,20 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
-      {mapApiResult(
-        soeker,
-        <Spinner visible label="Henter eventuelle verger" margin="0" />,
-        (error) => (
+      {mapResult(soeker, {
+        pending: <Spinner visible label="Henter eventuelle verger" margin="0" />,
+        error: (error) => (
           <ApiErrorAlert>
             {error.detail || 'Feil oppsto ved henting av eventuelle verger. Prøv igjen senere'}
           </ApiErrorAlert>
         ),
-        (soekeren) =>
-          (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []) && (
+        success: (soekeren) =>
+          (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
             <Alert variant="info" size="small" inline>
               Søker har verge
             </Alert>
-          )
-      )}
+          ),
+      })}
 
       <HStack gap="4" justify="space-between">
         <Heading spacing level="2" size="medium">

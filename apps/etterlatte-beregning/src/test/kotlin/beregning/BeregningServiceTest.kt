@@ -251,6 +251,7 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
         every { beregningRepository.deaktiverOverstyrtBeregning(any()) } just runs

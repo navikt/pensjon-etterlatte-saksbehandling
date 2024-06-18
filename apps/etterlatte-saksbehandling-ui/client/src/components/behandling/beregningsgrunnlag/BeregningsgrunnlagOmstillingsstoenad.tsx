@@ -24,6 +24,7 @@ import {
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
+  ReduksjonOMS,
 } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import Spinner from '~shared/Spinner'
@@ -110,6 +111,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         )}
         {isSuccess(beregningsgrunnlag) && (
           <InstitusjonsoppholdBeregning
+            reduksjonsTyper={ReduksjonOMS}
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
             institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}

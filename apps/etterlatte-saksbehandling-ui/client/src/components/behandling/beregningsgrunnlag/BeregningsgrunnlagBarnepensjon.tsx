@@ -34,6 +34,7 @@ import {
   BeregningsmetodeFlereAvdoedeData,
   BeregningsmetodeForAvdoed,
   InstitusjonsoppholdGrunnlagData,
+  ReduksjonBP,
 } from '~shared/types/Beregning'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
@@ -256,6 +257,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
                 </p>
               </LovtekstMedLenke>
             }
+            reduksjonsTyper={ReduksjonBP}
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />

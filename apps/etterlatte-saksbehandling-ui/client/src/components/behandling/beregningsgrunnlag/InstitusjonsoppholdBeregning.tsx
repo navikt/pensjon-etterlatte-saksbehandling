@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlagData, InstitusjonsoppholdGrunnlagDTO, ReduksjonBP } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import {
@@ -29,11 +29,12 @@ type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
   lovtekstMedLenke: React.ReactNode
+  reduksjonsTyper: Record<string, string>
   onSubmit: (data: InstitusjonsoppholdGrunnlagData) => void
 }
 
 const InstitusjonsoppholdBeregning = (props: InstitusjonsoppholdProps) => {
-  const { behandling, onSubmit, institusjonsopphold, lovtekstMedLenke } = props
+  const { behandling, onSubmit, institusjonsopphold, lovtekstMedLenke, reduksjonsTyper } = props
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
@@ -119,7 +120,7 @@ const InstitusjonsoppholdBeregning = (props: InstitusjonsoppholdProps) => {
                 setVisFeil={setVisFeil}
                 errors={errors.institusjonsOppholdForm?.[index]}
                 behandles={behandles}
-                reduksjon={ReduksjonBP}
+                reduksjon={reduksjonsTyper}
               />
             ))}
           </Table.Body>

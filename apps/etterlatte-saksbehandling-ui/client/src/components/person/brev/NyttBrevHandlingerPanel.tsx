@@ -126,7 +126,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           <BodyLong spacing>
             Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke angres.
           </BodyLong>
-          {brev.brevtype == Brevtype.VARSEL && (
+          {brev.brevtype === Brevtype.VARSEL && (
             <BodyLong spacing>Når varselbrevet er sendt kan du sette oppgaven på vent.</BodyLong>
           )}
           <Alert variant="info">

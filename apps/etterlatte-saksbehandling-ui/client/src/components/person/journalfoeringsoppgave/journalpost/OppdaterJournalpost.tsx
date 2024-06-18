@@ -24,7 +24,7 @@ interface Props {
 
 export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Props) => {
   const [journalpost, setJournalpost] = useState<Journalpost>({ ...initialJournalpost })
-  console.log('journalpost: ', journalpost)
+
   return (
     <>
       <Heading size="medium" spacing>

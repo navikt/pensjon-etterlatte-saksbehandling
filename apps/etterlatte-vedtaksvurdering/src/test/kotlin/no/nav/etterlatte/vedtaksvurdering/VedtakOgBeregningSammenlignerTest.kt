@@ -85,6 +85,7 @@ class VedtakOgBeregningSammenlignerTest {
                         ytelseEtterAvkorting = ytelseEtterAvkorting,
                         avkortingsbeloep = 500,
                         restanse = 0,
+                        sanksjon = null,
                     ),
                 ),
         )

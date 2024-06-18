@@ -113,4 +113,5 @@ fun AvkortetYtelse.toDto() =
         avkortingsbeloep = avkortingsbeloep,
         restanse = restanse?.fordeltRestanse ?: 0,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
+        sanksjon = sanksjon,
     )

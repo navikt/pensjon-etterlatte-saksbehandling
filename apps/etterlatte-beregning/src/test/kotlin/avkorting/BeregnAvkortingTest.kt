@@ -7,7 +7,6 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Restanse
-import no.nav.etterlatte.avkorting.SanksjonertYtelse
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.beregning
@@ -16,8 +15,9 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.sanksjon.SanksjonType
 import org.junit.jupiter.api.Test
 import java.time.Month
 import java.time.YearMonth

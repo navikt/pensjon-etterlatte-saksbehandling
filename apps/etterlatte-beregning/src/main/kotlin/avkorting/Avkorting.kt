@@ -7,12 +7,12 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
-import no.nav.etterlatte.sanksjon.SanksjonType
 import java.time.YearMonth
 import java.util.UUID
 
@@ -504,11 +504,6 @@ data class AvkortetYtelse(
     val kilde: Grunnlagsopplysning.RegelKilde,
     val inntektsgrunnlag: UUID? = null,
     val sanksjon: SanksjonertYtelse? = null,
-)
-
-data class SanksjonertYtelse(
-    val sanksjonId: UUID,
-    val sanksjonType: SanksjonType,
 )
 
 /**

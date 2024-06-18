@@ -87,6 +87,7 @@ data class AvkortetYtelseDto(
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
+    val sanksjon: SanksjonertYtelse?,
 )
 
 data class YtelseMedGrunnlagDto(

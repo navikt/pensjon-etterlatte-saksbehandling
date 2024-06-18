@@ -64,6 +64,19 @@ export const AvkortingInntekt = ({
   const finnesRedigerbartGrunnlag = () =>
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
+  const fulltAar = () => {
+    const innvilgelseFraJanuar =
+      behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+
+    const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar == 12
+
+    const revurderingINyttAar =
+      new Date(avkortingGrunnlag[0].fom).getFullYear() != new Date(virkningstidspunkt(behandling).dato).getFullYear()
+
+    return innvilgelseFraJanuar || revurderingINyttAar || revurderingIFulltAar
+  }
+
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (finnesRedigerbartGrunnlag()) {
       // Returnerer grunnlagsperiode som er opprettet i denne behandlingen

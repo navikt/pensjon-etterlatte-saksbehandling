@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
@@ -50,11 +49,6 @@ interface GrunnlagService {
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>?
-
-    fun hentOpplysningstypeNavnFraFnr(
-        fnr: Folkeregisteridentifikator,
-        navIdent: String,
-    ): NavnOpplysningDTO?
 
     fun lagreNyeSaksopplysninger(
         sakId: Long,
@@ -451,34 +445,6 @@ class RealGrunnlagService(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>? = opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
-
-    override fun hentOpplysningstypeNavnFraFnr(
-        fnr: Folkeregisteridentifikator,
-        navIdent: String,
-    ): NavnOpplysningDTO? {
-        val opplysning =
-            opplysningDao.finnNyesteOpplysningPaaFnr(fnr, Opplysningstype.NAVN)?.let {
-                val navn: Navn = deserialize(it.opplysning.opplysning.toString())
-                NavnOpplysningDTO(
-                    sakId = it.sakId,
-                    fornavn = navn.fornavn,
-                    mellomnavn = navn.mellomnavn,
-                    etternavn = navn.etternavn,
-                    foedselsnummer = fnr.value,
-                )
-            }
-        when (opplysning) {
-            null -> {
-                sporingslogg.logg(feilendeRequest(ident = fnr.value, navIdent = navIdent))
-                logger.warn("Fant ikke navn for person i grunnlaget")
-            }
-            else -> {
-                sporingslogg.logg(vellykkaRequest(ident = fnr.value, navIdent = navIdent))
-                logger.debug("Fant navn for person i grunnlaget")
-            }
-        }
-        return opplysning
-    }
 
     override fun lagreNyePersonopplysninger(
         sakId: Long,

@@ -15,8 +15,8 @@ data class VirkningstidspunktRequest(
     val dato: YearMonth = _dato.tilYearMonth()
 }
 
-fun String.tilYearMonth(): YearMonth {
-    return try {
+fun String.tilYearMonth(): YearMonth =
+    try {
         Tidspunkt.parse(this).toNorskTid().let {
             YearMonth.of(it.year, it.month)
         } ?: throw IllegalArgumentException("Dato $this må være definert")
@@ -26,4 +26,3 @@ fun String.tilYearMonth(): YearMonth {
     } catch (e: Exception) {
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $this", e)
     }
-}

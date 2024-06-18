@@ -158,6 +158,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 requireNotNull(brevutfall.await()),
                 generellBrevData.loependeIPesys(),
                 generellBrevData.personerISak.avdoede,
+                erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
             )
         } else {
             BarnepensjonInnvilgelse.fra(

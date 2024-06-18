@@ -34,7 +34,7 @@ internal class BeregningRepositoryTest(
         val beregning = beregning()
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
-        assertEquals(beregning, lagretBeregning)
+        assertEquals(beregning, lagretBeregning.fjernTilfeldigPeriodeIds())
     }
 
     @Test
@@ -47,7 +47,7 @@ internal class BeregningRepositoryTest(
             )
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
-        assertEquals(beregning, lagretBeregning)
+        assertEquals(beregning, lagretBeregning.fjernTilfeldigPeriodeIds())
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class BeregningRepositoryTest(
 
         val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
 
-        assertEquals(beregningLagret, beregningHentet)
+        assertEquals(beregningLagret, beregningHentet.fjernTilfeldigPeriodeIds())
     }
 
     @Test
@@ -67,14 +67,16 @@ internal class BeregningRepositoryTest(
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
         val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
 
-        assertEquals(beregningLagret, beregningHentet)
+        assertTrue(beregningHentet!!.beregningsperioder.none { it.id == null })
+
+        assertEquals(beregningLagret, beregningHentet.fjernTilfeldigPeriodeIds())
 
         val nyBeregning = beregning(beregningLagret.behandlingId, YearMonth.of(2022, 2))
 
         beregningRepository.lagreEllerOppdaterBeregning(nyBeregning)
         val beregningHentetNy = beregningRepository.hent(beregningLagret.behandlingId)
 
-        assertEquals(nyBeregning, beregningHentetNy)
+        assertEquals(nyBeregning, beregningHentetNy.fjernTilfeldigPeriodeIds())
     }
 
     @Test
@@ -156,4 +158,6 @@ internal class BeregningRepositoryTest(
             ),
         overstyrBeregning = overstyrBeregning,
     )
+
+    private fun Beregning?.fjernTilfeldigPeriodeIds() = this?.copy(beregningsperioder = this.beregningsperioder.map { it.copy(id = null) })
 }

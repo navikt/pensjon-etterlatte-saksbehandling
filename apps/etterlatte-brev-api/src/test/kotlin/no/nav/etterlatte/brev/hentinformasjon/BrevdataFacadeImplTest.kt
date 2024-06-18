@@ -249,6 +249,7 @@ internal class BrevdataFacadeImplTest {
         beloep: Int,
         soeskenFlokk: List<String>? = null,
     ) = Beregningsperiode(
+        UUID.randomUUID(),
         fom,
         tom,
         beloep,

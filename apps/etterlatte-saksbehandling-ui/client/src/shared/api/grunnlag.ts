@@ -1,17 +1,10 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { Grunnlagsopplysning, PersongalleriSamsvar, Personopplysninger } from '~shared/types/grunnlag'
-import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
 import { SakType } from '~shared/types/sak'
-
-export const getPersonNavn = async (fnr: string): Promise<ApiResponse<IPersonResult>> => {
-  return apiClient.post(`/grunnlag/person/navn`, {
-    foedselsnummer: fnr,
-  })
-}
 
 export const getGrunnlagsAvOpplysningstype = async (args: {
   sakId: number

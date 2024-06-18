@@ -43,13 +43,7 @@ interface SakService {
 
     fun finnSaker(person: String): List<Sak>
 
-    fun opprettSakMedGrunnlag(
-        fnr: String,
-        type: SakType,
-        overstyrendeEnhet: String? = null,
-    ): Sak
-
-    fun finnEllerOpprettSak(
+    fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String? = null,
@@ -179,7 +173,7 @@ class SakServiceImpl(
         dao.markerSakerMedSkjerming(sakIder, skjermet)
     }
 
-    override fun opprettSakMedGrunnlag(
+    override fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String?,
@@ -216,7 +210,7 @@ class SakServiceImpl(
             } ?: Spraak.NB
     }
 
-    override fun finnEllerOpprettSak(
+    private fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String?,

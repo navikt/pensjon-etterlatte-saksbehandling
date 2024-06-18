@@ -48,7 +48,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
       )}
       <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
 
-      <SettPaaVent oppgave={oppgave} redigerbar={true} />
+      <SettPaaVent oppgave={oppgave} />
     </Wrapper>
   )
 }

@@ -86,7 +86,12 @@ data class OmstillingsstoenadRevurdering(
                         innholdMedVedlegg,
                         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                     ),
-                erEndret = erEndret(forrigeAvkortingsinfo, avkortingsinfo),
+                erEndret =
+                    erEndret(
+                        forrigeAvkortingsinfo,
+                        avkortingsinfo,
+                    ) ||
+                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 // TODO klage kobler seg på her
                 datoVedtakOmgjoering = null,

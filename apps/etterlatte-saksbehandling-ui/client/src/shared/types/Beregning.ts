@@ -59,6 +59,7 @@ export interface Beregningsperiode {
   samletNorskTrygdetid: number | undefined
   samletTeoretiskTrygdetid: number | undefined
   broek: IProrataBroek | undefined
+  avdoedeForeldre: string[] | undefined
 }
 
 // TODO: Burde speile backend DTO-en

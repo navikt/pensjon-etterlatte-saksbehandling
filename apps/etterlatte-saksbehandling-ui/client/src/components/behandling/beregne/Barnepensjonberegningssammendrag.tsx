@@ -60,8 +60,10 @@ const SammendragGammeltRegelverk = (props: {
   )
 }
 
-const SammendragNyttRegelverk = (props: { soeker: BeregningsdetaljerPerson }) => {
-  const { soeker } = props
+const SammendragNyttRegelverk = (props: { soeker: BeregningsdetaljerPerson; flereAvdoede: boolean }) => {
+  const { soeker, flereAvdoede } = props
+
+  const tekst = flereAvdoede ? 'To foreldre døde: 2,25 x G til barnet.' : 'En forelder død: 100% av G til barnet.'
 
   return (
     <div>
@@ -69,7 +71,7 @@ const SammendragNyttRegelverk = (props: { soeker: BeregningsdetaljerPerson }) =>
         Beregning av barnepensjon
       </Heading>
       <BodyShort spacing>
-        <strong>§18-5</strong> En forelder død: 100% av G til barnet.
+        <strong>§18-5</strong> {tekst}
       </BodyShort>
 
       <Label>Beregningen gjelder:</Label>
@@ -130,10 +132,12 @@ export const Barnepensjonberegningssammendrag = ({
   const datoPeriodeFom = parseISO(beregningsperiode.datoFOM)
   const erPaaNyttRegelverk = isAfter(datoPeriodeFom, SISTE_MAANED_GAMMELT_REGELVERK)
 
+  const flereAvdoede = beregningsperiode.avdoedeForeldre !== undefined && beregningsperiode.avdoedeForeldre.length > 0
+
   return (
     <VStack gap="4">
       {erPaaNyttRegelverk ? (
-        <SammendragNyttRegelverk soeker={soeker} />
+        <SammendragNyttRegelverk soeker={soeker} flereAvdoede={flereAvdoede} />
       ) : (
         <SammendragGammeltRegelverk soesken={soesken ?? []} soeker={soeker} beregningsperiode={beregningsperiode} />
       )}

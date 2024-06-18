@@ -3,6 +3,7 @@ package no.nav.etterlatte.gyldigsoeknad.journalfoering
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,12 +28,7 @@ class JournalfoerSoeknadService(
         soeknad: InnsendtSoeknad,
     ): OpprettJournalpostResponse? {
         return try {
-            val tittel =
-                when (sak.sakType) {
-                    SakType.BARNEPENSJON -> "Søknad om barnepensjon"
-                    SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
-                }
-
+            val tittel = opprettTittel(sak.sakType)
             val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
             val request =
@@ -42,7 +38,7 @@ class JournalfoerSoeknadService(
                     journalfoerendeEnhet = sak.enhet,
                     avsenderMottaker = AvsenderMottaker(sak.ident),
                     bruker = Bruker(sak.ident),
-                    eksternReferanseId = "etterlatte:${sak.sakType.toString().lowercase()}:$soeknadId",
+                    eksternReferanseId = opprettEksternReferanseId(soeknadId, sak.sakType),
                     sak = JournalpostSak(sak.id.toString()),
                     dokumenter = listOf(dokument),
                 )
@@ -53,6 +49,44 @@ class JournalfoerSoeknadService(
             return null
         }
     }
+
+    fun opprettJournalpostForUkjent(
+        soeknadId: Long,
+        sakType: SakType,
+        soeknad: InnsendtSoeknad,
+    ): OpprettJournalpostResponse? =
+        try {
+            val tittel = opprettTittel(sakType)
+            val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
+
+            val request =
+                OpprettJournalpostRequest(
+                    tittel = tittel,
+                    tema = sakType.tema,
+                    journalfoerendeEnhet = Enheter.defaultEnhet.enhetNr,
+                    avsenderMottaker = null,
+                    bruker = null,
+                    eksternReferanseId = opprettEksternReferanseId(soeknadId, sakType),
+                    sak = null,
+                    dokumenter = listOf(dokument),
+                )
+
+            runBlocking { dokarkivKlient.opprettJournalpost(request, forsoekFerdigstill = false) }
+        } catch (e: Exception) {
+            logger.error("Feil oppsto ved journalføring av søknad (id=$soeknadId)", e)
+            null
+        }
+
+    private fun opprettTittel(sakType: SakType) =
+        when (sakType) {
+            SakType.BARNEPENSJON -> "Søknad om barnepensjon"
+            SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+        }
+
+    private fun opprettEksternReferanseId(
+        soeknadId: Long,
+        sakType: SakType,
+    ): String = "etterlatte:${sakType.name.lowercase()}:$soeknadId"
 
     private fun opprettDokument(
         soeknadId: Long,
@@ -94,7 +128,7 @@ class JournalfoerSoeknadService(
         logger.info("Oppretter arkiv PDF for søknad med id $soeknadId")
 
         return runBlocking {
-            retry<ByteArray> {
+            retry {
                 pdfgenKlient.genererPdf(soeknad.toJsonNode(), template)
             }.let {
                 when (it) {

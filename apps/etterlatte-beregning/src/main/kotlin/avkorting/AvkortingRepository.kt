@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -30,6 +31,7 @@ class AvkortingRepository(
                                 Aarsoppgjoer(
                                     id = row.uuid("id"),
                                     aar = row.int("aar"),
+                                    forventaInnvilgaMaaneder = row.string("innvilga_maaneder").toInt(),
                                 )
                             }.asList,
                     )
@@ -66,30 +68,63 @@ class AvkortingRepository(
                                         "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ?",
                                         it.id,
                                     ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
-
+                                val sanksjoner =
+                                    queryOf(
+                                        "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ?",
+                                        it.id,
+                                    ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                                 val avkortetYtelse =
                                     queryOf(
                                         "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ?",
                                         it.id,
-                                    ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
-
+                                    ).let { query ->
+                                        tx.run(
+                                            query
+                                                .map { row ->
+                                                    row.toAvkortetYtelse(
+                                                        restanse,
+                                                        sanksjoner,
+                                                    )
+                                                }.asList,
+                                        )
+                                    }
                                 Inntektsavkorting(
                                     grunnlag = it,
                                     avkortingsperioder = avkortingsperioder,
                                     avkortetYtelseForventetInntekt = avkortetYtelse,
                                 )
                             }
-
+                        val sanksjonerAvkortetYtelseAar =
+                            queryOf(
+                                """
+                                SELECT y.sanksjon_id, s.sanksjon_type 
+                                FROM avkortet_ytelse y 
+                                INNER JOIN sanksjon s 
+                                ON y.sanksjon_id = s.id 
+                                WHERE y.aarsoppgjoer_id = ? 
+                                AND y.type = ?
+                                """.trimIndent(),
+                                aarsoppgjoer.id,
+                                AvkortetYtelseType.AARSOPPGJOER.name,
+                            ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                         val avkortetYtelseAar =
                             queryOf(
                                 "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ?",
                                 aarsoppgjoer.id,
                                 AvkortetYtelseType.AARSOPPGJOER.name,
-                            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
+                            ).let { query ->
+                                tx.run(
+                                    query
+                                        .map { row ->
+                                            row.toAvkortetYtelse(
+                                                restanse,
+                                                sanksjonerAvkortetYtelseAar,
+                                            )
+                                        }.asList,
+                                )
+                            }
 
-                        Aarsoppgjoer(
-                            id = aarsoppgjoer.id,
-                            aar = aarsoppgjoer.aar,
+                        aarsoppgjoer.copy(
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             inntektsavkorting = inntektsavkorting,
                             avkortetYtelseAar = avkortetYtelseAar,
@@ -179,9 +214,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkorting_aarsoppgjoer(
-            	id, behandling_id, sak_id, aar
+            	id, behandling_id, sak_id, aar, innvilga_maaneder
             ) VALUES (
-            	:id, :behandling_id, :sak_id, :aar
+            	:id, :behandling_id, :sak_id, :aar, :innvilga_maaneder
             )
             """.trimIndent(),
         paramMap =
@@ -190,6 +225,7 @@ class AvkortingRepository(
                 "behandling_id" to behandlingId,
                 "sak_id" to sakId,
                 "aar" to aarsoppgjoer.aar,
+                "innvilga_maaneder" to aarsoppgjoer.forventaInnvilgaMaaneder,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -203,10 +239,10 @@ class AvkortingRepository(
             """
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
-                relevante_maaneder, spesifikasjon, kilde, aarsoppgjoer_id
+                spesifikasjon, kilde, aarsoppgjoer_id
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
-                :relevanteMaanederInnAar, :spesifikasjon, :kilde, :aarsoppgjoerId
+                :spesifikasjon, :kilde, :aarsoppgjoerId
             )
             """.trimIndent(),
         paramMap =
@@ -220,7 +256,6 @@ class AvkortingRepository(
                 "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
                 "inntektUtland" to avkortingsgrunnlag.inntektUtland,
                 "fratrekkInnAarUtland" to avkortingsgrunnlag.fratrekkInnAarUtland,
-                "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
             ),
@@ -325,11 +360,11 @@ class AvkortingRepository(
                 INSERT INTO avkortet_ytelse(
                     id, behandling_id, type, fom, tom, ytelse_etter_avkorting, avkortingsbeloep, restanse, 
                     ytelse_foer_avkorting, ytelse_etter_avkorting_uten_restanse, tidspunkt, regel_resultat, kilde,
-                    inntektsgrunnlag, aarsoppgjoer_id
+                    inntektsgrunnlag, aarsoppgjoer_id, sanksjon_id
                 ) VALUES (
                     :id, :behandlingId, :type, :fom, :tom,:ytelseEtterAvkorting, :avkortingsbeloep, :restanse,
                     :ytelseFoerAvkorting, :ytelseEtterAvkortingFoerRestanse, :tidspunkt, :regel_resultat, :kilde,
-                    :inntektsgrunnlag, :aarsoppgjoerId
+                    :inntektsgrunnlag, :aarsoppgjoerId, :sanksjon_id
                 )
                 """.trimIndent(),
             paramMap =
@@ -349,6 +384,7 @@ class AvkortingRepository(
                     "regel_resultat" to it.regelResultat.toJson(),
                     "kilde" to it.kilde.toJson(),
                     "inntektsgrunnlag" to it.inntektsgrunnlag,
+                    "sanksjon_id" to it.sanksjon?.sanksjonId,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -363,7 +399,6 @@ class AvkortingRepository(
                 ),
             aarsinntekt = int("aarsinntekt"),
             fratrekkInnAar = int("fratrekk_inn_ut"),
-            relevanteMaanederInnAar = int("relevante_maaneder"),
             inntektUtland = int("inntekt_utland"),
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
             spesifikasjon = string("spesifikasjon"),
@@ -406,23 +441,32 @@ class AvkortingRepository(
             kilde = string("kilde").let { objectMapper.readValue(it) },
         )
 
-    private fun Row.toAvkortetYtelse(allRestanse: List<Restanse>) =
-        AvkortetYtelse(
-            id = uuid("id"),
-            type = string("type").let { AvkortetYtelseType.valueOf(it) },
-            periode =
-                Periode(
-                    fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
-                    tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
-                ),
-            ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
-            avkortingsbeloep = int("avkortingsbeloep"),
-            restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
-            ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
-            ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
-            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
-            regelResultat = objectMapper.readTree(string("regel_resultat")),
-            kilde = string("kilde").let { objectMapper.readValue(it) },
-            inntektsgrunnlag = uuidOrNull("inntektsgrunnlag"),
+    private fun Row.toAvkortetYtelse(
+        allRestanse: List<Restanse>,
+        sanksjonertYtelse: List<SanksjonertYtelse>,
+    ) = AvkortetYtelse(
+        id = uuid("id"),
+        type = string("type").let { AvkortetYtelseType.valueOf(it) },
+        periode =
+            Periode(
+                fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
+            ),
+        ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
+        avkortingsbeloep = int("avkortingsbeloep"),
+        restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
+        ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
+        ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
+        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+        regelResultat = objectMapper.readTree(string("regel_resultat")),
+        kilde = string("kilde").let { objectMapper.readValue(it) },
+        inntektsgrunnlag = uuidOrNull("inntektsgrunnlag"),
+        sanksjon = uuidOrNull("sanksjon_id").let { sanksjonId -> sanksjonertYtelse.find { it.sanksjonId == sanksjonId } },
+    )
+
+    private fun Row.toSanksjonerYtelse(): SanksjonertYtelse =
+        SanksjonertYtelse(
+            sanksjonId = uuid("sanksjon_id"),
+            sanksjonType = enumValueOf(string("sanksjon_type")),
         )
 }

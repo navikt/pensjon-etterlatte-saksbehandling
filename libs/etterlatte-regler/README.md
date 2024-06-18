@@ -81,5 +81,15 @@ Resultattreet som produseres når en regel eksekveres dokumenterer følgende som
 - Tidspunkt regler er kjørt
 - Versjon av rammeverket som er brukt ved kjøring
 
+## Versjonering
+Vi versjonerer regler som et løpende tall som starter med 1 eller 1.0
+
+### Major versjon
+Første siffer står for en regelspesifisering. <br>
+Hver gang en spesifisering endres og regel i kode blir implementert etter ny spesifisering bumpes første siffer.
+
+### Minor versjon
+Andre siffer står for kodeendringer uten endring i regelspesifisering. <br>
+For eksempel hvis det er kodefeil/bug i implementasjonen av en regel.
 
 ## Videre arbeid

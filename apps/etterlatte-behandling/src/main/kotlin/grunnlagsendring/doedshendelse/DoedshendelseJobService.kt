@@ -148,7 +148,7 @@ class DoedshendelseJobService(
     private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
         logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøed ${doedshendelse.avdoedFnr.maskerFnr()}")
         val opprettetSak =
-            sakService.finnEllerOpprettSak(
+            sakService.finnEllerOpprettSakMedGrunnlag(
                 fnr = doedshendelse.beroertFnr,
                 type = doedshendelse.sakTypeForEpsEllerBarn(),
             )

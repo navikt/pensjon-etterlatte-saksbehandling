@@ -15,20 +15,11 @@ import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const oppgave = useSelectorOppgaveUnderBehandling()
-
-  const redigerbar = behandlingErRedigerbar(
-    behandlingsInfo.status,
-    behandlingsInfo.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -131,7 +122,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </HStack>
 
-      <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} />
+      <SettPaaVent oppgave={oppgave} />
     </SidebarPanel>
   )
 }

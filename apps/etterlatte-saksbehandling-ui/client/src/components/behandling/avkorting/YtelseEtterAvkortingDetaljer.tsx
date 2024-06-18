@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
 import { BodyShort, Box, ReadMore } from '@navikt/ds-react'
 import { NOK } from '~utils/formattering'
+import { tekstSanksjon } from '~shared/types/sanksjon'
 
 export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse }) => {
   const ytelse = props.ytelse
@@ -20,7 +21,13 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             <Operasjon>-</Operasjon>
             <Verdi>{NOK(ytelse.avkortingsbeloep)}</Verdi>
           </Rad>
-          {ytelse.restanse < 0 ? (
+          {ytelse.sanksjon ? (
+            <Rad>
+              <Navn>{tekstSanksjon[ytelse.sanksjon.sanksjonType]} i perioden</Navn>
+              <Operasjon>*</Operasjon>
+              <Verdi>0</Verdi>
+            </Rad>
+          ) : ytelse.restanse < 0 ? (
             <Rad>
               <Navn>Månedlig restansebeløp</Navn>
               <Operasjon>+</Operasjon>
@@ -30,12 +37,17 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             <Rad>
               <Navn>Månedlig restansebeløp</Navn>
               <Operasjon>-</Operasjon>
-              <Verdi>{NOK(ytelse.restanse)} kr</Verdi>
+              <Verdi>{NOK(ytelse.restanse)}</Verdi>
             </Rad>
           )}
+
           <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
             <Rad>
-              <Navn>Brutto stønad etter avkorting og restanse</Navn>
+              {ytelse.sanksjon ? (
+                <Navn>Brutto stønad etter sanksjon</Navn>
+              ) : (
+                <Navn>Brutto stønad etter avkorting og restanse</Navn>
+              )}
               <Operasjon>=</Operasjon>
               <Verdi>
                 <strong>{NOK(ytelse.ytelseEtterAvkorting)}</strong>
@@ -45,8 +57,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
         </ul>
         <Beskrivelse>
           <li>
-            <h4>Hvordan fungerer avkorting av en omstillingstønad?</h4>
-            <ReadMore header="Les mer">
+            <ReadMore header="Hvordan fungerer avkorting av en omstillingstønad?">
               <BodyShort size="small">
                 Omstillingsstønaden avkortes med mottakers forventede årsinntekt/12. Er forventet inntekt satt for
                 lavt/høyt, og en eventuell restanse (se under) ikke klarer å hente inn igjen for mye/lite utbetalt
@@ -55,9 +66,8 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             </ReadMore>
           </li>
           <li>
-            <h4>Hva er restanse?</h4>
-            <ReadMore header="Les mer">
-              <BodyShort spacing={true} size="small">
+            <ReadMore header="Hva er restanse?">
+              <BodyShort spacing size="small">
                 Hvis man fastsetter en ny forventet inntekt for inneværende år, oppstår det en
                 feilutbetaling/etterbetaling, en restanse. Restansen skal fordeles ut over resterende utbetalingsmåneder
                 for inneværende år. Dette gjøres for å minimere etteroppgjøret.

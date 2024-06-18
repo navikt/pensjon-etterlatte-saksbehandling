@@ -30,6 +30,8 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnla
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -47,7 +49,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.LagreSanksjon
 import no.nav.etterlatte.sanksjon.Sanksjon
-import no.nav.etterlatte.sanksjon.SanksjonType
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
@@ -111,9 +112,9 @@ fun avkorting(
     aarsoppgjoer =
         listOf(
             aarsoppgjoer(
-                ytelseFoerAvkorting,
-                inntektsavkorting,
-                avkortetYtelseAar,
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                inntektsavkorting = inntektsavkorting,
+                avkortetYtelseAar = avkortetYtelseAar,
             ),
         ),
 )
@@ -122,7 +123,6 @@ fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
-    relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
 ) = AvkortingGrunnlag(
@@ -132,7 +132,6 @@ fun avkortinggrunnlag(
     fratrekkInnAar = fratrekkInnAar,
     inntektUtland = 0,
     fratrekkInnAarUtland = 0,
-    relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
 )
@@ -173,12 +172,15 @@ fun inntektAvkortingGrunnlag(
 )
 
 fun aarsoppgjoer(
+    aar: Int = 2024,
+    forventaInnvilgaMaaneder: Int = 12,
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Aarsoppgjoer(
     id = UUID.randomUUID(),
-    aar = 2024,
+    aar = aar,
+    forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
     avkortetYtelseAar = avkortetYtelseAar,
@@ -225,10 +227,12 @@ fun avkortetYtelseGrunnlag(
     beregning: Int,
     avkorting: Int,
     fordeltRestanse: Int = 0,
+    sanksjon: Sanksjon? = null,
 ) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
     fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
+    sanksjon = FaktumNode(verdi = sanksjon, "", ""),
 )
 
 fun avkortetYtelse(
@@ -245,6 +249,7 @@ fun avkortetYtelse(
             tom = null,
         ),
     inntektsgrunnlag: UUID? = UUID.randomUUID(),
+    sanksjon: SanksjonertYtelse? = null,
 ) = AvkortetYtelse(
     id = id,
     type = type,
@@ -263,6 +268,7 @@ fun avkortetYtelse(
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
     inntektsgrunnlag = inntektsgrunnlag,
+    sanksjon = sanksjon,
 )
 
 fun beregning(
@@ -327,17 +333,18 @@ fun behandling(
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
 
 fun sanksjon(
-    id: UUID? = null,
+    id: UUID? = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
     sakId: Long = 123,
     fom: YearMonth = YearMonth.of(2024, 1),
-    tom: YearMonth = YearMonth.of(2024, 2),
+    tom: YearMonth? = YearMonth.of(2024, 2),
+    type: SanksjonType = SanksjonType.STANS,
     beskrivelse: String = "Ikke i jobb",
 ) = Sanksjon(
     id = id,
     behandlingId = behandlingId,
     sakId = sakId,
-    type = SanksjonType.STANS,
+    type = type,
     fom = fom,
     tom = tom,
     opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),

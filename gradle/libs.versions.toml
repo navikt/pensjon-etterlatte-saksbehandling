@@ -69,7 +69,7 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.06.05-14.02.b8abba8596b3"}
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.06.13-09.14.c3cc8d6b96b6"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.13" }

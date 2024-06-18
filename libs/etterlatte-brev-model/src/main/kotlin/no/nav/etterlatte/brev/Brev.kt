@@ -28,8 +28,8 @@ data class Adresse(
     val landkode: String,
     val land: String,
 ) {
-    fun erGyldig(): Boolean {
-        return if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
+    fun erGyldig(): Boolean =
+        if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
             false
         } else if (adresseType == "NORSKPOSTADRESSE") {
             !(postnummer.isNullOrBlank() || poststed.isNullOrBlank())
@@ -38,7 +38,6 @@ data class Adresse(
         } else {
             true
         }
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,15 +47,14 @@ data class Mottaker(
     val orgnummer: String? = null,
     val adresse: Adresse,
 ) {
-    fun erGyldig(): Boolean {
-        return if (navn.isBlank()) {
+    fun erGyldig(): Boolean =
+        if (navn.isBlank()) {
             false
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
             false
         } else {
             adresse.erGyldig()
         }
-    }
 }
 
 data class Brev(

@@ -127,34 +127,6 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteOpplysningPaaFnr(
-        fnr: Folkeregisteridentifikator,
-        opplysningType: Opplysningstype,
-    ): GrunnlagHendelse? =
-        connection.use {
-            it
-                .prepareStatement(
-                    """
-                    SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    WHERE hendelse.fnr = ? 
-                    AND hendelse.opplysning_type = ? 
-                    AND NOT EXISTS(
-                        SELECT 1 FROM grunnlagshendelse annen 
-                        WHERE annen.fnr = hendelse.fnr 
-                        AND hendelse.opplysning_type = annen.opplysning_type 
-                        AND annen.hendelsenummer > hendelse.hendelsenummer
-                    )
-                    ORDER BY hendelsenummer DESC, sak_id DESC
-                    LIMIT 1
-                    """.trimIndent(),
-                ).apply {
-                    setString(1, fnr.value)
-                    setString(2, opplysningType.name)
-                }.executeQuery()
-                .singleOrNull { asGrunnlagshendelse() }
-        }
-
     fun finnNyesteGrunnlagForSak(
         sakId: Long,
         opplysningType: Opplysningstype,

@@ -681,6 +681,70 @@ class AktivitetspliktServiceTest {
         }
     }
 
+    @Nested
+    inner class KopierVurderingForSak {
+        private val behandlingId = UUID.randomUUID()
+        private val sakId = 1L
+
+        @Test
+        fun `Skal kopiere vurdering med unntak`() {
+            val unntakId = UUID.randomUUID()
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    fom = null,
+                    tom = LocalDate.now().plusMonths(6),
+                )
+
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every { aktivitetspliktUnntakDao.kopierUnntak(unntakId, behandlingId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
+                mockk {
+                    every { id } returns unntakId
+                    every { tom } returns LocalDate.now().minusYears(1)
+                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                    every { sakId } returns aktivitet.sakId
+                }
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling
+
+            service.kopierVurdering(sakId, behandlingId)
+
+            verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) }
+            verify { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) }
+            verify { aktivitetspliktUnntakDao.kopierUnntak(unntakId, behandlingId) }
+        }
+
+        @Test
+        fun `Skal kopiere vurdering med aktivitetsgrad`() {
+            val aktivitetsgradId = UUID.randomUUID()
+
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
+                mockk {
+                    every { id } returns aktivitetsgradId
+                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
+                    every { fom } returns aktivitet.fom.minusMonths(1)
+                    every { sakId } returns aktivitet.sakId
+                }
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.kopierAktivtetsgrad(aktivitetsgradId, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling
+
+            service.kopierVurdering(sakId, behandlingId)
+
+            verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) }
+            verify { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) }
+            verify { aktivitetspliktAktivitetsgradDao.kopierAktivtetsgrad(aktivitetsgradId, behandlingId) }
+        }
+    }
+
     companion object {
         val behandling =
             mockk<Behandling> {

@@ -168,5 +168,13 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
                 call.respond(HttpStatusCode.Created)
             }
         }
+
+        post("/kopier") {
+            kunSkrivetilgang {
+                logger.info("Kopierer vurdering av aktiviteter til ny behandlingId=$behandlingId")
+                aktivitetspliktService.kopierVurdering(sakId, behandlingId)
+                call.respond(HttpStatusCode.Created)
+            }
+        }
     }
 }

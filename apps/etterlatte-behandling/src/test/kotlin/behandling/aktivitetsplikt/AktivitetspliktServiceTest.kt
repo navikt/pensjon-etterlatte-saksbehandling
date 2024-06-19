@@ -732,7 +732,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
-            every { aktivitetspliktAktivitetsgradDao.kopierAktivtetsgrad(aktivitetsgradId, behandlingId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(aktivitetsgradId, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
@@ -741,7 +741,7 @@ class AktivitetspliktServiceTest {
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
             verify { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) }
             verify { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) }
-            verify { aktivitetspliktAktivitetsgradDao.kopierAktivtetsgrad(aktivitetsgradId, behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(aktivitetsgradId, behandlingId) }
         }
     }
 

@@ -244,7 +244,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id)
             dao.hentAktivitetsgradForBehandling(nyBehandling.id) shouldBe null
 
-            dao.kopierAktivtetsgrad(aktivitetsgrad!!.id, nyBehandling.id) shouldBe 1
+            dao.kopierAktivitetsgrad(aktivitetsgrad!!.id, nyBehandling.id) shouldBe 1
 
             dao.hentAktivitetsgradForBehandling(nyBehandling.id)!!.asClue {
                 it.sakId shouldBe sak.id

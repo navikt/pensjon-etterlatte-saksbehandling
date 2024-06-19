@@ -122,7 +122,7 @@ class AktivitetspliktAktivitetsgradDao(
             }
         }
 
-    fun kopierAktivtetsgrad(
+    fun kopierAktivitetsgrad(
         aktivitetId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {

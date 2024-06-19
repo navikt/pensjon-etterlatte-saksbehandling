@@ -294,7 +294,7 @@ class AktivitetspliktService(
             if (nyesteVurdering != null) {
                 when (nyesteVurdering) {
                     is AktivitetspliktAktivitetsgrad ->
-                        aktivitetspliktAktivitetsgradDao.kopierAktivtetsgrad(
+                        aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(
                             nyesteVurdering.id,
                             behandlingId,
                         )

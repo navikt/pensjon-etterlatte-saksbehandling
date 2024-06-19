@@ -97,7 +97,7 @@ internal class TilbakekrevingKlientTest {
                 detaljertkravgrunnlag = kravgrunnlag
             }
 
-        val httpClient = mockedHttpClient("/tilbakekreving/kravgrunnlag", HttpMethod.Get, response)
+        val httpClient = mockedHttpClient("/tilbakekreving/kravgrunnlag", HttpMethod.Post, response)
         val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
         val sakId = 1L
 

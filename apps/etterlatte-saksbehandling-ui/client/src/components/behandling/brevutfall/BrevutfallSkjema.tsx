@@ -9,7 +9,6 @@ import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
   FeilutbetalingValg,
-  LavEllerIngenInntekt,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
@@ -19,7 +18,6 @@ import { ControlledMaanedVelger } from '~shared/components/maanedVelger/Controll
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/EtterbetalingHjelpeTekst'
 import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
-import { LavEllerIngenInntektHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/LavEllerIngenInntektHjelpeTekst'
 import { FeilutbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/FeilutbetalingHjelpeTekst'
 import { feilutbetalingToString } from '~components/behandling/brevutfall/BrevutfallVisning'
 
@@ -34,7 +32,6 @@ interface BrevutfallSkjemaData {
   datoFom?: Date | null
   datoTom?: Date | null
   aldersgruppe?: Aldersgruppe | null
-  lavEllerIngenInntekt?: LavEllerIngenInntekt | null
   feilutbetalingValg?: FeilutbetalingValg | null
   feilutbetalingKommentar: string | null
 }
@@ -76,7 +73,6 @@ export const BrevutfallSkjema = ({
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
       aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
-      lavEllerIngenInntekt: brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt,
       feilutbetalingValg: brevutfallOgEtterbetaling.brevutfall.feilutbetaling?.valg,
       feilutbetalingKommentar: brevutfallOgEtterbetaling.brevutfall.feilutbetaling?.kommentar ?? '',
     },
@@ -89,7 +85,6 @@ export const BrevutfallSkjema = ({
       opphoer: behandlingErOpphoer,
       brevutfall: {
         aldersgruppe: data.aldersgruppe,
-        lavEllerIngenInntekt: data.lavEllerIngenInntekt,
         feilutbetaling: data.feilutbetalingValg
           ? { valg: data.feilutbetalingValg, kommentar: data.feilutbetalingKommentar }
           : null,
@@ -203,27 +198,6 @@ export const BrevutfallSkjema = ({
                   </Radio>
                   <Radio size="small" value={Aldersgruppe.OVER_18}>
                     Over 18 år
-                  </Radio>
-                </>
-              }
-            />
-          </VStack>
-        )}
-
-        {!behandlingErOpphoer && behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
-          <VStack gap="4">
-            <ControlledRadioGruppe
-              name="lavEllerIngenInntekt"
-              control={control}
-              errorVedTomInput="Du må velge om OMS skal utbetales til søker fyller 67 år"
-              legend={<LavEllerIngenInntektHjelpeTekst />}
-              radios={
-                <>
-                  <Radio size="small" value={LavEllerIngenInntekt.JA}>
-                    Ja
-                  </Radio>
-                  <Radio size="small" value={LavEllerIngenInntekt.NEI}>
-                    Nei
                   </Radio>
                 </>
               }

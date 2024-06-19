@@ -113,6 +113,10 @@ spec:
       value: api://prod-fss.pensjondeployer.navansatt/.default
     - name: CLAMAV_ENDPOINT_URL
       value: http://clamav.nais-system.svc.cluster.local
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
@@ -139,6 +143,7 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
         - application: etterlatte-behandling

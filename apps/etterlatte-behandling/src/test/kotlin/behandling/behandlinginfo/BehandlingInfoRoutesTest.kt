@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -112,7 +111,6 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
-            opprettetBrevutfallOgEtterbetaling.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
             opprettetBrevutfallOgEtterbetaling.brevutfall?.kilde shouldNotBe null
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
@@ -146,7 +144,6 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
-            hentetBrevutfall.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
         }
     }
 
@@ -199,7 +196,6 @@ internal class BehandlingInfoRoutesTest {
         Brevutfall(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
-            lavEllerIngenInntekt = LavEllerIngenInntekt.JA,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
@@ -220,7 +216,6 @@ internal class BehandlingInfoRoutesTest {
                 BrevutfallDto(
                     behandlingId,
                     Aldersgruppe.UNDER_18,
-                    LavEllerIngenInntekt.JA,
                     Feilutbetaling(FeilutbetalingValg.NEI, null),
                     null,
                 ),

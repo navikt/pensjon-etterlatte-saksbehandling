@@ -39,9 +39,7 @@ data class BrevDataFerdigstillingRequest(
     val tittel: String? = null,
 )
 
-class BrevDataMapperFerdigstillingVedtak(
-    private val brevdataFacade: BrevdataFacade,
-) {
+class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
             if (generellBrevData.loependeIPesys()) {
@@ -214,6 +212,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
         val brevutfall = async { fetcher.hentBrevutfall() }
+        val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -222,6 +221,7 @@ class BrevDataMapperFerdigstillingVedtak(
             etterbetaling.await(),
             requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
+            requireNotNull(vilkaarsvurdering.await())
         )
     }
 
@@ -236,6 +236,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
         val brevutfall = async { fetcher.hentBrevutfall() }
+        val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
@@ -245,9 +246,8 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
             generellBrevData.revurderingsaarsak,
-            generellBrevData.personerISak.avdoede
-                .single()
-                .navn,
+            generellBrevData.personerISak.avdoede.single().navn,
+            requireNotNull(vilkaarsvurdering.await())
         )
     }
 

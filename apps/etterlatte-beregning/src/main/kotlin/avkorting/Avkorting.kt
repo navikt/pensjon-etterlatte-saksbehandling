@@ -191,6 +191,7 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
+
         val virkningstidspunktAar =
             beregning.beregningsperioder
                 .first()

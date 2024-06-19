@@ -600,7 +600,6 @@ class OppgaveService(
                         OppgaveType.REVURDERING,
                         OppgaveType.VURDER_KONSEKVENS,
                         OppgaveType.GOSYS,
-                        OppgaveType.KLAGE,
                         OppgaveType.TILBAKEKREVING,
                         OppgaveType.OMGJOERING,
                         OppgaveType.JOURNALFOERING,
@@ -609,7 +608,9 @@ class OppgaveService(
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                         ->
                             true
-                        OppgaveType.KRAVPAKKE_UTLAND -> {
+                        OppgaveType.KLAGE,
+                        OppgaveType.KRAVPAKKE_UTLAND,
+                        -> {
                             logger.info(
                                 "Tilbakestiller ikke oppgave av type ${it.type} " +
                                     "fra attestering for oppgave ${it.id}",

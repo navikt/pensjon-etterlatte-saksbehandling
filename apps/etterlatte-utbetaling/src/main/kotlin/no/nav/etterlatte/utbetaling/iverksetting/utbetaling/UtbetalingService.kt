@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
@@ -21,6 +22,7 @@ class UtbetalingService(
     val oppdragSender: OppdragSender,
     val utbetalingDao: UtbetalingDao,
     val clock: Clock,
+    val vedtaksverifiserer: Vedtaksverifiserer,
 ) {
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
         val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
@@ -41,6 +43,7 @@ class UtbetalingService(
                         vedtak = vedtak,
                     )
                 val utbetaling = utbetalingMapper.opprettUtbetaling()
+                vedtaksverifiserer.verifiser(utbetaling, vedtak)
 
                 oppdragMapper
                     .oppdragFraUtbetaling(

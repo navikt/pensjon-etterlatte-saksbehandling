@@ -34,6 +34,9 @@ spec:
     - application: etterlatte-pdltjenester
       cluster: dev-gcp
       namespace: etterlatte
+    - application: etterlatte-utbetaling
+      cluster: dev-gcp
+      namespace: etterlatte
   tenant: trygdeetaten.no
   secretName: azuread-etterlatte-saksbehandling-ui-lokal
   claims:

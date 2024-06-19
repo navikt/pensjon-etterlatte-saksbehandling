@@ -20,15 +20,18 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { Box, VStack } from '@navikt/ds-react'
+import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 
 export const Avkorting = ({
   behandling,
   resetBrevutfallvalidering,
   resetInntektsavkortingValidering,
+  visSimulering,
 }: {
   behandling: IBehandlingReducer
   resetBrevutfallvalidering: () => void
   resetInntektsavkortingValidering: () => void
+  visSimulering: boolean
 }) => {
   const dispatch = useAppDispatch()
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
@@ -72,6 +75,7 @@ export const Avkorting = ({
 
         {visSanksjon && <Sanksjon behandling={behandling} />}
         {avkorting && <YtelseEtterAvkorting />}
+        {avkorting && visSimulering && <SimulerUtbetaling behandling={behandling} />}
         {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
       </VStack>
     </Box>

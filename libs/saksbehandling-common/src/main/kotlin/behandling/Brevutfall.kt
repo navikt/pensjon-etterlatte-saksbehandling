@@ -6,7 +6,6 @@ import java.util.UUID
 data class Brevutfall(
     val behandlingId: UUID,
     val aldersgruppe: Aldersgruppe?,
-    val lavEllerIngenInntekt: LavEllerIngenInntekt?,
     val feilutbetaling: Feilutbetaling?,
     val kilde: Grunnlagsopplysning.Kilde,
 )
@@ -14,11 +13,6 @@ data class Brevutfall(
 enum class Aldersgruppe {
     OVER_18,
     UNDER_18,
-}
-
-enum class LavEllerIngenInntekt {
-    JA,
-    NEI,
 }
 
 data class Feilutbetaling(

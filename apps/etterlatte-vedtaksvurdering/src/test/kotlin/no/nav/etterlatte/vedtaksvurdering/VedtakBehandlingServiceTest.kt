@@ -1665,6 +1665,7 @@ internal class VedtakBehandlingServiceTest(
                         ytelseEtterAvkorting = ytelseEtterAvkorting,
                         avkortingsbeloep = 50,
                         restanse = 0,
+                        sanksjon = null,
                     ),
                 )
         }

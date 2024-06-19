@@ -17,7 +17,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { ILand } from '~shared/api/trygdetid'
 import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
-function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
+export function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
 }
 

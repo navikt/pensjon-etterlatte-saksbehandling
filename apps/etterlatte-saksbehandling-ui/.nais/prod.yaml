@@ -88,6 +88,8 @@ spec:
       value: http://etterlatte-trygdetid
     - name: PDLTJENESTER_API_URL
       value: http://etterlatte-pdltjenester
+    - name: UTBETALING_API_URL
+      value: http://etterlatte-utbetaling
     - name: BREV_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-brev-api/.default
     - name: VILKAARSVURDERING_API_SCOPE
@@ -104,6 +106,8 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: PDLTJENESTER_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: UTBETALING_API_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-utbetaling/.default
     - name: GOSYS_URL
       value: https://gosys.intern.nav.no/gosys
     - name: EESSI_PENSJON_URL

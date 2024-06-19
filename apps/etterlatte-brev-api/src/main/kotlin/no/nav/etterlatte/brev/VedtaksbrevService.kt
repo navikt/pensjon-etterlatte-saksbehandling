@@ -148,6 +148,7 @@ class VedtaksbrevService(
                     it.generellBrevData.sak.sakType,
                     brukerTokenInfo,
                     it.generellBrevData.utlandstilknytning,
+                    it.generellBrevData.revurderingsaarsak,
                 )
             } else {
                 brevDataMapperRedigerbartUtfallVedtak.brevData(it)

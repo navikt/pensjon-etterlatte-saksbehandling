@@ -16,8 +16,10 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -26,7 +28,7 @@ data class OmstillingsstoenadInnvilgelse(
     val avdoed: Avdoed,
     val beregning: OmstillingsstoenadBeregning,
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
-    val lavEllerIngenInntekt: Boolean,
+    val omsRettUtenTidsbegrensning: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
 ) : BrevDataFerdigstilling {
@@ -38,6 +40,7 @@ data class OmstillingsstoenadInnvilgelse(
             etterbetaling: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
+            vilkaarsVurdering: VilkaarsvurderingDto,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -61,6 +64,14 @@ data class OmstillingsstoenadInnvilgelse(
             val avdoed = generellBrevData.personerISak.avdoede.single()
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
+            val omsRettUtenTidsbegrensning =
+                vilkaarsVurdering.vilkaar.single {
+                    it.hovedvilkaar.type in
+                        listOf(
+                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                        )
+                }
+
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
@@ -81,7 +92,7 @@ data class OmstillingsstoenadInnvilgelse(
                     avdoed.doedsdato
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
-                lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
+                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 etterbetaling =
                     etterbetaling

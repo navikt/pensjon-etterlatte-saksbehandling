@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes
-import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingVedtakRoutes
+import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingRoutes
 
 fun main() {
     ApplicationContext().let { Server(it).run() }
@@ -27,7 +27,7 @@ class Server(
             withMetrics = false,
         ) {
             testKravgrunnlagRoutes(context.kravgrunnlagService)
-            tilbakekrevingVedtakRoutes(context.tilbakekrevingVedtakService)
+            tilbakekrevingRoutes(context.tilbakekrevingService)
         }
 
     fun run() =

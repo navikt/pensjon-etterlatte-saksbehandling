@@ -20,8 +20,15 @@ import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.utils.toPdlSearchVariables
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+
+data class SoekPerson(
+    val navn: String,
+    val foedselsdato: LocalDate,
+)
 
 class PdlOboKlient(
     private val httpClient: HttpClient,
@@ -85,6 +92,40 @@ class PdlOboKlient(
                     bearerAuth(getOboToken(bruker))
                     behandlingsnummer(sakType)
                     header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success ->
+                    it.content.also { result ->
+                        result.errors?.joinToString(",")?.let { feil ->
+                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
+                        }
+                    }
+
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    suspend fun soekPerson(
+        soekPerson: SoekPerson,
+        bruker: BrukerTokenInfo,
+    ): PdlPersonSoekResponse {
+        val request =
+            PdlGraphSoekRequest(
+                query = getQuery("/pdl/soekPerson.graphql"),
+                variables = toPdlSearchVariables(soekPerson),
+            )
+
+        return retry<PdlPersonSoekResponse>(times = 3) {
+            httpClient
+                .post(apiUrl) {
+                    bearerAuth(getOboToken(bruker))
+                    header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                    behandlingsnummer(SakType.entries)
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(request)

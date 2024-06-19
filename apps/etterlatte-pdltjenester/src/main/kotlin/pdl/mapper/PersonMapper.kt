@@ -18,7 +18,9 @@ import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.pdl.SoekPersonTreff
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
+import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
@@ -196,6 +198,30 @@ object PersonMapper {
                 foedselsaar = foedsel.foedselsaar,
             )
         }
+
+    suspend fun mapPersonSoek(
+        ppsKlient: ParallelleSannheterKlient,
+        ident: String,
+        soekPerson: SoekPersonTreff,
+    ): PersonSoekSvar {
+        val navn = ppsKlient.avklarNavn(soekPerson.navn)
+        val fnr =
+            if (Folkeregisteridentifikator.isValid(ident)) {
+                ident
+            } else {
+                ppsKlient
+                    .avklarFolkeregisteridentifikator(soekPerson.folkeregisteridentifikator)
+                    .identifikasjonsnummer
+            }
+
+        return PersonSoekSvar(
+            fornavn = navn.fornavn,
+            mellomnavn = navn.mellomnavn,
+            etternavn = navn.etternavn,
+            foedselsnummer = fnr,
+            bostedsadresse = soekPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) },
+        )
+    }
 
     fun mapOpplysningsperson(
         ppsKlient: ParallelleSannheterKlient,

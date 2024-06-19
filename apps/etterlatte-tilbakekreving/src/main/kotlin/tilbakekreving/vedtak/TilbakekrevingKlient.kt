@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -15,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
@@ -22,8 +24,12 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVe
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.HentKravgrunnlagDetaljDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
@@ -39,7 +45,7 @@ class TilbakekrevingKlient(
     private val hendelseRepository: TilbakekrevingHendelseRepository,
 ) {
     // Egen objectmapper for å fjerne timestamp fra xml-datoer da dette ikke blir riktig mot tilbakekrevingskomponenten
-    private val vedtakObjectMapper: ObjectMapper = objectMapper.copy().registerModule(CustomXMLGregorianCalendarModule())
+    private val tilbakekrevingObjectMapper: ObjectMapper = objectMapper.copy().registerModule(CustomXMLGregorianCalendarModule())
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
@@ -47,7 +53,7 @@ class TilbakekrevingKlient(
     fun sendTilbakekrevingsvedtak(vedtak: TilbakekrevingVedtak) {
         logger.info("Sender tilbakekrevingsvedtak ${vedtak.vedtakId} til tilbakekrevingskomponenten")
         val request = toTilbakekrevingsvedtakRequest(vedtak)
-        val requestAsJson = vedtakObjectMapper.writeValueAsString(request)
+        val requestAsJson = tilbakekrevingObjectMapper.writeValueAsString(request)
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = vedtak.sakId,
@@ -73,6 +79,45 @@ class TilbakekrevingKlient(
         )
 
         return kontrollerResponse(response)
+    }
+
+    fun hentKravgrunnlag(
+        sakId: Long,
+        kravgrunnlagId: Long,
+    ): Kravgrunnlag {
+        logger.info(
+            "Henter kravgrunnlag for tilbakekreving på sak $sakId med kravgrunnlagId $kravgrunnlagId " +
+                "fra tilbakekrevingskomponenten",
+        )
+        val request = toKravgrunnlagHentDetaljRequest(kravgrunnlagId)
+        val requestAsJson = tilbakekrevingObjectMapper.writeValueAsString(request)
+
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = sakId,
+            payload = requestAsJson,
+            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_SENDT,
+        )
+
+        val response =
+            runBlocking {
+                val httpResponse =
+                    httpClient.get("$url/tilbakekreving/kravgrunnlag") {
+                        contentType(ContentType.Application.Json)
+                        setBody(requestAsJson)
+                    }
+
+                httpResponse.body<KravgrunnlagHentDetaljResponse>()
+            }
+
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = sakId,
+            payload = response.toJson(),
+            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
+        )
+
+        val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(response.detaljertkravgrunnlag)
+
+        return kravgrunnlag
     }
 
     private fun toTilbakekrevingsvedtakRequest(vedtak: TilbakekrevingVedtak): TilbakekrevingsvedtakRequest =
@@ -147,6 +192,18 @@ class TilbakekrevingKlient(
             belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
         }
 
+    private fun toKravgrunnlagHentDetaljRequest(kravgrunnlagId: Long): KravgrunnlagHentDetaljRequest =
+        KravgrunnlagHentDetaljRequest().apply {
+            hentkravgrunnlag =
+                HentKravgrunnlagDetaljDto().apply {
+                    // Hent kravgrunnlag for danning av nytt tilbakekrevingsvedtak
+                    kodeAksjon = "4"
+                    this.kravgrunnlagId = kravgrunnlagId.toBigInteger()
+                    saksbehId = INTERN_SAKSBEHANDLER
+                    enhetAnsvarlig = ANSVARLIG_ENHET
+                }
+        }
+
     private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) =
         when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
             Alvorlighetsgrad.OK,
@@ -196,6 +253,7 @@ class TilbakekrevingKlient(
 
     private companion object {
         const val ANSVARLIG_ENHET = "4819"
+        const val INTERN_SAKSBEHANDLER = "EY"
     }
 
     private fun LocalDate.toXMLDate(): XMLGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())

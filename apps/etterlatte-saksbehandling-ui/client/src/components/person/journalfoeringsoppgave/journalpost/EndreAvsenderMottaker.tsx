@@ -1,30 +1,31 @@
-import { AvsenderMottaker } from '~shared/types/Journalpost'
+import { AvsenderMottaker, SoekPersonValg } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { useForm } from 'react-hook-form'
+import SoekPersonPdl from '~components/person/journalfoeringsoppgave/journalpost/modal/SoekPersonPdl'
 
 export const EndreAvsenderMottaker = ({
   avsenderMottaker,
   oppdaterAvsenderMottaker,
 }: {
   avsenderMottaker: AvsenderMottaker
-  oppdaterAvsenderMottaker: (avsenderMottaker: AvsenderMottaker) => void
+  oppdaterAvsenderMottaker: (avsenderMottaker: SoekPersonValg) => void
 }) => {
   const {
     register,
     formState: { errors },
     handleSubmit,
-    getValues,
     reset,
-  } = useForm<AvsenderMottaker>({ defaultValues: avsenderMottaker })
+  } = useForm<SoekPersonValg>({ defaultValues: avsenderMottaker })
 
   const [rediger, setRediger] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const lagreEndretMottaker = () => {
-    oppdaterAvsenderMottaker(getValues())
+  const lagreEndretMottaker = (avsenderMottaker: SoekPersonValg) => {
+    oppdaterAvsenderMottaker(avsenderMottaker)
     setRediger(false)
   }
 
@@ -64,14 +65,20 @@ export const EndreAvsenderMottaker = ({
           />
 
           <br />
+          <SoekPersonPdl open={open} setOpen={setOpen} velgPerson={lagreEndretMottaker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
-            <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
+            <Button
+              variant="secondary"
+              onClick={handleSubmit((avsendermottaker) => lagreEndretMottaker(avsendermottaker))}
+              size="small"
+            >
               Lagre
             </Button>
+            <Button onClick={() => setOpen(!open)}>Avansert Søk</Button>
           </HStack>
         </>
       ) : (

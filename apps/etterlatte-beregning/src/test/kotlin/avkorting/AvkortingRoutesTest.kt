@@ -13,7 +13,6 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -81,32 +80,7 @@ class AvkortingRoutesTest {
                 kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt),
             )
         val avkortetYtelseId = UUID.randomUUID()
-        val avkortetYtelse =
-            listOf(
-                avkortetYtelse(
-                    id = avkortetYtelseId,
-                    type = AvkortetYtelseType.AARSOPPGJOER,
-                    periode = Periode(fom = dato, tom = dato),
-                ),
-            )
-        val inntektsavkorting =
-            listOf(
-                Inntektsavkorting(
-                    grunnlag = avkortingsgrunnlag,
-                ),
-            )
         val avkorting =
-            Avkorting(
-                aarsoppgjoer =
-                    listOf(
-                        aarsoppgjoer(
-                            inntektsavkorting = inntektsavkorting,
-                        ),
-                    ),
-                avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
-                avkortetYtelseForrigeVedtak = avkortetYtelse,
-            )
-        val dto =
             AvkortingDto(
                 avkortingGrunnlag =
                     listOf(
@@ -119,7 +93,7 @@ class AvkortingRoutesTest {
                             spesifikasjon = "Spesifikasjon",
                             inntektUtland = 0,
                             fratrekkInnAarUtland = 0,
-                            forventaInnvilgaMaaneder = 12,
+                            relevanteMaanederInnAar = 12,
                             kilde =
                                 AvkortingGrunnlagKildeDto(
                                     tidspunkt = tidspunkt.toString(),
@@ -138,6 +112,7 @@ class AvkortingRoutesTest {
                             avkortingsbeloep = 200,
                             ytelseEtterAvkorting = 50,
                             restanse = 50,
+                            sanksjon = null,
                         ),
                     ),
                 tidligereAvkortetYtelse =
@@ -151,6 +126,7 @@ class AvkortingRoutesTest {
                             avkortingsbeloep = 200,
                             ytelseEtterAvkorting = 50,
                             restanse = 50,
+                            sanksjon = null,
                         ),
                     ),
             )
@@ -159,14 +135,14 @@ class AvkortingRoutesTest {
         testApplication {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
-                    setBody(dto.avkortingGrunnlag[0].toJson())
+                    setBody(avkorting.avkortingGrunnlag[0].toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.OK
             val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
-            result shouldBe dto
+            result shouldBe avkorting
             coVerify {
                 avkortingService.beregnAvkortingMedNyttGrunnlag(
                     behandlingsId,

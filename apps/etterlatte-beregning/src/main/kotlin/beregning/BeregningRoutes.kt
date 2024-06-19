@@ -5,6 +5,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -60,6 +61,13 @@ fun Route.beregning(
                         .toDTO()
 
                 call.respond(overstyrBeregning)
+            }
+        }
+
+        delete("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                beregningService.deaktiverOverstyrtberegning(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

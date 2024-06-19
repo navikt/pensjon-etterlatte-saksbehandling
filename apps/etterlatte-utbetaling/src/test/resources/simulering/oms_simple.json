@@ -1,0 +1,87 @@
+{
+  "simulering": {
+    "gjelderId": "14018401496",
+    "gjelderNavn": "MASKIN KLOK",
+    "datoBeregnet": "2024-05-02",
+    "kodeFaggruppe": "OMSTILL",
+    "belop": 5983.00,
+    "beregningsPeriode": [
+      {
+        "periodeFom": "2024-05-01",
+        "periodeTom": "2024-05-31",
+        "beregningStoppnivaa": [
+          {
+            "kodeFagomraade": "OMSTILL",
+            "stoppNivaaId": 1,
+            "behandlendeEnhet": "4819",
+            "oppdragsId": 70479876,
+            "fagsystemId": "1000198",
+            "kid": "",
+            "utbetalesTilId": "14018401496",
+            "utbetalesTilNavn": "MASKIN KLOK",
+            "bilagsType": "U",
+            "forfall": "2024-05-15",
+            "feilkonto": false,
+            "beregningStoppnivaaDetaljer": [
+              {
+                "faktiskFom": "2024-05-01",
+                "faktiskTom": "2024-05-31",
+                "kontoStreng": "4121000",
+                "behandlingskode": "2",
+                "belop": "11965.0",
+                "trekkVedtakId": 0,
+                "stonadId": "2000068",
+                "korrigering": "",
+                "tilbakeforing": false,
+                "linjeId": 1,
+                "sats": 11965.00,
+                "typeSats": "MND",
+                "antallSats": 1.00,
+                "saksbehId": "Z123456",
+                "uforeGrad": 0,
+                "kravhaverId": "",
+                "delytelseId": "2000089",
+                "bostedsenhet": "4819",
+                "skykldnerId": "",
+                "klassekode": "OMSTILLINGOR",
+                "klasseKodeBeskrivelse": "Omstillingsstønad, ordinær",
+                "typeKlasse": "YTEL",
+                "typeKlasseBeskrivelse": "Klassetype for ytelseskonti",
+                "refunderesOrgNr": ""
+              },
+              {
+                "faktiskFom": "2024-05-01",
+                "faktiskTom": "2024-05-31",
+                "kontoStreng": "0510000",
+                "behandlingskode": "0",
+                "belop": "-5982.0",
+                "trekkVedtakId": 13005686,
+                "stonadId": "",
+                "korrigering": "",
+                "tilbakeforing": false,
+                "linjeId": 0,
+                "sats": 0.00,
+                "typeSats": "MND",
+                "antallSats": 31.00,
+                "saksbehId": "Z123456",
+                "uforeGrad": 0,
+                "kravhaverId": "",
+                "delytelseId": "",
+                "bostedsenhet": "4819",
+                "skykldnerId": "",
+                "klassekode": "FSKTSKAT",
+                "klasseKodeBeskrivelse": "Forskuddskatt",
+                "typeKlasse": "SKAT",
+                "typeKlasseBeskrivelse": "Klassetype for skatt",
+                "refunderesOrgNr": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "infomelding": {
+    "beskrMelding": "Simulering er utført uten skattevedtak. Nominell sats benyttet."
+  }
+}

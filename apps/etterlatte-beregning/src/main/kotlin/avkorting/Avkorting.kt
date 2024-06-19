@@ -6,48 +6,70 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
-import no.nav.etterlatte.sanksjon.SanksjonType
 import java.time.YearMonth
 import java.util.UUID
 
 data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
-    val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(),
-    val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
 ) {
     /*
-     * avkortetYtelseFraVirkningstidspunkt - Årsoppgjør inneholder ytelsen sine perioder for hele år
-     * og for behandlinger/vedtak er det kun virknigstidspunkt og fremover som er relevant.
+     * Å skille på år er kun relevant internt for avkorting. Alle perioder på tvers av alle årene blir
+     * derfor flatet ut til sammenhengende perioder når avkorting hentes ut.
      *
-     * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder under behandlingen
+     * For AvkortingGrunnlag (inntekter) så er det ønskelig med full historikk.
+     * For AvkortetYtelse er det kun ønskelig å hente fra og med virkningstidspunkt til behandling.
+     *
+     * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder i frontend
      */
-    fun medYtelseFraOgMedVirkningstidspunkt(
-        virkningstidspunkt: YearMonth,
+    fun toDto(
+        fraVirkningstidspunkt: YearMonth? = null,
         forrigeAvkorting: Avkorting? = null,
-    ): Avkorting =
-        this.copy(
-            avkortetYtelseFraVirkningstidspunkt =
-                aarsoppgjoer.filter { virkningstidspunkt.year <= it.aar }.flatMap { aarsoppgjoer ->
-                    aarsoppgjoer.avkortetYtelseAar
-                        .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
-                        .map {
-                            if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
-                                it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
-                            } else {
-                                it
-                            }
-                        }
+    ): AvkortingDto =
+        AvkortingDto(
+            avkortingGrunnlag =
+                aarsoppgjoer.flatMap { aarsoppgjoer ->
+                    aarsoppgjoer.inntektsavkorting.map {
+                        it.grunnlag.toDto(aarsoppgjoer.forventaInnvilgaMaaneder)
+                    }
                 },
-            avkortetYtelseForrigeVedtak =
-                forrigeAvkorting?.aarsoppgjoer?.flatMap {
-                    it.avkortetYtelseAar
-                } ?: emptyList(),
+            avkortetYtelse =
+                if (fraVirkningstidspunkt !=
+                    null
+                ) {
+                    aarsoppgjoer.filter { fraVirkningstidspunkt.year <= it.aar }.flatMap { aarsoppgjoer ->
+                        aarsoppgjoer.avkortetYtelseAar
+                            .filter { it.periode.tom == null || fraVirkningstidspunkt <= it.periode.tom }
+                            .map {
+                                if (fraVirkningstidspunkt > it.periode.fom &&
+                                    (it.periode.tom == null || fraVirkningstidspunkt <= it.periode.tom)
+                                ) {
+                                    it.copy(periode = Periode(fom = fraVirkningstidspunkt, tom = it.periode.tom))
+                                } else {
+                                    it
+                                }
+                            }.map {
+                                it.toDto()
+                            }
+                    }
+                } else {
+                    aarsoppgjoer.flatMap { aarsoppgjoer ->
+                        aarsoppgjoer.avkortetYtelseAar.map { it.toDto() }
+                    }
+                },
+            tidligereAvkortetYtelse =
+                forrigeAvkorting
+                    ?.aarsoppgjoer
+                    ?.flatMap {
+                        it.avkortetYtelseAar
+                    }?.map { it.toDto() } ?: emptyList(),
         )
 
     /*
@@ -94,7 +116,7 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
     ): Avkorting {
         // TODO kreve at det er inneværende år?
-        val aarsoppgjoer = hentAarsoppgjoer(virkningstidspunkt, innvilgelse)
+        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(virkningstidspunkt, innvilgelse)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
@@ -169,6 +191,7 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
+
         val virkningstidspunktAar =
             beregning.beregningsperioder
                 .first()
@@ -355,7 +378,7 @@ data class Avkorting(
      * Ved innvilgelse/førstegangsbehandling så skal måneder før virkningsitdspunkt trekkes i fra
      * forventa innvilgede måneder.
      */
-    private fun hentAarsoppgjoer(
+    private fun hentEllerOpprettAarsoppgjoer(
         virkningstidspunkt: YearMonth,
         innvilgelse: Boolean,
     ): Aarsoppgjoer {
@@ -397,7 +420,6 @@ data class Aarsoppgjoer(
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
-
     fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
 
     /**
@@ -504,11 +526,6 @@ data class AvkortetYtelse(
     val kilde: Grunnlagsopplysning.RegelKilde,
     val inntektsgrunnlag: UUID? = null,
     val sanksjon: SanksjonertYtelse? = null,
-)
-
-data class SanksjonertYtelse(
-    val sanksjonId: UUID,
-    val sanksjonType: SanksjonType,
 )
 
 /**

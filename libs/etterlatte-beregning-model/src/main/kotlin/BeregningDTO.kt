@@ -59,7 +59,7 @@ data class AvkortingGrunnlagDto(
     val fratrekkInnAar: Int,
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
-    val forventaInnvilgaMaaneder: Int,
+    val relevanteMaanederInnAar: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
 )
@@ -87,6 +87,7 @@ data class AvkortetYtelseDto(
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
+    val sanksjon: SanksjonertYtelse?,
 )
 
 data class YtelseMedGrunnlagDto(

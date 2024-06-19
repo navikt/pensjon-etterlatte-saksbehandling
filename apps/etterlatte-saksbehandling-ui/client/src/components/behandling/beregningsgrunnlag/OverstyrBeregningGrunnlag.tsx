@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Box, Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, HStack, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -17,7 +17,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from './PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
@@ -31,6 +31,7 @@ import {
   hentOverstyrBeregningGrunnlag,
   lagreOverstyrBeregningGrunnlag,
   opprettEllerEndreBeregning,
+  slettOverstyrtBeregning,
 } from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -39,7 +40,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -64,14 +65,19 @@ function fjernWhitespaceFraUtbetaltBeloep(
   }))
 }
 
-const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
-  const { behandling, overstyrBeregning } = props
+const OverstyrBeregningGrunnlag = (props: {
+  behandling: IBehandlingReducer
+  overstyrBeregning: OverstyrBeregning
+  setOverstyrt: Dispatch<SetStateAction<OverstyrBeregning | undefined>>
+}) => {
+  const { behandling, overstyrBeregning, setOverstyrt } = props
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const perioder = useAppSelector((state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder)
@@ -82,6 +88,8 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
       overstyrBeregningForm: mapListeFraDto(perioder ?? []),
     },
   })
+  const [slettResultat, slettOverstyrtBereging] = useApiCall(slettOverstyrtBeregning)
+
   const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
@@ -245,14 +253,27 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                 </Button>
               )}
               {behandles && (
-                <Button
-                  type="submit"
-                  size="small"
-                  onClick={handleSubmit(ferdigstillForm)}
-                  loading={isPending(persistOverstyrBeregningGrunnlag)}
-                >
-                  Lagre
-                </Button>
+                <HStack gap="4" align="center">
+                  <Button
+                    type="submit"
+                    size="small"
+                    onClick={handleSubmit(ferdigstillForm)}
+                    loading={isPending(persistOverstyrBeregningGrunnlag)}
+                  >
+                    Lagre
+                  </Button>
+                  {behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+                    <Button
+                      variant="tertiary"
+                      loading={isPending(slettResultat)}
+                      onClick={() => {
+                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
+                      }}
+                    >
+                      Skru av overstyrt beregning
+                    </Button>
+                  )}
+                </HStack>
               )}
               {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
             </FormWrapper>

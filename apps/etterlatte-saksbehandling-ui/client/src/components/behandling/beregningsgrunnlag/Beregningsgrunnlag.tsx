@@ -51,7 +51,13 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
             {visOverstyrKnapp && !overstyrt && (
               <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
             )}
-            {overstyrt && <OverstyrBeregningGrunnlag behandling={behandling} overstyrBeregning={overstyrt} />}
+            {overstyrt && (
+              <OverstyrBeregningGrunnlag
+                behandling={behandling}
+                overstyrBeregning={overstyrt}
+                setOverstyrt={setOverstyrt}
+              />
+            )}
             {!overstyrt &&
               {
                 [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,

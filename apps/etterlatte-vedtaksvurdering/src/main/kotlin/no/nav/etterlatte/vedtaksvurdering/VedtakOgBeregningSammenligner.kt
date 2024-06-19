@@ -21,8 +21,8 @@ object VedtakOgBeregningSammenligner {
         }
         when (vedtak.innhold) {
             is VedtakInnhold.Behandling -> sammenlignBehandling(beregning, vedtak)
-            is VedtakInnhold.Klage -> sammenlignKlage(vedtak)
-            is VedtakInnhold.Tilbakekreving -> sammenlignTilbakekreving(vedtak)
+            is VedtakInnhold.Klage -> logger.info("Sammenligning av innhold i klage er ikke implementert enno")
+            is VedtakInnhold.Tilbakekreving -> logger.info("Sammenligning av innhold i tilbakekreving er ikke implementert enno")
         }
     }
 
@@ -63,15 +63,5 @@ object VedtakOgBeregningSammenligner {
                     "Alle perioder fra beregning: ${beregningsperioder.map { "${it.datoFOM}-${it.datoTOM}" } }"
             }
         }
-    }
-
-    private fun sammenlignKlage(vedtak: Vedtak) {
-        val innhold = vedtak.innhold as VedtakInnhold.Klage
-        logger.info("Sammenligning av innhold i klage er ikke implementert enno")
-    }
-
-    private fun sammenlignTilbakekreving(vedtak: Vedtak) {
-        val innhold = vedtak.innhold as VedtakInnhold.Tilbakekreving
-        logger.info("Sammenligning av innhold i tilbakekreving er ikke implementert enno")
     }
 }

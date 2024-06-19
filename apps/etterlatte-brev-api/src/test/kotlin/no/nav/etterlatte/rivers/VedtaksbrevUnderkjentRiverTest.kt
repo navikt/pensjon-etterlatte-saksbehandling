@@ -115,6 +115,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
                     virkningstidspunkt = YearMonth.now(),
                     behandling = Behandling(behandlingType, behandlingsid),
                     utbetalingsperioder = emptyList(),
+                    opphoerFraOgMed = null,
                 ),
         )
     }

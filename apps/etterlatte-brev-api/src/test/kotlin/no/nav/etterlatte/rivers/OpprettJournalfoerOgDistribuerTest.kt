@@ -142,6 +142,7 @@ internal class OpprettJournalfoerOgDistribuer {
                             revurderingInfo = null,
                         ),
                     utbetalingsperioder = listOf(),
+                    opphoerFraOgMed = null,
                 ),
         )
 }

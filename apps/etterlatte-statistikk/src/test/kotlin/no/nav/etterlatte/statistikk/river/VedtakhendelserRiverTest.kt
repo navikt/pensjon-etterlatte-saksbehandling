@@ -65,6 +65,7 @@ internal class VedtakhendelserRiverTest {
             pesysId = 123L,
             sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
             opphoerFom = null,
+            vedtaksperioder = null,
         )
 
     @Test

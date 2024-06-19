@@ -41,7 +41,7 @@ class StoenadRepository(
                         fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
                         sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
                         vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
-                        kilde, pesysid, sakYtelsesgruppe 
+                        kilde, pesysid, sakYtelsesgruppe, opphoerFom, vedtaksperioder
                     FROM stoenad
                     """.trimIndent(),
                 ).executeQuery()
@@ -77,7 +77,8 @@ class StoenadRepository(
                         fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                         behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
-                        virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, sakYtelsesgruppe 
+                        virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, 
+                        sakYtelsesgruppe 
                     ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
@@ -119,8 +120,9 @@ class StoenadRepository(
                             fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                             behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                             vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
-                             virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe 
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe, opphoerFom,
+                            vedtaksperioder
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                         Statement.RETURN_GENERATED_KEYS,
                     ).apply {
@@ -255,6 +257,8 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setString(24, stoenadsrad.kilde.name)
         stoenadsrad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
         setString(26, stoenadsrad.sakYtelsesgruppe?.name)
+        setDate(27, stoenadsrad.opphoerFom?.let { Date.valueOf(it.atDay(1)) })
+        setJsonb(28, stoenadsrad.vedtaksperioder)
     }
 
 private fun ResultSet.asStoenadRad(): StoenadRad =
@@ -286,4 +290,9 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
         pesysId = getLong("pesysid"),
         sakYtelsesgruppe = getString("sakYtelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
+        opphoerFom =
+            getDate("opphoerFom")?.toLocalDate()?.let {
+                YearMonth.of(it.year, it.monthValue)
+            },
+        vedtaksperioder = getString("vedtaksperioder")?.let { objectMapper.readValue(it) },
     )

@@ -321,6 +321,7 @@ fun vedtak(
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null,
+    opphoerFom: YearMonth? = null,
 ) = VedtakDto(
     id = vedtakId,
     behandlingId = behandlingId,
@@ -334,6 +335,7 @@ fun vedtak(
             virkningstidspunkt = virk,
             behandling = Behandling(type = behandlingType, id = behandlingId),
             utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
+            opphoerFraOgMed = opphoerFom,
         ),
 )
 

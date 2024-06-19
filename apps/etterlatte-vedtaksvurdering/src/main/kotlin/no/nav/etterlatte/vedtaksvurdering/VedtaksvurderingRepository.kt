@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -340,6 +341,17 @@ class VedtaksvurderingRepository(
             ) { it.toUtbetalingsperiode() }
         }
 
+    fun hentAvkortetYtelsePerioder(
+        vedtakId: Long,
+        tx: TransactionalSession? = null,
+    ): List<AvkortetYtelsePeriode> =
+        tx.session {
+            hentListe(
+                queryString = "SELECT * FROM avkortet_ytelse_periode WHERE vedtakid = :vedtakid",
+                params = { mapOf("vedtakid" to vedtakId) },
+            ) { it.toAvkortetYtelsePeriode() }
+        }
+
     fun fattVedtak(
         behandlingId: UUID,
         vedtakFattet: VedtakFattet,
@@ -527,6 +539,17 @@ class VedtaksvurderingRepository(
                 ),
             beloep = bigDecimalOrNull("beloep"),
             type = UtbetalingsperiodeType.valueOf(string("type")),
+        )
+
+    private fun Row.toAvkortetYtelsePeriode() =
+        AvkortetYtelsePeriode(
+            id = uuid("id"),
+            vedtakId = long("vedtakid"),
+            fom = YearMonth.from(localDate("datofom")),
+            tom = localDateOrNull("datotom")?.let(YearMonth::from),
+            type = string("type"),
+            ytelseFoerAvkorting = int("ytelseFoer"),
+            ytelseEtterAvkorting = int("ytelseEtter"),
         )
 
     fun tilbakestillIkkeIverksatteVedtak(

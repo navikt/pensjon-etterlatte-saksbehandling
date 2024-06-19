@@ -277,33 +277,6 @@ class AktivitetspliktService(
             AktivitetspliktVurdering(aktivitetsgrad, unntak)
         }
 
-    fun kopierVurdering(
-        sakId: Long,
-        behandlingId: UUID,
-    ) {
-        val harVurdering = runBlocking { hentVurderingForBehandling(behandlingId) }
-        if (harVurdering?.unntak != null || harVurdering?.aktivitet != null) {
-            return
-        }
-
-        inTransaction {
-            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-            val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-            val nyesteVurdering = listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
-
-            if (nyesteVurdering != null) {
-                when (nyesteVurdering) {
-                    is AktivitetspliktAktivitetsgrad ->
-                        aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(
-                            nyesteVurdering.id,
-                            behandlingId,
-                        )
-                    is AktivitetspliktUnntak -> aktivitetspliktUnntakDao.kopierUnntak(nyesteVurdering.id, behandlingId)
-                }
-            }
-        }
-    }
-
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
     ): OpprettRevurderingForAktivitetspliktResponse {

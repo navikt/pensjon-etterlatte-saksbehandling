@@ -15,14 +15,13 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import {
   hentAktivitspliktVurderingForBehandling,
-  kopierAktivitspliktVurdering,
   opprettAktivitspliktAktivitetsgradForBehandling,
   opprettAktivitspliktUnntakForBehandling,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { Toast } from '~shared/alerts/Toast'
 import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
@@ -59,7 +58,6 @@ export const AktivitetspliktVurdering = ({
 
   const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgradForBehandling)
   const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntakForBehandling)
-  const [kopiertVurdering, kopierVurdering] = useApiCall(kopierAktivitspliktVurdering)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForBehandling)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -132,23 +130,10 @@ export const AktivitetspliktVurdering = ({
 
   useEffect(() => {
     if (!vurdering) {
-      hent(
-        { sakId: behandling.sakId, behandlingId: behandling.id },
-        (result) => {
-          setVurdering(result)
-          if (result) resetManglerAktivitetspliktVurdering()
-        },
-        () => {
-          if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
-            kopierVurdering({ sakId: behandling.sakId, behandlingId: behandling.id }, () => {
-              hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
-                setVurdering(result)
-                if (result) resetManglerAktivitetspliktVurdering()
-              })
-            })
-          }
-        }
-      )
+      hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
+        setVurdering(result)
+        if (result) resetManglerAktivitetspliktVurdering()
+      })
     }
   }, [])
 
@@ -199,7 +184,7 @@ export const AktivitetspliktVurdering = ({
       {(isSuccess(opprettetUnntak) || isSuccess(opprettetAktivitetsgrad)) && (
         <Toast melding="Vurdering av aktivitetsplikt er lagret" />
       )}
-      <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet) || isPending(kopiertVurdering)} />
+      <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
       {visForm && redigerbar && (
         <VStack gap="4">
           <ControlledRadioGruppe

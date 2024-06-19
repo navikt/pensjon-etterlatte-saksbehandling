@@ -82,9 +82,3 @@ export const opprettAktivitspliktUnntakForBehandling = async (args: {
   apiClient.post(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/unntak`, {
     ...args.request,
   })
-
-export const kopierAktivitspliktVurdering = async (args: {
-  sakId: number
-  behandlingId: string
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
-  apiClient.post(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/kopier`, {})

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
@@ -357,6 +358,9 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
         )
+
+    val aktivitetspliktKopierService = AktivitetspliktKopierService(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao)
+
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
@@ -370,6 +374,7 @@ internal class ApplicationContext(
             klageService = klageService,
             behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
+            aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -77,7 +78,7 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInnekt(avkortingGrunnlagLagre, avkorting, behandling)
+        validerInntekt(avkortingGrunnlagLagre, avkorting, behandling)
 
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()

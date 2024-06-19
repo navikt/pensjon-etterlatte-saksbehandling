@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
@@ -363,6 +364,8 @@ internal class AvkortingServiceTest {
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            mockkObject(AvkortingValider)
+            every { AvkortingValider.validerInntekt(any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns null
             every {
@@ -379,6 +382,7 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, behandling)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
@@ -414,6 +418,8 @@ internal class AvkortingServiceTest {
 
             every { avkortingRepository.hentAvkorting(revurderingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
+            mockkObject(AvkortingValider)
+            every { AvkortingValider.validerInntekt(any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(revurderingId) } returns null
             every {
@@ -435,6 +441,7 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(revurderingId, bruker, false)
                 behandlingKlient.hentBehandling(revurderingId, bruker)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, revurdering)
                 beregningService.hentBeregningNonnull(revurderingId)
                 sanksjonService.hentSanksjon(revurderingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
@@ -471,7 +478,5 @@ internal class AvkortingServiceTest {
                 behandlingKlient.avkort(behandlingId, bruker, false)
             }
         }
-
-        // TODO unittest
     }
 }

@@ -65,6 +65,7 @@ class ApplicationContext {
         SanksjonService(
             sanksjonRepository = SanksjonRepository(dataSource),
             behandlingKlient = behandlingKlient,
+            featureToggleService = featureToggleService,
         )
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
@@ -113,6 +114,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             avkortingRepository = avkortingRepository,
             beregningService = beregningService,
+            sanksjonService = sanksjonService,
         )
     val ytelseMedGrunnlagService =
         YtelseMedGrunnlagService(

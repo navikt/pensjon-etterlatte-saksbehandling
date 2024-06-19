@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
@@ -29,7 +28,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -50,11 +48,6 @@ interface GrunnlagService {
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>?
-
-    fun hentOpplysningstypeNavnFraFnr(
-        fnr: Folkeregisteridentifikator,
-        navIdent: String,
-    ): NavnOpplysningDTO?
 
     fun lagreNyeSaksopplysninger(
         sakId: Long,
@@ -111,8 +104,6 @@ interface GrunnlagService {
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
-
     fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar
 
     fun laasTilVersjonForBehandling(
@@ -126,7 +117,6 @@ class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
     private val grunnlagHenter: GrunnlagHenter,
-    private val vergeService: VergeService,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -321,12 +311,6 @@ class RealGrunnlagService(
         return historiskForeldreansvar
     }
 
-    override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
-        val pdlPerson =
-            pdltjenesterKlient.hentPerson(folkeregisteridentifikator, PersonRolle.BARN, SakType.BARNEPENSJON)
-        return vergeService.hentGrunnlagsopplysningVergesAdresse(pdlPerson)?.opplysning
-    }
-
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
         val grunnlag =
             opplysningDao.hentGrunnlagAvTypeForBehandling(behandlingId, PERSONGALLERI_PDL_V1, PERSONGALLERI_V1)
@@ -451,34 +435,6 @@ class RealGrunnlagService(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>? = opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
-
-    override fun hentOpplysningstypeNavnFraFnr(
-        fnr: Folkeregisteridentifikator,
-        navIdent: String,
-    ): NavnOpplysningDTO? {
-        val opplysning =
-            opplysningDao.finnNyesteOpplysningPaaFnr(fnr, Opplysningstype.NAVN)?.let {
-                val navn: Navn = deserialize(it.opplysning.opplysning.toString())
-                NavnOpplysningDTO(
-                    sakId = it.sakId,
-                    fornavn = navn.fornavn,
-                    mellomnavn = navn.mellomnavn,
-                    etternavn = navn.etternavn,
-                    foedselsnummer = fnr.value,
-                )
-            }
-        when (opplysning) {
-            null -> {
-                sporingslogg.logg(feilendeRequest(ident = fnr.value, navIdent = navIdent))
-                logger.warn("Fant ikke navn for person i grunnlaget")
-            }
-            else -> {
-                sporingslogg.logg(vellykkaRequest(ident = fnr.value, navIdent = navIdent))
-                logger.debug("Fant navn for person i grunnlaget")
-            }
-        }
-        return opplysning
-    }
 
     override fun lagreNyePersonopplysninger(
         sakId: Long,

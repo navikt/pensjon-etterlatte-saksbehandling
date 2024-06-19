@@ -64,6 +64,10 @@ const LOKAL_API_CONFIG = () => {
       url: process.env.TRYGDETID_API_URL || 'https://etterlatte-trygdetid.intern.dev.nav.no',
       scope: process.env.TRYGDETID_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-trygdetid/.default',
     },
+    utbetaling: {
+      url: process.env.UTBETALING_API_URL || 'https://etterlatte-utbetaling.intern.dev.nav.no',
+      scope: process.env.UTBETALING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-utbetaling/.default',
+    },
   }
 }
 
@@ -117,6 +121,10 @@ const API_CONFIG_FROM_ENV = (): ApiConfig => {
     trygdetid: {
       url: requireEnvValue('TRYGDETID_API_URL'),
       scope: requireEnvValue('TRYGDETID_API_SCOPE'),
+    },
+    utbetaling: {
+      url: requireEnvValue('UTBETALING_API_URL'),
+      scope: requireEnvValue('UTBETALING_API_SCOPE'),
     },
   }
 }

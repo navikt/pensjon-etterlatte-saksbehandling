@@ -14,13 +14,13 @@ import {
 } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { ToolTip } from '~components/behandling/felles/ToolTip'
@@ -29,25 +29,22 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
-import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { lastDayOfMonth } from 'date-fns'
 
 export const AvkortingInntekt = ({
   behandling,
-  avkorting,
   redigerbar,
-  setAvkorting,
   resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
-  avkorting: IAvkorting | undefined
   redigerbar: boolean
-  setAvkorting: (avkorting: IAvkorting) => void
   resetInntektsavkortingValidering: () => void
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
@@ -67,12 +64,29 @@ export const AvkortingInntekt = ({
   const finnesRedigerbartGrunnlag = () =>
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
+  const fulltAar = () => {
+    const innvilgelseFraJanuar =
+      behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+
+    const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar == 12
+
+    const revurderingINyttAar =
+      new Date(avkortingGrunnlag[0].fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
+
+    return innvilgelseFraJanuar || revurderingINyttAar || revurderingIFulltAar
+  }
+
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (finnesRedigerbartGrunnlag()) {
       // Returnerer grunnlagsperiode som er opprettet i denne behandlingen
       return avkortingGrunnlag[0]
     }
     if (avkortingGrunnlag.length > 0) {
+      // Setter disabla felter til forventet verdi
+      if (fulltAar()) {
+        return { spesifikasjon: '', fratrekkInnAar: 0, fratrekkInnAarUtland: 0 }
+      }
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyeste = avkortingGrunnlag[0]
       return { ...nyeste, id: undefined, spesifikasjon: '' }
@@ -114,7 +128,7 @@ export const AvkortingInntekt = ({
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
-        setAvkorting(respons)
+        dispatch(oppdaterAvkorting(respons))
         setVisForm(false)
       }
     )
@@ -125,11 +139,8 @@ export const AvkortingInntekt = ({
       <Heading spacing size="small" level="2">
         Inntektsavkorting
       </Heading>
-      <HjemmelLenke
-        tittel="Folketrygdloven § 17-9 (mangler lenke)"
-        lenke="https://lovdata.no/lov/" // TODO lenke finnes ikke enda
-      />
-      <BodyShort>
+      <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
+      <BodyShort spacing>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
         grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
         legges til grunn.
@@ -246,6 +257,7 @@ export const AvkortingInntekt = ({
                       size="medium"
                       type="text"
                       inputMode="numeric"
+                      disabled={fulltAar()}
                       error={errors.fratrekkInnAar?.message}
                     />
                     <TextField
@@ -267,6 +279,7 @@ export const AvkortingInntekt = ({
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
+                      disabled={fulltAar()}
                       inputMode="numeric"
                       error={errors.fratrekkInnAarUtland?.message}
                     />
@@ -342,8 +355,7 @@ export const AvkortingInntekt = ({
 }
 
 const AvkortingInntektWrapper = styled.div`
-  width: 57em;
-  margin-bottom: 3em;
+  max-width: 70rem;
 `
 
 const InntektAvkortingTabell = styled.div`
@@ -352,7 +364,7 @@ const InntektAvkortingTabell = styled.div`
 
 const InntektAvkortingForm = styled.form`
   display: flex;
-  margin: 1em 0 1em 0;
+  margin: 1em 0 0 0;
 `
 
 const FormWrapper = styled.div`

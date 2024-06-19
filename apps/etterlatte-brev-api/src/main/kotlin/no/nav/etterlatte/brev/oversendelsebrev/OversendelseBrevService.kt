@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -151,15 +153,20 @@ class OversendelseBrevServiceImpl(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String =
+            val mottakerFnr: String? =
                 when (verge) {
                     is Vergemaal -> verge.foedselsnummer.value
+                    is UkjentVergemaal -> null
 
                     else ->
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
                 }
-            adresseService.hentMottakerAdresse(sakType, mottakerFnr)
+            return if (mottakerFnr != null) {
+                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
+            } else {
+                tomMottaker()
+            }
         }
 
     override fun ferdigstillOversendelseBrev(
@@ -223,6 +230,14 @@ class OversendelseBrevServiceImpl(
         }
         brevRepository.settBrevSlettet(brev.id, brukerTokenInfo)
     }
+
+    private fun tomMottaker() =
+        Mottaker(
+            navn = "Ukjent",
+            foedselsnummer = null,
+            orgnummer = null,
+            adresse = Adresse(adresseType = "", landkode = "", land = ""),
+        )
 }
 
 data class OversendelseBrevFerdigstillingData(

@@ -38,6 +38,11 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                     call.respond(service.lagrePerioder(tilbakekrevingId, request.perioder, it))
                 }
             }
+            put("/oppdater-kravgrunnlag") {
+                kunSaksbehandlerMedSkrivetilgang {
+                    call.respond(service.oppdaterKravgrunnlag(tilbakekrevingId, it))
+                }
+            }
             put("/skal-sende-brev") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val request = call.receive<TilbakekrevingSendeBrevRequest>()

@@ -2,11 +2,11 @@ import { AdresseType, IBrev } from '~shared/types/Brev'
 import { Alert, Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { getVergeadresseForPerson } from '~shared/api/grunnlag'
+import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
@@ -15,29 +15,32 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   const mottaker = brevState!.mottaker
   const adresse = mottaker?.adresse
 
-  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseForPerson)
-
+  const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
   useEffect(() => {
-    getVergeadresse(brev.soekerFnr)
+    getSoekerFraGrunnlag({
+      sakId: brev.sakId,
+      behandlingId: brev.behandlingId,
+      opplysningstype: 'SOEKER_PDL_V1',
+    })
   }, [brev])
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
-      {mapApiResult(
-        vergeadresse,
-        <Spinner visible label="Henter eventuell verges adresse" margin="0" />,
-        (error) => (
+      {mapResult(soeker, {
+        pending: <Spinner visible label="Henter eventuelle verger" margin="0" />,
+        error: (error) => (
           <ApiErrorAlert>
-            {error.detail || 'Feil oppsto ved henting av eventuell verges adresse. Prøv igjen senere'}
+            {error.detail || 'Feil oppsto ved henting av eventuelle verger. Prøv igjen senere'}
           </ApiErrorAlert>
         ),
-        (adresse) =>
-          adresse && (
+        success: (soekeren) =>
+          (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
             <Alert variant="info" size="small" inline>
               Søker har verge
             </Alert>
-          )
-      )}
+          ),
+      })}
+
       <HStack gap="4" justify="space-between">
         <Heading spacing level="2" size="medium">
           Mottaker{' '}
@@ -47,9 +50,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </Tag>
           )}
         </Heading>
-        <div>
-          {kanRedigeres && <BrevMottakerModal brev={brevState} setBrev={setBrevState} vergeadresse={vergeadresse} />}
-        </div>
+        <div>{kanRedigeres && <BrevMottakerModal brev={brevState} setBrev={setBrevState} />}</div>
       </HStack>
 
       <VStack gap="4">

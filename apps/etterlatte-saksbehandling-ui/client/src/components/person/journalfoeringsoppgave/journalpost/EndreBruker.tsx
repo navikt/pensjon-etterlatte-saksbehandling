@@ -1,4 +1,4 @@
-import { AvsenderMottaker, Bruker, BrukerIdType } from '~shared/types/Journalpost'
+import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Button, CopyButton, Heading, HStack, TextField } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
@@ -10,6 +10,7 @@ import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterNavn } from '~shared/types/Person'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import SoekPersonPdl from '~components/person/journalfoeringsoppgave/journalpost/modal/SoekPersonPdl'
 
 const formaterType = (type: BrukerIdType) => {
   switch (type) {
@@ -39,9 +40,10 @@ export const EndreBruker = ({
     handleSubmit,
     watch,
     reset,
-  } = useForm<AvsenderMottaker>({ defaultValues: bruker })
+  } = useForm<Bruker>({ defaultValues: bruker })
 
   const [rediger, setRediger] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const lagreEndretMottaker = (bruker: Bruker) => {
     oppdaterBruker({ ...bruker, type: BrukerIdType.FNR })
@@ -106,6 +108,7 @@ export const EndreBruker = ({
             ),
           })}
           <br />
+          <SoekPersonPdl open={open} setOpen={setOpen} velgPerson={lagreEndretMottaker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
@@ -114,6 +117,7 @@ export const EndreBruker = ({
             <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
               Lagre
             </Button>
+            <Button onClick={() => setOpen(!open)}>Avansert Søk</Button>
           </HStack>
         </>
       ) : (

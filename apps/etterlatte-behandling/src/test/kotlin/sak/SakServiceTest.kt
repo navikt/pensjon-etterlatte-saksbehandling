@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
@@ -49,20 +50,38 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
 
 internal class SakServiceTest {
-    private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
-    private val sakDao = mockk<SakDao>()
-    private val norg2Klient = mockk<Norg2Klient>()
-    private val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
-    private val saksbehandlerService = mockk<SaksbehandlerService>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
-    private val grunnlagservice = mockk<GrunnlagService>()
-    private val krrKlient = mockk<KrrKlient>()
-
-    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+    private lateinit var service: SakService
+    val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    val norg2Klient = mockk<Norg2Klient>()
+    val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+    val saksbehandlerService = mockk<SaksbehandlerService>()
+    val skjermingKlient = mockk<SkjermingKlient>()
+    val sakDao = mockk<SakDao>()
 
     @BeforeEach
     fun before() {
         clearAllMocks()
+        val grunnlagservice =
+            mockk<GrunnlagService> {
+                every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+                every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+            }
+        val krrKlient =
+            mockk<KrrKlient> {
+                coEvery { hentDigitalKontaktinformasjon(any()) } returns
+                    DigitalKontaktinformasjon(
+                        personident = "",
+                        aktiv = true,
+                        kanVarsles = true,
+                        reservert = false,
+                        spraak = "nb",
+                        epostadresse = null,
+                        mobiltelefonnummer = null,
+                        sikkerDigitalPostkasse = null,
+                    )
+            }
+        service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+
         every {
             sakDao.finnSakMedGraderingOgSkjerming(
                 any(),
@@ -236,7 +255,7 @@ internal class SakServiceTest {
 
         val thrown =
             assertThrows<ResponseException> {
-                service.finnEllerOpprettSak(
+                service.finnEllerOpprettSakMedGrunnlag(
                     KONTANT_FOT.value,
                     SakType.BARNEPENSJON,
                 )
@@ -262,7 +281,7 @@ internal class SakServiceTest {
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
-                service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
+                service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
             }
 
         thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
@@ -294,7 +313,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
 
-        val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
+        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe
             Sak(
@@ -354,7 +373,7 @@ internal class SakServiceTest {
         every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
 
         val sak =
-            service.finnEllerOpprettSak(
+            service.finnEllerOpprettSakMedGrunnlag(
                 KONTANT_FOT.value,
                 SakType.BARNEPENSJON,
             )
@@ -415,7 +434,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
+        val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe
             Sak(

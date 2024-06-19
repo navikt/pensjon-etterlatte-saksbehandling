@@ -12,6 +12,15 @@ data class TilbakekrevingBehandling(
     val tilbakekreving: Tilbakekreving,
     val sendeBrev: Boolean,
 ) {
+    fun oppdaterKravgrunnlag(kravgrunnlag: Kravgrunnlag) =
+        this.copy(
+            tilbakekreving =
+                this.tilbakekreving.copy(
+                    perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
+                    kravgrunnlag = kravgrunnlag,
+                ),
+        )
+
     fun underBehandling() =
         when (status) {
             TilbakekrevingStatus.UNDERKJENT,

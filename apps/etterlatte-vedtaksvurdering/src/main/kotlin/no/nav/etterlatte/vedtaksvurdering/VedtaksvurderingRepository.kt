@@ -7,6 +7,9 @@ import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -87,6 +90,9 @@ class VedtaksvurderingRepository(
                 ?.let { vedtakId ->
                     if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
                         opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
+                        opprettVedtak.innhold.avkorting?.let {
+                            opprettAvkortetYtelsePerioder(vedtakId, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                        }
                     }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
             return@session hentVedtak(opprettVedtak.behandlingId, this)
@@ -139,6 +145,10 @@ class VedtaksvurderingRepository(
             if (oppdatertVedtak.innhold is VedtakInnhold.Behandling) {
                 slettUtbetalingsperioder(oppdatertVedtak.id, this)
                 opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
+                slettAvkortetYtelsePerioder(oppdatertVedtak.id, this)
+                oppdatertVedtak.innhold.avkorting?.let {
+                    opprettAvkortetYtelsePerioder(oppdatertVedtak.id, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                }
             }
             return@session hentVedtak(oppdatertVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
@@ -184,6 +194,42 @@ class VedtaksvurderingRepository(
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
+
+    private fun slettAvkortetYtelsePerioder(
+        vedtakId: Long,
+        tx: TransactionalSession,
+    ) = queryOf(
+        statement = """
+                DELETE FROM avkortet_ytelse_periode
+                WHERE vedtakid = :vedtakid
+                """,
+        paramMap =
+            mapOf(
+                "vedtakid" to vedtakId,
+            ),
+    ).let { query -> tx.run(query.asUpdate) }
+
+    private fun opprettAvkortetYtelsePerioder(
+        vedtakId: Long,
+        avkortetYtelse: List<AvkortetYtelseDto>,
+        tx: TransactionalSession,
+    ) = tx.batchPreparedNamedStatement(
+        statement = """
+                    INSERT INTO avkortet_ytelse_periode(vedtakid, datofom, datotom, type, ytelseFoer, ytelseEtter) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :ytelseFoer, :ytelseEtter)
+                    """,
+        params =
+            avkortetYtelse.map {
+                mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to it.fom.atDay(1).let(Date::valueOf),
+                    "datotom" to it.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "type" to it.type,
+                    "ytelseFoer" to it.ytelseFoerAvkorting,
+                    "ytelseEtter" to it.ytelseEtterAvkorting,
+                )
+            },
+    )
 
     fun hentVedtak(
         vedtakId: Long,

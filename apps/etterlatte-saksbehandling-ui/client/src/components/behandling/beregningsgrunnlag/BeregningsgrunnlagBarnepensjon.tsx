@@ -21,7 +21,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
-import InstitusjonsoppholdBP from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'
+import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
@@ -34,6 +34,7 @@ import {
   BeregningsmetodeFlereAvdoedeData,
   BeregningsmetodeForAvdoed,
   InstitusjonsoppholdGrunnlagData,
+  ReduksjonBP,
 } from '~shared/types/Beregning'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
@@ -45,6 +46,8 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { hentTrygdetider, ITrygdetid } from '~shared/api/trygdetid'
 import BeregningsgrunnlagMetodeForAvdoed from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagMetodeForAvdoed'
 import BeregningsgrunnlagBarnepensjonOppsummering from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjonOppsummering'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
+import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/virkningstidspunkt/utils'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -238,9 +241,23 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           />
         )}
         {isSuccess(beregningsgrunnlag) && (
-          <InstitusjonsoppholdBP
+          <InstitusjonsoppholdBeregning
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
+            institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+            lovtekstMedLenke={
+              <LovtekstMedLenke tittel="Institusjonsopphold" hjemler={BP_INSTITUSJONSOPPHOLD_HJEMLER} status={null}>
+                <p>
+                  Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig
+                  ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske
+                  sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at
+                  barnepensjonen skal bli redusert. Dersom barnet har faste og nødvendige utgifter til bolig, kan
+                  arbeids- og velferdsetaten bestemme at barnepensjonen ikke skal reduseres eller reduseres mindre enn
+                  hovedregelen sier.
+                </p>
+              </LovtekstMedLenke>
+            }
+            reduksjonsTyper={ReduksjonBP}
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />

@@ -113,8 +113,9 @@ export const FilterRad = ({
               options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
               values={filter.oppgavestatusFilter}
               onChange={(statuser) => {
-                hentOppgaverStatus(statuser)
-                setFilter({ ...filter, oppgavestatusFilter: statuser })
+                const statusFilter = statuser.includes(OPPGAVESTATUSFILTER.visAlle) ? [] : statuser
+                hentOppgaverStatus(statusFilter)
+                setFilter({ ...filter, oppgavestatusFilter: statusFilter })
               }}
             />
 
@@ -122,7 +123,9 @@ export const FilterRad = ({
               label="Oppgavetype"
               options={Object.entries(OPPGAVETYPEFILTER).map(([, beskrivelse]) => beskrivelse)}
               values={filter.oppgavetypeFilter}
-              onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
+              onChange={(typer) =>
+                setFilter({ ...filter, oppgavetypeFilter: typer.includes(OPPGAVETYPEFILTER.visAlle) ? [] : typer })
+              }
             />
           </>
         )}

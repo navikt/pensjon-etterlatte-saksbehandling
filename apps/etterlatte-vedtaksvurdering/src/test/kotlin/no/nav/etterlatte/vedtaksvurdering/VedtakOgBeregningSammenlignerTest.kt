@@ -85,6 +85,16 @@ class VedtakOgBeregningSammenlignerTest {
                         ytelseEtterAvkorting = ytelseEtterAvkorting,
                         avkortingsbeloep = 500,
                         restanse = 0,
+                        sanksjon = null,
+                    ),
+                    AvkortetYtelseDto(
+                        fom = YearMonth.of(2024, Month.MAY),
+                        tom = YearMonth.of(2024, Month.JUNE),
+                        ytelseFoerAvkorting = 2500,
+                        ytelseEtterAvkorting = ytelseEtterAvkorting * 2,
+                        avkortingsbeloep = 500,
+                        restanse = 0,
+                        sanksjon = null,
                     ),
                 ),
         )

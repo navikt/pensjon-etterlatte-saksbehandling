@@ -105,7 +105,7 @@ export function TilbakekrevingSidemeny() {
               <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
             </div>
 
-            <SettPaaVent oppgave={oppgave} redigerbar={true} />
+            <SettPaaVent oppgave={oppgave} />
           </SidebarPanel>
         </Scroller>
       </SidebarContent>

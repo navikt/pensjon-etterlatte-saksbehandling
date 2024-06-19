@@ -48,7 +48,7 @@ class DoedshendelseJobServiceTest {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
     private val sakService =
         mockk<SakService> {
-            every { finnEllerOpprettSak(any(), any()) } returns
+            every { finnEllerOpprettSakMedGrunnlag(any(), any()) } returns
                 Sak(
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,

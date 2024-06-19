@@ -47,6 +47,7 @@ enum class Opplysningstype {
 
     HISTORISK_FORELDREANSVAR,
 
+    @Deprecated("Finnes bare i gamle rader i DB")
     VERGES_ADRESSE,
     FORELDRELOES,
     UFOERE,

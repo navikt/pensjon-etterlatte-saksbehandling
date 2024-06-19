@@ -173,7 +173,22 @@ class AvkortingValiderTest {
     }
 
     @Test
-    fun `Gyldig tilstand gir ikke valideringsfeil`() {
+    fun `Førstegangsbehandling i gyldig tilstand gir ikke valideringsfeil`() {
+        validerInntekt(
+            AvkortingGrunnlagLagreDto(
+                aarsinntekt = 100000,
+                fratrekkInnAar = 5000,
+                fratrekkInnAarUtland = 0,
+                inntektUtland = 100000,
+                spesifikasjon = "asdf",
+            ),
+            Avkorting(),
+            behandling(virkningstidspunkt = virkningstidsunkt(YearMonth.of(2024, 2))),
+        )
+    }
+
+    @Test
+    fun `Revurdering i gyldig tilstand gir ikke valideringsfeil`() {
         validerInntekt(
             AvkortingGrunnlagLagreDto(
                 aarsinntekt = 100000,

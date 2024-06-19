@@ -47,24 +47,24 @@ object AvkortingValider {
             return
         }
 
-        val innvilgelseFraJanuar =
-            behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && virkningstidspunkt.month == Month.JANUARY
-        if (innvilgelseFraJanuar) {
-            throw ErFulltAar()
-        }
-
-        val nyligsteAarsoppgjoer = avkorting.aarsoppgjoer.maxBy { it.aar }
-        val nyligsteInntekt = nyligsteAarsoppgjoer.inntektsavkorting.lastOrNull()?.grunnlag
-
-        if (nyligsteInntekt != null) {
-            val revurderingINyttAar = nyligsteInntekt.periode.fom.year < virkningstidspunkt.year
-            if (revurderingINyttAar) {
+        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (virkningstidspunkt.month == Month.JANUARY) {
                 throw ErFulltAar()
             }
+        } else {
+            val nyligsteAarsoppgjoer = avkorting.aarsoppgjoer.maxBy { it.aar }
+            val nyligsteInntekt = nyligsteAarsoppgjoer.inntektsavkorting.lastOrNull()?.grunnlag
 
-            val revurderingIFulltAar = nyligsteAarsoppgjoer.forventaInnvilgaMaaneder == 12
-            if (revurderingIFulltAar) {
-                throw ErFulltAar()
+            if (nyligsteInntekt != null) {
+                val revurderingINyttAar = nyligsteInntekt.periode.fom.year < virkningstidspunkt.year
+                if (revurderingINyttAar) {
+                    throw ErFulltAar()
+                }
+
+                val revurderingIFulltAar = nyligsteAarsoppgjoer.forventaInnvilgaMaaneder == 12
+                if (revurderingIFulltAar) {
+                    throw ErFulltAar()
+                }
             }
         }
     }

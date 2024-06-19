@@ -123,6 +123,7 @@ spec:
           ports:
             - port: 1413
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: etterlatte-proxy.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

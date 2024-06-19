@@ -2,7 +2,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak, opprettBrevForSak, slettBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BodyShort, Box, Button, HStack, Modal, Table, Tag } from '@navikt/ds-react'
+import { BodyShort, Box, Button, HStack, Modal, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
@@ -13,6 +13,7 @@ import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } fro
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -20,23 +21,6 @@ const mapAdresse = (mottaker: Mottaker) => {
   const postlinje = [adr?.postnummer, adr?.poststed, adr?.land].join(' ')
 
   return `${adresselinje}, ${postlinje}`
-}
-
-const mapStatus = (status: BrevStatus) => status.charAt(0) + status.slice(1).toLowerCase()
-
-const tagColors = (status: BrevStatus) => {
-  switch (status) {
-    case BrevStatus.OPPRETTET:
-    case BrevStatus.OPPDATERT:
-      return 'neutral'
-    case BrevStatus.FERDIGSTILT:
-    case BrevStatus.JOURNALFOERT:
-      return 'info'
-    case BrevStatus.DISTRIBUERT:
-      return 'success'
-    case BrevStatus.SLETTET:
-      return 'neutral'
-  }
 }
 
 const brevKanEndres = (status: BrevStatus) => [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
@@ -134,9 +118,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                 <Table.Row key={b.id}>
                   <Table.DataCell>{b.id}</Table.DataCell>
                   <Table.DataCell>
-                    <Tag variant={tagColors(b.status)} size="medium">
-                      {mapStatus(b.status)}
-                    </Tag>
+                    <BrevStatusTag status={b.status} />
                   </Table.DataCell>
                   <Table.DataCell>{formaterBrevtype(b.brevtype)}</Table.DataCell>
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>

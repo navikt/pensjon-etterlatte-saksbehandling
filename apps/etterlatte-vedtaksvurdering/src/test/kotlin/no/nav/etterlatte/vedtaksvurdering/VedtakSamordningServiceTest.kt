@@ -52,7 +52,7 @@ class VedtakSamordningServiceTest {
                         ),
                     ),
             )
-        every { vedtakRepository.hentAvkortetYtelsePerioder(1234) } returns emptyList()
+        every { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1234)) } returns emptyList()
 
         val resultat = samordningService.hentVedtak(1234)!!
 
@@ -117,20 +117,17 @@ class VedtakSamordningServiceTest {
                         ),
                 ),
             )
-        every { vedtakRepository.hentAvkortetYtelsePerioder(1) } returns
+        every { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1, 2)) } returns
             listOf(
                 AvkortetYtelsePeriode(
                     id = UUID.randomUUID(),
-                    vedtakId = 2,
+                    vedtakId = 1,
                     fom = virkFom2024Januar,
                     tom = virkFom2024Januar,
                     type = "FORVENTET_INNTEKT",
                     ytelseFoerAvkorting = 3000,
                     ytelseEtterAvkorting = 2500,
                 ),
-            )
-        every { vedtakRepository.hentAvkortetYtelsePerioder(2) } returns
-            listOf(
                 AvkortetYtelsePeriode(
                     id = UUID.randomUUID(),
                     vedtakId = 2,

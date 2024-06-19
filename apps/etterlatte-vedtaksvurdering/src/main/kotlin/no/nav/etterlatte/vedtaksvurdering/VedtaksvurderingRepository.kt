@@ -342,13 +342,14 @@ class VedtaksvurderingRepository(
         }
 
     fun hentAvkortetYtelsePerioder(
-        vedtakId: Long,
+        vedtakIds: Set<Long>,
         tx: TransactionalSession? = null,
     ): List<AvkortetYtelsePeriode> =
         tx.session {
+            val idArray = this.connection.underlying.createArrayOf("bigint", vedtakIds.toTypedArray())
             hentListe(
-                queryString = "SELECT * FROM avkortet_ytelse_periode WHERE vedtakid = :vedtakid",
-                params = { mapOf("vedtakid" to vedtakId) },
+                queryString = "SELECT * FROM avkortet_ytelse_periode WHERE vedtakid = ANY (:vedtakIds)",
+                params = { mapOf("vedtakIds" to idArray) },
             ) { it.toAvkortetYtelsePeriode() }
         }
 

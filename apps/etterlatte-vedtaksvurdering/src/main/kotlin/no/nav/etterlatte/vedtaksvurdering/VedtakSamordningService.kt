@@ -19,7 +19,10 @@ class VedtakSamordningService(
 
     fun hentVedtak(vedtakId: Long): VedtakSamordningDto? {
         logger.debug("Henter vedtak med id=$vedtakId")
-        return repository.hentVedtak(vedtakId)?.toSamordningsvedtakDto(repository)
+        return repository.hentVedtak(vedtakId)?.let {
+            val avkortetYtelsePerioder = repository.hentAvkortetYtelsePerioder(setOf(vedtakId))
+            it.toSamordningsvedtakDto(avkortetYtelsePerioder)
+        }
     }
 
     fun hentVedtaksliste(
@@ -32,12 +35,20 @@ class VedtakSamordningService(
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
-        return tidslinjeJustert.map { it.toSamordningsvedtakDto(repository) }
+
+        val avkortetYtelsePerioderByVedtak =
+            repository
+                .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
+                .groupBy { it.vedtakId }
+
+        return tidslinjeJustert.map {
+            val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
+            it.toSamordningsvedtakDto(avkortetYtelsePerioder)
+        }
     }
 }
 
-private fun Vedtak.toSamordningsvedtakDto(repository: VedtaksvurderingRepository): VedtakSamordningDto {
-    val avkortetYtelsePerioder = repository.hentAvkortetYtelsePerioder(id)
+private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetYtelsePeriode>): VedtakSamordningDto {
     val innhold = innhold as VedtakInnhold.Behandling
 
     return VedtakSamordningDto(

@@ -93,7 +93,7 @@ class BeregningRepository(
     fun deaktiverOverstyrtBeregning(sakId: Long) {
         dataSource.transaction { tx ->
             queryOf(
-                statement = Queries.deaktiverOverstyrtberegning,
+                statement = Queries.updateOverstyrtberegning,
                 paramMap = mapOf("sakId" to sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
             ).let { query ->
                 tx.run(query.asUpdate)
@@ -341,7 +341,7 @@ private object Queries {
         ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status
         """.trimIndent()
 
-    val deaktiverOverstyrtberegning =
+    val updateOverstyrtberegning =
         """
         UPDATE overstyr_beregning SET status = :status
         WHERE sak_id = :sakId

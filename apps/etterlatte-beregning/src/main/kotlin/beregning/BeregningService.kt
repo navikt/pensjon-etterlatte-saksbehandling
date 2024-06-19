@@ -107,10 +107,10 @@ class BeregningService(
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
             } else {
-                throw KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak()
+                throw KanIkkeDeaktivereOverstyrtBeregningGrunnetIverksatteBehandlinger()
             }
         } else {
-            throw KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak()
+            throw KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus()
         }
     }
 
@@ -124,10 +124,16 @@ class BeregningService(
         this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
 }
 
-class KanIkkeDeaktivereOverstyrtBeregningForBehandlingPaaSak :
+class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :
     UgyldigForespoerselException(
         code = "UGYLDIG_STATUS_BEHANDLING",
         detail = "Behandlingen kan ikke endre overstyrt beregning da den har feil status",
+    )
+
+class KanIkkeDeaktivereOverstyrtBeregningGrunnetIverksatteBehandlinger :
+    UgyldigForespoerselException(
+        code = "IVERKSATTE_BEHANDLINGER_MED_OVERSTYRT",
+        detail = "Behandlingen kan ikke deaktivere overstyrt beregning da den har iverksatte behandlinger som er overstyrt",
     )
 
 class TrygdetidMangler(

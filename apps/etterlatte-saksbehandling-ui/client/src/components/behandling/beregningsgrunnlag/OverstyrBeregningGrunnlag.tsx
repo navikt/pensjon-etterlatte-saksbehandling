@@ -270,7 +270,7 @@ const OverstyrBeregningGrunnlag = (props: {
                         slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
                       }}
                     >
-                      Slett overstyrt beregning
+                      Skru av overstyrt beregning
                     </Button>
                   )}
                 </HStack>

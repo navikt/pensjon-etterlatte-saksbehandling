@@ -11,12 +11,10 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
-import no.nav.etterlatte.statistikk.database.OppdaterBeregningDao
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
-import no.nav.etterlatte.statistikk.jobs.RefreshBeregningJob
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
@@ -87,20 +85,6 @@ class ApplicationContext {
 
     val klageHendelseRiver: KlagehendelseRiver by lazy {
         KlagehendelseRiver(rapidsConnection, statistikkService)
-    }
-
-    private val oppdaterBeregningDao: OppdaterBeregningDao by lazy {
-        OppdaterBeregningDao.using(datasource)
-    }
-
-    val refreshBeregningJob: RefreshBeregningJob by lazy {
-        RefreshBeregningJob(
-            beregningKlient,
-            oppdaterBeregningDao,
-            leaderElection,
-            Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            Duration.of(2, ChronoUnit.MINUTES),
-        )
     }
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {

@@ -43,7 +43,7 @@ object VedtakOgBeregningSammenligner {
                 }
         check(perioder.size == beregningsperioder.size) {
             "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
-                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}" +
+                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}. " +
                 "Alle perioder fra vedtak: ${perioder.map { "${it.periode}: ${it.beloep}" }}. " +
                 "Alle perioder fra beregning: ${beregningsperioder.map {
                     "${it.fom}-${it.tom} - ${it.beloep}"

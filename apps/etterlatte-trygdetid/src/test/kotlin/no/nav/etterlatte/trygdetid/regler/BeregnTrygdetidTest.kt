@@ -917,6 +917,157 @@ internal class BeregnTrygdetidTest {
                     null,
                     true,
                 ),
+                Arguments.of(
+                    // ...arguments =
+                    "Ikke mer enn en oppjustering",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(1994, 2, 10),
+                                til = LocalDate.of(2004, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.STORBRITANNIA.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2005, 3, 2),
+                                til = LocalDate.of(2008, 12, 31),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2009, 1, 1),
+                                til = LocalDate.of(2011, 12, 12),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = true,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2012, 11, 1),
+                                til = LocalDate.of(2012, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2014, 5, 23),
+                                til = LocalDate.of(2019, 3, 25),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2019, 10, 1),
+                                til = LocalDate.of(2019, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2013, 6, 1),
+                                til = LocalDate.of(2014, 5, 4),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2020, 6, 1),
+                                til = LocalDate.of(2021, 6, 3),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = true,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2022, 1, 1),
+                                til = LocalDate.of(2022, 7, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FREMTIDIG,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2022, 8, 23),
+                                til = LocalDate.of(2044, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = false,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(1, 5, 0),
+                                antallMaaneder = 17,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(27, 1, 0),
+                                antallMaaneder = 325,
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 5, 0),
+                                antallMaaneder = 269,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                            ),
+                        samletTrygdetidNorge = 21,
+                        samletTrygdetidTeoretisk = 40,
+                        prorataBroek = IntBroek(17, 325),
+                        overstyrt = false,
+                        yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
+                    ),
+                    null,
+                    null,
+                    false,
+                ),
             )
 
         private fun byggTrygdetidGrunnlag(

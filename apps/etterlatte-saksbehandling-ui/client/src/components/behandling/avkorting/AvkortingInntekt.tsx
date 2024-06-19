@@ -72,7 +72,7 @@ export const AvkortingInntekt = ({
     const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar == 12
 
     const revurderingINyttAar =
-      new Date(avkortingGrunnlag[0].fom).getFullYear() != new Date(virkningstidspunkt(behandling).dato).getFullYear()
+      new Date(avkortingGrunnlag[0].fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
 
     return innvilgelseFraJanuar || revurderingINyttAar || revurderingIFulltAar
   }

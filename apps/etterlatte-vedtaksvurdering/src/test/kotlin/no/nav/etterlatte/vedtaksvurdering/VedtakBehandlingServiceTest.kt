@@ -509,7 +509,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -739,7 +739,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -790,7 +790,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -859,7 +859,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -901,8 +901,8 @@ internal class VedtakBehandlingServiceTest(
                 behandlingId,
             )
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-            mockk<BeregningOgAvkorting>(relaxed = true).also {
-                every { it.beregning } returns
+            BeregningOgAvkorting(
+                beregning =
                     mockk<BeregningDTO>(relaxed = true).also {
                         every {
                             it.beregningsperioder
@@ -917,8 +917,9 @@ internal class VedtakBehandlingServiceTest(
                                     trygdetid = 40,
                                 ),
                             )
-                    }
-            }
+                    },
+                avkorting = null,
+            )
 
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -971,7 +972,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -1013,7 +1014,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -1059,7 +1060,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
 
         coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } throws RuntimeException("Behandling feilet")
@@ -1124,7 +1125,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -1165,7 +1166,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
@@ -1211,8 +1212,8 @@ internal class VedtakBehandlingServiceTest(
                 any(),
             )
         } returns
-            mockk<BeregningOgAvkorting>(relaxed = true).also {
-                every { it.beregning } returns
+            BeregningOgAvkorting(
+                beregning =
                     mockk<BeregningDTO>(relaxed = true).also {
                         every {
                             it.beregningsperioder
@@ -1227,8 +1228,9 @@ internal class VedtakBehandlingServiceTest(
                                     trygdetid = 40,
                                 ),
                             )
-                    }
-            }
+                    },
+                avkorting = null,
+            )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
@@ -1282,7 +1284,7 @@ internal class VedtakBehandlingServiceTest(
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
-                avkorting = mockAvkorting(),
+                avkorting = null,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 

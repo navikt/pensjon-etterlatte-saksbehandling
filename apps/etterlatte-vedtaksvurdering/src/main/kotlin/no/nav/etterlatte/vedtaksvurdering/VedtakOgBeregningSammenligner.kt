@@ -8,6 +8,7 @@ import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.YearMonth
 
 object VedtakOgBeregningSammenligner {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -32,36 +33,44 @@ object VedtakOgBeregningSammenligner {
     ) {
         val innhold = vedtak.innhold as VedtakInnhold.Behandling
         val perioder = innhold.utbetalingsperioder.sortedBy { it.periode.fom }.filter { it.type == UtbetalingsperiodeType.UTBETALING }
-        val beregningsperioder = beregning.beregning.beregningsperioder.sortedBy { it.datoFOM }
+        val beregningsperioder =
+            beregning.avkorting
+                ?.avkortetYtelse
+                ?.sortedBy { it.fom }
+                ?.map { PeriodeMedBeloep(fom = it.fom, tom = it.tom, beloep = it.ytelseEtterAvkorting) }
+                ?: beregning.beregning.beregningsperioder.sortedBy { it.datoFOM }.map {
+                    PeriodeMedBeloep(fom = it.datoFOM, tom = it.datoTOM, beloep = it.utbetaltBeloep)
+                }
         check(perioder.size == beregningsperioder.size) {
             "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
-                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}" +
+                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}. " +
                 "Alle perioder fra vedtak: ${perioder.map { "${it.periode}: ${it.beloep}" }}. " +
                 "Alle perioder fra beregning: ${beregningsperioder.map {
-                    "${it.datoFOM}-${it.datoTOM} - ${it.utbetaltBeloep}"
+                    "${it.fom}-${it.tom} - ${it.beloep}"
                 } }"
         }
         for (i in perioder.indices) {
             val periode = perioder[i]
             val beregningsperiode = beregningsperioder[i]
-            val avkorting =
-                beregning.avkorting?.avkortetYtelse?.firstOrNull {
-                    it.fom == beregningsperiode.datoFOM && it.tom == beregningsperiode.datoTOM
-                }
 
-            val sumFraBeregningOgEvAvkorting = BigDecimal(avkorting?.ytelseEtterAvkorting ?: beregningsperiode.utbetaltBeloep)
-            check(sumFraBeregningOgEvAvkorting == periode.beloep) {
-                "Beløp for periode ${periode.periode} i vedtak ${vedtak.id} og behandling ${vedtak.behandlingId} var ${periode.beloep} i vedtak, men $sumFraBeregningOgEvAvkorting fra beregning og eventuell avkorting"
+            check(BigDecimal(beregningsperiode.beloep) == periode.beloep) {
+                "Beløp for periode ${periode.periode} i vedtak ${vedtak.id} og behandling ${vedtak.behandlingId} var ${periode.beloep} i vedtak, men ${beregningsperiode.beloep} fra beregning og eventuell avkorting"
             }
-            check(Periode(beregningsperiode.datoFOM, beregningsperiode.datoTOM) == periode.periode) {
+            check(Periode(beregningsperiode.fom, beregningsperiode.tom) == periode.periode) {
                 "FOM og TOM for periode ${periode.periode} i vedtak ${vedtak.id} " +
                     "og behandling ${vedtak.behandlingId} i vedtak, men ${Periode(
-                        beregningsperiode.datoFOM,
-                        beregningsperiode.datoTOM,
+                        beregningsperiode.fom,
+                        beregningsperiode.tom,
                     )} fra beregning. Alle perioder fra vedtak:" +
                     "${perioder.map { it.periode }}. " +
-                    "Alle perioder fra beregning: ${beregningsperioder.map { "${it.datoFOM}-${it.datoTOM}" } }"
+                    "Alle perioder fra beregning: ${beregningsperioder.map { "${it.fom}-${it.tom}" } }"
             }
         }
     }
 }
+
+data class PeriodeMedBeloep(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val beloep: Int,
+)

@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -23,13 +24,19 @@ class RedigerbartVedleggHenter(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         brevtype: Brevtype,
-    ): List<BrevInnholdVedlegg>? =
+    ): List<BrevInnholdVedlegg> =
         when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> vedleggInnvilgelseOmstillingsstoenad(bruker, generellBrevData)
                     VedtakType.OPPHOER -> vedleggOpphoerOmstillingsstoenad(bruker, generellBrevData)
-                    VedtakType.ENDRING -> vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
+                    VedtakType.ENDRING -> {
+                        if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+                            emptyList()
+                        } else {
+                            vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
+                        }
+                    }
                     else -> {
                         if (brevtype == Brevtype.VARSEL) {
                             listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))

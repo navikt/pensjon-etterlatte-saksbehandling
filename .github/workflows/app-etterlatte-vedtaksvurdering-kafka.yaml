@@ -24,7 +24,6 @@ on:
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -40,7 +39,6 @@ on:
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
 
 permissions:

@@ -25,7 +25,6 @@ on:
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -42,7 +41,6 @@ on:
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
 
 permissions:

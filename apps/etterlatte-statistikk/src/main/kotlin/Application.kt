@@ -14,7 +14,6 @@ fun main() {
 
 fun jobs(applicationContext: ApplicationContext) {
     applicationContext.maanedligStatistikkJob.schedule().also { addShutdownHook(it) }
-    applicationContext.refreshBeregningJob.schedule().also { addShutdownHook(it) }
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =

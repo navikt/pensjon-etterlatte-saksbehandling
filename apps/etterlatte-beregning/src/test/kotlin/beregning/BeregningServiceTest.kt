@@ -5,7 +5,9 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.regler.bruker
@@ -225,7 +227,7 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `skal opprette overstyr beregning der den ikke finnes`() {
+    fun `skal opprette overstyrt beregning der den ikke finnes`() {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -246,6 +248,36 @@ internal class BeregningServiceTest {
                 beregningRepository.opprettOverstyrBeregning(any())
                 beregningRepository.hentOverstyrBeregning(any())
             }
+        }
+    }
+
+    @Test
+    fun `skal kunne slette overstyrt beregning der den finnes`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns null
+        every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
+        every { beregningRepository.deaktiverOverstyrtBeregning(any()) } just runs
+
+        runBlocking {
+            val overstyrBeregning =
+                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test"), bruker)
+
+            overstyrBeregning shouldNotBe null
+
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
+
+            verify(exactly = 1) {
+                beregningRepository.opprettOverstyrBeregning(any())
+                beregningRepository.hentOverstyrBeregning(any())
+            }
+
+            beregningService.deaktiverOverstyrtberegning(behandling.id, bruker)
+            val tomOverstyrt = beregningService.hentOverstyrBeregning(behandling)
+            tomOverstyrt shouldBe null
         }
     }
 

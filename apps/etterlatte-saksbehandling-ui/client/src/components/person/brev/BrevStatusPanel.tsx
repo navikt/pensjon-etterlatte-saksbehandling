@@ -1,22 +1,6 @@
-import { BrevStatus, IBrev } from '~shared/types/Brev'
-import { BodyShort, Box, Heading, Label, Tag } from '@navikt/ds-react'
-
-const mapStatusTilString = (status: BrevStatus) => {
-  switch (status) {
-    case BrevStatus.OPPRETTET:
-      return 'Opprettet'
-    case BrevStatus.OPPDATERT:
-      return 'Oppdatert'
-    case BrevStatus.FERDIGSTILT:
-      return 'Ferdigstilt'
-    case BrevStatus.JOURNALFOERT:
-      return 'Journalført'
-    case BrevStatus.DISTRIBUERT:
-      return 'Distribuert'
-    case BrevStatus.SLETTET:
-      return 'Slettet'
-  }
-}
+import { IBrev } from '~shared/types/Brev'
+import { BodyShort, Box, Heading, Label } from '@navikt/ds-react'
+import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 
 export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
   return (
@@ -40,9 +24,7 @@ export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
       <BodyShort spacing size="small">
         <Label>Status:</Label>
         <br />
-        <Tag variant="info" size="small">
-          {mapStatusTilString(brev.status)}
-        </Tag>
+        <BrevStatusTag status={brev.status} />
       </BodyShort>
     </Box>
   )

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
@@ -30,7 +31,6 @@ fun jobs(applicationContext: ApplicationContext): MutableSet<TimerJob> {
     if (applicationContext.properties.konsistensavstemmingOMSEnabled) {
         jobs.add(applicationContext.konsistensavstemmingJobOMS)
     }
-    jobs.add(applicationContext.verifiserUtbetalingOgVedtakJob)
     return jobs
 }
 
@@ -49,6 +49,10 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
                             val timerJobs = cronjobs.map { job -> job.schedule() }
                             addShutdownHook(timerJobs)
                         }
+                    }
+
+                    override fun onReady(rapidsConnection: RapidsConnection) {
+                        setReady()
                     }
 
                     override fun onShutdown(rapidsConnection: RapidsConnection) {

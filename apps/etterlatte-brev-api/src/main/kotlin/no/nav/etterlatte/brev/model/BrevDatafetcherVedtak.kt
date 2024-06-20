@@ -38,6 +38,12 @@ internal class BrevDatafetcherVedtak(
             sak.sakType,
         )
 
+    suspend fun hentVilkaarsvurdering() =
+        brevdataFacade.hentVilkaarsvurdering(
+            behandlingId!!,
+            brukerTokenInfo,
+        )
+
     suspend fun hentForrigeUtbetaling() =
         brevdataFacade.finnForrigeUtbetalingsinfo(
             sak.id,

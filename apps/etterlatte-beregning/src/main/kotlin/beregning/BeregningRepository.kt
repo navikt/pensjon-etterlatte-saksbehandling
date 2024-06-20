@@ -91,6 +91,17 @@ class BeregningRepository(
         }
     }
 
+    fun deaktiverOverstyrtBeregning(sakId: Long) {
+        dataSource.transaction { tx ->
+            queryOf(
+                statement = Queries.updateOverstyrtberegning,
+                paramMap = mapOf("sakId" to sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
+            ).let { query ->
+                tx.run(query.asUpdate)
+            }
+        }
+    }
+
     private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning,
@@ -330,6 +341,12 @@ private object Queries {
         INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status, kategori)
         VALUES (:sakId, :beskrivelse, :tidspunkt, :status, :kategori)
         ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status, kategori=:kategori
+        """.trimIndent()
+
+    val updateOverstyrtberegning =
+        """
+        UPDATE overstyr_beregning SET status = :status
+        WHERE sak_id = :sakId
         """.trimIndent()
 }
 

@@ -157,6 +157,16 @@ class TilbakekrevingDao(
             hentTilbakekreving(tilbakekrevingBehandling.id)
         }
 
+    fun lagreTilbakekrevingMedNyePerioder(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                deleteTilbakekrevingsperioder(this, tilbakekrevingBehandling.id)
+                insertTilbakekreving(this, tilbakekrevingBehandling)
+                insertTilbakekrevingsperioder(this, tilbakekrevingBehandling)
+            }
+            hentTilbakekreving(tilbakekrevingBehandling.id)
+        }
+
     private fun insertTilbakekreving(
         connection: Connection,
         tilbakekrevingBehandling: TilbakekrevingBehandling,
@@ -185,6 +195,21 @@ class TilbakekrevingDao(
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.executeUpdate().also { require(it == 1) }
+    }
+
+    private fun deleteTilbakekrevingsperioder(
+        connection: Connection,
+        tilbakekrevingId: UUID,
+    ) = with(connection) {
+        val statement =
+            prepareStatement(
+                """
+                DELETE FROM tilbakekrevingsperiode 
+                WHERE tilbakekreving_id = ?
+                """.trimIndent(),
+            )
+        statement.setObject(1, tilbakekrevingId)
+        statement.executeUpdate().also { require(it > 0) }
     }
 
     private fun insertTilbakekrevingsperioder(

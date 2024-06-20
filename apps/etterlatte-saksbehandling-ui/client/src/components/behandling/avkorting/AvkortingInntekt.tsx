@@ -65,16 +65,17 @@ export const AvkortingInntekt = ({
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
   const fulltAar = () => {
-    const innvilgelseFraJanuar =
-      behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+    if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
+      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+      return innvilgelseFraJanuar
+    } else {
+      const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12
 
-    const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar == 12
+      const revurderingINyttAar =
+        new Date(avkortingGrunnlag[0].fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
 
-    const revurderingINyttAar =
-      new Date(avkortingGrunnlag[0].fom).getFullYear() != new Date(virkningstidspunkt(behandling).dato).getFullYear()
-
-    return innvilgelseFraJanuar || revurderingINyttAar || revurderingIFulltAar
+      return revurderingINyttAar || revurderingIFulltAar
+    }
   }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {

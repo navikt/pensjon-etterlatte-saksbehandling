@@ -12,6 +12,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Box, HStack, Label } from '@navikt/ds-react'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -21,7 +22,9 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
-  const lagVarselbrev = behandling.kilde === Vedtaksloesning.GJENOPPRETTA
+  const lagVarselbrev =
+    behandling.kilde === Vedtaksloesning.GJENOPPRETTA ||
+    behandling.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
   const soeknadRoutes_ = soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
   const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
 

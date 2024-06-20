@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -169,6 +170,14 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     ) {
         return
+    }
+
+    override suspend fun hentKravgrunnlag(
+        brukerTokenInfo: BrukerTokenInfo,
+        sakId: Long,
+        kravgrunnlagId: Long,
+    ): Kravgrunnlag {
+        TODO("Not yet implemented")
     }
 
     override val serviceName: String

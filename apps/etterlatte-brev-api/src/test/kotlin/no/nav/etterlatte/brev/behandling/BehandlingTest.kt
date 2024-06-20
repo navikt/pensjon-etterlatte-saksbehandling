@@ -14,11 +14,11 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -400,7 +400,6 @@ internal class BehandlingTest {
             BrevutfallDto(
                 UUID.randomUUID(),
                 Aldersgruppe.OVER_18,
-                LavEllerIngenInntekt.NEI,
                 Feilutbetaling(FeilutbetalingValg.NEI, null),
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
@@ -539,6 +538,7 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
     val behandlingKlient: BehandlingKlient = mockk()
     val sakService: SakService = mockk()
     val trygdetidKlient: TrygdetidKlient = mockk()
+    val vilkaarsvurderingKlient: VilkaarsvurderingKlient = mockk()
 
     return BrevdataFacade(
         vedtaksvurderingKlient,
@@ -548,5 +548,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         sakService,
         trygdetidKlient,
         addresseService,
+        vilkaarsvurderingKlient,
     )
 }

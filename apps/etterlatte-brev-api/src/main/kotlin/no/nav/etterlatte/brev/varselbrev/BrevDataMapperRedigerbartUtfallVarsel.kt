@@ -2,6 +2,8 @@ package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselUtfall
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -12,6 +14,7 @@ object BrevDataMapperRedigerbartUtfallVarsel {
         sakType: SakType,
         bruker: BrukerTokenInfo,
         utlandstilknytning: Utlandstilknytning?,
+        revurderingsaarsak: Revurderingaarsak? = null,
     ) = when (sakType) {
         SakType.BARNEPENSJON ->
             BarnepensjonVarselRedigerbartUtfall(
@@ -19,6 +22,11 @@ object BrevDataMapperRedigerbartUtfallVarsel {
                 erBosattUtlandet = utlandstilknytning?.erBosattUtland() ?: false,
             )
 
-        SakType.OMSTILLINGSSTOENAD -> ManueltBrevData()
+        SakType.OMSTILLINGSSTOENAD ->
+            if (revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+                OmstillingsstoenadAktivitetspliktVarselUtfall()
+            } else {
+                ManueltBrevData()
+            }
     }
 }

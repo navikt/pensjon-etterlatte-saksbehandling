@@ -43,6 +43,7 @@ data class Beregningsperiode(
 
 data class OverstyrBeregningDTO(
     val beskrivelse: String,
+    val kategori: String,
 )
 
 data class AvkortingDto(

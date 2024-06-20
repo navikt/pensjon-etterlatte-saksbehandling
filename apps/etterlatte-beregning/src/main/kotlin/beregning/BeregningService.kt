@@ -94,6 +94,7 @@ class BeregningService(
                     behandling.sak,
                     overstyrBeregning.beskrivelse,
                     Tidspunkt.now(),
+                    kategori = overstyrBeregning.kategori,
                 ),
             )
     }

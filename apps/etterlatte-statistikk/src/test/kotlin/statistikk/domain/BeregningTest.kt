@@ -25,7 +25,7 @@ class BeregningTest {
                 beregningsperioder = listOf(),
                 beregnetDato = Tidspunkt.now(),
                 grunnlagMetadata = Metadata(sakId = 0, versjon = 0),
-                overstyrBeregning = OverstyrBeregningDTO("Overstyrt i pesys"),
+                overstyrBeregning = OverstyrBeregningDTO("Overstyrt i pesys", "Test"),
             )
         val statistikkBeregning = Beregning.fraBeregningDTO(dto)
         Assertions.assertTrue(statistikkBeregning.overstyrtBeregning == true)

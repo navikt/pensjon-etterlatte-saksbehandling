@@ -34,6 +34,7 @@ data class OverstyrBeregning(
     val beskrivelse: String,
     val tidspunkt: Tidspunkt,
     val status: OverstyrBeregningStatus = OverstyrBeregningStatus.AKTIV,
+    val kategori: String,
 )
 
-fun OverstyrBeregning.toDTO() = OverstyrBeregningDTO(this.beskrivelse)
+fun OverstyrBeregning.toDTO() = OverstyrBeregningDTO(this.beskrivelse, this.kategori)

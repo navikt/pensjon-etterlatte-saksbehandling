@@ -1,0 +1,1 @@
+ALTER TABLE overstyr_beregning ADD COLUMN kategori TEXT

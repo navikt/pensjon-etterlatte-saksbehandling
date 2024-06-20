@@ -76,6 +76,7 @@ class BeregningRepository(
                         "beskrivelse" to overstyrBeregning.beskrivelse,
                         "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
                         "status" to overstyrBeregning.status.name,
+                        "kategori" to overstyrBeregning.kategori,
                     ),
             ).let { query ->
                 tx.run(query.asUpdate)
@@ -129,6 +130,7 @@ private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
             sakId = long("sak_id"),
             beskrivelse = string("beskrivelse"),
             tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+            kategori = string("kategori"),
         )
     }
 
@@ -325,9 +327,9 @@ private object Queries {
 
     val opprettOverstyrBeregning =
         """
-        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status)
-        VALUES (:sakId, :beskrivelse, :tidspunkt, :status)
-        ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status
+        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status, kategori)
+        VALUES (:sakId, :beskrivelse, :tidspunkt, :status, :kategori)
+        ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status, kategori=:kategori
         """.trimIndent()
 }
 

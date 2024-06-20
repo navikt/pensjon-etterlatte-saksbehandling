@@ -88,7 +88,11 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal ikke hente en overstyr beregning som har status ugyldig`() {
-        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
+        val sakId = 10L
+        beregningRepository.opprettOverstyrBeregning(
+            OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV, kategori = "Test"),
+        )
+
         val beregningLagret = beregning()
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(10L)
@@ -98,20 +102,28 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal kunne opprette en gyldig overstyr beregning etter en ugyldig`() {
-        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
+        val sakId = 10L
+        beregningRepository.opprettOverstyrBeregning(
+            OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV, kategori = "Test"),
+        )
+
         beregningRepository.lagreEllerOppdaterBeregning(beregning())
         assertEquals(null, beregningRepository.hentOverstyrBeregning(10L))
 
         val overstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.AKTIV),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = "Test"),
             )
         assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(10L))
     }
 
     @Test
     fun `skal lagre og hente en overstyr beregning`() {
-        val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(1L, "Test", Tidspunkt.now()))
+        val sakId = 1L
+        val opprettetOverstyrBeregning =
+            beregningRepository.opprettOverstyrBeregning(
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = "Test"),
+            )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(1L)
 

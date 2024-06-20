@@ -180,7 +180,7 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now())
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = "Test")
 
         testApplication {
             runServer(server) {
@@ -198,6 +198,7 @@ internal class BeregningRoutesTest {
 
             hentetOverstyrBeregning shouldNotBe null
             hentetOverstyrBeregning.beskrivelse shouldBe "Test"
+            hentetOverstyrBeregning.kategori shouldBe "Test"
         }
     }
 

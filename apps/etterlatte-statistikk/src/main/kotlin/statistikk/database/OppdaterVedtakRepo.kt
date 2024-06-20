@@ -86,7 +86,7 @@ class OppdaterVedtakRepo(
                     behandlingId = getObject("behandling_id") as UUID,
                     vedtakId = getInt("vedtak_id"),
                     opphoerFom =
-                        getDate("opphoerFom")?.toLocalDate()?.let {
+                        getDate("opphoer_fom")?.toLocalDate()?.let {
                             YearMonth.of(it.year, it.monthValue)
                         },
                     perioder =

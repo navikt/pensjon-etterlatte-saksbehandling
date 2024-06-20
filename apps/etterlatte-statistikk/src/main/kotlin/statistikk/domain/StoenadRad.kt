@@ -2,7 +2,10 @@ package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -35,4 +38,35 @@ data class StoenadRad(
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
     val sakYtelsesgruppe: SakYtelsesgruppe?,
+    val opphoerFom: YearMonth?,
+    val vedtaksperioder: List<StoenadUtbetalingsperiode>?,
 )
+
+enum class StoenadPeriodeType {
+    OPPHOER,
+    UTBETALING,
+    ;
+
+    companion object {
+        fun fra(type: UtbetalingsperiodeType): StoenadPeriodeType =
+            when (type) {
+                UtbetalingsperiodeType.OPPHOER -> OPPHOER
+                UtbetalingsperiodeType.UTBETALING -> UTBETALING
+            }
+    }
+}
+
+data class StoenadUtbetalingsperiode(
+    val type: StoenadPeriodeType,
+    val beloep: BigDecimal?,
+    val fraOgMed: YearMonth,
+    val tilOgMed: YearMonth?,
+)
+
+fun tilStoenadUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): StoenadUtbetalingsperiode =
+    StoenadUtbetalingsperiode(
+        type = StoenadPeriodeType.fra(utbetalingsperiode.type),
+        beloep = utbetalingsperiode.beloep,
+        fraOgMed = utbetalingsperiode.periode.fom,
+        tilOgMed = utbetalingsperiode.periode.tom,
+    )

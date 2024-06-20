@@ -47,6 +47,7 @@ sealed class VedtakInnholdDto {
         val virkningstidspunkt: YearMonth,
         val behandling: Behandling,
         val utbetalingsperioder: List<Utbetalingsperiode>,
+        val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
 
     @JsonTypeName("TILBAKEKREVING")

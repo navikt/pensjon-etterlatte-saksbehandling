@@ -41,6 +41,7 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import no.nav.etterlatte.statistikk.domain.StoenadRad
+import no.nav.etterlatte.statistikk.domain.tilStoenadUtbetalingsperiode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -243,6 +244,8 @@ class StatistikkService(
                 YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(20)
             }
         val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+        val vedtaksperioder = vedtakInnhold.utbetalingsperioder.map { tilStoenadUtbetalingsperiode(it) }
+
         return StoenadRad(
             id = -1,
             fnrSoeker = vedtak.sak.ident,
@@ -276,6 +279,8 @@ class StatistikkService(
             kilde = vedtaksloesning,
             pesysId = pesysid,
             sakYtelsesgruppe = hentSakYtelsesgruppe(sakType = vedtak.sak.sakType, avdoede = persongalleri.avdoed),
+            opphoerFom = vedtakInnhold.opphoerFraOgMed,
+            vedtaksperioder = vedtaksperioder,
         )
     }
 

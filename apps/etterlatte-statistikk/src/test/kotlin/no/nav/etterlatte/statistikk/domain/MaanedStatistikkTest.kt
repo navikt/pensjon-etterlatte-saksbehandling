@@ -86,6 +86,8 @@ fun stoenadRad(
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     pesysId: Long = 123L,
     sakYtelsesgruppe: SakYtelsesgruppe? = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+    opphoerFom: YearMonth? = null,
+    vedtaksperioder: List<StoenadUtbetalingsperiode>? = null,
 ): StoenadRad =
     StoenadRad(
         id = id,
@@ -115,4 +117,6 @@ fun stoenadRad(
         kilde = kilde,
         pesysId = pesysId,
         sakYtelsesgruppe = sakYtelsesgruppe,
+        opphoerFom = opphoerFom,
+        vedtaksperioder = vedtaksperioder,
     )

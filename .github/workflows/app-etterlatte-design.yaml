@@ -38,7 +38,7 @@ jobs:
           app: ${{ env.APP_NAME }}
           team: etterlatte
           source: apps/${{ env.APP_NAME }}/dist
-          ingress: etterlatte-design.ekstern.dev.nav.no
+          ingress: https://${{ env.APP_NAME }}.ekstern.dev.nav.no
           environment: dev
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

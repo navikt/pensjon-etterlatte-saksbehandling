@@ -75,7 +75,7 @@ class ApplicationContext {
     }
 
     private val vedtaksvurderingsKlient: VedtaksvurderingsKlient by lazy {
-        VedtaksvurderingsKlient(vedtaksvurderingsHttpClient, "http://etterlatte-vedtak")
+        VedtaksvurderingsKlient(vedtaksvurderingsHttpClient, "http://etterlatte-vedtaksvurdering")
     }
 
     private val oppdaterVedtakRepo: OppdaterVedtakRepo by lazy {

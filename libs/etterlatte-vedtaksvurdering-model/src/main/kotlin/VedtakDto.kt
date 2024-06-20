@@ -115,6 +115,16 @@ enum class UtbetalingsperiodeType {
     UTBETALING,
 }
 
+data class AvkortetYtelsePeriode(
+    val id: UUID,
+    val vedtakId: Long,
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val type: String,
+    val ytelseFoerAvkorting: Int,
+    val ytelseEtterAvkorting: Int,
+)
+
 data class VedtakSamordningDto(
     val vedtakId: Long,
     val fnr: String,

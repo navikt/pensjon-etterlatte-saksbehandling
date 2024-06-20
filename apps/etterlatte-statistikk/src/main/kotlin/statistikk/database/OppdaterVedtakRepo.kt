@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.StoenadUtbetalingsperiode
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID
@@ -12,13 +13,15 @@ import javax.sql.DataSource
 class OppdaterVedtakRepo(
     private val datasource: DataSource,
 ) {
+    private val logger = LoggerFactory.getLogger(OppdaterVedtakRepo::class.java)
+
     fun vedtakSomIkkeErHentet(limit: Int): List<UUID> =
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
                     SELECT behandling_id FROM oppdaterte_vedtak_opphoer_fom_perioder 
-                    WHERE hentet_status = 'IKKE_HENTET' LIMIT ?;
+                    WHERE hentet_status = 'IKKE_HENTET' LIMIT ?
                     """.trimIndent(),
                 )
             statement.setInt(1, limit)
@@ -33,13 +36,14 @@ class OppdaterVedtakRepo(
         opphoerFom: YearMonth?,
         perioder: List<StoenadUtbetalingsperiode>,
     ) {
+        logger.info("Oppdaterer vedtak for behandling med id=$behandlingId")
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
                     UPDATE oppdaterte_vedtak_opphoer_fom_perioder SET 
-                    (vedtak_id, hentet_status, opphoer_fom, vedtaksperioder) = (?, ?, ?, ?) 
-                    where behandling_id = ? 
+                    vedtak_id = ?, hentet_status = ?, opphoer_fom = ?, vedtaksperioder = ? 
+                    where behandling_id = ?
                     """.trimIndent(),
                 )
             statement.setInt(1, vedtakId)

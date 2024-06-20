@@ -1,0 +1,37 @@
+name: etterlatte-design
+
+env:
+  APP_NAME: ${{ github.workflow }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - EY-4090-nettside-for-visuelle-standarer
+    paths:
+      - apps/etterlatte-design/**
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-spa:
+    name: Deploy to dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+      - run: npm run build
+      - uses: navikt/frontend/actions/spa-deploy/v2@main
+        with:
+          app: ${{ env.APP_NAME }}
+          team: etterlatte
+          source: ./dist
+          ingress: etterlatte-design.ekstern.dev.nav.no
+          environment: dev
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "@navikt/ds-css";
-import { Box, Heading, HStack, Tag, VStack } from "@navikt/ds-react";
+import { Box, Heading, Tag, VStack } from "@navikt/ds-react";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

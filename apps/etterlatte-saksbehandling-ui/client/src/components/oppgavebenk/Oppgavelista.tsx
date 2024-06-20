@@ -3,6 +3,7 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
+  finnOgOppdaterStatus,
   leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
@@ -19,7 +20,7 @@ import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppga
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
@@ -63,6 +64,15 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
     }, 2000)
   }
 
+  const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) => {
+    setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(finnOgOppdaterStatus(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, status))
+      dispatcher.setMinOppgavelisteOppgaver(
+        finnOgOppdaterStatus(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, status)
+      )
+    }, 2000)
+  }
+
   const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentOppgavelistaOppgaverFetch(
       {
@@ -100,6 +110,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
           oppgaver={oppgavebenkState.oppgavelistaOppgaver}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
+          oppdaterStatus={oppdaterStatus}
           filter={filter}
         />
       ) : (

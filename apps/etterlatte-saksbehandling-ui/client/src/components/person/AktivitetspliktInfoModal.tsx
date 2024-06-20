@@ -58,7 +58,13 @@ const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
   beskrivelse: '',
 }
 
-export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const AktivitetspliktInfoModal = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const [visModal, setVisModal] = useState(false)
   const [erFerdigstilt, setErFerdigstilt] = useState(false)
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
@@ -83,6 +89,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     if (!erFerdigstilt && vurdering) {
       apiFerdigstillOppgave(oppgave.id, () => {
         setVisModal(false)
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       })
     } else if (data.aktivitetsplikt === JaNei.NEI || data.unntak === JaNei.JA) {
       opprettUnntak(
@@ -103,6 +110,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         () => {
           apiFerdigstillOppgave(oppgave.id, () => {
             setVisModal(false)
+            oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
           })
         }
       )
@@ -121,6 +129,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         () => {
           apiFerdigstillOppgave(oppgave.id, () => {
             setVisModal(false)
+            oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
           })
         }
       )

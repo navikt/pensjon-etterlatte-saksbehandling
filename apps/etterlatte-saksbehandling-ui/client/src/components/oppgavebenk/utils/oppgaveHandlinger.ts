@@ -17,6 +17,17 @@ export const finnOgOppdaterSaksbehandlerTildeling = (
   }
 }
 
+export const finnOgOppdaterStatus = (oppgaver: OppgaveDTO[], oppgaveId: string, status: Oppgavestatus) => {
+  const index = oppgaver.findIndex((o) => o.id === oppgaveId)
+  if (index > -1) {
+    const oppdatertOppgaveState = [...oppgaver]
+    oppdatertOppgaveState[index].status = status
+    return oppdatertOppgaveState
+  } else {
+    return oppgaver
+  }
+}
+
 export const leggTilOppgavenIMinliste = (
   oppgaver: OppgaveDTO[],
   oppgave: OppgaveDTO,

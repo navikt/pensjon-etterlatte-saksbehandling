@@ -2,13 +2,19 @@ import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
-import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
 
-export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const HandlingerForOppgave = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
@@ -107,7 +113,11 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         )
       )
     case Oppgavetype.AKTIVITETSPLIKT:
-      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal oppgave={oppgave} />
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <AktivitetspliktInfoModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
       return erInnloggetSaksbehandlerOppgave && <AktivitetspliktRevurderingModal oppgave={oppgave} />
     default:

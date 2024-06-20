@@ -6,6 +6,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
+  finnOgOppdaterStatus,
   leggTilOppgavenIMinliste,
   oppdaterFrist,
   sorterOppgaverEtterOpprettet,
@@ -16,7 +17,7 @@ import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppga
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import {
   hentMinOppgavelisteFilterFraLocalStorage,
@@ -65,6 +66,15 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     }, 2000)
   }
 
+  const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) => {
+    setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(finnOgOppdaterStatus(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, status))
+      dispatcher.setMinOppgavelisteOppgaver(
+        finnOgOppdaterStatus(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, status)
+      )
+    }, 2000)
+  }
+
   const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentMinOppgavelisteOppgaverFetch(
       {
@@ -100,6 +110,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           oppdaterFrist={(id: string, nyfrist: string) =>
             oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
           }
+          oppdaterStatus={oppdaterStatus}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           filter={filter}
         />

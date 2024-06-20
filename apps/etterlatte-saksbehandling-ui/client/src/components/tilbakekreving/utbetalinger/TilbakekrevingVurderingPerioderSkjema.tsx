@@ -109,7 +109,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
           </div>
           {mapResult(oppdaterKravgrunnlagStatus, {
             success: () => <Toast melding="Periodene ble oppdatert" position="bottom-center"></Toast>,
-            error: () => <ApiErrorAlert>En feil oppstod under henting av perioder fra kravgrunnlag</ApiErrorAlert>,
+            error: (error) => (
+              <ApiErrorAlert>En feil oppstod under henting av perioder fra kravgrunnlag: {error.detail}</ApiErrorAlert>
+            ),
           })}
 
           <Table className="table" zebraStripes>

@@ -71,6 +71,7 @@ class VedtakOppdateringJob(
             behandlingIder.forEach { behandlingId ->
                 try {
                     val vedtak = runBlocking { vedtakKlient.hentVedtak(behandlingId.toString()) }
+                    logger.info("hentet vedtak for id=$behandlingId, og fikk vedtak med id=${vedtak?.id}")
                     if (vedtak == null) {
                         oppdaterVedtakRepo.oppdaterIkkeFunnetVedtak(behandlingId)
                     } else {

@@ -179,7 +179,7 @@ const OverstyrBeregningGrunnlag = (props: {
     <>
       <Box paddingInline="16" paddingBlock="0 4">
         <VStack gap="5">
-          <Alert variant="warning">Denne beregningen er manuelt overstyrt</Alert>
+          <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
           <BodyShort textColor="default">
             <b>Årsak:</b> {getValueOfKey(overstyrBeregning.kategori)}
           </BodyShort>

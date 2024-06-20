@@ -15,8 +15,7 @@ class VedtaksvurderingsKlient(
 
     suspend fun hentVedtak(behandlingId: String): VedtakDto? =
         try {
-            // TODO URL
-            httpClient.get("$vedtakUrl/").body()
+            httpClient.get("$vedtakUrl/api/vedtak/$behandlingId").body()
         } catch (e: Exception) {
             logger.warn("Kunne ikke hente vedtaket for behandlingen med id=$behandlingId", e)
             null

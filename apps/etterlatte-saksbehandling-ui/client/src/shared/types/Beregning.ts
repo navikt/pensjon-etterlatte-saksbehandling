@@ -4,6 +4,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { IProrataBroek } from '~shared/api/trygdetid'
 import { KildeSaksbehandler } from '~shared/types/kilde'
+import { KATEGORI } from '~shared/types/OverstyrtBeregning'
 
 export interface Beregning {
   beregningId: string
@@ -17,6 +18,7 @@ export interface Beregning {
 
 export interface OverstyrBeregning {
   beskrivelse: string
+  kategori: KATEGORI
 }
 
 export interface GrunnlagMetadata {

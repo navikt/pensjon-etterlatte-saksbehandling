@@ -110,6 +110,9 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val beregningsMetode: BeregningsMetode?,
 )
 
-enum class OverstyrtBeregningKategori {
-    FORELDRELOS,
+enum class OverstyrtBeregningKategori(
+    s: String,
+) {
+    FORELDRELOS("FORELDRELØS"),
+    UKJENT_KATEGORI("UKJENT KATEGORI"), // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }

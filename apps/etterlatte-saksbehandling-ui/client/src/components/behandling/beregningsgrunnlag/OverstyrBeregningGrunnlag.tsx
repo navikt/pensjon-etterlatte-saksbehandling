@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Box, Button, ErrorSummary, Heading, HStack, Table } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, HStack, Label, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -46,6 +46,7 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { getValueOfKey } from '~shared/types/OverstyrtBeregning'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -178,8 +179,10 @@ const OverstyrBeregningGrunnlag = (props: {
     <>
       <Box paddingInline="16" paddingBlock="16 4">
         <Heading size="medium" level="2">
-          Overstyr beregning: {overstyrBeregning.beskrivelse}
+          Årsak: ({getValueOfKey(overstyrBeregning.kategori)})
         </Heading>
+
+        <Label size="medium">Begrunnelse: {overstyrBeregning.beskrivelse}</Label>
       </Box>
       {mapApiResult(
         overstyrBeregningGrunnlag,

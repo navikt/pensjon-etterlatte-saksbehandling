@@ -1,7 +1,7 @@
 import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
-import { BodyLong, Box, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyLong, Box, Button, Heading, Select, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
@@ -11,6 +11,7 @@ import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { KATEGORI } from '~shared/types/OverstyrtBeregning'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -77,11 +78,15 @@ const OverstyrBeregningForGrunnlag = (props: {
   const { behandlingId, setOverstyrt } = props
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [begrunnelse, setBegrunnelse] = useState<string>('')
+  const [kategori, setKategori] = useState<KATEGORI>()
   const overstyrBeregning = () => {
     opprettOverstyrtBeregningReq(
       {
         behandlingId,
         beskrivelse: begrunnelse,
+
+        // @ts-expect-error tillate undefined
+        kategori: kategori,
       },
       (result) => {
         if (result) {
@@ -95,6 +100,19 @@ const OverstyrBeregningForGrunnlag = (props: {
     <FormWrapper>
       <Heading size="small">Overstyre beregning</Heading>
       <BodyLong>Er det ønskelig å overstyre beregning?</BodyLong>
+      <Select
+        label="Velg årsak til overstyring:"
+        onChange={(e) => {
+          setKategori(e.target.value as KATEGORI)
+        }}
+      >
+        <option value="">Velg kategori</option>
+        {Object.entries(KATEGORI).map(([key, value]) => (
+          <option key={key} value={key}>
+            {value}
+          </option>
+        ))}
+      </Select>
       <TextField
         onChange={(e) => {
           setBegrunnelse(e.target.value)
@@ -102,6 +120,7 @@ const OverstyrBeregningForGrunnlag = (props: {
         label=""
         placeholder="Begrunnelse"
       />
+
       <Button onClick={overstyrBeregning} loading={isPending(overstyrBeregningStatus)}>
         Overstyr
       </Button>

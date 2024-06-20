@@ -4,9 +4,7 @@ package no.nav.etterlatte.beregning
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders

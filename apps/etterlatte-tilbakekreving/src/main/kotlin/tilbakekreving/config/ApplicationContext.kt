@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
-import no.nav.etterlatte.tilbakekreving.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.tilbakekreving.klienter.TilbakekrevingskomponentenKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 
@@ -47,7 +47,7 @@ class ApplicationContext(
     val tilbakekrevingHendelseRepository = TilbakekrevingHendelseRepository(dataSource)
 
     val tilbakekrevingKlient =
-        TilbakekrevingKlient(
+        TilbakekrevingskomponentenKlient(
             url = properties.proxyUrl,
             httpClient =
                 httpClientClientCredentials(

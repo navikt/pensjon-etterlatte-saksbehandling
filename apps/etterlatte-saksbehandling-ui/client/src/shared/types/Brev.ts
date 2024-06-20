@@ -3,7 +3,7 @@ export interface IBrev {
   sakId: number
   tittel: string
   spraak: Spraak
-  behandlingId: string
+  behandlingId?: string
   prosessType: BrevProsessType
   soekerFnr: string
   status: BrevStatus

@@ -17,6 +17,10 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
 
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
   useEffect(() => {
+    if (!brev.behandlingId) {
+      return
+    }
+
     getSoekerFraGrunnlag({
       sakId: brev.sakId,
       behandlingId: brev.behandlingId,
@@ -27,6 +31,11 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
       {mapResult(soeker, {
+        initial: kanRedigeres && (
+          <Alert variant="info" size="small" inline>
+            Sjekk om bruker har verge
+          </Alert>
+        ),
         pending: <Spinner visible label="Henter eventuelle verger" margin="0" />,
         error: (error) => (
           <ApiErrorAlert>

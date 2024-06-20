@@ -118,6 +118,7 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
         - application: etterlatte-beregning
+        - application: etterlatte-statistikk # skal fjernes etter at vedtaksdata i statistikk er oppdatert
         - application: etterlatte-samordning-vedtak
           permissions:
             roles:

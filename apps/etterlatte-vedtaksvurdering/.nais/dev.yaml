@@ -119,6 +119,7 @@ spec:
             roles:
               - samordning-write
         - application: etterlatte-utbetaling
+        - application: etterlatte-statistikk # skal fjernes etter at vedtaksdata i statistikk er oppdatert
         - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
           namespace: aura
           cluster: dev-gcp

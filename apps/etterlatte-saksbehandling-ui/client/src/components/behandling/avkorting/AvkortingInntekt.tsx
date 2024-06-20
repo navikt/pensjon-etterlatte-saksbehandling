@@ -58,8 +58,6 @@ export const AvkortingInntekt = ({
   const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
 
-  const [ugyldigInntektAngitt, setUgyldigInntektAngitt] = useState(false)
-
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () =>
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
@@ -107,19 +105,12 @@ export const AvkortingInntekt = ({
     reset,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<IAvkortingGrunnlagLagre>({
     defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
   })
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
-    const ugyldigInntekt = data.aarsinntekt! < data.fratrekkInnAar!
-    const ugyldigInntektUtland = data.inntektUtland! < data.fratrekkInnAarUtland!
-    if (ugyldigInntekt || ugyldigInntektUtland) {
-      setUgyldigInntektAngitt(true)
-      return
-    }
-    setUgyldigInntektAngitt(false)
-
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
@@ -237,26 +228,27 @@ export const AvkortingInntekt = ({
             {visForm && (
               <>
                 <FormWrapper>
-                  <HStack gap="4">
+                  <HStack gap="4" align="start" wrap={false}>
                     <TextField
                       {...register('aarsinntekt', {
-                        required: { value: true, message: 'Må fylles ut' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
+                        required: { value: true, message: 'Må fylles ut' },
                       })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
                       error={errors.aarsinntekt?.message}
                     />
                     <TextField
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
+                        max: { value: watch('aarsinntekt') || 0, message: 'Kan ikke være høyere enn årsinntekt' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
                       disabled={fulltAar()}
                       error={errors.fratrekkInnAar?.message}
@@ -268,18 +260,22 @@ export const AvkortingInntekt = ({
                       })}
                       label="Forventet årsinntekt utland"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
                       error={errors.inntektUtland?.message}
                     />
                     <TextField
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
+                        max: {
+                          value: watch('inntektUtland') || 0,
+                          message: 'Kan ikke være høyere enn årsinntekt utland',
+                        },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
-                      type="text"
+                      type="tel"
                       disabled={fulltAar()}
                       inputMode="numeric"
                       error={errors.fratrekkInnAarUtland?.message}
@@ -307,9 +303,6 @@ export const AvkortingInntekt = ({
                     }
                   />
                 </TextAreaWrapper>
-                {ugyldigInntektAngitt && (
-                  <Alert variant="error">En årsinntekt kan ikke være lavere enn fratrekk inn-år</Alert>
-                )}
               </>
             )}
             <FormKnapper>

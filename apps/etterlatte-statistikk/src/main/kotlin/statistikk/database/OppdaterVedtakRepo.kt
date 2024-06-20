@@ -51,6 +51,7 @@ class OppdaterVedtakRepo(
             statement.setDate(3, opphoerFom?.atDay(1)?.let { Date.valueOf(it) })
             statement.setJsonb(4, perioder)
             statement.setObject(5, behandlingId)
+            statement.executeUpdate()
         }
     }
 
@@ -64,6 +65,7 @@ class OppdaterVedtakRepo(
                     """.trimIndent(),
                 )
             statement.setObject(1, behandlingId)
+            statement.executeUpdate()
         }
     }
 

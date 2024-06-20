@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -96,7 +97,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = "Test"),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
                     bruker,
                 )
 
@@ -175,7 +176,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = "Test"),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
                     bruker,
                 )
 
@@ -261,7 +262,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = "Test"),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
                     bruker,
                 )
 
@@ -347,7 +348,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = "test"),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
                     bruker,
                 )
 

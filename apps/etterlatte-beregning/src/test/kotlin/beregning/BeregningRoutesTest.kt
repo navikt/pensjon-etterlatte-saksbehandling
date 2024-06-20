@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package no.nav.etterlatte.beregning
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -19,10 +21,7 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.*
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -39,7 +38,8 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningRoutesTest {
+internal class
+BeregningRoutesTest {
     private val server = MockOAuth2Server()
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -180,7 +180,8 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = "Test")
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns
+            OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS)
 
         testApplication {
             runServer(server) {
@@ -198,7 +199,7 @@ internal class BeregningRoutesTest {
 
             hentetOverstyrBeregning shouldNotBe null
             hentetOverstyrBeregning.beskrivelse shouldBe "Test"
-            hentetOverstyrBeregning.kategori shouldBe "Test"
+            hentetOverstyrBeregning.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
         }
     }
 

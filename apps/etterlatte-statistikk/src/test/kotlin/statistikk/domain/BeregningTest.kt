@@ -1,10 +1,9 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package statistikk.domain
 
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.*
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.domain.Beregning
@@ -25,7 +24,7 @@ class BeregningTest {
                 beregningsperioder = listOf(),
                 beregnetDato = Tidspunkt.now(),
                 grunnlagMetadata = Metadata(sakId = 0, versjon = 0),
-                overstyrBeregning = OverstyrBeregningDTO("Overstyrt i pesys", "Test"),
+                overstyrBeregning = OverstyrBeregningDTO("Overstyrt i pesys", OverstyrtBeregningKategori.FORELDRELOS),
             )
         val statistikkBeregning = Beregning.fraBeregningDTO(dto)
         Assertions.assertTrue(statistikkBeregning.overstyrtBeregning == true)

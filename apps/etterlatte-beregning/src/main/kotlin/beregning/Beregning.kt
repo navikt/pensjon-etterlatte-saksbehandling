@@ -1,9 +1,8 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.*
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -34,7 +33,7 @@ data class OverstyrBeregning(
     val beskrivelse: String,
     val tidspunkt: Tidspunkt,
     val status: OverstyrBeregningStatus = OverstyrBeregningStatus.AKTIV,
-    val kategori: String,
+    val kategori: OverstyrtBeregningKategori,
 )
 
 fun OverstyrBeregning.toDTO() = OverstyrBeregningDTO(this.beskrivelse, this.kategori)

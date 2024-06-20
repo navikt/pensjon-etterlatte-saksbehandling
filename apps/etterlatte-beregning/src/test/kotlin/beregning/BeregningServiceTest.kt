@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -73,7 +74,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = "Test",
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
             )
 
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
@@ -145,7 +146,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = "Test",
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
             )
 
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
@@ -210,7 +211,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = "Test",
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
             )
 
         runBlocking {
@@ -220,7 +221,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe "Test"
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }
@@ -236,13 +237,17 @@ internal class BeregningServiceTest {
 
         runBlocking {
             val overstyrBeregning =
-                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test", "Test"), bruker)
+                beregningService.opprettOverstyrBeregning(
+                    behandling.id,
+                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOS),
+                    bruker,
+                )
 
             overstyrBeregning shouldNotBe null
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe "Test"
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
 
             verify(exactly = 1) {
                 beregningRepository.opprettOverstyrBeregning(any())
@@ -263,7 +268,11 @@ internal class BeregningServiceTest {
 
         runBlocking {
             val overstyrBeregning =
-                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test"), bruker)
+                beregningService.opprettOverstyrBeregning(
+                    behandling.id,
+                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOS),
+                    bruker,
+                )
 
             overstyrBeregning shouldNotBe null
 
@@ -291,18 +300,22 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = "Test",
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
             )
 
         runBlocking {
             val overstyrBeregning =
-                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test 2", "Test 2"), bruker)
+                beregningService.opprettOverstyrBeregning(
+                    behandling.id,
+                    OverstyrBeregningDTO("Test 2", OverstyrtBeregningKategori.FORELDRELOS),
+                    bruker,
+                )
 
             overstyrBeregning shouldNotBe null
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe "Test"
+            // overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS // TODO: legge til igjen når vi har flere alternativer?
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -91,7 +92,13 @@ internal class BeregningRepositoryTest(
     fun `skal ikke hente en overstyr beregning som har status ugyldig`() {
         val sakId = 10L
         beregningRepository.opprettOverstyrBeregning(
-            OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV, kategori = "Test"),
+            OverstyrBeregning(
+                sakId,
+                "Test",
+                Tidspunkt.now(),
+                OverstyrBeregningStatus.IKKE_AKTIV,
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+            ),
         )
 
         val beregningLagret = beregning()
@@ -106,7 +113,13 @@ internal class BeregningRepositoryTest(
         val sakId = 10L
 
         beregningRepository.opprettOverstyrBeregning(
-            OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV, kategori = "Test"),
+            OverstyrBeregning(
+                sakId,
+                "Test",
+                Tidspunkt.now(),
+                OverstyrBeregningStatus.IKKE_AKTIV,
+                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+            ),
         )
 
         beregningRepository.lagreEllerOppdaterBeregning(beregning())
@@ -114,7 +127,7 @@ internal class BeregningRepositoryTest(
 
         val overstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = "Test"),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
             )
         assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(sakId))
     }
@@ -125,7 +138,7 @@ internal class BeregningRepositoryTest(
 
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = "Test"),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
@@ -141,7 +154,7 @@ internal class BeregningRepositoryTest(
         val sakId = 1L
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = "Test"),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)

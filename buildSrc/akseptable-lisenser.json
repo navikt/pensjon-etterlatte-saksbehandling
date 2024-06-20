@@ -78,6 +78,9 @@
       "moduleLicense": "The MIT License (MIT)"
     },
     {
+      "moduleLicense": "The MIT License"
+    },
+    {
       "moduleLicense": "Public Domain"
     },
     {
@@ -87,7 +90,14 @@
       "moduleLicense": "The Apache Software License, Version 2.0"
     },
     {
+      "moduleLicense": "Apache Software License, version 2.0"
+    },
+    {
       "moduleLicense": "The Apache License, Version 2.0"
+    },
+    {
+      "moduleLicense": "Mozilla Public License, Version 2.0",
+      "moduleName": "org.mozilla:rhino"
     },
     {
       "moduleName": "no.nav.*"

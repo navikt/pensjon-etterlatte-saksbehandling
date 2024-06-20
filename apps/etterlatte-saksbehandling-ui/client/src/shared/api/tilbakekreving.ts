@@ -32,6 +32,12 @@ export function lagreTilbakekrevingsperioder(args: {
   return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/perioder`, { perioder: args.perioder })
 }
 
+export function oppdaterTilbakekrevingKravgrunnlag(args: {
+  tilbakekrevingId: string
+}): Promise<ApiResponse<TilbakekrevingBehandling>> {
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/oppdater-kravgrunnlag`, {})
+}
+
 export const validerTilbakekreving = async (
   tilbakekrevingId: string
 ): Promise<ApiResponse<TilbakekrevingBehandling>> => {

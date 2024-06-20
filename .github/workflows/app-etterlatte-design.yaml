@@ -21,16 +21,20 @@ jobs:
     name: Deploy to dev-gcp
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
           node-version: 21
-      - run: npm run build
+      - name: Build
+        run: npm run build
+        working-directory: apps/${{ env.APP_NAME }}
       - uses: navikt/frontend/actions/spa-deploy/v2@main
         with:
           app: ${{ env.APP_NAME }}
           team: etterlatte
-          source: ./dist
+          source: apps/${{ env.APP_NAME }}/dist
           ingress: etterlatte-design.ekstern.dev.nav.no
           environment: dev
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}

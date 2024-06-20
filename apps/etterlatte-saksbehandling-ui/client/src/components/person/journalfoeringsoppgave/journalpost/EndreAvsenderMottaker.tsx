@@ -1,30 +1,30 @@
-import { AvsenderMottaker, SoekPersonValg } from '~shared/types/Journalpost'
-import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
+import { AvsenderMottaker, BrukerIdType } from '~shared/types/Journalpost'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { useForm } from 'react-hook-form'
-import SoekPersonPdl from '~components/person/journalfoeringsoppgave/journalpost/modal/SoekPersonPdl'
+import { PersonSoekModal } from '~components/person/journalfoeringsoppgave/journalpost/modal/PersonSoekModal'
 
 export const EndreAvsenderMottaker = ({
   avsenderMottaker,
   oppdaterAvsenderMottaker,
 }: {
   avsenderMottaker: AvsenderMottaker
-  oppdaterAvsenderMottaker: (avsenderMottaker: SoekPersonValg) => void
+  oppdaterAvsenderMottaker: (avsenderMottaker: AvsenderMottaker) => void
 }) => {
   const {
     register,
     formState: { errors },
     handleSubmit,
     reset,
-  } = useForm<SoekPersonValg>({ defaultValues: avsenderMottaker })
+    setValue,
+  } = useForm<AvsenderMottaker>({ defaultValues: avsenderMottaker })
 
   const [rediger, setRediger] = useState(false)
-  const [open, setOpen] = useState(false)
 
-  const lagreEndretMottaker = (avsenderMottaker: SoekPersonValg) => {
+  const lagreEndring = (avsenderMottaker: AvsenderMottaker) => {
     oppdaterAvsenderMottaker(avsenderMottaker)
     setRediger(false)
   }
@@ -41,46 +41,55 @@ export const EndreAvsenderMottaker = ({
       </Heading>
 
       {rediger ? (
-        <>
-          <TextField
-            {...register('id', {
-              pattern: {
-                value: /^\d{11}$/,
-                message: 'Fødselsnummer må bestå av 11 siffer',
-              },
-            })}
-            label="Fødselsnummer"
-            error={errors?.id?.message}
-          />
-          <br />
-          <TextField
-            {...register('navn', {
-              required: {
-                value: true,
-                message: 'Navn må fylles ut',
-              },
-            })}
-            label="Navn"
-            error={errors?.navn?.message}
-          />
+        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
+          <VStack gap="8">
+            <VStack gap="4">
+              <TextField
+                {...register('id', {
+                  pattern: {
+                    value: /^\d{11}$/,
+                    message: 'Fødselsnummer må bestå av 11 siffer',
+                  },
+                })}
+                label="Fødselsnummer"
+                error={errors?.id?.message}
+                htmlSize={40}
+              />
+              <TextField
+                {...register('navn', {
+                  required: {
+                    value: true,
+                    message: 'Navn må fylles ut',
+                  },
+                })}
+                label="Navn"
+                error={errors?.navn?.message}
+              />
+            </VStack>
+
+            <VStack gap="4">
+              <Label>Har du ikke fødselsnummeret?</Label>
+              <PersonSoekModal
+                velgPerson={({ id, navn }) => {
+                  setValue('id', id, { shouldDirty: true, shouldValidate: true })
+                  setValue('idType', BrukerIdType.FNR)
+                  setValue('navn', navn, { shouldDirty: true, shouldValidate: true })
+                }}
+              />
+            </VStack>
+          </VStack>
 
           <br />
-          <SoekPersonPdl open={open} setOpen={setOpen} velgPerson={lagreEndretMottaker} />
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
-            <Button
-              variant="secondary"
-              onClick={handleSubmit((avsendermottaker) => lagreEndretMottaker(avsendermottaker))}
-              size="small"
-            >
+            <Button onClick={handleSubmit((avsendermottaker) => lagreEndring(avsendermottaker))} size="small">
               Lagre
             </Button>
-            <Button onClick={() => setOpen(!open)}>Avansert Søk</Button>
           </HStack>
-        </>
+        </Box>
       ) : (
         <>
           <InputFlexRow>

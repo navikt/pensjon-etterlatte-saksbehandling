@@ -1,5 +1,5 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
 
@@ -29,20 +29,20 @@ export const EndreTittelJournalpost = ({
       </Heading>
 
       {rediger ? (
-        <>
-          <TextField label="Tittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} hideLabel={true} />
+        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
+          <VStack gap="4">
+            <TextField label="Tittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} hideLabel={true} />
 
-          <br />
-
-          <HStack gap="4" justify="end">
-            <Button variant="tertiary" onClick={avbryt} size="small">
-              Avbryt
-            </Button>
-            <Button variant="secondary" onClick={lagre} disabled={nyTittel === journalpost.tittel} size="small">
-              Lagre
-            </Button>
-          </HStack>
-        </>
+            <HStack gap="4" justify="end">
+              <Button variant="tertiary" onClick={avbryt} size="small">
+                Avbryt
+              </Button>
+              <Button onClick={lagre} disabled={nyTittel === journalpost.tittel} size="small">
+                Lagre
+              </Button>
+            </HStack>
+          </VStack>
+        </Box>
       ) : (
         <>
           <InputFlexRow>

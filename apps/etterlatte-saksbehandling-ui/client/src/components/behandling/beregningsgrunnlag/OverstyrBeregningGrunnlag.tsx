@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Box, Button, ErrorSummary, Heading, HStack, Label, Table } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ErrorSummary, HStack, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -177,13 +177,18 @@ const OverstyrBeregningGrunnlag = (props: {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
-        <Heading size="medium" level="2">
-          Årsak: ({getValueOfKey(overstyrBeregning.kategori)})
-        </Heading>
-
-        <Label size="medium">Begrunnelse: {overstyrBeregning.beskrivelse}</Label>
+      <Box paddingInline="16" paddingBlock="0 4">
+        <VStack gap="5">
+          <Alert variant="warning">Denne beregningen er manuelt overstyrt</Alert>
+          <BodyShort textColor="default">
+            <b>Årsak:</b> {getValueOfKey(overstyrBeregning.kategori)}
+          </BodyShort>
+          <BodyShort textColor="default">
+            <b>Beskrivelse: </b> {overstyrBeregning.beskrivelse}
+          </BodyShort>
+        </VStack>
       </Box>
+
       {mapApiResult(
         overstyrBeregningGrunnlag,
         <Spinner visible={true} label="Henter grunnlag" />,

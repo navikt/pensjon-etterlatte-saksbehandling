@@ -111,8 +111,3 @@ export interface IOpprettAktivitetspliktUnntak {
   tom?: string
   beskrivelse: string
 }
-
-export enum IValgJaNei {
-  JA = 'JA',
-  NEI = 'NEI',
-}

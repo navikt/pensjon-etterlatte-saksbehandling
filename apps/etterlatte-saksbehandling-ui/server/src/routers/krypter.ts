@@ -31,7 +31,7 @@ function encrypt(tekst: string, ENCRYPTION_KEY: string) {
   return `${iv.toString('base64')}:${encrypted.toString('base64')}`
 }
 
-krypterRouter.post(`/krypter/`, async (req: Request, res: Response) => {
+krypterRouter.post(`/krypter/`, express.json(), async (req, res) => {
   try {
     const fnr = req.body as KrypterRequest
     const response: KrypterResponse = {
@@ -56,7 +56,7 @@ function decrypt(tekst: string, ENCRYPTION_KEY: string) {
   return decrypted.toString()
 }
 
-krypterRouter.post(`/dekrypter/`, async (req: Request, res: Response) => {
+krypterRouter.post(`/dekrypter/`, express.json(), async (req: Request, res: Response) => {
   try {
     const fnr = req.body as DekrypterRequest
     const response: DekrypterResponse = {

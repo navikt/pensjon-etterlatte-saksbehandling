@@ -13,6 +13,7 @@ import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { selftestRouter } from './routers/selftestRouter'
+import { krypterRouter } from './routers/krypter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -62,6 +63,7 @@ app.get(
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
 app.use('/api/kodeverk', kodeverkRouter)
 app.use('/api/github', githubRouter)
+app.use('/api/krypter', krypterRouter)
 
 app.use(
   '/api/vilkaarsvurdering',

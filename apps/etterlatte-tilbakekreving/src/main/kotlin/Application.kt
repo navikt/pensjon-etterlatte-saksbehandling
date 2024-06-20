@@ -1,12 +1,14 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
+import io.ktor.server.application.log
+import io.ktor.server.routing.application
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.kravgrunnlagRoutes
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingRoutes
 
 fun main() {
@@ -26,8 +28,12 @@ class Server(
             applicationConfig = ConfigFactory.load(),
             withMetrics = false,
         ) {
-            testKravgrunnlagRoutes(context.kravgrunnlagService)
             tilbakekrevingRoutes(context.tilbakekrevingService)
+
+            if (context.properties.enableKravgrunnlagRoutes) {
+                application.log.warn("Legger på endepunkter for kravgrunnlag (kun tilgjengelig lokalt)")
+                kravgrunnlagRoutes(context.kravgrunnlagService)
+            }
         }
 
     fun run() =

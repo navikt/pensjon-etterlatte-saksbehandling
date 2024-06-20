@@ -11,5 +11,5 @@ create table oppdaterte_vedtak_opphoer_fom_perioder
 with kjente_vedtak as (select distinct behandlingid as behandling_id from stoenad)
 insert
 into oppdaterte_vedtak_opphoer_fom_perioder (behandling_id, vedtak_id)
-select (behandling_id, null)
+select behandling_id, null
 from kjente_vedtak;

@@ -9,7 +9,6 @@ import {
   AktivitetspliktUnntakType,
   AktivitetspliktVurderingType,
   IAktivitetspliktVurdering,
-  IValgJaNei,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
@@ -27,11 +26,12 @@ import { Toast } from '~shared/alerts/Toast'
 import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { JaNei } from '~shared/types/ISvar'
 
 interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: IValgJaNei | null
+  aktivitetsplikt: JaNei | null
   aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: IValgJaNei | null
+  unntak: JaNei | null
   midlertidigUnntak: AktivitetspliktUnntakType | ''
   sluttdato?: Date | null
   beskrivelse: string
@@ -79,7 +79,7 @@ export const AktivitetspliktVurdering = ({
   })
 
   const opprettVurdering = (data: AktivitetspliktVurderingValues) => {
-    if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
+    if (data.aktivitetsplikt === JaNei.NEI || data.unntak === JaNei.JA) {
       opprettUnntak(
         {
           sakId: behandling.sakId,
@@ -87,14 +87,12 @@ export const AktivitetspliktVurdering = ({
           request: {
             id: vurdering?.unntak ? vurdering.unntak.id : undefined,
             unntak:
-              data.aktivitetsplikt === IValgJaNei.NEI
+              data.aktivitetsplikt === JaNei.NEI
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
             tom:
-              data.sluttdato && data.aktivitetsplikt === IValgJaNei.JA
-                ? new Date(data.sluttdato).toISOString()
-                : undefined,
+              data.sluttdato && data.aktivitetsplikt === JaNei.JA ? new Date(data.sluttdato).toISOString() : undefined,
           },
         },
         () => {
@@ -141,9 +139,9 @@ export const AktivitetspliktVurdering = ({
     if (visForm && vurdering) {
       if (vurdering.aktivitet) {
         reset({
-          aktivitetsplikt: IValgJaNei.JA,
+          aktivitetsplikt: JaNei.JA,
           aktivitetsgrad: vurdering.aktivitet.aktivitetsgrad,
-          unntak: IValgJaNei.NEI,
+          unntak: JaNei.NEI,
           midlertidigUnntak: '',
           sluttdato: undefined,
           beskrivelse: vurdering.aktivitet.beskrivelse,
@@ -152,7 +150,7 @@ export const AktivitetspliktVurdering = ({
       if (vurdering.unntak) {
         if (vurdering.unntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT) {
           reset({
-            aktivitetsplikt: IValgJaNei.NEI,
+            aktivitetsplikt: JaNei.NEI,
             aktivitetsgrad: '',
             unntak: null,
             midlertidigUnntak: '',
@@ -161,9 +159,9 @@ export const AktivitetspliktVurdering = ({
           })
         } else {
           reset({
-            aktivitetsplikt: IValgJaNei.JA,
+            aktivitetsplikt: JaNei.JA,
             aktivitetsgrad: '',
-            unntak: IValgJaNei.JA,
+            unntak: JaNei.JA,
             midlertidigUnntak: vurdering.unntak.unntak,
             sluttdato: vurdering.unntak.tom ? new Date(vurdering.unntak.tom) : undefined,
             beskrivelse: vurdering.unntak.beskrivelse,
@@ -194,10 +192,10 @@ export const AktivitetspliktVurdering = ({
             legend="Har bruker aktivitetsplikt?"
             radios={
               <>
-                <Radio size="small" value={IValgJaNei.JA}>
+                <Radio size="small" value={JaNei.JA}>
                   Ja
                 </Radio>
-                <Radio size="small" value={IValgJaNei.NEI}>
+                <Radio size="small" value={JaNei.NEI}>
                   {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT]}
                 </Radio>
               </>
@@ -209,7 +207,7 @@ export const AktivitetspliktVurdering = ({
             overstiger to ganger grunnbeløpet for hvert av de fem siste årene. I tillegg må den årlige inntekten ikke ha
             oversteget tre ganger grunnbeløpet hvert av de siste to årene før dødsfallet.
           </ReadMore>
-          {harAktivitetsplikt === IValgJaNei.JA && (
+          {harAktivitetsplikt === JaNei.JA && (
             <>
               <ControlledRadioGruppe
                 name="unntak"
@@ -218,16 +216,16 @@ export const AktivitetspliktVurdering = ({
                 legend="Er det unntak for bruker?"
                 radios={
                   <>
-                    <Radio size="small" value={IValgJaNei.JA}>
+                    <Radio size="small" value={JaNei.JA}>
                       Ja
                     </Radio>
-                    <Radio size="small" value={IValgJaNei.NEI}>
+                    <Radio size="small" value={JaNei.NEI}>
                       Nei
                     </Radio>
                   </>
                 }
               />
-              {harUnntak === IValgJaNei.JA && (
+              {harUnntak === JaNei.JA && (
                 <>
                   <Select
                     label="Hvilket midlertidig unntak er det?"
@@ -256,7 +254,7 @@ export const AktivitetspliktVurdering = ({
                   />
                 </>
               )}
-              {harUnntak === IValgJaNei.NEI && (
+              {harUnntak === JaNei.NEI && (
                 <Select
                   label="Hva er brukers aktivitetsgrad?"
                   {...register('aktivitetsgrad', {

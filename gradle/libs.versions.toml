@@ -104,6 +104,7 @@ test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", vers
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.2" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.0.0" }
 
 #Workarounds
 bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-version"}

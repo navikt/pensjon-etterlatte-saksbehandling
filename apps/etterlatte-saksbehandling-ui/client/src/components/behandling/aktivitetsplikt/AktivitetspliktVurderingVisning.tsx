@@ -67,12 +67,12 @@ export const AktivitetspliktVurderingVisning = ({
           <div>
             <Button
               size="small"
-              variant="tertiary"
+              variant={vurdering ? 'tertiary' : 'secondary'}
               icon={<PencilIcon aria-hidden />}
-              iconPosition="right"
+              iconPosition="left"
               onClick={() => visForm()}
             >
-              Rediger
+              {vurdering ? 'Rediger vurdering' : 'Legg til vurdering'}
             </Button>
           </div>
         )}

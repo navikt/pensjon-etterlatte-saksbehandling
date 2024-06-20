@@ -122,6 +122,27 @@ class AktivitetspliktAktivitetsgradDao(
             }
         }
 
+    fun kopierAktivitetsgrad(
+        aktivitetId: UUID,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse) 
+                        SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, behandlingId)
+            stmt.setObject(2, aktivitetId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     fun slettAktivitetsgrad(
         aktivitetId: UUID,
         behandlingId: UUID,

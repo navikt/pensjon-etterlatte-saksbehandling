@@ -129,10 +129,12 @@ export const AktivitetspliktVurdering = ({
   }
 
   useEffect(() => {
-    hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
-      setVurdering(result)
-      if (result) resetManglerAktivitetspliktVurdering()
-    })
+    if (!vurdering) {
+      hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
+        setVurdering(result)
+        if (result) resetManglerAktivitetspliktVurdering()
+      })
+    }
   }, [])
 
   useEffect(() => {

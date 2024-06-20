@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -100,6 +101,7 @@ class RevurderingService(
     private val klageService: KlageService,
     private val behandlingService: BehandlingService,
     private val aktivitetspliktDao: AktivitetspliktDao,
+    private val aktivitetspliktKopierService: AktivitetspliktKopierService,
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
@@ -335,6 +337,7 @@ class RevurderingService(
                     ?.copy(behandlingId = opprettBehandling.id)
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
+                aktivitetspliktKopierService.kopierVurdering(sakId, opprettBehandling.id)
             }
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 

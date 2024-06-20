@@ -1,5 +1,6 @@
 package behandling.aktivitetsplikt.vurdering
 
+import behandling.aktivitetsplikt.AktivitetspliktDaoTest.Companion.kilde
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -204,6 +205,52 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe opprettBehandling.id
                 it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
+                it.opprettet shouldBe kilde
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            }
+        }
+    }
+
+    @Nested
+    inner class KopierAktivitetsgrad {
+        private val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+
+        val lagreAktivitetsgrad =
+            LagreAktivitetspliktAktivitetsgrad(
+                aktivitetsgrad = AKTIVITET_OVER_50,
+                beskrivelse = "Beskrivelse",
+            )
+
+        private val forrigeBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+
+        private val nyBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak.id,
+            )
+
+        @Test
+        fun `skal kopiere nyeste aktivitetsgrad til behandling`() {
+            behandlingDao.opprettBehandling(forrigeBehandling)
+            behandlingDao.opprettBehandling(nyBehandling)
+
+            dao.opprettAktivitetsgrad(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
+
+            val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id)
+            dao.hentAktivitetsgradForBehandling(nyBehandling.id) shouldBe null
+
+            dao.kopierAktivitetsgrad(aktivitetsgrad!!.id, nyBehandling.id) shouldBe 1
+
+            dao.hentAktivitetsgradForBehandling(nyBehandling.id)!!.asClue {
+                it.sakId shouldBe sak.id
+                it.behandlingId shouldBe nyBehandling.id
+                it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
+                it.fom shouldBe aktivitetsgrad.fom
                 it.opprettet shouldBe kilde
                 it.endret shouldBe kilde
                 it.beskrivelse shouldBe aktivitetsgrad.beskrivelse

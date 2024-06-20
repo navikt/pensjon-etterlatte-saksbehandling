@@ -2,7 +2,7 @@ import { Button, Heading, HStack, Radio, ReadMore, Select, Textarea, VStack } fr
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
-import { isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isFailure, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import {
@@ -128,10 +128,16 @@ export const AktivitetspliktVurdering = ({
 
   useEffect(() => {
     if (!vurdering) {
-      hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
-        setVurdering(result)
-        if (result) resetManglerAktivitetspliktVurdering()
-      })
+      hent(
+        { sakId: behandling.sakId, behandlingId: behandling.id },
+        (result) => {
+          setVurdering(result)
+          if (result) resetManglerAktivitetspliktVurdering()
+        },
+        (error) => {
+          if (error.status === 404) setVisForm(true)
+        }
+      )
     }
   }, [])
 
@@ -316,6 +322,9 @@ export const AktivitetspliktVurdering = ({
       {mapFailure(opprettetAktivitetsgrad, (error) => (
         <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av aktivitetsgrad'}</ApiErrorAlert>
       ))}
+      {isFailure(hentet) && hentet.error.status !== 404 && (
+        <ApiErrorAlert>{hentet.error.detail || 'Det oppsto en feil ved henting av vurdering'}</ApiErrorAlert>
+      )}
     </AktivitetspliktVurderingWrapper>
   )
 }

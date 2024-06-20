@@ -96,6 +96,10 @@
       "moduleLicense": "The Apache License, Version 2.0"
     },
     {
+      "moduleLicense": "Mozilla Public License, Version 2.0",
+      "moduleName": "org.mozilla:rhino"
+    },
+    {
       "moduleName": "no.nav.*"
     }
   ]

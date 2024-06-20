@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving.klienter
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -22,8 +21,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
@@ -39,13 +38,16 @@ import java.time.LocalDate
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
 
-class TilbakekrevingKlient(
+class TilbakekrevingskomponentenKlient(
     private val url: String,
     private val httpClient: HttpClient,
     private val hendelseRepository: TilbakekrevingHendelseRepository,
 ) {
     // Egen objectmapper for å fjerne timestamp fra xml-datoer da dette ikke blir riktig mot tilbakekrevingskomponenten
-    private val tilbakekrevingObjectMapper: ObjectMapper = objectMapper.copy().registerModule(CustomXMLGregorianCalendarModule())
+    private val tilbakekrevingObjectMapper: ObjectMapper =
+        objectMapper.copy().registerModule(
+            CustomXMLGregorianCalendarModule(),
+        )
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()

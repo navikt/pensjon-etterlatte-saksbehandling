@@ -1,4 +1,4 @@
-package tilbakekreving
+package no.nav.etterlatte.tilbakekreving
 
 import no.nav.etterlatte.GenerellDatabaseExtension
 import no.nav.etterlatte.ResetDatabaseStatement

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
+import no.nav.etterlatte.tilbakekreving.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingService
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call

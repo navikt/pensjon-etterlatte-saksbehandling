@@ -1,7 +1,8 @@
-package no.nav.etterlatte.tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving
 
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.tilbakekreving.klienter.TilbakekrevingKlient
 import org.slf4j.LoggerFactory
 
 class TilbakekrevingService(

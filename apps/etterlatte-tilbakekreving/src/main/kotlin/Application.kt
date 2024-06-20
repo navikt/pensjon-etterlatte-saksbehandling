@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes
-import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingRoutes
+import no.nav.etterlatte.tilbakekreving.tilbakekrevingRoutes
 
 fun main() {
     ApplicationContext().let { Server(it).run() }

@@ -1,5 +1,5 @@
 export enum KATEGORI {
-  FORELDRELOS = 'FORELDRELØS',
+  FORELDRELOES = 'FORELDRELØS',
 }
 
 export function getValueOfKey(key: KATEGORI): string {

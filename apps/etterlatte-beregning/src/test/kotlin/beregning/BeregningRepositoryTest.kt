@@ -97,7 +97,7 @@ internal class BeregningRepositoryTest(
                 "Test",
                 Tidspunkt.now(),
                 OverstyrBeregningStatus.IKKE_AKTIV,
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             ),
         )
 
@@ -118,7 +118,7 @@ internal class BeregningRepositoryTest(
                 "Test",
                 Tidspunkt.now(),
                 OverstyrBeregningStatus.IKKE_AKTIV,
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             ),
         )
 
@@ -127,7 +127,7 @@ internal class BeregningRepositoryTest(
 
         val overstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
             )
         assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(sakId))
     }
@@ -138,7 +138,7 @@ internal class BeregningRepositoryTest(
 
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
@@ -154,7 +154,7 @@ internal class BeregningRepositoryTest(
         val sakId = 1L
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)

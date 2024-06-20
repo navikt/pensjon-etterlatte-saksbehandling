@@ -113,6 +113,6 @@ data class YtelseMedGrunnlagPeriodisertDto(
 enum class OverstyrtBeregningKategori(
     s: String,
 ) {
-    FORELDRELOS("FORELDRELØS"),
+    FORELDRELOES("FORELDRELØS"),
     UKJENT_KATEGORI("UKJENT KATEGORI"), // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }

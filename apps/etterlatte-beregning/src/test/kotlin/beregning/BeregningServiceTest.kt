@@ -74,7 +74,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             )
 
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
@@ -146,7 +146,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             )
 
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
@@ -211,7 +211,7 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             )
 
         runBlocking {
@@ -221,7 +221,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOES
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }
@@ -239,7 +239,7 @@ internal class BeregningServiceTest {
             val overstyrBeregning =
                 beregningService.opprettOverstyrBeregning(
                     behandling.id,
-                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOS),
+                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOES),
                     bruker,
                 )
 
@@ -247,7 +247,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOES
 
             verify(exactly = 1) {
                 beregningRepository.opprettOverstyrBeregning(any())
@@ -270,7 +270,7 @@ internal class BeregningServiceTest {
             val overstyrBeregning =
                 beregningService.opprettOverstyrBeregning(
                     behandling.id,
-                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOS),
+                    OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.FORELDRELOES),
                     bruker,
                 )
 
@@ -300,14 +300,14 @@ internal class BeregningServiceTest {
                 behandling.sak,
                 "Test",
                 Tidspunkt.now(),
-                kategori = OverstyrtBeregningKategori.FORELDRELOS,
+                kategori = OverstyrtBeregningKategori.FORELDRELOES,
             )
 
         runBlocking {
             val overstyrBeregning =
                 beregningService.opprettOverstyrBeregning(
                     behandling.id,
-                    OverstyrBeregningDTO("Test 2", OverstyrtBeregningKategori.FORELDRELOS),
+                    OverstyrBeregningDTO("Test 2", OverstyrtBeregningKategori.FORELDRELOES),
                     bruker,
                 )
 
@@ -315,7 +315,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            // overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS // TODO: legge til igjen når vi har flere alternativer?
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }

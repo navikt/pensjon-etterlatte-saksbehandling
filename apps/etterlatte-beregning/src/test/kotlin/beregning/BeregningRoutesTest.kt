@@ -179,7 +179,7 @@ BeregningRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
         every { beregningRepository.hentOverstyrBeregning(1L) } returns
-            OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOS)
+            OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES)
 
         testApplication {
             runServer(server) {
@@ -197,7 +197,7 @@ BeregningRoutesTest {
 
             hentetOverstyrBeregning shouldNotBe null
             hentetOverstyrBeregning.beskrivelse shouldBe "Test"
-            hentetOverstyrBeregning.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOS
+            hentetOverstyrBeregning.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOES
         }
     }
 

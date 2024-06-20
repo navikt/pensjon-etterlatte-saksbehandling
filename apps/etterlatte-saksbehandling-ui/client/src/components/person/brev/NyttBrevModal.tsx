@@ -8,7 +8,6 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 
@@ -118,8 +117,8 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
                     radios={
                       <>
-                        <Radio value={IValgJaNei.JA}>Ja</Radio>
-                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                        <Radio value={JaNei.JA}>Ja</Radio>
+                        <Radio value={JaNei.NEI}>Nei</Radio>
                       </>
                     }
                   />
@@ -130,8 +129,8 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     errorVedTomInput="Du må velge om stønaden kommer til utbetaling"
                     radios={
                       <>
-                        <Radio value={IValgJaNei.JA}>Ja</Radio>
-                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                        <Radio value={JaNei.JA}>Ja</Radio>
+                        <Radio value={JaNei.NEI}>Nei</Radio>
                       </>
                     }
                   />
@@ -235,11 +234,11 @@ export type BrevParametre =
 type FilledFormData = {
   type: FormType
   aktivitetsgrad?: string
-  utbetaling?: IValgJaNei | ''
-  redusertEtterInntekt?: IValgJaNei | ''
+  utbetaling?: JaNei | ''
+  redusertEtterInntekt?: JaNei | ''
   nasjonalEllerUtland?: NasjonalEllerUtland
   avdoedNavn?: string
-  erOver18Aar?: IValgJaNei | ''
+  erOver18Aar?: JaNei | ''
 }
 
 enum NasjonalEllerUtland {
@@ -260,8 +259,8 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
-        utbetaling: formdata.utbetaling!! === IValgJaNei.JA,
-        redusertEtterInntekt: formdata.redusertEtterInntekt!! === IValgJaNei.JA,
+        utbetaling: formdata.utbetaling!! === JaNei.JA,
+        redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
     case FormType.TOMT_BREV:
@@ -279,7 +278,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         type: formdata.type,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
-        erOver18Aar: formdata.erOver18Aar === IValgJaNei.JA,
+        erOver18Aar: formdata.erOver18Aar === JaNei.JA,
       }
     default:
       throw new Error('Valgt type er ikke gyldig')

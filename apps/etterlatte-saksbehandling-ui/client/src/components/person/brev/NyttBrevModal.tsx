@@ -70,14 +70,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
               >
                 <option value={FormType.TOMT_BREV}>Manuelt brev</option>
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
-                  <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                    Informasjon om aktivitetsplikt ved 4 måneder
-                  </option>
-                )}
-                {sakType === SakType.OMSTILLINGSSTOENAD && (
-                  <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
-                    Informasjon om dødsfall
-                  </option>
+                  <>
+                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
+                      Informasjon om aktivitetsplikt ved 4 måneder
+                    </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
+                      Informasjon om dødsfall
+                    </option>
+                  </>
                 )}
                 {sakType === SakType.BARNEPENSJON && (
                   <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>

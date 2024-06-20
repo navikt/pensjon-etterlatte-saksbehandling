@@ -57,6 +57,11 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   }
 
   const tilbakestill = () => {
+    if (!brev.behandlingId) {
+      throw new Error(`Prøvde å tilbakestille et brev med id ${brev.id} som ikke er koblet på en behandling. 
+      Dette skal ikke kunne skje.`)
+    }
+
     apiTilbakestillManuellPayload(
       { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId, brevtype: brev.brevtype },
       (payload: any) => {

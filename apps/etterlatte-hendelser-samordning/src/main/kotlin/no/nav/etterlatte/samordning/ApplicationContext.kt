@@ -24,5 +24,5 @@ class ApplicationContext(
 
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 
-    val isProd = env.requireEnvValue("NAIS_CLUSTER_NAME") == "prod-gcp"
+    val isProd = env.getOrDefault("NAIS_CLUSTER_NAME", "nada") == "prod-gcp"
 }

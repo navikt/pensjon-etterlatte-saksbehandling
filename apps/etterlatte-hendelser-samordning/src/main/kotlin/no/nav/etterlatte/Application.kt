@@ -32,6 +32,7 @@ class Server(
         setReady().also { engine.start(true) }
 
         if (context.isProd) {
+            context.handler.logger.info("isProd=true, enabling FAGSYSTEM-335360")
             Timer("fake-tp-svar").schedule(
                 object : TimerTask() {
                     override fun run() {
@@ -47,6 +48,8 @@ class Server(
                 },
                 60_000L,
             )
+        } else {
+            context.handler.logger.info("isProd=false, skipping FAGSYSTEM-335360")
         }
     }
 }

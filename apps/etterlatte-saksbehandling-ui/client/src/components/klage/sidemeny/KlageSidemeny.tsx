@@ -1,9 +1,8 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Heading, HStack, Tag, VStack } from '@navikt/ds-react'
+import { Heading, HStack, VStack } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
-import { tagColors, TagList } from '~shared/Tags'
-import { formaterSakstype, formaterStringDato } from '~utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import AvsluttKlage from '~components/klage/AvsluttKlage'
@@ -20,6 +19,7 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -63,13 +63,9 @@ export function KlageSidemeny() {
         )}
 
         <VStack gap="2">
-          <HStack gap="4">
-            <TagList>
-              <li>
-                <Tag variant={tagColors[klage.sak.sakType]}>{formaterSakstype(klage.sak.sakType)}</Tag>
-              </li>
-            </TagList>
-          </HStack>
+          <div>
+            <SakTypeTag sakType={klage.sak.sakType} />
+          </div>
 
           <HStack gap="4">
             <div>

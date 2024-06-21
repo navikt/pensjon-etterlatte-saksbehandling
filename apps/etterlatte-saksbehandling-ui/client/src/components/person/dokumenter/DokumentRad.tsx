@@ -2,14 +2,15 @@ import { Journalpost, Journalposttype, Journalstatus } from '~shared/types/Journ
 import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { useState } from 'react'
-import { HStack, Table, Tag } from '@navikt/ds-react'
+import { HStack, Table } from '@navikt/ds-react'
 import { JournalpostInnhold } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnhold'
 import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
-import { Variants } from '~shared/Tags'
 import { UtsendingsinfoModal } from '~components/person/dokumenter/UtsendingsinfoModal'
 import { OppgaveFraJournalpostModal } from '~components/person/dokumenter/OppgaveFraJournalpostModal'
 import DokumentModal from '~components/person/dokumenter/DokumentModal'
 import { HaandterAvvikModal } from './avvik/HaandterAvvikModal'
+import { GosysTemaTag } from '~shared/tags/GosysTemaTag'
+import { GosysTema } from '~shared/types/Gosys'
 
 export const DokumentRad = ({
   dokument,
@@ -37,13 +38,7 @@ export const DokumentRad = ({
       </Table.DataCell>
       <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
       <Table.DataCell title={`Tema ${dokument.tema}`}>
-        {
-          {
-            ['EYO']: <Tag variant={Variants.ALT2}>Omstillingsstønad</Tag>,
-            ['EYB']: <Tag variant={Variants.INFO}>Barnepensjon</Tag>,
-            ['PEN']: <Tag variant={Variants.ALT1}>Pensjon</Tag>,
-          }[dokument.tema]
-        }
+        <GosysTemaTag tema={dokument.tema as GosysTema} />
       </Table.DataCell>
       <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
       <Table.DataCell>

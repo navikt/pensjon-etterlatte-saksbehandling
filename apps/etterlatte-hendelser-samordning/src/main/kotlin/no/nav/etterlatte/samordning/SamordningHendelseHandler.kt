@@ -10,7 +10,7 @@ import java.util.UUID
 class SamordningHendelseHandler(
     private val kafkaProduser: KafkaProdusent<String, JsonMessage>,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(SamordningHendelseHandler::class.java)
+    val logger: Logger = LoggerFactory.getLogger(SamordningHendelseHandler::class.java)
 
     /**
      * Skal kun dytte info videre for Omstillingsstønad-hendelser slik at R&R lytter kan faktisk håndtere det

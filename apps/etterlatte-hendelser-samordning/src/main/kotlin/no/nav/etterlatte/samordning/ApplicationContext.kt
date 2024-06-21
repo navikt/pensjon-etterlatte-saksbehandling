@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.requireEnvValue
 class ApplicationContext(
     env: Map<String, String> = System.getenv(),
 ) {
-    private val handler =
+    val handler =
         SamordningHendelseHandler(
             kafkaProduser =
                 GcpKafkaConfig
@@ -23,4 +23,6 @@ class ApplicationContext(
         )
 
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+
+    val isProd = env.requireEnvValue("NAIS_CLUSTER_NAME") == "prod-gcp"
 }

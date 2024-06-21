@@ -287,7 +287,12 @@ class TilbakekrevingService(
             // Dersom kontrollfeltet er forskjellig betyr det at kravgrunnlaget har blitt endret hos økonomi
             if (oppdatertKravgrunnlag.kontrollFelt.value != tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value) {
                 logger.info("Oppdaterer kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId")
-                val oppdatertTilbakekreving = tilbakekreving.oppdaterKravgrunnlag(oppdatertKravgrunnlag)
+                val oppdatertTilbakekreving =
+                    tilbakekreving
+                        .oppdaterKravgrunnlag(
+                            oppdatertKravgrunnlag,
+                        ).copy(status = TilbakekrevingStatus.UNDER_ARBEID)
+
                 tilbakekrevingDao.lagreTilbakekrevingMedNyePerioder(oppdatertTilbakekreving)
             } else {
                 logger.info("Kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId er ikke endret - beholder vurderinger")

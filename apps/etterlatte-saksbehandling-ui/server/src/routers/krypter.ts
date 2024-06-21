@@ -23,6 +23,21 @@ interface DekrypterResponse {
 
 const algoritme = 'aes-256-cbc'
 
+function tilBase64Url(tekst: Buffer) {
+  return tekst
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '')
+}
+
+function fraBase64Url(tekst: string) {
+  return Buffer.from(tekst
+      .replace(/-/g, '+')
+      .replace(/_/g, '/'),
+      'base64')
+}
+
 function encrypt(tekst: string, ENCRYPTION_KEY: string) {
   const iv = crypto.randomBytes(16)
   const cipher = crypto.createCipheriv(algoritme, Buffer.from(ENCRYPTION_KEY), iv)
@@ -30,13 +45,13 @@ function encrypt(tekst: string, ENCRYPTION_KEY: string) {
 
   encrypted = Buffer.concat([encrypted, cipher.final()])
 
-  return `${iv.toString('base64')}:${encrypted.toString('base64')}`
+  return `${tilBase64Url(iv)}:${tilBase64Url(encrypted)}`
 }
 
 function decrypt(tekst: string, ENCRYPTION_KEY: string) {
   const [ivStreng, tekstStreng] = tekst.split(':')
-  const iv = Buffer.from(ivStreng, 'base64')
-  const kryptertTekst = Buffer.from(tekstStreng, 'base64')
+  const iv = fraBase64Url(ivStreng)
+  const kryptertTekst = fraBase64Url(tekstStreng)
   const decipher = crypto.createDecipheriv(algoritme, Buffer.from(ENCRYPTION_KEY), iv)
   let decrypted = decipher.update(kryptertTekst)
 

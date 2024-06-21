@@ -1,5 +1,11 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } from '~shared/types/oppgave'
+import {
+  erOppgaveRedigerbar,
+  OppgaveDTO,
+  OppgaveSaksbehandler,
+  Oppgavestatus,
+  Oppgavetype,
+} from '~shared/types/oppgave'
 import { Alert, HStack, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -11,10 +17,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { OppgaveValg } from '~components/person/sakOgBehandling/SakOversikt'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import {
-  finnOgOppdaterSaksbehandlerTildeling,
-  sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveHandlinger'
+import { finnOgOppdaterOppgave, sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
 import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
 import styled from 'styled-components'
@@ -43,7 +46,12 @@ export const ForenkletOppgaverTable = ({
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
 
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) =>
-    setFiltrerteOppgaver(finnOgOppdaterSaksbehandlerTildeling(filtrerteOppgaver, oppgave.id, saksbehandler))
+    setFiltrerteOppgaver(
+      finnOgOppdaterOppgave(filtrerteOppgaver, oppgave.id, { status: Oppgavestatus.UNDER_BEHANDLING, saksbehandler })
+    )
+
+  const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) =>
+    setFiltrerteOppgaver(finnOgOppdaterOppgave(filtrerteOppgaver, oppgaveId, { status }))
 
   useEffect(() => {
     setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg())
@@ -96,7 +104,9 @@ export const ForenkletOppgaverTable = ({
               />
             </Table.DataCell>
             <HandlingerDataCell>
-              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && <HandlingerForOppgave oppgave={oppgave} />}
+              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
+                <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+              )}
             </HandlingerDataCell>
           </Table.Row>
         ))}

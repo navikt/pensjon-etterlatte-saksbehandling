@@ -11,13 +11,14 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import { AlertIngenOppgaver } from '~components/oppgavebenk/utils/oppgaveFelles'
 
 export interface Props {
   oppgaver: OppgaveDTO[]
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
   oppdaterFrist?: (id: string, nyfrist: string) => void
   filter?: Filter
 }
@@ -27,6 +28,7 @@ export const Oppgaver = ({
   saksbehandlereIEnhet,
   oppdaterSaksbehandlerTildeling,
   oppdaterFrist,
+  oppdaterStatus,
   filter,
 }: Props): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
@@ -70,6 +72,7 @@ export const Oppgaver = ({
         oppgaver={paginerteOppgaver}
         oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         oppdaterFrist={oppdaterFrist}
+        oppdaterStatus={oppdaterStatus}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
       />

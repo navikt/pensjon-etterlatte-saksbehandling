@@ -8,7 +8,7 @@ import {
   OppgaveSortering,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 
 export enum SortKey {
   REGISTRERINGSDATO = 'registreringsdato',
@@ -20,6 +20,7 @@ interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   setSortering: (nySortering: OppgaveSortering) => void
 }
@@ -28,6 +29,7 @@ export const OppgaverTable = ({
   oppgaver,
   oppdaterTildeling,
   oppdaterFrist,
+  oppdaterStatus,
   saksbehandlereIEnhet,
   setSortering,
 }: Props): ReactNode => {
@@ -88,6 +90,7 @@ export const OppgaverTable = ({
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             oppdaterTildeling={oppdaterTildeling}
             oppdaterFrist={oppdaterFrist}
+            oppdaterStatus={oppdaterStatus}
           />
         ))}
       </Table.Body>

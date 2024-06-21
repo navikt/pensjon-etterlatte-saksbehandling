@@ -79,13 +79,14 @@ const OverstyrBeregningForGrunnlag = (props: {
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [begrunnelse, setBegrunnelse] = useState<string>('')
   const [kategori, setKategori] = useState<KATEGORI>()
+
   const overstyrBeregning = () => {
     opprettOverstyrtBeregningReq(
       {
         behandlingId,
         beskrivelse: begrunnelse,
 
-        // @ts-expect-error tillate undefined
+        // @ts-expect-error ignorere undefined
         kategori: kategori,
       },
       (result) => {

@@ -97,7 +97,7 @@ internal class BeregningRepositoryTest(
                 "Test",
                 Tidspunkt.now(),
                 OverstyrBeregningStatus.IKKE_AKTIV,
-                kategori = OverstyrtBeregningKategori.FORELDRELOES,
+                kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
             ),
         )
 
@@ -118,7 +118,7 @@ internal class BeregningRepositoryTest(
                 "Test",
                 Tidspunkt.now(),
                 OverstyrBeregningStatus.IKKE_AKTIV,
-                kategori = OverstyrtBeregningKategori.FORELDRELOES,
+                kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
             ),
         )
 
@@ -127,7 +127,7 @@ internal class BeregningRepositoryTest(
 
         val overstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
             )
         assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(sakId))
     }
@@ -138,7 +138,7 @@ internal class BeregningRepositoryTest(
 
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
@@ -154,7 +154,7 @@ internal class BeregningRepositoryTest(
         val sakId = 1L
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
             )
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)

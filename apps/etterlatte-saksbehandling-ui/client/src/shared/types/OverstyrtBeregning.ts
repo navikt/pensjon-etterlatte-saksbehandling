@@ -1,7 +1,9 @@
 export enum KATEGORI {
-  FORELDRELOES = 'FORELDRELØS',
+  UKJENT_AVDOED = 'Ukjent avdød',
+  AVKORTING_UFOERETRYGD = 'Avkorting uføretrygd',
+  FENGSELSOPPHOLD = 'Fengselsopphold',
 }
 
 export function getValueOfKey(key: KATEGORI): string {
-  return key
+  return KATEGORI[key as unknown as keyof typeof KATEGORI] || key
 }

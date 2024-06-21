@@ -97,7 +97,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -176,7 +176,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -262,7 +262,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -348,7 +348,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.FORELDRELOES),
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 

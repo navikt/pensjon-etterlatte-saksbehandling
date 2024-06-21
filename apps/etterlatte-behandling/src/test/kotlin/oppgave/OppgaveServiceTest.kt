@@ -1211,7 +1211,7 @@ internal class OppgaveServiceTest(
     }
 
     @Test
-    fun `skal hente forrige status hvis kun flere statusendringer er gjort`() {
+    fun `skal hente forrige status hvis flere statusendringer er gjort`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(

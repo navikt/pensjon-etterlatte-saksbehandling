@@ -8,9 +8,8 @@ on:
   push:
     branches:
       - main
-      - EY-4090-nettside-for-visuelle-standarer
-#    paths:
-#      - apps/etterlatte-design/**
+    paths:
+      - apps/etterlatte-design/**
 
 permissions:
   contents: read

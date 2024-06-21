@@ -22,7 +22,7 @@ class AvkortingRepository(
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
-                    "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ?",
+                    "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ? ORDER BY aar ASC",
                     behandlingId,
                 ).let { query ->
                     tx.run(
@@ -45,13 +45,13 @@ class AvkortingRepository(
 
                         val avkortingGrunnlag =
                             queryOf(
-                                "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ?",
+                                "SELECT * FROM avkortingsgrunnlag WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                 aarsoppgjoer.id,
                             ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
 
                         val ytelseFoerAvkorting =
                             queryOf(
-                                "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ?",
+                                "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE aarsoppgjoer_id = ? ORDER BY fom ASC",
                                 aarsoppgjoer.id,
                             ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
 
@@ -65,17 +65,17 @@ class AvkortingRepository(
                             avkortingGrunnlag.map {
                                 val avkortingsperioder =
                                     queryOf(
-                                        "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ?",
+                                        "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
                                         it.id,
                                     ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
                                 val sanksjoner =
                                     queryOf(
-                                        "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ?",
+                                        "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ? ORDER BY y.fom ASC",
                                         it.id,
                                     ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                                 val avkortetYtelse =
                                     queryOf(
-                                        "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ?",
+                                        "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ? ORDER BY fom ASC",
                                         it.id,
                                     ).let { query ->
                                         tx.run(
@@ -103,13 +103,14 @@ class AvkortingRepository(
                                 ON y.sanksjon_id = s.id 
                                 WHERE y.aarsoppgjoer_id = ? 
                                 AND y.type = ?
+                                ORDER BY y.fom ASC
                                 """.trimIndent(),
                                 aarsoppgjoer.id,
                                 AvkortetYtelseType.AARSOPPGJOER.name,
                             ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                         val avkortetYtelseAar =
                             queryOf(
-                                "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ?",
+                                "SELECT * FROM avkortet_ytelse WHERE aarsoppgjoer_id = ? AND type = ? ORDER BY fom ASC",
                                 aarsoppgjoer.id,
                                 AvkortetYtelseType.AARSOPPGJOER.name,
                             ).let { query ->

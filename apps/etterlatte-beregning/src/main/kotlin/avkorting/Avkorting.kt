@@ -20,6 +20,10 @@ import java.util.UUID
 data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
 ) {
+    init {
+        check(aarsoppgjoer.zipWithNext().all { it.first.aar < it.second.aar })
+    }
+
     /*
      * Å skille på år er kun relevant internt for avkorting. Alle perioder på tvers av alle årene blir
      * derfor flatet ut til sammenhengende perioder når avkorting hentes ut.
@@ -191,7 +195,6 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
     ): Avkorting {
-
         val virkningstidspunktAar =
             beregning.beregningsperioder
                 .first()
@@ -420,6 +423,12 @@ data class Aarsoppgjoer(
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
+    init {
+        check(ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+        check(inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom })
+        check(avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+    }
+
     fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
 
     /**
@@ -453,6 +462,11 @@ data class Inntektsavkorting(
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList(),
 ) {
+    init {
+        check(avkortingsperioder.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+        check(avkortetYtelseForventetInntekt.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+    }
+
     fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth) =
         when (grunnlag.periode.tom) {
             null ->

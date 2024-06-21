@@ -17,8 +17,9 @@ permissions:
   id-token: write
 
 jobs:
-  deploy-spa:
-    name: Deploy to dev-gcp
+  build-and-test:
+    if: github.event_name == 'pull_request'
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,6 +34,11 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: apps/${{ env.APP_NAME }}
+
+  deploy-spa:
+    name: Deploy to dev-gcp
+    runs-on: ubuntu-latest
+    steps:
       - uses: navikt/frontend/actions/spa-deploy/v2@main
         with:
           app: ${{ env.APP_NAME }}

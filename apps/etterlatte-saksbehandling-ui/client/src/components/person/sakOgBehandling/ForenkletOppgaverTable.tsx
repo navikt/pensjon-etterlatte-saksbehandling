@@ -3,7 +3,7 @@ import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } fr
 import { Alert, HStack, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import { OppgavetypeTag } from '~components/oppgavebenk/components/tags/Tags'
+import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'

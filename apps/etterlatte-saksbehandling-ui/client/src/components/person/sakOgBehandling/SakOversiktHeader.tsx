@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
-import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, Tag, VStack } from '@navikt/ds-react'
-import { tagColors } from '~shared/Tags'
-import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
+import { formaterStringDato } from '~utils/formattering'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
 import { ISakMedUtlandstilknytning, SakType } from '~shared/types/sak'
@@ -16,6 +15,7 @@ import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -53,11 +53,8 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       <VStack gap="4" align="start">
         <SakTypeTag sakType={sak.sakType} />
 
-        {!!sak.utlandstilknytning?.type && (
-          <Tag variant={tagColors[sak.utlandstilknytning?.type]}>
-            {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
-          </Tag>
-        )}
+        <UtenlandstilknytningTypeTag utenlandstilknytningType={sak.utlandstilknytning?.type} />
+
         <SakStatus sakId={sak.id} />
       </VStack>
 

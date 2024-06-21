@@ -27,6 +27,6 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
       return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
     default:
-      return <Tag variant="warning-filled">Ukjent oppgave</Tag>
+      return <Tag variant="error-filled">Ukjent oppgave</Tag>
   }
 }

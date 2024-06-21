@@ -1,21 +1,17 @@
 import styled from 'styled-components'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
-import {
-  formaterBehandlingstype,
-  formaterDatoMedKlokkeslett,
-  formaterEnumTilLesbarString,
-  formaterSakstype,
-  formaterStringDato,
-} from '~utils/formattering'
+import { formaterBehandlingstype, formaterDatoMedKlokkeslett, formaterStringDato } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Alert, BodyShort, Heading, HStack, Tag } from '@navikt/ds-react'
-import { tagColors, TagList } from '~shared/Tags'
+import { Alert, Heading, HStack } from '@navikt/ds-react'
+import { TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -67,18 +63,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
       <TagList>
         <li>
-          <Tag variant={tagColors[behandlingsInfo.sakType]} size="small">
-            {formaterSakstype(behandlingsInfo.sakType)}
-          </Tag>
+          <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
         </li>
         <li>
-          {behandlingsInfo.nasjonalEllerUtland ? (
-            <Tag variant={tagColors[behandlingsInfo.nasjonalEllerUtland]} size="small">
-              {formaterEnumTilLesbarString(behandlingsInfo.nasjonalEllerUtland)}
-            </Tag>
-          ) : (
-            <BodyShort>Du må velge en tilknytning</BodyShort>
-          )}
+          <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
         </li>
       </TagList>
       <div className="flex">

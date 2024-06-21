@@ -214,7 +214,7 @@ const Virkningstidspunkt = (props: {
 
                 <SoeknadsoversiktTextArea
                   label="Begrunnelse"
-                  placeholder="Forklar brgrunnelsen"
+                  placeholder="Forklar begrunnelsen"
                   value={begrunnelse}
                   onChange={(e) => setBegrunnelse(e.target.value)}
                 />

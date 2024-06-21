@@ -60,7 +60,7 @@ enum class JobbType(
         SakType.OMSTILLINGSSTOENAD,
     ),
     REGULERING(
-        "Regulering",
+        "Starter regulering",
         JobbKategori.REGULERING,
         sakType = null,
     ),

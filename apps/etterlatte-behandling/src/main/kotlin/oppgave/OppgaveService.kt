@@ -471,16 +471,11 @@ class OppgaveService(
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
 
-        val endringerForOppgave = oppgaveDao.hentEndringerForOppgave(oppgaveId)
-
-        return if (endringerForOppgave.size == 1) {
-            endringerForOppgave.first().oppgaveFoer.status
-        } else {
-            endringerForOppgave
-                .sortedByDescending { it.tidspunkt }
-                .first { it.oppgaveEtter.status != oppgave.status }
-                .oppgaveEtter.status
-        }
+        return oppgaveDao
+            .hentEndringerForOppgave(oppgaveId)
+            .sortedByDescending { it.tidspunkt }
+            .first { it.oppgaveFoer.status != oppgave.status }
+            .oppgaveFoer.status
     }
 
     fun avbrytOppgaveUnderBehandling(

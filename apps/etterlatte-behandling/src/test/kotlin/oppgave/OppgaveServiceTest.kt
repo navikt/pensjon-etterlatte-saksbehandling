@@ -59,7 +59,7 @@ internal class OppgaveServiceTest(
 ) {
     private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
-    private val hendelser: BehandlingHendelserKafkaProducer = mockk()
+    private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
@@ -1189,5 +1189,46 @@ internal class OppgaveServiceTest(
             )
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.PAA_VENT)
         oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.UNDER_BEHANDLING)
+    }
+
+    @Test
+    fun `skal hente forrige status naar kun en statusendring er utfoert`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                UUID.randomUUID().toString(),
+                opprettetSak.id,
+                OppgaveKilde.TILBAKEKREVING,
+                OppgaveType.TILBAKEKREVING,
+                null,
+            )
+
+        val oppdatertOppgave = oppgaveService.endrePaaVent(PaaVent(oppgave.id, PaaVentAarsak.ANNET, "merknad", true))
+        val forrigeStatus = oppgaveService.hentForrigeStatus(oppgave.id)
+
+        oppdatertOppgave.status shouldBe Status.PAA_VENT
+        forrigeStatus shouldBe Status.NY
+    }
+
+    @Test
+    fun `skal hente forrige status hvis kun flere statusendringer er gjort`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgave =
+            oppgaveService.opprettOppgave(
+                UUID.randomUUID().toString(),
+                opprettetSak.id,
+                OppgaveKilde.TILBAKEKREVING,
+                OppgaveType.TILBAKEKREVING,
+                null,
+            )
+
+        oppgaveService.endrePaaVent(PaaVent(oppgave.id, PaaVentAarsak.ANNET, "merknad", true))
+        oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "en ny merknad", Status.UNDER_BEHANDLING)
+        oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "enda en ny merknad", Status.FERDIGSTILT)
+        val oppdatertOppgave = oppgaveService.hentOppgave(oppgave.id)
+        val forrigeStatus = oppgaveService.hentForrigeStatus(oppgave.id)
+
+        oppdatertOppgave.status shouldBe Status.FERDIGSTILT
+        forrigeStatus shouldBe Status.UNDER_BEHANDLING
     }
 }

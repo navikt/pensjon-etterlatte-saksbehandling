@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import '@navikt/ds-css'
 import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'
-import { Person } from '~components/person/Person'
 import useHentInnloggetSaksbehandler from 'src/shared/hooks/useSettInnloggetSaksbehandler'
 import { nb } from 'date-fns/locale'
 import { registerLocale } from 'react-datepicker'
@@ -24,6 +23,7 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
+import { DekrypterendePerson } from '~components/person/DekrypterendePerson'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -51,7 +51,7 @@ function App() {
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
-                  <Route path="/person/:fnr" element={<Person />} />
+                  <Route path="/person/:fnr" element={<DekrypterendePerson />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

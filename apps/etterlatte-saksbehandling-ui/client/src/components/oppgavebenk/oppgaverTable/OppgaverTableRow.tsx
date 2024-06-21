@@ -9,7 +9,7 @@ import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
-import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
 import styled from 'styled-components'
 

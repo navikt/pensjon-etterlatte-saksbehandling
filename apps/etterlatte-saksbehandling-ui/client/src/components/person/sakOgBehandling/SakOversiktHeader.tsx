@@ -15,7 +15,7 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
-import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 

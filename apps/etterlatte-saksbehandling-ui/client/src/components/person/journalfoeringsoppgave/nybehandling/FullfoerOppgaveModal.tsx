@@ -7,7 +7,7 @@ import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/types/oppgave'
-import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 
 interface ModalProps {
   oppgave: OppgaveDTO

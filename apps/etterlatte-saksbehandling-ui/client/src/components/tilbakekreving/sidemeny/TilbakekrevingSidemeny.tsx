@@ -1,6 +1,6 @@
 import { CollapsibleSidebar, Scroller, SidebarContent, SidebarTools } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
@@ -13,17 +13,15 @@ import { AttesteringEllerUnderkjenning } from '~components/behandling/attesterin
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
-
 import { mapApiResult } from '~shared/api/apiUtils'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { tagColors, TagList } from '~shared/Tags'
-import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 
 export function TilbakekrevingSidemeny() {
   const dispatch = useAppDispatch()
@@ -75,13 +73,9 @@ export function TilbakekrevingSidemeny() {
             <Heading size="xsmall" spacing>
               {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
             </Heading>
-            <TagList>
-              <li>
-                <Tag variant={tagColors[tilbakekreving!!.sak.sakType]}>
-                  {formaterSakstype(tilbakekreving!!.sak.sakType)}
-                </Tag>
-              </li>
-            </TagList>
+            <div>
+              <SakTypeTag sakType={tilbakekreving.sak.sakType} />
+            </div>
             <div className="info">
               <Info>Saksbehandler</Info>
               {mapApiResult(

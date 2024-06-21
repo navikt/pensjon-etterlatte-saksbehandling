@@ -203,6 +203,22 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     }
 
     @Test
+    fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og sette paa vent uten tildelt saksbehandler`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+
+        service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = true)
+
+        val oppgavePaaVent = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+        oppgavePaaVent.status shouldBe Status.PAA_VENT
+
+        service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = false)
+
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+        oppgave.status shouldBe Status.NY
+    }
+
+    @Test
     fun `skal ikke kunne opprette tilbakekrevingsbehandling dersom det allerede finnes en`() {
         val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
 
@@ -285,6 +301,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         // Oppdaterer kravgrunnlag
         val tilbakekrevingMedNyePerioder = service.oppdaterKravgrunnlag(tilbakekreving.id, saksbehandler)
+
+        tilbakekrevingMedNyePerioder.status shouldBe TilbakekrevingStatus.UNDER_ARBEID
 
         // Nye perioder skal ha resatt verdiene som skal vurderes
         with(tilbakekrevingMedNyePerioder.tilbakekreving) {

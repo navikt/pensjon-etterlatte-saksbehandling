@@ -229,7 +229,7 @@ class OppgaveService(
         operasjon: () -> Unit,
     ) {
         sikreAtOppgaveIkkeErAvsluttet(oppgave)
-        if (oppgave.saksbehandler?.ident.isNullOrEmpty()) {
+        if (oppgave.saksbehandler?.ident.isNullOrEmpty() && oppgave.type != OppgaveType.TILBAKEKREVING) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgave.id)
         } else {
             operasjon()
@@ -474,8 +474,8 @@ class OppgaveService(
         return oppgaveDao
             .hentEndringerForOppgave(oppgaveId)
             .sortedByDescending { it.tidspunkt }
-            .first { it.oppgaveEtter.status != oppgave.status }
-            .oppgaveEtter.status
+            .first { it.oppgaveFoer.status != oppgave.status }
+            .oppgaveFoer.status
     }
 
     fun avbrytOppgaveUnderBehandling(

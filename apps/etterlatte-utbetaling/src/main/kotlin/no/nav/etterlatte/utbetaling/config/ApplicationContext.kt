@@ -47,6 +47,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.simulering.SimuleringDao
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
@@ -142,6 +143,7 @@ class ApplicationContext(
         SimuleringOsService(
             utbetalingDao,
             vedtaksvurderingKlient,
+            SimuleringDao(dataSource),
             simuleringOsKlient,
         )
 

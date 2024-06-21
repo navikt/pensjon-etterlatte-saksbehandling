@@ -8,9 +8,9 @@ import { HandlingerForOppgave } from '~components/oppgavebenk/components/Handlin
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
 export const OppgaverTableRow = ({
@@ -25,6 +26,7 @@ export const OppgaverTableRow = ({
   saksbehandlereIEnhet,
   oppdaterTildeling,
   oppdaterFrist,
+  oppdaterStatus,
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
@@ -65,7 +67,7 @@ export const OppgaverTableRow = ({
       />
     </Table.DataCell>
     <HandlingerDataCell>
-      <HandlingerForOppgave oppgave={oppgave} />
+      <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     </HandlingerDataCell>
   </Table.Row>
 )

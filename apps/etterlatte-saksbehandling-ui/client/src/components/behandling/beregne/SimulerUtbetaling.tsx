@@ -32,7 +32,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
         </Heading>
 
         {!erFerdigBehandlet(behandling.status) && (
-          <Button variant="secondary" size="small" onClick={() => simuler()}>
+          <Button variant="secondary" size="small" onClick={simuler}>
             Simuler
           </Button>
         )}

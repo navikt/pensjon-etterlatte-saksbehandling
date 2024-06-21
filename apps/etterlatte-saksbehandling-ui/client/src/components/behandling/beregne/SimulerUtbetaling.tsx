@@ -10,6 +10,7 @@ import { SimulertBeregning, UtbetalingAggregert } from '~shared/types/Utbetaling
 import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -30,9 +31,11 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
           Simulere utbetaling
         </Heading>
 
-        <Button variant="secondary" size="small" onClick={() => simuler()}>
-          Simuler
-        </Button>
+        {!erFerdigBehandlet(behandling.status) && (
+          <Button variant="secondary" size="small" onClick={simuler}>
+            Simuler
+          </Button>
+        )}
         {mapResult(simuleringStatus, {
           pending: <Spinner visible={true} label="Simulerer..." />,
           success: (simuleringrespons) => <SimuleringBeregning data={simuleringrespons} />,

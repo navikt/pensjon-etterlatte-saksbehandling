@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
@@ -34,6 +34,7 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   ufoere: boolean
   overstyrBeregning: boolean
   overstyrTrygdetid: boolean
+  kategori: KATEGORI
 }
 
 export default function ManuellBehandling() {
@@ -48,6 +49,8 @@ export default function ManuellBehandling() {
   const { '*': oppgaveId } = useParams()
 
   const [oppgaveStatus, setOppgaveStatus] = useState<Oppgavestatus | undefined>(undefined)
+
+  const [isOverstyrBeregningChecked, setIsOverstyrBeregningChecked] = useState(false)
 
   useEffect(() => {
     if (oppgaveId) {
@@ -96,7 +99,7 @@ export default function ManuellBehandling() {
           opprettOverstyrtBeregningReq({
             behandlingId: nyBehandlingRespons,
             beskrivelse: 'Manuell migrering',
-            kategori: KATEGORI.MANUELL_MIGRERING, // TODO: finnes det en annen måte?
+            kategori: data.kategori,
           })
         }
         if (data.overstyrTrygdetid) {
@@ -159,7 +162,30 @@ export default function ManuellBehandling() {
           ))}
         </Select>
 
-        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+        <Box paddingBlock="4 4">
+          <Checkbox
+            {...register('overstyrBeregning')}
+            onChange={(e) => setIsOverstyrBeregningChecked(e.target.checked)}
+          >
+            Skal bruke manuell beregning
+          </Checkbox>
+
+          <Select
+            label="Årsak overstyrt beregning:"
+            {...register('kategori', {
+              required: { value: true, message: 'Du må velge kategori' },
+            })}
+            disabled={!isOverstyrBeregningChecked}
+            error={errors.kategori?.message}
+          >
+            <option value="">Velg kategori</option>
+            {Object.entries(KATEGORI).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </Select>
+        </Box>
 
         <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
 

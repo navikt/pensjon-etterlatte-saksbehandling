@@ -25,7 +25,8 @@ class SimuleringDao(
                     INSERT INTO simulering (behandlingid, saksbehandlerid, vedtak, request, response)
                     VALUES (?, ?, ?, ?, ?)
                     ON CONFLICT (behandlingid) 
-                    DO UPDATE SET saksbehandlerid = excluded.saksbehandlerid 
+                    DO UPDATE SET tidspunkt = now() 
+                    , saksbehandlerid = excluded.saksbehandlerid 
                     , vedtak = excluded.vedtak
                     , request = excluded.request
                     , response = excluded.response

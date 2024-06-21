@@ -10,11 +10,14 @@ import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
+import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -258,8 +261,8 @@ internal class AvkortingTest {
                                 ),
                             inntektsavkorting =
                                 listOf(
-                                    Inntektsavkorting(avkortinggrunnlag()),
-                                    Inntektsavkorting(avkortinggrunnlag()),
+                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
+                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
                                 ),
                         ),
                     ),
@@ -480,6 +483,114 @@ internal class AvkortingTest {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Nested
+    inner class SorterePerioder {
+        @Test
+        fun `Avkorting skal alltid sortere aarsoppgjoer ascending på år`() {
+            assertThrows<IllegalStateException> {
+                Avkorting(
+                    listOf(
+                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
+                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `Aarsoppgjoer skal alltid sortere ytelseFoerAvkorting ascending på fom`() {
+            assertThrows<IllegalStateException> {
+                val ytelseFoerAvkorting =
+                    listOf(
+                        ytelseFoerAvkorting(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                        ytelseFoerAvkorting(periode = Periode(fom = YearMonth.of(2024, 1), tom = null)),
+                    )
+                Avkorting(
+                    listOf(
+                        Aarsoppgjoer(
+                            ytelseFoerAvkorting = ytelseFoerAvkorting,
+                            aar = 2024,
+                            id = UUID.randomUUID(),
+                            forventaInnvilgaMaaneder = 12,
+                        ),
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `Aarsoppgjoer skal alltid sortere inntektsavkorting ascending på fom`() {
+            assertThrows<IllegalStateException> {
+                val inntektsavkorting =
+                    listOf(
+                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
+                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
+                    )
+                Avkorting(
+                    listOf(
+                        Aarsoppgjoer(
+                            inntektsavkorting = inntektsavkorting,
+                            aar = 2024,
+                            id = UUID.randomUUID(),
+                            forventaInnvilgaMaaneder = 12,
+                        ),
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `Aarsoppgjoer skal alltid sortere avkortetYtelseAar ascending på fom`() {
+            assertThrows<IllegalStateException> {
+                val avkortetYtelseAar =
+                    listOf(
+                        avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                        avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 1), tom = null)),
+                    )
+                Avkorting(
+                    listOf(
+                        Aarsoppgjoer(
+                            avkortetYtelseAar = avkortetYtelseAar,
+                            aar = 2024,
+                            id = UUID.randomUUID(),
+                            forventaInnvilgaMaaneder = 12,
+                        ),
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `Inntektsavkorting skal alltid sortere avkortingsperioder ascending på fom`() {
+            assertThrows<IllegalStateException> {
+                val avkortingsperioder =
+                    listOf(
+                        avkortingsperiode(fom = YearMonth.of(2024, 2), tom = null),
+                        avkortingsperiode(fom = YearMonth.of(2024, 1), tom = null),
+                    )
+                Inntektsavkorting(
+                    grunnlag = avkortinggrunnlag(),
+                    avkortingsperioder = avkortingsperioder,
+                )
+            }
+        }
+
+        @Test
+        fun `Inntektsavkorting skal alltid sortere avkortetYtelseForventetInntekt ascending på fom`() {
+            assertThrows<IllegalStateException> {
+                val avkortetYtelseForventetInntekt =
+                    listOf(
+                        avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                        avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 1), tom = null)),
+                    )
+                Inntektsavkorting(
+                    grunnlag = avkortinggrunnlag(),
+                    avkortetYtelseForventetInntekt = avkortetYtelseForventetInntekt,
+                )
             }
         }
     }

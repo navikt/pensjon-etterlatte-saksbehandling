@@ -2,8 +2,7 @@ import styled from 'styled-components'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterDatoMedKlokkeslett, formaterStringDato } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Alert, Heading, HStack } from '@navikt/ds-react'
-import { TagList } from '~shared/Tags'
+import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -61,14 +60,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
       {behandlingsInfo.datoFattet && <Tekst>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Tekst>}
 
-      <TagList>
-        <li>
+      <Box paddingInline="2 0">
+        <HStack gap="2">
           <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
-        </li>
-        <li>
           <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
-        </li>
-      </TagList>
+        </HStack>
+      </Box>
+
       <div className="flex">
         <div className="info">
           <Info>Saksbehandler</Info>

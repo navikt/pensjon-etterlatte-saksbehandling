@@ -1,5 +1,3 @@
-import styled from 'styled-components'
-
 export enum Variants {
   NEUTRAL = 'neutral',
   INFO = 'info',
@@ -12,10 +10,3 @@ export enum Variants {
   ALT3 = 'alt3',
   ALT3_FILLED = 'alt3-filled',
 }
-
-export const TagList = styled.ul`
-  display: flex;
-  list-style-type: none;
-  gap: 0.5em;
-  margin-top: 0.5em;
-`

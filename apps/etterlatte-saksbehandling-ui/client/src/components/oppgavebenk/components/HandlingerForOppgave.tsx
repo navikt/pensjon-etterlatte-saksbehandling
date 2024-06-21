@@ -7,7 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
-import Kryptering from '~shared/api/krypter'
+import krypterFnr from '~shared/api/krypter'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -52,7 +52,7 @@ export const HandlingerForOppgave = ({
         <Button
           size="small"
           icon={<EyeIcon />}
-          href={`/person/${Kryptering({ fnr })}?fane=HENDELSER&referanse=${referanse}`}
+          href={`/person/${krypterFnr({ fnr })}?fane=HENDELSER&referanse=${referanse}`}
           as="a"
         >
           Se hendelse

@@ -20,7 +20,7 @@ import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import Kryptering from '~shared/api/krypter'
+import krypterFnr from '~shared/api/krypter'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -43,7 +43,7 @@ export default function NyttBrev() {
   return (
     <>
       <StatusBarPersonHenter ident={fnr} />
-      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${Kryptering({ fnr })}?fane=BREV`} />
+      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${krypterFnr({ fnr })}?fane=BREV`} />
 
       {mapApiResult(
         brevStatus,

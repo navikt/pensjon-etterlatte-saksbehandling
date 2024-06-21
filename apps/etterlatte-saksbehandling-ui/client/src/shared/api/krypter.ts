@@ -1,4 +1,4 @@
-import { apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
+import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { DekrypterResponse, KrypterResponse } from '~shared/types/Krypter'
 
 export const krypter = async (dekryptert: string): Promise<ApiResponse<KrypterResponse>> =>
@@ -9,9 +9,9 @@ export const dekrypter = async (kryptert: string): Promise<ApiResponse<Dekrypter
 
 import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { mapResult } from '~shared/api/apiUtils'
+import { mapSuccess } from '~shared/api/apiUtils'
 
-const Kryptering = ({ fnr }: { fnr: string | undefined | null }) => {
+const krypterFnr = ({ fnr }: { fnr: string | undefined | null }) => {
   const [kryptert, krypterFetch] = useApiCall(krypter)
 
   useEffect(() => {
@@ -20,12 +20,7 @@ const Kryptering = ({ fnr }: { fnr: string | undefined | null }) => {
     }
   }, [fnr])
 
-  return mapResult(kryptert, {
-    success: (res) => res.respons,
-    error: (error: ApiError) => {
-      console.log(error)
-    },
-  })
+  return mapSuccess(kryptert, (res) => res.respons)
 }
 
-export default Kryptering
+export default krypterFnr

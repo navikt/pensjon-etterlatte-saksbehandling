@@ -48,12 +48,14 @@ class SimuleringOsRouteTest {
     private val server = MockOAuth2Server()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
+    private val simuleringDao: SimuleringDao = mockk()
     private val simuleringOsKlient: SimuleringOsKlient = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val simuleringOsService: SimuleringOsService =
         SimuleringOsService(
             utbetalingDao,
             vedtaksvurderingKlient,
+            simuleringDao,
             simuleringOsKlient,
         )
 
@@ -102,6 +104,7 @@ class SimuleringOsRouteTest {
             )
 
         coEvery { utbetalingDao.hentUtbetalinger(sakId) } returns emptyList()
+        coEvery { simuleringDao.lagre(behandlingId, any(), vedtak, any(), any()) } returns Unit
         coEvery { vedtaksvurderingKlient.hentVedtakSimulering(behandlingId, any()) } returns vedtak
         coEvery {
             behandlingKlient.harTilgangTilBehandling(behandlingId, true, bruker = any())

@@ -33,6 +33,7 @@ import java.util.UUID
 class SimuleringOsService(
     private val utbetalingDao: UtbetalingDao,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val simuleringDao: SimuleringDao,
     private val simuleringOsKlient: SimuleringOsKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -81,10 +82,13 @@ class SimuleringOsService(
             return simuleringOsKlient
                 .simuler(request)
                 .also {
-                    it.infomelding
-                        ?.beskrMelding
-                        ?.trim()
-                        .let { melding -> logger.info(melding) }
+                    simuleringDao.lagre(
+                        behandlingId = behandlingId,
+                        saksbehandler = brukerTokenInfo.ident(),
+                        vedtak = vedtak,
+                        simuleringRequest = request,
+                        simuleringResponse = it,
+                    )
                 }.tilSimulertBeregning()
         } else {
             throw IkkeStoettetSimulering(behandlingId)

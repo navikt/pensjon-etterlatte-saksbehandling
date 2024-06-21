@@ -9,6 +9,7 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
+import Kryptering2 from "~shared/api/krypter";
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -76,7 +77,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 variant="tertiary"
                 size="small"
                 as={Link}
-                href={`/person/${fnr}?fane=DOKUMENTER`}
+                href={`/person/${Kryptering2({fnr})}?fane=DOKUMENTER`}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

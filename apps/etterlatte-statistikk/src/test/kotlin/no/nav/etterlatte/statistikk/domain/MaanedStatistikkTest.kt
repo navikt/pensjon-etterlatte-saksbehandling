@@ -1,11 +1,14 @@
 package no.nav.etterlatte.statistikk.domain
 
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -54,7 +57,56 @@ class MaanedStatistikkTest {
         val statistikkRad = statistikk.rader[0]
 
         Assertions.assertEquals(statistikkRad.nettoYtelse, "20")
-        // TODO nettoYtelse til skal utbedres?
+    }
+
+    @Test
+    fun `opphørte vedtak skal ikke bli med i månedsstatistikken`() {
+        val rader: List<StoenadRad> =
+            listOf(
+                stoenadRad(
+                    123,
+                    vedtakLoependeFom = LocalDate.of(2024, 1, 1),
+                    vedtaksperioder =
+                        listOf(
+                            StoenadUtbetalingsperiode(
+                                fraOgMed = YearMonth.of(2024, Month.JANUARY),
+                                tilOgMed = null,
+                                type = StoenadPeriodeType.UTBETALING,
+                                beloep = BigDecimal("1000"),
+                            ),
+                        ),
+                ),
+                stoenadRad(
+                    123,
+                    vedtakLoependeFom = LocalDate.of(2024, 5, 1),
+                    opphoerFom = YearMonth.of(2024, Month.JUNE),
+                    vedtaksperioder =
+                        listOf(
+                            StoenadUtbetalingsperiode(
+                                type = StoenadPeriodeType.UTBETALING,
+                                beloep = BigDecimal("1100"),
+                                fraOgMed = YearMonth.of(2024, Month.MAY),
+                                tilOgMed = null,
+                            ),
+                            StoenadUtbetalingsperiode(
+                                type = StoenadPeriodeType.OPPHOER,
+                                beloep = null,
+                                fraOgMed = YearMonth.of(2024, Month.JUNE),
+                                tilOgMed = null,
+                            ),
+                        ),
+                ),
+            )
+
+        val statistikkMai = MaanedStatistikk(YearMonth.of(2024, Month.MAY), rader)
+        val statisitkkJuni = MaanedStatistikk(YearMonth.of(2024, Month.JUNE), rader)
+
+        with(statistikkMai.rader) {
+            size shouldBe 1
+            val rad = get(0)
+            rad.vedtakLoependeTom shouldBe YearMonth.of(2024, Month.MAY).atEndOfMonth()
+        }
+        statisitkkJuni.rader.size shouldBe 0
     }
 }
 

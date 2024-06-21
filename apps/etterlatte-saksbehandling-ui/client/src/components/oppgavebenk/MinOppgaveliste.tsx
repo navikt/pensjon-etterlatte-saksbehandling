@@ -5,10 +5,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import {
-  finnOgOppdaterSaksbehandlerTildeling,
-  finnOgOppdaterStatus,
+  finnOgOppdaterOppgave,
   leggTilOppgavenIMinliste,
-  oppdaterFrist,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
@@ -46,7 +44,10 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
       dispatcher.setOppgavelistaOppgaver(
-        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler)
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, {
+          status: Oppgavestatus.UNDER_BEHANDLING,
+          saksbehandler,
+        })
       )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
@@ -58,7 +59,10 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
             filtrerKunInnloggetBrukerOppgaver(
-              finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, saksbehandler)
+              finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, {
+                status: Oppgavestatus.UNDER_BEHANDLING,
+                saksbehandler,
+              })
             )
           )
         )
@@ -68,9 +72,19 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) => {
     setTimeout(() => {
-      dispatcher.setOppgavelistaOppgaver(finnOgOppdaterStatus(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, status))
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, { status })
+      )
       dispatcher.setMinOppgavelisteOppgaver(
-        finnOgOppdaterStatus(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, status)
+        finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, { status })
+      )
+    }, 2000)
+  }
+
+  const oppdaterFrist = (oppgaveId: string, frist: string) => {
+    setTimeout(() => {
+      dispatcher.setMinOppgavelisteOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, { frist })
       )
     }, 2000)
   }
@@ -107,9 +121,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         <Oppgaver
           oppgaver={oppgavebenkState.minOppgavelisteOppgaver}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-          oppdaterFrist={(id: string, nyfrist: string) =>
-            oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
-          }
+          oppdaterFrist={oppdaterFrist}
           oppdaterStatus={oppdaterStatus}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           filter={filter}

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import {
-  finnOgOppdaterSaksbehandlerTildeling,
-  finnOgOppdaterStatus,
+  finnOgOppdaterOppgave,
   leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
@@ -44,7 +43,10 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
       dispatcher.setOppgavelistaOppgaver(
-        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler)
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, {
+          status: Oppgavestatus.UNDER_BEHANDLING,
+          saksbehandler,
+        })
       )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
@@ -56,7 +58,10 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
             filtrerKunInnloggetBrukerOppgaver(
-              finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, saksbehandler)
+              finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, {
+                status: Oppgavestatus.UNDER_BEHANDLING,
+                saksbehandler,
+              })
             )
           )
         )
@@ -66,9 +71,11 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
 
   const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) => {
     setTimeout(() => {
-      dispatcher.setOppgavelistaOppgaver(finnOgOppdaterStatus(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, status))
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, { status })
+      )
       dispatcher.setMinOppgavelisteOppgaver(
-        finnOgOppdaterStatus(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, status)
+        finnOgOppdaterOppgave(oppgavebenkState.minOppgavelisteOppgaver, oppgaveId, { status })
       )
     }, 2000)
   }

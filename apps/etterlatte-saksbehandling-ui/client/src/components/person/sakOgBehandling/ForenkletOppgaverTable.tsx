@@ -17,11 +17,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { OppgaveValg } from '~components/person/sakOgBehandling/SakOversikt'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import {
-  finnOgOppdaterSaksbehandlerTildeling,
-  finnOgOppdaterStatus,
-  sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveHandlinger'
+import { finnOgOppdaterOppgave, sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
 import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
 import styled from 'styled-components'
@@ -50,10 +46,12 @@ export const ForenkletOppgaverTable = ({
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
 
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) =>
-    setFiltrerteOppgaver(finnOgOppdaterSaksbehandlerTildeling(filtrerteOppgaver, oppgave.id, saksbehandler))
+    setFiltrerteOppgaver(
+      finnOgOppdaterOppgave(filtrerteOppgaver, oppgave.id, { status: Oppgavestatus.UNDER_BEHANDLING, saksbehandler })
+    )
 
   const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) =>
-    setFiltrerteOppgaver(finnOgOppdaterStatus(filtrerteOppgaver, oppgaveId, status))
+    setFiltrerteOppgaver(finnOgOppdaterOppgave(filtrerteOppgaver, oppgaveId, { status }))
 
   useEffect(() => {
     setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg())

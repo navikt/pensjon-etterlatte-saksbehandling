@@ -1,27 +1,22 @@
 import { logger } from '~utils/logger'
 import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 
-export const finnOgOppdaterSaksbehandlerTildeling = (
+export const finnOgOppdaterOppgave = (
   oppgaver: OppgaveDTO[],
   oppgaveId: string,
-  saksbehandler: OppgaveSaksbehandler | null
-) => {
-  const index = oppgaver.findIndex((o) => o.id === oppgaveId)
-  if (index > -1) {
-    const oppdatertOppgaveState = [...oppgaver]
-    oppdatertOppgaveState[index].saksbehandler = saksbehandler
-    oppdatertOppgaveState[index].status = Oppgavestatus.UNDER_BEHANDLING
-    return oppdatertOppgaveState
-  } else {
-    return oppgaver
+  felter: {
+    status?: Oppgavestatus
+    frist?: string
+    saksbehandler?: OppgaveSaksbehandler | null
   }
-}
-
-export const finnOgOppdaterStatus = (oppgaver: OppgaveDTO[], oppgaveId: string, status: Oppgavestatus) => {
+) => {
+  const { status, frist, saksbehandler } = felter
   const index = oppgaver.findIndex((o) => o.id === oppgaveId)
   if (index > -1) {
     const oppdatertOppgaveState = [...oppgaver]
-    oppdatertOppgaveState[index].status = status
+    if (status) oppdatertOppgaveState[index].status = status
+    if (frist) oppdatertOppgaveState[index].frist = frist
+    if (saksbehandler) oppdatertOppgaveState[index].saksbehandler = saksbehandler
     return oppdatertOppgaveState
   } else {
     return oppgaver
@@ -38,20 +33,6 @@ export const leggTilOppgavenIMinliste = (
     saksbehandler: saksbehandler,
     status: Oppgavestatus.UNDER_BEHANDLING,
   })
-}
-
-export const oppdaterFrist = (
-  setHentedeOppgaver: (oppdatertListe: OppgaveDTO[]) => void,
-  hentedeOppgaver: OppgaveDTO[],
-  id: string,
-  frist: string
-) => {
-  setTimeout(() => {
-    const oppdatertOppgaveState = [...hentedeOppgaver]
-    const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-    oppdatertOppgaveState[index].frist = frist
-    setHentedeOppgaver(oppdatertOppgaveState)
-  }, 2000)
 }
 
 export const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {

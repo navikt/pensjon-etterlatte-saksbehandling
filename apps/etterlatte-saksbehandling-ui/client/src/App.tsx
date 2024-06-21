@@ -23,7 +23,8 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
-import { DekrypterendePerson } from '~components/person/DekrypterendePerson'
+import { DekrypterendeWrapper } from '~components/person/DekrypterendeWrapper'
+import { Person } from '~components/person/Person'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -51,7 +52,10 @@ function App() {
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
-                  <Route path="/person/:fnr" element={<DekrypterendePerson />} />
+                  <Route
+                    path="/person/:fnr"
+                    element={<DekrypterendeWrapper component={(fnr: string) => <Person fnr={fnr} />} />}
+                  />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

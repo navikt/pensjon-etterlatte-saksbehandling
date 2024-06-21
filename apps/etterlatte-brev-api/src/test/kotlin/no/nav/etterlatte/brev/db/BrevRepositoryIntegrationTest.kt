@@ -11,7 +11,6 @@ import kotliquery.using
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -27,6 +26,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

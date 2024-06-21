@@ -10,13 +10,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
@@ -24,6 +19,13 @@ import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.AvsenderMottaker
+import no.nav.etterlatte.libs.journalpost.felles.Bruker
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -89,7 +91,7 @@ internal class NySoeknadRiverTest {
             assertEquals(AvsenderMottaker("25478323363"), this.avsenderMottaker)
             assertEquals(Bruker("25478323363"), this.bruker)
             assertEquals("etterlatte:barnepensjon:621", this.eksternReferanseId)
-            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+            assertEquals(JournalpostSak(Sakstype.FAGSAK, sak.id.toString(), Fagsaksystem.EY.navn), this.sak)
         }
     }
 
@@ -129,7 +131,7 @@ internal class NySoeknadRiverTest {
             assertEquals(AvsenderMottaker("13848599411"), this.avsenderMottaker)
             assertEquals(Bruker("13848599411"), this.bruker)
             assertEquals("etterlatte:omstillingsstoenad:42", this.eksternReferanseId)
-            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+            assertEquals(JournalpostSak(Sakstype.FAGSAK, sak.id.toString(), Fagsaksystem.EY.navn), this.sak)
         }
     }
 

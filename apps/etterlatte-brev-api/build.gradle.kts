@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:journalpost"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 

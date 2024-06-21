@@ -1,5 +1,13 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import no.nav.etterlatte.libs.journalpost.dokarkiv.KnyttTilAnnenSakRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.KnyttTilAnnenSakResponse
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OppdaterJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OppdaterJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpost
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
 import org.slf4j.LoggerFactory
 
 interface DokarkivService {

@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.etterlatte.common)
 
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:journalpost"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

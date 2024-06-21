@@ -1,6 +1,5 @@
 package no.nav.etterlatte.gyldigsoeknad.journalfoering
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -12,6 +11,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(
@@ -53,83 +54,4 @@ class DokarkivKlient(
             )
         }
     }
-}
-
-@Suppress("unused")
-data class OpprettJournalpostRequest(
-    val tittel: String,
-    val tema: String,
-    val journalfoerendeEnhet: String?,
-    val avsenderMottaker: AvsenderMottaker?,
-    val bruker: Bruker?,
-    val eksternReferanseId: String,
-    val sak: JournalpostSak?,
-    var dokumenter: List<JournalpostDokument>,
-) {
-    val journalpostType: String = "INNGAAENDE"
-    val kanal: String = "NAV_NO"
-}
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettJournalpostResponse(
-    val journalpostId: String,
-    val journalpostferdigstilt: Boolean,
-    val dokumenter: List<DokumentInfo> = emptyList(),
-) {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class DokumentInfo(
-        val dokumentInfoId: String,
-    )
-}
-
-sealed class DokumentVariant {
-    abstract val filtype: String
-    abstract val fysiskDokument: String
-    abstract val variantformat: String
-
-    data class ArkivPDF(
-        override val fysiskDokument: String,
-    ) : DokumentVariant() {
-        override val filtype: String = "PDFA"
-        override val variantformat: String = "ARKIV"
-    }
-
-    data class OriginalJson(
-        override val fysiskDokument: String,
-    ) : DokumentVariant() {
-        override val filtype: String = "JSON"
-        override val variantformat: String = "ORIGINAL"
-    }
-}
-
-@Suppress("unused")
-data class JournalpostSak(
-    val fagsakId: String,
-) {
-    val sakstype: String = "FAGSAK"
-    val fagsaksystem: String = "EY"
-}
-
-@Suppress("unused")
-data class AvsenderMottaker(
-    val id: String,
-) {
-    val navn: String = ""
-    val idType: String = "FNR"
-}
-
-@Suppress("unused")
-data class Bruker(
-    val id: String,
-) {
-    val idType = "FNR"
-}
-
-@Suppress("unused")
-data class JournalpostDokument(
-    val tittel: String,
-    val dokumentvarianter: List<DokumentVariant>,
-) {
-    val dokumentKategori = "SOK"
-    val brevkode = "XX.YY-ZZ"
 }

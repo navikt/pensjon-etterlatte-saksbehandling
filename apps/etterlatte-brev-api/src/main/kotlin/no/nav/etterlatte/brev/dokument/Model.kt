@@ -2,9 +2,9 @@ package no.nav.etterlatte.brev.dokument
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
-import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
 
 data class HentUtsendingsinfoResponse(
     val data: ResponseData? = null,

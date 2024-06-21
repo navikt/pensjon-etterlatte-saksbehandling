@@ -15,6 +15,12 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.journalpost.dokarkiv.KnyttTilAnnenSakRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.KnyttTilAnnenSakResponse
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OppdaterJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OppdaterJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpost
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(

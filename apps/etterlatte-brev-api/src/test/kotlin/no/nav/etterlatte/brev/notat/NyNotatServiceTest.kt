@@ -11,14 +11,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.NotatAlleredeJournalfoert
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpost
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
@@ -145,17 +145,17 @@ internal class NyNotatServiceTest(
         }
 
         with(journalpostRequest.captured) {
-            assertEquals(sak.ident, this.bruker.id)
-            assertEquals(BrukerIdType.FNR, this.bruker.idType)
+            assertEquals(sak.ident, this.bruker!!.id)
+            assertEquals(BrukerIdType.FNR, this.bruker!!.idType)
             assertEquals("$sakId.${nyttNotat.id}", this.eksternReferanseId)
             assertEquals(sak.enhet, this.journalfoerendeEnhet)
             assertEquals(sak.sakType.tema, this.tema)
             assertEquals(nyttNotat.tittel, this.tittel)
 
-            assertEquals(nyttNotat.sakId.toString(), this.sak.fagsakId)
-            assertEquals(sak.sakType.tema, this.sak.tema)
-            assertEquals(Sakstype.FAGSAK, this.sak.sakstype)
-            assertEquals(Fagsaksystem.EY.navn, this.sak.fagsaksystem)
+            assertEquals(nyttNotat.sakId.toString(), this.sak!!.fagsakId)
+            assertEquals(sak.sakType.tema, this.sak!!.tema)
+            assertEquals(Sakstype.FAGSAK, this.sak!!.sakstype)
+            assertEquals(Fagsaksystem.EY.navn, this.sak!!.fagsaksystem)
         }
     }
 }

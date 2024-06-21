@@ -12,13 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.JournalPostType
-import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
-import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -34,6 +28,12 @@ import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostKoder
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostType
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -224,7 +224,7 @@ class JournalfoerBrevServiceTest {
             db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
         }
 
-        val requestSlot = slot<JournalpostRequest>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
         coVerify(exactly = 1) {
             vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
             sakService.hentSak(forventetBrev.sakId, Systembruker.brev)
@@ -233,16 +233,16 @@ class JournalfoerBrevServiceTest {
 
         with(requestSlot.captured) {
             this.tittel shouldBe innhold.tittel
-            this.journalposttype shouldBe JournalPostType.UTGAAENDE
-            this.avsenderMottaker.id shouldBe forventetBrev.soekerFnr
-            this.bruker.id shouldBe forventetBrev.soekerFnr
-            this.bruker.idType shouldBe BrukerIdType.FNR
+            this.journalposttype shouldBe JournalpostType.UTGAAENDE
+            this.avsenderMottaker!!.id shouldBe forventetBrev.soekerFnr
+            this.bruker!!.id shouldBe forventetBrev.soekerFnr
+            this.bruker!!.idType shouldBe BrukerIdType.FNR
             this.eksternReferanseId shouldContain forventetBrev.sakId.toString()
             this.eksternReferanseId shouldContain forventetBrev.id.toString()
-            this.sak.sakstype shouldBe Sakstype.FAGSAK
-            this.sak.tema shouldBe sak.sakType.tema
-            this.sak.fagsakId shouldBe sak.id.toString()
-            this.sak.fagsaksystem shouldBe Fagsaksystem.EY.navn
+            this.sak!!.sakstype shouldBe Sakstype.FAGSAK
+            this.sak!!.tema shouldBe sak.sakType.tema
+            this.sak!!.fagsakId shouldBe sak.id.toString()
+            this.sak!!.fagsaksystem shouldBe Fagsaksystem.EY.navn
             this.tema shouldBe sak.sakType.tema
             this.kanal shouldBe "S"
             this.journalfoerendeEnhet shouldBe sak.enhet
@@ -299,7 +299,7 @@ class JournalfoerBrevServiceTest {
             db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
         }
 
-        val requestSlot = slot<JournalpostRequest>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
         coVerify {
             sakService.hentSak(forventetBrev.sakId, bruker)
             dokarkivService.journalfoer(capture(requestSlot))
@@ -307,16 +307,16 @@ class JournalfoerBrevServiceTest {
 
         with(requestSlot.captured) {
             this.tittel shouldBe innhold.tittel
-            this.journalposttype shouldBe JournalPostType.UTGAAENDE
-            this.avsenderMottaker.id shouldBe forventetBrev.soekerFnr
-            this.bruker.id shouldBe forventetBrev.soekerFnr
-            this.bruker.idType shouldBe BrukerIdType.FNR
+            this.journalposttype shouldBe JournalpostType.UTGAAENDE
+            this.avsenderMottaker!!.id shouldBe forventetBrev.soekerFnr
+            this.bruker!!.id shouldBe forventetBrev.soekerFnr
+            this.bruker!!.idType shouldBe BrukerIdType.FNR
             this.eksternReferanseId shouldContain forventetBrev.sakId.toString()
             this.eksternReferanseId shouldContain forventetBrev.id.toString()
-            this.sak.sakstype shouldBe Sakstype.FAGSAK
-            this.sak.tema shouldBe sak.sakType.tema
-            this.sak.fagsakId shouldBe sak.id.toString()
-            this.sak.fagsaksystem shouldBe Fagsaksystem.EY.navn
+            this.sak!!.sakstype shouldBe Sakstype.FAGSAK
+            this.sak!!.tema shouldBe sak.sakType.tema
+            this.sak!!.fagsakId shouldBe sak.id.toString()
+            this.sak!!.fagsaksystem shouldBe Fagsaksystem.EY.navn
             this.tema shouldBe sak.sakType.tema
             this.kanal shouldBe "S"
             this.journalfoerendeEnhet shouldBe sak.enhet

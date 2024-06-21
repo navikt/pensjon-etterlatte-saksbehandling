@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_PDF_QUERY
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -43,6 +42,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 import javax.sql.DataSource

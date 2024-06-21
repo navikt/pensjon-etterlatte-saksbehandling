@@ -6,7 +6,6 @@ import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -19,6 +18,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage

@@ -5,7 +5,6 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import javax.sql.DataSource
 

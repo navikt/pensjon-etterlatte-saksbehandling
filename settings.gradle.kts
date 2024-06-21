@@ -47,6 +47,7 @@ include(
     "libs:etterlatte-mq",
     "libs:etterlatte-pdl-model",
     "libs:etterlatte-institusjonsopphold-model",
+    "libs:journalpost",
     "libs:etterlatte-trygdetid-model",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",

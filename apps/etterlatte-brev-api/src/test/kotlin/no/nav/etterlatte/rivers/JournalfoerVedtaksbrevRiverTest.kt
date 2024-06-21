@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Spraak
@@ -35,6 +34,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

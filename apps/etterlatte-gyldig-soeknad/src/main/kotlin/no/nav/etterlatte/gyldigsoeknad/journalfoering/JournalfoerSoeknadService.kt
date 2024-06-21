@@ -11,6 +11,17 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.AvsenderMottaker
+import no.nav.etterlatte.libs.journalpost.felles.Bruker
+import no.nav.etterlatte.libs.journalpost.felles.DokumentVariant
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostDokument
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostKanal
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostType
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -36,10 +47,12 @@ class JournalfoerSoeknadService(
                     tittel = tittel,
                     tema = sak.sakType.tema,
                     journalfoerendeEnhet = sak.enhet,
+                    journalposttype = JournalpostType.INNGAAENDE,
+                    kanal = JournalpostKanal.NAV_NO,
                     avsenderMottaker = AvsenderMottaker(sak.ident),
                     bruker = Bruker(sak.ident),
                     eksternReferanseId = opprettEksternReferanseId(soeknadId, sak.sakType),
-                    sak = JournalpostSak(sak.id.toString()),
+                    sak = JournalpostSak(Sakstype.FAGSAK, sak.id.toString(), Fagsaksystem.EY.navn),
                     dokumenter = listOf(dokument),
                 )
 
@@ -64,6 +77,8 @@ class JournalfoerSoeknadService(
                     tittel = tittel,
                     tema = sakType.tema,
                     journalfoerendeEnhet = Enheter.defaultEnhet.enhetNr,
+                    journalposttype = JournalpostType.INNGAAENDE,
+                    kanal = JournalpostKanal.NAV_NO,
                     avsenderMottaker = null,
                     bruker = null,
                     eksternReferanseId = opprettEksternReferanseId(soeknadId, sakType),

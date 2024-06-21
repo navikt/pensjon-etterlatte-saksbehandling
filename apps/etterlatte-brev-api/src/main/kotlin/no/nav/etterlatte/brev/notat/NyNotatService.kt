@@ -1,14 +1,6 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.dokarkiv.Bruker
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
-import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
-import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
-import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.notat.Notat
@@ -21,6 +13,14 @@ import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettNotatJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.felles.Bruker
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.DokumentVariant
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostDokument
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory

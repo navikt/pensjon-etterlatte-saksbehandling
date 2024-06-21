@@ -1,23 +1,24 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.AvsenderMottaker
-import no.nav.etterlatte.brev.dokarkiv.Bruker
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
-import no.nav.etterlatte.brev.dokarkiv.JournalPostType
-import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
-import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
-import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
-import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.libs.journalpost.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.journalpost.felles.AvsenderMottaker
+import no.nav.etterlatte.libs.journalpost.felles.Bruker
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.DokumentVariant
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostDokument
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostKoder
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostType
+import no.nav.etterlatte.libs.journalpost.felles.Sakstype
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -101,7 +102,7 @@ class JournalfoerBrevService(
     private fun mapTilJournalpostRequest(
         brev: Brev,
         sak: Sak,
-    ): JournalpostRequest {
+    ): OpprettJournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
@@ -111,17 +112,21 @@ class JournalfoerBrevService(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =
                         when {
-                            foedselsnummer != null -> "FNR"
-                            orgnummer != null -> "ORGNR"
-                            else -> "UKJENT"
+                            foedselsnummer != null -> BrukerIdType.FNR
+                            orgnummer != null -> BrukerIdType.ORGNR
+                            /**
+                             * Kun påkrevd dersom ID er satt.
+                             * Hvis vi mangler både fnr. og orgnr. kan vi sette denne til null
+                             **/
+                            else -> null
                         },
                     navn = navn,
                 )
             }
 
-        return JournalpostRequest(
+        return OpprettJournalpostRequest(
             tittel = innhold.tittel,
-            journalposttype = JournalPostType.UTGAAENDE,
+            journalposttype = JournalpostType.UTGAAENDE,
             avsenderMottaker = avsenderMottaker,
             bruker = Bruker(brev.soekerFnr),
             eksternReferanseId = "${brev.sakId}.${brev.id}",

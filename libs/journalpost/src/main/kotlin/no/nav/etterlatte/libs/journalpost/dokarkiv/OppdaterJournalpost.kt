@@ -1,8 +1,10 @@
-package no.nav.etterlatte.brev.dokarkiv
+package no.nav.etterlatte.libs.journalpost.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.etterlatte.libs.journalpost.felles.BrukerIdType
+import no.nav.etterlatte.libs.journalpost.felles.JournalpostSak
 
 /**
  * Requestobjekt for å oppdatere eksisterende Journalpost.
@@ -37,3 +39,7 @@ data class OppdaterJournalpostRequest(
         val navn: String? = null,
     )
 }
+
+data class OppdaterJournalpostResponse(
+    val journalpostId: String,
+)

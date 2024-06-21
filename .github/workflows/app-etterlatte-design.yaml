@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build-and-test:
-    if: github.event_name == 'pull_request'
+    if: github.event_name !== 'pull_request'
     name: Build and test
     runs-on: ubuntu-latest
     steps:

@@ -28,7 +28,6 @@ class Server(
     fun run() {
         startLytting(context.konsument, LoggerFactory.getLogger(Application::class.java))
         setReady()
-            .also { engine.start(true) }
             .also {
                 if (context.isProd) {
                     context.handler.logger.info("isProd=true, enabling FAGSYSTEM-335360")
@@ -52,6 +51,6 @@ class Server(
                 } else {
                     context.handler.logger.info("isProd=false, skipping FAGSYSTEM-335360")
                 }
-            }
+            }.also { engine.start(true) }
     }
 }

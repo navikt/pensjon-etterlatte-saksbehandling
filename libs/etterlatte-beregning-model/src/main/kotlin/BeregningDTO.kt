@@ -114,5 +114,6 @@ enum class OverstyrtBeregningKategori(
     s: String,
 ) {
     FORELDRELOES("FORELDRELØS"),
+    MANUELL_MIGRERING("MANUELL MIGRERING"), // for manuell behandling
     UKJENT_KATEGORI("UKJENT KATEGORI"), // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }

@@ -24,6 +24,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { KATEGORI } from '~shared/types/OverstyrtBeregning'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -95,6 +96,7 @@ export default function ManuellBehandling() {
           opprettOverstyrtBeregningReq({
             behandlingId: nyBehandlingRespons,
             beskrivelse: 'Manuell migrering',
+            kategori: KATEGORI.MANUELL_MIGRERING, // TODO: finnes det en annen måte?
           })
         }
         if (data.overstyrTrygdetid) {

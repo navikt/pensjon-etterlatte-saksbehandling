@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,26 +13,35 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.util.UUID
 
 class VedtakSamordningServiceTest {
     private val vedtakRepository: VedtaksvurderingRepository = mockk()
     private val samordningService = VedtakSamordningService(vedtakRepository)
 
+    @AfterEach
+    fun tearDown() {
+        clearAllMocks()
+    }
+
     @Test
     fun `skal hente vedtak`() {
         every { vedtakRepository.hentVedtak(1234) } returns
             vedtak(
+                id = 1234,
                 status = VedtakStatus.IVERKSATT,
                 avkorting =
                     objectMapper.valueToTree(
@@ -42,6 +52,7 @@ class VedtakSamordningServiceTest {
                         ),
                     ),
             )
+        every { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1234)) } returns emptyList()
 
         val resultat = samordningService.hentVedtak(1234)!!
 
@@ -60,6 +71,7 @@ class VedtakSamordningServiceTest {
         every { vedtakRepository.hentFerdigstilteVedtak(ident, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 vedtak(
+                    id = 1,
                     status = VedtakStatus.IVERKSATT,
                     virkningstidspunkt = virkFom2024Januar,
                     vedtakFattet =
@@ -82,6 +94,7 @@ class VedtakSamordningServiceTest {
                         ),
                 ),
                 vedtak(
+                    id = 2,
                     status = VedtakStatus.IVERKSATT,
                     virkningstidspunkt = virkFom2024Februar,
                     vedtakFattet =
@@ -102,6 +115,27 @@ class VedtakSamordningServiceTest {
                         objectMapper.valueToTree(
                             avkortingDto(fom = virkFom2024Februar, ytelseFoer = 3200, ytelseEtter = 2900),
                         ),
+                ),
+            )
+        every { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1, 2)) } returns
+            listOf(
+                AvkortetYtelsePeriode(
+                    id = UUID.randomUUID(),
+                    vedtakId = 1,
+                    fom = virkFom2024Januar,
+                    tom = virkFom2024Januar,
+                    type = "FORVENTET_INNTEKT",
+                    ytelseFoerAvkorting = 3000,
+                    ytelseEtterAvkorting = 2500,
+                ),
+                AvkortetYtelsePeriode(
+                    id = UUID.randomUUID(),
+                    vedtakId = 2,
+                    fom = virkFom2024Februar,
+                    tom = null,
+                    type = "FORVENTET_INNTEKT",
+                    ytelseFoerAvkorting = 3200,
+                    ytelseEtterAvkorting = 2900,
                 ),
             )
 
@@ -142,6 +176,7 @@ class VedtakSamordningServiceTest {
                     ytelseEtterAvkorting = ytelseEtter,
                     avkortingsbeloep = ytelseEtter - ytelseFoer,
                     restanse = 0,
+                    sanksjon = null,
                 ),
             ),
         tidligereAvkortetYtelse = emptyList(),

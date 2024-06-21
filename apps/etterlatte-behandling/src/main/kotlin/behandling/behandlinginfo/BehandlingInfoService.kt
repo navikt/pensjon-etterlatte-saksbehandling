@@ -43,7 +43,6 @@ class BehandlingInfoService(
         brevutfall: Brevutfall,
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
-        sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, opphoer, brevutfall)
         sjekkFeilutbetalingErSatt(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
@@ -131,19 +130,6 @@ class BehandlingInfoService(
     ) {
         if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
             throw BrevutfallException.AldergruppeIkkeSatt()
-        }
-    }
-
-    private fun sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(
-        behandling: Behandling,
-        opphoer: Boolean,
-        brevutfall: Brevutfall,
-    ) {
-        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
-            !opphoer &&
-            brevutfall.lavEllerIngenInntekt == null
-        ) {
-            throw BrevutfallException.LavEllerIngenInntektIkkeSatt()
         }
     }
 

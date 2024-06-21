@@ -1,6 +1,9 @@
 package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.core.JacksonException
+import io.github.smiley4.ktorswaggerui.SwaggerUI
+import io.github.smiley4.ktorswaggerui.routing.openApiSpec
+import io.github.smiley4.ktorswaggerui.routing.swaggerUI
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.JacksonConverter
@@ -23,6 +26,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.binder.MeterBinder
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
@@ -92,12 +96,28 @@ fun Application.restModule(
     }
 
     install(StatusPages, StatusPagesKonfigurasjon(sikkerLogg).config)
+    install(SwaggerUI) {
+        info {
+            title = "Etterlatte"
+            contact {
+                url = "https://github.com/navikt/pensjon-etterlatte-saksbehandling"
+            }
+        }
+    }
 
     routing {
         healthApi()
         authenticate {
             route(routePrefix ?: "") {
                 authenticatedRoutes()
+            }
+        }
+        if (!isProd()) {
+            route("swagger") {
+                swaggerUI("/api.json")
+            }
+            route("api.json") {
+                openApiSpec()
             }
         }
         if (routes != null) {

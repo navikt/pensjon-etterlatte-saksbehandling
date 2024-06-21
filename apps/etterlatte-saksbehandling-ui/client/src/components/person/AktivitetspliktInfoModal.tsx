@@ -25,7 +25,6 @@ import {
   AktivitetspliktUnntakType,
   AktivitetspliktVurderingType,
   IAktivitetspliktVurdering,
-  IValgJaNei,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
@@ -39,11 +38,12 @@ import { formaterStringDato } from '~utils/formattering'
 import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { JaNei } from '~shared/types/ISvar'
 
 interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: IValgJaNei | null
+  aktivitetsplikt: JaNei | null
   aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: IValgJaNei | null
+  unntak: JaNei | null
   midlertidigUnntak: AktivitetspliktUnntakType | ''
   sluttdato?: Date | null
   beskrivelse: string
@@ -58,7 +58,13 @@ const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
   beskrivelse: '',
 }
 
-export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const AktivitetspliktInfoModal = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const [visModal, setVisModal] = useState(false)
   const [erFerdigstilt, setErFerdigstilt] = useState(false)
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
@@ -83,8 +89,9 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     if (!erFerdigstilt && vurdering) {
       apiFerdigstillOppgave(oppgave.id, () => {
         setVisModal(false)
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       })
-    } else if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
+    } else if (data.aktivitetsplikt === JaNei.NEI || data.unntak === JaNei.JA) {
       opprettUnntak(
         {
           sakId: oppgave.sakId,
@@ -92,19 +99,18 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
           request: {
             id: undefined,
             unntak:
-              data.aktivitetsplikt === IValgJaNei.NEI
+              data.aktivitetsplikt === JaNei.NEI
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
             tom:
-              data.sluttdato && data.aktivitetsplikt === IValgJaNei.JA
-                ? new Date(data.sluttdato).toISOString()
-                : undefined,
+              data.sluttdato && data.aktivitetsplikt === JaNei.JA ? new Date(data.sluttdato).toISOString() : undefined,
           },
         },
         () => {
           apiFerdigstillOppgave(oppgave.id, () => {
             setVisModal(false)
+            oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
           })
         }
       )
@@ -123,6 +129,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         () => {
           apiFerdigstillOppgave(oppgave.id, () => {
             setVisModal(false)
+            oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
           })
         }
       )
@@ -176,10 +183,10 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                     legend="Har bruker aktivitetsplikt?"
                     radios={
                       <>
-                        <Radio size="small" value={IValgJaNei.JA}>
+                        <Radio size="small" value={JaNei.JA}>
                           Ja
                         </Radio>
-                        <Radio size="small" value={IValgJaNei.NEI}>
+                        <Radio size="small" value={JaNei.NEI}>
                           {
                             tekstAktivitetspliktUnntakType[
                               AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
@@ -195,7 +202,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                     som overstiger to ganger grunnbeløpet for hvert av de fem siste årene. I tillegg må den årlige
                     inntekten ikke ha oversteget tre ganger grunnbeløpet hvert av de siste to årene før dødsfallet.
                   </ReadMore>
-                  {harAktivitetsplikt === IValgJaNei.JA && (
+                  {harAktivitetsplikt === JaNei.JA && (
                     <>
                       <ControlledRadioGruppe
                         name="unntak"
@@ -204,16 +211,16 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                         legend="Er det unntak for bruker?"
                         radios={
                           <>
-                            <Radio size="small" value={IValgJaNei.JA}>
+                            <Radio size="small" value={JaNei.JA}>
                               Ja
                             </Radio>
-                            <Radio size="small" value={IValgJaNei.NEI}>
+                            <Radio size="small" value={JaNei.NEI}>
                               Nei
                             </Radio>
                           </>
                         }
                       />
-                      {harUnntak === IValgJaNei.JA && (
+                      {harUnntak === JaNei.JA && (
                         <>
                           <Select
                             label="Hvilket midlertidig unntak er det?"
@@ -243,7 +250,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                           />
                         </>
                       )}
-                      {harUnntak === IValgJaNei.NEI && (
+                      {harUnntak === JaNei.NEI && (
                         <Select
                           label="Hva er brukers aktivitetsgrad?"
                           {...register('aktivitetsgrad', {

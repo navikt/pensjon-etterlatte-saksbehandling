@@ -19,6 +19,9 @@ export const formaterEnumTilLesbarString = (string: string): string => {
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
 
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
+
+export const formaterStringMaanedDato = (dato: string) => format(new Date(dato), 'MMMM yyyy').toString()
+
 export const formaterKanskjeStringDato = (dato?: string): string =>
   formaterKanskjeStringDatoMedFallback('Ukjent dato', dato)
 

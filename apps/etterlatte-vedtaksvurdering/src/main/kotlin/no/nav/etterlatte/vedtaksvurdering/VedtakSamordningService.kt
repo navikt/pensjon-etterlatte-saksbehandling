@@ -1,11 +1,9 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
@@ -21,7 +19,10 @@ class VedtakSamordningService(
 
     fun hentVedtak(vedtakId: Long): VedtakSamordningDto? {
         logger.debug("Henter vedtak med id=$vedtakId")
-        return repository.hentVedtak(vedtakId)?.toSamordningsvedtakDto()
+        return repository.hentVedtak(vedtakId)?.let {
+            val avkortetYtelsePerioder = repository.hentAvkortetYtelsePerioder(setOf(vedtakId))
+            it.toSamordningsvedtakDto(avkortetYtelsePerioder)
+        }
     }
 
     fun hentVedtaksliste(
@@ -34,13 +35,21 @@ class VedtakSamordningService(
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
-        return tidslinjeJustert.map { it.toSamordningsvedtakDto() }
+
+        val avkortetYtelsePerioderByVedtak =
+            repository
+                .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
+                .groupBy { it.vedtakId }
+
+        return tidslinjeJustert.map {
+            val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
+            it.toSamordningsvedtakDto(avkortetYtelsePerioder)
+        }
     }
 }
 
-private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
+private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetYtelsePeriode>): VedtakSamordningDto {
     val innhold = innhold as VedtakInnhold.Behandling
-    val avkorting = innhold.avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
 
     return VedtakSamordningDto(
         vedtakId = id,
@@ -60,14 +69,12 @@ private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
         virkningstidspunkt = innhold.virkningstidspunkt,
         beregning = innhold.beregning,
         perioder =
-            avkorting
-                ?.avkortetYtelse
-                ?.map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) }
-                ?: emptyList(),
+            avkortetYtelsePerioder
+                .map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) },
     )
 }
 
-private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
+private fun AvkortetYtelsePeriode.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
     val justertPeriode = utbetalingsperioder.firstOrNull { this.fom == it.periode.fom }
 
     return VedtakSamordningPeriode(

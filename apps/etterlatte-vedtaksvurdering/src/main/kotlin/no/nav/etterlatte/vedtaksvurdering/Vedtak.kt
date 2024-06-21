@@ -65,6 +65,7 @@ data class Vedtak(
                                     innhold.revurderingInfo,
                                 ),
                             utbetalingsperioder = innhold.utbetalingsperioder,
+                            opphoerFraOgMed = innhold.opphoerFraOgMed,
                         )
 
                     is VedtakInnhold.Tilbakekreving ->

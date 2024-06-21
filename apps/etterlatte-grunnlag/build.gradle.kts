@@ -39,8 +39,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(project(":libs:testdata"))
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
     testImplementation(testFixtures(project(":libs:etterlatte-ktor")))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

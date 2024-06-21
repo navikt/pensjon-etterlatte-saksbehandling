@@ -28,7 +28,6 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
-import no.nav.etterlatte.utbetaling.avstemming.vedtak.VerifiserUtbetalingOgVedtakJob
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
@@ -48,6 +47,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.simulering.SimuleringDao
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
@@ -111,12 +111,15 @@ class ApplicationContext(
 
     val utbetalingDao = UtbetalingDao(dataSource)
 
+    val vedtaksverifiserer = Vedtaksverifiserer()
+
     val utbetalingService =
         UtbetalingService(
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
             clock = clock,
+            vedtaksverifiserer = vedtaksverifiserer,
         )
 
     val avstemmingsdataSender =
@@ -140,6 +143,7 @@ class ApplicationContext(
         SimuleringOsService(
             utbetalingDao,
             vedtaksvurderingKlient,
+            SimuleringDao(dataSource),
             simuleringOsKlient,
         )
 
@@ -190,15 +194,6 @@ class ApplicationContext(
             periode = Duration.of(4, ChronoUnit.HOURS),
             clock = clock,
             saktype = Saktype.OMSTILLINGSSTOENAD,
-        )
-
-    val vedtaksverifiserer = Vedtaksverifiserer(utbetalingDao, vedtaksvurderingKlient)
-    val verifiserUtbetalingOgVedtakJob =
-        VerifiserUtbetalingOgVedtakJob(
-            verifiserer = vedtaksverifiserer,
-            leaderElection = leaderElection,
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(12, ChronoUnit.DAYS),
         )
 
     val rapidsConnection =

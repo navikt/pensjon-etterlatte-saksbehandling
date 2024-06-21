@@ -1,5 +1,5 @@
 import { DokumentInfo } from '~shared/types/Journalpost'
-import { Alert, Button, Heading, HStack, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -59,20 +59,20 @@ const Dokument = ({
   return (
     <div key={dokument.dokumentInfoId}>
       {rediger ? (
-        <>
-          <TextField label="Dokumenttittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />
+        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
+          <VStack gap="4">
+            <TextField label="Dokumenttittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />
 
-          <br />
-
-          <HStack gap="4" justify="end">
-            <Button variant="tertiary" onClick={avbryt} size="small">
-              Avbryt
-            </Button>
-            <Button variant="secondary" onClick={lagre} disabled={nyTittel === dokument.tittel} size="small">
-              Lagre
-            </Button>
-          </HStack>
-        </>
+            <HStack gap="4" justify="end">
+              <Button variant="tertiary" onClick={avbryt} size="small">
+                Avbryt
+              </Button>
+              <Button onClick={lagre} disabled={nyTittel === dokument.tittel} size="small">
+                Lagre
+              </Button>
+            </HStack>
+          </VStack>
+        </Box>
       ) : (
         <InputFlexRow>
           <Info label="Dokumenttittel" tekst={nyTittel} />

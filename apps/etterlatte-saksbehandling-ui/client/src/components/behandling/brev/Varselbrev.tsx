@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
-import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -23,11 +22,13 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { format } from 'date-fns'
+import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const { sakId, soeknadMottattDato } = props.behandling
+  const { sakId } = props.behandling
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [redigerbar, setKanRedigeres] = useState(
@@ -105,10 +106,16 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
             <Heading spacing size="large" level="1">
               Varselbrev
             </Heading>
-            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             {varselbrev && (
               <>
+                <div>
+                  <BrevStatusTag status={varselbrev.status} />
+                  <BodyShort spacing>
+                    <b>Sist endret:</b> {format(new Date(varselbrev.statusEndret), 'dd.MM.yyyy')}
+                  </BodyShort>
+                </div>
+
                 <BrevTittel
                   brevId={varselbrev.id}
                   sakId={varselbrev.sakId}

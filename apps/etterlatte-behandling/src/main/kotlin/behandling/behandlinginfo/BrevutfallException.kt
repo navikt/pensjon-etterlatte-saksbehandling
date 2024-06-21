@@ -27,12 +27,6 @@ sealed class BrevutfallException {
             detail = "Aldersgruppe må være satt for behandling av barnepensjon.",
         )
 
-    class LavEllerIngenInntektIkkeSatt :
-        IkkeTillattException(
-            code = "LAV_ELLER_INGEN_INNTEKT_IKKE_SATT",
-            detail = "Lav eller ingen inntekt må være satt for behandling av omstillingsstønad.",
-        )
-
     class FeilutbetalingIkkeSatt :
         IkkeTillattException(
             code = "FEILUTBETALING_IKKE_SATT",

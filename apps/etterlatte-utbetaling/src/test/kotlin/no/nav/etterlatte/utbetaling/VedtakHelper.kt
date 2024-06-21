@@ -42,6 +42,7 @@ fun vedtak(
         ),
     saktype: SakType = SakType.BARNEPENSJON,
     virkningstidspunkt: YearMonth? = null,
+    opphoerFraOgMed: YearMonth? = null,
 ) = VedtakDto(
     id = vedtakId,
     behandlingId = behandling.id,
@@ -70,6 +71,7 @@ fun vedtak(
             behandling = behandling,
             virkningstidspunkt = virkningstidspunkt ?: YearMonth.of(2022, 1),
             utbetalingsperioder = utbetalingsperioder,
+            opphoerFraOgMed = opphoerFraOgMed,
         ),
 )
 
@@ -112,6 +114,7 @@ fun ugyldigVedtakTilUtbetaling(
                         UtbetalingsperiodeType.UTBETALING,
                     ),
                 ),
+            opphoerFraOgMed = null,
         ),
 )
 
@@ -170,6 +173,7 @@ fun revurderingVedtak(
             behandling = behandling,
             virkningstidspunkt = YearMonth.of(2022, 1),
             utbetalingsperioder = utbetalingsperioder,
+            opphoerFraOgMed = null,
         ),
 )
 
@@ -199,18 +203,18 @@ fun opphoersVedtak(
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
-        VedtakInnholdDto.VedtakBehandlingDto(
-            virkningstidspunkt = YearMonth.of(2022, 1),
-            behandling = behandling,
-            utbetalingsperioder =
-                (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
+        with(vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+            VedtakInnholdDto.VedtakBehandlingDto(
+                virkningstidspunkt = YearMonth.of(2022, 1),
+                behandling = behandling,
+                utbetalingsperioder =
                     listOf(
                         Utbetalingsperiode(
-                            id = it.utbetalingsperioder.last().id!! + 1,
+                            id = this.utbetalingsperioder.last().id!! + 1,
                             periode =
                                 Periode(
                                     fom =
-                                        it.utbetalingsperioder
+                                        this.utbetalingsperioder
                                             .first()
                                             .periode.fom
                                             .plusMonths(1),
@@ -219,9 +223,14 @@ fun opphoersVedtak(
                             beloep = null,
                             type = UtbetalingsperiodeType.OPPHOER,
                         ),
-                    )
-                },
-        ),
+                    ),
+                opphoerFraOgMed =
+                    this.utbetalingsperioder
+                        .first()
+                        .periode.fom
+                        .plusMonths(1),
+            )
+        },
 )
 
 fun genererEtterfolgendeUtbetalingsperioder(

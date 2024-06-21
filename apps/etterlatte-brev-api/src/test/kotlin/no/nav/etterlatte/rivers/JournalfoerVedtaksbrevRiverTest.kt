@@ -144,6 +144,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                     virkningstidspunkt = YearMonth.now(),
                     behandling = Behandling(behandlingType, behandlingId),
                     utbetalingsperioder = emptyList(),
+                    opphoerFraOgMed = null,
                 ),
         )
     }

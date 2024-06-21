@@ -47,6 +47,7 @@ sealed class VedtakInnholdDto {
         val virkningstidspunkt: YearMonth,
         val behandling: Behandling,
         val utbetalingsperioder: List<Utbetalingsperiode>,
+        val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
 
     @JsonTypeName("TILBAKEKREVING")
@@ -113,6 +114,16 @@ enum class UtbetalingsperiodeType {
     OPPHOER,
     UTBETALING,
 }
+
+data class AvkortetYtelsePeriode(
+    val id: UUID,
+    val vedtakId: Long,
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val type: String,
+    val ytelseFoerAvkorting: Int,
+    val ytelseEtterAvkorting: Int,
+)
 
 data class VedtakSamordningDto(
     val vedtakId: Long,

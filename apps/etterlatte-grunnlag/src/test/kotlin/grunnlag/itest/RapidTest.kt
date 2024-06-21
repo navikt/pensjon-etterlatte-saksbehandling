@@ -45,7 +45,7 @@ internal class RapidTest(
     fun beforeAll() {
         opplysningRepo = OpplysningDao(dataSource)
         val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
-        grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk(), mockk(), mockk())
+        grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk(), mockk())
         inspector =
             TestRapid().apply {
                 GrunnlagHendelserRiver(this, grunnlagService)

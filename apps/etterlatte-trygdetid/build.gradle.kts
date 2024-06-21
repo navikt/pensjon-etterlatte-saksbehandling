@@ -20,9 +20,9 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
 
-    testImplementation(project(":libs:testdata"))
     testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.vedtak
 
+import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -16,7 +17,10 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb
+import no.nav.etterlatte.tilbakekreving.readFile
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.Test
@@ -78,6 +82,39 @@ internal class TilbakekrevingKlientTest {
                 tilbakekrevingsvedtak.sakId,
                 any(),
                 TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
+            )
+        }
+    }
+
+    @Test
+    fun `skal kunne hente kravgrunnlag og haandtere ok fra tilbakekrevingskomponenten`() {
+        val xml = readFile("/kravgrunnlag.xml")
+        val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(xml)
+
+        val response =
+            KravgrunnlagHentDetaljResponse().apply {
+                mmel = MmelDto().apply { alvorlighetsgrad = "00" }
+                detaljertkravgrunnlag = kravgrunnlag
+            }
+
+        val httpClient = mockedHttpClient("/tilbakekreving/kravgrunnlag", HttpMethod.Post, response)
+        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
+        val sakId = 1L
+
+        val kravgrunnlagResponse = tilbakekrevingKlient.hentKravgrunnlag(sakId, 123L)
+
+        kravgrunnlagResponse shouldNotBe null
+
+        verify {
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                sakId,
+                any(),
+                TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_SENDT,
+            )
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                sakId,
+                any(),
+                TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
             )
         }
     }

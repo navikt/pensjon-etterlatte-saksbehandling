@@ -128,7 +128,7 @@ export const GyldigFramsattVurdering = ({
             </RadioGroupWrapper>
             <SoeknadsoversiktTextArea
               label="Begrunnelse"
-              placeholder="Forklar brgrunnelsen"
+              placeholder="Forklar begrunnelsen"
               value={begrunnelse}
               onChange={(e) => {
                 const oppdatertBegrunnelse = e.target.value

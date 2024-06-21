@@ -1,5 +1,6 @@
 package behandling.aktivitetsplikt.vurdering
 
+import behandling.aktivitetsplikt.AktivitetspliktDaoTest.Companion.kilde
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -216,6 +217,54 @@ class AktivitetspliktUnntakDaoTest(
                 it.id shouldBe unntak.id
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe opprettBehandling.id
+                it.unntak shouldBe unntak.unntak
+                it.fom shouldBe unntak.fom
+                it.tom shouldBe unntak.tom
+                it.opprettet shouldBe kilde
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe unntak.beskrivelse
+            }
+        }
+    }
+
+    @Nested
+    inner class KopierUnntak {
+        private val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+
+        private val lagreUnntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+        private val forrigeBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+
+        private val nyBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak.id,
+            )
+
+        @Test
+        fun `skal kopiere nyeste unntak til behandling`() {
+            behandlingDao.opprettBehandling(forrigeBehandling)
+            behandlingDao.opprettBehandling(nyBehandling)
+
+            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, forrigeBehandling.id)
+
+            val unntak = dao.hentUnntakForBehandling(forrigeBehandling.id)
+            dao.hentUnntakForBehandling(nyBehandling.id) shouldBe null
+
+            dao.kopierUnntak(unntak!!.id, nyBehandling.id) shouldBe 1
+
+            dao.hentUnntakForBehandling(nyBehandling.id)!!.asClue {
+                it.sakId shouldBe sak.id
+                it.behandlingId shouldBe nyBehandling.id
                 it.unntak shouldBe unntak.unntak
                 it.fom shouldBe unntak.fom
                 it.tom shouldBe unntak.tom

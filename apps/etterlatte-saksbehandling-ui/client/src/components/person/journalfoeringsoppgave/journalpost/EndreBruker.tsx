@@ -1,6 +1,6 @@
-import { AvsenderMottaker, Bruker, BrukerIdType } from '~shared/types/Journalpost'
+import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
 import React, { useEffect, useState } from 'react'
-import { Alert, BodyShort, Button, CopyButton, Heading, HStack, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, CopyButton, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -10,6 +10,7 @@ import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterNavn } from '~shared/types/Person'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { PersonSoekModal } from '~components/person/journalfoeringsoppgave/journalpost/modal/PersonSoekModal'
 
 const formaterType = (type: BrukerIdType) => {
   switch (type) {
@@ -39,11 +40,12 @@ export const EndreBruker = ({
     handleSubmit,
     watch,
     reset,
-  } = useForm<AvsenderMottaker>({ defaultValues: bruker })
+    setValue,
+  } = useForm<Bruker>({ defaultValues: bruker })
 
   const [rediger, setRediger] = useState(false)
 
-  const lagreEndretMottaker = (bruker: Bruker) => {
+  const lagreEndring = (bruker: Bruker) => {
     oppdaterBruker({ ...bruker, type: BrukerIdType.FNR })
     setRediger(false)
   }
@@ -79,43 +81,59 @@ export const EndreBruker = ({
       </Heading>
 
       {rediger ? (
-        <>
-          <TextField
-            {...register('id', {
-              pattern: {
-                value: /[0-9]{11}/,
-                message: 'Fødselsnummer må bestå av 11 siffer',
-              },
-            })}
-            label="Fødselsnummer"
-            error={errors?.id?.message}
-          />
-          {mapResult(personResult, {
-            pending: <Spinner visible label="Søker etter person..." />,
-            success: (person) => (
-              <>
-                <Alert variant="info" size="small">
-                  {formaterNavn(person)}
-                </Alert>
-                {!!initieltFnr && person.foedselsnummer !== initieltFnr && (
-                  <Alert variant="warning" size="small">
-                    Du flytter nå journalposten til en annen bruker
-                  </Alert>
-                )}
-              </>
-            ),
-          })}
-          <br />
+        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
+          <VStack gap="8">
+            <VStack gap="4">
+              <TextField
+                {...register('id', {
+                  pattern: {
+                    value: /[0-9]{11}/,
+                    message: 'Fødselsnummer må bestå av 11 siffer',
+                  },
+                })}
+                label="Fødselsnummer"
+                error={errors?.id?.message}
+                htmlSize={50}
+              />
+
+              {mapResult(personResult, {
+                pending: <Spinner visible label="Søker etter person..." />,
+                success: (person) => (
+                  <>
+                    <Alert variant="info" size="small">
+                      {formaterNavn(person)}
+                    </Alert>
+                    {!!initieltFnr && person.foedselsnummer !== initieltFnr && (
+                      <Alert variant="warning" size="small">
+                        Du flytter nå journalposten til en annen bruker
+                      </Alert>
+                    )}
+                  </>
+                ),
+              })}
+            </VStack>
+
+            <VStack gap="4">
+              <Label>Har du ikke fødselsnummeret?</Label>
+              <PersonSoekModal
+                velgPerson={({ id }) => {
+                  setValue('id', id, { shouldDirty: true, shouldValidate: true })
+                  setValue('type', BrukerIdType.FNR)
+                }}
+              />
+            </VStack>
+          </VStack>
 
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
-            <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
+
+            <Button onClick={handleSubmit(lagreEndring)} size="small">
               Lagre
             </Button>
           </HStack>
-        </>
+        </Box>
       ) : (
         <>
           <InputFlexRow>

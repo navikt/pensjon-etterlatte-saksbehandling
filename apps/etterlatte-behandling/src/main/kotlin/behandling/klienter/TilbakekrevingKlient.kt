@@ -1,11 +1,15 @@
 package no.nav.etterlatte.behandling.klienter
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
@@ -18,6 +22,12 @@ interface TilbakekrevingKlient : Pingable {
         brukerTokenInfo: BrukerTokenInfo,
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     )
+
+    suspend fun hentKravgrunnlag(
+        brukerTokenInfo: BrukerTokenInfo,
+        sakId: Long,
+        kravgrunnlagId: Long,
+    ): Kravgrunnlag
 }
 
 class TilbakekrevingKlientImpl(
@@ -32,7 +42,7 @@ class TilbakekrevingKlientImpl(
     ) {
         logger.info("Sender tilbakekrevingsvedtak til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
         val response =
-            client.post("$url/api/tilbakekreving/tilbakekrevingsvedtak") {
+            client.post("$url/api/tilbakekreving/${tilbakekrevingVedtak.sakId}/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     tilbakekrevingVedtak,
@@ -43,6 +53,25 @@ class TilbakekrevingKlientImpl(
                 "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",
             )
         }
+    }
+
+    override suspend fun hentKravgrunnlag(
+        brukerTokenInfo: BrukerTokenInfo,
+        sakId: Long,
+        kravgrunnlagId: Long,
+    ): Kravgrunnlag {
+        logger.info("Henter oppdatert kravgrunnlag tilknyttet tilbakekreving for sak $sakId")
+        val response =
+            client.get("$url/api/tilbakekreving/$sakId/kravgrunnlag/$kravgrunnlagId") {
+                contentType(ContentType.Application.Json)
+            }
+        if (!response.status.isSuccess()) {
+            throw TilbakekrevingKlientException(
+                "Henting av kravgrunnlag tilknyttet tilbakekreving for sak $sakId feilet",
+            )
+        }
+
+        return response.body()
     }
 
     override val serviceName: String

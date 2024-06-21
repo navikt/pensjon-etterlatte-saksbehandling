@@ -84,7 +84,7 @@ messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.
 
 mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.5.1" }
 
-navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024041714471713358051.71746f05c18e" }
+navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024061408021718344972.64ebbdb34321" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsimulering = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
@@ -104,6 +104,7 @@ test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", vers
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.2" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.0.0" }
 
 #Workarounds
 bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-version"}

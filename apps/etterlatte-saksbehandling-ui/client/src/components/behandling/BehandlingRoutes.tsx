@@ -22,6 +22,7 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -159,7 +160,9 @@ export const useBehandlingRoutes = () => {
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
-  const lagVarselbrev = behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
+  const lagVarselbrev =
+    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
+    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
@@ -219,6 +222,7 @@ export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev:
     : [
         routeTypes.revurderingsoversikt,
         routeTypes.vilkaarsvurdering,
+        routeTypes.aktivitetsplikt,
         routeTypes.trygdetid,
         routeTypes.beregningsgrunnlag,
         routeTypes.beregning,

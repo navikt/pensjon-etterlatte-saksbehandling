@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -985,6 +986,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
         behandlingsHendelser: BehandlingsHendelserKafkaProducerImpl = applicationContext.behandlingsHendelser,
         aktivitetspliktDao: AktivitetspliktDao = applicationContext.aktivitetspliktDao,
+        aktivitetspliktKopierService: AktivitetspliktKopierService = applicationContext.aktivitetspliktKopierService,
     ) = RevurderingService(
         oppgaveService,
         grunnlagService,
@@ -997,6 +999,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         applicationContext.klageService,
         applicationContext.behandlingService,
         aktivitetspliktDao,
+        aktivitetspliktKopierService,
     )
 
     private fun behandlingFactory() =

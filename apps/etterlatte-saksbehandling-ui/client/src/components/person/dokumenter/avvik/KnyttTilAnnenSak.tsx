@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert, Button, HStack, Radio, RadioGroup, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
-import { Journalpost, Journalstatus, Sakstype } from '~shared/types/Journalpost'
+import { BrukerIdType, Journalpost, Journalstatus, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
 import { hentSak } from '~shared/api/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -62,7 +62,7 @@ export const KnyttTilAnnenSak = ({
       request: {
         bruker: {
           id: sak.ident,
-          idType: 'FNR',
+          idType: BrukerIdType.FNR,
         },
         fagsakId: sak.id.toString(),
         fagsaksystem: 'EY',

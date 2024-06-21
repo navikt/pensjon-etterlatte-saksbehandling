@@ -26,5 +26,4 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(project(":libs:testdata"))
 }

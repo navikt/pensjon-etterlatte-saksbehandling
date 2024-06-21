@@ -229,7 +229,7 @@ class OppgaveService(
         operasjon: () -> Unit,
     ) {
         sikreAtOppgaveIkkeErAvsluttet(oppgave)
-        if (oppgave.saksbehandler?.ident.isNullOrEmpty()) {
+        if (oppgave.saksbehandler?.ident.isNullOrEmpty() && oppgave.type != OppgaveType.TILBAKEKREVING) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgave.id)
         } else {
             operasjon()
@@ -474,8 +474,8 @@ class OppgaveService(
         return oppgaveDao
             .hentEndringerForOppgave(oppgaveId)
             .sortedByDescending { it.tidspunkt }
-            .first { it.oppgaveEtter.status != oppgave.status }
-            .oppgaveEtter.status
+            .first { it.oppgaveFoer.status != oppgave.status }
+            .oppgaveFoer.status
     }
 
     fun avbrytOppgaveUnderBehandling(
@@ -590,10 +590,35 @@ class OppgaveService(
 
     fun tilbakestillOppgaverUnderAttestering(saker: List<Long>) {
         val oppgaverTilAttestering =
-            oppgaveDao.hentOppgaverTilSaker(
-                saker,
-                listOf(Status.ATTESTERING.name),
-            )
+            oppgaveDao
+                .hentOppgaverTilSaker(
+                    saker,
+                    listOf(Status.ATTESTERING.name),
+                ).filter {
+                    when (it.type) {
+                        OppgaveType.FOERSTEGANGSBEHANDLING,
+                        OppgaveType.REVURDERING,
+                        OppgaveType.VURDER_KONSEKVENS,
+                        OppgaveType.GOSYS,
+                        OppgaveType.TILBAKEKREVING,
+                        OppgaveType.OMGJOERING,
+                        OppgaveType.JOURNALFOERING,
+                        OppgaveType.GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
+                        OppgaveType.AKTIVITETSPLIKT,
+                        OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                        ->
+                            true
+                        OppgaveType.KLAGE,
+                        OppgaveType.KRAVPAKKE_UTLAND,
+                        -> {
+                            logger.info(
+                                "Tilbakestiller ikke oppgave av type ${it.type} " +
+                                    "fra attestering for oppgave ${it.id}",
+                            )
+                            false
+                        }
+                    }
+                }
         oppgaverTilAttestering.forEach { oppgave ->
             oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
             saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandlerIdent ->

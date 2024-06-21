@@ -1,3 +1,5 @@
+import { SanksjonType } from '~shared/types/sanksjon'
+
 export interface IAvkorting {
   behandlingId: string
   avkortingGrunnlag: IAvkortingGrunnlag[]
@@ -11,7 +13,7 @@ export interface IAvkortingGrunnlag {
   tom?: string
   aarsinntekt: number
   fratrekkInnAar: number
-  forventaInnvilgaMaaneder: number
+  relevanteMaanederInnAar: number
   inntektUtland: number
   fratrekkInnAarUtland: number
   spesifikasjon: string
@@ -39,4 +41,10 @@ export interface IAvkortetYtelse {
   avkortingsbeloep: number
   restanse: number
   ytelseEtterAvkorting: number
+  sanksjon?: SanksjonertYtelse
+}
+
+export interface SanksjonertYtelse {
+  id: string
+  sanksjonType: SanksjonType
 }

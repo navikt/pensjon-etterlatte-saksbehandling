@@ -437,7 +437,6 @@ internal class BehandlingStatusServiceTest {
     ) = Brevutfall(
         behandlingId = behandlingId,
         aldersgruppe = null,
-        lavEllerIngenInntekt = null,
         feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),
         kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
     )

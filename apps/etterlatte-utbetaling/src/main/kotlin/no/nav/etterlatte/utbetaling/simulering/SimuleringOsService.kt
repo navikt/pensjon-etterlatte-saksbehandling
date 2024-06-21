@@ -16,12 +16,14 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakFattet
+import no.nav.system.os.entiteter.oppdragskjema.Attestant
 import no.nav.system.os.entiteter.oppdragskjema.Enhet
 import no.nav.system.os.entiteter.typer.simpletypes.FradragTillegg
 import no.nav.system.os.entiteter.typer.simpletypes.KodeStatusLinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdrag
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdragslinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
+import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -31,6 +33,7 @@ import java.util.UUID
 class SimuleringOsService(
     private val utbetalingDao: UtbetalingDao,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val simuleringDao: SimuleringDao,
     private val simuleringOsKlient: SimuleringOsKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -79,12 +82,14 @@ class SimuleringOsService(
             return simuleringOsKlient
                 .simuler(request)
                 .also {
-                    it.infomelding
-                        ?.beskrMelding
-                        ?.trim()
-                        .let { melding -> logger.info(melding) }
-                }.simulering
-                ?.tilSimulertBeregning()
+                    simuleringDao.lagre(
+                        behandlingId = behandlingId,
+                        saksbehandler = brukerTokenInfo.ident(),
+                        vedtak = vedtak,
+                        simuleringRequest = request,
+                        simuleringResponse = it,
+                    )
+                }.tilSimulertBeregning()
         } else {
             throw IkkeStoettetSimulering(behandlingId)
         }
@@ -162,8 +167,14 @@ class SimuleringOsService(
             datoVedtakFom = utbetalingslinje.periode.fra.toOppdragDate()
             datoVedtakTom = utbetalingslinje.periode.til?.toOppdragDate()
             utbetalesTilId = utbetaling.stoenadsmottaker.value
+            datoUtbetalesTilIdFom = utbetalingslinje.periode.fra.toOppdragDate()
             henvisning = utbetaling.behandlingId.shortValue.value
             saksbehId = brukerTokenInfo.ident()
+            attestant.add(
+                Attestant().apply {
+                    attestantId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
+                },
+            )
 
             kodeEndringLinje = "NY"
             kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
@@ -189,6 +200,9 @@ private fun LocalDate.toOppdragDate(): String =
         .ofPattern("yyyy-MM-dd")
         .withZone(norskTidssone)
         .format(this)
+
+private fun SimulerBeregningResponse.tilSimulertBeregning(): SimulertBeregning? =
+    this.simulering?.tilSimulertBeregning(this.infomelding?.beskrMelding)
 
 class IkkeStoettetSimulering(
     behandlingId: UUID,

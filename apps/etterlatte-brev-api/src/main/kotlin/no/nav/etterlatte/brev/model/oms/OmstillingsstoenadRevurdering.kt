@@ -16,9 +16,11 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
@@ -31,7 +33,7 @@ data class OmstillingsstoenadRevurdering(
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harFlereUtbetalingsperioder: Boolean,
     val harUtbetaling: Boolean,
-    val lavEllerIngenInntekt: Boolean,
+    val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -44,6 +46,7 @@ data class OmstillingsstoenadRevurdering(
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
             navnAvdoed: String,
+            vilkaarsVurdering: VilkaarsvurderingDto,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -66,6 +69,14 @@ data class OmstillingsstoenadRevurdering(
 
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
+
+            val omsRettUtenTidsbegrensning =
+                vilkaarsVurdering.vilkaar.single {
+                    it.hovedvilkaar.type in
+                        listOf(
+                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                        )
+                }
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
@@ -106,7 +117,7 @@ data class OmstillingsstoenadRevurdering(
                     },
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
+                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
             )
         }

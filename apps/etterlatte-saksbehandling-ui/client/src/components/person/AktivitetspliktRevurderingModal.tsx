@@ -8,7 +8,13 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
 
-export const AktivitetspliktRevurderingModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const AktivitetspliktRevurderingModal = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const [visModal, setVisModal] = useState(false)
   const [erFerdigstilt, setErFerdigstilt] = useState(false)
 
@@ -27,6 +33,7 @@ export const AktivitetspliktRevurderingModal = ({ oppgave }: { oppgave: OppgaveD
     if (!erFerdigstilt) {
       apiFerdigstillOppgave(oppgave.id, () => {
         setVisModal(false)
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       })
     }
   }

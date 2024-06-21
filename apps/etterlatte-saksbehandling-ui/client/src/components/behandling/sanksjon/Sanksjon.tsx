@@ -14,13 +14,14 @@ import {
   Detail,
   Heading,
   HStack,
+  ReadMore,
   Select,
   Table,
   Textarea,
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterStringDato, formaterStringMaanedDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
@@ -29,6 +30,7 @@ import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSamme
 import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
 import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -102,6 +104,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const slettEnkeltSanksjon = (behandlingId: string, sanksjonId: string) => {
     slettSanksjonRequest({ behandlingId, sanksjonId }, () => {
       hentSanksjoner()
+      fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
     })
   }
 
@@ -119,25 +122,27 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
 
   const validerFom = (value: Date): string | undefined => {
     const fom = new Date(value)
-    const tom = getValues().datoTom ? new Date(getValues().datoTom!) : null
+    const skjemaTom = getValues('datoTom')
+    const tom = skjemaTom ? new Date(skjemaTom) : null
 
     if (tom && isBefore(tom, fom)) {
-      return 'Til dato må være etter Fra dato'
+      return 'Fra-dato kan ikke være etter til-dato'
     } else if (
       behandling.virkningstidspunkt?.dato &&
       isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
     ) {
-      return 'Fra dato kan ikke være før virkningstidspunkt'
+      return 'Fra-dato kan ikke være før virkningstidspunkt'
     }
     return undefined
   }
 
   const validerTom = (value: Date): string | undefined => {
     const tom = value ? new Date(value) : null
-    const fom = getValues().datoFom ? new Date(getValues().datoFom!) : null
+    const skjemaFom = getValues('datoFom')
+    const fom = skjemaFom ? new Date(skjemaFom) : null
 
     if (fom && tom && isBefore(tom, fom)) {
-      return 'Til dato må være etter Fra dato'
+      return 'Til-dato kan ikke være før fra-dato'
     }
     return undefined
   }
@@ -145,7 +150,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
-    <Box paddingBlock="4">
+    <TableBox>
       {mapApiResult(
         hentSanksjonStatus,
         <Spinner visible label="Henter sanksjoner" />,
@@ -154,10 +159,37 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         ),
         () => (
           <VStack gap="4">
-            <Heading spacing size="small" level="2">
+            <Heading size="small" level="2">
               Sanksjoner
             </Heading>
-            <BodyShort>Her kommer det informasjon om sanksjoner.</BodyShort>
+            <Box>
+              <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
+              <BodyShort spacing>
+                Når en bruker har en sanksjon for en periode, vil 0 ytelse bli utbetalt. Hvis det er restanse fra
+                endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden, men forsøkt
+                omfordelt på måneder etter sanksjon.
+              </BodyShort>
+              <ReadMore header="Når skal sanksjoner gis?">
+                <BodyShort spacing>
+                  Dersom den gjenlevende ikke følger opp aktivitetskravet i{' '}
+                  <HjemmelLenke tittel="§ 17-7" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-7" />, skal
+                  omstillingsstønaden stanses inntil vilkårene for å motta ytelsen igjen er oppfylt.
+                </BodyShort>
+                <BodyShort spacing>
+                  Dersom den gjenlevende uten rimelig grunn sier opp sin stilling, nekter å ta imot tilbudt arbeid,
+                  unnlater å gjenoppta sitt arbeidsforhold etter endt foreldrepermisjon, nekter å delta i
+                  arbeidsmarkedstiltak eller unnlater å møte ved innkalling til arbeids- og velferdsetaten, faller
+                  omstillingsstønaden bort én måned.
+                </BodyShort>
+                <BodyShort>
+                  Dersom den gjenlevende har gitt uriktige opplysninger om forhold som har betydning for retten til
+                  ytelser etter dette kapitlet, og han eller hun var klar over eller burde vært klar over dette, kan
+                  vedkommende utestenges fra rett til stønad i inntil tre måneder første gang og inntil seks måneder ved
+                  gjentakelser. Det samme gjelder dersom den gjenlevende har unnlatt å gi opplysninger av betydning for
+                  retten til ytelser.
+                </BodyShort>
+              </ReadMore>
+            </Box>
 
             <TableBox>
               <Table className="table" zebraStripes size="medium">
@@ -177,9 +209,9 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <>
                       {sanksjoner.map((lagretSanksjon, index) => (
                         <Table.Row key={index}>
-                          <Table.DataCell>{formaterStringDato(lagretSanksjon.fom)}</Table.DataCell>
+                          <Table.DataCell>{formaterStringMaanedDato(lagretSanksjon.fom)}</Table.DataCell>
                           <Table.DataCell>
-                            {lagretSanksjon.tom ? formaterStringDato(lagretSanksjon.tom) : '-'}
+                            {lagretSanksjon.tom ? formaterStringMaanedDato(lagretSanksjon.tom) : '-'}
                           </Table.DataCell>
                           <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
                           <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
@@ -234,7 +266,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     </>
                   ) : (
                     <Table.Row>
-                      <Table.DataCell align="center" colSpan={6}>
+                      <Table.DataCell align="center" colSpan={redigerbar ? 7 : 6}>
                         Bruker har ingen sanksjoner
                       </Table.DataCell>
                     </Table.Row>
@@ -342,6 +374,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
           </VStack>
         )
       )}
-    </Box>
+    </TableBox>
   )
 }

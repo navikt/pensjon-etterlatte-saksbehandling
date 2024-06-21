@@ -10,6 +10,8 @@ import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.YearMonth
 
@@ -21,11 +23,21 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             when (request.generellBrevData.sak.sakType) {
                 SakType.BARNEPENSJON -> hentBrevDataFerdigstillingBarnepensjon(request)
-                SakType.OMSTILLINGSSTOENAD ->
-                    ManueltBrevMedTittelData(
-                        request.innholdMedVedlegg.innhold(),
-                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL.tittel,
-                    )
+                SakType.OMSTILLINGSSTOENAD -> hentBrevdataFerdigstillingOmstillingsstoenad(request)
+            }
+        }
+
+    private suspend fun hentBrevdataFerdigstillingOmstillingsstoenad(request: BrevDataFerdigstillingRequest) =
+        coroutineScope {
+            if (request.generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+                OmstillingsstoenadAktivitetspliktVarsel(
+                    request.innholdMedVedlegg.innhold(),
+                )
+            } else {
+                ManueltBrevMedTittelData(
+                    request.innholdMedVedlegg.innhold(),
+                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL.tittel,
+                )
             }
         }
 

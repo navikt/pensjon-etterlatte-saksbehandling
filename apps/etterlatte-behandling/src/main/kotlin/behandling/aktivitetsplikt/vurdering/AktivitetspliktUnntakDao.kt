@@ -142,6 +142,27 @@ class AktivitetspliktUnntakDao(
             }
         }
 
+    fun kopierUnntak(
+        unntakId: UUID,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                    INSERT INTO aktivitetsplikt_unntak(id, sak_id, behandling_id, unntak, fom, tom, opprettet, endret, beskrivelse)
+                    SELECT gen_random_uuid(), sak_id, ?, unntak, fom, tom, opprettet, endret, beskrivelse
+                    FROM aktivitetsplikt_unntak
+                    WHERE id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, behandlingId)
+            stmt.setObject(2, unntakId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     private fun ResultSet.toUnntak() =
         AktivitetspliktUnntak(
             id = getUUID("id"),

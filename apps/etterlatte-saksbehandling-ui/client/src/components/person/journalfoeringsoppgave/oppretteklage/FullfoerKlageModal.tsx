@@ -8,7 +8,7 @@ import { opprettNyKlage } from '~shared/api/klage'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
 import { Journalpost } from '~shared/types/Journalpost'
 import { OppgaveDTO } from '~shared/types/oppgave'
-import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
 
 interface ModalProps {
   oppgave: OppgaveDTO

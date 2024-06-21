@@ -3,14 +3,14 @@ import { HStack, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
-import { OppgavetypeTag } from '~components/oppgavebenk/components/tags/Tags'
+import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
-import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
-import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
+import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
 export const OppgaverTableRow = ({
@@ -25,6 +26,7 @@ export const OppgaverTableRow = ({
   saksbehandlereIEnhet,
   oppdaterTildeling,
   oppdaterFrist,
+  oppdaterStatus,
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
@@ -65,7 +67,7 @@ export const OppgaverTableRow = ({
       />
     </Table.DataCell>
     <HandlingerDataCell>
-      <HandlingerForOppgave oppgave={oppgave} />
+      <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     </HandlingerDataCell>
   </Table.Row>
 )

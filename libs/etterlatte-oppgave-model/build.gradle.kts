@@ -9,7 +9,6 @@ dependencies {
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(project(":libs:testdata"))
 }
 
 tasks {

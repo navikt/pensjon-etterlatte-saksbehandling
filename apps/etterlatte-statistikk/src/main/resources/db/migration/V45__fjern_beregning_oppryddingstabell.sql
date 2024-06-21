@@ -1,0 +1,1 @@
+drop table beregning_oppdatering;

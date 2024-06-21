@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
@@ -202,6 +203,22 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     }
 
     @Test
+    fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og sette paa vent uten tildelt saksbehandler`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+
+        service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = true)
+
+        val oppgavePaaVent = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+        oppgavePaaVent.status shouldBe Status.PAA_VENT
+
+        service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = false)
+
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+        oppgave.status shouldBe Status.NY
+    }
+
+    @Test
     fun `skal ikke kunne opprette tilbakekrevingsbehandling dersom det allerede finnes en`() {
         val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
 
@@ -259,6 +276,58 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
             }
         }
+    }
+
+    @Test
+    fun `skal oppdatere kravgrunnlag og perioder i tilbakekrevingsbehandling`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
+        coEvery { tilbakekrevingKlient.hentKravgrunnlag(any(), any(), any()) } returns
+            kravgrunnlag(sak).copy(kontrollFelt = Kontrollfelt("ny_verdi"))
+
+        // Oppretter tilbakekreving basert på kravgrunnlag
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        // Tildeler oppgaven til saksbehandler
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
+
+        // Lagrer vurdering og perioder
+        service.lagreVurdering(tilbakekreving.id, tilbakekrevingVurdering(), saksbehandler)
+        service.lagrePerioder(tilbakekreving.id, tilbakekrevingPerioder(tilbakekreving), saksbehandler)
+        service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
+
+        // Oppdaterer kravgrunnlag
+        val tilbakekrevingMedNyePerioder = service.oppdaterKravgrunnlag(tilbakekreving.id, saksbehandler)
+
+        tilbakekrevingMedNyePerioder.status shouldBe TilbakekrevingStatus.UNDER_ARBEID
+
+        // Nye perioder skal ha resatt verdiene som skal vurderes
+        with(tilbakekrevingMedNyePerioder.tilbakekreving) {
+            perioder.size shouldBe tilbakekreving.tilbakekreving.perioder.size
+            perioder.forEach {
+                with(it.ytelse) {
+                    bruttoTilbakekreving shouldBe null
+                    skatt shouldBe null
+                    resultat shouldBe null
+                    rentetillegg shouldBe null
+                    skyld shouldBe null
+                    tilbakekrevingsprosent shouldBe null
+                    beregnetFeilutbetaling shouldBe null
+                    nettoTilbakekreving shouldBe null
+                }
+            }
+        }
+
+        tilbakekrevingMedNyePerioder.tilbakekreving.kravgrunnlag.kontrollFelt.value shouldBe "ny_verdi"
+
+        coVerify {
+            tilbakekrevingKlient.hentKravgrunnlag(saksbehandler, any(), any())
+        }
+
+        confirmVerified(tilbakekrevingKlient)
     }
 
     @Test

@@ -141,9 +141,13 @@ enum class Kjoereplan(
 
 enum class OppdragKlassifikasjonskode(
     private val oppdragVerdi: String,
+    val tekniskArt: Boolean = false,
 ) {
     BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),
     OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR"),
+    FORSKUDDSSKATT("FSKTSKAT"),
+    FEILKONTO("KL_KODE_FEIL_PEN"),
+    MOTPOSTERING("TBMOTOBS", tekniskArt = true),
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -154,7 +158,10 @@ enum class OppdragKlassifikasjonskode(
                 "BARNEPENSJON-OPTP" -> BARNEPENSJON_OPTP
                 "BARNEPENSJON_OPTP" -> BARNEPENSJON_OPTP
                 "OMSTILLINGOR" -> OMSTILLINGSTOENAD_OPTP
-                else -> throw IllegalArgumentException("$string er ikke en OppgragKlassifikasjonskode!")
+                "FSKTSKAT" -> FORSKUDDSSKATT
+                "KL_KODE_FEIL_PEN" -> FEILKONTO
+                "TBMOTOBS" -> MOTPOSTERING
+                else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }
 }

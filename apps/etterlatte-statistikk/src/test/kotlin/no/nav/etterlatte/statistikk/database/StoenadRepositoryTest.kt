@@ -12,7 +12,9 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
+import no.nav.etterlatte.statistikk.domain.StoenadPeriodeType
 import no.nav.etterlatte.statistikk.domain.StoenadRad
+import no.nav.etterlatte.statistikk.domain.StoenadUtbetalingsperiode
 import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -107,6 +110,22 @@ class StoenadRepositoryTest(
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
                 sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                opphoerFom = YearMonth.of(2024, 1),
+                vedtaksperioder =
+                    listOf(
+                        StoenadUtbetalingsperiode(
+                            type = StoenadPeriodeType.UTBETALING,
+                            beloep = BigDecimal(1000),
+                            fraOgMed = YearMonth.of(2023, 6),
+                            tilOgMed = YearMonth.of(2023, 12),
+                        ),
+                        StoenadUtbetalingsperiode(
+                            type = StoenadPeriodeType.UTBETALING,
+                            beloep = null,
+                            fraOgMed = YearMonth.of(2024, 1),
+                            tilOgMed = null,
+                        ),
+                    ),
             ),
         )
         repo.hentStoenadRader().also {
@@ -121,6 +140,8 @@ class StoenadRepositoryTest(
             assertEquals(stoenadRad.avkorting, mockAvkorting)
             assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
             assertEquals(stoenadRad.sakUtland, SakUtland.NASJONAL)
+            assertEquals(2, stoenadRad.vedtaksperioder?.size)
+            assertEquals(YearMonth.of(2024, 1), stoenadRad.opphoerFom)
         }
     }
 
@@ -156,6 +177,8 @@ class StoenadRepositoryTest(
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
                 sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                opphoerFom = null,
+                vedtaksperioder = null,
             ),
         )
         repo.hentStoenadRader().also {
@@ -368,6 +391,8 @@ class StoenadRepositoryTest(
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
                     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                    opphoerFom = null,
+                    vedtaksperioder = null,
                 ),
             )
 

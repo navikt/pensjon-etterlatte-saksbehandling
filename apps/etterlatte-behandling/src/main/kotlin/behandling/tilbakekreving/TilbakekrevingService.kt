@@ -264,6 +264,42 @@ class TilbakekrevingService(
             lagretTilbakekreving
         }
 
+    fun oppdaterKravgrunnlag(
+        tilbakekrevingId: UUID,
+        saksbehandler: Saksbehandler,
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Oppdaterer kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId")
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+
+            sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+
+            val oppdatertKravgrunnlag =
+                runBlocking {
+                    tilbakekrevingKlient.hentKravgrunnlag(
+                        saksbehandler,
+                        tilbakekreving.sak.id,
+                        tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value,
+                    )
+                }
+
+            // Dersom kontrollfeltet er forskjellig betyr det at kravgrunnlaget har blitt endret hos økonomi
+            if (oppdatertKravgrunnlag.kontrollFelt.value != tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value) {
+                logger.info("Oppdaterer kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId")
+                val oppdatertTilbakekreving =
+                    tilbakekreving
+                        .oppdaterKravgrunnlag(
+                            oppdatertKravgrunnlag,
+                        ).copy(status = TilbakekrevingStatus.UNDER_ARBEID)
+
+                tilbakekrevingDao.lagreTilbakekrevingMedNyePerioder(oppdatertTilbakekreving)
+            } else {
+                logger.info("Kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId er ikke endret - beholder vurderinger")
+                tilbakekreving
+            }
+        }
+
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
         saksbehandler: Saksbehandler,

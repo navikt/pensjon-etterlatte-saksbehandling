@@ -13,6 +13,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -71,6 +72,7 @@ class BehandlingFactoryTest {
     private val sakServiceMock = mockk<SakService>()
     private val klageService = mockk<KlageService>()
     private val aktivitetspliktDao = mockk<AktivitetspliktDao>()
+    private val aktivitetspliktKopierService = mockk<AktivitetspliktKopierService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
@@ -100,6 +102,7 @@ class BehandlingFactoryTest {
                 klageService,
                 behandlingService,
                 aktivitetspliktDao,
+                aktivitetspliktKopierService,
             ),
         )
     private val behandlingFactory =
@@ -551,6 +554,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.alleBehandlingerISak(any())
         } returns listOf(iverksattBehandling)
         every { aktivitetspliktDao.kopierAktiviteter(any(), any()) } returns 1
+        every { aktivitetspliktKopierService.kopierVurdering(any(), any()) } returns Unit
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(

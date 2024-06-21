@@ -1,15 +1,15 @@
-import { Button, Heading, HStack, Modal, Radio, Select, VStack } from '@navikt/ds-react'
+import { Button, ErrorMessage, Heading, HStack, Modal, Radio, Select, TextField, VStack } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
+import { JaNei } from '~shared/types/ISvar'
 
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -69,9 +69,17 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
               >
                 <option value={FormType.TOMT_BREV}>Manuelt brev</option>
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
-                  <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                    Informasjon om aktivitetsplikt ved 4 måneder
-                  </option>
+                  <>
+                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
+                      Informasjon om aktivitetsplikt ved 4 måneder
+                    </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
+                      Informasjon om dødsfall
+                    </option>
+                  </>
+                )}
+                {sakType === SakType.BARNEPENSJON && (
+                  <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
                 )}
               </Select>
 
@@ -109,8 +117,8 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
                     radios={
                       <>
-                        <Radio value={IValgJaNei.JA}>Ja</Radio>
-                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                        <Radio value={JaNei.JA}>Ja</Radio>
+                        <Radio value={JaNei.NEI}>Nei</Radio>
                       </>
                     }
                   />
@@ -121,11 +129,61 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     errorVedTomInput="Du må velge om stønaden kommer til utbetaling"
                     radios={
                       <>
-                        <Radio value={IValgJaNei.JA}>Ja</Radio>
-                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                        <Radio value={JaNei.JA}>Ja</Radio>
+                        <Radio value={JaNei.NEI}>Nei</Radio>
                       </>
                     }
                   />
+                </>
+              )}
+              {[
+                FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD,
+                FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD,
+              ].includes(skjemaet.type) && (
+                <>
+                  <ControlledRadioGruppe
+                    name="nasjonalEllerUtland"
+                    control={control}
+                    legend="Er bruker bosatt i Norge eller utlandet?"
+                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
+                    radios={
+                      <>
+                        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
+                        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
+                      </>
+                    }
+                  />
+                  <Controller
+                    rules={{
+                      required: true,
+                      minLength: 1,
+                    }}
+                    name="avdoedNavn"
+                    control={control}
+                    render={({ field, fieldState }) => {
+                      const { value, ...rest } = field
+                      return (
+                        <>
+                          <TextField label="Avdødes navn" value={value ?? ''} {...rest} />
+                          {fieldState.error && <ErrorMessage>Du må oppgi navnet på avdøde.</ErrorMessage>}
+                        </>
+                      )
+                    }}
+                  />
+                  {FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD === skjemaet.type && (
+                    <ControlledRadioGruppe
+                      name="erOver18Aar"
+                      control={control}
+                      legend="Er bruker over 18 år?"
+                      errorVedTomInput="Du må velge om bruker er over 18 år"
+                      radios={
+                        <>
+                          <Radio value={JaNei.JA}>Ja</Radio>
+                          <Radio value={JaNei.NEI}>Nei</Radio>
+                        </>
+                      }
+                    />
+                  )}
                 </>
               )}
             </VStack>
@@ -161,13 +219,26 @@ export type BrevParametre =
   | {
       type: FormType.TOMT_BREV
     }
+  | {
+      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD
+      bosattUtland: boolean
+      avdoedNavn: string
+    }
+  | {
+      type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
+      bosattUtland: boolean
+      avdoedNavn: string
+      erOver18Aar: boolean
+    }
 
 type FilledFormData = {
   type: FormType
   aktivitetsgrad?: string
-  utbetaling?: IValgJaNei | ''
-  redusertEtterInntekt?: IValgJaNei | ''
+  utbetaling?: JaNei | ''
+  redusertEtterInntekt?: JaNei | ''
   nasjonalEllerUtland?: NasjonalEllerUtland
+  avdoedNavn?: string
+  erOver18Aar?: JaNei | ''
 }
 
 enum NasjonalEllerUtland {
@@ -178,6 +249,8 @@ enum NasjonalEllerUtland {
 enum FormType {
   TOMT_BREV = 'TOMT_BREV',
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
+  OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
+  BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -186,13 +259,26 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
-        utbetaling: formdata.utbetaling!! === IValgJaNei.JA,
-        redusertEtterInntekt: formdata.redusertEtterInntekt!! === IValgJaNei.JA,
+        utbetaling: formdata.utbetaling!! === JaNei.JA,
+        redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
     case FormType.TOMT_BREV:
       return {
         type: formdata.type,
+      }
+    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD:
+      return {
+        type: formdata.type,
+        bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        avdoedNavn: formdata.avdoedNavn!!,
+      }
+    case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
+      return {
+        type: formdata.type,
+        bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        avdoedNavn: formdata.avdoedNavn!!,
+        erOver18Aar: formdata.erOver18Aar === JaNei.JA,
       }
     default:
       throw new Error('Valgt type er ikke gyldig')

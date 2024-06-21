@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktBrevdata
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametre {
@@ -25,6 +27,36 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
             AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+    }
+
+    @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")
+    data class OmstillingsstoenadInformasjonDoedsfallRedigerbar(
+        val bosattUtland: Boolean,
+        val avdoedNavn: String,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+            OmstillingsstoenadInformasjonDoedsfall(
+                innhold = emptyList(),
+                avdoedNavn = avdoedNavn,
+                borIutland = bosattUtland,
+            )
+    }
+
+    @JsonTypeName("BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD")
+    data class BarnepensjonInformasjonDoedsfallRedigerbar(
+        val bosattUtland: Boolean,
+        val avdoedNavn: String,
+        val erOver18Aar: Boolean,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+            BarnepensjonInformasjonDoedsfall(
+                innhold = emptyList(),
+                avdoedNavn = avdoedNavn,
+                borIutland = bosattUtland,
+                erOver18aar = erOver18Aar,
+            )
     }
 
     @JsonTypeName("TOMT_BREV")

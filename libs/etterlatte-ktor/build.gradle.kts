@@ -14,6 +14,7 @@ dependencies {
     api(kotlin("reflect"))
 
     implementation(project(":libs:saksbehandling-common"))
+    implementation(libs.openapi)
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

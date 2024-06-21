@@ -26,6 +26,14 @@ export interface IFamilieRelasjon {
   barn?: string[]
 }
 
+export interface IPdlPersonSoekResponse {
+  fornavn: string
+  mellomnavn?: string
+  etternavn: string
+  foedselsnummer: string
+  bostedsadresse?: IAdresse[]
+}
+
 export interface IPdlPerson {
   fornavn: string
   mellomnavn?: string

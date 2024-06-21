@@ -29,7 +29,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
-import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { lastDayOfMonth } from 'date-fns'
@@ -58,11 +58,23 @@ export const AvkortingInntekt = ({
   const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
 
-  const [ugyldigInntektAngitt, setUgyldigInntektAngitt] = useState(false)
-
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () =>
     avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
+
+  const fulltAar = () => {
+    if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
+      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+      return innvilgelseFraJanuar
+    } else {
+      const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12
+
+      const revurderingINyttAar =
+        new Date(avkortingGrunnlag[0].fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
+
+      return revurderingINyttAar || revurderingIFulltAar
+    }
+  }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (finnesRedigerbartGrunnlag()) {
@@ -70,6 +82,10 @@ export const AvkortingInntekt = ({
       return avkortingGrunnlag[0]
     }
     if (avkortingGrunnlag.length > 0) {
+      // Setter disabla felter til forventet verdi
+      if (fulltAar()) {
+        return { spesifikasjon: '', fratrekkInnAar: 0, fratrekkInnAarUtland: 0 }
+      }
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyeste = avkortingGrunnlag[0]
       return { ...nyeste, id: undefined, spesifikasjon: '' }
@@ -89,19 +105,12 @@ export const AvkortingInntekt = ({
     reset,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<IAvkortingGrunnlagLagre>({
     defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
   })
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
-    const ugyldigInntekt = data.aarsinntekt! < data.fratrekkInnAar!
-    const ugyldigInntektUtland = data.inntektUtland! < data.fratrekkInnAarUtland!
-    if (ugyldigInntekt || ugyldigInntektUtland) {
-      setUgyldigInntektAngitt(true)
-      return
-    }
-    setUgyldigInntektAngitt(false)
-
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
@@ -122,11 +131,8 @@ export const AvkortingInntekt = ({
       <Heading spacing size="small" level="2">
         Inntektsavkorting
       </Heading>
-      <HjemmelLenke
-        tittel="Folketrygdloven § 17-9 (mangler lenke)"
-        lenke="https://lovdata.no/lov/" // TODO lenke finnes ikke enda
-      />
-      <BodyShort>
+      <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
+      <BodyShort spacing>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
         grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
         legges til grunn.
@@ -193,7 +199,7 @@ export const AvkortingInntekt = ({
                     <Table.DataCell key="InntektTotalt">
                       {NOK(forventetInntekt + forventetInntektUtland)}
                     </Table.DataCell>
-                    <Table.DataCell>{inntektsgrunnlag.forventaInnvilgaMaaneder}</Table.DataCell>
+                    <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
                     <Table.DataCell key="Periode">
                       {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -{' '}
                       {inntektsgrunnlag.tom && formaterDato(lastDayOfMonth(new Date(inntektsgrunnlag.tom)))}
@@ -222,48 +228,55 @@ export const AvkortingInntekt = ({
             {visForm && (
               <>
                 <FormWrapper>
-                  <HStack gap="4">
-                    <TextField
+                  <HStack gap="2" align="start" wrap={false}>
+                    <TekstFelt
                       {...register('aarsinntekt', {
-                        required: { value: true, message: 'Må fylles ut' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
+                        required: { value: true, message: 'Må fylles ut' },
                       })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
                       error={errors.aarsinntekt?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
+                        max: { value: watch('aarsinntekt') || 0, message: 'Kan ikke være høyere enn årsinntekt' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
+                      disabled={fulltAar()}
                       error={errors.fratrekkInnAar?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('inntektUtland', {
                         required: { value: true, message: 'Må fylles ut' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt utland"
                       size="medium"
-                      type="text"
+                      type="tel"
                       inputMode="numeric"
                       error={errors.inntektUtland?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
+                        max: {
+                          value: watch('inntektUtland') || 0,
+                          message: 'Kan ikke være høyere enn årsinntekt utland',
+                        },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
-                      type="text"
+                      type="tel"
+                      disabled={fulltAar()}
                       inputMode="numeric"
                       error={errors.fratrekkInnAarUtland?.message}
                     />
@@ -290,9 +303,6 @@ export const AvkortingInntekt = ({
                     }
                   />
                 </TextAreaWrapper>
-                {ugyldigInntektAngitt && (
-                  <Alert variant="error">En årsinntekt kan ikke være lavere enn fratrekk inn-år</Alert>
-                )}
               </>
             )}
             <FormKnapper>
@@ -339,8 +349,7 @@ export const AvkortingInntekt = ({
 }
 
 const AvkortingInntektWrapper = styled.div`
-  width: 57em;
-  margin-bottom: 3em;
+  max-width: 70rem;
 `
 
 const InntektAvkortingTabell = styled.div`
@@ -349,7 +358,7 @@ const InntektAvkortingTabell = styled.div`
 
 const InntektAvkortingForm = styled.form`
   display: flex;
-  margin: 1em 0 1em 0;
+  margin: 1em 0 0 0;
 `
 
 const FormWrapper = styled.div`
@@ -363,6 +372,10 @@ const FormKnapper = styled.div`
   margin-top: 1rem;
   margin-right: 1em;
   gap: 1rem;
+`
+
+const TekstFelt = styled(TextField)`
+  max-width: 11.85em;
 `
 
 const TextAreaWrapper = styled.div`

@@ -21,7 +21,6 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -34,7 +33,6 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
-      - libs/testdata/**
       - gradle/libs.versions.toml
 
 permissions:

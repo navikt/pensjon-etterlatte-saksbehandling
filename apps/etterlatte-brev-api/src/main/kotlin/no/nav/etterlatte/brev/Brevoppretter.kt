@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -21,6 +22,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -180,16 +182,29 @@ class Brevoppretter(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String =
+            val mottakerFnr: String? =
                 when (verge) {
                     is Vergemaal -> verge.foedselsnummer.value
+                    is UkjentVergemaal -> null
 
                     else ->
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
                 }
-            adresseService.hentMottakerAdresse(sakType, mottakerFnr)
+            if (mottakerFnr != null) {
+                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
+            } else {
+                tomMottaker()
+            }
         }
+
+    private fun tomMottaker() =
+        Mottaker(
+            navn = "Ukjent",
+            foedselsnummer = null,
+            orgnummer = null,
+            adresse = Adresse(adresseType = "", landkode = "", land = ""),
+        )
 }
 
 private data class OpprettBrevRequest(

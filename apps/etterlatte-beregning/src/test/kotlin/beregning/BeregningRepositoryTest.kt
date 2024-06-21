@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -88,37 +89,57 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal ikke hente en overstyr beregning som har status ugyldig`() {
-        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
+        val sakId = 10L
+        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
         val beregningLagret = beregning()
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
-        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(10L)
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
 
         assertEquals(overstyrBeregning, null)
     }
 
     @Test
     fun `skal kunne opprette en gyldig overstyr beregning etter en ugyldig`() {
-        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
+        val sakId = 10L
+        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.IKKE_AKTIV))
         beregningRepository.lagreEllerOppdaterBeregning(beregning())
-        assertEquals(null, beregningRepository.hentOverstyrBeregning(10L))
+        assertEquals(null, beregningRepository.hentOverstyrBeregning(sakId))
 
         val overstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.AKTIV),
+                OverstyrBeregning(sakId, "Test", Tidspunkt.now(), OverstyrBeregningStatus.AKTIV),
             )
-        assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(10L))
+        assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(sakId))
     }
 
     @Test
     fun `skal lagre og hente en overstyr beregning`() {
-        val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(1L, "Test", Tidspunkt.now()))
+        val sakId = 1L
+        val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(sakId, "Test", Tidspunkt.now()))
 
-        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(1L)
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
 
         assertNotNull(overstyrBeregning)
 
         assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
         assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
+    }
+
+    @Test
+    fun `skal lagre og hente en overstyr beregning og deretter kunne slette overstyrt beregning`() {
+        val sakId = 1L
+        val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(sakId, "Test", Tidspunkt.now()))
+
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(sakId)
+
+        assertNotNull(overstyrBeregning)
+
+        assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
+        assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
+
+        beregningRepository.deaktiverOverstyrtBeregning(sakId)
+        val overstyrBeregningSlettet = beregningRepository.hentOverstyrBeregning(sakId)
+        assertNull(overstyrBeregningSlettet)
     }
 
     private fun beregning(

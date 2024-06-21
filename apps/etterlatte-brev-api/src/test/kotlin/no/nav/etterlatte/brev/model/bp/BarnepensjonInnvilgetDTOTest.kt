@@ -99,7 +99,6 @@ internal class BarnepensjonInnvilgetDTOTest {
                     BrevutfallDto(
                         UUID.randomUUID(),
                         Aldersgruppe.UNDER_18,
-                        null,
                         Feilutbetaling(
                             FeilutbetalingValg.NEI,
                             null,

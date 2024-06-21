@@ -119,7 +119,11 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
-      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktRevurderingModal oppgave={oppgave} />
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <AktivitetspliktRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     default:
       return null
   }

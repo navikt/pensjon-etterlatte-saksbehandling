@@ -307,7 +307,7 @@ internal class BeregningServiceTest {
             val overstyrBeregning =
                 beregningService.opprettOverstyrBeregning(
                     behandling.id,
-                    OverstyrBeregningDTO("Test 2", OverstyrtBeregningKategori.FORELDRELOES),
+                    OverstyrBeregningDTO("Test 2", OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -315,7 +315,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning?.sakId shouldBe behandling.sak
             overstyrBeregning?.beskrivelse shouldBe "Test"
-            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
+            overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.FORELDRELOES
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }

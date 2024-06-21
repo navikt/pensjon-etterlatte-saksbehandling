@@ -21,7 +21,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterStringDato, formaterStringMaanedDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
@@ -104,6 +104,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   const slettEnkeltSanksjon = (behandlingId: string, sanksjonId: string) => {
     slettSanksjonRequest({ behandlingId, sanksjonId }, () => {
       hentSanksjoner()
+      fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
     })
   }
 
@@ -121,25 +122,27 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
 
   const validerFom = (value: Date): string | undefined => {
     const fom = new Date(value)
-    const tom = getValues().datoTom ? new Date(getValues().datoTom!) : null
+    const skjemaTom = getValues('datoTom')
+    const tom = skjemaTom ? new Date(skjemaTom) : null
 
     if (tom && isBefore(tom, fom)) {
-      return 'Til dato må være etter Fra dato'
+      return 'Fra-dato kan ikke være etter til-dato'
     } else if (
       behandling.virkningstidspunkt?.dato &&
       isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
     ) {
-      return 'Fra dato kan ikke være før virkningstidspunkt'
+      return 'Fra-dato kan ikke være før virkningstidspunkt'
     }
     return undefined
   }
 
   const validerTom = (value: Date): string | undefined => {
     const tom = value ? new Date(value) : null
-    const fom = getValues().datoFom ? new Date(getValues().datoFom!) : null
+    const skjemaFom = getValues('datoFom')
+    const fom = skjemaFom ? new Date(skjemaFom) : null
 
     if (fom && tom && isBefore(tom, fom)) {
-      return 'Til dato må være etter Fra dato'
+      return 'Til-dato kan ikke være før fra-dato'
     }
     return undefined
   }
@@ -206,9 +209,9 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <>
                       {sanksjoner.map((lagretSanksjon, index) => (
                         <Table.Row key={index}>
-                          <Table.DataCell>{formaterStringDato(lagretSanksjon.fom)}</Table.DataCell>
+                          <Table.DataCell>{formaterStringMaanedDato(lagretSanksjon.fom)}</Table.DataCell>
                           <Table.DataCell>
-                            {lagretSanksjon.tom ? formaterStringDato(lagretSanksjon.tom) : '-'}
+                            {lagretSanksjon.tom ? formaterStringMaanedDato(lagretSanksjon.tom) : '-'}
                           </Table.DataCell>
                           <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
                           <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
@@ -263,7 +266,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     </>
                   ) : (
                     <Table.Row>
-                      <Table.DataCell align="center" colSpan={6}>
+                      <Table.DataCell align="center" colSpan={redigerbar ? 7 : 6}>
                         Bruker har ingen sanksjoner
                       </Table.DataCell>
                     </Table.Row>

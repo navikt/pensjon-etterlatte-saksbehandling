@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
@@ -65,6 +66,13 @@ class OmregningService(
             }
         }
         omregningDao.oppdaterKjoering(request)
+    }
+
+    fun kjoeringFullfoert(request: LagreKjoeringRequest) {
+        if (request.status != KjoeringStatus.FERDIGSTILT) {
+            throw IllegalStateException("Prøver å lagre at kjøring er fullført, men status er ikke ferdigstilt.")
+        }
+        omregningDao.lagreKjoering(request)
     }
 }
 

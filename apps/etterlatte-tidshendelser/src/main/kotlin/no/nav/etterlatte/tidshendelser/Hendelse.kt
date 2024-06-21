@@ -34,7 +34,7 @@ data class Hendelse(
 enum class JobbType(
     val beskrivelse: String,
     val kategori: JobbKategori,
-    val sakType: SakType,
+    val sakType: SakType?,
 ) {
     AO_BP20("Aldersovergang barnepensjon ved 20 år", JobbKategori.ALDERSOVERGANG, SakType.BARNEPENSJON),
     AO_BP21("Aldersovergang barnepensjon ved 21 år", JobbKategori.ALDERSOVERGANG, SakType.BARNEPENSJON),
@@ -59,11 +59,22 @@ enum class JobbType(
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
+    REGULERING(
+        "Starter regulering",
+        JobbKategori.REGULERING,
+        sakType = null,
+    ),
+    FINN_SAKER_TIL_REGULERING(
+        "Finner saker som skal reguleres",
+        JobbKategori.REGULERING,
+        sakType = null,
+    ),
 }
 
 enum class JobbKategori {
     ALDERSOVERGANG,
     OMS_DOEDSDATO,
+    REGULERING,
 }
 
 enum class JobbStatus {

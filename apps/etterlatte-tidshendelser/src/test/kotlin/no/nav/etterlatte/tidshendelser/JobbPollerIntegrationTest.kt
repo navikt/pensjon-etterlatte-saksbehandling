@@ -26,9 +26,10 @@ class JobbPollerIntegrationTest(
 
     private val aldersovergangerService = mockk<AldersovergangerService>()
     private val omstillingsstoenadService = mockk<OmstillingsstoenadService>()
+    private val reguleringService = mockk<ReguleringService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService)
+    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService)
 
     @BeforeEach
     fun beforeEach() {

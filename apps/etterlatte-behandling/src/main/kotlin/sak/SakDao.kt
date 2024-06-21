@@ -119,7 +119,11 @@ class SakDao(
                     where
                     (
                     -- ikke kjørt i det hele tatt
-                    not exists (select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
+                    not exists (
+                        select 1 from omregningskjoering k where k.sak_id=s.id 
+                        and k.kjoering='$kjoering' 
+                        and k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
+                    )
                     or exists(
                         -- nyeste kjøring har feila
                         select 1 from omregningskjoering k

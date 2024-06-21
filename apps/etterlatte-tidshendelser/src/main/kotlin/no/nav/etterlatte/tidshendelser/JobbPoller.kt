@@ -35,6 +35,7 @@ class JobbPoller(
     private val hendelseDao: HendelseDao,
     private val aldersovergangerService: AldersovergangerService,
     private val omstillingsstoenadService: OmstillingsstoenadService,
+    private val reguleringService: ReguleringService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -49,6 +50,7 @@ class JobbPoller(
                 when (it.type.kategori) {
                     JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
                     JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
+                    JobbKategori.REGULERING -> reguleringService.execute(it)
                 }
 
             if (saker.isEmpty()) {

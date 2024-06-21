@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
+import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -59,6 +60,14 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                 omregningService.oppdaterKjoering(request)
             }
             call.respond(HttpStatusCode.OK)
+        }
+
+        post("kjoeringFullfoert") {
+            val request = call.receive<LagreKjoeringRequest>()
+            inTransaction {
+                omregningService.kjoeringFullfoert(request)
+            }
+            call.respond(HttpStatusCode.Created)
         }
     }
 }

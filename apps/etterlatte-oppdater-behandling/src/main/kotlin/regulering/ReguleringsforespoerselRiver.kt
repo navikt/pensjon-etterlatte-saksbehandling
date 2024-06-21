@@ -7,6 +7,9 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -24,9 +27,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import kotlin.math.max
-import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -63,51 +63,25 @@ internal class ReguleringsforespoerselRiver(
         val spesifikkeSaker = packet.saker
         val sakType = packet.optionalSakType()
 
-        val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
-        var tatt = 0
-
-        while (tatt < antall) {
-            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
-            logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning =
-                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakerViIkkeRegulererAutomatiskNaa, sakType)
-            logger.info("Henta ${sakerTilOmregning.saker.size} saker")
-
-            if (sakerTilOmregning.saker.isEmpty()) {
-                logger.debug("Ingen saker i denne runden. Returnerer")
-                break
-            }
-
-            val sakListe =
-                behandlingService
-                    .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
-                    .also { sakIdListe ->
-                        logger.info(
-                            "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
-                                sakIdListe.tilbakestileBehandlinger.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
-                        )
-                    }
-
-            sakerTilOmregning.saker.forEach {
-                logger.debug("Lagrer kjøring starta for sak ${it.id}")
-                behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
-                logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
-                packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-                packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(it.id)
-                packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(it.id)
-                packet.sakId = it.id
-                logger.debug("Sender til omregning for sak ${it.id}")
-                context.publish(packet.toJson())
-            }
-            tatt += sakerTilOmregning.saker.size
-            logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
-                break
-            }
-            val venteperiode = Duration.ofSeconds(5)
-            logger.info("Venter $venteperiode før neste runde.")
-            Thread.sleep(venteperiode)
-        }
+        kjoerIBatch(
+            logger = logger,
+            antall = antall,
+            finnSaker = { antallIDenneRunden ->
+                behandlingService.hentAlleSaker(
+                    kjoering,
+                    antallIDenneRunden,
+                    spesifikkeSaker,
+                    sakerViIkkeRegulererAutomatiskNaa,
+                    sakType,
+                )
+            },
+            haandterSaker = { sakerTilOmregning ->
+                val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+                sakerTilOmregning.saker.forEach {
+                    publiserSak(it, kjoering, packet, sakListe, context)
+                }
+            },
+        )
     }
 
     private fun JsonMessage.optionalSakType(): SakType? =
@@ -116,8 +90,32 @@ internal class ReguleringsforespoerselRiver(
             else -> SakType.valueOf(node.asText())
         }
 
-    companion object {
-        const val MAKS_BATCHSTOERRELSE = 100
+    private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning: Saker): SakIDListe =
+        behandlingService
+            .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+            .also { sakIdListe ->
+                logger.info(
+                    "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
+                        sakIdListe.tilbakestileBehandlinger.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
+                )
+            }
+
+    private fun publiserSak(
+        sak: Sak,
+        kjoering: String,
+        packet: JsonMessage,
+        sakListe: SakIDListe,
+        context: MessageContext,
+    ) {
+        logger.debug("Lagrer kjøring starta for sak ${sak.id}")
+        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
+        logger.debug("Ferdig lagra kjøring starta for sak ${sak.id}")
+        packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
+        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(sak.id)
+        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(sak.id)
+        packet.sakId = sak.id
+        logger.debug("Sender til omregning for sak ${sak.id}")
+        context.publish(packet.toJson())
     }
 }
 

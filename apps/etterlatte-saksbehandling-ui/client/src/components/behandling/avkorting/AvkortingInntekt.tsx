@@ -228,8 +228,8 @@ export const AvkortingInntekt = ({
             {visForm && (
               <>
                 <FormWrapper>
-                  <HStack gap="4" align="start" wrap={false}>
-                    <TextField
+                  <HStack gap="2" align="start" wrap={false}>
+                    <TekstFelt
                       {...register('aarsinntekt', {
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                         required: { value: true, message: 'Må fylles ut' },
@@ -240,7 +240,7 @@ export const AvkortingInntekt = ({
                       inputMode="numeric"
                       error={errors.aarsinntekt?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
                         max: { value: watch('aarsinntekt') || 0, message: 'Kan ikke være høyere enn årsinntekt' },
@@ -253,7 +253,7 @@ export const AvkortingInntekt = ({
                       disabled={fulltAar()}
                       error={errors.fratrekkInnAar?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('inntektUtland', {
                         required: { value: true, message: 'Må fylles ut' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
@@ -264,7 +264,7 @@ export const AvkortingInntekt = ({
                       inputMode="numeric"
                       error={errors.inntektUtland?.message}
                     />
-                    <TextField
+                    <TekstFelt
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
                         max: {
@@ -372,6 +372,10 @@ const FormKnapper = styled.div`
   margin-top: 1rem;
   margin-right: 1em;
   gap: 1rem;
+`
+
+const TekstFelt = styled(TextField)`
+  max-width: 11.85em;
 `
 
 const TextAreaWrapper = styled.div`

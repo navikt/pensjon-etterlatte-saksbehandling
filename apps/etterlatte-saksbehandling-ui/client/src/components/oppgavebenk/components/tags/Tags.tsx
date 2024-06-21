@@ -1,7 +1,6 @@
 import { Tag } from '@navikt/ds-react'
 import { Variants } from '~shared/Tags'
 import { Oppgavetype } from '~shared/types/oppgave'
-import { GosysTema } from '~shared/types/Gosys'
 
 const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: string }> = {
   FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
@@ -25,16 +24,5 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
     return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
   } else {
     return <Tag variant={Variants.ALT1_FILLED}>Ukjent oppgave</Tag>
-  }
-}
-
-export const TemaTag = ({ tema }: { tema: GosysTema }) => {
-  switch (tema) {
-    case 'EYO':
-      return <Tag variant={Variants.ALT2}>Omstillingsstønad</Tag>
-    case 'EYB':
-      return <Tag variant={Variants.INFO}>Barnepensjon</Tag>
-    case 'PEN':
-      return <Tag variant={Variants.ALT1}>Pensjon</Tag>
   }
 }

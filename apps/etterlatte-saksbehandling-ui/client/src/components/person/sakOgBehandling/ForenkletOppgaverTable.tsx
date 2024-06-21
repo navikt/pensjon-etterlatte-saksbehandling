@@ -16,7 +16,7 @@ import {
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
-import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
+import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import styled from 'styled-components'
 
 export const ForenkletOppgaverTable = ({

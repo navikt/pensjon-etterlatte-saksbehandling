@@ -2,7 +2,6 @@ import { BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from 
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
-import { TemaTag } from '~components/oppgavebenk/components/tags/Tags'
 import { formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -11,6 +10,7 @@ import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
 import { formaterOppgavetype, GosysOppgave } from '~shared/types/Gosys'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GosysBrukerWrapper } from '~components/oppgavebenk/gosys/GosysBrukerWrapper'
+import { GosysTemaTag } from '~shared/tags/GosysTemaTag'
 
 const TagRow = styled.div`
   display: flex;
@@ -56,7 +56,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
 
         <Modal.Body>
           <TagRow>
-            <TemaTag tema={tema} />
+            <GosysTemaTag tema={tema} />
           </TagRow>
           <InfoGrid>
             <div>

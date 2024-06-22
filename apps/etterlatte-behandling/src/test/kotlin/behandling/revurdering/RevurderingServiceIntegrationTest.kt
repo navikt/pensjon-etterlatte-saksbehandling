@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
@@ -1000,6 +1001,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         applicationContext.behandlingService,
         aktivitetspliktDao,
         aktivitetspliktKopierService,
+        DummyFeatureToggleService().also { it.settBryter(RevurderingFeatureToggle.KopierGrunnlag, false) },
     )
 
     private fun behandlingFactory() =

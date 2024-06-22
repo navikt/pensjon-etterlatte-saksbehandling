@@ -375,6 +375,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
+            featureToggleService = featureToggleService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 

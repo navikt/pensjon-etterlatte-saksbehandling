@@ -17,6 +17,8 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -102,6 +104,7 @@ class RevurderingService(
     private val behandlingService: BehandlingService,
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
@@ -186,7 +189,12 @@ class RevurderingService(
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
             opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
-        )
+        ).also {
+            if (featureToggleService.isEnabled(RevurderingFeatureToggle.KopierGrunnlag, false)) {
+                throw Exception("Tester kopier grunnlag til revurdering")
+                // TODO klientkall til alle apper..
+            }
+        }
     }
 
     private fun kanOppretteRevurderingForAarsak(
@@ -517,4 +525,13 @@ sealed class FeilIOmgjoering {
             "Klagen med id=${klage.id} har laget en omgjøringsoppgave men vi finner ikke behandlingen som skal omgjøres." +
                 " Noe galt har skjedd i ferdigstillingen av denne klagen, eller dette er ikke et behandlingsvedtak.",
         )
+}
+
+enum class RevurderingFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    KopierGrunnlag("Revurdering_kopier_grunnlag"),
+    ;
+
+    override fun key() = key
 }

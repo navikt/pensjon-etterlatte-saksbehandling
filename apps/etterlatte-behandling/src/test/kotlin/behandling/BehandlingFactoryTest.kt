@@ -22,11 +22,10 @@ import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.behandling.revurdering.RevurderingFeatureToggle
+import no.nav.etterlatte.behandling.revurdering.RevurderingKopierGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -75,6 +74,7 @@ class BehandlingFactoryTest {
     private val klageService = mockk<KlageService>()
     private val aktivitetspliktDao = mockk<AktivitetspliktDao>()
     private val aktivitetspliktKopierService = mockk<AktivitetspliktKopierService>()
+    private val revurderingKopierGrunnlag = mockk<RevurderingKopierGrunnlag>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
@@ -105,7 +105,7 @@ class BehandlingFactoryTest {
                 behandlingService,
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
-                DummyFeatureToggleService().also { it.settBryter(RevurderingFeatureToggle.KopierGrunnlag, false) },
+                revurderingKopierGrunnlag,
             ),
         )
     private val behandlingFactory =

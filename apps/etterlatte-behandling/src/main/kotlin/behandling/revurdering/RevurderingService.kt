@@ -18,7 +18,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -104,7 +103,7 @@ class RevurderingService(
     private val behandlingService: BehandlingService,
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
-    private val featureToggleService: FeatureToggleService,
+    private val revurderingKopierGrunnlag: RevurderingKopierGrunnlag,
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
@@ -190,10 +189,7 @@ class RevurderingService(
             saksbehandler = saksbehandler,
             opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
         ).also {
-            if (featureToggleService.isEnabled(RevurderingFeatureToggle.KopierGrunnlag, false)) {
-                throw Exception("Tester kopier grunnlag til revurdering")
-                // TODO klientkall til alle apper..
-            }
+            revurderingKopierGrunnlag.kopier()
         }
     }
 

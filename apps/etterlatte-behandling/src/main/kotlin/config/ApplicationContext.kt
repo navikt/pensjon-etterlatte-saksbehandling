@@ -61,6 +61,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingKopierGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
@@ -361,6 +362,11 @@ internal class ApplicationContext(
 
     val aktivitetspliktKopierService = AktivitetspliktKopierService(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao)
 
+    val revurderingKopierGrunnlag =
+        RevurderingKopierGrunnlag(
+            featureToggleService = featureToggleService,
+        )
+
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
@@ -375,7 +381,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
-            featureToggleService = featureToggleService,
+            revurderingKopierGrunnlag = revurderingKopierGrunnlag,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 

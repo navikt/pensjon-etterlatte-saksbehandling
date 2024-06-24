@@ -102,11 +102,11 @@ class KravgrunnlagConsumer(
         jmsTimestampNyHendelse: Tidspunkt,
     ) {
         val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId, type)
-        if (sisteHendelse?.status == TilbakekrevingHendelseStatus.MOTTATT) {
-            throw Exception("Må ferdigstille forrige melding for sak $sakId før ny kan prosesseres")
+        if (sisteHendelse?.status == TilbakekrevingHendelseStatus.NY) {
+            throw Exception("Må ferdigstille forrige hendelse ${sisteHendelse.id} for sak $sakId før ny kan prosesseres")
         }
         if (sisteHendelse?.jmsTimestamp?.isAfter(jmsTimestampNyHendelse) == true) {
-            throw Exception("Meldinger har blitt behandlet i feil rekkefølge for $sakId - dette må undersøkes videre")
+            throw Exception("Hendelser har blitt behandlet i feil rekkefølge for $sakId - dette må undersøkes videre")
         }
     }
 

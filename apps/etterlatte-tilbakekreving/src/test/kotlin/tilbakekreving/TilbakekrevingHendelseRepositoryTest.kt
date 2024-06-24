@@ -47,7 +47,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         tilbakekrevingHendelse?.sakId shouldBe sakId
         tilbakekrevingHendelse?.payload shouldBe kravgrunnlag
         tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
-        tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.MOTTATT
+        tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.NY
         tilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestamp
     }
 
@@ -72,7 +72,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         tilbakekrevingHendelse?.sakId shouldBe sakId
         tilbakekrevingHendelse?.payload shouldBe melding
         tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT
-        tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.MOTTATT
+        tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.NY
         tilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestamp
     }
 

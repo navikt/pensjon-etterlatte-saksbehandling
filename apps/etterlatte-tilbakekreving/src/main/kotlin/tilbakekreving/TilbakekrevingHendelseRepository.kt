@@ -22,7 +22,7 @@ data class TilbakekrevingHendelse(
 )
 
 enum class TilbakekrevingHendelseStatus {
-    MOTTATT,
+    NY,
     FERDIGSTILT,
 }
 
@@ -63,7 +63,7 @@ class TilbakekrevingHendelseRepository(
                         "jmsTimestamp" to jmsTimestamp?.toTimestamp(),
                         "status" to
                             if (type.mqHendelse) {
-                                TilbakekrevingHendelseStatus.MOTTATT.name
+                                TilbakekrevingHendelseStatus.NY.name
                             } else {
                                 TilbakekrevingHendelseStatus.FERDIGSTILT.name
                             },
@@ -118,7 +118,9 @@ class TilbakekrevingHendelseRepository(
         queryOf(
             statement =
                 """
-                UPDATE tilbakekreving_hendelse SET status = 'FERIDGSTILT' WHERE id = ?
+                UPDATE tilbakekreving_hendelse 
+                SET status = '${TilbakekrevingHendelseStatus.FERDIGSTILT.name}' 
+                WHERE id = ?
                 """.trimIndent(),
             paramMap =
                 mapOf(

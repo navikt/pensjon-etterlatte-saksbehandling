@@ -60,7 +60,7 @@ class KravgrunnlagConsumerTest {
         every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any()) } returns
             tilbakekrevingHendelse(
                 type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
-                status = TilbakekrevingHendelseStatus.MOTTATT,
+                status = TilbakekrevingHendelseStatus.NY,
             )
 
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()
@@ -81,7 +81,7 @@ class KravgrunnlagConsumerTest {
         every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any()) } returns
             tilbakekrevingHendelse(
                 type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
-                status = TilbakekrevingHendelseStatus.MOTTATT,
+                status = TilbakekrevingHendelseStatus.NY,
             )
 
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()

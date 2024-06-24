@@ -95,6 +95,12 @@ class KanIkkeEndreSendeBrevForFoerstegangsbehandling :
         "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
     )
 
+class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling :
+    UgyldigForespoerselException(
+        "KAN_IKKE_OPPRETTE_REVURDERING_MANGLER_FOERSTEGANGSBEHANDLING_IVERKSATT",
+        "Kan ikke opprette revurdering når man mangler føstegangsbehandling med virkningstidspunkt",
+    )
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
@@ -429,7 +435,11 @@ internal class BehandlingServiceImpl(
     ): Boolean {
         val virkningstidspunkt = request.dato
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
-        return virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
+        if (foersteVirkDato == null) {
+            throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
+        } else {
+            return virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
+        }
     }
 
     private suspend fun hentDoedsdato(

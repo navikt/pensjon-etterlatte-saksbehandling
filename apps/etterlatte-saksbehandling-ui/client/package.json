@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "vite",
     "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BlueOak-1.0.0;BSD-2-Clause;BSD-3-Clause;CC0-1.0;CC-BY-3.0;ISC;MPL-2.0;Python-2.0;0BSD\" --excludePackages vedtakslosning-ui@0.1.0 --summary",
-    "build": "tsc && eslint src -c .ts,.tsx && vite build && yarn lisenssjekk",
-    "lint": "eslint src --ext .ts,.tsx",
+    "build": "tsc && eslint src --ext .ts,.tsx && vite build && yarn lisenssjekk",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts,.tsx",
     "test": "vitest",
     "preview": "vite preview --port 5173",
     "coverage": "vitest run --coverage"

@@ -9,64 +9,62 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.Month
 import java.util.UUID
 
-val year = LocalDate.now().year
-val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(year, Month.MAY, 1)
-private val kjoering = "Regulering-$GRUNNBELOEP_REGULERING_DATO"
+private fun kjoering(dato: LocalDate) = "Regulering-$dato"
 
 class ReguleringService(
     private val rapidsPublisher: (UUID, String) -> Unit,
+    private val reguleringDao: ReguleringDao,
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun execute(jobb: HendelserJobb): List<Long> {
         logger.info("Handling jobb ${jobb.id}, type ${jobb.type} (${jobb.type.beskrivelse})")
+        val konfigurasjon = reguleringDao.hentNyesteKonfigurasjon()
         when (jobb.type) {
-            JobbType.REGULERING -> startRegulering()
-            JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering()
+            JobbType.REGULERING -> startRegulering(konfigurasjon)
+            JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering(konfigurasjon)
             else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
         }
         return listOf()
     }
 
-    private fun startRegulering() {
+    private fun startRegulering(konfigurasjon: Reguleringskonfigurasjon) {
         logger.info("StartReguleringJob startet")
         rapidsPublisher(
             UUID.randomUUID(),
-            createRecord(GRUNNBELOEP_REGULERING_DATO),
+            createRecord(konfigurasjon),
         )
         logger.info("StartReguleringJob ferdig")
     }
 
-    private fun finnSakerTilRegulering() {
+    private fun finnSakerTilRegulering(konfigurasjon: Reguleringskonfigurasjon) {
         logger.info("Finner saker til regulering startet")
         rapidsPublisher(
             UUID.randomUUID(),
-            finnSakerTilRegulering(GRUNNBELOEP_REGULERING_DATO),
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
+                        ReguleringEvents.DATO to konfigurasjon.dato.toString(),
+                        ReguleringEvents.KJOERING to kjoering(konfigurasjon.dato),
+                    ),
+                ).toJson(),
         )
         logger.info("Finner saker til regulering ferdig")
     }
 }
 
-fun createRecord(dato: LocalDate) =
+fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
     JsonMessage
         .newMessage(
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to kjoering,
-                ReguleringEvents.ANTALL to 20,
-            ),
-        ).toJson()
-
-fun finnSakerTilRegulering(dato: LocalDate) =
-    JsonMessage
-        .newMessage(
-            mapOf(
-                ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to kjoering,
+                ReguleringEvents.DATO to konfigurasjon.dato.toString(),
+                ReguleringEvents.KJOERING to kjoering(konfigurasjon.dato),
+                ReguleringEvents.ANTALL to konfigurasjon.antall,
+                ReguleringEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker,
+                ReguleringEvents.EKSKLUDERTE_SAKER to konfigurasjon.ekskluderteSaker,
             ),
         ).toJson()

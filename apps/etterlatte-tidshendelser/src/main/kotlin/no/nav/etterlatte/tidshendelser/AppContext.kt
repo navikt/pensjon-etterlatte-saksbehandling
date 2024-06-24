@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import java.time.Duration
 import java.util.UUID
@@ -54,7 +55,8 @@ class AppContext(
     val hendelseDao = HendelseDao(dataSource)
     private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient, behandlingKlient)
     private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
-    private val reguleringService = ReguleringService(publisher)
+    private val reguleringDao = ReguleringDao(dataSource)
+    private val reguleringService = ReguleringService(publisher, reguleringDao)
 
     val jobbPollerTask =
         JobbPollerTask(

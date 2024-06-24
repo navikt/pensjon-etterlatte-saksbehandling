@@ -47,7 +47,7 @@ spec:
     - name: SAMORDNINGVEDTAK_HENDELSE_GROUP_ID
       value: "etterlatte-v1"
     - name: SAMORDNINGVEDTAK_HENDELSE_TOPIC
-      value: "pensjonsamhandling.sam-vedtak-samhandlersvar-q1"
+      value: "pensjonsamhandling.sam-vedtak-samhandlersvar-q2"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

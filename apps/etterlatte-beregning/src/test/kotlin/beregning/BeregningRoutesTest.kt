@@ -1,6 +1,7 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package no.nav.etterlatte.beregning
+
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -36,8 +37,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class
-BeregningRoutesTest {
+internal class BeregningRoutesTest {
     private val server = MockOAuth2Server()
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -179,7 +179,12 @@ BeregningRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
         every { beregningRepository.hentOverstyrBeregning(1L) } returns
-            OverstyrBeregning(1L, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI)
+            OverstyrBeregning(
+                1L,
+                "Test",
+                Tidspunkt.now(),
+                kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+            )
 
         testApplication {
             runServer(server) {

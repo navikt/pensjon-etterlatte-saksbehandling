@@ -24,7 +24,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
-import { overstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -34,7 +34,7 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   ufoere: boolean
   overstyrBeregning: boolean
   overstyrTrygdetid: boolean
-  kategori: overstyrtBeregningKategori
+  kategori: OverstyrtBeregningKategori
 }
 
 export default function ManuellBehandling() {
@@ -173,7 +173,7 @@ export default function ManuellBehandling() {
             error={errors.kategori?.message}
           >
             <option value="">Velg kategori</option>
-            {Object.entries(overstyrtBeregningKategori).map(([key, value]) => (
+            {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
               </option>

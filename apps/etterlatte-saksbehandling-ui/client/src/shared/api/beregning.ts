@@ -8,7 +8,7 @@ import {
   OverstyrBeregning,
   OverstyrBeregningGrunnlagPostDTO,
 } from '~shared/types/Beregning'
-import { overstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.get(`/beregning/${behandlingId}`)
@@ -57,7 +57,7 @@ export const slettOverstyrtBeregning = async (behandlingId: string): Promise<Api
 export const opprettOverstyrBeregning = async (args: {
   behandlingId: string
   beskrivelse: string
-  kategori: overstyrtBeregningKategori
+  kategori: OverstyrtBeregningKategori
 }): Promise<ApiResponse<OverstyrBeregning | null>> => {
   return apiClient.post<OverstyrBeregning | null>(`/beregning/${args.behandlingId}/overstyrt`, {
     beskrivelse: args.beskrivelse,

@@ -11,7 +11,7 @@ import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
-import { overstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -83,7 +83,7 @@ const OverstyrBeregningForGrunnlag = (props: {
   const { behandlingId, setOverstyrt } = props
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [begrunnelse, setBegrunnelse] = useState<string>('')
-  const [kategori, setKategori] = useState<overstyrtBeregningKategori>()
+  const [kategori, setKategori] = useState<OverstyrtBeregningKategori>()
   const [kategoriError, setKategoriError] = useState<string>('')
 
   const overstyrBeregning = () => {
@@ -113,13 +113,13 @@ const OverstyrBeregningForGrunnlag = (props: {
       <Select
         label="Velg årsak:"
         onChange={(e) => {
-          setKategori(e.target.value as overstyrtBeregningKategori)
+          setKategori(e.target.value as OverstyrtBeregningKategori)
         }}
         description="Hvis du ikke finner riktig kategori for å overstyre saken, må du ta kontakt med team Etterlatte"
         error={kategoriError}
       >
         <option value="">Velg kategori</option>
-        {Object.entries(overstyrtBeregningKategori).map(([key, value]) => (
+        {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
           <option key={key} value={key}>
             {value}
           </option>

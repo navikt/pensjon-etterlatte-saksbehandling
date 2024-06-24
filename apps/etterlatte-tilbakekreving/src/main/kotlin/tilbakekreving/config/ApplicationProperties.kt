@@ -21,7 +21,7 @@ data class ApplicationProperties(
     val behandlingScope: String,
     val proxyUrl: String,
     val proxyScope: String,
-    val enableKravgrunnlagRoutes: Boolean,
+    val devMode: Boolean,
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) =
@@ -50,7 +50,7 @@ data class ApplicationProperties(
                     behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
                     proxyUrl = value("ETTERLATTE_PROXY_URL"),
                     proxyScope = value("ETTERLATTE_PROXY_SCOPE"),
-                    enableKravgrunnlagRoutes = valueOrNull("ENABLE_KRAVGRUNNLAG_ROUTES").toBoolean(),
+                    devMode = valueOrNull("DEV_MODE").toBoolean(),
                 )
             }
 

@@ -6,10 +6,10 @@ services:
       - '5442:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-  mq:
-    image: 'icr.io/ibm-messaging/mq'
-    ports:
-      - '1414:1414'
-    environment:
-      - LICENSE=accept
-      - MQ_QMGR_NAME=QM1
+#  mq:
+#    image: 'icr.io/ibm-messaging/mq'
+#    ports:
+#      - '1414:1414'
+#    environment:
+#      - LICENSE=accept
+#      - MQ_QMGR_NAME=QM1

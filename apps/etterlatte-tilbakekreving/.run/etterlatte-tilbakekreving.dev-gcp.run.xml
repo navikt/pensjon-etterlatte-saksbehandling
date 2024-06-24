@@ -22,7 +22,7 @@
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_PROXY_SCOPE" value="api://dev-fss.etterlatte.etterlatte-proxy/.default" />
       <env name="ETTERLATTE_PROXY_URL" value="https://etterlatte-proxy.dev-fss-pub.nais.io/aad" />
-      <env name="ENABLE_KRAVGRUNNLAG_ROUTES" value="true" />
+      <env name="DEV_MODE" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-tilbakekreving.main" />

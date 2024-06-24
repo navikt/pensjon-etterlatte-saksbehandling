@@ -4,6 +4,11 @@ import { NextFunction, Request, Response } from 'express'
 import { AdConfig } from '../config/config'
 import { getTokenInCache, setTokenInCache } from '../cache'
 
+interface OboResponse {
+  access_token: string
+  expires_in: number
+}
+
 export const tokenMiddleware = (scope: string) => async (req: Request, res: Response, next: NextFunction) => {
   const bearerToken = req.headers?.authorization?.split(' ')[1]
 
@@ -48,7 +53,8 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
     if (response.status >= 400) {
       throw new Error('Token-kall feilet')
     }
-    const json = await response.json()
+
+    const json = (await response.json()) as OboResponse
 
     setTokenInCache(cacheKey, json['access_token'], json['expires_in'])
 

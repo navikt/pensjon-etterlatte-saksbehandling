@@ -20,3 +20,5 @@ fun DataSource.insert(
         ).let { query -> tx.run(query.asUpdate) }
     }
 }
+
+fun List<Long>.tilDatabasetabell(tx: TransactionalSession) = tx.createArrayOf("bigint", this)

@@ -17,7 +17,10 @@ class ReguleringDao(
     fun hentNyesteKonfigurasjon(): Reguleringskonfigurasjon =
         datasource.transaction { tx ->
             with(Databasetabell) {
-                tx.hent("SELECT $ANTALL, $DATO, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER FROM $TABELLNAVN WHERE $AKTIV=true") { row ->
+                tx.hent(
+                    "SELECT $ANTALL, $DATO, $SPESIFIKKE_SAKER, $EKSKLUDERTE_SAKER FROM $TABELLNAVN " +
+                        "WHERE $AKTIV=true ORDER BY $OPPRETTET DESC LIMIT 1",
+                ) { row ->
                     Reguleringskonfigurasjon(
                         antall = row.int(ANTALL),
                         dato = row.localDate(DATO),
@@ -35,5 +38,6 @@ class ReguleringDao(
         const val SPESIFIKKE_SAKER = "spesifikke_saker"
         const val EKSKLUDERTE_SAKER = "ekskluderte_saker"
         const val AKTIV = "aktiv"
+        const val OPPRETTET = "opprettet"
     }
 }

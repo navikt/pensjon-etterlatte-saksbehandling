@@ -103,8 +103,12 @@ spec:
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TILBAKEKREVING_URL

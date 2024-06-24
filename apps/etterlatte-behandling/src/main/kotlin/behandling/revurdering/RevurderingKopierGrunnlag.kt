@@ -25,11 +25,13 @@ class RevurderingKopierGrunnlag(
         runBlocking {
             vilkaarsvurderingKlient.kopierTrygdetidFraForrigeBehandling(nyBehandling, forrigeBehandling, brukerTokenInfo)
             trygdetidKlient.kopierTrygdetidFraForrigeBehandling(nyBehandling, forrigeBehandling, brukerTokenInfo)
-            // TODO klientkall beregningsgrunnlag
-            // TODO klientkall beregning
-            // TODO klientkall avkorting
 
-            // TODO mer?
+            beregningKlient.kopierBeregningsgrunnlagFraForrigeBehandling(nyBehandling, forrigeBehandling, brukerTokenInfo)
+
+            // TODO kopier overstyrt beregning?
+
+            beregningKlient.opprettBeregning(nyBehandling, brukerTokenInfo)
+            beregningKlient.opprettAvkorting(nyBehandling, forrigeBehandling, brukerTokenInfo)
         }
     }
 }

@@ -15,6 +15,23 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun kopierBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun opprettBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun opprettAvkorting(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BeregningKlientImpl(
@@ -37,6 +54,55 @@ class BeregningKlientImpl(
         downstreamResourceClient
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/$behandlingId"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
+    }
+
+    override suspend fun kopierBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Kopier beregningsgrunnlag for behandling id=$behandlingId")
+        downstreamResourceClient
+            .post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/fra/$forrigeBehandlingId",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
+    }
+
+    override suspend fun opprettBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Oppretter beregning for behandling id=$behandlingId")
+        downstreamResourceClient
+            .post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/$behandlingId"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
+    }
+
+    override suspend fun opprettAvkorting(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Oppretter avkorting for behandling id=$behandlingId")
+        downstreamResourceClient
+            .post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId",
+                    ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = "",
             ).mapError { error -> throw error }

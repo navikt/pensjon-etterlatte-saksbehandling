@@ -95,6 +95,23 @@ class BeregningKlientTest : BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
+
+    override suspend fun kopierBeregningsgrunnlagFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+
+    override suspend fun opprettBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+
+    override suspend fun opprettAvkorting(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {

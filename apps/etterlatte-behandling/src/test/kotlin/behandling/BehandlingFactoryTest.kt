@@ -434,6 +434,161 @@ class BehandlingFactoryTest {
     }
 
     @Test
+    fun `skal lage ny førstegangsbehandling hvis behandlinge kun er avslått og eller avbrutt`() {
+        val behandlingOpprettes = slot<OpprettBehandling>()
+        val behandlingHentes = slot<UUID>()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+
+        val nyBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utlandstilknytning = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
+            )
+
+        val persongalleri =
+            Persongalleri(
+                "Soeker",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
+
+        every { sakServiceMock.finnSak(any()) } returns nyBehandling.sak
+        every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns nyBehandling
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns emptyList()
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
+        every {
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(
+                any(),
+                any(),
+            )
+        } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
+        } returns mockOppgave
+        every {
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+        } returns mockOppgave
+        every {
+            oppgaveService.tildelSaksbehandler(any(), any())
+        } just runs
+
+        val foerstegangsbehandling =
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )!!
+                .also { it.sendMeldingForHendelse() }
+                .behandling
+
+        Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
+
+        val iverksattBehandlingId = UUID.randomUUID()
+        val iverksattBehandling =
+            Foerstegangsbehandling(
+                id = iverksattBehandlingId,
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.AVSLAG,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utlandstilknytning = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode =
+                    KommerBarnetTilgode(
+                        JaNei.JA,
+                        "",
+                        Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                        iverksattBehandlingId,
+                    ),
+                kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
+            )
+
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns listOf(iverksattBehandling)
+        every { aktivitetspliktDao.kopierAktiviteter(any(), any()) } returns 1
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            revurdering(
+                sakId = 1,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            )
+
+        val revurderingsBehandling =
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )?.also { it.sendMeldingForHendelse() }
+                ?.behandling
+        Assertions.assertTrue(revurderingsBehandling is Revurdering)
+        verify {
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
+        }
+        verify(exactly = 2) {
+            sakServiceMock.finnSak(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
+        }
+    }
+
+    @Test
     fun `skal lage ny behandling som revurdering hvis behandling er satt til iverksatt`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()

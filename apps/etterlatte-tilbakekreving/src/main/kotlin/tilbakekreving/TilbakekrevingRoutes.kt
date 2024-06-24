@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -18,8 +18,10 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
     route("/api/tilbakekreving/{sakId}") {
         post("/vedtak") {
             kunSystembruker {
-                logger.info("Sender tilbakekrevingsvedtak")
                 val vedtak = call.receive<TilbakekrevingVedtak>()
+
+                logger.info("Sender tilbakekrevingsvedtak for sak ${vedtak.sakId}")
+
                 tilbakekrevingService.sendTilbakekrevingsvedtak(vedtak)
                 call.respond(HttpStatusCode.Created)
             }
@@ -27,9 +29,10 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
 
         get("/kravgrunnlag/{kravgrunnlagId}") {
             kunSystembruker {
-                logger.info("Henter oppdatert kravgrunnlag")
                 val sakId = requireNotNull(call.parameters["sakId"]).toLong()
                 val kravgrunnlagId = requireNotNull(call.parameters["kravgrunnlagId"]).toLong()
+
+                logger.info("Henter oppdatert kravgrunnlag for sak $sakId med kravgrunnlagId $kravgrunnlagId")
 
                 val oppdatertKravgrunnlag =
                     tilbakekrevingService.hentKravgrunnlag(

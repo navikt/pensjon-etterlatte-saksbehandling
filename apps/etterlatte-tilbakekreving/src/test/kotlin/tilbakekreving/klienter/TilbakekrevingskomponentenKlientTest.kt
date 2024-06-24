@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving.klienter
 
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
@@ -15,8 +15,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb
 import no.nav.etterlatte.tilbakekreving.readFile
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
@@ -26,7 +26,7 @@ import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class TilbakekrevingKlientTest {
+internal class TilbakekrevingskomponentenKlientTest {
     private val hendelseRepository = mockk<TilbakekrevingHendelseRepository>(relaxed = true)
 
     @Test
@@ -37,7 +37,7 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
+        val tilbakekrevingKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
         tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
@@ -64,12 +64,12 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
+        val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
 
         assertThrows<Exception>("Tilbakekrevingsvedtak feilet med alvorlighetsgrad 08") {
-            tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
+            tilbakekrevingskomponentenKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
         }
 
         verify {
@@ -98,10 +98,10 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/kravgrunnlag", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
+        val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
         val sakId = 1L
 
-        val kravgrunnlagResponse = tilbakekrevingKlient.hentKravgrunnlag(sakId, 123L)
+        val kravgrunnlagResponse = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, 123L)
 
         kravgrunnlagResponse shouldNotBe null
 

@@ -12,6 +12,7 @@ import java.util.UUID
 
 val year = LocalDate.now().year
 val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(year, Month.MAY, 1)
+private val kjoering = "Regulering-$GRUNNBELOEP_REGULERING_DATO"
 
 class ReguleringService(
     private val rapidsPublisher: (UUID, String) -> Unit,
@@ -53,7 +54,7 @@ fun createRecord(dato: LocalDate) =
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to "Regulering-$year",
+                ReguleringEvents.KJOERING to kjoering,
                 ReguleringEvents.ANTALL to 20,
             ),
         ).toJson()
@@ -64,6 +65,6 @@ fun finnSakerTilRegulering(dato: LocalDate) =
             mapOf(
                 ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
                 ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to "Regulering-$year",
+                ReguleringEvents.KJOERING to kjoering,
             ),
         ).toJson()

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.hendelse
+package no.nav.etterlatte.tilbakekreving
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import tilbakekreving.DatabaseExtension
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

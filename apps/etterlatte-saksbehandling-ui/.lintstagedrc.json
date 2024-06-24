@@ -1,4 +1,4 @@
 {
-  "*.{js,ts,tsx}": "ESLINT_USE_FLAT_CONFIG=false eslint --cache --fix --max-warnings 0",
+  "*.{js,ts,tsx}": "cd client && eslint --cache --fix --max-warnings 0",
   "*.{js,jsx,ts,tsx,md,html,css}": "prettier --write"
 }

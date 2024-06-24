@@ -7,8 +7,8 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toKravOgVedtakstatus
 import org.slf4j.Logger

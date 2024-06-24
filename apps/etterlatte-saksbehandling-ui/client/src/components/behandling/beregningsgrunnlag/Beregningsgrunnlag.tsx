@@ -1,7 +1,7 @@
 import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
-import { BodyLong, Box, Button, Heading, Select, TextField } from '@navikt/ds-react'
+import { BodyLong, Box, Button, ErrorMessage, Heading, Select, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
@@ -79,22 +79,26 @@ const OverstyrBeregningForGrunnlag = (props: {
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [begrunnelse, setBegrunnelse] = useState<string>('')
   const [kategori, setKategori] = useState<KATEGORI>()
+  const [kategoriError, setKategoriError] = useState<string>('')
 
   const overstyrBeregning = () => {
-    opprettOverstyrtBeregningReq(
-      {
-        behandlingId,
-        beskrivelse: begrunnelse,
-
-        // @ts-expect-error ignorere undefined
-        kategori: kategori,
-      },
-      (result) => {
-        if (result) {
-          setOverstyrt(result)
+    if (kategori != undefined) {
+      setKategoriError('')
+      opprettOverstyrtBeregningReq(
+        {
+          behandlingId,
+          beskrivelse: begrunnelse,
+          kategori: kategori,
+        },
+        (result) => {
+          if (result) {
+            setOverstyrt(result)
+          }
         }
-      }
-    )
+      )
+    } else {
+      setKategoriError('Vennligst velg en kategori for å overstyre beregningen.')
+    }
   }
 
   return (
@@ -102,10 +106,12 @@ const OverstyrBeregningForGrunnlag = (props: {
       <Heading size="small">Overstyre beregning</Heading>
       <BodyLong>Er det ønskelig å overstyre beregning?</BodyLong>
       <Select
-        label="Velg årsak til overstyring:"
+        label="Velg årsak:"
         onChange={(e) => {
           setKategori(e.target.value as KATEGORI)
         }}
+        description="Hvis du ikke finner riktig kategori for å overstyre saken, må du ta kontakt med team Etterlatte"
+        error={!!kategoriError}
       >
         <option value="">Velg kategori</option>
         {Object.entries(KATEGORI).map(([key, value]) => (
@@ -114,9 +120,12 @@ const OverstyrBeregningForGrunnlag = (props: {
           </option>
         ))}
       </Select>
+
+      {kategoriError !== '' ? <ErrorMessage>{kategoriError}</ErrorMessage> : null}
       <TextField
         onChange={(e) => {
           setBegrunnelse(e.target.value)
+          setKategoriError('')
         }}
         label=""
         placeholder="Begrunnelse"

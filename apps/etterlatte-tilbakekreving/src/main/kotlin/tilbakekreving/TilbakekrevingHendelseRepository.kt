@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.hendelse
+package no.nav.etterlatte.tilbakekreving
 
 import kotliquery.queryOf
 import kotliquery.sessionOf

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.readFile
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

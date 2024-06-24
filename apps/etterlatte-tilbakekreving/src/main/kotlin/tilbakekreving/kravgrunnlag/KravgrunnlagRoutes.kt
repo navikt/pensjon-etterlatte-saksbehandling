@@ -9,7 +9,10 @@ import io.ktor.server.routing.route
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 
-fun Route.testKravgrunnlagRoutes(service: KravgrunnlagService) {
+/**
+ * Brukes kun for lokal testing
+ */
+fun Route.kravgrunnlagRoutes(service: KravgrunnlagService) {
     route("kravgrunnlag") {
         post {
             val dto = call.receive<DetaljertKravgrunnlagDto>()

@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect } from 'react'
-import { HStack, Loader, Tag } from '@navikt/ds-react'
+import { HStack, Loader, Tag, Label } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'

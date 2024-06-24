@@ -1,4 +1,4 @@
 {
-  "*.{js,ts,tsx}": "cd client && eslint --cache --fix --max-warnings 0",
+  "*.{js,ts,tsx}": "cd client && eslint --cache --fix --max-warnings 0 && cd ../server && eslint --cache --fix --max-warnings 0",
   "*.{js,jsx,ts,tsx,md,html,css}": "prettier --write"
 }

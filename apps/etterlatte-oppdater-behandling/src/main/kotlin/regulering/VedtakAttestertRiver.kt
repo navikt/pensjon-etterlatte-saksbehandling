@@ -31,6 +31,12 @@ internal class VedtakAttestertRiver(
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(KJOERING) }
+            validate { it.requireKey(BEREGNING_BELOEP_FOER) }
+            validate { it.requireKey(BEREGNING_BELOEP_ETTER) }
+            validate { it.requireKey(BEREGNING_G_FOER) }
+            validate { it.requireKey(BEREGNING_G_ETTER) }
+            validate { it.requireKey(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
+            validate { it.requireKey(VEDTAK_BELOEP) }
         }
     }
 

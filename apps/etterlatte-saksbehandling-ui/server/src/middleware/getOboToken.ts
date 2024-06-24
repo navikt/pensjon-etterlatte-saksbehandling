@@ -50,9 +50,9 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
     }
     const json = await response.json()
 
-    setTokenInCache(cacheKey, json.access_token, json.expires_in)
+    setTokenInCache(cacheKey, json['access_token'], json['expires_in'])
 
-    return json.access_token
+    return json['access_token']
   } catch (e) {
     logger.info('Feil ved henting av obo-token: ', e)
     throw new Error('Det skjedde en feil ved henting av obo-token')

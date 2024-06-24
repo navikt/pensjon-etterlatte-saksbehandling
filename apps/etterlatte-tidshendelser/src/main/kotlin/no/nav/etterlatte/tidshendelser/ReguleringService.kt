@@ -53,7 +53,7 @@ fun createRecord(dato: LocalDate) =
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to "Regulering-$year",
+                ReguleringEvents.KJOERING to "Regulering-$year-take2",
                 ReguleringEvents.ANTALL to 20,
             ),
         ).toJson()
@@ -64,6 +64,6 @@ fun finnSakerTilRegulering(dato: LocalDate) =
             mapOf(
                 ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
                 ReguleringEvents.DATO to dato.toString(),
-                ReguleringEvents.KJOERING to "Regulering-$year",
+                ReguleringEvents.KJOERING to "Regulering-$year-take2",
             ),
         ).toJson()

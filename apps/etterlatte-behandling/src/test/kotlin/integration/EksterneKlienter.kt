@@ -123,7 +123,7 @@ class TrygdetidKlientTest : TrygdetidKlient {
 }
 
 class VilkaarsvurderingKlientTest : VilkaarsvurderingKlient {
-    override suspend fun kopierTrygdetidFraForrigeBehandling(
+    override suspend fun kopierVilkaarsvurderingFraForrigeBehandling(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

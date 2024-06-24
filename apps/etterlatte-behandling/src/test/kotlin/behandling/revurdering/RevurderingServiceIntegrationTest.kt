@@ -138,7 +138,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             iverksett(behandling!!)
         }
 
-        val revurdering =
+        val (revurdering) =
             inTransaction {
                 revurderingService(
                     oppgaveService,
@@ -195,7 +195,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 grunnlagService,
                 hendelser,
             )
-        val revurdering =
+        val (revurdering) =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -345,7 +345,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        val revurdering =
+        val (revurdering) =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -437,7 +437,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        val revurdering =
+        val (revurdering) =
             inTransaction {
                 revurderingService(
                     oppgaveService,
@@ -543,7 +543,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
             ferdigstillOppgaver(behandling, saksbehandler)
         }
-        val revurderingen =
+        val (revurderingen) =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -560,7 +560,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        val revurderingto =
+        val (revurderingto) =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -933,7 +933,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         }
 
         // Opprett revurdering, triggende oppgave konverteres til aa gjelde behandlingen
-        val revurdering =
+        val (revurdering) =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -1001,7 +1001,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         applicationContext.behandlingService,
         aktivitetspliktDao,
         aktivitetspliktKopierService,
-        revurderingKopierGrunnlag,
     )
 
     private fun behandlingFactory() =

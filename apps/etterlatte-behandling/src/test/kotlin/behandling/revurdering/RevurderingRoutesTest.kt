@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesTest {
@@ -44,6 +45,23 @@ internal class RevurderingRoutesTest {
         every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
+            )
+        every {
+            applicationContext.revurderingService.opprettManuellRevurderingWrapper(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            Pair(
+                mockk {
+                    every { id } returns UUID.randomUUID()
+                },
+                mockk(),
             )
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjerming(any())

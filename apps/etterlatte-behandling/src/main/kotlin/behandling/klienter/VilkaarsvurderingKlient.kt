@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface VilkaarsvurderingKlient {
-    suspend fun kopierTrygdetidFraForrigeBehandling(
+    suspend fun kopierVilkaarsvurderingFraForrigeBehandling(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -30,7 +30,7 @@ class VilkaarsvurderingKlientImpl(
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    override suspend fun kopierTrygdetidFraForrigeBehandling(
+    override suspend fun kopierVilkaarsvurderingFraForrigeBehandling(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

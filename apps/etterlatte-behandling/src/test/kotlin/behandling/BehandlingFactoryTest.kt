@@ -105,7 +105,6 @@ class BehandlingFactoryTest {
                 behandlingService,
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
-                revurderingKopierGrunnlag,
             ),
         )
     private val behandlingFactory =

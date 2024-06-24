@@ -103,7 +103,6 @@ class RevurderingService(
     private val behandlingService: BehandlingService,
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
-    private val revurderingKopierGrunnlag: RevurderingKopierGrunnlag,
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
@@ -146,7 +145,7 @@ class RevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandler: Saksbehandler,
-    ): Revurdering {
+    ): Pair<Revurdering, UUID> {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettet(aarsak)
         }
@@ -178,19 +177,19 @@ class RevurderingService(
             throw BadRequestException("$aarsak er ikke støttet for $sakType")
         }
         kanOppretteRevurderingForAarsak(sakId, aarsak)
-        return opprettManuellRevurdering(
-            sakId = forrigeIverksatteBehandling.sak.id,
-            forrigeBehandling = forrigeIverksatteBehandling,
-            revurderingAarsak = aarsak,
-            paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
-            paaGrunnAvOppgave = paaGrunnAvOppgaveUuid,
-            begrunnelse = begrunnelse,
-            fritekstAarsak = fritekstAarsak,
-            saksbehandler = saksbehandler,
-            opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
-        ).also {
-            revurderingKopierGrunnlag.kopier(it.id, forrigeIverksatteBehandling.id, saksbehandler)
-        }
+        val revurdering =
+            opprettManuellRevurdering(
+                sakId = forrigeIverksatteBehandling.sak.id,
+                forrigeBehandling = forrigeIverksatteBehandling,
+                revurderingAarsak = aarsak,
+                paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
+                paaGrunnAvOppgave = paaGrunnAvOppgaveUuid,
+                begrunnelse = begrunnelse,
+                fritekstAarsak = fritekstAarsak,
+                saksbehandler = saksbehandler,
+                opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
+            )
+        return Pair(revurdering, forrigeIverksatteBehandling.id)
     }
 
     private fun kanOppretteRevurderingForAarsak(

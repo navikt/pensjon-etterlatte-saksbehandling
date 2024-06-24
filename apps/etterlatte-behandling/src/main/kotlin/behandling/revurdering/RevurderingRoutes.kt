@@ -22,7 +22,10 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
-internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
+internal fun Route.revurderingRoutes(
+    revurderingService: RevurderingService,
+    revurderingKopierGrunnlag: RevurderingKopierGrunnlag,
+) {
     val logger = routeLogger
 
     route("/api/revurdering") {
@@ -52,7 +55,7 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
 
-                        val revurdering =
+                        val (revurdering) =
                             inTransaction {
                                 revurderingService.opprettManuellRevurderingWrapper(
                                     sakId = sakId,
@@ -63,6 +66,8 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                                     fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
                                     saksbehandler = saksbehandler,
                                 )
+                            }.also { (revurdering, forrige) ->
+                                revurderingKopierGrunnlag.kopier(revurdering.id, forrige, saksbehandler)
                             }
 
                         call.respond(revurdering.id)

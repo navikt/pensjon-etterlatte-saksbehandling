@@ -390,7 +390,6 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
-            revurderingKopierGrunnlag = revurderingKopierGrunnlag,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 

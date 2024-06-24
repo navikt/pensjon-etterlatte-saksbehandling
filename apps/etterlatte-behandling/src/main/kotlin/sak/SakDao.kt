@@ -136,7 +136,7 @@ class SakDao(
                     ${if (spesifikkeSaker.isEmpty()) "" else " and id = any(?)"}
                     ${if (ekskluderteSaker.isEmpty()) "" else " and NOT(id = any(?))"}
                     ${if (sakType == null) "" else " and s.saktype = ?"}
-                    ORDER by id ASC
+                    ORDER by id DESC
                     LIMIT $antall
                         """.trimMargin(),
                     )

@@ -14,7 +14,7 @@ const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
 export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }) => (
   <>
     <Heading size="small" spacing>
-      Journalpostdetailjer
+      Journalpostdetaljer
     </Heading>
 
     <VStack gap="4">

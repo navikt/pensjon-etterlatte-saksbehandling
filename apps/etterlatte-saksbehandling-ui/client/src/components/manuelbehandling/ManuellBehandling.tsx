@@ -50,8 +50,6 @@ export default function ManuellBehandling() {
 
   const [oppgaveStatus, setOppgaveStatus] = useState<Oppgavestatus | undefined>(undefined)
 
-  const [isOverstyrBeregningChecked, setIsOverstyrBeregningChecked] = useState(false)
-
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
@@ -114,6 +112,7 @@ export default function ManuellBehandling() {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = methods
 
@@ -163,19 +162,14 @@ export default function ManuellBehandling() {
         </Select>
 
         <Box paddingBlock="4 4">
-          <Checkbox
-            {...register('overstyrBeregning')}
-            onChange={(e) => setIsOverstyrBeregningChecked(e.target.checked)}
-          >
-            Skal bruke manuell beregning
-          </Checkbox>
+          <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
 
           <Select
             label="Årsak overstyrt beregning:"
             {...register('kategori', {
               required: { value: true, message: 'Du må velge kategori' },
             })}
-            disabled={!isOverstyrBeregningChecked}
+            disabled={!watch('overstyrBeregning')}
             error={errors.kategori?.message}
           >
             <option value="">Velg kategori</option>

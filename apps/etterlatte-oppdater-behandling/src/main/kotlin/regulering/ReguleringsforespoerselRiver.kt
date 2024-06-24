@@ -40,7 +40,7 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
-            validate { it.requireKey(SPESIFIKKE_SAKER) }
+            validate { it.interestedIn(SPESIFIKKE_SAKER) }
             validate { it.interestedIn(SAK_TYPE) }
         }
     }

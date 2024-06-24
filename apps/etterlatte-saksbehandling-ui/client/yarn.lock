@@ -221,22 +221,7 @@
     "@floating-ui/core" "^1.0.0"
     "@floating-ui/utils" "^0.2.0"
 
-"@floating-ui/dom@^1.6.1":
-  version "1.6.3"
-  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.6.3.tgz#954e46c1dd3ad48e49db9ada7218b0985cee75ef"
-  integrity sha512-RnDthu3mzPlQ31Ss/BTwQ1zjzIhr3lk1gZB1OC56h/1vEtaXkESrOqL5fQVMfXpwGtRwX+YsZBdyHtJMQnkArw==
-  dependencies:
-    "@floating-ui/core" "^1.0.0"
-    "@floating-ui/utils" "^0.2.0"
-
-"@floating-ui/react-dom@^2.0.0", "@floating-ui/react-dom@^2.0.2":
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.0.8.tgz#afc24f9756d1b433e1fe0d047c24bd4d9cefaa5d"
-  integrity sha512-HOdqOt3R3OGeTKidaLvJKcgg75S6tibQ3Tif4eyd91QnIJWr0NLvoXFpJA/j8HqkFSL68GDca9AuyWEHlhyClw==
-  dependencies:
-    "@floating-ui/dom" "^1.6.1"
-
-"@floating-ui/react-dom@^2.0.9":
+"@floating-ui/react-dom@^2.0.0", "@floating-ui/react-dom@^2.0.2", "@floating-ui/react-dom@^2.0.9":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.1.0.tgz#4f0e5e9920137874b2405f7d6c862873baf4beff"
   integrity sha512-lNzj5EQmEKn5FFKc04+zasr09h/uX8RtJRNj5gUXsSQIXHVWTVh+hVAg1vOMCexkX8EgvemMvIFpQfkosnVNyA==
@@ -319,33 +304,33 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^6.10.0":
-  version "6.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.10.0.tgz#d832911d79939b408fddfa1b4da7bac3527f6fe4"
-  integrity sha512-MNjjpNc+wahqQBD4oSj/iIKJQCKZn5rGVh3RmKi95tX/Ta/MRskb807LTVZvq4S1+sOKK4VPgFONf8OertJz9g==
+"@navikt/aksel-icons@^6.11.0":
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.11.0.tgz#77b15cf3dd8cd4240862b8bb212a3e94c7b507f8"
+  integrity sha512-7S8C8h5Dc5GQPqJZVlgbBrjMTndn4wwwoIjusg27A3TVXUs94Iy9JyyU1U59h3L58lLYzo/Yb6kSqV3wKtMpZA==
 
-"@navikt/ds-css@~6.10.0":
-  version "6.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-6.10.0.tgz#cd03b719d06e7993980699c2f6cb31795fa91535"
-  integrity sha512-hpuoPzOVT23oDjZlq1NH9f8K9R/n/j3RhTJwiuT5lkpx8xkB/enZ7uc4A3eeyZszontxktZRTQN2KXNN0vhvBg==
+"@navikt/ds-css@~6.11.0":
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-6.11.0.tgz#d71f2ada5c3376a5bba21d876604f7b9f946fff3"
+  integrity sha512-G62P4NJ3Yh5ianMxBlgjtpl/0+NG1Nvm5yREZ2A6sOLYn6P0Fv5hZWOoSY+eCfWlkT9JXvzTDoFokQtqrUzflA==
 
-"@navikt/ds-react@~6.10.0":
-  version "6.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-6.10.0.tgz#43abd526e58f1641effd0aa76a255a064068b5dd"
-  integrity sha512-o+/MqUQMX++tp3mXe5Vlnu97CmDd+mdxcr8sT8jeLm9Jf3ms52O1hSdKK6NlJFYVBkOtZMH0Rr306n5n7X+VGA==
+"@navikt/ds-react@~6.11.0":
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-6.11.0.tgz#d5570c1f831bbf7dfbbd005693f59fe74f67d1ee"
+  integrity sha512-HAwKQpyJ98cKUIsnv/ZBeppJjZt72virxQiJZCCSFdBBWVOajJ4Q9C7gOXbhOZ4yNgPL3NJnPMlnqNe8Ce/hQg==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^6.10.0"
-    "@navikt/ds-tokens" "^6.10.0"
+    "@navikt/aksel-icons" "^6.11.0"
+    "@navikt/ds-tokens" "^6.11.0"
     clsx "^2.1.0"
     date-fns "^3.0.0"
     react-day-picker "8.10.0"
 
-"@navikt/ds-tokens@^6.10.0", "@navikt/ds-tokens@~6.10.0":
-  version "6.10.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.10.0.tgz#56ae8412d9973f5a844b7a15d95c2ac3e008b171"
-  integrity sha512-wnTS4mirTcTFoptobIp6PfmO8eEHDmt3FNxWAB+AORLOuwVF7Qrfb/zDnAEKBwN381ySSPuFZuQTudJU7hIcfQ==
+"@navikt/ds-tokens@^6.11.0", "@navikt/ds-tokens@~6.11.0":
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.11.0.tgz#ad1fc80e0934e1576e1c1f88a74eb52e40771e9b"
+  integrity sha512-6+NfOyMWEzcq/mRUgVGugDta8LK4a3+lZWq1zTiyKayVQ+ADG4m5YbW1XnN35X+RdsVUxm+kxZa9myeSigwCrQ==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"

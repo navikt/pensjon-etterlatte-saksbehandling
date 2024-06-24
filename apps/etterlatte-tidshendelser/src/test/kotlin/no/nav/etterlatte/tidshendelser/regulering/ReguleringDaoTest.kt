@@ -31,11 +31,23 @@ class ReguleringDaoTest(
         containsInOrder(listOf(1, 2, 4), konfigurasjon.ekskluderteSaker)
     }
 
+    @Test
+    fun ignorerInaktivKonfigurasjon() {
+        val dato = LocalDate.of(2024, Month.JUNE, 22)
+        leggInnReguleringskonfigurasjon(dato, 10, listOf(), listOf())
+        leggInnReguleringskonfigurasjon(dato, 20, listOf(), listOf(), false)
+        val dao = ReguleringDao(datasource = dataSource)
+        val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
+        assertEquals(10, konfigurasjon.antall)
+        assertEquals(dato, konfigurasjon.dato)
+    }
+
     private fun leggInnReguleringskonfigurasjon(
         dato: LocalDate,
         antall: Int,
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
+        aktiv: Boolean = true,
     ) = dataSource.insert(
         tabellnavn = Databasetabell.TABELLNAVN,
         params = { tx ->
@@ -44,7 +56,7 @@ class ReguleringDaoTest(
                 Databasetabell.DATO to dato,
                 Databasetabell.SPESIFIKKE_SAKER to spesifikkeSaker.tilDatabasetabell(tx),
                 Databasetabell.EKSKLUDERTE_SAKER to ekskluderteSaker.tilDatabasetabell(tx),
-                Databasetabell.AKTIV to true,
+                Databasetabell.AKTIV to aktiv,
             )
         },
     )

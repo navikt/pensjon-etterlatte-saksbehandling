@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
@@ -54,6 +55,15 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Henter samordningsinfo for sak $sakId")
                 val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)
                 call.respond(samordningsinfo)
+            }
+        }
+
+        post("/sak/{$SAKID_CALL_PARAMETER}/samordning/melding") {
+            withSakId(behandlingKlient) { sakId ->
+                val oppdatering = requireNotNull(call.receive<OppdaterSamordningsmelding>())
+                logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
+                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

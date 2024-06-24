@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
@@ -41,6 +42,11 @@ interface SamordningsKlient {
         vedtak: Vedtak,
         alleVedtak: Boolean,
     ): List<Samordningsvedtak>
+
+    suspend fun oppdaterSamordningsmelding(
+        samordningmelding: OppdaterSamordningsmelding,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class SamordningsKlientImpl(
@@ -83,7 +89,7 @@ class SamordningsKlientImpl(
                 httpClient.get("$resourceUrl/api/vedtak") {
                     header("pid", vedtak.soeker.value)
                     parameter("fagomrade", "EYO")
-                    // parameter("sakId", "${vedtak.sakId}")
+                    // parameter("sakId", "${vedtak.sakId}")  // FIXME retting i SAM ble prodsatt 29.05.2024. 6 ukers svarfrist...
                     if (!alleVedtak) {
                         parameter("vedtakId", "${vedtak.id}")
                     }
@@ -96,6 +102,30 @@ class SamordningsKlientImpl(
             }
         } catch (e: Exception) {
             throw SamordneVedtakGenerellException("Kunne ikke hente samordningsdata", e)
+        }
+    }
+
+    override suspend fun oppdaterSamordningsmelding(
+        samordningmelding: OppdaterSamordningsmelding,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            val response =
+                httpClient.post("$resourceUrl/api/refusjonskrav") {
+                    contentType(ContentType.Application.Json)
+                    header("pid", samordningmelding.pid)
+                    parameter("tpNr", samordningmelding.tpNr)
+                    parameter("samId", samordningmelding.samId)
+                    parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    // parameter("periodisertBelopListe", ...)
+                }
+
+            if (!response.status.isSuccess()) {
+                throw ResponseException(response, "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]")
+            }
+        } catch (e: Exception) {
+            logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
+            throw SamordneVedtakGenerellException("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
         }
     }
 }

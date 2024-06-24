@@ -36,3 +36,18 @@ data class SamordningsvedtakWrapper(
     val samordningsvedtak: Samordningsvedtak,
     val behandlingId: UUID,
 )
+
+data class OppdaterSamordningsmelding(
+    val pid: String,
+    val tpNr: String,
+    val samId: Long,
+    val refusjonskrav: Boolean,
+    val periodisertBelopListe: List<Refusjonstrekk>,
+)
+
+data class Refusjonstrekk(
+    val fom: LocalDate,
+    val tom: LocalDate?,
+    val belop: Double,
+    val kravstillerReferanse: String,
+)

@@ -6,10 +6,10 @@
     "express": "^4.19.2",
     "http-proxy-middleware": "^3.0.0",
     "node-cache": "^5.1.2",
-    "node-fetch": "^2.6.12",
+    "node-fetch": "^2.7.0",
     "prom-client": "^15.1.2",
     "source-map": "~0.7.4",
-    "unleash-client": "^5.5.3",
+    "unleash-client": "^5.5.5",
     "winston": "^3.13.0",
     "winston-transport": "^4.6.0"
   },
@@ -18,8 +18,8 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.13.0",
-    "@types/node-fetch": "^2.6.4",
+    "@types/node": "^20.14.8",
+    "@types/node-fetch": "^2.6.11",
     "@types/request": "^2.48.12",
     "@typescript-eslint/eslint-plugin": "~7.5.0",
     "@typescript-eslint/parser": "~7.5.0",
@@ -31,7 +31,7 @@
     "mocha": "^10.4.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "dev": "ts-node-dev ./src/index.ts",

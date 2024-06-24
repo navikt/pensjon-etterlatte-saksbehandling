@@ -124,6 +124,7 @@ export enum TilbakekrevingStatus {
   FATTET_VEDTAK = 'FATTET_VEDTAK',
   ATTESTERT = 'ATTESTERT',
   UNDERKJENT = 'UNDERKJENT',
+  AVBRUTT = 'AVBRUTT',
 }
 export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> = {
   OPPRETTET: 'Opprettet',
@@ -132,6 +133,7 @@ export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> =
   FATTET_VEDTAK: 'Fattet vedtak',
   ATTESTERT: 'Attestert',
   UNDERKJENT: 'Underkjent',
+  AVBRUTT: 'Avbrutt',
 }
 
 export const erUnderBehandling = (status: TilbakekrevingStatus) =>

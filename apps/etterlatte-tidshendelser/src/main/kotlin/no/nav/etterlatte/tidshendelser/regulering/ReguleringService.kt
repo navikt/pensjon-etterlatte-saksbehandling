@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser.regulering
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.JobbType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -64,7 +65,7 @@ fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
                 ReguleringEvents.DATO to konfigurasjon.dato.toString(),
                 ReguleringEvents.KJOERING to kjoering(konfigurasjon.dato),
                 ReguleringEvents.ANTALL to konfigurasjon.antall,
-                ReguleringEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker,
-                ReguleringEvents.EKSKLUDERTE_SAKER to konfigurasjon.ekskluderteSaker,
+                ReguleringEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),
+                ReguleringEvents.EKSKLUDERTE_SAKER to konfigurasjon.ekskluderteSaker.tilSeparertString(),
             ),
         ).toJson()

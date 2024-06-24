@@ -21,22 +21,24 @@ var JsonMessage.saker: List<Long>
     get() =
         this[ReguleringEvents.SPESIFIKKE_SAKER]
             .asText()
-            .trim()
-            .split(";")
-            .filter { it.isNotEmpty() }
-            .map { it.toLong() }
+            .tilSeparertListe()
     set(name) {
-        this[ReguleringEvents.SPESIFIKKE_SAKER] = name.joinToString(";") { it.toString() }
+        this[ReguleringEvents.SPESIFIKKE_SAKER] = name.tilSeparertString()
     }
 
 var JsonMessage.ekskluderteSaker: List<Long>
     get() =
         this[ReguleringEvents.EKSKLUDERTE_SAKER]
             .asText()
-            .trim()
-            .split(";")
-            .filter { it.isNotEmpty() }
-            .map { it.toLong() }
+            .tilSeparertListe()
     set(name) {
-        this[ReguleringEvents.EKSKLUDERTE_SAKER] = name.joinToString(";") { it.toString() }
+        this[ReguleringEvents.EKSKLUDERTE_SAKER] = name.tilSeparertString()
     }
+
+fun String.tilSeparertListe() =
+    trim()
+        .split(";")
+        .filter { it.isNotEmpty() }
+        .map { it.toLong() }
+
+fun List<Long>.tilSeparertString() = this.joinToString(";") { it.toString() }

@@ -39,7 +39,9 @@ data class BrevDataFerdigstillingRequest(
     val tittel: String? = null,
 )
 
-class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {
+class BrevDataMapperFerdigstillingVedtak(
+    private val brevdataFacade: BrevdataFacade,
+) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
             if (generellBrevData.loependeIPesys()) {
@@ -221,7 +223,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             etterbetaling.await(),
             requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
-            requireNotNull(vilkaarsvurdering.await())
+            requireNotNull(vilkaarsvurdering.await()),
         )
     }
 
@@ -246,8 +248,10 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
             generellBrevData.revurderingsaarsak,
-            generellBrevData.personerISak.avdoede.single().navn,
-            requireNotNull(vilkaarsvurdering.await())
+            generellBrevData.personerISak.avdoede
+                .single()
+                .navn,
+            requireNotNull(vilkaarsvurdering.await()),
         )
     }
 

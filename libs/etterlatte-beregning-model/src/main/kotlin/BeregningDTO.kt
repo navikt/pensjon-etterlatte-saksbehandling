@@ -43,6 +43,7 @@ data class Beregningsperiode(
 
 data class OverstyrBeregningDTO(
     val beskrivelse: String,
+    val kategori: OverstyrtBeregningKategori,
 )
 
 data class AvkortingDto(
@@ -108,3 +109,10 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val grunnbelopMnd: Int,
     val beregningsMetode: BeregningsMetode?,
 )
+
+enum class OverstyrtBeregningKategori {
+    UKJENT_AVDOED,
+    AVKORTING_UFOERETRYGD,
+    FENGSELSOPPHOLD,
+    UKJENT_KATEGORI, // for å kunne håndtere tidligere overstyringer som ikke har kategori
+}

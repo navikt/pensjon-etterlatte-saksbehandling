@@ -41,7 +41,7 @@ internal class BrevDatafetcherVedtak(
     suspend fun hentVilkaarsvurdering() =
         brevdataFacade.hentVilkaarsvurdering(
             behandlingId!!,
-            brukerTokenInfo
+            brukerTokenInfo,
         )
 
     suspend fun hentForrigeUtbetaling() =

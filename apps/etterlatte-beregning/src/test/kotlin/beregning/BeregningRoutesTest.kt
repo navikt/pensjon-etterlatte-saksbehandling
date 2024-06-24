@@ -1,4 +1,5 @@
 package no.nav.etterlatte.beregning
+
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -180,7 +182,13 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now())
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns
+            OverstyrBeregning(
+                1L,
+                "Test",
+                Tidspunkt.now(),
+                kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+            )
 
         testApplication {
             runServer(server) {
@@ -198,6 +206,7 @@ internal class BeregningRoutesTest {
 
             hentetOverstyrBeregning shouldNotBe null
             hentetOverstyrBeregning.beskrivelse shouldBe "Test"
+            hentetOverstyrBeregning.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
         }
     }
 

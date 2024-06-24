@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
@@ -24,6 +24,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -33,6 +34,7 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   ufoere: boolean
   overstyrBeregning: boolean
   overstyrTrygdetid: boolean
+  kategori: OverstyrtBeregningKategori
 }
 
 export default function ManuellBehandling() {
@@ -95,6 +97,7 @@ export default function ManuellBehandling() {
           opprettOverstyrtBeregningReq({
             behandlingId: nyBehandlingRespons,
             beskrivelse: 'Manuell migrering',
+            kategori: data.kategori,
           })
         }
         if (data.overstyrTrygdetid) {
@@ -109,6 +112,7 @@ export default function ManuellBehandling() {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = methods
 
@@ -157,7 +161,25 @@ export default function ManuellBehandling() {
           ))}
         </Select>
 
-        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+        <Box paddingBlock="4 4">
+          <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+
+          <Select
+            label="Årsak overstyrt beregning:"
+            {...register('kategori', {
+              required: { value: true, message: 'Du må velge kategori' },
+            })}
+            disabled={!watch('overstyrBeregning')}
+            error={errors.kategori?.message}
+          >
+            <option value="">Velg kategori</option>
+            {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </Select>
+        </Box>
 
         <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
 

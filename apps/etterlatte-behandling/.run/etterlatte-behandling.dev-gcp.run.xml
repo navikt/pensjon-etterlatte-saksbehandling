@@ -33,6 +33,10 @@
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />
       <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="http://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />
+      <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
       <env name="HTTP_PORT" value="8090" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />

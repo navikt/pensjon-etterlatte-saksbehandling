@@ -93,6 +93,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering

@@ -99,6 +99,8 @@ abstract class BehandlingIntegrationTest {
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
+                trygdetidKlient = TrygdetidKlientTest(),
+                vilkaarsvurderingKlient = VilkaarsvurderingKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),

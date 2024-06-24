@@ -112,6 +112,10 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -182,6 +186,8 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-beregning
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
       external:

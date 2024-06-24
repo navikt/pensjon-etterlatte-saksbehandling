@@ -16,7 +16,9 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -91,6 +93,22 @@ class GrunnlagKlientTest : GrunnlagKlient {
 class BeregningKlientTest : BeregningKlient {
     override suspend fun slettAvkorting(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+}
+
+class TrygdetidKlientTest : TrygdetidKlient {
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+}
+
+class VilkaarsvurderingKlientTest : VilkaarsvurderingKlient {
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
 }

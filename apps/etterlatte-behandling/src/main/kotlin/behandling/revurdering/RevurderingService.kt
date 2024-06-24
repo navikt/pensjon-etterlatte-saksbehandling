@@ -189,7 +189,7 @@ class RevurderingService(
             saksbehandler = saksbehandler,
             opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
         ).also {
-            revurderingKopierGrunnlag.kopier()
+            revurderingKopierGrunnlag.kopier(it.id, forrigeIverksatteBehandling.id, saksbehandler)
         }
     }
 

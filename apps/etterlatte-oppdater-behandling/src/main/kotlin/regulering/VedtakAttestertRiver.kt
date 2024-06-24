@@ -20,7 +20,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
-import java.time.YearMonth
 
 internal class VedtakAttestertRiver(
     rapidsConnection: RapidsConnection,
@@ -31,7 +30,13 @@ internal class VedtakAttestertRiver(
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireValue(KJOERING, "Regulering-${YearMonth.now().year}") }
+            validate { it.requireKey(KJOERING) }
+            validate { it.requireKey(BEREGNING_BELOEP_FOER) }
+            validate { it.requireKey(BEREGNING_BELOEP_ETTER) }
+            validate { it.requireKey(BEREGNING_G_FOER) }
+            validate { it.requireKey(BEREGNING_G_ETTER) }
+            validate { it.requireKey(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
+            validate { it.requireKey(VEDTAK_BELOEP) }
         }
     }
 

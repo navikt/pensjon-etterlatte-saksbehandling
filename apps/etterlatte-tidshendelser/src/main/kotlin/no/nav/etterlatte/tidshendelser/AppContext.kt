@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import java.time.Duration
 import java.util.UUID
 

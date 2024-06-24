@@ -1,8 +1,10 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.regulering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.tidshendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.JobbType
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

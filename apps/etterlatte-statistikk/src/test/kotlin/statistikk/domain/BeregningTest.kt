@@ -1,9 +1,11 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package statistikk.domain
 
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.beregning.*
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.domain.Beregning

@@ -6,6 +6,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -69,8 +70,6 @@ internal class OmregningHendelserBeregningRiver(
         runBlocking {
             val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
             packet[BEREGNING_KEY] = beregning.beregning
-            beregning.forrigeAvkorting?.let { packet[AVKORTING_FOER] = it }
-            beregning.avkorting?.let { packet[AVKORTING_ETTER] = it }
             sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
@@ -140,6 +139,13 @@ internal class OmregningHendelserBeregningRiver(
                 }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
+
+        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+            packet[AVKORTING_FOER] = it.ytelseFoerAvkorting
+        }
+        beregning.avkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+            packet[AVKORTING_ETTER] = it.ytelseFoerAvkorting
+        }
     }
 
     private fun verifiserToleransegrenser(
@@ -203,6 +209,10 @@ internal class OmregningHendelserBeregningRiver(
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
         filter { it.datoFOM.erFoerEllerPaa(dato) }
             .firstOrNull { it.datoTOM.erEtter(dato) }
+
+    private fun List<AvkortetYtelseDto>.paaDato(dato: LocalDate) =
+        filter { it.fom.erFoerEllerPaa(dato) }
+            .firstOrNull { it.tom.erEtter(dato) }
 }
 
 class MindreEnnForrigeBehandling(

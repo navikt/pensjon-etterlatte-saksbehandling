@@ -233,7 +233,7 @@ class BehandlingFactory(
     fun opprettOmgjoeringAvslag(
         sakId: Long,
         saksbehandler: Saksbehandler,
-    ): BehandlingOgOppgave {
+    ): Behandling {
         val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
         val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
         val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
@@ -267,8 +267,10 @@ class BehandlingFactory(
             ) {
                 "Behandlingen vi akkurat opprettet fins ikke :("
             }
+
         val persongalleri = runBlocking { grunnlagService.hentPersongalleri(foerstegangsbehandlingViOmgjoerer.id) }
         grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+
         val oppgave =
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                 referanse = behandling.id.toString(),
@@ -278,12 +280,11 @@ class BehandlingFactory(
             )
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
 
-        return BehandlingOgOppgave(behandling, oppgave) {
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                behandling.toStatistikkBehandling(persongalleri),
-                BehandlingHendelseType.OPPRETTET,
-            )
-        }
+        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+            behandling.toStatistikkBehandling(persongalleri),
+            BehandlingHendelseType.OPPRETTET,
+        )
+        return behandling
     }
 
     internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {

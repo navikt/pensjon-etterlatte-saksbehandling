@@ -13,6 +13,7 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -80,11 +81,11 @@ internal fun Route.behandlingRoutes(
             throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
         }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-            val behandling =
+            val behandlingOgOppgave =
                 inTransaction {
                     behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
                 }
-            call.respond(behandling)
+            call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }
 

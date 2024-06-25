@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import { Box, Heading, Link, Table } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSamordningsdataForSak } from '~shared/api/vedtaksvurdering'
@@ -8,12 +8,15 @@ import { formaterStringDato } from '~utils/formattering'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Samordningsvedtak } from '~components/vedtak/typer'
+import SamordningOppdaterMeldingModal from "~components/person/SamordningOppdaterMeldingModal";
 
-export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) => {
+export const SamordningSak = ({ fnr, sakResult }: { fnr: string, sakResult: Result<SakMedBehandlinger> }) => {
   const [samordningdataStatus, hent] = useApiCall(hentSamordningsdataForSak)
+  const [sakId, setSakId] = useState<number>()
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
+      setSakId(sakResult.data.sak.id)
       hent(sakResult.data.sak.id)
     }
   }, [sakResult])
@@ -23,7 +26,7 @@ export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlin
       <Heading size="medium">Samordningsmeldinger</Heading>
 
       {mapResult(samordningdataStatus, {
-        success: (data) => <SamordningTabell samordningsdata={data} />,
+        success: (data) => <SamordningTabell fnr={fnr} sakId={sakId!} samordningsdata={data}/>,
         pending: <Spinner visible={true} label="Henter samordningsdata" />,
         error: () => <ApiErrorAlert>Kunne ikke hente samordningsdata</ApiErrorAlert>,
       })}
@@ -31,7 +34,11 @@ export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlin
   )
 }
 
-function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordningsvedtak> }) {
+function SamordningTabell({fnr, sakId, samordningsdata}: {
+  fnr: string,
+  sakId: number,
+  samordningsdata: Array<Samordningsvedtak>
+}) {
   return samordningsdata.length == 0 ? (
     <p>Ingen samordningsmeldinger</p>
   ) : (
@@ -47,6 +54,7 @@ function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordni
           <Table.HeaderCell>Mottatt dato</Table.HeaderCell>
           <Table.HeaderCell>Purret dato</Table.HeaderCell>
           <Table.HeaderCell>Refusjonskrav</Table.HeaderCell>
+          <Table.HeaderCell>Overstyr</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -68,6 +76,9 @@ function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordni
                 <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
                 <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
                 <Table.DataCell>{mld.svartDato && (mld.refusjonskrav ? 'Ja' : 'Nei')}</Table.DataCell>
+                {!mld.svartDato && (<Table.DataCell>
+                  <SamordningOppdaterMeldingModal fnr={fnr} sakId={sakId} mld={mld}/>
+                </Table.DataCell>)}
               </Table.Row>
             ))
           )}

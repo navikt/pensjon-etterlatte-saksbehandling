@@ -12,18 +12,21 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
 import no.nav.etterlatte.statistikk.clients.VedtaksvurderingsKlient
+import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
 import no.nav.etterlatte.statistikk.database.OppdaterVedtakRepo
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.jobs.VedtakOppdateringJob
+import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
 import no.nav.etterlatte.statistikk.river.TilbakekrevinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
+import no.nav.etterlatte.statistikk.service.AktivitetspliktService
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -106,6 +109,18 @@ class ApplicationContext {
 
     val klageHendelseRiver: KlagehendelseRiver by lazy {
         KlagehendelseRiver(rapidsConnection, statistikkService)
+    }
+
+    private val aktivitetspliktRepo: AktivitetspliktRepo by lazy {
+        AktivitetspliktRepo(datasource)
+    }
+
+    private val aktivitetspliktService: AktivitetspliktService by lazy {
+        AktivitetspliktService(aktivitetspliktRepo)
+    }
+
+    val aktivitetspliktRiver: AktivitetspliktHendelseRiver by lazy {
+        AktivitetspliktHendelseRiver(rapidsConnection, aktivitetspliktService)
     }
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {

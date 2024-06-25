@@ -387,6 +387,7 @@ internal class ApplicationContext(
             grunnlagKlient = grunnlagKlientObo,
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
+            statistikkKafkaProducer = behandlingsHendelser,
         )
 
     val gyldighetsproevingService =

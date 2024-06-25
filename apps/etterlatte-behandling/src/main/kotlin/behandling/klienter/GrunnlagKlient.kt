@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -29,6 +30,11 @@ interface GrunnlagKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>?
+
+    suspend fun hentGrunnlagForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag
 }
 
 class GrunnlagKlientException(
@@ -104,6 +110,33 @@ class GrunnlagKlientObo(
         } catch (e: Exception) {
             throw GrunnlagKlientException(
                 "Henting av persongalleri fra grunnlag for behandling med id=$behandlingId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun hentGrunnlagForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag {
+        try {
+            logger.info("Henter grunnlag for sak med id=$sakId")
+
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/grunnlag/sak/$sakId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response!!.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw GrunnlagKlientException(
+                "Henting av grunnlag for sak med id=$sakId feilet",
                 e,
             )
         }

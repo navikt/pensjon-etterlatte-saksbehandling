@@ -32,6 +32,19 @@ class ReguleringDaoTest(
     }
 
     @Test
+    fun taklerAtViIkkeHarSpesifisertSaker() {
+        val dato = LocalDate.of(2024, Month.JUNE, 22)
+        leggInnReguleringskonfigurasjon(dato, 10, null, null)
+        leggInnReguleringskonfigurasjon(dato, 20, null, null)
+        val dao = ReguleringDao(datasource = dataSource)
+        val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
+        assertEquals(20, konfigurasjon.antall)
+        assertEquals(dato, konfigurasjon.dato)
+        containsInOrder(listOf(1, 2, 3, 4, 5), konfigurasjon.spesifikkeSaker)
+        containsInOrder(listOf(1, 2, 4), konfigurasjon.ekskluderteSaker)
+    }
+
+    @Test
     fun ignorerInaktivKonfigurasjon() {
         val dato = LocalDate.of(2024, Month.JUNE, 22)
         leggInnReguleringskonfigurasjon(dato, 10, listOf(), listOf())
@@ -45,8 +58,8 @@ class ReguleringDaoTest(
     private fun leggInnReguleringskonfigurasjon(
         dato: LocalDate,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<Long>?,
+        ekskluderteSaker: List<Long>?,
         aktiv: Boolean = true,
     ) = dataSource.insert(
         tabellnavn = Databasetabell.TABELLNAVN,
@@ -54,8 +67,8 @@ class ReguleringDaoTest(
             mapOf(
                 Databasetabell.ANTALL to antall,
                 Databasetabell.DATO to dato,
-                Databasetabell.SPESIFIKKE_SAKER to spesifikkeSaker.tilDatabasetabell(tx),
-                Databasetabell.EKSKLUDERTE_SAKER to ekskluderteSaker.tilDatabasetabell(tx),
+                Databasetabell.SPESIFIKKE_SAKER to spesifikkeSaker?.tilDatabasetabell(tx),
+                Databasetabell.EKSKLUDERTE_SAKER to ekskluderteSaker?.tilDatabasetabell(tx),
                 Databasetabell.AKTIV to aktiv,
             )
         },

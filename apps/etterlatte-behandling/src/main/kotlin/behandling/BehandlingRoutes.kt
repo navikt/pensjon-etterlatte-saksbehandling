@@ -80,7 +80,10 @@ internal fun Route.behandlingRoutes(
             throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
         }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-            val behandling = behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
+            val behandling =
+                inTransaction {
+                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
+                }
             call.respond(behandling)
         }
     }

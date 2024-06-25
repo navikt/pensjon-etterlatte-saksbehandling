@@ -121,6 +121,7 @@ private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
             behandlingId = behandlingId,
             datoFom = etterbetalingCopy.datoFom,
             datoTom = etterbetalingCopy.datoTom,
+            inneholderKrav = etterbetalingCopy.inneholderKrav,
             kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
         )
     } else {
@@ -142,6 +143,7 @@ private fun Etterbetaling.toDto() =
         datoFom = fom.atDay(1),
         datoTom = tom.atEndOfMonth(),
         kilde = kilde,
+        inneholderKrav = inneholderKrav,
     )
 
 class OpphoerIkkeSatt(

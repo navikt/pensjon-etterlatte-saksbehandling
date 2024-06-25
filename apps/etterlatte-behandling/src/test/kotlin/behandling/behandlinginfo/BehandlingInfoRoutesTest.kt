@@ -115,6 +115,7 @@ internal class BehandlingInfoRoutesTest {
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
@@ -171,6 +172,7 @@ internal class BehandlingInfoRoutesTest {
 
             etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
             etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
+            etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
         }
     }
 
@@ -205,6 +207,7 @@ internal class BehandlingInfoRoutesTest {
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 1),
             tom = YearMonth.of(2023, 2),
+            inneholderKrav = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
@@ -224,6 +227,7 @@ internal class BehandlingInfoRoutesTest {
                     behandlingId = behandlingId,
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
+                    inneholderKrav = true,
                     null,
                 ),
         )

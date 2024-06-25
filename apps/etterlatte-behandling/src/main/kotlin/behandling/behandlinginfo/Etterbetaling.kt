@@ -10,6 +10,7 @@ data class Etterbetaling(
     val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
+    val inneholderKrav: Boolean?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {
     init {
@@ -26,12 +27,13 @@ data class Etterbetaling(
             behandlingId: UUID,
             datoFom: LocalDate?,
             datoTom: LocalDate?,
+            inneholderKrav: Boolean?,
             kilde: Grunnlagsopplysning.Saksbehandler,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
                 throw EtterbetalingException.EtterbetalingManglerDato()
             }
-            return Etterbetaling(behandlingId, YearMonth.from(datoFom), YearMonth.from(datoTom), kilde)
+            return Etterbetaling(behandlingId, YearMonth.from(datoFom), YearMonth.from(datoTom), inneholderKrav, kilde)
         }
     }
 }

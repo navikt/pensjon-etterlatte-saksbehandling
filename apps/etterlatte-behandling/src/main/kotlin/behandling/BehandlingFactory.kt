@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -232,7 +233,7 @@ class BehandlingFactory(
     fun opprettOmgjoeringAvslag(
         sakId: Long,
         saksbehandler: Saksbehandler,
-    ) {
+    ): BehandlingOgOppgave {
         val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
         val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
         val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
@@ -266,11 +267,23 @@ class BehandlingFactory(
             ) {
                 "Behandlingen vi akkurat opprettet fins ikke :("
             }
-        val oppgaveForFoerstegangsbehandling =
-            checkNotNull(oppgaveService.hentOppgaveUnderBehandling(behandling.id.toString())) {
-                "Behandlingen vi akkurat opprettet har ikke noen oppgave :("
-            }
-        oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler.ident)
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(foerstegangsbehandlingViOmgjoerer.id) }
+        grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+        val oppgave =
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                referanse = behandling.id.toString(),
+                sakId = behandling.sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                merknad = "Omgjøring av førstegangsbehandling",
+            )
+        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
+
+        return BehandlingOgOppgave(behandling, oppgave) {
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                behandling.toStatistikkBehandling(persongalleri),
+                BehandlingHendelseType.OPPRETTET,
+            )
+        }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
@@ -161,25 +161,23 @@ export default function ManuellBehandling() {
           ))}
         </Select>
 
-        <Box paddingBlock="4 4">
-          <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
 
-          <Select
-            label="Årsak overstyrt beregning:"
-            {...register('kategori', {
-              required: { value: true, message: 'Du må velge kategori' },
-            })}
-            disabled={!watch('overstyrBeregning')}
-            error={errors.kategori?.message}
-          >
-            <option value="">Velg kategori</option>
-            {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </Select>
-        </Box>
+        <Select
+          label="Årsak overstyrt beregning:"
+          {...register('kategori', {
+            required: { value: !!watch('overstyrBeregning'), message: 'Du må velge kategori' },
+          })}
+          disabled={!watch('overstyrBeregning')}
+          error={errors.kategori?.message}
+        >
+          <option value="">Velg kategori</option>
+          {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+            <option key={key} value={key}>
+              {value}
+            </option>
+          ))}
+        </Select>
 
         <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
 

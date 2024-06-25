@@ -7,6 +7,7 @@ object ReguleringEvents {
     const val KJOERING = "kjoering"
     const val ANTALL = "antall"
     const val SPESIFIKKE_SAKER = "spesifikke_saker"
+    const val EKSKLUDERTE_SAKER = "ekskluderte_saker"
 
     const val BEREGNING_BELOEP_FOER = "beregning_beloep_foer"
     const val BEREGNING_BELOEP_ETTER = "beregning_beloep_etter"
@@ -20,10 +21,24 @@ var JsonMessage.saker: List<Long>
     get() =
         this[ReguleringEvents.SPESIFIKKE_SAKER]
             .asText()
-            .trim()
-            .split(";")
-            .filter { it.isNotEmpty() }
-            .map { it.toLong() }
+            .tilSeparertListe()
     set(name) {
-        this[ReguleringEvents.SPESIFIKKE_SAKER] = name.joinToString(";") { it.toString() }
+        this[ReguleringEvents.SPESIFIKKE_SAKER] = name.tilSeparertString()
     }
+
+var JsonMessage.ekskluderteSaker: List<Long>
+    get() =
+        this[ReguleringEvents.EKSKLUDERTE_SAKER]
+            .asText()
+            .tilSeparertListe()
+    set(name) {
+        this[ReguleringEvents.EKSKLUDERTE_SAKER] = name.tilSeparertString()
+    }
+
+fun String.tilSeparertListe() =
+    trim()
+        .split(";")
+        .filter { it.isNotEmpty() }
+        .map { it.toLong() }
+
+fun List<Long>.tilSeparertString() = this.joinToString(";") { it.toString() }

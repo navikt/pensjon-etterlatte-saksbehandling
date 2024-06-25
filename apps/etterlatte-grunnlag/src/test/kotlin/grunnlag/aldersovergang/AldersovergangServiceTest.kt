@@ -37,24 +37,28 @@ class AldersovergangServiceTest(
         dataSource.insert(
             tabellnavn = "grunnlagshendelse",
             params =
-                mapOf(
-                    "opplysning_type" to "SOEKER_PDL_V1",
-                    "opplysning" to "{}",
-                    "sak_id" to 1,
-                    "hendelsenummer" to 1,
-                    "fnr" to SOEKER_FOEDSELSNUMMER.value,
-                ),
+                {
+                    mapOf(
+                        "opplysning_type" to "SOEKER_PDL_V1",
+                        "opplysning" to "{}",
+                        "sak_id" to 1,
+                        "hendelsenummer" to 1,
+                        "fnr" to SOEKER_FOEDSELSNUMMER.value,
+                    )
+                },
         )
         dataSource.insert(
             tabellnavn = "grunnlagshendelse",
             params =
-                mapOf(
-                    "opplysning_type" to "FOEDSELSDATO",
-                    "opplysning" to foedselsdato,
-                    "sak_id" to 1,
-                    "hendelsenummer" to 2,
-                    "fnr" to SOEKER_FOEDSELSNUMMER.value,
-                ),
+                {
+                    mapOf(
+                        "opplysning_type" to "FOEDSELSDATO",
+                        "opplysning" to foedselsdato,
+                        "sak_id" to 1,
+                        "hendelsenummer" to 2,
+                        "fnr" to SOEKER_FOEDSELSNUMMER.value,
+                    )
+                },
         )
     }
 }

@@ -48,9 +48,11 @@ export default function SamordningOppdaterMeldingModal({fnr, sakId, mld}: {
 
     return (
         <>
-            <Button variant="primary" onClick={() => setOpen(true)}>
-                <DocPencilIcon title="Overstyr"/>
-            </Button>
+            <Button
+                variant="primary"
+                icon={<DocPencilIcon title="Overstyr"/>}
+                onClick={() => setOpen(true)}
+            />
 
             <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
                 <Modal.Body>

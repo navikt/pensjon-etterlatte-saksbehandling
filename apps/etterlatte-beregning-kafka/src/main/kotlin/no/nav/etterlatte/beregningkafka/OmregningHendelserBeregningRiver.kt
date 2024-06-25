@@ -141,10 +141,10 @@ internal class OmregningHendelserBeregningRiver(
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
 
         beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
-            packet[AVKORTING_FOER] = it.ytelseFoerAvkorting
+            packet[AVKORTING_FOER] = it.avkortingsbeloep
         }
         beregning.avkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
-            packet[AVKORTING_ETTER] = it.ytelseFoerAvkorting
+            packet[AVKORTING_ETTER] = it.avkortingsbeloep
         }
     }
 

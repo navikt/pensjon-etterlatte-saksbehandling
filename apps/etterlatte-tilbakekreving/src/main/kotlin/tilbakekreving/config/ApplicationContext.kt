@@ -46,7 +46,7 @@ class ApplicationContext(
 
     val tilbakekrevingHendelseRepository = TilbakekrevingHendelseRepository(dataSource)
 
-    val tilbakekrevingKlient =
+    val tilbakekrevingskomponentenKlient =
         TilbakekrevingskomponentenKlient(
             url = properties.proxyUrl,
             httpClient =
@@ -59,7 +59,7 @@ class ApplicationContext(
             hendelseRepository = tilbakekrevingHendelseRepository,
         )
 
-    val tilbakekrevingService = TilbakekrevingService(tilbakekrevingKlient)
+    val tilbakekrevingService = TilbakekrevingService(tilbakekrevingskomponentenKlient)
 
     val kravgrunnlagService = KravgrunnlagService(behandlingKlient)
 

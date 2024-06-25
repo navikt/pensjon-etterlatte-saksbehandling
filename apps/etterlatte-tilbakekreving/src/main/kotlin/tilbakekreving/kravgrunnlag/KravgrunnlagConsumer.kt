@@ -6,13 +6,16 @@ import jakarta.jms.MessageListener
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseStatus
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toKravOgVedtakstatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import kotlin.system.exitProcess
 
 class KravgrunnlagConsumer(
@@ -38,33 +41,48 @@ class KravgrunnlagConsumer(
             try {
                 logger.info("Melding (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
                 payload = message.getBody(String::class.java)
+                val jmsTimestamp = Tidspunkt(Instant.ofEpochMilli(message.jmsTimestamp))
 
                 when {
                     payload.contains("detaljertKravgrunnlagMelding") -> {
                         logger.info("Mottok melding av type detaljertKravgrunnlagMelding")
                         val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
+                        val sakId = detaljertKravgrunnlag.fagsystemId.toLong()
+                        val type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
 
-                        hendelseRepository.lagreTilbakekrevingHendelse(
-                            sakId = detaljertKravgrunnlag.fagsystemId.toLong(),
-                            payload = payload,
-                            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
-                        )
+                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, type, jmsTimestamp)
+
+                        val hendelseId =
+                            hendelseRepository.lagreTilbakekrevingHendelse(
+                                sakId = detaljertKravgrunnlag.fagsystemId.toLong(),
+                                payload = payload,
+                                type = type,
+                                jmsTimestamp = jmsTimestamp,
+                            )
 
                         val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag)
                         kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
+                        hendelseRepository.ferdigstillTilbakekrevingHendelse(sakId, hendelseId)
                     }
                     payload.contains("endringKravOgVedtakstatus") -> {
                         logger.info("Mottok melding av type endringKravOgVedtakstatus")
                         val kravOgVedtakstatusDto = toKravOgVedtakstatus(payload)
+                        val sakId = kravOgVedtakstatusDto.fagsystemId.toLong()
+                        val type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
 
-                        hendelseRepository.lagreTilbakekrevingHendelse(
-                            sakId = kravOgVedtakstatusDto.fagsystemId.toLong(),
-                            payload = payload,
-                            type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
-                        )
+                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, type, jmsTimestamp)
+
+                        val hendelseId =
+                            hendelseRepository.lagreTilbakekrevingHendelse(
+                                sakId = kravOgVedtakstatusDto.fagsystemId.toLong(),
+                                payload = payload,
+                                type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
+                                jmsTimestamp = jmsTimestamp,
+                            )
 
                         val kravOgVedtakstatus = KravgrunnlagMapper.toKravOgVedtakstatus(kravOgVedtakstatusDto)
                         kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
+                        hendelseRepository.ferdigstillTilbakekrevingHendelse(sakId, hendelseId)
                     }
 
                     else -> throw Exception("Ukjent meldingstype, sjekk sikkerlogg og feilkø")
@@ -77,6 +95,20 @@ class KravgrunnlagConsumer(
                 throw t
             }
         }
+
+    private fun sjekkAtSisteHendelseForSakErFerdigstilt(
+        sakId: Long,
+        type: TilbakekrevingHendelseType,
+        jmsTimestampNyHendelse: Tidspunkt,
+    ) {
+        val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId, type)
+        if (sisteHendelse?.status == TilbakekrevingHendelseStatus.NY) {
+            throw Exception("Må ferdigstille forrige hendelse ${sisteHendelse.id} for sak $sakId før ny kan prosesseres")
+        }
+        if (sisteHendelse?.jmsTimestamp?.isAfter(jmsTimestampNyHendelse) == true) {
+            throw Exception("Hendelser har blitt behandlet i feil rekkefølge for $sakId - dette må undersøkes videre")
+        }
+    }
 
     private fun exceptionListener() =
         ExceptionListener {

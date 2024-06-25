@@ -7,6 +7,7 @@ import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retry
+import java.time.Instant
 
 class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
     private var mq: MutableMap<String, String> = mutableMapOf()
@@ -38,6 +39,7 @@ class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
                             every { it.jmsMessageID } returns System.currentTimeMillis().toString()
                             every { it.getBody(String::class.java) } returns xml
                             every { it.getLongProperty(any()) } returns 1L
+                            every { it.jmsTimestamp } returns Instant.now().toEpochMilli()
                         },
                     )
                 }

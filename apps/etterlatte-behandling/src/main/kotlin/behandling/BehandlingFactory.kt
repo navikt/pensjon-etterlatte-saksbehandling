@@ -252,7 +252,7 @@ class BehandlingFactory(
         }
 
         val foerstegangsbehandlingViOmgjoerer =
-            foerstegangsbehandlingerIkkeAvslaattAvbrutt.maxBy { it.behandlingOpprettet }
+            foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
         // TODO: skal vi kopiere med noe annet her?
         val behandling =
             checkNotNull(

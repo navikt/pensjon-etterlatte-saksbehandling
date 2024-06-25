@@ -44,7 +44,7 @@ class AktivitetspliktRepo(
             statement.setString(3, statisikkAktivitet.avdoedDoedsmaaned.toString())
             statement.setJsonb(4, statisikkAktivitet.unntak)
             statement.setJsonb(5, statisikkAktivitet.brukersAktivitet)
-            statement.setJsonb(6, statisikkAktivitet.aktitetsgrad)
+            statement.setJsonb(6, statisikkAktivitet.aktivitetsgrad)
             statement.setBoolean(7, statisikkAktivitet.harVarigUnntak)
             statement.setString(8, YearMonth.from(statisikkAktivitet.registrert.toNorskLocalDate()).toString())
             statement.executeUpdate()
@@ -75,18 +75,18 @@ class AktivitetspliktRepo(
             statement.setLong(1, sakId)
             statement.setString(2, yearMonth.toString())
             statement.executeQuery().singleOrNull {
-                somStatistikkAkvititet()
+                somStatistikkAktivititet()
             }
         }
 
-    private fun ResultSet.somStatistikkAkvititet(): StatistikkAktivitet =
+    private fun ResultSet.somStatistikkAktivititet(): StatistikkAktivitet =
         StatistikkAktivitet(
             sakId = getLong("sak_id"),
             registrert = getTidspunkt("registrert"),
             avdoedDoedsmaaned = getString("avdoed_doedsmaaned").let { YearMonth.parse(it) },
             unntak = getString("unntak").let { objectMapper.readValue(it) },
             brukersAktivitet = getString("brukers_aktivitet").let { objectMapper.readValue(it) },
-            aktitetsgrad = getString("aktivitetsgrad").let { objectMapper.readValue(it) },
+            aktivitetsgrad = getString("aktivitetsgrad").let { objectMapper.readValue(it) },
             harVarigUnntak = getBoolean("varig_unntak"),
         )
 }
@@ -97,7 +97,7 @@ data class StatistikkAktivitet(
     val avdoedDoedsmaaned: YearMonth,
     val unntak: List<PeriodisertAktivitetspliktopplysning>,
     val brukersAktivitet: List<PeriodisertAktivitetspliktopplysning>,
-    val aktitetsgrad: List<PeriodisertAktivitetspliktopplysning>,
+    val aktivitetsgrad: List<PeriodisertAktivitetspliktopplysning>,
     val harVarigUnntak: Boolean,
 ) {
     companion object {
@@ -108,7 +108,7 @@ data class StatistikkAktivitet(
                 avdoedDoedsmaaned = dto.avdoedDoedsmaaned,
                 unntak = dto.unntak.map { PeriodisertAktivitetspliktopplysning.fra(it) },
                 brukersAktivitet = dto.brukersAktivitet.map { PeriodisertAktivitetspliktopplysning.fra(it) },
-                aktitetsgrad = dto.aktivitetsgrad.map { PeriodisertAktivitetspliktopplysning.fra(it) },
+                aktivitetsgrad = dto.aktivitetsgrad.map { PeriodisertAktivitetspliktopplysning.fra(it) },
                 harVarigUnntak = dto.unntak.any { it.unntak == UnntakFraAktivitetsplikt.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT },
             )
     }

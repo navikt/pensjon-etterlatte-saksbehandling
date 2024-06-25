@@ -84,8 +84,16 @@ class AktivitetspliktService(
         val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
         val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
 
-        val aktivitetsgrad = listOfNotNull(aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId))
-        val unntak = listOfNotNull(aktivitetspliktUnntakDao.hentNyesteUnntak(sakId))
+        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+        val sisteVurdering = listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+
+        val (unntak, aktivitetsgrad) =
+            when (sisteVurdering) {
+                is AktivitetspliktAktivitetsgrad -> emptyList<AktivitetspliktUnntak>() to listOf(sisteVurdering)
+                is AktivitetspliktUnntak -> listOf(sisteVurdering) to emptyList()
+                else -> emptyList<AktivitetspliktUnntak>() to emptyList()
+            }
 
         return AktivitetspliktDto(
             sakId = sakId,

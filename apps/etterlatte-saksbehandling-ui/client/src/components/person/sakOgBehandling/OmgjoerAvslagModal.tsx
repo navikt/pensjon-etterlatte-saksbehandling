@@ -1,15 +1,16 @@
-import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOmgjoeringFoerstegangsbehandling } from '~shared/api/revurdering'
-import { isPending } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { useNavigate } from 'react-router-dom'
 
 export function OmgjoerAvslagModal(props: { sakId: number }) {
   const sakId = props.sakId
   const [open, setOpen] = useState(false)
   const [opprettOmgjoeringStatus, opprettOmgjoering] = useApiCall(opprettOmgjoeringFoerstegangsbehandling)
-
+  const navigate = useNavigate()
   function opprett() {
     opprettOmgjoering({ sakId })
   }
@@ -34,19 +35,36 @@ export function OmgjoerAvslagModal(props: { sakId: number }) {
             Hvis det kun er avslåtte / avbrutte førstegangsbehandlinger i saken (ingenting er iverksatt mot oppdrag) må
             en eventuell omgjøring / rebehandling gjøres som en ny førstegangsbehandling.
           </BodyShort>
-          {isFailureHandler({
-            apiResult: opprettOmgjoeringStatus,
-            errorMessage:
-              'Kunne ikke opprette omgjøring av førstegangsbehandling. Prøv på nytt om litt, og meld sak hvis det fremdeles er feil',
+          {mapResult(opprettOmgjoeringStatus, {
+            success: () => (
+              <Alert variant="success">
+                Ny førstegangsbehandling opprettet! Last siden på nytt for å se den i listen, eller gå rett inn på
+                behandlingen.
+              </Alert>
+            ),
+            error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
           })}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" loading={isPending(opprettOmgjoeringStatus)} onClick={opprett}>
-            Opprett ny førstegangsbehandling
-          </Button>
-          <Button variant="secondary" disabled={isPending(opprettOmgjoeringStatus)} onClick={lukkModal}>
-            Avbryt
-          </Button>
+          {isSuccess(opprettOmgjoeringStatus) ? (
+            <>
+              <Button variant="primary" onClick={() => navigate(`/behandling/${opprettOmgjoeringStatus.data.id}`)}>
+                Åpne førstegangsbehandling
+              </Button>
+              <Button variant="secondary" onClick={lukkModal}>
+                Lukk
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="primary" loading={isPending(opprettOmgjoeringStatus)} onClick={opprett}>
+                Opprett ny førstegangsbehandling
+              </Button>
+              <Button variant="secondary" disabled={isPending(opprettOmgjoeringStatus)} onClick={lukkModal}>
+                Avbryt
+              </Button>
+            </>
+          )}
         </Modal.Footer>
       </Modal>
     </>

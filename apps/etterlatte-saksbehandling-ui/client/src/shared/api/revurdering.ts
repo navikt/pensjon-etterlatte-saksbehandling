@@ -3,6 +3,7 @@ import { RevurderingInfo, RevurderinginfoMedIdOgOpprettet } from '~shared/types/
 import { SakType } from '~shared/types/sak'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsammendrag } from '~components/person/typer'
 
 export const lagreRevurderingInfo = ({
   behandlingId,
@@ -69,6 +70,6 @@ export const opprettOmgjoeringKlage = async (args: {
 
 export const opprettOmgjoeringFoerstegangsbehandling = async (args: {
   sakId: number
-}): Promise<ApiResponse<IDetaljertBehandling>> => {
+}): Promise<ApiResponse<IBehandlingsammendrag>> => {
   return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, {})
 }

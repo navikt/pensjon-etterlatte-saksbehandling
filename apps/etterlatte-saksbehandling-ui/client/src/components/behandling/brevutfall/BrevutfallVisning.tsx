@@ -65,10 +65,16 @@ export const BrevutfallVisning = (props: {
         </VStack>
       )}
       {sakType == SakType.BARNEPENSJON && (
-        <VStack gap="2">
-          <Label>Gjelder brevet under eller over 18 år?</Label>
-          <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
-        </VStack>
+        <>
+          <VStack gap="2">
+            <Label>Er det krav i etterbetalingen?</Label>
+            <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
+          </VStack>
+          <VStack gap="2">
+            <Label>Gjelder brevet under eller over 18 år?</Label>
+            <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
+          </VStack>
+        </>
       )}
 
       {brevutfallOgEtterbetaling.brevutfall.feilutbetaling && (

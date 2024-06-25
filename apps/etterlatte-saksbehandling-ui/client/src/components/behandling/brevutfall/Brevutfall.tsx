@@ -47,6 +47,7 @@ export enum FeilutbetalingValg {
 export interface Etterbetaling {
   datoFom?: string | null
   datoTom?: string | null
+  inneholderKrav: boolean | null
 }
 
 const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {

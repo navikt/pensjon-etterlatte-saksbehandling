@@ -66,3 +66,9 @@ export const opprettOmgjoeringKlage = async (args: {
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.post(`/revurdering/${args.sakId}/omgjoering-klage`, { oppgaveIdOmgjoering: args.oppgaveId })
 }
+
+export const opprettOmgjoeringFoerstegangsbehandling = async (args: {
+  sakId: number
+}): Promise<ApiResponse<IDetaljertBehandling>> => {
+  return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, {})
+}

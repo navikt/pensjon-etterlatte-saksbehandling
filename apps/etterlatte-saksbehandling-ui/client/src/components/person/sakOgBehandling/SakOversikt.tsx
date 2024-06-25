@@ -13,9 +13,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
 import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 import { TilbakekrevingListe } from '~components/person/sakOgBehandling/TilbakekrevingListe'
-import { revurderingKanOpprettes } from '~components/person/hendelser/utils'
+import { omgjoeringAvslagKanOpprettes, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
+import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAvslagModal'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -26,8 +28,8 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
-
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
+  const omgjoerAvslagEnabled = useFeatureEnabledMedDefault('omgjoer-avslag', false)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -71,6 +73,10 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                   <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
                 )}
+                {omgjoerAvslagEnabled &&
+                  omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                    <OmgjoerAvslagModal sakId={sak.id} />
+                  )}
               </VStack>
 
               <VStack gap="4">

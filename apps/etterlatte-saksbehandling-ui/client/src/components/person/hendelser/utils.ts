@@ -10,7 +10,7 @@ import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { behandlingErIverksatt, enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 
 export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType, string> = {
@@ -143,5 +143,19 @@ export const revurderingKanOpprettes = (
   return (
     behandlinger.filter((behandling) => behandlingErIverksatt(behandling.status)).length > 0 &&
     enhetErSkrivbar(enhetId, enheter)
+  )
+}
+
+export const omgjoeringAvslagKanOpprettes = (
+  behandlinger: IBehandlingsammendrag[],
+  enhet: string,
+  enheter: Array<string>
+): Boolean => {
+  return (
+    behandlinger.every(
+      (behandling) =>
+        behandling.behandlingType != IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+        [IBehandlingStatus.AVSLAG, IBehandlingStatus.AVBRUTT].includes(behandling.status)
+    ) && enhetErSkrivbar(enhet, enheter)
   )
 }

@@ -23,6 +23,7 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
@@ -59,6 +60,7 @@ internal class BehandlingRoutesTest {
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
+    private val featureToggleService = DummyFeatureToggleService()
 
     @BeforeAll
     fun before() {
@@ -290,6 +292,7 @@ internal class BehandlingRoutesTest {
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         behandlingFactory,
+                        featureToggleService,
                     )
                 }
             block(client)

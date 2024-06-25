@@ -19,10 +19,11 @@ import {Samordningsmelding} from "~components/vedtak/typer";
 import {JaNei} from "~shared/types/ISvar";
 import {Toast} from "~shared/alerts/Toast";
 
-export default function SamordningOppdaterMeldingModal({fnr, sakId, mld}: {
+export default function SamordningOppdaterMeldingModal({fnr, sakId, mld, refresh}: {
     fnr: string,
     sakId: number,
-    mld: Samordningsmelding
+    mld: Samordningsmelding,
+    refresh: () => void
 }) {
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
@@ -42,7 +43,7 @@ export default function SamordningOppdaterMeldingModal({fnr, sakId, mld}: {
             },
         }, () => {
             setOpen(false)
-            //navigate(`/person/${fnr}/?fane=SAMORDNING`)
+            refresh()
         })
     }
 

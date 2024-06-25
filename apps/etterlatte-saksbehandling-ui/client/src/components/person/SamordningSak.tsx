@@ -26,7 +26,12 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string, sakResult: Resu
       <Heading size="medium">Samordningsmeldinger</Heading>
 
       {mapResult(samordningdataStatus, {
-        success: (data) => <SamordningTabell fnr={fnr} sakId={sakId!} samordningsdata={data}/>,
+        success: (data) => <SamordningTabell
+            fnr={fnr}
+            sakId={sakId!}
+            samordningsdata={data}
+            refresh={() => hent(sakId!)}
+        />,
         pending: <Spinner visible={true} label="Henter samordningsdata" />,
         error: () => <ApiErrorAlert>Kunne ikke hente samordningsdata</ApiErrorAlert>,
       })}
@@ -34,10 +39,11 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string, sakResult: Resu
   )
 }
 
-function SamordningTabell({fnr, sakId, samordningsdata}: {
+function SamordningTabell({fnr, sakId, samordningsdata, refresh}: {
   fnr: string,
   sakId: number,
-  samordningsdata: Array<Samordningsvedtak>
+  samordningsdata: Array<Samordningsvedtak>,
+  refresh: () => void
 }) {
   return samordningsdata.length == 0 ? (
     <p>Ingen samordningsmeldinger</p>
@@ -77,7 +83,12 @@ function SamordningTabell({fnr, sakId, samordningsdata}: {
                 <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
                 <Table.DataCell>{mld.svartDato && (mld.refusjonskrav ? 'Ja' : 'Nei')}</Table.DataCell>
                 {!mld.svartDato && (<Table.DataCell>
-                  <SamordningOppdaterMeldingModal fnr={fnr} sakId={sakId} mld={mld}/>
+                  <SamordningOppdaterMeldingModal
+                      fnr={fnr}
+                      sakId={sakId}
+                      mld={mld}
+                      refresh={refresh}
+                  />
                 </Table.DataCell>)}
               </Table.Row>
             ))

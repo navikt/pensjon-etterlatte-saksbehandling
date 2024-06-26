@@ -4,8 +4,8 @@ export interface SimulertBeregning {
   infomelding: string | null
   beloep: number
   kommendeUtbetalinger: SimulertBeregningsperiode[]
-  etterbetaling: UtbetalingAggregert[]
-  tilbakekreving: UtbetalingAggregert[]
+  etterbetaling: SimulertBeregningsperiode[]
+  tilbakekreving: SimulertBeregningsperiode[]
 }
 
 export interface SimulertBeregningsperiode {
@@ -23,11 +23,4 @@ export interface SimulertBeregningsperiode {
   klassekode: string
   klassekodeBeskrivelse: string
   klasseType: string
-}
-
-export interface UtbetalingAggregert {
-  klassekode: string
-  klassekodeBeskrivelse: string
-  klasseType: string
-  beloep: number
 }

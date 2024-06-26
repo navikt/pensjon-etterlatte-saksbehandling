@@ -5,8 +5,8 @@ import { isInitial, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
-import { BodyShort, Button, Heading, Table, HStack, Box } from '@navikt/ds-react'
-import { SimulertBeregning, UtbetalingAggregert } from '~shared/types/Utbetaling'
+import {BodyShort, Button, Heading, Table, Box, Label} from '@navikt/ds-react'
+import {SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -49,47 +49,15 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
   return (
     <>
-      <TableWrapper>
-        <b>Kommende utbetaling(er)</b>
-        <Table zebraStripes>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Periode</Table.HeaderCell>
-              <Table.HeaderCell>Klasse</Table.HeaderCell>
-              <Table.HeaderCell>Konto</Table.HeaderCell>
-              <Table.HeaderCell>Forfall</Table.HeaderCell>
-              <Table.HeaderCell align="right">Beløp</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data.kommendeUtbetalinger.map((periode, idx) => (
-              <Table.Row key={idx}>
-                <Table.DataCell>
-                  {formaterStringDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
-                </Table.DataCell>
-                <Table.DataCell>{periode.klassekodeBeskrivelse}</Table.DataCell>
-                <Table.DataCell>{periode.konto}</Table.DataCell>
-                <Table.DataCell>{formaterStringDato(periode.forfall)}</Table.DataCell>
-                <Table.DataCell align="right">{NOK(periode.beloep)}</Table.DataCell>
-              </Table.Row>
-            ))}
-            <Table.Row>
-              <Table.DataCell colSpan={4}>
-                <b>Sum utbetaling</b>
-              </Table.DataCell>
-              <Table.DataCell align="right">{NOK(data.beloep)}</Table.DataCell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-      </TableWrapper>
+      <UtbetalingTable tittel="Kommende utbetaling(er)" data={data.kommendeUtbetalinger} />
 
-      <HStack gap="12">
-        {data.etterbetaling.length > 0 && <UtbetalingAggregertTable tittel="Etterbetaling" data={data.etterbetaling} />}
+      {data.etterbetaling.length > 0 &&
+          <UtbetalingTable tittel="Etterbetaling" data={data.etterbetaling} />
+      }
 
-        {data.tilbakekreving.length > 0 && (
-          <UtbetalingAggregertTable tittel="Potensiell tilbakekreving" data={data.tilbakekreving} />
-        )}
-      </HStack>
+      {data.tilbakekreving.length > 0 &&
+        <UtbetalingTable tittel="Potensiell tilbakekreving" data={data.tilbakekreving} />
+      }
 
       <>
         Beregnet dato: {formaterStringDato(data.datoBeregnet)}
@@ -107,34 +75,42 @@ const TableWrapper = styled.div`
   margin-bottom: 1em;
 `
 
-const UtbetalingAggregertTable = (props: { tittel: string; data: UtbetalingAggregert[] }) => {
+const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiode[] }) => {
   return (
-    <TableWrapper>
-      <b>{props.tittel}</b>
-      <Table zebraStripes size="small">
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell />
-            <Table.HeaderCell align="right">Beløp</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {props.data.map((rad, idx) => (
-            <Table.Row key={idx}>
-              <Table.DataCell>{rad.klassekodeBeskrivelse}</Table.DataCell>
-              <Table.DataCell align="right">{NOK(rad.beloep)}</Table.DataCell>
+      <TableWrapper>
+        <Heading size="xsmall">{props.tittel}</Heading>
+        <Table zebraStripes>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Periode</Table.HeaderCell>
+              <Table.HeaderCell>Klasse</Table.HeaderCell>
+              <Table.HeaderCell>Konto</Table.HeaderCell>
+              <Table.HeaderCell>Forfall</Table.HeaderCell>
+              <Table.HeaderCell align="right">Beløp</Table.HeaderCell>
             </Table.Row>
-          ))}
-          <Table.Row>
-            <Table.DataCell>
-              <b>Sum</b>
-            </Table.DataCell>
-            <Table.DataCell align="right">
-              {NOK(props.data.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}
-            </Table.DataCell>
-          </Table.Row>
-        </Table.Body>
-      </Table>
-    </TableWrapper>
+          </Table.Header>
+          <Table.Body>
+            {props.data.map((periode, idx) => (
+                <Table.Row key={idx}>
+                  <Table.DataCell>
+                    {formaterStringDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
+                  </Table.DataCell>
+                  <Table.DataCell>{periode.klassekodeBeskrivelse}</Table.DataCell>
+                  <Table.DataCell>{periode.konto}</Table.DataCell>
+                  <Table.DataCell>{formaterStringDato(periode.forfall)}</Table.DataCell>
+                  <Table.DataCell align="right">{NOK(periode.beloep)}</Table.DataCell>
+                </Table.Row>
+            ))}
+            <Table.Row>
+              <Table.DataCell colSpan={4}>
+                <Label>Sum</Label>
+              </Table.DataCell>
+              <Table.DataCell align="right">
+                {NOK(props.data.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}
+              </Table.DataCell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
+      </TableWrapper>
   )
 }

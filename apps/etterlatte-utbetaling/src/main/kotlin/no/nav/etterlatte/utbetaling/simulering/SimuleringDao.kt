@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.simulering
 
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
@@ -34,9 +33,9 @@ class SimuleringDao(
                 )
             statement.setObject(1, behandlingId)
             statement.setString(2, saksbehandler)
-            statement.setJsonb(3, vedtak.toJson())
-            statement.setJsonb(4, simuleringRequest.toJson())
-            statement.setJsonb(5, simuleringResponse.toJson())
+            statement.setJsonb(3, vedtak)
+            statement.setJsonb(4, simuleringRequest)
+            statement.setJsonb(5, simuleringResponse)
 
             statement.executeUpdate()
         }

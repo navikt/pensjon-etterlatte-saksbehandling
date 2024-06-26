@@ -3,7 +3,7 @@ import { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstids
 import { SakType } from '~shared/types/sak'
 
 export function hentMinimumsVirkningstidspunkt(
-  avdoedDoedsdato: string | undefined,
+  avdoedDoedsdato: Date | undefined,
   soeknadMottattDato: Date,
   sakType: SakType
 ): Date {

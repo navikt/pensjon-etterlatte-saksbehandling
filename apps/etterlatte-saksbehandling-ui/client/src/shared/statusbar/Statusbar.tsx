@@ -9,6 +9,8 @@ import { useEffect } from 'react'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
+import { differenceInYears } from 'date-fns'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -21,6 +23,7 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
         etternavn: person.etternavn,
         foedselsaar: person.foedselsaar,
         foedselsdato: person.foedselsdato,
+        doedsdato: person.doedsdato,
       },
     }}
   />
@@ -55,7 +58,11 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
           <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Label>
-          <VisAlderForPerson foedselsdato={person.foedselsdato} foedselsaar={person.foedselsaar} />
+
+          <DoedsdatoTag doedsdato={person.doedsdato} />
+
+          <Alder foedselsdato={person.foedselsdato} doedsdato={person.doedsdato} foedselsaar={person.foedselsaar} />
+
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
         </HStack>
@@ -64,9 +71,25 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
   )
 }
 
-const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
+const finnAlder = (foedselsdato: Date, doedsdato?: Date) => {
+  if (doedsdato) {
+    return differenceInYears(doedsdato, foedselsdato)
+  } else {
+    return hentAlderForDato(foedselsdato)
+  }
+}
+
+const Alder = ({
+  foedselsdato,
+  doedsdato,
+  foedselsaar,
+}: {
+  foedselsdato?: Date
+  doedsdato?: Date
+  foedselsaar: number
+}) => {
   if (foedselsdato) {
-    const alder = hentAlderForDato(foedselsdato)
+    const alder = finnAlder(foedselsdato, doedsdato)
     return <BodyShort textColor="subtle">({alder} år)</BodyShort>
   } else {
     return (

@@ -69,6 +69,7 @@ class StoenadRepositoryTest(
                     avkortingsbeloep = 50,
                     ytelseEtterAvkorting = 150,
                     restanse = 0,
+                    sanksjonertYtelse = null,
                 ),
             ),
         )
@@ -351,6 +352,10 @@ class StoenadRepositoryTest(
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
                 sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                harAktivitetsplikt = "JA",
+                oppfyllerAktivitet = true,
+                aktivitet = "100_PROSENT_ARBEIDSSOEKER",
+                sanksjon = null,
             )
 
         assertDoesNotThrow {

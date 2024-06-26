@@ -41,7 +41,7 @@ class ApplicationContext {
     val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv())
 
     private val statistikkService: StatistikkService by lazy {
-        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient)
+        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient, aktivitetspliktService)
     }
 
     val avbruttOpprettetBehandlinghendelseRiver: AvbruttOpprettetBehandlinghendelseRiver by lazy {

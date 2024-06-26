@@ -59,6 +59,7 @@ class SakRepositoryTest(
                     avkortingsbeloep = 50,
                     ytelseEtterAvkorting = 150,
                     restanse = 0,
+                    sanksjonertYtelse = null,
                 ),
             ),
         )

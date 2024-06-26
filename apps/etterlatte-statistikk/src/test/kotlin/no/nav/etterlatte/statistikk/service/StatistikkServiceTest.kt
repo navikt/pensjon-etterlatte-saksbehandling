@@ -59,12 +59,14 @@ class StatistikkServiceTest {
     private val sakRepo = mockk<SakRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
+    private val aktivitetspliktService = mockk<AktivitetspliktService>()
     private val service =
         StatistikkService(
             stoenadRepository = stoenadRepo,
             sakRepository = sakRepo,
             behandlingKlient = behandlingKlient,
             beregningKlient = beregningKlient,
+            aktivitetspliktService = aktivitetspliktService,
         )
 
     @Test
@@ -203,6 +205,7 @@ class StatistikkServiceTest {
                         avkortingsbeloep = 50,
                         ytelseEtterAvkorting = 150,
                         restanse = 0,
+                        sanksjonertYtelse = null,
                     ),
                 ),
             )
@@ -301,8 +304,9 @@ class StatistikkServiceTest {
                 sakRepository = sakRepo,
                 behandlingKlient = behandlingKlient,
                 beregningKlient = beregningKlient,
+                aktivitetspliktService = aktivitetspliktService,
             )
-        service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList()))
+        service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList(), emptyMap()))
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
         }

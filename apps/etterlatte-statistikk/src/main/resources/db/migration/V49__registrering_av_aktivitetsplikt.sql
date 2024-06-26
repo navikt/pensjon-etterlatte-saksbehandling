@@ -6,7 +6,7 @@ create table aktivitetsplikt(
     unntak JSONB NOT NULL,
     brukers_aktivitet JSONB NOT NULL,
     aktivitetsgrad JSONB NOT NULL,
-    varig_unntak JSONB NOT NULL,
+    varig_unntak BOOL NOT NULL,
     registrert_maaned TEXT NOT NULL
 );
 

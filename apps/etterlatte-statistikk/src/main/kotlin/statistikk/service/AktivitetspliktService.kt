@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
 import no.nav.etterlatte.statistikk.database.StatistikkAktivitet
 import no.nav.etterlatte.statistikk.database.VurdertAktivitet
@@ -10,20 +11,17 @@ import java.time.temporal.ChronoUnit
 class AktivitetspliktService(
     private val aktivitetspliktRepo: AktivitetspliktRepo,
 ) {
-    fun oppdatereVurderingAktivitetsplikt(aktivitetspliktDto: AktivitetspliktDto) {
-        aktivitetspliktRepo.lagreAktivitetspliktForSak(aktivitetspliktDto)
+    fun oppdaterVurderingAktivitetsplikt(
+        aktivitetspliktDto: AktivitetspliktDto,
+        overstyrRegistrert: Tidspunkt? = null,
+    ) {
+        aktivitetspliktRepo.lagreAktivitetspliktForSak(aktivitetspliktDto, overstyrRegistrert)
     }
 
-    fun mapRelevantStatistikkForMaanedOgSak(
+    fun hentAktivitet(
         sakId: Long,
-        statistikkmaaned: YearMonth,
-    ): AktivitetForMaaned {
-        val aktivitet =
-            aktivitetspliktRepo.hentAktivitetspliktForMaaned(sakId, statistikkmaaned)
-                ?: return AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD
-
-        return AktivitetForMaaned.mapFraStatistikkAktivitet(aktivitet, statistikkmaaned)
-    }
+        sisteMaaned: YearMonth,
+    ): StatistikkAktivitet? = aktivitetspliktRepo.hentAktivitetspliktForMaaned(sakId, sisteMaaned)
 
     fun mapAktivitetForSaker(
         sakIds: List<Long>,
@@ -64,7 +62,7 @@ data class AktivitetForMaaned(
                 )
             val aktivitetsplikt =
                 when (maanederEtterDoedsfall) {
-                    in 0..5 -> Aktivitetsplikt.OMSTILLINGSPERIODE
+                    in 0..6 -> Aktivitetsplikt.OMSTILLINGSPERIODE
                     else ->
                         if (statistikkAktivitet.harVarigUnntak) {
                             Aktivitetsplikt.VARIG_UNNTAK
@@ -96,7 +94,10 @@ data class AktivitetForMaaned(
 
             val aktivitet =
                 unntakForMaaned?.opplysning?.let { "UNNTAK_$it" }
-                    ?: listOfNotNull(vurderingForMaaned?.vurdering?.name, aktivitetForBruker).joinToString(separator = "_")
+                    ?: listOfNotNull(
+                        vurderingForMaaned?.vurdering?.name,
+                        aktivitetForBruker,
+                    ).joinToString(separator = "_")
 
             return AktivitetForMaaned(
                 harAktivitetsplikt = aktivitetsplikt,

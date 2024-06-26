@@ -30,7 +30,7 @@ class AktivitetspliktHendelseRiver(
         context: MessageContext,
     ) = try {
         val aktivitetspliktDto: AktivitetspliktDto = objectMapper.readValue(packet[AKTIVITETSPLIKT_DTO_RIVER_KEY].textValue())
-        aktivitetspliktService.oppdatereVurderingAktivitetsplikt(aktivitetspliktDto)
+        aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
     } catch (e: Exception) {
         logger.error(
             """

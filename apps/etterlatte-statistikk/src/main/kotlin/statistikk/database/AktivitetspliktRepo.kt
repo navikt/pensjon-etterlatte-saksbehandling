@@ -38,7 +38,7 @@ class AktivitetspliktRepo(
                         aktivitetsgrad, varig_unntak, registrert_maaned
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)  
                     ON CONFLICT (sak_id, registrert_maaned) DO UPDATE 
-                    SET registret = EXCLUDED.registret, avdoed_doedsmaaned = EXCLUDED.avdoed_doedsmaaned,
+                    SET registrert = EXCLUDED.registrert, avdoed_doedsmaaned = EXCLUDED.avdoed_doedsmaaned,
                         unntak = EXCLUDED.unntak, brukers_aktivitet = EXCLUDED.brukers_aktivitet,
                         aktivitetsgrad = EXCLUDED.aktivitetsgrad, varig_unntak = EXCLUDED.varig_unntak; 
                     """.trimIndent(),
@@ -69,11 +69,12 @@ class AktivitetspliktRepo(
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT sak_id, registrert, avdoed_doedsmaaned, unntak, brukers_aktivitet, 
+                    SELECT DISTINCT ON (sak_id) sak_id, registrert, avdoed_doedsmaaned, unntak, brukers_aktivitet, 
                         aktivitetsgrad, varig_unntak
                     FROM aktivitetsplikt
                     WHERE sak_id = ?
                     AND registrert_maaned <= ?
+                    ORDER BY sak_id, registrert_maaned DESC
                     """.trimIndent(),
                 )
             statement.setLong(1, sakId)
@@ -91,11 +92,12 @@ class AktivitetspliktRepo(
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT sak_id, registrert, avdoed_doedsmaaned, unntak, brukers_aktivitet, 
+                    SELECT DISTINCT ON (sak_id) sak_id, registrert, avdoed_doedsmaaned, unntak, brukers_aktivitet, 
                         aktivitetsgrad, varig_unntak
                     FROM aktivitetsplikt
                     WHERE sak_id = ANY(?)
                     AND registrert_maaned <= ?
+                    ORDER BY sak_id, registrert_maaned DESC
                     """.trimIndent(),
                 )
             statement.setArray(1, connection.createArrayOf("bigint", sakIder.toTypedArray()))

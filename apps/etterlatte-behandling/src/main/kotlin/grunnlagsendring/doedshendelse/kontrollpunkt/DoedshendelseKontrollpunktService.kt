@@ -43,22 +43,30 @@ class DoedshendelseKontrollpunktService(
             Relasjon.EKTEFELLE -> {
                 val (sak, avdoed, eps) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
-                val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
-                val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, eps)
+                if (avdoed.doedsdato == null) {
+                    listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+                } else {
+                    val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
+                    val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
+                    val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, eps)
 
-                ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                }
             }
 
             Relasjon.SAMBOER -> {
                 val (sak, avdoed, samboer) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
-                val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, samboer)
+                if (avdoed.doedsdato == null) {
+                    listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+                } else {
+                    val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
+                    val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, samboer)
 
-                avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                }
             }
 
             Relasjon.AVDOED -> {

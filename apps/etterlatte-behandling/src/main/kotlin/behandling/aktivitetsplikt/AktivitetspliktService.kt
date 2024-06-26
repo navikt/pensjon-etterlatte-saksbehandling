@@ -86,7 +86,8 @@ class AktivitetspliktService(
 
         val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
         val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val sisteVurdering = listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+        val sisteVurdering =
+            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
 
         val (unntak, aktivitetsgrad) =
             when (sisteVurdering) {
@@ -178,11 +179,13 @@ class AktivitetspliktService(
                 aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
             }
         }
+        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo) }
     }
 
     fun slettAktivitet(
         behandlingId: UUID,
         aktivitetId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
@@ -194,6 +197,7 @@ class AktivitetspliktService(
         inTransaction {
             aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
+        runBlocking { sendDtoTilStatistikk(behandling.sak.id, null) }
     }
 
     fun opprettAktivitetsgradForOppgave(
@@ -209,6 +213,7 @@ class AktivitetspliktService(
             ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
     }
 
     fun upsertAktivitetsgradForBehandling(

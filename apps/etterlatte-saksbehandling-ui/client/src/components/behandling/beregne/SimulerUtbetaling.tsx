@@ -78,7 +78,7 @@ const TableWrapper = styled.div`
 const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiode[] }) => {
   return (
       <TableWrapper>
-        <Label>{props.tittel}</Label>
+        <Heading size="xsmall">{props.tittel}</Heading>
         <Table zebraStripes>
           <Table.Header>
             <Table.Row>

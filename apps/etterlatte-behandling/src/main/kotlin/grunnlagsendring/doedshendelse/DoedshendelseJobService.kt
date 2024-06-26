@@ -88,7 +88,7 @@ class DoedshendelseJobService(
             try {
                 doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
             } catch (e: Exception) {
-                val sak = doedshendelse.sakId?.toString() ?: "sak mangler"
+                val sak = doedshendelse.sakId?.toString() ?: "mangler"
                 logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
                 throw e
             }

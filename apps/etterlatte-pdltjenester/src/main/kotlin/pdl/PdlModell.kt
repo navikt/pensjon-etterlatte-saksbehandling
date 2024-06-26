@@ -158,6 +158,7 @@ data class PdlHentPersonNavnFoedselsdato(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
     val navn: List<PdlNavn>,
     val foedsel: List<PdlFoedsel>,
+    val doedsfall: List<PdlDoedsfall>,
 )
 
 data class PdlHentPerson(

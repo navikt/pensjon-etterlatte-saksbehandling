@@ -11,6 +11,7 @@ data class PersonNavnFoedselsaar(
     val foedselsnummer: Folkeregisteridentifikator,
     val foedselsaar: Int,
     val foedselsdato: LocalDate? = null,
+    val doedsdato: LocalDate? = null,
 )
 
 data class PersonSoekSvar(

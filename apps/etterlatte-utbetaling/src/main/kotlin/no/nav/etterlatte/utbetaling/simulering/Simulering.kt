@@ -13,8 +13,8 @@ data class SimulertBeregning(
     val infomelding: String? = null,
     val beloep: BigDecimal,
     val kommendeUtbetalinger: List<SimulertBeregningsperiode>,
-    val etterbetaling: List<UtbetalingAggregert>,
-    val tilbakekreving: List<UtbetalingAggregert>,
+    val etterbetaling: List<SimulertBeregningsperiode>,
+    val tilbakekreving: List<SimulertBeregningsperiode>,
 )
 
 data class SimulertBeregningsperiode(
@@ -84,8 +84,6 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
             .filter { !it.forfall.isAfter(simulertPaaDato) }
             .filter { !it.klassekode.tekniskArt }
             .filter { it.klasseType != KlasseType.FEIL }
-            .groupBy { it.klasseType }
-            .map { (klasseType, periode) -> tilUtbetalingAggregert(periode, klasseType) }
             .toList()
 
     val tilbakekreving =
@@ -94,8 +92,6 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
             .filter { !it.forfall.isAfter(simulertPaaDato) }
             .filter { !it.klassekode.tekniskArt }
             .filter { it.klasseType == KlasseType.FEIL }
-            .groupBy { it.klasseType }
-            .map { (klasseType, periode) -> tilUtbetalingAggregert(periode, klasseType) }
             .toList()
 
     val kommendeUtbetalinger = perioder.filter { it.forfall.isAfter(simulertPaaDato) }
@@ -110,20 +106,3 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         tilbakekreving = tilbakekreving,
     )
 }
-
-private fun tilUtbetalingAggregert(
-    periode: List<SimulertBeregningsperiode>,
-    klasseType: KlasseType,
-) = UtbetalingAggregert(
-    klassekode = periode.map { it.klassekode }.distinct().first(),
-    klassekodeBeskrivelse = periode.map { it.klassekodeBeskrivelse }.distinct().first(),
-    klasseType = klasseType,
-    beloep = periode.map { it.beloep }.reduce { acc, bigDecimal -> acc + bigDecimal },
-)
-
-data class UtbetalingAggregert(
-    val klassekode: OppdragKlassifikasjonskode,
-    val klassekodeBeskrivelse: String,
-    val klasseType: KlasseType,
-    val beloep: BigDecimal,
-)

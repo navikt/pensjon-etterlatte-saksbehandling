@@ -41,7 +41,7 @@ export interface IPdlPerson {
   foedselsnummer: string
   foedselsdato: Date
   foedselsaar: number
-  doedsdato: string | undefined
+  doedsdato: Date | undefined
   bostedsadresse?: IAdresse[]
   deltBostedsadresse?: IAdresse[]
   kontaktadresse?: IAdresse[]
@@ -63,6 +63,7 @@ export interface IPdlPersonNavnFoedsel {
   foedselsnummer: string
   foedselsaar: number
   foedselsdato: Date | undefined
+  doedsdato: Date | undefined
 }
 
 export interface Utland {

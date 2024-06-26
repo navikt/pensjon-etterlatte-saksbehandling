@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -15,15 +16,17 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import org.slf4j.LoggerFactory
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
-    pesysKlient: PesysKlient,
+    private val pesysKlient: PesysKlient,
     private val behandlingService: BehandlingService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val kontrollpunktEktefelleService = DoedshendelseKontrollpunktEktefelleService()
     private val kontrollpunktAvdoedService = DoedshendelseKontrollpunktAvdoedService()
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
@@ -33,32 +36,45 @@ class DoedshendelseKontrollpunktService(
         when (hendelse.relasjon) {
             Relasjon.BARN -> {
                 val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
-                val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
-                val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, barn)
 
-                barnKontrollpunkter + avdoedKontrollpunkter + duplikatKontrollpunkt
+                if (avdoed.doedsdato == null) {
+                    listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+                } else {
+                    val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
+                    val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, avdoed, barn)
+
+                    barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
+                }
             }
 
             Relasjon.EKTEFELLE -> {
                 val (sak, avdoed, eps) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
-                val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
-                val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, eps)
+                if (avdoed.doedsdato == null) {
+                    listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+                } else {
+                    val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
+                    val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
+                    val fellesKontrollpunkts = fellesKontrollpunkter(hendelse, sak, avdoed, eps)
 
-                ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkts
+                }
             }
 
             Relasjon.SAMBOER -> {
                 val (sak, avdoed, samboer) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
-                val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, samboer)
+                if (avdoed.doedsdato == null) {
+                    listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+                } else {
+                    val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
+                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, avdoed, samboer)
 
-                avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
+                }
             }
 
             Relasjon.AVDOED -> {
@@ -101,11 +117,14 @@ class DoedshendelseKontrollpunktService(
     private fun fellesKontrollpunkter(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
+        avdoed: PersonDTO,
         gjenlevende: PersonDTO,
     ): List<DoedshendelseKontrollpunkt> {
         val duplikatKontrollpunkt = kontrollerDuplikatHendelse(hendelse, sak)
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
-        return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt)
+        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende)
+
+        return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt, haandtertAvPesys)
     }
 
     private fun kontrollerAktivAdresse(gjenlevende: PersonDTO): DoedshendelseKontrollpunkt? =
@@ -143,4 +162,21 @@ class DoedshendelseKontrollpunktService(
             else -> null
         }
     }
+
+    private fun behandletAvPesys(
+        avdoed: PersonDTO,
+        gjenlevende: PersonDTO,
+    ): DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys? =
+        runBlocking {
+            try {
+                if (pesysKlient.erTilstoetendeBehandlet(gjenlevende.foedselsnummer.verdi.value, avdoed.doedsdato!!.verdi)) {
+                    DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                logger.error("Feil ved kall til Pesys for å sjekke om tilstøtt har blitt behandlet", e)
+                null // TODO: Fjern try-catch når vi har testet at grensesnittet fungerer som det skal mot Pesys
+            }
+        }
 }

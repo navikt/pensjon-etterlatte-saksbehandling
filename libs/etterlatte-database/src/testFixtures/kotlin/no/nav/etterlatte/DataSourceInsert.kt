@@ -7,7 +7,7 @@ import javax.sql.DataSource
 
 fun DataSource.insert(
     tabellnavn: String,
-    params: (tx: TransactionalSession) -> Map<String, Any>,
+    params: (tx: TransactionalSession) -> Map<String, Any?>,
 ) {
     this.transaction { tx ->
         val paramMap = params(tx)

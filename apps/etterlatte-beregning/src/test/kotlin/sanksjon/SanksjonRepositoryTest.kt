@@ -91,4 +91,20 @@ internal class SanksjonRepositoryTest(
 
         ingenSanksjoner shouldBe null
     }
+
+    @Test
+    fun `skal kunne opprette en sanksjon fra kopi`() {
+        val behandlingId: UUID = UUID.randomUUID()
+        val sanksjon = lagreSanksjon()
+        sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
+
+        val nyBehandlingId = UUID.randomUUID()
+        val gammelSanksjon = sanksjonRepository.hentSanksjon(behandlingId)?.get(0)!!
+        sanksjonRepository.opprettSanksjonFraKopi(
+            behandlingId = nyBehandlingId,
+            sakId = sakId,
+            sanksjon = gammelSanksjon,
+        )
+        sanksjonRepository.hentSanksjon(nyBehandlingId)?.size shouldBe 1
+    }
 }

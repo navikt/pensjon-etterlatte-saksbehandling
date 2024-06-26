@@ -62,7 +62,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           Oppfølging av aktivitet
         </Heading>
         <BodyShort spacing>
-          <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
+          <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(avdoedesDoedsdato)}
         </BodyShort>
       </Box>
 
@@ -79,8 +79,8 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        {visTidslinje && isValid(new Date(avdoedesDoedsdato!!)) && (
-          <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
+        {visTidslinje && isValid(avdoedesDoedsdato!!) && (
+          <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
         )}
         {visTidslinje && (
           <AktivitetspliktVurdering

@@ -24,7 +24,7 @@ const SoekerDoedsdatoGrunnlag = () => {
   return (
     <Info
       label="Dødsdato mottaker av ytelsen"
-      tekst={soekerDoedsdato ? formaterStringDato(soekerDoedsdato) : 'Ingen dødsdato registrert'}
+      tekst={soekerDoedsdato ? formaterDato(soekerDoedsdato) : 'Ingen dødsdato registrert'}
     />
   )
 }

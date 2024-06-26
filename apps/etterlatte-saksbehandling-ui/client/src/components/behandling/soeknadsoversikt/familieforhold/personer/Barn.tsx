@@ -6,7 +6,7 @@ import { BodyShort, HStack, Label, VStack } from '@navikt/ds-react'
 
 type Props = {
   person: IPdlPerson
-  doedsdato: string | null
+  doedsdato: Date | undefined
 }
 
 export const Barn = ({ person, doedsdato }: Props) => {

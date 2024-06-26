@@ -78,6 +78,8 @@ class DoedshendelseKontrollpunktServiceTest {
     fun oppsett() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns emptyList()
+        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalOMS.beroertFnr, any()) } returns false
+        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalBP.beroertFnr, any()) } returns false
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
@@ -99,6 +101,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns
             mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
                 familieRelasjon =
                     OpplysningDTO(
                         FamilieRelasjon(
@@ -117,7 +120,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns
             mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr), null),
             )
         every { sakService.finnSak(any(), any()) } returns null
         every {
@@ -359,6 +362,14 @@ class DoedshendelseKontrollpunktServiceTest {
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse)
+    }
+
+    @Test
+    fun `Skal opprette kontrollpunkt hvis saken er behandlet i Pesys`() {
+        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalBP.beroertFnr, any()) } returns true
+
+        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP) shouldBe
+            listOf(DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys)
     }
 
     @Test

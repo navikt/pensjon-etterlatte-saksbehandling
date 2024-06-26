@@ -160,7 +160,7 @@ class AktivitetspliktServiceTest {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
 
-            service.slettAktivitet(behandling.id, aktivitetId)
+            service.slettAktivitet(behandling.id, aktivitetId, brukerTokenInfo)
 
             coVerify { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) }
         }
@@ -173,7 +173,7 @@ class AktivitetspliktServiceTest {
                 }
 
             assertThrows<BehandlingKanIkkeEndres> {
-                service.slettAktivitet(behandling.id, aktivitetId)
+                service.slettAktivitet(behandling.id, aktivitetId, brukerTokenInfo)
             }
         }
     }

@@ -5,7 +5,7 @@ import { isInitial, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
-import { BodyShort, Button, Heading, Table, Box } from '@navikt/ds-react'
+import {BodyShort, Button, Heading, Table, Box, Label} from '@navikt/ds-react'
 import {SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
 import styled from 'styled-components'
@@ -78,7 +78,7 @@ const TableWrapper = styled.div`
 const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiode[] }) => {
   return (
       <TableWrapper>
-        <b>{props.tittel}</b>
+        <Label>{props.tittel}</Label>
         <Table zebraStripes>
           <Table.Header>
             <Table.Row>
@@ -103,7 +103,7 @@ const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiod
             ))}
             <Table.Row>
               <Table.DataCell colSpan={4}>
-                <b>Sum</b>
+                <Label>Sum</Label>
               </Table.DataCell>
               <Table.DataCell align="right">
                 {NOK(props.data.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}

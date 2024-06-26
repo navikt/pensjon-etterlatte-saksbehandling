@@ -35,9 +35,9 @@ class DoedshendelseKontrollpunktService(
                 val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
                 val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, barn)
+                val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, barn)
 
-                barnKontrollpunkter + avdoedKontrollpunkter + duplikatKontrollpunkt
+                barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
             }
 
             Relasjon.EKTEFELLE -> {
@@ -49,9 +49,9 @@ class DoedshendelseKontrollpunktService(
                     val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                     val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                    val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, eps)
+                    val fellesKontrollpunkts = fellesKontrollpunkter(hendelse, sak, eps)
 
-                    ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkts
                 }
             }
 
@@ -63,9 +63,9 @@ class DoedshendelseKontrollpunktService(
                 } else {
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                     val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                    val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, samboer)
+                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, samboer)
 
-                    avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                    avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
                 }
             }
 

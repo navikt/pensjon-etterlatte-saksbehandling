@@ -33,8 +33,8 @@ class OmregningDao(
                         """
                         INSERT INTO omregningskjoering (kjoering, status, sak_id, beregning_beloep_foer, 
                         beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
-                        beregning_brukt_omregningsfaktor, vedtak_beloep)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setString(1, request.kjoering)
@@ -45,7 +45,9 @@ class OmregningDao(
                 statement.setBigDecimal(6, request.beregningGFoer)
                 statement.setBigDecimal(7, request.beregningGEtter)
                 statement.setBigDecimal(8, request.beregningBruktOmregningsfaktor)
-                statement.setBigDecimal(9, request.vedtakBeloep)
+                statement.setBigDecimal(9, request.avkortingFoer)
+                statement.setBigDecimal(10, request.avkortingEtter)
+                statement.setBigDecimal(11, request.vedtakBeloep)
                 statement.executeUpdate().also { require(it == 1) }
             }
         }

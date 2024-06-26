@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Box, Button, ErrorSummary, Heading, HStack, Table } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ErrorSummary, HStack, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -46,6 +46,7 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { getValueOfKey } from '~shared/types/OverstyrtBeregning'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -176,11 +177,18 @@ const OverstyrBeregningGrunnlag = (props: {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
-        <Heading size="medium" level="2">
-          Overstyr beregning: {overstyrBeregning.beskrivelse}
-        </Heading>
+      <Box paddingInline="16" paddingBlock="0 4">
+        <VStack gap="5">
+          <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
+          <BodyShort textColor="default">
+            <b>Årsak:</b> {getValueOfKey(overstyrBeregning.kategori)}
+          </BodyShort>
+          <BodyShort textColor="default">
+            <b>Beskrivelse: </b> {overstyrBeregning.beskrivelse}
+          </BodyShort>
+        </VStack>
       </Box>
+
       {mapApiResult(
         overstyrBeregningGrunnlag,
         <Spinner visible={true} label="Henter grunnlag" />,

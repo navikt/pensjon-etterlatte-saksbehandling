@@ -297,6 +297,16 @@ sealed class DoedshendelseKontrollpunkt {
         override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
+
+    @JsonTypeName("TILSTOETENDE_BEHANDLET_I_PESYS")
+    data object TilstoetendeBehandletIPesys : DoedshendelseKontrollpunkt() {
+        override val kode = "TILSTOETENDE_BEHANDLET_I_PESYS"
+        override val beskrivelse: String = "Gjenlevende er allerede behandlet i Pesys"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
+        override val avbryt: Boolean = true
+    }
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? = this.filterIsInstance<KontrollpunktMedSak>().firstOrNull()?.sak

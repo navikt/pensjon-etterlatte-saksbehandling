@@ -363,6 +363,11 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
 class PesysKlientTest : PesysKlient {
     override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> = emptyList()
+
+    override suspend fun erTilstoetendeBehandlet(
+        fnr: String,
+        doedsdato: LocalDate,
+    ): Boolean = false
 }
 
 class KrrklientTest : KrrKlient {

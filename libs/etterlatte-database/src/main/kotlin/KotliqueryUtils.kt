@@ -54,7 +54,7 @@ fun TransactionalSession.oppdater(
 
 fun <T> TransactionalSession.hent(
     queryString: String,
-    params: Map<String, Any>,
+    params: Map<String, Any> = mapOf(),
     converter: (r: Row) -> T,
 ) = queryOf(statement = queryString, paramMap = params)
     .let { query -> this.run(query.map { row -> converter.invoke(row) }.asSingle) }

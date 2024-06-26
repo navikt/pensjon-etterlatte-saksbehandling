@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR
@@ -36,6 +38,8 @@ internal class VedtakAttestertRiver(
             validate { it.requireKey(BEREGNING_G_FOER) }
             validate { it.requireKey(BEREGNING_G_ETTER) }
             validate { it.requireKey(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
+            validate { it.interestedIn(AVKORTING_FOER) }
+            validate { it.interestedIn(AVKORTING_ETTER) }
             validate { it.requireKey(VEDTAK_BELOEP) }
         }
     }
@@ -58,6 +62,8 @@ internal class VedtakAttestertRiver(
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),
                 beregningGEtter = bigDecimal(packet, BEREGNING_G_ETTER),
                 beregningBruktOmregningsfaktor = bigDecimal(packet, BEREGNING_BRUKT_OMREGNINGSFAKTOR),
+                avkortingFoer = packet[AVKORTING_FOER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
+                avkortingEtter = packet[AVKORTING_ETTER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
         behandlingService.lagreFullfoertKjoering(request)

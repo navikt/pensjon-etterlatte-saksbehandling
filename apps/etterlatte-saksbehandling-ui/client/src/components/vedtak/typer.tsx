@@ -43,3 +43,18 @@ export interface Samordningsmelding {
   purretDato?: string
   refusjonskrav: boolean
 }
+
+export interface OppdaterSamordningsmelding {
+  samId: number
+  pid: string
+  tpNr: string
+  refusjonskrav: boolean
+  periodisertBelopListe: Refusjonstrekk[]
+}
+
+export interface Refusjonstrekk {
+  fom: string
+  tom?: string
+  belop: number
+  kravstillerReferanse?: String
+}

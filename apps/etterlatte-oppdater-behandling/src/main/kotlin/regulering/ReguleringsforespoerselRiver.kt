@@ -14,12 +14,14 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
 import no.nav.etterlatte.rapidsandrivers.dato
+import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
@@ -41,6 +43,7 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
             validate { it.interestedIn(SPESIFIKKE_SAKER) }
+            validate { it.interestedIn(EKSKLUDERTE_SAKER) }
             validate { it.interestedIn(SAK_TYPE) }
         }
     }
@@ -61,6 +64,7 @@ internal class ReguleringsforespoerselRiver(
         val kjoering = packet[KJOERING].asText()
         val antall = packet[ANTALL].asInt()
         val spesifikkeSaker = packet.saker
+        val ekskluderteSaker = packet.ekskluderteSaker
         val sakType = packet.optionalSakType()
 
         kjoerIBatch(
@@ -71,7 +75,7 @@ internal class ReguleringsforespoerselRiver(
                     kjoering,
                     antallIDenneRunden,
                     spesifikkeSaker,
-                    sakerViIkkeRegulererAutomatiskNaa,
+                    ekskluderteSaker,
                     sakType,
                 )
             },
@@ -127,5 +131,3 @@ enum class ReguleringFeatureToggle(
 
     override fun key() = key
 }
-
-private val sakerViIkkeRegulererAutomatiskNaa: List<Long> = emptyList()

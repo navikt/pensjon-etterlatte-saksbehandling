@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenligner
@@ -403,6 +404,13 @@ class VedtakBehandlingService(
                     detail = "Fant ikke vedtak med id=${samordningsvedtak.vedtakId}",
                 )
         return SamordningsvedtakWrapper(samordningsvedtak, vedtak.behandlingId)
+    }
+
+    suspend fun oppdaterSamordningsmelding(
+        samordningmelding: OppdaterSamordningsmelding,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
     }
 
     suspend fun iverksattVedtak(

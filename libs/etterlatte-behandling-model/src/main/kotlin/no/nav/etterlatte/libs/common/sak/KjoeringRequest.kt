@@ -17,6 +17,8 @@ data class LagreKjoeringRequest(
     val beregningGFoer: BigDecimal,
     val beregningGEtter: BigDecimal,
     val beregningBruktOmregningsfaktor: BigDecimal,
+    val avkortingFoer: BigDecimal?,
+    val avkortingEtter: BigDecimal?,
     val vedtakBeloep: BigDecimal,
 )
 

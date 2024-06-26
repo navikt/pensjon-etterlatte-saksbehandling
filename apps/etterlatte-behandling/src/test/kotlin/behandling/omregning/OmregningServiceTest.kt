@@ -48,6 +48,8 @@ class OmregningServiceTest(
                 beregningGFoer = BigDecimal("10000"),
                 beregningGEtter = BigDecimal("15000"),
                 beregningBruktOmregningsfaktor = BigDecimal("1.5"),
+                avkortingFoer = BigDecimal("1000"),
+                avkortingEtter = BigDecimal("2000"),
                 vedtakBeloep = BigDecimal("15000"),
             )
 
@@ -61,7 +63,7 @@ class OmregningServiceTest(
                             """
                             SELECT kjoering, status, sak_id, beregning_beloep_foer, 
                             beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
-                            beregning_brukt_omregningsfaktor, vedtak_beloep 
+                            beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep 
                             FROM omregningskjoering WHERE sak_id=${sak.id}
                             """.trimIndent(),
                         )
@@ -77,6 +79,8 @@ class OmregningServiceTest(
                                 beregningGFoer = getBigDecimal("beregning_g_foer"),
                                 beregningGEtter = getBigDecimal("beregning_g_etter"),
                                 beregningBruktOmregningsfaktor = getBigDecimal("beregning_brukt_omregningsfaktor"),
+                                avkortingFoer = getBigDecimal("avkorting_foer"),
+                                avkortingEtter = getBigDecimal("avkorting_etter"),
                                 vedtakBeloep = getBigDecimal("vedtak_beloep"),
                             )
                         }.first()

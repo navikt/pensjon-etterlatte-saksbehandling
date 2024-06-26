@@ -29,7 +29,7 @@ class SimuleringResponsMappingTest {
 
         resultat.kommendeUtbetalinger shouldHaveSize 3
         resultat.kommendeUtbetalinger.filter { it.tilbakefoering } shouldHaveSize 1
-        resultat.etterbetaling shouldHaveSize 1
+        resultat.etterbetaling shouldHaveSize 5
         resultat.tilbakekreving shouldHaveSize 1
     }
 }

@@ -6,13 +6,13 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.AVKORTING_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
@@ -21,6 +21,8 @@ import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
@@ -68,7 +70,6 @@ internal class OmregningHendelserBeregningRiver(
         runBlocking {
             val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
             packet[BEREGNING_KEY] = beregning.beregning
-            beregning.avkorting?.let { packet[AVKORTING_KEY] = it }
             sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
@@ -95,16 +96,23 @@ internal class OmregningHendelserBeregningRiver(
                 beregningService
                     .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
+            val forrigeAvkorting =
+                beregningService
+                    .hentAvkorting(behandlingViOmregnerFra)
+                    .takeIf { it.status == HttpStatusCode.OK }
+                    ?.body<AvkortingDto>() ?: throw IllegalStateException("Forrige behandling $behandlingViOmregnerFra mangler avkorting")
             BeregningOgAvkorting(
                 beregning = beregning,
                 forrigeBeregning = forrigeBeregning,
                 avkorting = avkorting,
+                forrigeAvkorting = forrigeAvkorting,
             )
         } else {
             BeregningOgAvkorting(
                 beregning = beregning,
                 forrigeBeregning = forrigeBeregning,
                 avkorting = null,
+                forrigeAvkorting = null,
             )
         }
     }
@@ -131,6 +139,13 @@ internal class OmregningHendelserBeregningRiver(
                 }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
+
+        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+            packet[AVKORTING_FOER] = it.avkortingsbeloep
+        }
+        beregning.avkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+            packet[AVKORTING_ETTER] = it.avkortingsbeloep
+        }
     }
 
     private fun verifiserToleransegrenser(
@@ -194,6 +209,10 @@ internal class OmregningHendelserBeregningRiver(
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
         filter { it.datoFOM.erFoerEllerPaa(dato) }
             .firstOrNull { it.datoTOM.erEtter(dato) }
+
+    private fun List<AvkortetYtelseDto>.paaDato(dato: LocalDate) =
+        filter { it.fom.erFoerEllerPaa(dato) }
+            .firstOrNull { it.tom.erEtter(dato) }
 }
 
 class MindreEnnForrigeBehandling(
@@ -217,4 +236,5 @@ data class BeregningOgAvkorting(
     val beregning: BeregningDTO,
     val forrigeBeregning: BeregningDTO,
     val avkorting: AvkortingDto?,
+    val forrigeAvkorting: AvkortingDto?,
 )

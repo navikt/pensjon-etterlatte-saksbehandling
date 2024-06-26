@@ -1,7 +1,7 @@
 import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
-import { BodyLong, Box, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyLong, Box, Button, Heading, Select, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
@@ -11,6 +11,7 @@ import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -64,7 +65,12 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
                 [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
               }[behandling.sakType]}
           </>
-        )}
+        )}{' '}
+        :
+        {isFailureHandler({
+          apiResult: overstyrtBeregning,
+          errorMessage: 'Det oppsto en feil.',
+        })}
       </>
     </>
   )
@@ -77,31 +83,58 @@ const OverstyrBeregningForGrunnlag = (props: {
   const { behandlingId, setOverstyrt } = props
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [begrunnelse, setBegrunnelse] = useState<string>('')
+  const [kategori, setKategori] = useState<OverstyrtBeregningKategori>()
+  const [kategoriError, setKategoriError] = useState<string>('')
+
   const overstyrBeregning = () => {
-    opprettOverstyrtBeregningReq(
-      {
-        behandlingId,
-        beskrivelse: begrunnelse,
-      },
-      (result) => {
-        if (result) {
-          setOverstyrt(result)
+    if (!!kategori) {
+      setKategoriError('')
+      opprettOverstyrtBeregningReq(
+        {
+          behandlingId,
+          beskrivelse: begrunnelse,
+          kategori: kategori,
+        },
+        (result) => {
+          if (result) {
+            setOverstyrt(result)
+          }
         }
-      }
-    )
+      )
+    } else {
+      setKategoriError('Vennligst velg en kategori for å overstyre beregningen.')
+    }
   }
 
   return (
     <FormWrapper>
       <Heading size="small">Overstyre beregning</Heading>
       <BodyLong>Er det ønskelig å overstyre beregning?</BodyLong>
+      <Select
+        label="Velg årsak:"
+        onChange={(e) => {
+          setKategori(e.target.value as OverstyrtBeregningKategori)
+        }}
+        description="Hvis du ikke finner riktig kategori for å overstyre saken, må du ta kontakt med team Etterlatte"
+        error={kategoriError}
+      >
+        <option value="">Velg kategori</option>
+        {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+          <option key={key} value={key}>
+            {value}
+          </option>
+        ))}
+      </Select>
+
       <TextField
         onChange={(e) => {
           setBegrunnelse(e.target.value)
+          setKategoriError('')
         }}
         label=""
         placeholder="Begrunnelse"
       />
+
       <Button onClick={overstyrBeregning} loading={isPending(overstyrBeregningStatus)}>
         Overstyr
       </Button>

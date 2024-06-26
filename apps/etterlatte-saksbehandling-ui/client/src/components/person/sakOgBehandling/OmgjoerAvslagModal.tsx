@@ -6,8 +6,8 @@ import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 
-export function OmgjoerAvslagModal(props: { sakId: number }) {
-  const sakId = props.sakId
+export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: boolean }) {
+  const { sakId, harAapenBehandling } = props
   const [open, setOpen] = useState(false)
   const [opprettOmgjoeringStatus, opprettOmgjoering] = useApiCall(opprettOmgjoeringFoerstegangsbehandling)
   const navigate = useNavigate()
@@ -35,6 +35,11 @@ export function OmgjoerAvslagModal(props: { sakId: number }) {
             Hvis det kun er avslåtte / avbrutte førstegangsbehandlinger i saken (ingenting er iverksatt mot oppdrag) må
             en eventuell omgjøring / rebehandling gjøres som en ny førstegangsbehandling.
           </BodyShort>
+          {harAapenBehandling && (
+            <Alert variant="warning">
+              Saken har allerede en åpen behandling. Denne må avsluttes / avbrytes før en omgjøring kan startes.
+            </Alert>
+          )}
           {mapResult(opprettOmgjoeringStatus, {
             success: () => (
               <Alert variant="success">

@@ -18,6 +18,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAvslagModal'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { statusErRedigerbar } from '~components/behandling/felles/utils'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -75,7 +76,10 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 )}
                 {omgjoerAvslagEnabled &&
                   omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                    <OmgjoerAvslagModal sakId={sak.id} />
+                    <OmgjoerAvslagModal
+                      sakId={sak.id}
+                      harAapenBehandling={behandlinger.some((behandling) => statusErRedigerbar(behandling.status))}
+                    />
                   )}
               </VStack>
 

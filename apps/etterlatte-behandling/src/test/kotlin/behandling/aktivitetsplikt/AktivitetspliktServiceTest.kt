@@ -1,4 +1,4 @@
-package behandling.aktivitetsplikt
+package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -11,14 +11,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitet
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitetType
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
-import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandlingException
-import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
@@ -61,6 +55,7 @@ class AktivitetspliktServiceTest {
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val automatiskRevurderingService: AutomatiskRevurderingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
     private val service =
         AktivitetspliktService(
             aktivitetspliktDao,
@@ -69,6 +64,7 @@ class AktivitetspliktServiceTest {
             behandlingService,
             grunnlagKlient,
             automatiskRevurderingService,
+            statistikkProduer,
             oppgaveService,
         )
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()

@@ -1,13 +1,10 @@
-package behandling.aktivitetsplikt
+package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitetType
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
-import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao

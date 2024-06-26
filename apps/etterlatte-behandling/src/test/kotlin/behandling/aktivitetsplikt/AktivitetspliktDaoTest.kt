@@ -1,4 +1,4 @@
-package behandling.aktivitetsplikt
+package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -6,9 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitetType
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak

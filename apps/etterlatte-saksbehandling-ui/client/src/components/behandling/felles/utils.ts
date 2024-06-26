@@ -27,11 +27,11 @@ export function soeknadsoversiktErFerdigUtfylt(behandling: IDetaljertBehandling)
   }
 }
 
-export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
+export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: Date | undefined): IAdresse[] {
   if (doedsdato == null) {
     return adresser
   }
-  return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
+  return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), doedsdato))
 }
 
 export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {

@@ -27,10 +27,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
         <BodyShort>{person.foedselsnummer}</BodyShort>
       </VStack>
       <PersonInfoAdresse
-        adresser={hentAdresserEtterDoedsdato(
-          person.bostedsadresse!!,
-          avdoede.opplysning.doedsdato ? avdoede.opplysning.doedsdato.toString() : 'Ingen dødsdato for avdød'
-        )}
+        adresser={hentAdresserEtterDoedsdato(person.bostedsadresse!!, avdoede.opplysning.doedsdato)}
         visHistorikk={true}
         adresseDoedstidspunkt={false}
       />

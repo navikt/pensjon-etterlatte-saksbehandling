@@ -4,7 +4,7 @@ import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import { format } from 'date-fns'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
-import { DatoFormat } from '~utils/formattering'
+import { DatoFormat, formaterDato } from '~utils/formattering'
 
 type Props = {
   familieforhold: Familieforhold
@@ -49,9 +49,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
                         : 'Annen person'}
                     </Table.DataCell>
                     <Table.DataCell>
-                      {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
-                        ? format(new Date(avdoed.doedsdato!), DatoFormat.DAG_MAANED_AAR)
-                        : ''}
+                      {ss.relatertVedSiviltilstand === avdoed.foedselsnummer ? formaterDato(avdoed.doedsdato!) : ''}
                     </Table.DataCell>
                   </Table.Row>
                 )

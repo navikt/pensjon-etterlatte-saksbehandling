@@ -62,8 +62,8 @@ internal class VedtakAttestertRiver(
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),
                 beregningGEtter = bigDecimal(packet, BEREGNING_G_ETTER),
                 beregningBruktOmregningsfaktor = bigDecimal(packet, BEREGNING_BRUKT_OMREGNINGSFAKTOR),
-                avkortingFoer = packet[AVKORTING_FOER].asText().takeIf { it.isNotEmpty() }.let { BigDecimal(it) },
-                avkortingEtter = packet[AVKORTING_ETTER].asText().takeIf { it.isNotEmpty() }.let { BigDecimal(it) },
+                avkortingFoer = packet[AVKORTING_FOER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
+                avkortingEtter = packet[AVKORTING_ETTER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
         behandlingService.lagreFullfoertKjoering(request)

@@ -32,12 +32,12 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
         </Modal.Header>
         <Modal.Body>
           <BodyShort>
-            Hvis det kun er avslåtte / avbrutte førstegangsbehandlinger i saken (ingenting er iverksatt mot oppdrag) må
-            en eventuell omgjøring / rebehandling gjøres som en ny førstegangsbehandling.
+            Hvis det kun er avslåtte / avbrutte førstegangsbehandlinger i saken må en eventuell omgjøring gjøres som en
+            ny førstegangsbehandling.
           </BodyShort>
           {harAapenBehandling && (
             <Alert variant="warning">
-              Saken har allerede en åpen behandling. Denne må avsluttes / avbrytes før en omgjøring kan startes.
+              Saken har allerede en åpen behandling. Denne må avsluttes eller avbrytes før en omgjøring kan startes.
             </Alert>
           )}
           {mapResult(opprettOmgjoeringStatus, {

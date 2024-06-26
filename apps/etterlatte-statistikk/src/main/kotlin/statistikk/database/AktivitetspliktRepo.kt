@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.YearMonth
@@ -23,8 +24,11 @@ class AktivitetspliktRepo(
 ) {
     // Vi trenger ikke lagre flere enn den nyeste vurderingen per registrert måned, siden de ikke vil påvirke
     // statistikken
-    fun lagreAktivitetspliktForSak(aktivitetspliktDto: AktivitetspliktDto): StatistikkAktivitet {
-        val statisikkAktivitet = StatistikkAktivitet.fra(aktivitetspliktDto)
+    fun lagreAktivitetspliktForSak(
+        aktivitetspliktDto: AktivitetspliktDto,
+        overstyrtRegistret: Tidspunkt? = null,
+    ): StatistikkAktivitet {
+        val statisikkAktivitet = StatistikkAktivitet.fra(aktivitetspliktDto, overstyrtRegistret)
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
@@ -79,6 +83,28 @@ class AktivitetspliktRepo(
             }
         }
 
+    fun hentAktivitetspliktForMaaneder(
+        sakIder: List<Long>,
+        yearMonth: YearMonth,
+    ): List<StatistikkAktivitet> =
+        datasource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT sak_id, registrert, avdoed_doedsmaaned, unntak, brukers_aktivitet, 
+                        aktivitetsgrad, varig_unntak
+                    FROM aktivitetsplikt
+                    WHERE sak_id = ANY(?)
+                    AND registrert_maaned <= ?
+                    """.trimIndent(),
+                )
+            statement.setArray(1, connection.createArrayOf("bigint", sakIder.toTypedArray()))
+            statement.setString(2, yearMonth.toString())
+            statement
+                .executeQuery()
+                .toList { somStatistikkAktivititet() }
+        }
+
     private fun ResultSet.somStatistikkAktivititet(): StatistikkAktivitet =
         StatistikkAktivitet(
             sakId = getLong("sak_id"),
@@ -97,21 +123,61 @@ data class StatistikkAktivitet(
     val avdoedDoedsmaaned: YearMonth,
     val unntak: List<PeriodisertAktivitetspliktopplysning>,
     val brukersAktivitet: List<PeriodisertAktivitetspliktopplysning>,
-    val aktivitetsgrad: List<PeriodisertAktivitetspliktopplysning>,
+    val aktivitetsgrad: List<AktivitetsgradPeriode>,
     val harVarigUnntak: Boolean,
 ) {
     companion object {
-        fun fra(dto: AktivitetspliktDto): StatistikkAktivitet =
+        fun fra(
+            dto: AktivitetspliktDto,
+            overstyrtRegistret: Tidspunkt?,
+        ): StatistikkAktivitet =
             StatistikkAktivitet(
                 sakId = dto.sakId,
-                registrert = Tidspunkt.now(),
+                registrert = overstyrtRegistret ?: Tidspunkt.now(),
                 avdoedDoedsmaaned = dto.avdoedDoedsmaaned,
                 unntak = dto.unntak.map { PeriodisertAktivitetspliktopplysning.fra(it) },
                 brukersAktivitet = dto.brukersAktivitet.map { PeriodisertAktivitetspliktopplysning.fra(it) },
-                aktivitetsgrad = dto.aktivitetsgrad.map { PeriodisertAktivitetspliktopplysning.fra(it) },
+                aktivitetsgrad = dto.aktivitetsgrad.map { AktivitetsgradPeriode.fra(it) },
                 harVarigUnntak = dto.unntak.any { it.unntak == UnntakFraAktivitetsplikt.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT },
             )
     }
+}
+
+interface AktivitetspliktPeriode {
+    val fom: LocalDate?
+    val tom: LocalDate?
+
+    fun erInnenforMaaned(maaned: YearMonth): Boolean {
+        val erEtterFom = (fom?.let { YearMonth.from(it) } ?: maaned) <= maaned
+        val erEtterTom = (tom?.let { YearMonth.from(it) } ?: maaned) >= maaned
+        return erEtterFom && erEtterTom
+    }
+}
+
+data class AktivitetsgradPeriode(
+    override val fom: LocalDate?,
+    override val tom: LocalDate?,
+    val vurdering: VurdertAktivitet,
+) : AktivitetspliktPeriode {
+    companion object {
+        fun fra(dto: AktivitetspliktAktivitetsgradDto): AktivitetsgradPeriode =
+            AktivitetsgradPeriode(
+                fom = dto.fom,
+                tom = dto.fom,
+                vurdering =
+                    when (dto.vurdering) {
+                        VurdertAktivitetsgrad.AKTIVITET_UNDER_50 -> VurdertAktivitet.UNDER_50_PROSENT
+                        VurdertAktivitetsgrad.AKTIVITET_OVER_50 -> VurdertAktivitet.OVER_50_PROSENT
+                        VurdertAktivitetsgrad.AKTIVITET_100 -> VurdertAktivitet.HUNDRE_PROSENT
+                    },
+            )
+    }
+}
+
+enum class VurdertAktivitet {
+    OVER_50_PROSENT,
+    UNDER_50_PROSENT,
+    HUNDRE_PROSENT,
 }
 
 /**
@@ -120,9 +186,9 @@ data class StatistikkAktivitet(
  */
 data class PeriodisertAktivitetspliktopplysning(
     val opplysning: String,
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-) {
+    override val fom: LocalDate?,
+    override val tom: LocalDate?,
+) : AktivitetspliktPeriode {
     companion object {
         fun fra(opplysning: UnntakFraAktivitetDto): PeriodisertAktivitetspliktopplysning =
             PeriodisertAktivitetspliktopplysning(
@@ -135,18 +201,6 @@ data class PeriodisertAktivitetspliktopplysning(
                         UnntakFraAktivitetsplikt.GRADERT_UFOERETRYGD -> "GRADERT_UFOERETRYGD"
                         UnntakFraAktivitetsplikt.MIDLERTIDIG_SYKDOM -> "MIDLERTIDIG_SYKDOM"
                         UnntakFraAktivitetsplikt.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT -> "FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT"
-                    },
-                fom = opplysning.fom,
-                tom = opplysning.tom,
-            )
-
-        fun fra(opplysning: AktivitetspliktAktivitetsgradDto): PeriodisertAktivitetspliktopplysning =
-            PeriodisertAktivitetspliktopplysning(
-                opplysning =
-                    when (opplysning.vurdering) {
-                        VurdertAktivitetsgrad.AKTIVITET_UNDER_50 -> "AKTIVITET_UNDER_50"
-                        VurdertAktivitetsgrad.AKTIVITET_OVER_50 -> "AKTIVITET_OVER_50"
-                        VurdertAktivitetsgrad.AKTIVITET_100 -> "AKTIVITET_100"
                     },
                 fom = opplysning.fom,
                 tom = opplysning.tom,

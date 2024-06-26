@@ -1,8 +1,10 @@
 package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.statistikk.service.AktivitetForMaaned
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -35,11 +37,16 @@ data class MaanedStoenadRad(
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
     val sakYtelsesgruppe: SakYtelsesgruppe?,
+    val harAktivitetsplikt: String?,
+    val oppfyllerAktivitet: Boolean?,
+    val aktivitet: String?,
+    val sanksjon: String?,
 )
 
 class MaanedStatistikk(
     val maaned: YearMonth,
     stoenadRader: List<StoenadRad>,
+    aktiviteter: Map<Long, AktivitetForMaaned>,
 ) {
     val rader: List<MaanedStoenadRad>
 
@@ -47,7 +54,7 @@ class MaanedStatistikk(
         val vedtakPerSak = stoenadRader.groupBy { it.sakId }
 
         rader =
-            vedtakPerSak.mapNotNull { (_, vedtakPaaSak) ->
+            vedtakPerSak.mapNotNull { (sakId, vedtakPaaSak) ->
                 val sisteVedtak = vedtakPaaSak.maxBy { it.tekniskTid }
 
                 // finn aktuell beregnet ytelse for dette vedtaket
@@ -60,15 +67,15 @@ class MaanedStatistikk(
                         ?: sisteVedtak.nettoYtelse?.toInt() // TODO nettoYtelse til skal utbedres?
                         ?: 0
 
-                val (avkortingsbeloep, aarsinntekt) =
+                val (avkortingsbeloep, aarsinntekt, sanksjon) =
                     sisteVedtak.avkorting?.let { avkorting ->
                         val aktuellAvkorting =
                             avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                         val avkortingGrunnlag =
                             avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                         val aarsinntekt = avkortingGrunnlag?.let { it.aarsinntekt - it.fratrekkInnAar }
-                        Pair(aktuellAvkorting?.avkortingsbeloep, aarsinntekt)
-                    } ?: Pair(null, null)
+                        Triple(aktuellAvkorting?.avkortingsbeloep, aarsinntekt, aktuellAvkorting?.sanksjonertYtelse?.sanksjonType)
+                    } ?: Triple(null, null, null)
 
                 val erOpphoer =
                     when (sisteVedtak.vedtakType) {
@@ -88,6 +95,10 @@ class MaanedStatistikk(
                     // Hvis denne opphører denne måneden overstyr løpende tom til å være slutten av forrige måned
                     vedtakLoependeTom = maaned.minusMonths(1).atEndOfMonth()
                 }
+
+                val aktivitetForMaaned =
+                    (aktiviteter[sakId] ?: AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD)
+                        .takeIf { sisteVedtak.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }
 
                 MaanedStoenadRad(
                     id = -1,
@@ -123,6 +134,10 @@ class MaanedStatistikk(
                     kilde = sisteVedtak.kilde,
                     pesysId = sisteVedtak.pesysId,
                     sakYtelsesgruppe = sisteVedtak.sakYtelsesgruppe,
+                    harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,
+                    oppfyllerAktivitet = aktivitetForMaaned?.oppfyllerAktivitet,
+                    aktivitet = aktivitetForMaaned?.aktivitet,
+                    sanksjon = sanksjon?.name,
                 )
             }
     }

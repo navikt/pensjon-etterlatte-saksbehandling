@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HeartIcon } from '@navikt/aksel-icons'
-import { Heading, HStack, Table, Tag } from '@navikt/ds-react'
+import { Heading, HStack, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formattering'
-import styled from 'styled-components'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { Familiemedlem, Sivilstand } from '~shared/types/familieOpplysninger'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 export const Sivilstatus = ({
   sivilstand,
@@ -15,15 +15,8 @@ export const Sivilstatus = ({
   sivilstand?: Sivilstand[]
   avdoede?: Familiemedlem[]
 }): ReactNode => {
-  const relatertVedSivilstandDoedsdato = (
-    relatertVedSiviltilstand: string,
-    avdoede: Familiemedlem[]
-  ): string | undefined => {
-    const relaterteAvdoed = avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
-
-    if (!!relaterteAvdoed?.doedsdato) return formaterDato(relaterteAvdoed.doedsdato)
-    else return undefined
-  }
+  const relatertAvdoed = (relatertVedSiviltilstand: string, avdoede: Familiemedlem[]): Familiemedlem | undefined =>
+    avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 
   return (
     <Personopplysning heading="Sivilstatus" icon={<HeartIcon />}>
@@ -48,15 +41,7 @@ export const Sivilstatus = ({
                         <>
                           <KopierbarVerdi value={stand.relatertVedSivilstand} iconPosition="right" />
                           {avdoede && avdoede.length >= 0 && (
-                            <>
-                              {!!relatertVedSivilstandDoedsdato(stand.relatertVedSivilstand, avdoede) && (
-                                <DoedsDatoWrapper>
-                                  <Tag variant="error-filled" size="small">
-                                    Død {relatertVedSivilstandDoedsdato(stand.relatertVedSivilstand, avdoede)}
-                                  </Tag>
-                                </DoedsDatoWrapper>
-                              )}
-                            </>
+                            <DoedsdatoTag doedsdato={relatertAvdoed(stand.relatertVedSivilstand, avdoede)?.doedsdato} />
                           )}
                         </>
                       )}
@@ -77,9 +62,3 @@ export const Sivilstatus = ({
     </Personopplysning>
   )
 }
-
-const DoedsDatoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`

@@ -63,6 +63,7 @@ export interface IPdlPersonNavnFoedsel {
   foedselsnummer: string
   foedselsaar: number
   foedselsdato: Date | undefined
+  doedsdato: Date | undefined
 }
 
 export interface Utland {

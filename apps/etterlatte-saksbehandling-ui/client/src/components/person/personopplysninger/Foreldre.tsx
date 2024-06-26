@@ -1,12 +1,12 @@
 import React from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { PersonIcon } from '@navikt/aksel-icons'
-import { Heading, HStack, Table, Tag } from '@navikt/ds-react'
-import { formaterDato } from '~utils/formattering'
+import { Heading, HStack, Table } from '@navikt/ds-react'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 export const Foreldre = ({
   avdoed,
@@ -39,12 +39,8 @@ export const Foreldre = ({
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <HStack gap="4">
-                      {`${doed.fornavn} ${doed.etternavn}`}
-                      {!!doed.doedsdato && (
-                        <Tag variant="error-filled" size="small">
-                          Død {formaterDato(doed.doedsdato)}
-                        </Tag>
-                      )}
+                      {doed.fornavn} {doed.etternavn}
+                      <DoedsdatoTag doedsdato={doed.doedsdato} />
                     </HStack>
                   </Table.DataCell>
                   <Table.DataCell>

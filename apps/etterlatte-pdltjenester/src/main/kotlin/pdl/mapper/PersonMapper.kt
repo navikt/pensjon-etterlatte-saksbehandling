@@ -188,6 +188,7 @@ object PersonMapper {
                         .identifikasjonsnummer
                 }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
             PersonNavnFoedselsaar(
                 fornavn = navn.fornavn,
@@ -196,6 +197,7 @@ object PersonMapper {
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
                 foedselsdato = foedsel.foedselsdato,
                 foedselsaar = foedsel.foedselsaar,
+                doedsdato = doedsfall?.doedsdato,
             )
         }
 

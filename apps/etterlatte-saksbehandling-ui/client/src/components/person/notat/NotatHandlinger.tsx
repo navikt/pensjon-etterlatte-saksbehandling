@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { journalfoerNotat } from '~shared/api/notat'
 import { NotatRedigeringFane } from '~components/person/notat/NotatRedigeringModal'
-import { formaterTidspunktTimeMinutterSekunder } from '~utils/formattering'
+import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
 
 export const NotatHandlinger = ({
   notatId,

@@ -1,7 +1,7 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
 import { Alert, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import { hentAktiviteter, slettAktivitet } from '~shared/api/aktivitetsplikt'
-import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formattering'
+import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
 import { useApiCall } from '~shared/hooks/useApiCall'

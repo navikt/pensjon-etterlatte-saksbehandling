@@ -1,6 +1,6 @@
 import { formaterOppgavetype, formaterStatus, GosysOppgave } from '~shared/types/Gosys'
 import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { VelgSaksbehandler } from '~components/oppgavebenk/gosys/VelgSaksbehandler'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
@@ -13,8 +13,8 @@ export const GosysOppgaveRow = (props: { oppgave: GosysOppgave; saksbehandlereIE
 
   return (
     <Table.Row>
-      <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
-      <Table.DataCell>{oppgave.frist ? formaterStringDato(oppgave.frist) : 'Mangler'}</Table.DataCell>
+      <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
+      <Table.DataCell>{oppgave.frist ? formaterDato(oppgave.frist) : 'Mangler'}</Table.DataCell>
       <Table.DataCell>
         <GosysBrukerWrapper bruker={oppgave.bruker} />
       </Table.DataCell>

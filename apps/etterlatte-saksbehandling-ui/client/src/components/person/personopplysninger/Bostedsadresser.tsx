@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HouseIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
@@ -24,10 +24,10 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsad
                 <Table.Row key={index}>
                   <BostedsadresseDataCell bostedsadresse={bostedsadresse} index={index} visAktiv />
                   <Table.DataCell>
-                    {!!adresse.gyldigFraOgMed ? formaterStringDato(adresse.gyldigFraOgMed) : ''}
+                    {!!adresse.gyldigFraOgMed ? formaterDato(adresse.gyldigFraOgMed) : ''}
                   </Table.DataCell>
                   <Table.DataCell>
-                    {!!adresse.gyldigTilOgMed ? formaterStringDato(adresse.gyldigTilOgMed) : ''}
+                    {!!adresse.gyldigTilOgMed ? formaterDato(adresse.gyldigTilOgMed) : ''}
                   </Table.DataCell>
                 </Table.Row>
               ))}

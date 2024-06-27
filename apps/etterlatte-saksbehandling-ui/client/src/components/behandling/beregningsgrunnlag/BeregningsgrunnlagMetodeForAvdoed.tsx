@@ -2,7 +2,7 @@ import { BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from
 import React from 'react'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { lastDayOfMonth, startOfDay } from 'date-fns'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'

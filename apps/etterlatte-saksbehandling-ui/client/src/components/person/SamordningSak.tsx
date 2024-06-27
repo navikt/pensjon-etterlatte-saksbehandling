@@ -4,7 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSamordningsdataForSak } from '~shared/api/vedtaksvurdering'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Samordningsvedtak } from '~components/vedtak/typer'
@@ -90,9 +90,9 @@ function SamordningTabell({
                   {mld.tpNr} {mld.tpNavn}
                 </Table.DataCell>
                 <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
-                <Table.DataCell>{formaterStringDato(mld.sendtDato)}</Table.DataCell>
-                <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
-                <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
+                <Table.DataCell>{formaterDato(mld.sendtDato)}</Table.DataCell>
+                <Table.DataCell>{mld.svartDato && formaterDato(mld.svartDato)}</Table.DataCell>
+                <Table.DataCell>{mld.purretDato && formaterDato(mld.purretDato)}</Table.DataCell>
                 <Table.DataCell>{mld.svartDato && (mld.refusjonskrav ? 'Ja' : 'Nei')}</Table.DataCell>
                 {redigerbar && (
                   <Table.DataCell>

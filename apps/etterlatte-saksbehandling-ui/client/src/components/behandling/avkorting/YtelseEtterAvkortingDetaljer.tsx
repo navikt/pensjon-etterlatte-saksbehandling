@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
 import { BodyShort, Box, ReadMore } from '@navikt/ds-react'
-import { NOK } from '~utils/formattering'
+import { NOK } from '~utils/formatering/formatering'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 
 export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse }) => {

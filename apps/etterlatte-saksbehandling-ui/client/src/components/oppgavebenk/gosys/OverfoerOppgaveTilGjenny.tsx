@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { GosysBrukerType, GosysOppgave, GosysTema, sakTypeFraTema } from '~shared/types/Gosys'
 import { flyttTilGjenny } from '~shared/api/gosys'
 import { SakType } from '~shared/types/sak'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype } from '~utils/formatering/formatering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GOSYS_TEMA_FILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 

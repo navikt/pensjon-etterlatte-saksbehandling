@@ -5,7 +5,7 @@ import {
 } from '~shared/types/RevurderingInfo'
 import React, { useState } from 'react'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { ILand } from '~shared/api/trygdetid'
 import { Accordion } from '@navikt/ds-react'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
@@ -55,7 +55,7 @@ function Sluttbehandling({
   return (
     <Accordion.Item open={open}>
       <Accordion.Header onClick={() => setOpen(() => !open)}>
-        Vis sluttbehandling som ble opprettet {formaterStringDato(opprettetDato)} med id: {id}
+        Vis sluttbehandling som ble opprettet {formaterDato(opprettetDato)} med id: {id}
       </Accordion.Header>
       {open ? (
         <Accordion.Content>

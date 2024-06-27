@@ -2,9 +2,10 @@ import { Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
-import { formaterJournalpostSakstype, formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import { formaterDato } from '~utils/formatering/dato'
+import { formaterJournalpostSakstype, formaterJournalpostStatus } from '~utils/formatering/formatering'
 
 const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
   if (temaTilhoererGjenny(journalpost)) return <Tag variant="success">{journalpost.tema}</Tag>
@@ -23,7 +24,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       <Info
         label="Registrert dato"
-        tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
+        tekst={journalpost.datoOpprettet ? formaterDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
       />
     </VStack>
 

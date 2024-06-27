@@ -16,7 +16,7 @@ import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -226,7 +226,7 @@ const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | null): string =
   if (innhold?.dokumenter) {
     return innhold.dokumenter
       .filter((doc) => doc.sendt && doc.dato)
-      .map((e) => `${e.dokumenttype} ${formaterStringDato(e.dato as string)}`)
+      .map((e) => `${e.dokumenttype} ${formaterDato(e.dato as string)}`)
       .join(', ')
   }
   return ''

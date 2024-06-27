@@ -4,7 +4,7 @@ import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljer
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { IHendelse, IHendelseType } from '~shared/types/IHendelse'
-import { DatoFormat } from '~utils/formattering'
+import { DatoFormat } from '~utils/formatering/dato'
 
 export const hentAlderForDato = (dato: Date) =>
   differenceInYears(new Date(), parse(String(dato), DatoFormat.AAR_MAANED_DAG, new Date()))

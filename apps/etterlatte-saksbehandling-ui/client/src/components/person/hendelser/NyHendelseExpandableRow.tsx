@@ -5,7 +5,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { Alert, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { HendelseBeskrivelse } from '~components/person/hendelser/HendelseBeskrivelse'
 import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/hendelser/utils'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
@@ -62,7 +62,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
       }
     >
       <Table.DataCell>{grunnlagsendringsTittel[hendelse.samsvarMellomKildeOgGrunnlag.type]}</Table.DataCell>
-      <Table.DataCell>{formaterStringDato(hendelse.opprettet)}</Table.DataCell>
+      <Table.DataCell>{formaterDato(hendelse.opprettet)}</Table.DataCell>
     </Table.ExpandableRow>
   )
 }

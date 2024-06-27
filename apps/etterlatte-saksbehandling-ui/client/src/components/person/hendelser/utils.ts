@@ -5,7 +5,7 @@ import {
   IBehandlingsammendrag,
   Saksrolle,
 } from '~components/person/typer'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'

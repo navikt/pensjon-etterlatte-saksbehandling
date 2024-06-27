@@ -2,7 +2,8 @@ import { IAvkortetYtelse } from '~shared/types/IAvkorting'
 import { Box, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
-import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
+import { NOK } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { lastDayOfMonth } from 'date-fns'
@@ -73,7 +74,7 @@ export const YtelseEtterAvkorting = () => {
                   >
                     <Table.DataCell>
                       <BredCelle>
-                        {formaterStringDato(ytelse.fom)} -{' '}
+                        {formaterDato(ytelse.fom)} -{' '}
                         {ytelse.tom ? formaterDato(lastDayOfMonth(new Date(ytelse.tom))) : ''}
                       </BredCelle>
                     </Table.DataCell>

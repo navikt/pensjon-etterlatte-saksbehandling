@@ -1,7 +1,7 @@
 import { ErrorSummary } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 const FeilIPerioderOppsummering = styled(ErrorSummary)`
   margin: 2em auto;

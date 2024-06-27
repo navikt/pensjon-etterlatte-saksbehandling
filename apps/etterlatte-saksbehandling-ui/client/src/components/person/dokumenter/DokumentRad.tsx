@@ -4,7 +4,8 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import React, { useState } from 'react'
 import { HStack, Table } from '@navikt/ds-react'
 import { JournalpostInnhold } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnhold'
-import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterJournalpostType } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 import { UtsendingsinfoModal } from '~components/person/dokumenter/UtsendingsinfoModal'
 import { OppgaveFraJournalpostModal } from '~components/person/dokumenter/OppgaveFraJournalpostModal'
 import DokumentModal from '~components/person/dokumenter/DokumentModal'
@@ -32,7 +33,7 @@ export const DokumentRad = ({
       <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
       <Table.DataCell>{dokument.tittel}</Table.DataCell>
       <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
-      <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
+      <Table.DataCell>{formaterDato(dokument.datoOpprettet)}</Table.DataCell>
       <Table.DataCell>
         {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
       </Table.DataCell>

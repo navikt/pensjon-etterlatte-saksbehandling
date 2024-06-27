@@ -2,7 +2,7 @@ import { Info, Overskrift, Tekst, Wrapper } from '~components/behandling/atteste
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { genbehandlingTypeTilLesbartNavn } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 
 export const AttestertVisning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }

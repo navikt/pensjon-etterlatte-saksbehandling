@@ -1,7 +1,7 @@
 import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { compareDesc, isBefore, lastDayOfMonth } from 'date-fns'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { Beregning } from '~shared/types/Beregning'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
@@ -83,7 +83,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
               }
             >
               <Table.DataCell>
-                {`${formaterStringDato(beregningsperiode.datoFOM)} - ${
+                {`${formaterDato(beregningsperiode.datoFOM)} - ${
                   beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
                 }`}
               </Table.DataCell>

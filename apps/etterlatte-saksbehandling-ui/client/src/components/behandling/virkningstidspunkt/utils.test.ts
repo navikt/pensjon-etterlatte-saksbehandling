@@ -4,7 +4,7 @@ import { SakType } from '~shared/types/sak'
 
 describe('minimumstidspunkt for virkningstidspunkt er', () => {
   it('maaned etter doedsdato hvis soknad er mottatt innenfor tre aar', () => {
-    const avdoedDoedsdato = '2020-01-01'
+    const avdoedDoedsdato = new Date('2020-01-01')
     const soeknadMottattDato = '2020-03-01'
 
     const minimumsVirkningstidspunkt = hentMinimumsVirkningstidspunkt(
@@ -18,7 +18,7 @@ describe('minimumstidspunkt for virkningstidspunkt er', () => {
   })
 
   it('tre aar fra mottatt soknad hvis soknad er mottatt tre aar etter doedsdato', () => {
-    const avdoedDoedsdato = '2016-12-31'
+    const avdoedDoedsdato = new Date('2016-12-31')
     const soeknadMottattDato = '2020-01-01'
 
     const minimumsVirkningstidspunkt = hentMinimumsVirkningstidspunkt(

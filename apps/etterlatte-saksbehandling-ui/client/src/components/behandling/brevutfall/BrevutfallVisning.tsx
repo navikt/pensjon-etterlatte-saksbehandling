@@ -5,9 +5,9 @@ import {
   BrevutfallOgEtterbetaling,
   FeilutbetalingValg,
 } from '~components/behandling/brevutfall/Brevutfall'
-import { format, parseISO } from 'date-fns'
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { formaterStringMaanedDato } from '~utils/formattering'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -33,10 +33,6 @@ export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | nul
   }
 }
 
-function formaterDatoSomMaaned(dato: string) {
-  return format(parseISO(dato), 'MMMM yyyy')
-}
-
 export const BrevutfallVisning = (props: {
   behandlingErOpphoer: Boolean
   redigerbar: boolean
@@ -58,11 +54,11 @@ export const BrevutfallVisning = (props: {
             <HStack gap="8">
               <VStack gap="2">
                 <Label>Fra og med</Label>
-                <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
+                <BodyShort>{formaterStringMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
               </VStack>
               <VStack gap="2">
                 <Label>Til og med</Label>
-                <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
+                <BodyShort>{formaterStringMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
               </VStack>
             </HStack>
           )}

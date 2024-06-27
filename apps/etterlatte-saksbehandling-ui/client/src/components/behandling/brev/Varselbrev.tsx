@@ -22,8 +22,8 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { format } from 'date-fns'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
+import { formaterStringDato } from '~utils/formattering'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -112,7 +112,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <div>
                   <BrevStatusTag status={varselbrev.status} />
                   <BodyShort spacing>
-                    <b>Sist endret:</b> {format(new Date(varselbrev.statusEndret), 'dd.MM.yyyy')}
+                    <b>Sist endret:</b> {formaterStringDato(varselbrev.statusEndret)}
                   </BodyShort>
                 </div>
 
@@ -129,7 +129,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
           </Box>
         </Sidebar>
 
-        {!!varselbrev && <RedigerbartBrev brev={varselbrev!!} kanRedigeres={redigerbar} />}
+        {!!varselbrev && <RedigerbartBrev brev={varselbrev} kanRedigeres={redigerbar} />}
 
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}

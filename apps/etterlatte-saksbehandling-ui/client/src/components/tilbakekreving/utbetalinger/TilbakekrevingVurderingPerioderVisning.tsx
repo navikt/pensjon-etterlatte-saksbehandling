@@ -6,8 +6,8 @@ import {
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
-import { format } from 'date-fns'
 import { useNavigate } from 'react-router'
+import { formaterMaanedDato } from '~utils/formattering'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
@@ -37,7 +37,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index}>
-                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy')}</Table.DataCell>
+                <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">{beloeper.beregnetFeilutbetaling} kr</Table.DataCell>

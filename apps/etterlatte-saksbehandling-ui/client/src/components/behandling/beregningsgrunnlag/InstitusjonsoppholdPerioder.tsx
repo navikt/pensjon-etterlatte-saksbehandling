@@ -13,7 +13,7 @@ export const FeilIPerioder = (props: { feil: [number, FeilIPeriode][] }) => {
     <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
       {props.feil.map(([index, feil]) => (
         <ErrorSummary.Item key={`${index}${feil}`} href={`#institusjonsopphold.${index}`}>
-          {`${teksterFeilIPeriode[feil]}, opphold nummer ${index}`}
+          {teksterFeilIPeriode[feil]}, opphold nummer {index}
         </ErrorSummary.Item>
       ))}
     </FeilIPerioderOppsummering>
@@ -33,5 +33,9 @@ const teksterFeilIPeriode: Record<FeilIPeriode, string> = {
 export const PeriodeVisning = (props: { fom: Date; tom: Date | undefined }) => {
   const { fom, tom } = props
 
-  return <>{`${formaterDato(fom)} - ${tom ? formaterDato(tom) : ''}`}</>
+  return (
+    <>
+      {formaterDato(fom)} - {tom ? formaterDato(tom) : ''}
+    </>
+  )
 }

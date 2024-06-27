@@ -53,5 +53,14 @@ query(
                 ...metadata
             }
         }
+        doedsfall {
+            doedsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
     }
 }

@@ -2,11 +2,11 @@ import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-rea
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { format } from 'date-fns'
-import { DatoFormat, formaterFnr } from '~utils/formattering'
+import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
+import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -39,9 +39,9 @@ export const BarneListe = ({ familieforhold }: Props) => {
         </Table.Header>
         <Table.Body>
           {barneListe.length ? (
-            barneListe.map((barn, i) => {
-              return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
-            })
+            barneListe.map((barn, i) => (
+              <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
+            ))
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={5} aria-colspan={5} align="center">
@@ -56,17 +56,17 @@ export const BarneListe = ({ familieforhold }: Props) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
-  const erDoed = !!barn.doedsdato
   const barnetsFnr = barn.foedselsnummer
 
   // Søker er alltid gjenlevende for OMS
   const erGjenlevendesBarn = familieforhold.soeker?.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
 
-  if (erDoed) {
-    const navn = `${barn.fornavn} ${barn.etternavn} '(død)'}`
+  if (!!barn.doedsdato) {
     return (
       <Table.Row>
-        <Table.DataCell>{navn}</Table.DataCell>
+        <Table.DataCell>
+          {barn.fornavn} {barn.etternavn} <DoedsdatoTag doedsdato={barn.doedsdato} />
+        </Table.DataCell>
         <Table.DataCell>
           <FnrWrapper>
             <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
@@ -83,20 +83,19 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
   }
 
   const alder = hentAlderForDato(barn.foedselsdato)
-  const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
   const periode = aktivAdresse
-    ? `${format(new Date(aktivAdresse!!.gyldigFraOgMed!!), DatoFormat.DAG_MAANED_AAR)} - ${
-        aktivAdresse?.gyldigTilOgMed
-          ? format(new Date(aktivAdresse!!.gyldigTilOgMed!!), DatoFormat.DAG_MAANED_AAR)
-          : 'nå'
+    ? `${formaterStringDato(aktivAdresse!!.gyldigFraOgMed!!)} - ${
+        aktivAdresse?.gyldigTilOgMed ? formaterStringDato(aktivAdresse!!.gyldigTilOgMed!!) : 'nå'
       }`
     : 'Mangler adresse'
 
   return (
     <Table.Row>
-      <Table.DataCell>{navnMedAlder}</Table.DataCell>
+      <Table.DataCell>
+        {barn.fornavn} {barn.etternavn} ({alder} år)
+      </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">

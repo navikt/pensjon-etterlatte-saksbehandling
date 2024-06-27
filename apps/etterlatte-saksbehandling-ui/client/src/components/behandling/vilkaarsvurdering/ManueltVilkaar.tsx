@@ -55,11 +55,13 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
             </HStack>
             {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
               <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
+                {paragrafType(vilkaar)} {formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}
                 <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
               </Link>
             ) : (
-              <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
+              <>
+                {paragrafType(vilkaar)} {vilkaar.hovedvilkaar.lovreferanse.paragraf}
+              </>
             )}
             <Informasjon>{vilkaar.hovedvilkaar.beskrivelse}</Informasjon>
           </VStack>

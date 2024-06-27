@@ -109,7 +109,7 @@ export const Resultat = (props: Props) => {
             <Box>
               <HStack gap="2" align="center">
                 <StatusIcon status={status} />
-                <BodyShort textColor="subtle">{`${resultatTekst()}`}</BodyShort>
+                <BodyShort textColor="subtle">{resultatTekst()}</BodyShort>
               </HStack>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort textColor="subtle">

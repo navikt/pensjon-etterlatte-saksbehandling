@@ -116,8 +116,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     }
   }
 
-  const doedsdato = avdoede?.opplysning.doedsdato ?? null
-
   return (
     <>
       <Box paddingInline="16" paddingBlock="16 4">
@@ -126,7 +124,9 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         </Heading>
       </Box>
       <FamilieforholdWrapper>
-        {personopplysninger.soeker && <Barn person={personopplysninger.soeker?.opplysning} doedsdato={doedsdato} />}
+        {personopplysninger.soeker && (
+          <Barn person={personopplysninger.soeker?.opplysning} doedsdato={avdoede?.opplysning.doedsdato} />
+        )}
       </FamilieforholdWrapper>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}

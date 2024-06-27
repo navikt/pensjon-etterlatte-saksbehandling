@@ -1,6 +1,6 @@
-import { format } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
 import { VStack } from '@navikt/ds-react'
+import { formaterStringDato } from '~utils/formattering'
 
 export const Adressevisning = ({
   adresser,
@@ -25,8 +25,8 @@ export const Adressevisning = ({
 }
 
 export const Adresse = ({ adresse, soeknadsoversikt }: { adresse: IAdresse; soeknadsoversikt: boolean }) => {
-  const fra = format(new Date(adresse.gyldigFraOgMed!), 'dd.MM.yyyy')
-  const til = adresse.aktiv ? 'nå' : format(new Date(adresse.gyldigTilOgMed!), 'dd.MM.yyyy')
+  const fra = formaterStringDato(adresse.gyldigFraOgMed)
+  const til = adresse.aktiv ? 'nå' : formaterStringDato(adresse.gyldigTilOgMed!)
 
   return (
     <>

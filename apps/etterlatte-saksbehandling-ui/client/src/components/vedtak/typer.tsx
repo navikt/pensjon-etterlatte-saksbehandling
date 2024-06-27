@@ -45,16 +45,16 @@ export interface Samordningsmelding {
 }
 
 export interface OppdaterSamordningsmelding {
-  samId: number,
-  pid: string,
-  tpNr: string,
-  refusjonskrav: boolean,
+  samId: number
+  pid: string
+  tpNr: string
+  refusjonskrav: boolean
   periodisertBelopListe: Refusjonstrekk[]
 }
 
 export interface Refusjonstrekk {
-  fom: string,
-  tom?: string,
-  belop: number,
+  fom: string
+  tom?: string
+  belop: number
   kravstillerReferanse?: String
 }

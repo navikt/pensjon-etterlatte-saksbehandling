@@ -26,4 +26,5 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
             applicationContext.tilbakekrevingriver
             applicationContext.soeknadStatistikkRiver
             applicationContext.klageHendelseRiver
+            applicationContext.aktivitetspliktRiver
         }

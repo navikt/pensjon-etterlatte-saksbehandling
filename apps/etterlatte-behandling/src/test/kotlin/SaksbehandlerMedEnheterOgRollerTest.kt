@@ -1,8 +1,9 @@
+package no.nav.etterlatte
+
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo

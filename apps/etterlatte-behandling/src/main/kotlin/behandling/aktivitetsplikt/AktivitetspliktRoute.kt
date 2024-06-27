@@ -84,7 +84,7 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
                     kunSkrivetilgang {
                         logger.info("Sletter aktivitet $aktivitetId for behandlingId $behandlingId")
 
-                        aktivitetspliktService.slettAktivitet(behandlingId, aktivitetId)
+                        aktivitetspliktService.slettAktivitet(behandlingId, aktivitetId, brukerTokenInfo)
 
                         call.respond(aktivitetspliktService.hentAktiviteter(behandlingId))
                     }

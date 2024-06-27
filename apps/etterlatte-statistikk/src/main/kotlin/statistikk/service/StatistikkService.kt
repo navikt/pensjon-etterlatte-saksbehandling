@@ -52,6 +52,7 @@ class StatistikkService(
     private val sakRepository: SakRepository,
     private val behandlingKlient: BehandlingKlient,
     private val beregningKlient: BeregningKlient,
+    private val aktivitetspliktService: AktivitetspliktService,
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -89,7 +90,9 @@ class StatistikkService(
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {
         val vedtak = stoenadRepository.hentStoenadRaderInnenforMaaned(maaned)
-        return MaanedStatistikk(maaned, vedtak)
+        val omsSaker = vedtak.filter { it.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }.map { it.id }
+        val aktiviteterForOmsSaker = aktivitetspliktService.mapAktivitetForSaker(omsSaker, maaned)
+        return MaanedStatistikk(maaned, vedtak, aktiviteterForOmsSaker)
     }
 
     private fun registrerSakStatistikkForVedtak(

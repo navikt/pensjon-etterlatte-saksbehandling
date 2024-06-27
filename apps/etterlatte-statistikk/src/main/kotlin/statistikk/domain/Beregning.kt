@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.Month
@@ -166,6 +167,7 @@ data class AvkortetYtelse(
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
+    val sanksjonertYtelse: SanksjonertYtelse?,
 ) {
     companion object {
         fun fraDTO(dto: AvkortetYtelseDto) =
@@ -176,6 +178,7 @@ data class AvkortetYtelse(
                 avkortingsbeloep = dto.avkortingsbeloep,
                 ytelseEtterAvkorting = dto.ytelseEtterAvkorting,
                 restanse = dto.restanse,
+                sanksjonertYtelse = dto.sanksjon,
             )
     }
 }

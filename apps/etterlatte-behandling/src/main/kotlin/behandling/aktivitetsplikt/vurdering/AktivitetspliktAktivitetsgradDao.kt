@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOppr
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
+import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Date
@@ -186,7 +188,19 @@ data class AktivitetspliktAktivitetsgrad(
     override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
-) : AktivitetspliktVurderingOpprettetDato
+) : AktivitetspliktVurderingOpprettetDato {
+    fun toDto(): AktivitetspliktAktivitetsgradDto =
+        AktivitetspliktAktivitetsgradDto(
+            vurdering =
+                when (this.aktivitetsgrad) {
+                    AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50 -> VurdertAktivitetsgrad.AKTIVITET_UNDER_50
+                    AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50 -> VurdertAktivitetsgrad.AKTIVITET_OVER_50
+                    AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> VurdertAktivitetsgrad.AKTIVITET_100
+                },
+            fom = this.fom,
+            tom = null,
+        )
+}
 
 data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,

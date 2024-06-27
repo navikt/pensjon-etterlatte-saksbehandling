@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -201,7 +203,21 @@ data class AktivitetspliktAktivitet(
     val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
-)
+) {
+    fun toDto(): AktivitetDto =
+        AktivitetDto(
+            typeAktivitet =
+                when (this.type) {
+                    AktivitetspliktAktivitetType.ARBEIDSTAKER -> AktivitetType.ARBEIDSTAKER
+                    AktivitetspliktAktivitetType.SELVSTENDIG_NAERINGSDRIVENDE -> AktivitetType.SELVSTENDIG_NAERINGSDRIVENDE
+                    AktivitetspliktAktivitetType.ETABLERER_VIRKSOMHET -> AktivitetType.ETABLERER_VIRKSOMHET
+                    AktivitetspliktAktivitetType.ARBEIDSSOEKER -> AktivitetType.ARBEIDSSOEKER
+                    AktivitetspliktAktivitetType.UTDANNING -> AktivitetType.UTDANNING
+                },
+            fom = fom,
+            tom = tom,
+        )
+}
 
 data class LagreAktivitetspliktAktivitet(
     val id: UUID? = null,

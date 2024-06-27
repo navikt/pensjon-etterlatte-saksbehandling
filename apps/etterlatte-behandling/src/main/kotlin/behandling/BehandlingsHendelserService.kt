@@ -2,6 +2,9 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AKTIVITETSPLIKT_DTO_RIVER_KEY
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktHendelse
 import no.nav.etterlatte.libs.common.behandling.BEHANDLING_ID_PAA_VENT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PAA_VENT_AARSAK_KEY
@@ -17,7 +20,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface BehandlingHendelserKafkaProducer {
-    fun sendMeldingForHendelseMedDetaljertBehandling(
+    fun sendMeldingForHendelseStatisitkk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
     )
@@ -32,6 +35,8 @@ interface BehandlingHendelserKafkaProducer {
         behandlingId: UUID,
         hendelseType: BehandlingHendelseType,
     )
+
+    fun sendMeldingOmAktivitetsplikt(aktivitetspliktDto: AktivitetspliktDto)
 }
 
 class BehandlingsHendelserKafkaProducerImpl(
@@ -39,7 +44,7 @@ class BehandlingsHendelserKafkaProducerImpl(
 ) : BehandlingHendelserKafkaProducer {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendMeldingForHendelseMedDetaljertBehandling(
+    override fun sendMeldingForHendelseStatisitkk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
     ) {
@@ -115,6 +120,28 @@ class BehandlingsHendelserKafkaProducerImpl(
                 logger.info(
                     "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
                         " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
+    }
+
+    override fun sendMeldingOmAktivitetsplikt(aktivitetspliktDto: AktivitetspliktDto) {
+        val correlationId = getCorrelationId()
+        rapid
+            .publiser(
+                "aktivitetsplikt-${aktivitetspliktDto.sakId}",
+                JsonMessage
+                    .newMessage(
+                        AktivitetspliktHendelse.OPPDATERT.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            AKTIVITETSPLIKT_DTO_RIVER_KEY to aktivitetspliktDto,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Sendte hendelse om aktivitetsplikt for sak ${aktivitetspliktDto.sakId} på partition " +
+                        "$partition, offset $offset, correlationid: $correlationId",
                 )
             }
     }

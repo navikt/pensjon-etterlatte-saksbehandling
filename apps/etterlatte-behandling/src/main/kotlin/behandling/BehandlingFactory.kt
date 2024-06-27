@@ -212,7 +212,7 @@ class BehandlingFactory(
                         },
                 )
             return BehandlingOgOppgave(behandling, oppgave) {
-                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                behandlingHendelser.sendMeldingForHendelseStatisitkk(
                     behandling.toStatistikkBehandling(persongalleri),
                     BehandlingHendelseType.OPPRETTET,
                 )

@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOppr
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
+import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Date
@@ -189,7 +191,36 @@ data class AktivitetspliktUnntak(
     override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
-) : AktivitetspliktVurderingOpprettetDato
+) : AktivitetspliktVurderingOpprettetDato {
+    fun toDto(): UnntakFraAktivitetDto =
+        UnntakFraAktivitetDto(
+            unntak =
+                when (this.unntak) {
+                    AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR ->
+                        UnntakFraAktivitetsplikt.OMSORG_BARN_UNDER_ETT_AAR
+
+                    AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM ->
+                        UnntakFraAktivitetsplikt.OMSORG_BARN_SYKDOM
+
+                    AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM ->
+                        UnntakFraAktivitetsplikt.MANGLENDE_TILSYNSORDNING_SYKDOM
+
+                    AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE ->
+                        UnntakFraAktivitetsplikt.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE
+
+                    AktivitetspliktUnntakType.GRADERT_UFOERETRYGD ->
+                        UnntakFraAktivitetsplikt.GRADERT_UFOERETRYGD
+
+                    AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM ->
+                        UnntakFraAktivitetsplikt.MIDLERTIDIG_SYKDOM
+
+                    AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT ->
+                        UnntakFraAktivitetsplikt.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                },
+            fom = fom,
+            tom = tom,
+        )
+}
 
 data class LagreAktivitetspliktUnntak(
     val id: UUID? = null,

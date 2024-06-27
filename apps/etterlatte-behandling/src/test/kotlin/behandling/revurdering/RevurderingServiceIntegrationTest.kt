@@ -171,7 +171,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         verify { aktivitetspliktDao.kopierAktiviteter(behandling!!.id, revurdering.id) }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
@@ -258,7 +258,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
-            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             verify { oppgaveService.hentOppgave(any()) }
@@ -368,7 +368,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling!!.id) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             verify { oppgaveService.hentOppgave(any()) }
-            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettOppgave(
                     behandling!!.id.toString(),
@@ -396,7 +396,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any()) }
             verify {
-                hendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                hendelser.sendMeldingForHendelseStatisitkk(
                     behandling!!.toStatistikkBehandling(
                         persongalleri(),
                     ),
@@ -468,7 +468,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }

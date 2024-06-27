@@ -78,8 +78,8 @@ class StoenadRepository(
                         behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
                         virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, 
-                        sakYtelsesgruppe 
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sakYtelsesgruppe, harAktivitetsplikt, oppfyllerAktivitet, aktivitet, sanksjon
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
                     setString(1, maanedStatistikkRad.fnrSoeker)
@@ -107,6 +107,10 @@ class StoenadRepository(
                     setString(23, maanedStatistikkRad.kilde.name)
                     maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
                     setString(25, maanedStatistikkRad.sakYtelsesgruppe?.name)
+                    setString(26, maanedStatistikkRad.harAktivitetsplikt)
+                    setString(27, maanedStatistikkRad.oppfyllerAktivitet?.toString())
+                    setString(28, maanedStatistikkRad.aktivitet)
+                    setString(29, maanedStatistikkRad.sanksjon)
                 }.executeUpdate()
         }
 

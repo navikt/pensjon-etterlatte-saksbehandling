@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import {OppdaterSamordningsmelding, Samordningsvedtak, VedtakSammendrag} from '~components/vedtak/typer'
+import { OppdaterSamordningsmelding, Samordningsvedtak, VedtakSammendrag } from '~components/vedtak/typer'
 
 export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiResponse<VedtakSammendrag>> => {
   return apiClient.get(`vedtak/${behandlingId}/sammendrag`)
@@ -41,8 +41,8 @@ export const hentSamordningsdataForSak = async (sakId: number): Promise<ApiRespo
 }
 
 export const oppdaterSamordningsmeldingForSak = async (args: {
-  sakId: number,
+  sakId: number
   oppdaterSamordningsmelding: OppdaterSamordningsmelding
 }): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`vedtak/sak/${args.sakId}/samordning/melding`, {...args.oppdaterSamordningsmelding})
+  return apiClient.post(`vedtak/sak/${args.sakId}/samordning/melding`, { ...args.oppdaterSamordningsmelding })
 }

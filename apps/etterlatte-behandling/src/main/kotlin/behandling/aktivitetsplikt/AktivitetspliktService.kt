@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
@@ -17,6 +18,7 @@ import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -25,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -33,6 +36,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class AktivitetspliktService(
@@ -42,6 +46,7 @@ class AktivitetspliktService(
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
+    private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val oppgaveService: OppgaveService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
@@ -61,6 +66,45 @@ class AktivitetspliktService(
         return hentAktivitetspliktOppfolging(behandlingId)!!
     }
 
+    suspend fun hentAktivitetspliktDto(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+    ): AktivitetspliktDto {
+        val grunnlag = grunnlagKlient.hentGrunnlagForSak(sakId, bruker)
+        val avdoedDoedsdato =
+            requireNotNull(
+                grunnlag
+                    .hentAvdoede()
+                    .singleOrNull()
+                    ?.hentDoedsdato()
+                    ?.verdi,
+            ) {
+                "Kunne ikke hente ut avdødes dødsdato for sak med id=$sakId"
+            }
+        val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
+        val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
+
+        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+        val sisteVurdering =
+            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+
+        val (unntak, aktivitetsgrad) =
+            when (sisteVurdering) {
+                is AktivitetspliktAktivitetsgrad -> emptyList<AktivitetspliktUnntak>() to listOf(sisteVurdering)
+                is AktivitetspliktUnntak -> listOf(sisteVurdering) to emptyList()
+                else -> emptyList<AktivitetspliktUnntak>() to emptyList()
+            }
+
+        return AktivitetspliktDto(
+            sakId = sakId,
+            avdoedDoedsmaaned = YearMonth.from(avdoedDoedsdato),
+            aktivitetsgrad = aktivitetsgrad.map { it.toDto() },
+            unntak = unntak.map { it.toDto() },
+            brukersAktivitet = aktiviteter.map { it.toDto() },
+        )
+    }
+
     fun oppfyllerAktivitetsplikt(
         sakId: Long,
         aktivitetspliktDato: LocalDate,
@@ -68,7 +112,8 @@ class AktivitetspliktService(
         return inTransaction {
             val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
             val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-            val nyesteVurdering = listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+            val nyesteVurdering =
+                listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
 
             return@inTransaction when (nyesteVurdering) {
                 is AktivitetspliktAktivitetsgrad -> oppfyllerAktivitet(nyesteVurdering)
@@ -134,11 +179,13 @@ class AktivitetspliktService(
                 aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
             }
         }
+        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo) }
     }
 
     fun slettAktivitet(
         behandlingId: UUID,
         aktivitetId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
@@ -150,6 +197,7 @@ class AktivitetspliktService(
         inTransaction {
             aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
+        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo) }
     }
 
     fun opprettAktivitetsgradForOppgave(
@@ -165,6 +213,7 @@ class AktivitetspliktService(
             ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
     }
 
     fun upsertAktivitetsgradForBehandling(
@@ -193,9 +242,16 @@ class AktivitetspliktService(
                 if (unntak != null) {
                     aktivitetspliktUnntakDao.slettUnntak(unntak.id, behandlingId)
                 }
-                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
+                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                    aktivitetsgrad,
+                    sakId,
+                    kilde,
+                    behandlingId = behandlingId,
+                )
             }
         }
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
     }
 
     fun opprettUnntakForOpppgave(
@@ -215,6 +271,8 @@ class AktivitetspliktService(
             ) { "Unntak finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
         }
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
     }
 
     fun upsertUnntakForBehandling(
@@ -250,6 +308,25 @@ class AktivitetspliktService(
                 }
                 aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
             }
+        }
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+    }
+
+    private suspend fun sendDtoTilStatistikk(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        try {
+            val bruker = brukerTokenInfo ?: Systembruker.automatiskJobb
+            val dto = hentAktivitetspliktDto(sakId, bruker)
+            statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke sende hendelse til statistikk om oppdatert aktivitetsplikt, for sak $sakId. " +
+                    "Dette betyr at vi kan mangle oppdatert informasjon om aktivitetsplikten i saken for bruker, og " +
+                    "bør sees på / vurdere en ekstra sending for akkurat denne saken.",
+            )
         }
     }
 

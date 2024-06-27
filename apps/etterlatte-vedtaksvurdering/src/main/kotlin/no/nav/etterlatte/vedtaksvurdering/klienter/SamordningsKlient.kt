@@ -117,7 +117,6 @@ class SamordningsKlientImpl(
                     parameter("tpNr", samordningmelding.tpNr)
                     parameter("samId", samordningmelding.samId)
                     parameter("refusjonskrav", samordningmelding.refusjonskrav)
-                    // parameter("periodisertBelopListe", ...)
                 }
 
             if (!response.status.isSuccess()) {

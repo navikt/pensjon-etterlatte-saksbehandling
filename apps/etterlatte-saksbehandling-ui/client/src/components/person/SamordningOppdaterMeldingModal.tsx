@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, HStack, Label, Modal, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, HStack, Label, Modal, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,6 +25,7 @@ export default function SamordningOppdaterMeldingModal({
   const navigate = useNavigate()
 
   const [erRefusjonskrav, setErRefusjonskrav] = useState<JaNei>()
+  const [kommentar, setKommentar] = useState<string>('')
   const [oppdaterSamordningsmeldingStatus, oppdaterSamordningsmelding] = useApiCall(oppdaterSamordningsmeldingForSak)
 
   const oppdaterMelding = () => {
@@ -36,7 +37,7 @@ export default function SamordningOppdaterMeldingModal({
           pid: fnr,
           tpNr: mld.tpNr,
           refusjonskrav: erRefusjonskrav === JaNei.JA,
-          periodisertBelopListe: [],
+          kommentar: kommentar,
         },
       },
       () => {
@@ -83,6 +84,14 @@ export default function SamordningOppdaterMeldingModal({
               </HStack>
             </RadioGroup>
 
+            <Textarea
+              label="Kommentar/dialog med TP-ordning"
+              description="Det opprettes et notat på saken for å dokumentere handlingen."
+              minRows="5"
+              maxRows="10"
+              onChange={(event) => setKommentar(event.target.value)}
+            />
+
             {isSuccess(oppdaterSamordningsmeldingStatus) ? (
               <>
                 <Toast melding="Melding oppdatert" />
@@ -104,7 +113,7 @@ export default function SamordningOppdaterMeldingModal({
                 </Button>
                 <Button
                   variant="primary"
-                  disabled={erRefusjonskrav === undefined}
+                  disabled={erRefusjonskrav === undefined || !kommentar.length}
                   onClick={oppdaterMelding}
                   loading={isPending(oppdaterSamordningsmeldingStatus)}
                 >

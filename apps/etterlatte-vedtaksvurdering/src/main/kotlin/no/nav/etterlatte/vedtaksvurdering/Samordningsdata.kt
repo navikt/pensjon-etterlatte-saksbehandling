@@ -42,12 +42,4 @@ data class OppdaterSamordningsmelding(
     val tpNr: String,
     val samId: Long,
     val refusjonskrav: Boolean,
-    val periodisertBelopListe: List<Refusjonstrekk>,
-)
-
-data class Refusjonstrekk(
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val belop: Double,
-    val kravstillerReferanse: String,
 )

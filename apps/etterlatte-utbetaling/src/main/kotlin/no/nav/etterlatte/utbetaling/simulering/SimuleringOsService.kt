@@ -24,7 +24,6 @@ import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdragslinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -36,7 +35,7 @@ class SimuleringOsService(
     private val simuleringDao: SimuleringDao,
     private val simuleringOsKlient: SimuleringOsKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    fun hent(behandlingId: UUID): SimulertBeregning? = simuleringDao.hent(behandlingId)?.tilSimulertBeregning()
 
     suspend fun simuler(
         behandlingId: UUID,

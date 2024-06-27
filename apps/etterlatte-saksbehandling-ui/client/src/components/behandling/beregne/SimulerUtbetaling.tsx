@@ -1,10 +1,10 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { simulerUtbetaling } from '~shared/api/utbetaling'
+import { hentSimulertUtbetaling, simulerUtbetaling } from '~shared/api/utbetaling'
 import { isInitial, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BodyShort, Button, Heading, Table, Box, Label } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
@@ -15,6 +15,22 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const [simuleringStatus, simulerUtbetalingRequest] = useApiCall(simulerUtbetaling)
+  const [lagretSimuleringStatus, hentLagretSimulerUtbetaling] = useApiCall(hentSimulertUtbetaling)
+  const [, setLagretSimulerUtbetaling] = useState<SimulertBeregning | null>()
+
+  function behandlingStatusFerdigEllerVedtakFattet() {
+    return erFerdigBehandlet(behandling.status) || behandling.status === IBehandlingStatus.FATTET_VEDTAK
+  }
+
+  useEffect(() => {
+    if (behandlingStatusFerdigEllerVedtakFattet()) {
+      hentLagretSimulerUtbetaling(behandling.id, (result, statusCode) => {
+        if (statusCode === 200) {
+          setLagretSimulerUtbetaling(result)
+        }
+      })
+    }
+  }, [behandling.status])
 
   const simuler = () => {
     if (isInitial(simuleringStatus)) {
@@ -31,7 +47,19 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
           Simulere utbetaling
         </Heading>
 
-        {!erFerdigBehandlet(behandling.status) && (
+        {behandlingStatusFerdigEllerVedtakFattet() &&
+          mapResult(lagretSimuleringStatus, {
+            pending: <Spinner visible={true} label="Henter lagret simulering..." />,
+            success: (lagretSimulering) =>
+              lagretSimulering ? (
+                <SimuleringBeregning data={lagretSimulering} />
+              ) : (
+                <BodyShort textColor="subtle">Fant ingen lagret simulering.</BodyShort>
+              ),
+            error: () => <ApiErrorAlert>Feil ved henting av lagret simulering</ApiErrorAlert>,
+          })}
+
+        {!behandlingStatusFerdigEllerVedtakFattet() && (
           <Button variant="secondary" size="small" onClick={simuler}>
             Simuler
           </Button>

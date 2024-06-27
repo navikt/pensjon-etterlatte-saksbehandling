@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.simulering
 
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
@@ -40,4 +42,16 @@ class SimuleringDao(
             statement.executeUpdate()
         }
     }
+
+    fun hent(behandlingId: UUID): SimulerBeregningResponse? =
+        dataSource.connection.use {
+            it
+                .prepareStatement("SELECT response::jsonb FROM simulering WHERE behandlingid = ?")
+                .apply {
+                    setObject(1, behandlingId)
+                }.executeQuery()
+                .firstOrNull {
+                    objectMapper.readValue(getString("response"), SimulerBeregningResponse::class.java)
+                }
+        }
 }

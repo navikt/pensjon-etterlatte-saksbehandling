@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -71,7 +72,7 @@ class AktivitetspliktUnntakDaoTest(
     fun `Skal hente seneste unntak`() {
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(1000, ChronoUnit.SECONDS))
         val unntak =
             LagreAktivitetspliktUnntak(
                 unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,

@@ -197,7 +197,7 @@ class AktivitetspliktService(
         inTransaction {
             aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
-        runBlocking { sendDtoTilStatistikk(behandling.sak.id, null) }
+        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo) }
     }
 
     fun opprettAktivitetsgradForOppgave(

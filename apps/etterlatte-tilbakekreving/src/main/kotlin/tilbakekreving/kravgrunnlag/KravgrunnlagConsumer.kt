@@ -50,7 +50,7 @@ class KravgrunnlagConsumer(
                         val sakId = detaljertKravgrunnlag.fagsystemId.toLong()
                         val type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
 
-                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, type, jmsTimestamp)
+                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 
                         val hendelseId =
                             hendelseRepository.lagreTilbakekrevingHendelse(
@@ -68,15 +68,15 @@ class KravgrunnlagConsumer(
                         logger.info("Mottok melding av type endringKravOgVedtakstatus")
                         val kravOgVedtakstatusDto = toKravOgVedtakstatus(payload)
                         val sakId = kravOgVedtakstatusDto.fagsystemId.toLong()
-                        val type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
+                        val type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT
 
-                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, type, jmsTimestamp)
+                        sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 
                         val hendelseId =
                             hendelseRepository.lagreTilbakekrevingHendelse(
                                 sakId = kravOgVedtakstatusDto.fagsystemId.toLong(),
                                 payload = payload,
-                                type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
+                                type = type,
                                 jmsTimestamp = jmsTimestamp,
                             )
 
@@ -98,10 +98,9 @@ class KravgrunnlagConsumer(
 
     private fun sjekkAtSisteHendelseForSakErFerdigstilt(
         sakId: Long,
-        type: TilbakekrevingHendelseType,
         jmsTimestampNyHendelse: Tidspunkt,
     ) {
-        val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId, type)
+        val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId)
         if (sisteHendelse?.status == TilbakekrevingHendelseStatus.NY) {
             throw Exception("Må ferdigstille forrige hendelse ${sisteHendelse.id} for sak $sakId før ny kan prosesseres")
         }

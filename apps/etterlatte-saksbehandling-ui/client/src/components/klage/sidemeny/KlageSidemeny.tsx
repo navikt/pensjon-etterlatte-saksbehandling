@@ -1,9 +1,8 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Heading, HStack, VStack } from '@navikt/ds-react'
+import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { formaterStringDato } from '~utils/formattering'
-import { Info, Tekst } from '~components/behandling/attestering/styled'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import AvsluttKlage from '~components/klage/AvsluttKlage'
 import React, { useEffect, useState } from 'react'
@@ -69,16 +68,16 @@ export function KlageSidemeny() {
 
           <HStack gap="4">
             <div>
-              <Info>Klager</Info>
-              <Tekst>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Tekst>
+              <Label size="small">Klager</Label>
+              <Detail>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Detail>
             </div>
             <div>
-              <Info>Klagedato</Info>
-              <Tekst>
+              <Label size="small">Klagedato</Label>
+              <Detail>
                 {klage.innkommendeDokument?.mottattDato
                   ? formaterStringDato(klage.innkommendeDokument.mottattDato)
                   : 'Ukjent'}
-              </Tekst>
+              </Detail>
             </div>
           </HStack>
         </VStack>

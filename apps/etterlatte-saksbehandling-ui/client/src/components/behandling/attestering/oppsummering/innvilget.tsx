@@ -1,8 +1,10 @@
-import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { formaterBehandlingstype, formaterDato, formaterStringDato } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { SidebarPanel } from '~shared/components/Sidebar'
+import React from 'react'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
   switch (vedtaksresultat) {
@@ -20,9 +22,13 @@ function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
 }
 
 function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat | null }) {
-  const tekst = innvilgelsestekst(vedtaksresultat)
   const erInnvilget = vedtaksresultat == 'innvilget' || vedtaksresultat == 'endring'
-  return <UnderOverskrift $innvilget={erInnvilget}>{tekst}</UnderOverskrift>
+
+  return (
+    <Heading size="xsmall" style={{ color: erInnvilget ? '#007C2E' : '#881d0c' }}>
+      {innvilgelsestekst(vedtaksresultat)}
+    </Heading>
+  )
 }
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
@@ -33,30 +39,42 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
     : formaterDato(new Date())
 
   return (
-    <Wrapper $innvilget={true}>
-      <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
-      <Resultat vedtaksresultat={vedtaksResultat} />
-      <div className="flex">
+    <SidebarPanel $border style={{ borderLeft: '5px solid #007C2E' }}>
+      <VStack gap="4">
         <div>
-          <Info>Attestant</Info>
-          <Tekst>{behandlingsInfo.attesterendeSaksbehandler}</Tekst>
+          <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+          <Resultat vedtaksresultat={vedtaksResultat} />
         </div>
-        <div>
-          <Info>Saksbehandler</Info>
-          <Tekst>{behandlingsInfo.behandlendeSaksbehandler}</Tekst>
-        </div>
-      </div>
-      <div className="flex">
-        <div>
-          <Info>Virkningsdato</Info>
-          <Tekst>{virkningsdato}</Tekst>
-        </div>
-        <div>
-          <Info>Vedtaksdato</Info>
-          <Tekst>{attestertDato}</Tekst>
-        </div>
-      </div>
-      <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-    </Wrapper>
+
+        <HStack gap="4" justify="space-between">
+          <VStack gap="4">
+            <div>
+              <Label size="small">Attestant</Label>
+              <Detail>{behandlingsInfo.attesterendeSaksbehandler || '-'}</Detail>
+            </div>
+            <div>
+              <Label size="small">Virkningsdato</Label>
+              <Detail>{virkningsdato}</Detail>
+            </div>
+          </VStack>
+
+          <VStack gap="4">
+            <div>
+              <Label size="small">Saksbehandler</Label>
+              <Detail>{behandlingsInfo.behandlendeSaksbehandler}</Detail>
+            </div>
+            <div>
+              <Label size="small">Vedtaksdato</Label>
+              <Detail>{attestertDato}</Detail>
+            </div>
+          </VStack>
+        </HStack>
+
+        <HStack gap="4" align="center">
+          <Label size="small">Sakid:</Label>
+          <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
+        </HStack>
+      </VStack>
+    </SidebarPanel>
   )
 }

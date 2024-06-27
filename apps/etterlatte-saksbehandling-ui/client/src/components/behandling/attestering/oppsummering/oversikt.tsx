@@ -1,8 +1,7 @@
-import styled from 'styled-components'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterDatoMedKlokkeslett, formaterStringDato } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
+import { Alert, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -41,85 +40,79 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   return (
     <SidebarPanel $border>
-      <Heading size="small">
-        {formaterBehandlingstype(behandlingsInfo.type)}
+      <VStack gap="2">
+        <div>
+          <Heading size="small">
+            {formaterBehandlingstype(behandlingsInfo.type)}
 
-        {(behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.UTLANDSTILSNITT ||
-          behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.BOSATT_UTLAND) && (
-          <EessiPensjonLenke
-            sakId={behandlingsInfo.sakId}
-            behandlingId={behandlingsInfo.behandlingId}
-            sakType={behandlingsInfo.sakType}
-          />
-        )}
-      </Heading>
+            {(behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.UTLANDSTILSNITT ||
+              behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.BOSATT_UTLAND) && (
+              <EessiPensjonLenke
+                sakId={behandlingsInfo.sakId}
+                behandlingId={behandlingsInfo.behandlingId}
+                sakType={behandlingsInfo.sakType}
+              />
+            )}
+          </Heading>
 
-      <Heading size="xsmall" spacing>
-        {hentStatus()}
-      </Heading>
+          <Heading size="xsmall">{hentStatus()}</Heading>
 
-      {behandlingsInfo.datoFattet && <Tekst>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Tekst>}
+          {behandlingsInfo.datoFattet && <Detail>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Detail>}
+        </div>
 
-      <Box paddingInline="2 0">
-        <HStack gap="2">
-          <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
-          <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
+        <Box paddingInline="2 0">
+          <HStack gap="2">
+            <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
+            <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
+          </HStack>
+        </Box>
+
+        <HStack gap="4" justify="space-between" wrap={false}>
+          <div>
+            <Label size="small">Saksbehandler</Label>
+            {!!oppgave?.saksbehandler ? (
+              <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+            ) : (
+              <Alert size="small" variant="warning">
+                Oppgaven er ikke tildelt
+              </Alert>
+            )}
+          </div>
+          <div>
+            <Label size="small">Kilde</Label>
+            <Detail>{behandlingsInfo.kilde}</Detail>
+          </div>
         </HStack>
-      </Box>
 
-      <div className="flex">
-        <div className="info">
-          <Info>Saksbehandler</Info>
-          {!!oppgave?.saksbehandler ? (
-            <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
-          ) : (
-            <Alert size="small" variant="warning">
-              Ingen saksbehandler har tatt denne oppgaven
-            </Alert>
-          )}
-        </div>
-        <div className="info">
-          <Info>Kilde</Info>
-          <Tekst>{behandlingsInfo.kilde}</Tekst>
-        </div>
-      </div>
-      <div className="flex">
-        <div>
-          <Info>Virkningstidspunkt</Info>
-          <Tekst>
-            {behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
-          </Tekst>
-        </div>
-        <div>
-          <Info>Vedtaksdato</Info>
-          <Tekst>
-            {behandlingsInfo.datoAttestert ? formaterStringDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
-          </Tekst>
-        </div>
-      </div>
-      {kommentarFraAttestant && (
-        <div className="info">
-          <Info>Kommentar fra attestant</Info>
-          <Tekst>{kommentarFraAttestant}</Tekst>
-        </div>
-      )}
-      <HStack gap="4" align="center">
-        <Info>Sakid:</Info>
-        <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      </HStack>
+        <HStack gap="4" justify="space-between">
+          <div>
+            <Label size="small">Virkningstidspunkt</Label>
+            <Detail>
+              {behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
+            </Detail>
+          </div>
+          <div>
+            <Label size="small">Vedtaksdato</Label>
+            <Detail>
+              {behandlingsInfo.datoAttestert ? formaterStringDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
+            </Detail>
+          </div>
+        </HStack>
 
-      <SettPaaVent oppgave={oppgave} />
+        {kommentarFraAttestant && (
+          <HStack gap="4" justify="space-between">
+            <Label size="small">Kommentar fra attestant</Label>
+            <Detail>{kommentarFraAttestant}</Detail>
+          </HStack>
+        )}
+
+        <HStack gap="4" align="center">
+          <Label size="small">Sakid:</Label>
+          <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
+        </HStack>
+
+        <SettPaaVent oppgave={oppgave} />
+      </VStack>
     </SidebarPanel>
   )
 }
-
-const Info = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-`
-
-const Tekst = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: #595959;
-`

@@ -19,6 +19,5 @@ export const AttesterVedtak = ({ kommentar }: { kommentar: string }) => {
     return <AttesterKlage klage={klage} kommentar={kommentar} />
   } else {
     throw Error('Mangler behandling')
-    //return <div>Mangler behandling</div>
   }
 }

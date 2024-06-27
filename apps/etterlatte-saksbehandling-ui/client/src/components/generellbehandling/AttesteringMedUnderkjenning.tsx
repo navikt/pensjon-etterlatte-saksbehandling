@@ -1,5 +1,4 @@
-import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
-import { Info, RadioGroupWrapper, Tekst } from '~components/behandling/attestering/styled'
+import { Alert, Detail, Heading, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
 import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
@@ -29,34 +28,37 @@ export const AttesteringMedUnderkjenning = (props: {
           <br />
           <>
             <Heading size="xsmall">Beslutning</Heading>
-            <div className="flex">
+            <HStack gap="4" justify="space-between">
               <div>
-                <Info>Saksbehandler</Info>
+                <Label size="small">Saksbehandler</Label>
                 {utlandsBehandling.behandler?.saksbehandler ? (
-                  <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
+                  <Detail>{utlandsBehandling.behandler?.saksbehandler}</Detail>
                 ) : (
                   <Alert variant="error">Saksbehandler mangler og du vil da ikke få attestert behandlingen</Alert>
                 )}
               </div>
-              <Info>Behandlet dato</Info>
-              <Tekst>
-                {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
-              </Tekst>
-            </div>
-            <RadioGroupWrapper>
-              <RadioGroup
-                disabled={false}
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => setBeslutning(event as BeslutningsTyper)}
-              >
-                <div className="flex">
-                  <Radio value={Beslutning.GODKJENN}>{Beslutning.GODKJENN}</Radio>
-                  <Radio value={Beslutning.UNDERKJENN}>{Beslutning.UNDERKJENN}</Radio>
-                </div>
-              </RadioGroup>
-            </RadioGroupWrapper>
+
+              <div>
+                <Label size="small">Behandlet dato</Label>
+                <Detail>
+                  {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
+                </Detail>
+              </div>
+            </HStack>
+
+            <RadioGroup
+              disabled={false}
+              legend=""
+              size="small"
+              className="radioGroup"
+              onChange={(event) => setBeslutning(event as BeslutningsTyper)}
+            >
+              <HStack gap="4" wrap={false} justify="space-between">
+                <Radio value={Beslutning.GODKJENN}>{Beslutning.GODKJENN}</Radio>
+                <Radio value={Beslutning.UNDERKJENN}>{Beslutning.UNDERKJENN}</Radio>
+              </HStack>
+            </RadioGroup>
+
             {beslutning === Beslutning.GODKJENN && <Attesteringmodal utlandsBehandling={utlandsBehandling} />}
             {beslutning === Beslutning.UNDERKJENN && <UnderkjenneModal utlandsBehandling={utlandsBehandling} />}
           </>

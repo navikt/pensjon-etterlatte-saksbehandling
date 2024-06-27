@@ -1,8 +1,10 @@
-import { Info, Overskrift, Tekst, Wrapper } from '~components/behandling/attestering/styled'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { genbehandlingTypeTilLesbartNavn } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { SidebarPanel } from '~shared/components/Sidebar'
+import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import React from 'react'
 
 export const AttestertVisning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -10,33 +12,41 @@ export const AttestertVisning = (props: {
   const { utlandsBehandling } = props
 
   return (
-    <Wrapper $innvilget={true}>
-      <Overskrift>{genbehandlingTypeTilLesbartNavn(utlandsBehandling.type)}</Overskrift>
-      <div className="flex">
-        <div>
-          <Info>Attestant</Info>
-          <Tekst>{utlandsBehandling.attestant?.attestant}</Tekst>
-        </div>
-        <div>
-          <Info>Saksbehandler</Info>
-          <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
-        </div>
-      </div>
-      <div className="flex">
-        <div>
-          <Info>Attestert dato</Info>
-          <Tekst>
-            {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.attestant?.tidspunkt)}
-          </Tekst>
-        </div>
-        <div>
-          <Info>Behandlet dato</Info>
-          <Tekst>
-            {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
-          </Tekst>
-        </div>
-      </div>
-      <KopierbarVerdi value={utlandsBehandling.sakId.toString()} />
-    </Wrapper>
+    <SidebarPanel $border style={{ borderLeft: '5px solid #007C2E' }}>
+      <VStack gap="4">
+        <Heading size="small">{genbehandlingTypeTilLesbartNavn(utlandsBehandling.type)}</Heading>
+
+        <HStack gap="4" justify="space-between">
+          <div>
+            <Label size="small">Attestant</Label>
+            <Detail>{utlandsBehandling.attestant?.attestant}</Detail>
+          </div>
+          <div>
+            <Label size="small">Saksbehandler</Label>
+            <Detail>{utlandsBehandling.behandler?.saksbehandler}</Detail>
+          </div>
+        </HStack>
+
+        <HStack gap="4" justify="space-between">
+          <div>
+            <Label size="small">Attestert dato</Label>
+            <Detail>
+              {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.attestant?.tidspunkt)}
+            </Detail>
+          </div>
+          <div>
+            <Label size="small">Behandlet dato</Label>
+            <Detail>
+              {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
+            </Detail>
+          </div>
+        </HStack>
+
+        <HStack gap="4" align="center">
+          <Label size="small">Sakid:</Label>
+          <KopierbarVerdi value={utlandsBehandling.sakId.toString()} />
+        </HStack>
+      </VStack>
+    </SidebarPanel>
   )
 }

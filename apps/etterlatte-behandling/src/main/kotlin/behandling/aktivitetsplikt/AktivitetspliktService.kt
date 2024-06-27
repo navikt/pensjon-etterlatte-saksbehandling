@@ -315,17 +315,17 @@ class AktivitetspliktService(
 
     private suspend fun sendDtoTilStatistikk(
         sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         try {
-            val bruker = brukerTokenInfo ?: Systembruker.automatiskJobb
-            val dto = hentAktivitetspliktDto(sakId, bruker)
+            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo)
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke sende hendelse til statistikk om oppdatert aktivitetsplikt, for sak $sakId. " +
                     "Dette betyr at vi kan mangle oppdatert informasjon om aktivitetsplikten i saken for bruker, og " +
                     "bør sees på / vurdere en ekstra sending for akkurat denne saken.",
+                e,
             )
         }
     }

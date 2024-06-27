@@ -3,7 +3,6 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { BodyShort, Button, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
-import { format } from 'date-fns'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import React from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -16,6 +15,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { formaterMaanedDato } from '~utils/formattering'
 
 type SoeskenjusteringPeriodeProps = {
   control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
@@ -73,7 +73,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                 ) : (
                   <OppdrasSammenLes>
                     <Label>Fra og med</Label>
-                    <BodyShort>{format(fom.field.value, 'MMMM yyyy')}</BodyShort>
+                    <BodyShort>{formaterMaanedDato(fom.field.value)}</BodyShort>
                   </OppdrasSammenLes>
                 )
               }
@@ -100,7 +100,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                 ) : (
                   <OppdrasSammenLes>
                     <Label>Til og med</Label>
-                    <BodyShort>{formaterMaanedDato('Ingen slutt', tom.field.value)}</BodyShort>
+                    <BodyShort>{tom.field.value ? formaterMaanedDato(tom.field.value) : 'Ingen slutt'}</BodyShort>
                   </OppdrasSammenLes>
                 )
               }
@@ -159,13 +159,6 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
       </UstiletListe>
     </PeriodeAccordion>
   )
-}
-
-const formaterMaanedDato = (fallback: string, dato: Date | null | undefined) => {
-  if (dato) {
-    return format(dato, 'MMMM yyyy')
-  }
-  return fallback
 }
 
 const FeilForPeriode = (props: { feil: FeilIPeriodeGrunnlagAlle[] }) => {

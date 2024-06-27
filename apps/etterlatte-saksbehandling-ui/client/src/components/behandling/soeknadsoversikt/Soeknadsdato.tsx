@@ -1,10 +1,8 @@
-import { format } from 'date-fns'
+import { formaterStringDato } from '~utils/formattering'
 
-export const Soeknadsdato = ({ mottattDato }: { mottattDato: string }) => {
-  return (
-    <div>
-      <strong>Søknad mottatt: </strong>
-      {format(new Date(mottattDato), 'dd.MM.yyyy')}
-    </div>
-  )
-}
+export const Soeknadsdato = ({ mottattDato }: { mottattDato: string }) => (
+  <div>
+    <strong>Søknad mottatt: </strong>
+    {formaterStringDato(mottattDato)}
+  </div>
+)

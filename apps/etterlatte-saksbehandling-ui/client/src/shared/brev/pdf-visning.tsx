@@ -20,5 +20,5 @@ interface Props {
 }
 
 export const PdfVisning = ({ fileUrl }: Props) => {
-  return !!fileUrl && <PdfViewer src={`${fileUrl}`} />
+  return !!fileUrl && <PdfViewer src={fileUrl} />
 }

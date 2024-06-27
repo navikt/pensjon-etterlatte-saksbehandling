@@ -1,9 +1,8 @@
 import { PersonIcon } from '@navikt/aksel-icons'
-import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
 import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { DatoFormat, formaterFnr } from '~utils/formattering'
+import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { IPdlPerson } from '~shared/types/Person'
@@ -45,8 +44,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
           {avdoed ? 'Avdød' : 'Gjenlevende'}
         </Heading>
         <BodyShort>
-          {`${person.fornavn} ${person.etternavn}`}
-
+          {person.fornavn} {person.etternavn}
           <HStack>
             <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
@@ -67,7 +65,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
           <Label size="small" as="p">
             Kilde
           </Label>
-          {`${kilde.type.toUpperCase()} ${format(new Date(kilde.tidspunkt), DatoFormat.DAG_MAANED_AAR)}`}
+          {kilde.type.toUpperCase()} {formaterStringDato(kilde.tidspunkt)}
         </Detail>
       </PersonInfoWrapper>
     </PersonBorder>

@@ -77,7 +77,7 @@ const SammendragNyttRegelverk = (props: { soeker: BeregningsdetaljerPerson; fler
       <Label>Beregningen gjelder:</Label>
       <ul>
         <ListWithoutBullet>
-          {`${soeker.fornavn} ${soeker.etternavn} / ${soeker.foedselsnummer} / ${hentAlderForDato(soeker.foedselsdato)} år`}
+          {soeker.fornavn} {soeker.etternavn} / {soeker.foedselsnummer} {hentAlderForDato(soeker.foedselsdato)} år
         </ListWithoutBullet>
       </ul>
     </div>

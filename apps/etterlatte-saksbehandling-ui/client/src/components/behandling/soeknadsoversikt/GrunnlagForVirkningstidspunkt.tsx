@@ -16,7 +16,7 @@ export const GrunnlagForVirkningstidspunkt = () => {
           label="Dødsdato"
           tekst={
             <>
-              {`${avdod.opplysning.fornavn} ${avdod.opplysning.etternavn}`}
+              {avdod.opplysning.fornavn} {avdod.opplysning.etternavn}
               <br />
               {avdod.opplysning.doedsdato ? formaterDato(avdod?.opplysning.doedsdato) : 'Ikke registrert'}
             </>

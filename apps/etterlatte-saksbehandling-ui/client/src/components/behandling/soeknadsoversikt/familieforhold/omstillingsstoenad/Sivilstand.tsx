@@ -1,10 +1,9 @@
 import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
-import { format } from 'date-fns'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
-import { DatoFormat, formaterDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formattering'
 
 type Props = {
   familieforhold: Familieforhold
@@ -39,9 +38,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
                   <Table.Row key={index}>
                     <Table.DataCell>{ss.sivilstatus}</Table.DataCell>
                     <Table.DataCell>
-                      {ss.gyldigFraOgMed
-                        ? format(new Date(ss.gyldigFraOgMed), DatoFormat.DAG_MAANED_AAR)
-                        : ' Mangler dato'}
+                      {ss.gyldigFraOgMed ? formaterDato(ss.gyldigFraOgMed) : ' Mangler dato'}
                     </Table.DataCell>
                     <Table.DataCell>
                       {ss.relatertVedSiviltilstand === avdoed.foedselsnummer

@@ -3,8 +3,7 @@ import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-rea
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { format } from 'date-fns'
-import { DatoFormat, formaterFnr } from '~utils/formattering'
+import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 
@@ -58,15 +57,11 @@ export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
   const alder = hentAlderForDato(barn.foedselsdato)
 
-  const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
-
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
   const periode = aktivAdresse
-    ? `${format(new Date(aktivAdresse!!.gyldigFraOgMed!!), DatoFormat.DAG_MAANED_AAR)} - ${
-        aktivAdresse?.gyldigTilOgMed
-          ? format(new Date(aktivAdresse!!.gyldigTilOgMed!!), DatoFormat.DAG_MAANED_AAR)
-          : 'nå'
+    ? `${formaterStringDato(aktivAdresse!!.gyldigFraOgMed!!)} - ${
+        aktivAdresse?.gyldigTilOgMed ? formaterStringDato(aktivAdresse!!.gyldigTilOgMed!!) : 'nå'
       }`
     : 'Mangler adresse'
 
@@ -76,7 +71,9 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
 
   return (
     <Table.Row>
-      <Table.DataCell>{navnMedAlder}</Table.DataCell>
+      <Table.DataCell>
+        {barn.fornavn} {barn.etternavn} ({alder} år)
+      </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">

@@ -81,28 +81,30 @@ class AktivitetspliktService(
             ) {
                 "Kunne ikke hente ut avdødes dødsdato for sak med id=$sakId"
             }
-        val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
-        val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
+        return inTransaction {
+            val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
+            val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
 
-        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val sisteVurdering =
-            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+            val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+            val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+            val sisteVurdering =
+                listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
 
-        val (unntak, aktivitetsgrad) =
-            when (sisteVurdering) {
-                is AktivitetspliktAktivitetsgrad -> emptyList<AktivitetspliktUnntak>() to listOf(sisteVurdering)
-                is AktivitetspliktUnntak -> listOf(sisteVurdering) to emptyList()
-                else -> emptyList<AktivitetspliktUnntak>() to emptyList()
-            }
+            val (unntak, aktivitetsgrad) =
+                when (sisteVurdering) {
+                    is AktivitetspliktAktivitetsgrad -> emptyList<AktivitetspliktUnntak>() to listOf(sisteVurdering)
+                    is AktivitetspliktUnntak -> listOf(sisteVurdering) to emptyList()
+                    else -> emptyList<AktivitetspliktUnntak>() to emptyList()
+                }
 
-        return AktivitetspliktDto(
-            sakId = sakId,
-            avdoedDoedsmaaned = YearMonth.from(avdoedDoedsdato),
-            aktivitetsgrad = aktivitetsgrad.map { it.toDto() },
-            unntak = unntak.map { it.toDto() },
-            brukersAktivitet = aktiviteter.map { it.toDto() },
-        )
+            AktivitetspliktDto(
+                sakId = sakId,
+                avdoedDoedsmaaned = YearMonth.from(avdoedDoedsdato),
+                aktivitetsgrad = aktivitetsgrad.map { it.toDto() },
+                unntak = unntak.map { it.toDto() },
+                brukersAktivitet = aktiviteter.map { it.toDto() },
+            )
+        }
     }
 
     fun oppfyllerAktivitetsplikt(

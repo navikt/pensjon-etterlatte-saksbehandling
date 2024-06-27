@@ -3,6 +3,8 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType.UTENLANDSKADRESSE
+import no.nav.etterlatte.libs.common.person.AdresseType.UTENLANDSKADRESSEFRITTFORMAT
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -23,11 +25,17 @@ fun harAktivAdresse(person: PersonDTO): Boolean = person.alleAdresser().any { it
 fun personBorIUtlandet(person: PersonDTO): Boolean {
     val alleAdresser = person.alleAdresser()
     return if (alleAdresser.any { it.aktiv }) {
-        val adresse = alleAdresser.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
-        borIUtlandet(adresse)
+        alleAdresser
+            .filter { it.aktiv }
+            .sortedByDescending { it.gyldigFraOgMed }
+            .first()
+            .erUtland()
     } else {
-        val adresse = alleAdresser.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
-        borIUtlandet(adresse)
+        alleAdresser
+            .filter { !it.aktiv }
+            .sortedByDescending { it.gyldigFraOgMed }
+            .first()
+            .erUtland()
     }
 }
 
@@ -40,7 +48,7 @@ private fun PersonDTO.alleAdresser(): List<Adresse> =
         kontaktadresse + bostedsadresse + oppholdsadresse
     }
 
-private fun borIUtlandet(adresse: Adresse): Boolean = adresse.land == null || adresse.land?.uppercase() != "NOR"
+private fun Adresse.erUtland(): Boolean = this.type in listOf(UTENLANDSKADRESSE, UTENLANDSKADRESSEFRITTFORMAT) && this.land != "NOR"
 
 fun harFellesBarn(
     avdoed: PersonDTO,

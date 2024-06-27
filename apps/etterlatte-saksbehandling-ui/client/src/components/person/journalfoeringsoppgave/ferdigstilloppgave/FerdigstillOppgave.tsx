@@ -2,7 +2,6 @@ import { Alert, BodyLong, Button, Heading, HStack, Link, VStack } from '@navikt/
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FerdigstillOppgaveModal from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgaveModal'
 import { Journalstatus } from '~shared/types/Journalpost'
 import { PersonOversiktFane } from '~components/person/Person'
@@ -31,7 +30,7 @@ export default function FerdigstillOppgave() {
   const kanFerdigstilleOppgaven = journalpostErFerdigstilt || journalpostTilhoererAnnetTema
 
   return (
-    <FormWrapper $column>
+    <VStack gap="4">
       <Heading size="medium" spacing>
         Ferdigstill oppgave
       </Heading>
@@ -71,6 +70,6 @@ export default function FerdigstillOppgave() {
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </VStack>
-    </FormWrapper>
+    </VStack>
   )
 }

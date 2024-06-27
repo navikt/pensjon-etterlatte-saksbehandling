@@ -2,11 +2,9 @@ import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React, { useState } from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { ISak } from '~shared/types/sak'
 import { formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
-import styled from 'styled-components'
 import { EndreTema } from '~components/person/journalfoeringsoppgave/journalpost/EndreTema'
 import { EndreBruker } from '~components/person/journalfoeringsoppgave/journalpost/EndreBruker'
 import { EndreAvsenderMottaker } from '~components/person/journalfoeringsoppgave/journalpost/EndreAvsenderMottaker'
@@ -54,7 +52,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
         </Heading>
       </Box>
 
-      <FormWrapper $column={true}>
+      <VStack gap="4">
         <EndreTema journalpost={journalpost} oppdater={(kode) => setJournalpost({ ...journalpost, tema: kode.navn })} />
 
         <EndreBruker
@@ -96,18 +94,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
             <AvbrytBehandleJournalfoeringOppgave />
           </HStack>
         </VStack>
-      </FormWrapper>
+      </VStack>
     </>
   )
 }
-
-export const InputFlexRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 0.5rem;
-
-  > :not(:last-child) {
-    flex: 1;
-  }
-`

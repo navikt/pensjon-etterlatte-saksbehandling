@@ -5,7 +5,6 @@ import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
 import { Column, GridContainer } from '~shared/styled'
-import styled from 'styled-components'
 import {
   settBruker,
   settJournalpost,
@@ -137,9 +136,3 @@ export default function BehandleJournalfoeringOppgave() {
     </>
   )
 }
-
-export const FormWrapper = styled.div<{ $column?: boolean }>`
-  display: flex;
-  flex-direction: ${(props) => (props.$column ? 'column' : 'row')};
-  gap: 1rem;
-`

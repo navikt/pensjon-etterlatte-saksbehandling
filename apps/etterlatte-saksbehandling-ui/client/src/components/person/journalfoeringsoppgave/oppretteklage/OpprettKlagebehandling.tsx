@@ -1,8 +1,7 @@
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import { Button, Heading, HStack, Tag } from '@navikt/ds-react'
+import { Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { formaterSakstype } from '~utils/formattering'
 import { settNyKlageRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useState } from 'react'
@@ -32,7 +31,7 @@ export default function OpprettKlagebehandling() {
   const tilbake = () => navigate('../', { relative: 'path' })
 
   return (
-    <FormWrapper $column>
+    <VStack gap="4">
       <Heading size="medium" spacing>
         Opprett klage fra oppgave{' '}
         <Tag variant="success" size="medium">
@@ -64,6 +63,6 @@ export default function OpprettKlagebehandling() {
           Neste
         </Button>
       </HStack>
-    </FormWrapper>
+    </VStack>
   )
 }

@@ -1,7 +1,6 @@
 import { Journalpost } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { InputFlexRow } from './OppdaterJournalpost'
 
 export const EndreTittelJournalpost = ({
   journalpost,
@@ -44,22 +43,21 @@ export const EndreTittelJournalpost = ({
           </VStack>
         </Box>
       ) : (
-        <>
-          <InputFlexRow>
+        <VStack gap="4">
+          <HStack gap="4" justify="space-between" align="center">
             <BodyShort as="div">{nyTittel}</BodyShort>
 
             <Button variant="secondary" size="small" onClick={() => setRediger(true)}>
               Endre
             </Button>
-          </InputFlexRow>
+          </HStack>
 
-          <br />
           {!nyTittel && (
             <Alert variant="warning" size="small">
               Journalposten mangler tittel
             </Alert>
           )}
-        </>
+        </VStack>
       )}
     </div>
   )

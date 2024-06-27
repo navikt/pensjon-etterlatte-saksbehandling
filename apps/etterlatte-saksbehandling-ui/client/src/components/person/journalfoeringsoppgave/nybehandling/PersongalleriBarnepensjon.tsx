@@ -1,6 +1,6 @@
 import React from 'react'
-import { BodyShort, Box, Button, Heading, TextField, VStack } from '@navikt/ds-react'
-import { InputList, InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
+import { BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
+import { NyBehandlingSkjema } from './OpprettNyBehandling'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import {
   validateFnrObligatorisk,
@@ -32,24 +32,22 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         readOnly={!erManuellMigrering}
       />
 
-      <InputRow>
-        <TextField
-          {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
-          label="Innsender"
-          description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
-          error={errors.persongalleri?.innsender?.message}
-        />
-      </InputRow>
+      <TextField
+        {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
+        label="Innsender"
+        description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
+        error={errors.persongalleri?.innsender?.message}
+      />
 
       <Box padding="4" borderWidth="1" borderRadius="small">
-        <Heading size="small" spacing>
-          Gjenlevende forelder
-          <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
-        </Heading>
+        <VStack gap="4">
+          <Heading size="small" spacing>
+            Gjenlevende forelder
+            <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
+          </Heading>
 
-        <InputList>
           {gjenlevendeFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
+            <HStack key={index} align="end">
               <TextField
                 {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
                 key={field.id}
@@ -62,28 +60,32 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                 variant="tertiary"
                 onClick={() => gjenlevendeFormArray.remove(index)}
               />
-            </InputRow>
+            </HStack>
           ))}
-          <Button
-            icon={<PlusIcon aria-hidden />}
-            onClick={() => gjenlevendeFormArray.append({ value: '' })}
-            disabled={!kanLeggeTil}
-            type="button"
-          >
-            Legg til gjenlevende
-          </Button>
-        </InputList>
+
+          <div>
+            <Button
+              variant="secondary"
+              icon={<PlusIcon aria-hidden />}
+              onClick={() => gjenlevendeFormArray.append({ value: '' })}
+              disabled={!kanLeggeTil}
+              type="button"
+            >
+              Legg til gjenlevende
+            </Button>
+          </div>
+        </VStack>
       </Box>
 
       <Box padding="4" borderWidth="1" borderRadius="small">
-        <Heading size="small" spacing>
-          Avdød forelder
-          <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
-        </Heading>
+        <VStack gap="4">
+          <Heading size="small" spacing>
+            Avdød forelder
+            <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
+          </Heading>
 
-        <InputList>
           {avdoedFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
+            <HStack key={index} align="end">
               <TextField
                 {...register(`persongalleri.avdoed.${index}.value`, { validate: validateFnrObligatorisk })}
                 key={field.id}
@@ -96,27 +98,32 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                 variant="tertiary"
                 onClick={() => avdoedFormArray.remove(index)}
               />
-            </InputRow>
+            </HStack>
           ))}
-          <Button
-            icon={<PlusIcon aria-hidden />}
-            onClick={() => avdoedFormArray.append({ value: '' })}
-            disabled={!kanLeggeTil}
-            type="button"
-          >
-            Legg til avdød
-          </Button>
-        </InputList>
+
+          <div>
+            <Button
+              variant="secondary"
+              icon={<PlusIcon aria-hidden />}
+              onClick={() => avdoedFormArray.append({ value: '' })}
+              disabled={!kanLeggeTil}
+              type="button"
+            >
+              Legg til avdød
+            </Button>
+          </div>
+        </VStack>
       </Box>
 
       <Box padding="4" borderWidth="1" borderRadius="small">
-        <Heading size="small" spacing>
-          Søsken
-          <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
-        </Heading>
-        <InputList>
+        <VStack gap="4">
+          <Heading size="small" spacing>
+            Søsken
+            <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
+          </Heading>
+
           {soeskenFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
+            <HStack key={index} align="end">
               <TextField
                 {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
                 key={field.id}
@@ -129,12 +136,20 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                 variant="tertiary"
                 onClick={() => soeskenFormArray.remove(index)}
               />
-            </InputRow>
+            </HStack>
           ))}
-          <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">
-            Legg til søsken
-          </Button>
-        </InputList>
+
+          <div>
+            <Button
+              variant="secondary"
+              icon={<PlusIcon aria-hidden />}
+              onClick={() => soeskenFormArray.append({ value: '' })}
+              type="button"
+            >
+              Legg til søsken
+            </Button>
+          </div>
+        </VStack>
       </Box>
     </VStack>
   )

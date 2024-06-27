@@ -1,7 +1,6 @@
 import { DokumentInfo } from '~shared/types/Journalpost'
 import { Alert, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export const EndreDokumenter = ({
@@ -74,13 +73,13 @@ const Dokument = ({
           </VStack>
         </Box>
       ) : (
-        <InputFlexRow>
+        <HStack gap="4" justify="space-between" align="center">
           <Info label="Dokumenttittel" tekst={nyTittel} />
 
           <Button size="small" variant="secondary" onClick={() => setRediger(true)}>
             Endre
           </Button>
-        </InputFlexRow>
+        </HStack>
       )}
 
       <br />

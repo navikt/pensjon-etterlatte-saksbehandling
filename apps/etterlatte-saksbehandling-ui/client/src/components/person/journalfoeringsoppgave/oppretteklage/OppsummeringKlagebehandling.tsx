@@ -2,7 +2,6 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Alert, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import FullfoerKlageModal from '~components/person/journalfoeringsoppgave/oppretteklage/FullfoerKlageModal'
@@ -34,7 +33,7 @@ export default function OppsummeringKlagebehandling() {
   const tilbake = () => navigate('../', { relative: 'path' })
 
   return (
-    <FormWrapper $column>
+    <VStack gap="4">
       <Heading size="medium" spacing>
         Opprett klage fra oppgave{' '}
         <Tag variant="success" size="medium">
@@ -63,6 +62,6 @@ export default function OppsummeringKlagebehandling() {
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </div>
-    </FormWrapper>
+    </VStack>
   )
 }

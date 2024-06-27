@@ -1,5 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, Modal, TextField } from '@navikt/ds-react'
-import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { Alert, Box, Button, Heading, HStack, Modal, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -9,7 +8,6 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { SakType } from '~shared/types/sak'
 
 type Props = {
@@ -83,18 +81,19 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         Rediger
       </Button>
 
-      <Modal open={isOpen} onClose={avbryt} aria-label="Rediger familieforhold">
+      <Modal open={isOpen} onClose={avbryt} aria-label="Rediger familieforhold" size="medium">
         <Modal.Header>
           <Heading size="medium" spacing>
             Rediger familieforhold
           </Heading>
         </Modal.Header>
+
         <Modal.Body>
-          <FormWrapper $column={true}>
+          <VStack gap="4">
             <Box padding="4" borderWidth="1" borderRadius="small">
-              <InputList>
+              <VStack gap="4">
                 {avdoedListe.fields?.map((field, index) => (
-                  <InputRow key={field.id}>
+                  <HStack key={field.id} align="end">
                     <TextField
                       {...register(`avdoede.${index}.fnr`, {
                         validate: {
@@ -106,7 +105,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                       error={errors?.avdoede?.[index]?.fnr?.message}
                     />
                     <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
-                  </InputRow>
+                  </HStack>
                 ))}
                 <Button
                   icon={<PlusIcon />}
@@ -115,13 +114,13 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                 >
                   Legg til avdøde
                 </Button>
-              </InputList>
+              </VStack>
             </Box>
 
             <Box padding="4" borderWidth="1" borderRadius="small">
-              <InputList>
+              <VStack gap="4">
                 {gjenlevendeListe.fields?.map((field, index) => (
-                  <InputRow key={field.id}>
+                  <HStack key={field.id} align="end">
                     <TextField
                       {...register(`gjenlevende.${index}.fnr`, {
                         validate: {
@@ -133,7 +132,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                       error={errors?.gjenlevende?.[index]?.fnr?.message}
                     />
                     <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
-                  </InputRow>
+                  </HStack>
                 ))}
 
                 <Button
@@ -143,9 +142,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                 >
                   Legg til gjenlevende
                 </Button>
-              </InputList>
+              </VStack>
             </Box>
-          </FormWrapper>
+          </VStack>
 
           <br />
 

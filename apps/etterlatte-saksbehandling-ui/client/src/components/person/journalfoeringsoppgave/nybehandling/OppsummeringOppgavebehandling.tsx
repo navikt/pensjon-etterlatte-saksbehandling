@@ -5,7 +5,6 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import React from 'react'
@@ -33,42 +32,40 @@ export default function OppsummeringOppgavebehandling() {
   }
 
   return (
-    <FormWrapper $column>
+    <VStack gap="4">
       <Heading size="medium" spacing>
         Opprett behandling fra oppgave
       </Heading>
 
-      <VStack gap="4">
-        <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
+      <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
-        <Info label="Språk" tekst={formaterSpraak(spraak)} />
-        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
+      <Info label="Språk" tekst={formaterSpraak(spraak)} />
+      <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
 
-        <Info label="Søker" tekst={persongalleri.soeker} />
-        <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />
+      <Info label="Søker" tekst={persongalleri.soeker} />
+      <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />
 
-        {oppgave.sakType === SakType.BARNEPENSJON && persongalleri.gjenlevende?.length ? (
-          persongalleri.gjenlevende?.map((gjenlevende) => (
-            <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
-          ))
-        ) : (
-          <Info label="Gjenlevende" tekst={<Detail>Ikke oppgitt</Detail>} />
-        )}
+      {oppgave.sakType === SakType.BARNEPENSJON && persongalleri.gjenlevende?.length ? (
+        persongalleri.gjenlevende?.map((gjenlevende) => (
+          <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
+        ))
+      ) : (
+        <Info label="Gjenlevende" tekst={<Detail>Ikke oppgitt</Detail>} />
+      )}
 
-        {persongalleri.avdoed?.length ? (
-          persongalleri.avdoed?.map((avdoed) => <Info key={avdoed} label="Avdød" tekst={avdoed} />)
-        ) : (
-          <Info label="Avdød" tekst={<Detail>Ikke oppgitt</Detail>} />
-        )}
+      {persongalleri.avdoed?.length ? (
+        persongalleri.avdoed?.map((avdoed) => <Info key={avdoed} label="Avdød" tekst={avdoed} />)
+      ) : (
+        <Info label="Avdød" tekst={<Detail>Ikke oppgitt</Detail>} />
+      )}
 
-        {persongalleri.soesken?.map((soeskenEllerBarn) => (
-          <Info
-            key={soeskenEllerBarn}
-            label={oppgave?.sakType === SakType.BARNEPENSJON ? 'Søsken' : 'Barn'}
-            tekst={soeskenEllerBarn || ''}
-          />
-        )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
-      </VStack>
+      {persongalleri.soesken?.map((soeskenEllerBarn) => (
+        <Info
+          key={soeskenEllerBarn}
+          label={oppgave?.sakType === SakType.BARNEPENSJON ? 'Søsken' : 'Barn'}
+          tekst={soeskenEllerBarn || ''}
+        />
+      )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
 
       {!persongalleri.avdoed?.length && (
         <Alert variant="warning" size="small">
@@ -89,6 +86,6 @@ export default function OppsummeringOppgavebehandling() {
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </VStack>
-    </FormWrapper>
+    </VStack>
   )
 }

@@ -1,14 +1,10 @@
-import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, Select, TextField, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
-import {
-  InputRow,
-  NyBehandlingSkjema,
-} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { NyBehandlingSkjema } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
@@ -120,24 +116,24 @@ export default function ManuellBehandling() {
     return <div>Henter oppgave</div>
   }
   return (
-    <FormWrapper>
-      <FormProvider {...methods}>
-        <Heading size="large">Manuell behandling</Heading>
+    <FormProvider {...methods}>
+      <Box padding="4" style={{ width: '40rem' }}>
+        <VStack gap="4">
+          <Heading size="large">Manuell behandling</Heading>
 
-        <Select
-          {...register('kilde', {
-            required: { value: true, message: 'Du må spesifisere om det er en sak i fra Pesys' },
-          })}
-          label="Er det sak fra Pesys? (påkrevd)"
-          error={errors.kilde?.message}
-        >
-          <option>Velg ...</option>
-          <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
-          <option value="GJENOPPRETTA">Gjenoppretting av opphørt aldersovergang</option>
-          <option value="GJENNY">Nei</option>
-        </Select>
+          <Select
+            {...register('kilde', {
+              required: { value: true, message: 'Du må spesifisere om det er en sak i fra Pesys' },
+            })}
+            label="Er det sak fra Pesys? (påkrevd)"
+            error={errors.kilde?.message}
+          >
+            <option>Velg ...</option>
+            <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
+            <option value="GJENOPPRETTA">Gjenoppretting av opphørt aldersovergang</option>
+            <option value="GJENNY">Nei</option>
+          </Select>
 
-        <InputRow>
           <TextField
             {...register('pesysId', {
               required: {
@@ -151,123 +147,111 @@ export default function ManuellBehandling() {
             pattern="[0-9]{11}"
             maxLength={11}
           />
-        </InputRow>
 
-        <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
-          {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-            <option key={status} value={status}>
-              {statusbeskrivelse}
-            </option>
-          ))}
-        </Select>
+          <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
+            {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+              <option key={status} value={status}>
+                {statusbeskrivelse}
+              </option>
+            ))}
+          </Select>
 
-        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+          <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
 
-        <Select
-          label="Årsak overstyrt beregning:"
-          {...register('kategori', {
-            required: { value: !!watch('overstyrBeregning'), message: 'Du må velge kategori' },
-          })}
-          disabled={!watch('overstyrBeregning')}
-          error={errors.kategori?.message}
-        >
-          <option value="">Velg kategori</option>
-          {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-            <option key={key} value={key}>
-              {value}
-            </option>
-          ))}
-        </Select>
-
-        <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
-
-        <Select
-          {...register('spraak', {
-            required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
-          })}
-          label="Hva skal språket/målform være?"
-          error={errors.spraak?.message}
-        >
-          <option value="">Velg ...</option>
-          <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
-          <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
-          <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
-        </Select>
-
-        <ControlledDatoVelger
-          name="mottattDato"
-          label="Mottatt dato"
-          description="Datoen søknaden ble mottatt"
-          control={control}
-          errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-        />
-
-        <Checkbox {...register('foreldreloes')}>Er foreldreløs</Checkbox>
-
-        <Checkbox {...register('ufoere')}>Søker har en sak for uføretrygd løpende eller under behandling.</Checkbox>
-
-        <PersongalleriBarnepensjon erManuellMigrering />
-
-        <Knapp>
-          <Button
-            variant="secondary"
-            onClick={handleSubmit(ferdigstill)}
-            loading={
-              isPending(opprettBehandlingStatus) ||
-              isPending(overstyrBeregningStatus) ||
-              isPending(overstyrTrygdetidStatus)
-            }
+          <Select
+            label="Årsak overstyrt beregning:"
+            {...register('kategori', {
+              required: { value: !!watch('overstyrBeregning'), message: 'Du må velge kategori' },
+            })}
+            disabled={!watch('overstyrBeregning')}
+            error={errors.kategori?.message}
           >
-            Opprett behandling
-          </Button>
-        </Knapp>
+            <option value="">Velg kategori</option>
+            {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </Select>
 
-        {oppgaveId && oppgaveStatus && isSuccess(hentOppgaveStatus) && (
-          <Knapp>
+          <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
+
+          <Select
+            {...register('spraak', {
+              required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+            })}
+            label="Hva skal språket/målform være?"
+            error={errors.spraak?.message}
+          >
+            <option value="">Velg ...</option>
+            <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+            <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+            <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+          </Select>
+
+          <ControlledDatoVelger
+            name="mottattDato"
+            label="Mottatt dato"
+            description="Datoen søknaden ble mottatt"
+            control={control}
+            errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+          />
+
+          <Checkbox {...register('foreldreloes')}>Er foreldreløs</Checkbox>
+
+          <Checkbox {...register('ufoere')}>Søker har en sak for uføretrygd løpende eller under behandling.</Checkbox>
+
+          <PersongalleriBarnepensjon erManuellMigrering />
+
+          <div>
+            <Button
+              onClick={handleSubmit(ferdigstill)}
+              loading={
+                isPending(opprettBehandlingStatus) ||
+                isPending(overstyrBeregningStatus) ||
+                isPending(overstyrTrygdetidStatus)
+              }
+            >
+              Opprett behandling
+            </Button>
+          </div>
+
+          {oppgaveId && oppgaveStatus && isSuccess(hentOppgaveStatus) && (
             <GjenopprettingModal oppgaveId={oppgaveId} oppgaveStatus={oppgaveStatus} />
-          </Knapp>
-        )}
+          )}
 
-        {isSuccess(opprettBehandlingStatus) && (
-          <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
-        )}
-        {isFailureHandler({
-          apiResult: opprettBehandlingStatus,
-          errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
-        })}
+          {isSuccess(opprettBehandlingStatus) && (
+            <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
+          )}
+          {isFailureHandler({
+            apiResult: opprettBehandlingStatus,
+            errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
+          })}
 
-        {mapAllApiResult(
-          overstyrBeregningStatus,
-          <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
-          null,
-          () => (
-            <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
-          ),
-          () => (
-            <Alert variant="success">Overstyrt beregning opprettet!</Alert>
-          )
-        )}
-        {mapAllApiResult(
-          overstyrTrygdetidStatus,
-          <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
-          null,
-          () => (
-            <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
-          ),
-          () => (
-            <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
-          )
-        )}
-      </FormProvider>
-    </FormWrapper>
+          {mapAllApiResult(
+            overstyrBeregningStatus,
+            <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
+            null,
+            () => (
+              <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
+            ),
+            () => (
+              <Alert variant="success">Overstyrt beregning opprettet!</Alert>
+            )
+          )}
+          {mapAllApiResult(
+            overstyrTrygdetidStatus,
+            <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
+            null,
+            () => (
+              <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
+            ),
+            () => (
+              <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
+            )
+          )}
+        </VStack>
+      </Box>
+    </FormProvider>
   )
 }
-const FormWrapper = styled.div`
-  margin: 2em;
-  width: 25em;
-  display: grid;
-  gap: var(--a-spacing-4);
-`
-const Knapp = styled.div`
-  margin-top: 1em;
-`

@@ -5,8 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { isInitial, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import { Alert, UNSAFE_Combobox } from '@navikt/ds-react'
+import { Alert, UNSAFE_Combobox, VStack } from '@navikt/ds-react'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 export const EndreTema = ({
@@ -35,7 +34,7 @@ export const EndreTema = ({
     <Spinner label="Henter tilgjengelige temakoder ..." visible />,
     () => <ApiErrorAlert>Feil ved henting av temakoder</ApiErrorAlert>,
     (koder) => (
-      <FormWrapper $column={true}>
+      <VStack gap="4">
         <UNSAFE_Combobox
           label="Tema"
           options={koder.sort((a, b) => a.term.localeCompare(b.term)).map((kode) => kode.term)}
@@ -65,7 +64,7 @@ export const EndreTema = ({
               til enheten som eier tema, og oppgaven i Gjenny blir avsluttet.
             </Alert>
           ))}
-      </FormWrapper>
+      </VStack>
     )
   )
 }

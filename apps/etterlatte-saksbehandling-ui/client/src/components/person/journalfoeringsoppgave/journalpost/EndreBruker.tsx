@@ -2,7 +2,6 @@ import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, CopyButton, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { fnrHarGyldigFormat } from '~utils/fnr'
@@ -135,8 +134,8 @@ export const EndreBruker = ({
           </HStack>
         </Box>
       ) : (
-        <>
-          <InputFlexRow>
+        <VStack gap="4">
+          <HStack gap="4" justify="space-between" align="center">
             <BodyShort as="div" spacing>
               {mapSuccess(personResult, (person) => formaterNavn(person))}
 
@@ -157,12 +156,10 @@ export const EndreBruker = ({
                 Endre
               </Button>
             )}
-          </InputFlexRow>
-
-          <br />
+          </HStack>
 
           {!bruker?.id && <Alert variant="warning">Bruker må være satt</Alert>}
-        </>
+        </VStack>
       )}
     </div>
   )

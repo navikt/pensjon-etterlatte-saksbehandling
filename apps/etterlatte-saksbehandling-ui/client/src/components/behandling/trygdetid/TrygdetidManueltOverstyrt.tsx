@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, HStack, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -8,7 +8,6 @@ import {
   oppdaterTrygdetidOverstyrtMigrering,
   opprettTrygdetidOverstyrtMigrering,
 } from '~shared/api/trygdetid'
-import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -104,7 +103,7 @@ export const TrygdetidManueltOverstyrt = ({
         Prorata brøk
       </Checkbox>
       {skalHaProrata && (
-        <InputRow>
+        <HStack gap="4">
           <TextField
             label="Prorata teller"
             placeholder="Prorata teller"
@@ -121,7 +120,7 @@ export const TrygdetidManueltOverstyrt = ({
             maxLength={11}
             onChange={(e) => setNevner(Number(e.target.value))}
           />
-        </InputRow>
+        </HStack>
       )}
 
       <Knapp>

@@ -8,10 +8,9 @@ import { formaterOppgaveStatus, formaterSakstype, formaterStringDato } from '~ut
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
-import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
@@ -51,7 +50,7 @@ export default function StartOppgavebehandling() {
     return <Alert variant="success">Oppgaven er allerede ferdigbehandlet!</Alert>
 
   return (
-    <FormWrapper $column>
+    <VStack gap="4">
       <Heading size="medium" spacing>
         Behandle journalføringsoppgave
       </Heading>
@@ -111,7 +110,7 @@ export default function StartOppgavebehandling() {
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </VStack>
-    </FormWrapper>
+    </VStack>
   )
 }
 

@@ -2,7 +2,6 @@ import { AvsenderMottaker, BrukerIdType } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import React, { useState } from 'react'
-import { InputFlexRow } from './OppdaterJournalpost'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { useForm } from 'react-hook-form'
 import { PersonSoekModal } from '~components/person/journalfoeringsoppgave/journalpost/modal/PersonSoekModal'
@@ -91,9 +90,9 @@ export const EndreAvsenderMottaker = ({
           </HStack>
         </Box>
       ) : (
-        <>
-          <InputFlexRow>
-            <BodyShort spacing className="flex" as="div">
+        <VStack gap="4">
+          <HStack gap="4" justify="space-between" align="center">
+            <BodyShort spacing as="div">
               {avsenderMottaker.navn || '-'}
               {avsenderMottaker.id && <KopierbarVerdi value={avsenderMottaker?.id} />}
             </BodyShort>
@@ -101,14 +100,12 @@ export const EndreAvsenderMottaker = ({
             <Button variant="secondary" size="small" onClick={() => setRediger(true)}>
               Endre
             </Button>
-          </InputFlexRow>
-
-          <br />
+          </HStack>
 
           {!avsenderMottaker.navn && !fnrHarGyldigFormat(avsenderMottaker.id) && (
             <Alert variant="warning">Avsender/mottaker må ha et gyldig fnr. hvis navn ikke er satt</Alert>
           )}
-        </>
+        </VStack>
       )}
     </div>
   )

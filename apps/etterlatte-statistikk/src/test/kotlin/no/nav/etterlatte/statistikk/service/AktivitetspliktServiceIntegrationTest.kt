@@ -207,6 +207,13 @@ class AktivitetspliktServiceIntegrationTest(
                     null,
                 ),
             )
+            get(sakMedOppfyltAktivitet)?.shouldBeEqual(
+                AktivitetForMaaned(
+                    Aktivitetsplikt.JA,
+                    true,
+                    "HUNDRE_PROSENT_ARBEIDSSOEKER",
+                ),
+            )
             get(sakMedIkkeOppfyltAktivitet)?.shouldBeEqual(
                 AktivitetForMaaned(
                     Aktivitetsplikt.JA,
@@ -237,6 +244,9 @@ class AktivitetspliktServiceIntegrationTest(
                 AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD,
             )
             get(sakMedMidlertidigUnntakId)?.shouldBeEqual(
+                AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD,
+            )
+            get(sakMedOppfyltAktivitet)?.shouldBeEqual(
                 AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD,
             )
             get(sakMedIngenRegistrertAktivitet) shouldBe null

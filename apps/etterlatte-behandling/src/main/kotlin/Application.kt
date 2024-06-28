@@ -164,6 +164,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         gyldighetsproevingService = applicationContext.gyldighetsproevingService,
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
+        featureToggleService = applicationContext.featureToggleService,
     )
     aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)

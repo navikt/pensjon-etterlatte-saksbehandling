@@ -1,8 +1,10 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -29,20 +31,25 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -56,6 +63,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -430,6 +438,137 @@ class BehandlingFactoryTest {
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
             oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
+        }
+    }
+
+    @Test
+    fun `skal ikke kunne opprette omgjøring førstegangsbehandling hvis det er innvilget førstegangsbehandling`() {
+        val sakId = 1L
+        val iverksattBehandlingId = UUID.randomUUID()
+        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val iverksattBehandling =
+            foerstegangsbehandling(
+                status = BehandlingStatus.IVERKSATT,
+                sak = sak(sakId = sakId),
+                id = iverksattBehandlingId,
+            )
+
+        every { behandlingDaoMock.alleBehandlingerISak(sakId) } returns listOf(iverksattBehandling)
+        every { sakServiceMock.finnSak(sakId) } returns iverksattBehandling.sak
+
+        assertThrows<AvslagOmgjoering.FoerstegangsbehandlingFeilStatus> {
+            behandlingFactory.opprettOmgjoeringAvslag(
+                sakId,
+                saksbehandler,
+            )
+        }
+        verify {
+            sakServiceMock.finnSak(sakId)
+            behandlingDaoMock.alleBehandlingerISak(sakId)
+        }
+    }
+
+    @Test
+    fun `skal ikke omgjøre hvis vi ikke har en førstegangsbehandling i saken`() {
+        val sak = sak()
+        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+
+        every { sakServiceMock.finnSak(sak.id) } returns sak
+        every { behandlingDaoMock.alleBehandlingerISak(sak.id) } returns emptyList()
+
+        assertThrows<AvslagOmgjoering.IngenFoerstegangsbehandling> {
+            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler)
+        }
+
+        verify {
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.alleBehandlingerISak(sak.id)
+        }
+    }
+
+    @Test
+    fun `skal ikke omgjøre hvis vi har en åpen behandling i saken`() {
+        val sak = sak()
+        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+        val revurdering =
+            revurdering(
+                sak = sak,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                status = BehandlingStatus.OPPRETTET,
+            )
+
+        every { sakServiceMock.finnSak(sak.id) } returns sak
+        every { behandlingDaoMock.alleBehandlingerISak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+
+        assertThrows<AvslagOmgjoering.HarAapenBehandling> { behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler) }
+
+        verify {
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.alleBehandlingerISak(sak.id)
+        }
+    }
+
+    @Test
+    fun `skal lage ny førstegangsbehandling, oppgave og sende statisitkkmelding hvis omgjøring er lov`() {
+        val sak = sak()
+        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+        val revurdering =
+            revurdering(
+                sak = sak,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                status = BehandlingStatus.AVBRUTT,
+            )
+
+        every { sakServiceMock.finnSak(sak.id) } returns sak
+        every { behandlingDaoMock.alleBehandlingerISak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
+        every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
+
+        val opprettBehandlingSlot = slot<OpprettBehandling>()
+        every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
+        coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } just runs
+        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+            OppgaveIntern(
+                id = UUID.randomUUID(),
+                status = Status.PAA_VENT,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                saksbehandler = null,
+                forrigeSaksbehandlerIdent = null,
+                referanse = "",
+                merknad = null,
+                opprettet = Tidspunkt.now(),
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fnr = null,
+                frist = null,
+            )
+        every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } just runs
+
+        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler)
+        opprettetBehandling.sak.id shouldBe sak.id
+        opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+        opprettBehandlingSlot.captured.sakId shouldBe sak.id
+        opprettBehandlingSlot.captured.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+
+        verify {
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.alleBehandlingerISak(sak.id)
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
+        }
+        coVerify {
+            grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
         }
     }
 
@@ -835,4 +974,75 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
     }
+
+    private fun sak(
+        sakId: Long = 1L,
+        sakType: SakType = SakType.BARNEPENSJON,
+        enhet: String = Enheter.defaultEnhet.enhetNr,
+    ): Sak =
+        Sak(
+            ident = "Soeker",
+            sakType = sakType,
+            id = sakId,
+            enhet = enhet,
+        )
+
+    private fun revurdering(
+        id: UUID = UUID.randomUUID(),
+        sak: Sak = sak(),
+        status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+        revurderingAarsak: Revurderingaarsak = Revurderingaarsak.ANNEN,
+    ): Revurdering =
+        Revurdering.opprett(
+            id = id,
+            sak = sak,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeNorskTid(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeNorskTid(),
+            status = status,
+            kommerBarnetTilgode = null,
+            virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingsaarsak = revurderingAarsak,
+            revurderingInfo = null,
+            prosesstype = Prosesstype.MANUELL,
+            kilde = Vedtaksloesning.GJENNY,
+            begrunnelse = null,
+            relatertBehandlingId = null,
+            opphoerFraOgMed = null,
+            utlandstilknytning = null,
+            sendeBrev = true,
+        )
+
+    private fun foerstegangsbehandling(
+        id: UUID = UUID.randomUUID(),
+        sak: Sak = sak(),
+        status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+        virk: YearMonth = YearMonth.of(2022, 1),
+    ): Foerstegangsbehandling =
+        Foerstegangsbehandling(
+            id = id,
+            sak = sak,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeNorskTid(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeNorskTid(),
+            status = status,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            gyldighetsproeving = null,
+            virkningstidspunkt =
+                Virkningstidspunkt(
+                    virk,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "begrunnelse",
+                ),
+            utlandstilknytning = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode =
+                KommerBarnetTilgode(
+                    JaNei.JA,
+                    "",
+                    Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                    id,
+                ),
+            kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
+        )
 }

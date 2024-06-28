@@ -38,14 +38,6 @@ fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     return list
 }
 
-fun <T> ResultSet.toListPassesRsToBlock(block: (resultSet: ResultSet) -> T): List<T> {
-    val list = ArrayList<T>()
-    while (next()) {
-        list.add(block(this))
-    }
-    return list
-}
-
 inline fun <reified T : Any> PreparedStatement.setJsonb(
     parameterIndex: Int,
     jsonb: T?,

@@ -48,15 +48,14 @@ class KravgrunnlagConsumer(
                         logger.info("Mottok melding av type detaljertKravgrunnlagMelding")
                         val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
                         val sakId = detaljertKravgrunnlag.fagsystemId.toLong()
-                        val type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
 
                         sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 
                         val hendelseId =
                             hendelseRepository.lagreTilbakekrevingHendelse(
-                                sakId = detaljertKravgrunnlag.fagsystemId.toLong(),
+                                sakId = sakId,
                                 payload = payload,
-                                type = type,
+                                type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
                                 jmsTimestamp = jmsTimestamp,
                             )
 
@@ -68,15 +67,14 @@ class KravgrunnlagConsumer(
                         logger.info("Mottok melding av type endringKravOgVedtakstatus")
                         val kravOgVedtakstatusDto = toKravOgVedtakstatus(payload)
                         val sakId = kravOgVedtakstatusDto.fagsystemId.toLong()
-                        val type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT
 
                         sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 
                         val hendelseId =
                             hendelseRepository.lagreTilbakekrevingHendelse(
-                                sakId = kravOgVedtakstatusDto.fagsystemId.toLong(),
+                                sakId = sakId,
                                 payload = payload,
-                                type = type,
+                                type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
                                 jmsTimestamp = jmsTimestamp,
                             )
 

@@ -9,6 +9,10 @@ import { isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
 import { round } from 'lodash'
 
+/**
+ * Husk å endre [proxy_body_size] i nais-filene hvis du skal øke maks filstørrelse.
+ * Mer info: https://docs.nais.io
+ **/
 const MAKS_FILSTOERRELSE_MB = 1
 
 export const LastOppBrev = ({ sak }: { sak: ISak }) => {

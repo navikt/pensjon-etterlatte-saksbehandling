@@ -182,7 +182,7 @@ export const BrevutfallSkjema = ({
               }
             />
 
-            {watch().harEtterbetaling == ISvar.JA && (
+            {watch('harEtterbetaling') == ISvar.JA && (
               <HStack gap="4">
                 <ControlledMaanedVelger
                   fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
@@ -253,7 +253,7 @@ export const BrevutfallSkjema = ({
                         </>
                       }
                     />
-                    {watch().frivilligSkattetrekk == ISvar.JA && (
+                    {watch('frivilligSkattetrekk') == ISvar.JA && (
                       <ControlledRadioGruppe
                         name="skatteTrekkFomTomDatoSatt"
                         control={control}
@@ -319,13 +319,13 @@ export const BrevutfallSkjema = ({
               />
             </VStack>
 
-            {watch().feilutbetalingValg && (
+            {watch('feilutbetalingValg') && (
               <Controller
                 name="feilutbetalingKommentar"
                 render={(props) => (
                   <Textarea
                     label="Kommentar"
-                    value={watch().feilutbetalingKommentar ?? ''}
+                    value={watch('feilutbetalingKommentar') ?? ''}
                     style={{ width: '100%' }}
                     {...props}
                     onChange={(e) => {

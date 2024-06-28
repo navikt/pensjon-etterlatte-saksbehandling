@@ -1,4 +1,3 @@
-version: "3"
 services:
   frackend-dev-gcp:
     container_name: frackend-dev-gcp

@@ -3,7 +3,7 @@ import { formaterBehandlingstype } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
   switch (vedtaksresultat) {

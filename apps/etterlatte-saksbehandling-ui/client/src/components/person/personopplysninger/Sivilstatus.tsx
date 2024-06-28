@@ -4,7 +4,7 @@ import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, HStack, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { lowerCase, startCase } from 'lodash'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem, Sivilstand } from '~shared/types/familieOpplysninger'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 

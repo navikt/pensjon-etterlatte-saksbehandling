@@ -1,6 +1,6 @@
 import { AvsenderMottaker, BrukerIdType } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
 import { fnrHarGyldigFormat } from '~utils/fnr'

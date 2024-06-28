@@ -6,7 +6,7 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'

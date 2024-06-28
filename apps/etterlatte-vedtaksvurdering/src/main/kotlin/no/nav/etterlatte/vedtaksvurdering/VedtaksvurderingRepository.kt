@@ -29,7 +29,6 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID

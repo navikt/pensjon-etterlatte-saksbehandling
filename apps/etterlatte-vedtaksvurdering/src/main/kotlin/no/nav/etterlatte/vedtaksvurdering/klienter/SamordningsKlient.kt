@@ -18,8 +18,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
+import no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
+import no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory

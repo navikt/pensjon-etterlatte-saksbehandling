@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -77,7 +76,7 @@ class AktivitetspliktService(
                 "Kunne ikke hente ut avdødes dødsdato for sak med id=$sakId"
             }
 
-        val sisteBehandling = inTransaction { behandlingService.hentSisteIverksatte(sakId) }
+        val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
         val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
 
         val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
@@ -105,19 +104,17 @@ class AktivitetspliktService(
         sakId: Long,
         aktivitetspliktDato: LocalDate,
     ): Boolean {
-        return inTransaction {
-            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-            val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-            val nyesteVurdering =
-                listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+        val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+        val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+        val nyesteVurdering =
+            listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
 
-            return@inTransaction when (nyesteVurdering) {
-                is AktivitetspliktAktivitetsgrad -> oppfyllerAktivitet(nyesteVurdering)
-                is AktivitetspliktUnntak -> harUnntakPaaDato(nyesteVurdering, aktivitetspliktDato)
-                else -> {
-                    logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
-                    false
-                }
+        return when (nyesteVurdering) {
+            is AktivitetspliktAktivitetsgrad -> oppfyllerAktivitet(nyesteVurdering)
+            is AktivitetspliktUnntak -> harUnntakPaaDato(nyesteVurdering, aktivitetspliktDato)
+            else -> {
+                logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
+                false
             }
         }
     }
@@ -264,7 +261,7 @@ class AktivitetspliktService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
-            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
 
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()

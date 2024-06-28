@@ -13,11 +13,13 @@ import { Toast } from '~shared/alerts/Toast'
 export default function SamordningOppdaterMeldingModal({
   fnr,
   sakId,
+  vedtakId,
   mld,
   refresh,
 }: {
   fnr: string
   sakId: number
+  vedtakId: number
   mld: Samordningsmelding
   refresh: () => void
 }) {
@@ -38,6 +40,7 @@ export default function SamordningOppdaterMeldingModal({
           tpNr: mld.tpNr,
           refusjonskrav: erRefusjonskrav === JaNei.JA,
           kommentar: kommentar,
+          vedtakId: vedtakId,
         },
       },
       () => {

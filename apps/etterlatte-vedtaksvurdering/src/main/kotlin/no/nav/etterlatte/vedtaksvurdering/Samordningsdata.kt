@@ -41,5 +41,7 @@ data class OppdaterSamordningsmelding(
     val pid: String,
     val tpNr: String,
     val samId: Long,
+    val vedtakId: Long,
     val refusjonskrav: Boolean,
+    val kommentar: String,
 )

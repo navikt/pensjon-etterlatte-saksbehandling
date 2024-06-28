@@ -50,4 +50,5 @@ export interface OppdaterSamordningsmelding {
   tpNr: string
   refusjonskrav: boolean
   kommentar: string
+  vedtakId: number
 }

@@ -32,7 +32,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     if (loependeVedtak?.vedtakType === VedtakType.AVSLAG) {
       return (
         <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
-          Avslått den {loependeVedtak.virkningstidspunkt && formaterStringDato(loependeVedtak.virkningstidspunkt)}
+          Avslått den {loependeVedtak.datoAttestert && formaterStringDato(loependeVedtak.datoAttestert)}
         </Tag>
       )
     }

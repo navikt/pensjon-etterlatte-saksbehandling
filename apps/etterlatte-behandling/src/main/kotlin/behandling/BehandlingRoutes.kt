@@ -13,7 +13,10 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -25,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SendBrev
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -32,18 +36,31 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+
+enum class BehandlingFeatures(
+    private val key: String,
+) : FeatureToggle {
+    OMGJOERE_AVSLAG("omgjoer-avslag"),
+    ;
+
+    override fun key(): String = key
+}
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     behandlingFactory: BehandlingFactory,
+    featureToggleService: FeatureToggleService,
 ) {
     val logger = routeLogger
 
@@ -56,6 +73,19 @@ internal fun Route.behandlingRoutes(
         kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
             call.respondText(behandling.id.toString())
+        }
+    }
+
+    post("/api/behandling/omgjoer-avslag-avbrudd/{$SAKID_CALL_PARAMETER}") {
+        if (!featureToggleService.isEnabled(BehandlingFeatures.OMGJOERE_AVSLAG, false)) {
+            throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
+        }
+        kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+            val behandlingOgOppgave =
+                inTransaction {
+                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
+                }
+            call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }
 

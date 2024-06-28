@@ -2,7 +2,7 @@ import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
 import { BodyLong, Box, Button, Heading, Select, TextField } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning, opprettOverstyrBeregning } from '~shared/api/beregning'
@@ -27,7 +27,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
-    ? formaterStringDato(behandling.virkningstidspunkt.dato)
+    ? formaterDato(behandling.virkningstidspunkt.dato)
     : undefined
 
   useEffect(() => {

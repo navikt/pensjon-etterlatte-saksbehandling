@@ -21,7 +21,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { formaterStringDato, formaterStringMaanedDato } from '~utils/formattering'
+import { formaterDato, formaterMaanedDato } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
@@ -209,21 +209,21 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <>
                       {sanksjoner.map((lagretSanksjon, index) => (
                         <Table.Row key={index}>
-                          <Table.DataCell>{formaterStringMaanedDato(lagretSanksjon.fom)}</Table.DataCell>
+                          <Table.DataCell>{formaterMaanedDato(lagretSanksjon.fom)}</Table.DataCell>
                           <Table.DataCell>
-                            {lagretSanksjon.tom ? formaterStringMaanedDato(lagretSanksjon.tom) : '-'}
+                            {lagretSanksjon.tom ? formaterMaanedDato(lagretSanksjon.tom) : '-'}
                           </Table.DataCell>
                           <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
                           <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
                           <Table.DataCell>
                             <BodyShort>{lagretSanksjon.opprettet.ident}</BodyShort>
-                            <Detail>{`saksbehandler: ${formaterStringDato(lagretSanksjon.opprettet.tidspunkt)}`}</Detail>
+                            <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.opprettet.tidspunkt)}`}</Detail>
                           </Table.DataCell>
                           <Table.DataCell>
                             {lagretSanksjon.endret ? (
                               <>
                                 <BodyShort>{lagretSanksjon.endret.ident}</BodyShort>
-                                <Detail>{`saksbehandler: ${formaterStringDato(lagretSanksjon.endret.tidspunkt)}`}</Detail>
+                                <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.endret.tidspunkt)}`}</Detail>
                               </>
                             ) : (
                               '-'

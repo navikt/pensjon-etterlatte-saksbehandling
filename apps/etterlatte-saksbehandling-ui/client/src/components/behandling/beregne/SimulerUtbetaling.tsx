@@ -7,7 +7,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
 import { BodyShort, Button, Heading, Table, Box, Label } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
-import { formaterKanskjeStringDato, formaterStringDato, NOK } from '~utils/formattering'
+import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
+import { NOK } from '~utils/formatering/formatering'
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
@@ -86,7 +87,7 @@ const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
       )}
 
       <>
-        Beregnet dato: {formaterStringDato(data.datoBeregnet)}
+        Beregnet dato: {formaterDato(data.datoBeregnet)}
         {data.infomelding && <BodyShort textColor="subtle">{data.infomelding}</BodyShort>}
       </>
     </>
@@ -119,13 +120,13 @@ const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiod
           {props.data.map((periode, idx) => (
             <Table.Row key={idx}>
               <Table.DataCell>
-                {formaterStringDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
+                {formaterDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
               </Table.DataCell>
               <Table.DataCell>
                 {periode.klassekodeBeskrivelse} {periode.tilbakefoering && '(tidligere utbetalt)'}
               </Table.DataCell>
               <Table.DataCell>{periode.konto}</Table.DataCell>
-              <Table.DataCell>{formaterStringDato(periode.forfall)}</Table.DataCell>
+              <Table.DataCell>{formaterDato(periode.forfall)}</Table.DataCell>
               <Table.DataCell align="right">{NOK(periode.beloep)}</Table.DataCell>
             </Table.Row>
           ))}

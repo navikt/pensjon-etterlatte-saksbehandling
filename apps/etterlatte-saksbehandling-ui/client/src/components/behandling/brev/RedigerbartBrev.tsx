@@ -11,7 +11,7 @@ import Spinner from '~shared/Spinner'
 import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
-import { formaterTidspunktTimeMinutterSekunder } from '~utils/formattering'
+import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',

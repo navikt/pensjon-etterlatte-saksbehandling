@@ -1,6 +1,6 @@
 import { IAdresse } from '~shared/types/IAdresse'
 import { VStack } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 export const Adressevisning = ({
   adresser,
@@ -25,8 +25,8 @@ export const Adressevisning = ({
 }
 
 export const Adresse = ({ adresse, soeknadsoversikt }: { adresse: IAdresse; soeknadsoversikt: boolean }) => {
-  const fra = formaterStringDato(adresse.gyldigFraOgMed)
-  const til = adresse.aktiv ? 'nå' : formaterStringDato(adresse.gyldigTilOgMed!)
+  const fra = formaterDato(adresse.gyldigFraOgMed)
+  const til = adresse.aktiv ? 'nå' : formaterDato(adresse.gyldigTilOgMed!)
 
   return (
     <>

@@ -1,6 +1,6 @@
 import { ISak } from '~shared/types/sak'
 import { Box, Heading, Table } from '@navikt/ds-react'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype } from '~utils/formatering/formatering'
 import React from 'react'
 
 export const SakOverfoeringDetailjer = ({ fra, til }: { fra: ISak; til: ISak }) => (

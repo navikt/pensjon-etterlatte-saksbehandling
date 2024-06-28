@@ -1,12 +1,13 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import React, { useEffect } from 'react'
-import { formaterStringDato, formaterVedtakType } from '~utils/formattering'
 import { Table } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { formaterDato } from '~utils/formatering/dato'
+import { formaterVedtakType } from '~utils/formatering/formatering'
 
 export const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
@@ -16,7 +17,7 @@ export const VedtakKolonner = (props: { behandlingId: string }) => {
   }, [])
 
   const attestertDato = (dato?: string) => {
-    if (dato) return formaterStringDato(dato)
+    if (dato) return formaterDato(dato)
     else return ''
   }
 

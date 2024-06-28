@@ -34,7 +34,7 @@ import {
   opprettAktivitspliktUnntak,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -300,8 +300,8 @@ export const AktivitetspliktInfoModal = ({
                           <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
 
                           <Detail>
-                            Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av
-                            saksbehandler {vurdering.unntak.opprettet.ident}
+                            Vurdering ble utført {formaterDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
+                            {vurdering.unntak.opprettet.ident}
                           </Detail>
                         </>
                       )}
@@ -314,7 +314,7 @@ export const AktivitetspliktInfoModal = ({
                           <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
 
                           <Detail>
-                            Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av
+                            Vurdering ble utført {formaterDato(vurdering.aktivitet.opprettet.tidspunkt)} av
                             saksbehandler {vurdering.aktivitet.opprettet.ident}
                           </Detail>
                         </>

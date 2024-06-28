@@ -7,7 +7,7 @@ import {
 } from '~components/behandling/brevutfall/Brevutfall'
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { formaterStringMaanedDato } from '~utils/formattering'
+import { formaterMaanedDato } from '~utils/formatering/dato'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -54,11 +54,11 @@ export const BrevutfallVisning = (props: {
             <HStack gap="8">
               <VStack gap="2">
                 <Label>Fra og med</Label>
-                <BodyShort>{formaterStringMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
+                <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
               </VStack>
               <VStack gap="2">
                 <Label>Til og med</Label>
-                <BodyShort>{formaterStringMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
+                <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
               </VStack>
             </HStack>
           )}

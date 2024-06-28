@@ -1,7 +1,7 @@
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import React from 'react'
 import { Table } from '@navikt/ds-react'
-import { NOK } from '~utils/formattering'
+import { NOK } from '~utils/formatering/formatering'
 
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sum(beloeper: (number | null)[]) {

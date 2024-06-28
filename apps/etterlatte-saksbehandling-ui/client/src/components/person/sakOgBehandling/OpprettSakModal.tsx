@@ -6,7 +6,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { hentSakForPerson } from '~shared/api/sak'
 import { SakType } from '~shared/types/sak'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype } from '~utils/formatering/formatering'
 
 export const OpprettSakModal = ({ fnr }: { fnr: string }) => {
   const [isOpen, setIsOpen] = useState(false)

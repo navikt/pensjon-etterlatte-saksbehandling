@@ -3,7 +3,7 @@ import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 type Props = {
   familieforhold: Familieforhold

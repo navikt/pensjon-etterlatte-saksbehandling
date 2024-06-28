@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Link, Table } from '@navikt/ds-react'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 import {
   teksterTilbakekrevingStatus,
@@ -51,7 +51,7 @@ function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBeh
       <Table.Body>
         {tilbakekrevinger.map((tilbakekreving) => (
           <Table.Row key={tilbakekreving.id} shadeOnHover={false}>
-            <Table.DataCell>{formaterStringDato(tilbakekreving.opprettet)}</Table.DataCell>
+            <Table.DataCell>{formaterDato(tilbakekreving.opprettet)}</Table.DataCell>
             <Table.DataCell>{teksterTilbakekrevingStatus[tilbakekreving.status]}</Table.DataCell>
             <Table.DataCell>{formaterPeriode(tilbakekreving.tilbakekreving.perioder)}</Table.DataCell>
             <VedtakKolonner behandlingId={tilbakekreving.id} />

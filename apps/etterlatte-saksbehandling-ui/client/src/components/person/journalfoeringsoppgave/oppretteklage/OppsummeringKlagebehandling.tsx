@@ -1,12 +1,13 @@
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Alert, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
-import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import FullfoerKlageModal from '~components/person/journalfoeringsoppgave/oppretteklage/FullfoerKlageModal'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
+import { formaterSakstype } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 
 export function opprettKlageErUtfylt(
   utfylling?: Partial<NyKlageRequestUtfylling>
@@ -43,7 +44,7 @@ export default function OppsummeringKlagebehandling() {
       </Heading>
 
       <VStack gap="4">
-        <Info label="Klage framsatt dato" tekst={formaterStringDato(mottattDato)} />
+        <Info label="Klage framsatt dato" tekst={formaterDato(mottattDato)} />
 
         <Alert variant="warning">
           {/* TODO: støtte for at vi bare sender ut et strukturert kvitteringsbrev når klagen opprettes */}

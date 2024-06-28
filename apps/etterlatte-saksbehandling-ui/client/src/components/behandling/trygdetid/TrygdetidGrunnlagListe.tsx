@@ -8,7 +8,7 @@ import {
 import { IconSize } from '~shared/types/Icon'
 import { BodyShort, Button, Detail, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -206,15 +206,15 @@ const PeriodeRow = ({
         {landListe.find((land) => land.isoLandkode == trygdetidGrunnlag.bosted)?.beskrivelse?.tekst}
       </Table.DataCell>
       <Table.DataCell>
-        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeFra)}</Datofelt>
+        <Datofelt>{formaterDato(trygdetidGrunnlag.periodeFra)}</Datofelt>
       </Table.DataCell>
       <Table.DataCell>
-        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeTil)}</Datofelt>
+        <Datofelt>{formaterDato(trygdetidGrunnlag.periodeTil)}</Datofelt>
       </Table.DataCell>
       <Table.DataCell>{beregnetTrygdetid}</Table.DataCell>
       <Table.DataCell>
         <BodyShort>{trygdetidGrunnlag.kilde.ident}</BodyShort>
-        <Detail>{`saksbehandler: ${formaterStringDato(trygdetidGrunnlag.kilde.tidspunkt)}`}</Detail>
+        <Detail>{`saksbehandler: ${formaterDato(trygdetidGrunnlag.kilde.tidspunkt)}`}</Detail>
       </Table.DataCell>
       {redigerbar && (
         <>

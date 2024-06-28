@@ -4,7 +4,7 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { formaterOppgaveStatus, formaterSakstype, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
@@ -15,6 +15,7 @@ import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
+import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -147,7 +148,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
           </Link>
         }
       />
-      <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
+      <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </VStack>
   </SidebarPanel>

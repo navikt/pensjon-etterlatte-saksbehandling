@@ -13,7 +13,7 @@ import { GosysOppgaver } from '~components/oppgavebenk/gosys/GosysOppgaver'
 import { hentGosysOppgaver } from '~shared/api/gosys'
 import { GosysFilterRad } from './filtreringAvOppgaver/GosysFilterRad'
 import { GosysOppgave } from '~shared/types/Gosys'
-import { formaterEnumTilLesbarString } from '~utils/formattering'
+import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import {
   hentGosysOppgaverFilterFraLocalStorage,
   leggGosysOppgaverFilterILocalStorage,

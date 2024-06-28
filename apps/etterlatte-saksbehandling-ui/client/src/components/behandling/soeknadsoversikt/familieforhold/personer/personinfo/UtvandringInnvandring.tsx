@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Utland } from '~shared/types/Person'
 import { Box, Label } from '@navikt/ds-react'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 
 export const ListeItemMedSpacingIMellom = styled.li`
   :not(:first-child) {

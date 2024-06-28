@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -20,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -37,11 +39,13 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.util.UUID
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
@@ -192,7 +196,13 @@ class BehandlingFactory(
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
             val behandling =
-                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, request.sak, mottattDato, kilde, prosessType)
+                opprettFoerstegangsbehandling(
+                    harBehandlingUnderbehandling,
+                    request.sak,
+                    mottattDato,
+                    kilde,
+                    prosessType,
+                )
                     ?: return null
             grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
             val oppgave =
@@ -218,6 +228,62 @@ class BehandlingFactory(
                 )
             }
         }
+    }
+
+    fun opprettOmgjoeringAvslag(
+        sakId: Long,
+        saksbehandler: Saksbehandler,
+    ): Behandling {
+        val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
+        val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
+        val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+        if (foerstegangsbehandlinger.isEmpty()) {
+            throw AvslagOmgjoering.IngenFoerstegangsbehandling()
+        }
+        val foerstegangsbehandlingerIkkeAvslaattAvbrutt =
+            foerstegangsbehandlinger.filter { it.status !in listOf(BehandlingStatus.AVBRUTT, BehandlingStatus.AVSLAG) }
+        if (foerstegangsbehandlingerIkkeAvslaattAvbrutt.isNotEmpty()) {
+            throw AvslagOmgjoering.FoerstegangsbehandlingFeilStatus(
+                sakId,
+                foerstegangsbehandlingerIkkeAvslaattAvbrutt.first().id,
+            )
+        }
+        if (behandlingerISak.any { it.status.aapenBehandling() }) {
+            throw AvslagOmgjoering.HarAapenBehandling()
+        }
+
+        val foerstegangsbehandlingViOmgjoerer =
+            foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
+        val behandling =
+            checkNotNull(
+                opprettFoerstegangsbehandling(
+                    harBehandlingUnderbehandling = listOf(),
+                    sak = sak,
+                    mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
+                    kilde = Vedtaksloesning.GJENNY,
+                    prosessType = Prosesstype.MANUELL,
+                ),
+            ) {
+                "Behandlingen vi akkurat opprettet fins ikke :("
+            }
+
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(foerstegangsbehandlingViOmgjoerer.id) }
+        grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+
+        val oppgave =
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                referanse = behandling.id.toString(),
+                sakId = behandling.sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                merknad = "Omgjøring av førstegangsbehandling",
+            )
+        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
+
+        behandlingHendelser.sendMeldingForHendelseStatisitkk(
+            behandling.toStatistikkBehandling(persongalleri),
+            BehandlingHendelseType.OPPRETTET,
+        )
+        return behandling
     }
 
     internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
@@ -284,6 +350,29 @@ class UgyldigEnhetException :
         code = "UGYLDIG-ENHET",
         detail = "Enhet brukt i form er matcher ingen gyldig enhet",
     )
+
+sealed class AvslagOmgjoering {
+    class IngenFoerstegangsbehandling :
+        UgyldigForespoerselException(
+            "INGEN_FOERSTEGANGSBEHANDLING",
+            "Fant ingen førstegangsbehandling i saken der førstegangsbehandling skulle omgjøres",
+        )
+
+    class FoerstegangsbehandlingFeilStatus(
+        sakId: Long,
+        behandlingId: UUID,
+    ) : UgyldigForespoerselException(
+            "FOERSTEGANGSBEHANDLING_UGYLDIG_STATUS",
+            "Kan ikke omgjøre førstegangsbehandling i sak $sakId, siden $behandlingId er en " +
+                "førstegangsbehandling i saken som ikke er avslått eller avbrutt",
+        )
+
+    class HarAapenBehandling :
+        UgyldigForespoerselException(
+            "HAR_AAPEN_BEHANDLING",
+            "For å omgjøre en førstegangsbehandling må alle andre behandlinger i saken være lukket.",
+        )
+}
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA
 

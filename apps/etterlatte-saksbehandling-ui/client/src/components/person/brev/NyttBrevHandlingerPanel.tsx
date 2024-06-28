@@ -1,11 +1,11 @@
 import { Alert, BodyLong, Box, Button, ConfirmationPanel, Heading, HStack, Modal } from '@navikt/ds-react'
 import { BrevStatus, Brevtype, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 
-import { isInitial, isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { isPending, mapAllApiResult } from '~shared/api/apiUtils'
 
 interface Props {
   brev: IBrev
@@ -30,7 +30,6 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       setFeilmeldingBekreft('Du må huke av for at infobrevet er sendt')
       return
     }
-    setKanRedigeres(false)
     apiFerdigstillBrev(
       {
         brevId: brev.id,
@@ -39,6 +38,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       },
       () => journalfoer()
     )
+    setStatusModalOpen(true)
+    setIsOpen(false)
   }
 
   const journalfoer = () => {
@@ -47,23 +48,16 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
 
   const distribuer = () =>
     apiDistribuerBrev({ brevId: brev.id, sakId: brev.sakId }, () => {
+      setKanRedigeres(false)
       if (callback) {
         callback()
-      } else {
-        void setTimeout(() => window.location.reload(), 2000)
       }
+      void setTimeout(() => window.location.reload(), 2000)
     })
 
   if (brev.status === BrevStatus.DISTRIBUERT) {
     return null
   }
-
-  useEffect(() => {
-    setStatusModalOpen(
-      isSuccess(distribuerStatus) ||
-        !(isInitial(ferdigstillStatus) && isInitial(journalfoerStatus) && isInitial(distribuerStatus))
-    )
-  }, [ferdigstillStatus, journalfoerStatus, distribuerStatus])
 
   return (
     <>

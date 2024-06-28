@@ -24,11 +24,12 @@ import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterStringDato } from '~utils/formattering'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const { sakId } = props.behandling
+  const { sakId, revurderingsaarsak } = props.behandling
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [redigerbar, setKanRedigeres] = useState(
@@ -51,15 +52,21 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const settPaaVent = async () => {
     requesthentOppgaveForBehandlingEkte(behandlingId!!, (oppgave) => {
-      requestSettPaaVent({
-        oppgaveId: oppgave.id,
-        settPaaVentRequest: {
-          merknad: 'Manuelt: Varselbrev er sendt ut | ' + oppgave.merknad || '',
-          paaVent: true,
+      requestSettPaaVent(
+        {
+          oppgaveId: oppgave.id,
+          settPaaVentRequest: {
+            merknad: 'Manuelt: Varselbrev er sendt ut | ' + oppgave.merknad || '',
+            paaVent: true,
+          },
         },
-      })
+        () => {
+          if (revurderingsaarsak !== Revurderingaarsak.AKTIVITETSPLIKT) {
+            next()
+          }
+        }
+      )
     })
-    next()
   }
 
   // Opppdaterer behandling for å sikre at siste hendelser er på plass
@@ -146,7 +153,12 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
               Neste side uten å sende varselbrev
             </Button>
             {varselbrev && (
-              <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} callback={settPaaVent} />
+              <NyttBrevHandlingerPanel
+                brev={varselbrev}
+                setKanRedigeres={setKanRedigeres}
+                callback={settPaaVent}
+                erAktivitetspliktVarsel={revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT}
+              />
             )}
           </BehandlingHandlingKnapper>
         ) : (

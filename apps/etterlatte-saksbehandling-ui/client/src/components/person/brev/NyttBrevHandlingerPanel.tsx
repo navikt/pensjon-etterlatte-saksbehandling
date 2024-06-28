@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, ConfirmationPanel, Heading, HStack, Modal } from '@navikt/ds-react'
 import { BrevStatus, Brevtype, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
@@ -11,19 +11,26 @@ interface Props {
   brev: IBrev
   setKanRedigeres: (kanRedigeres: boolean) => void
   callback?: () => void
+  erAktivitetspliktVarsel?: boolean
 }
 
-export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callback }: Props) {
+export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callback, erAktivitetspliktVarsel }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [statusModalOpen, setStatusModalOpen] = useState(false)
+  const [bekreftetInfobrev, setBekreftetInfobrev] = useState(!erAktivitetspliktVarsel)
+  const [feilmeldingBekreft, setFeilmeldingBekreft] = useState<string | undefined>()
 
   const [ferdigstillStatus, apiFerdigstillBrev] = useApiCall(ferdigstillBrev)
   const [journalfoerStatus, apiJournalfoerBrev] = useApiCall(journalfoerBrev)
   const [distribuerStatus, apiDistribuerBrev] = useApiCall(distribuerBrev)
 
   const ferdigstill = () => {
+    setFeilmeldingBekreft(undefined)
+    if (erAktivitetspliktVarsel && !bekreftetInfobrev) {
+      setFeilmeldingBekreft('Du må huke av for at infobrevet er sendt')
+      return
+    }
     setKanRedigeres(false)
-
     apiFerdigstillBrev(
       {
         brevId: brev.id,
@@ -32,9 +39,6 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       },
       () => journalfoer()
     )
-    if (callback) {
-      callback()
-    }
   }
 
   const journalfoer = () => {
@@ -42,10 +46,13 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
   }
 
   const distribuer = () =>
-    apiDistribuerBrev(
-      { brevId: brev.id, sakId: brev.sakId },
-      () => void setTimeout(() => window.location.reload(), 2000)
-    )
+    apiDistribuerBrev({ brevId: brev.id, sakId: brev.sakId }, () => {
+      if (callback) {
+        callback()
+      } else {
+        void setTimeout(() => window.location.reload(), 2000)
+      }
+    })
 
   if (brev.status === BrevStatus.DISTRIBUERT) {
     return null
@@ -128,6 +135,17 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           </BodyLong>
           {brev.brevtype === Brevtype.VARSEL && (
             <BodyLong spacing>Når varselbrevet er sendt kan du sette oppgaven på vent.</BodyLong>
+          )}
+          {erAktivitetspliktVarsel && (
+            <Box paddingBlock="4">
+              <ConfirmationPanel
+                label="Infobrevet er sendt for minst tre uker siden, slik at varselsbrevet kan sendes ut"
+                onChange={() => setBekreftetInfobrev((bekreftet) => !bekreftet)}
+                error={feilmeldingBekreft}
+              >
+                <strong>Infobrev er sendt</strong>
+              </ConfirmationPanel>
+            </Box>
           )}
           <Alert variant="info">
             Ikke glem å lagre innholdet i brev <i>før</i> du ferdigstiller!

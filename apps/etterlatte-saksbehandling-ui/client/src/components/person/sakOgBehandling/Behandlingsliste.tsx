@@ -1,6 +1,5 @@
 import { Alert, HStack, Link, Table } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
-import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
@@ -19,6 +18,8 @@ import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
+import { formaterDato } from '~utils/formatering/dato'
+import { formaterBehandlingstype, formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
@@ -72,7 +73,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
               if (isVanligBehandling(behandling)) {
                 return (
                   <Table.Row key={behandling.id}>
-                    <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
+                    <Table.DataCell>{formaterDato(behandling.behandlingOpprettet)}</Table.DataCell>
                     <Table.DataCell>
                       <HStack gap="2" align="center">
                         {formaterBehandlingstype(behandling.behandlingType)}
@@ -87,7 +88,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                       {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
                     </Table.DataCell>
                     <Table.DataCell>
-                      {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
+                      {behandling.virkningstidspunkt ? formaterDato(behandling.virkningstidspunkt!!.dato) : ''}
                     </Table.DataCell>
                     <VedtakKolonner behandlingId={behandling.id} />
                     <Table.DataCell>
@@ -98,7 +99,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
               } else {
                 return (
                   <Table.Row key={behandling.id}>
-                    <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
+                    <Table.DataCell>{formaterDato(behandling.opprettet)}</Table.DataCell>
                     <Table.DataCell>{genbehandlingTypeTilLesbartNavn(behandling.type)}</Table.DataCell>
                     <Table.DataCell>-</Table.DataCell>
                     <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>

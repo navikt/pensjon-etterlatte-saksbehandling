@@ -5,7 +5,7 @@ import {
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon } from '@navikt/aksel-icons'
 
 export const AktivitetspliktVurderingVisning = ({
@@ -38,7 +38,7 @@ export const AktivitetspliktVurderingVisning = ({
                 <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
 
                 <Detail>
-                  Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
+                  Vurdering ble utført {formaterDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
                   {vurdering.unntak.opprettet.ident}
                 </Detail>
               </>
@@ -53,7 +53,7 @@ export const AktivitetspliktVurderingVisning = ({
                 <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
 
                 <Detail>
-                  Vurdering ble utført {formaterStringDato(vurdering.aktivitet.endret.tidspunkt)} av saksbehandler{' '}
+                  Vurdering ble utført {formaterDato(vurdering.aktivitet.endret.tidspunkt)} av saksbehandler{' '}
                   {vurdering.aktivitet.endret.ident}
                 </Detail>
               </>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFristApi } from '~shared/api/oppgaver'
 import { Alert, Button, DatePicker, Heading, HStack, Label, Modal } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { add, isBefore } from 'date-fns'
@@ -121,12 +121,12 @@ export const FristHandlinger = (props: {
               onClick={() => setOpen(!open)}
             >
               <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())}>
-                {formaterStringDato(frist)}
+                {formaterDato(frist)}
               </FristWrapper>
             </Button>
           ) : (
             <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())} $utenKnapp>
-              <Label size="small">{formaterStringDato(frist)}</Label>
+              <Label size="small">{formaterDato(frist)}</Label>
             </FristWrapper>
           )}
         </>

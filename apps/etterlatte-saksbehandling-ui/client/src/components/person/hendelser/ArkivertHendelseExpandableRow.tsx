@@ -4,7 +4,7 @@ import { HendelseBeskrivelse } from '~components/person/hendelser/HendelseBeskri
 import { SakType } from '~shared/types/sak'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { grunnlagsendringsTittel } from '~components/person/hendelser/utils'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 interface Props {
   sakType: SakType
@@ -15,7 +15,7 @@ export const ArkivertHendelseExpandableRow = ({ sakType, hendelse }: Props) => {
   return (
     <Table.ExpandableRow content={<HendelseBeskrivelse hendelse={hendelse} sakType={sakType} />} expandOnRowClick>
       <Table.DataCell>{grunnlagsendringsTittel[hendelse.samsvarMellomKildeOgGrunnlag.type]}</Table.DataCell>
-      <Table.DataCell>{formaterStringDato(hendelse.opprettet)}</Table.DataCell>
+      <Table.DataCell>{formaterDato(hendelse.opprettet)}</Table.DataCell>
     </Table.ExpandableRow>
   )
 }

@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
-import { formaterBehandlingstype, formaterDatoMedKlokkeslett, formaterStringDato } from '~utils/formattering'
+import { formaterBehandlingstype } from '~utils/formatering/formatering'
+import { formaterDatoMedKlokkeslett, formaterDato } from '~utils/formatering/dato'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
@@ -86,15 +87,11 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <div className="flex">
         <div>
           <Info>Virkningstidspunkt</Info>
-          <Tekst>
-            {behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
-          </Tekst>
+          <Tekst>{behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}</Tekst>
         </div>
         <div>
           <Info>Vedtaksdato</Info>
-          <Tekst>
-            {behandlingsInfo.datoAttestert ? formaterStringDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
-          </Tekst>
+          <Tekst>{behandlingsInfo.datoAttestert ? formaterDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}</Tekst>
         </div>
       </div>
       {kommentarFraAttestant && (

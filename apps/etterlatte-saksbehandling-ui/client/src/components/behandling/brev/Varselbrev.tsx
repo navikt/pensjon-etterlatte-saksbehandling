@@ -23,7 +23,7 @@ import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerP
 import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
@@ -119,7 +119,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <div>
                   <BrevStatusTag status={varselbrev.status} />
                   <BodyShort spacing>
-                    <b>Sist endret:</b> {formaterStringDato(varselbrev.statusEndret)}
+                    <b>Sist endret:</b> {formaterDato(varselbrev.statusEndret)}
                   </BodyShort>
                 </div>
 

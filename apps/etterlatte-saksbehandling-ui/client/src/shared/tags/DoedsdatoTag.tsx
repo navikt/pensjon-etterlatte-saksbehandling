@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tag } from '@navikt/ds-react'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 
 export const DoedsdatoTag = ({ doedsdato }: { doedsdato?: Date }) =>
   doedsdato && (

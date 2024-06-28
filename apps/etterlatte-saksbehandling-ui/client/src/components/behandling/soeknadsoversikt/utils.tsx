@@ -1,7 +1,7 @@
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { JaNei } from '~shared/types/ISvar'
 import { KildePdl } from '~shared/types/kilde'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 
 export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
@@ -16,9 +16,9 @@ export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
 }
 
 export const formaterKildePdl = (kilde?: KildePdl) => {
-  return kilde ? kilde.navn.toUpperCase() + ': ' + formaterStringDato(kilde.tidspunktForInnhenting) : undefined
+  return kilde ? kilde.navn.toUpperCase() + ': ' + formaterDato(kilde.tidspunktForInnhenting) : undefined
 }
 
 export const formaterGrunnlagKilde = (kilde?: GrunnlagKilde) => {
-  return kilde ? kilde.type.toUpperCase() + ': ' + formaterStringDato(kilde.tidspunkt) : undefined
+  return kilde ? kilde.type.toUpperCase() + ': ' + formaterDato(kilde.tidspunkt) : undefined
 }

@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
@@ -15,29 +14,6 @@ export const formaterEnumTilLesbarString = (string: string): string => {
   const storForbokstav = capitalize(string.toLowerCase())
   return storForbokstav.replace('_', ' ')
 }
-
-export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
-
-export const formaterMaanedDato = (dato: Date) => format(dato, 'MMMM yyyy').toString()
-
-export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
-
-export const formaterStringMaanedDato = (dato: string) => format(new Date(dato), 'MMMM yyyy').toString()
-
-export const formaterKanskjeStringDato = (dato?: string): string =>
-  formaterKanskjeStringDatoMedFallback('Ukjent dato', dato)
-
-export const formaterDatoStrengTilLocaleDateTime = (dato: string) => new Date(dato).toISOString().replace('Z', '')
-
-export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
-  dato ? formaterStringDato(dato) : fallback
-
-export const formaterTidspunktTimeMinutterSekunder = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
-
-export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
-
-export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
-  format(new Date(dato), "dd.MM.yyyy 'kl.' HH:mm").toString()
 
 export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {
   switch (behandlingstype) {
@@ -160,11 +136,6 @@ export const formaterJournalpostSakstype = (sakstype: Sakstype) => {
     case Sakstype.GENERELL_SAK:
       return 'Generell sak'
   }
-}
-
-export enum DatoFormat {
-  AAR_MAANED_DAG = 'yyyy-MM-dd',
-  DAG_MAANED_AAR = 'dd.MM.yyyy',
 }
 
 const norskKroneFormat = new Intl.NumberFormat('NO-nb', {

@@ -1,5 +1,5 @@
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import {
   IGrunnlagOpplysninger,
   IOpplysningsgrunnlag,
@@ -53,10 +53,10 @@ const Opplysningsgrunnlag = ({
 }) => (
   <Info
     label={label}
-    tekst={opplysningsgrunnlag?.opplysning ? formaterStringDato(opplysningsgrunnlag.opplysning) : 'Ikke registrert'}
+    tekst={opplysningsgrunnlag?.opplysning ? formaterDato(opplysningsgrunnlag.opplysning) : 'Ikke registrert'}
     undertekst={
       opplysningsgrunnlag?.kilde
-        ? opplysningsgrunnlag?.kilde.type + ': ' + formaterStringDato(opplysningsgrunnlag?.kilde.tidspunkt)
+        ? opplysningsgrunnlag?.kilde.type + ': ' + formaterDato(opplysningsgrunnlag?.kilde.tidspunkt)
         : 'Ikke registrert'
     }
   />

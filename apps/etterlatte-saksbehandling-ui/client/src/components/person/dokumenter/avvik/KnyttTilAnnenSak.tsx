@@ -16,7 +16,7 @@ import { opprettOppgave } from '~shared/api/oppgaver'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { JaNei } from '~shared/types/ISvar'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype } from '~utils/formatering/formatering'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost

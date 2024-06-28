@@ -1,5 +1,6 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { formaterBehandlingstype, formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterBehandlingstype } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -26,10 +27,10 @@ function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat | null 
 }
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
-  const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
+  const virkningsdato = behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : '-'
   const vedtaksResultat = useVedtaksResultat()
   const attestertDato = behandlingsInfo.datoAttestert
-    ? formaterStringDato(behandlingsInfo.datoAttestert)
+    ? formaterDato(behandlingsInfo.datoAttestert)
     : formaterDato(new Date())
 
   return (

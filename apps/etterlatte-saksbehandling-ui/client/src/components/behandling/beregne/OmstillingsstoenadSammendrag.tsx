@@ -1,7 +1,8 @@
 import { Box, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
-import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
+import { NOK } from '~utils/formatering/formatering'
 import { Beregning } from '~shared/types/Beregning'
 import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
@@ -36,7 +37,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
           {beregningsperioder?.map((beregningsperiode, key) => (
             <Table.Row key={key} shadeOnHover={false}>
               <Table.DataCell>
-                {`${formaterStringDato(beregningsperiode.datoFOM)} - ${
+                {`${formaterDato(beregningsperiode.datoFOM)} - ${
                   beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
                 }`}
               </Table.DataCell>

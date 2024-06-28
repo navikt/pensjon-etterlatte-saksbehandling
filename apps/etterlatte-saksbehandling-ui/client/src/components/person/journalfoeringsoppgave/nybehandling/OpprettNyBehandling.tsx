@@ -2,7 +2,7 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
-import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
+import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formatering/formatering'
 import { Alert, Button, Heading, HStack, Select, VStack } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'

@@ -11,7 +11,7 @@ import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box, HStack, V
 import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
-import { formaterSakstype, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { ISvar } from '~shared/types/ISvar'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
@@ -21,6 +21,7 @@ import { SakType } from '~shared/types/sak'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
+import { formaterSakstype } from '~utils/formatering/formatering'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -115,7 +116,7 @@ export const Resultat = (props: Props) => {
                 <BodyShort textColor="subtle">
                   {erRevurdering
                     ? null
-                    : `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterStringDato(
+                    : `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterDato(
                         vilkaarsvurdering.virkningstidspunkt
                       )}`}
                 </BodyShort>

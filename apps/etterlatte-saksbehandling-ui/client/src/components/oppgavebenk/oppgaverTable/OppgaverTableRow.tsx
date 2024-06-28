@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { HStack, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
@@ -30,7 +30,7 @@ export const OppgaverTableRow = ({
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
-    <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
+    <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>
       {oppdaterFrist ? (
         <FristHandlinger

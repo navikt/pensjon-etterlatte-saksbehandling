@@ -11,7 +11,7 @@ import {
 } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
@@ -158,7 +158,7 @@ const Virkningstidspunkt = (props: {
                       </Heading>
                       <BodyShort>
                         {behandling.virkningstidspunkt?.kravdato
-                          ? formaterStringDato(behandling.virkningstidspunkt.kravdato)
+                          ? formaterDato(behandling.virkningstidspunkt.kravdato)
                           : 'Ikke fastsatt'}
                       </BodyShort>
                     </div>
@@ -167,7 +167,7 @@ const Virkningstidspunkt = (props: {
                     <Heading size="xsmall">Virkningstidspunkt</Heading>
                     <BodyShort spacing>
                       {behandling.virkningstidspunkt
-                        ? formaterStringDato(behandling.virkningstidspunkt.dato)
+                        ? formaterDato(behandling.virkningstidspunkt.dato)
                         : 'Ikke fastsatt'}
                     </BodyShort>
                   </div>

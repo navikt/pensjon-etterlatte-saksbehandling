@@ -1,6 +1,6 @@
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 
@@ -26,7 +26,7 @@ export const GrunnlagForVirkningstidspunkt = () => {
       ))}
       {!avdoede.length && <Info key="manglerDoedsdato" label="Dødsdato" tekst="Ikke registrert" />}
       {behandling?.soeknadMottattDato && (
-        <Info key="soeknadMottatt" label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
+        <Info key="soeknadMottatt" label="Søknad mottatt" tekst={formaterDato(behandling.soeknadMottattDato)} />
       )}
     </>
   )

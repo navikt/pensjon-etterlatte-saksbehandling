@@ -1,7 +1,7 @@
 import React from 'react'
 import { Klage, teksterKlageutfall } from '~shared/types/Klage'
 import { BodyShort, Heading, HStack, VStack } from '@navikt/ds-react'
-import { formaterDatoMedTidspunkt } from '~utils/formattering'
+import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export const InitiellVurderingVisning = (props: { klage: Klage }) => {

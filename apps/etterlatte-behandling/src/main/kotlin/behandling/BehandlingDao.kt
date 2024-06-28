@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.libs.database.toListPassesRsToBlock
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -105,7 +104,7 @@ class BehandlingDao(
 
                 stmt.setLong(1, sakid)
                 stmt.setString(2, revurderingaarsak.name)
-                stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
+                stmt.executeQuery().toList { asRevurdering(this) }
             }
         }
 

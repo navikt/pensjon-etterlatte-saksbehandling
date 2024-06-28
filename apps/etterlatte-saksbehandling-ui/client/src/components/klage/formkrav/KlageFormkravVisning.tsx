@@ -1,6 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
-import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
+import { formaterVedtakType } from '~utils/formatering/formatering'
+import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { useNavigate } from 'react-router-dom'

@@ -7,7 +7,7 @@ import { oppdaterSpraak, tilbakestillManuellPayload } from '~shared/api/brev'
 import { useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import { Brevtype, Spraak } from '~shared/types/Brev'
-import { formaterSpraak } from '~utils/formattering'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 interface Props {
   nyttSpraak: Spraak

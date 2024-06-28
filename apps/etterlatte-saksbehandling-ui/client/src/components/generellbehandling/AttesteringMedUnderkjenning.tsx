@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
 import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 
 type BeslutningsTyper = 'UNDERKJENN' | 'GODKJENN'
 const Beslutning: Record<BeslutningsTyper, string> = {

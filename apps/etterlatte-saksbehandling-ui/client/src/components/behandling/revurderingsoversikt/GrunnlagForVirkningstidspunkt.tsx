@@ -1,7 +1,7 @@
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterDato, formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
+import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
@@ -43,7 +43,7 @@ const FoersteVirkGrunnlag = () => {
     <Spinner visible={true} label="Henter første virkningstidspunkt" />,
     () => <ApiErrorAlert>Kunne ikke hente første virkningstidspunkt</ApiErrorAlert>,
     (foersteVirk) => (
-      <Info tekst={formaterStringDato(foersteVirk.foersteIverksatteVirkISak)} label="Første virkningstidspunkt i sak" />
+      <Info tekst={formaterDato(foersteVirk.foersteIverksatteVirkISak)} label="Første virkningstidspunkt i sak" />
     )
   )
 }

@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, HStack, Link, Modal } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Link, Modal, VStack } from '@navikt/ds-react'
 import { useState } from 'react'
 import { DownloadIcon, UploadIcon } from '@navikt/aksel-icons'
 import { opprettBrevFraPDF } from '~shared/api/brev'
@@ -7,6 +7,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
 import { isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
+import { round } from 'lodash'
+
+const MAKS_FILSTOERRELSE_MB = 1
 
 export const LastOppBrev = ({ sak }: { sak: ISak }) => {
   const navigate = useNavigate()
@@ -14,15 +17,27 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [filURL, setFilURL] = useState<string | undefined>()
   const [valgtFil, setValgtFil] = useState<File | undefined>()
+  const [error, setError] = useState<string>()
 
   const [lastOppStatus, lastOppBrev] = useApiCall(opprettBrevFraPDF)
 
   const onFileChange = (event: any) => {
     const fil = event.target.files[0]
-    setValgtFil(fil)
 
-    const url = URL.createObjectURL(fil)
-    setFilURL(url)
+    const filstoerrelseMegabytes = fil.size / 1000000
+
+    if (filstoerrelseMegabytes > MAKS_FILSTOERRELSE_MB) {
+      setError(`
+        Filen du har valgt er for stor (${round(filstoerrelseMegabytes, 1)}MB).
+        Kan ikke laste opp filer større enn ${MAKS_FILSTOERRELSE_MB}MB.
+      `)
+    } else {
+      setError(undefined)
+      setValgtFil(fil)
+
+      const url = URL.createObjectURL(fil)
+      setFilURL(url)
+    }
   }
 
   const lagre = () => {
@@ -63,39 +78,40 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
           </Heading>
         </Modal.Header>
         <Modal.Body>
-          {!valgtFil && (
-            <>
-              <Alert variant="warning" inline>
-                Denne funksjonen skal kun brukes i de tilfeller det ikke finnes en brevmal i Gjenny. Vær obs på at
-                PDF-en du laster opp må inneholde NAV-logo, søker sitt navn, fødselsnummer, samt saksnummer og dato for
-                utsending.
+          <VStack gap="4">
+            {!valgtFil && (
+              <>
+                <Alert variant="warning" inline>
+                  Denne funksjonen skal kun brukes i de tilfeller det ikke finnes en brevmal i Gjenny. Vær obs på at
+                  PDF-en du laster opp må inneholde NAV-logo, søker sitt navn, fødselsnummer, samt saksnummer og dato
+                  for utsending. Filen du laster opp kan heller ikke være større enn {MAKS_FILSTOERRELSE_MB}MB
+                  <br />
+                  {/* */}
+                  <Link href="/tom-brevmal.docx" target="_blank">
+                    Last ned mal <DownloadIcon />
+                  </Link>
+                </Alert>
                 <br />
-                {/* */}
-                <Link href="/tom-brevmal.docx" target="_blank">
-                  Last ned mal <DownloadIcon />
-                </Link>
-              </Alert>
-              <br />
-              <br />
-            </>
-          )}
+                <br />
+              </>
+            )}
 
-          <input type="file" name="file" id="file" onChange={onFileChange} accept="application/pdf" />
+            <input type="file" name="file" id="file" onChange={onFileChange} accept="application/pdf" />
 
-          <br />
-          <br />
+            {error && <Alert variant="error">{error}</Alert>}
 
-          <PdfVisning fileUrl={filURL} />
+            <PdfVisning fileUrl={filURL} />
 
-          <HStack gap="4" justify="end">
-            <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
-              Avbryt
-            </Button>
+            <HStack gap="4" justify="end">
+              <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
+                Avbryt
+              </Button>
 
-            <Button onClick={lagre} disabled={!valgtFil} loading={isPending(lastOppStatus)}>
-              Lagre
-            </Button>
-          </HStack>
+              <Button onClick={lagre} disabled={!valgtFil} loading={isPending(lastOppStatus)}>
+                Lagre
+              </Button>
+            </HStack>
+          </VStack>
         </Modal.Body>
       </DokumentVisningModal>
     </>

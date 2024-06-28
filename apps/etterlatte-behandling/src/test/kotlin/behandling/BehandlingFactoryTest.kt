@@ -548,7 +548,7 @@ class BehandlingFactoryTest {
                 frist = null,
             )
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
-        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } just runs
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
         val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler)
         opprettetBehandling.sak.id shouldBe sak.id
@@ -564,7 +564,7 @@ class BehandlingFactoryTest {
             oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
         }
         coVerify {
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)

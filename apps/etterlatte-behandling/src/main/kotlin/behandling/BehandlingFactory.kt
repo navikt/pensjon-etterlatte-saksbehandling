@@ -279,7 +279,7 @@ class BehandlingFactory(
             )
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
 
-        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+        behandlingHendelser.sendMeldingForHendelseStatisitkk(
             behandling.toStatistikkBehandling(persongalleri),
             BehandlingHendelseType.OPPRETTET,
         )

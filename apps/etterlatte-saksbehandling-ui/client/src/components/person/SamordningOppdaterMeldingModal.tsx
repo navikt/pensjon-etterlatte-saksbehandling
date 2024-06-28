@@ -87,8 +87,8 @@ export default function SamordningOppdaterMeldingModal({
             <Textarea
               label="Kommentar/dialog med TP-ordning"
               description="Det opprettes et notat på saken for å dokumentere handlingen."
-              minRows="5"
-              maxRows="10"
+              minRows={5}
+              maxRows={10}
               onChange={(event) => setKommentar(event.target.value)}
             />
 

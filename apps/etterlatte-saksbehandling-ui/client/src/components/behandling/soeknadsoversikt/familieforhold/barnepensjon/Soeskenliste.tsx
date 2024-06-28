@@ -3,7 +3,7 @@ import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-rea
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
@@ -61,7 +61,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
   const periode = aktivAdresse
-    ? `${formaterDato(aktivAdresse!!.gyldigFraOgMed!!)} - ${
+    ? `${formaterKanskjeStringDato(aktivAdresse.gyldigFraOgMed)} - ${
         aktivAdresse?.gyldigTilOgMed ? formaterDato(aktivAdresse!!.gyldigTilOgMed!!) : 'nå'
       }`
     : 'Mangler adresse'

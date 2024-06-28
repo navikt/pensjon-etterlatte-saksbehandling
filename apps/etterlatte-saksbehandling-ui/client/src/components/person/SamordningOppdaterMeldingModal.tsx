@@ -1,14 +1,12 @@
 import { BodyShort, Button, Heading, HStack, Label, Modal, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterSamordningsmeldingForSak } from '~shared/api/vedtaksvurdering'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import { Samordningsmelding } from '~components/vedtak/typer'
 import { JaNei } from '~shared/types/ISvar'
-import { Toast } from '~shared/alerts/Toast'
 
 export default function SamordningOppdaterMeldingModal({
   fnr,
@@ -24,7 +22,6 @@ export default function SamordningOppdaterMeldingModal({
   refresh: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
 
   const [erRefusjonskrav, setErRefusjonskrav] = useState<JaNei>()
   const [kommentar, setKommentar] = useState<string>('')
@@ -95,35 +92,23 @@ export default function SamordningOppdaterMeldingModal({
               onChange={(event) => setKommentar(event.target.value)}
             />
 
-            {isSuccess(oppdaterSamordningsmeldingStatus) ? (
-              <>
-                <Toast melding="Melding oppdatert" />
-
-                <HStack gap="4" justify="center">
-                  <Button variant="primary" onClick={() => navigate(`/person/${fnr}/?fane=SAMORDNING`)}>
-                    Gå til samordningsoversikten
-                  </Button>
-                </HStack>
-              </>
-            ) : (
-              <HStack gap="4" justify="center">
-                <Button
-                  variant="secondary"
-                  onClick={() => setOpen(false)}
-                  disabled={isPending(oppdaterSamordningsmeldingStatus)}
-                >
-                  Avbryt
-                </Button>
-                <Button
-                  variant="primary"
-                  disabled={erRefusjonskrav === undefined || !kommentar.length}
-                  onClick={oppdaterMelding}
-                  loading={isPending(oppdaterSamordningsmeldingStatus)}
-                >
-                  Lagre
-                </Button>
-              </HStack>
-            )}
+            <HStack gap="4" justify="center">
+              <Button
+                variant="secondary"
+                onClick={() => setOpen(false)}
+                disabled={isPending(oppdaterSamordningsmeldingStatus)}
+              >
+                Avbryt
+              </Button>
+              <Button
+                variant="primary"
+                disabled={erRefusjonskrav === undefined || !kommentar.length}
+                onClick={oppdaterMelding}
+                loading={isPending(oppdaterSamordningsmeldingStatus)}
+              >
+                Lagre
+              </Button>
+            </HStack>
 
             {mapFailure(oppdaterSamordningsmeldingStatus, (error) => (
               <Modal.Footer>

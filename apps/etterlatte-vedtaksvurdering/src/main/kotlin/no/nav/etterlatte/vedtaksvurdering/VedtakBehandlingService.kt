@@ -410,7 +410,14 @@ class VedtakBehandlingService(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+        repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
+
+        try {
+            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+        } catch (e: Exception) {
+            repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
+            throw e
+        }
     }
 
     suspend fun iverksattVedtak(

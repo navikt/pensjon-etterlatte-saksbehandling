@@ -1,6 +1,5 @@
-import { Alert, Button, HStack } from '@navikt/ds-react'
+import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
@@ -51,17 +50,17 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
   }
 
   return (
-    <BeslutningWrapper>
+    <>
       {error && (
         <Alert variant="error" style={{ marginTop: '1rem' }}>
           {error}
         </Alert>
       )}
-      <HStack align="start">
-        <Button variant="primary" onClick={() => setModalisOpen(true)}>
-          Iverksett vedtak {skalSendeBrev ? 'og send brev' : ''}
-        </Button>
-      </HStack>
+
+      <Button variant="primary" onClick={() => setModalisOpen(true)}>
+        Iverksett vedtak {skalSendeBrev ? 'og send brev' : ''}
+      </Button>
+
       <GeneriskModal
         tittel="Er du sikker på at du vil iverksette vedtaket?"
         beskrivelse={
@@ -74,6 +73,6 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
         open={modalisOpen}
         loading={isPending(attesterVedtakStatus) || isPending(ferdigstillVedtaksbrevStatus)}
       />
-    </BeslutningWrapper>
+    </>
   )
 }

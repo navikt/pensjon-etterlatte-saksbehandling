@@ -122,6 +122,9 @@ private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
             datoFom = etterbetalingCopy.datoFom,
             datoTom = etterbetalingCopy.datoTom,
             inneholderKrav = etterbetalingCopy.inneholderKrav,
+            frivilligSkattetrekk = etterbetalingCopy.frivilligSkattetrekk,
+            etterbetalingPeriodeValg = etterbetalingCopy.etterbetalingPeriodeValg,
+            skatteTrekkFomTomDatoSatt = etterbetalingCopy.skatteTrekkFomTomDatoSatt,
             kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
         )
     } else {
@@ -144,6 +147,9 @@ private fun Etterbetaling.toDto() =
         datoTom = tom.atEndOfMonth(),
         kilde = kilde,
         inneholderKrav = inneholderKrav,
+        frivilligSkattetrekk = frivilligSkattetrekk,
+        etterbetalingPeriodeValg = etterbetalingPeriodeValg,
+        skatteTrekkFomTomDatoSatt = skatteTrekkFomTomDatoSatt,
     )
 
 class OpphoerIkkeSatt(

@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -116,6 +117,10 @@ internal class BehandlingInfoRoutesTest {
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt shouldBe
+                dto.etterbetaling?.skatteTrekkFomTomDatoSatt
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
@@ -173,6 +178,9 @@ internal class BehandlingInfoRoutesTest {
             etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
             etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
             etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
+            etterbetaling.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
+            etterbetaling.skatteTrekkFomTomDatoSatt shouldBe dto.etterbetaling?.skatteTrekkFomTomDatoSatt
+            etterbetaling.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
         }
     }
 
@@ -209,6 +217,9 @@ internal class BehandlingInfoRoutesTest {
             tom = YearMonth.of(2023, 2),
             inneholderKrav = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+            frivilligSkattetrekk = true,
+            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
+            skatteTrekkFomTomDatoSatt = true,
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
@@ -228,7 +239,10 @@ internal class BehandlingInfoRoutesTest {
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
                     inneholderKrav = true,
-                    null,
+                    frivilligSkattetrekk = true,
+                    etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
+                    skatteTrekkFomTomDatoSatt = true,
+                    kilde = null,
                 ),
         )
 

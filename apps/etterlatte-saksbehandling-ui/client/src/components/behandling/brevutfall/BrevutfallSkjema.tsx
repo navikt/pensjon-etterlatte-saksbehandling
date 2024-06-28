@@ -8,6 +8,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
+  EtterbetalingPeriodeValg,
   FeilutbetalingValg,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
@@ -27,6 +28,9 @@ interface BrevutfallSkjemaData {
   datoFom?: Date | null
   datoTom?: Date | null
   kravIEtterbetaling: ISvar | null
+  frivilligSkattetrekk: ISvar | null
+  etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
+  skatteTrekkFomTomDatoSatt: ISvar | null
   aldersgruppe?: Aldersgruppe | null
   feilutbetalingValg?: FeilutbetalingValg | null
   feilutbetalingKommentar: string | null
@@ -58,14 +62,27 @@ export const BrevutfallSkjema = ({
     defaultValues: {
       harEtterbetaling:
         brevutfallOgEtterbetaling.etterbetaling === undefined
-          ? ISvar.IKKE_VURDERT
+          ? undefined
           : brevutfallOgEtterbetaling.etterbetaling
             ? ISvar.JA
             : ISvar.NEI,
       kravIEtterbetaling:
         brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav === undefined
-          ? ISvar.IKKE_VURDERT
+          ? undefined
           : brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav
+            ? ISvar.JA
+            : ISvar.NEI,
+      frivilligSkattetrekk:
+        brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk === undefined
+          ? undefined
+          : brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk
+            ? ISvar.JA
+            : ISvar.NEI,
+      etterbetalingPeriodeValg: brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg,
+      skatteTrekkFomTomDatoSatt:
+        brevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt === undefined
+          ? undefined
+          : brevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt
             ? ISvar.JA
             : ISvar.NEI,
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
@@ -97,6 +114,10 @@ export const BrevutfallSkjema = ({
               datoFom: formatISO(data.datoFom!, { representation: 'date' }),
               datoTom: formatISO(data.datoTom!, { representation: 'date' }),
               inneholderKrav: data.kravIEtterbetaling === ISvar.JA,
+              frivilligSkattetrekk: data.frivilligSkattetrekk === ISvar.JA,
+              etterbetalingPeriodeValg: data.etterbetalingPeriodeValg,
+              skatteTrekkFomTomDatoSatt:
+                data.frivilligSkattetrekk === ISvar.JA ? data.skatteTrekkFomTomDatoSatt === ISvar.JA : null,
             }
           : null,
     }
@@ -183,22 +204,74 @@ export const BrevutfallSkjema = ({
                   required
                 />
                 {behandling.sakType == SakType.BARNEPENSJON && (
-                  <ControlledRadioGruppe
-                    name="kravIEtterbetaling"
-                    control={control}
-                    errorVedTomInput="Du må velge om det er krav i etterbetalingen"
-                    legend={<HStack gap="2">Er det krav i etterbetalingen?</HStack>}
-                    radios={
-                      <>
-                        <Radio size="small" value={ISvar.JA}>
-                          Ja
-                        </Radio>
-                        <Radio size="small" value={ISvar.NEI}>
-                          Nei
-                        </Radio>
-                      </>
-                    }
-                  />
+                  <>
+                    <ControlledRadioGruppe
+                      name="kravIEtterbetaling"
+                      control={control}
+                      errorVedTomInput="Du må velge om det er krav i etterbetalingen"
+                      legend={<HStack gap="2">Er det krav i etterbetalingen?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={ISvar.JA}>
+                            Ja
+                          </Radio>
+                          <Radio size="small" value={ISvar.NEI}>
+                            Nei
+                          </Radio>
+                        </>
+                      }
+                    />
+                    <ControlledRadioGruppe
+                      name="frivilligSkattetrekk"
+                      control={control}
+                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
+                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={ISvar.JA}>
+                            Ja
+                          </Radio>
+                          <Radio size="small" value={ISvar.NEI}>
+                            Nei
+                          </Radio>
+                        </>
+                      }
+                    />
+                    <ControlledRadioGruppe
+                      name="etterbetalingPeriodeValg"
+                      control={control}
+                      errorVedTomInput="Velg hvor lang etterbetalingsperiode det er"
+                      legend={<HStack gap="2">Hvor mange måneder etterbetales det for?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={EtterbetalingPeriodeValg.UNDER_3_MND}>
+                            Etterbetaling 1 - 2 måneder
+                          </Radio>
+                          <Radio size="small" value={EtterbetalingPeriodeValg.FRA_3_MND}>
+                            Etterbetaling fra 3 måneder
+                          </Radio>
+                        </>
+                      }
+                    />
+                    {watch().frivilligSkattetrekk == ISvar.JA && (
+                      <ControlledRadioGruppe
+                        name="skatteTrekkFomTomDatoSatt"
+                        control={control}
+                        errorVedTomInput="Du må velge om det er lagt inn til og med dato på skattetrekk"
+                        legend={<HStack gap="2">Er det lagt inn til og med dato på skattetrekk?</HStack>}
+                        radios={
+                          <>
+                            <Radio size="small" value={ISvar.JA}>
+                              Ja
+                            </Radio>
+                            <Radio size="small" value={ISvar.NEI}>
+                              Nei
+                            </Radio>
+                          </>
+                        }
+                      />
+                    )}
+                  </>
                 )}
               </HStack>
             )}

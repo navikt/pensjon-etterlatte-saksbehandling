@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -152,6 +153,9 @@ internal class BehandlingInfoDaoTest(
             fom = YearMonth.of(2023, 11),
             tom = YearMonth.of(2023, 12),
             inneholderKrav = true,
+            frivilligSkattetrekk = true,
+            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
+            skatteTrekkFomTomDatoSatt = true,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

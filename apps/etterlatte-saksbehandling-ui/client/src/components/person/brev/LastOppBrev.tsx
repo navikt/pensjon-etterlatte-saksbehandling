@@ -28,7 +28,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
   const onFileChange = (event: any) => {
     const fil = event.target.files[0]
 
-    const filstoerrelseMegabytes = fil.size / 1000000
+    const filstoerrelseMegabytes = fil.size / (1024 * 1024)
 
     if (filstoerrelseMegabytes > MAKS_FILSTOERRELSE_MB) {
       setError(`

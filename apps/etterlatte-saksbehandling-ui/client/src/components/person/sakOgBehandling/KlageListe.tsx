@@ -14,7 +14,7 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Link, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { JaNei } from '~shared/types/ISvar'
 
 import { mapApiResult } from '~shared/api/apiUtils'
@@ -75,7 +75,7 @@ function KlageTabell(props: { klager: Array<Klage> }) {
       <Table.Body>
         {klager.map((klage) => (
           <Table.Row key={klage.id}>
-            <Table.DataCell>{formaterStringDato(klage.opprettet)}</Table.DataCell>
+            <Table.DataCell>{formaterDato(klage.opprettet)}</Table.DataCell>
             <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
             <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
             <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>

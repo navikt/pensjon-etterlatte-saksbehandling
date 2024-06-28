@@ -3,7 +3,7 @@ import { Personopplysning } from '~components/person/personopplysninger/Personop
 import { PassportIcon } from '@navikt/aksel-icons'
 import { Statsborgerskap as PdlStatsborgerskap } from '~shared/types/Person'
 import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import { ILand } from '~shared/api/trygdetid'
 
@@ -32,10 +32,10 @@ export const Statsborgerskap = ({
               <Table.Row key={index}>
                 <Table.DataCell>{finnLandSomTekst(borgerskap.land, landListe)}</Table.DataCell>
                 <Table.DataCell>
-                  {!!borgerskap.gyldigFraOgMed ? formaterStringDato(borgerskap.gyldigFraOgMed) : ''}
+                  {!!borgerskap.gyldigFraOgMed ? formaterDato(borgerskap.gyldigFraOgMed) : ''}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {!!borgerskap.gyldigTilOgMed ? formaterStringDato(borgerskap.gyldigTilOgMed) : ''}
+                  {!!borgerskap.gyldigTilOgMed ? formaterDato(borgerskap.gyldigTilOgMed) : ''}
                 </Table.DataCell>
               </Table.Row>
             ))

@@ -1,5 +1,5 @@
 import { isBefore } from 'date-fns'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import classnames from 'classnames'
 
 export const FristWrapper = ({ dato }: { dato?: string }) => {
@@ -7,7 +7,7 @@ export const FristWrapper = ({ dato }: { dato?: string }) => {
 
   return (
     <span className={classnames({ 'navds-error-message': fristHarPassert })}>
-      {dato ? formaterStringDato(dato) : 'Ingen frist'}
+      {dato ? formaterDato(dato) : 'Ingen frist'}
     </span>
   )
 }

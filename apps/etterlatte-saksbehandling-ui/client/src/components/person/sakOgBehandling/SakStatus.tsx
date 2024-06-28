@@ -4,7 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   hentInnvilgelseVedtak,
@@ -32,7 +32,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     if (loependeVedtak?.vedtakType === VedtakType.AVSLAG) {
       return (
         <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
-          Avslått den {loependeVedtak.datoAttestert && formaterStringDato(loependeVedtak.datoAttestert)}
+          Avslått den {loependeVedtak.datoAttestert && formaterDato(loependeVedtak.datoAttestert)}
         </Tag>
       )
     }
@@ -41,7 +41,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       const opphoerer = ytelseOpphoersdato(loependeVedtak)
       return (
         <Tag key={VedtakType.OPPHOER} variant="alt2">
-          Opphørt fra {opphoerer && formaterStringDato(opphoerer)}
+          Opphørt fra {opphoerer && formaterDato(opphoerer)}
         </Tag>
       )
     }
@@ -49,15 +49,14 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     if (ytelseErLoependeMedOpphoerFremITid(loependeVedtak)) {
       return (
         <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-          Løpende til {loependeVedtak.opphoerFraOgMed && formaterStringDato(loependeVedtak.opphoerFraOgMed)}
+          Løpende til {loependeVedtak.opphoerFraOgMed && formaterDato(loependeVedtak.opphoerFraOgMed)}
         </Tag>
       )
     }
 
     return (
       <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-        Løpende fra{' '}
-        {innvilgelsesVedtak?.virkningstidspunkt && formaterStringDato(innvilgelsesVedtak.virkningstidspunkt)}
+        Løpende fra {innvilgelsesVedtak?.virkningstidspunkt && formaterDato(innvilgelsesVedtak.virkningstidspunkt)}
       </Tag>
     )
   }

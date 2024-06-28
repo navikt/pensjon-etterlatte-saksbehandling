@@ -20,7 +20,7 @@ import {
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '~components/person/typer'
-import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback, formaterDato } from '~utils/formatering/dato'
 import styled from 'styled-components'
 import { BodyShort, Label, VStack } from '@navikt/ds-react'
 import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
@@ -184,18 +184,18 @@ const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => 
       <KortTekst size="small">Oppholdstype: {samsvar.oppholdstype}</KortTekst>
       <KortTekst size="small">
         Startdato:{' '}
-        {samsvar.oppholdBeriket.startdato ? formaterStringDato(samsvar.oppholdBeriket.startdato) : 'Ingen startdato'}
+        {samsvar.oppholdBeriket.startdato ? formaterDato(samsvar.oppholdBeriket.startdato) : 'Ingen startdato'}
       </KortTekst>
       <KortTekst size="small">
         Faktisk sluttdato:{' '}
         {samsvar.oppholdBeriket.faktiskSluttdato
-          ? formaterStringDato(samsvar.oppholdBeriket.faktiskSluttdato)
+          ? formaterDato(samsvar.oppholdBeriket.faktiskSluttdato)
           : 'Ingen sluttdato'}
       </KortTekst>
       <KortTekst size="small">
         Forventet sluttdato:{' '}
         {samsvar.oppholdBeriket.forventetSluttdato
-          ? formaterStringDato(samsvar.oppholdBeriket.forventetSluttdato)
+          ? formaterDato(samsvar.oppholdBeriket.forventetSluttdato)
           : 'Ingen forventet sluttdato'}
       </KortTekst>
       <KortTekst size="small">

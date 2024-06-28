@@ -1,5 +1,5 @@
 import { Box, Button, Heading } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -34,7 +34,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const vedtaksresultat = useVedtaksResultat()
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
-    ? formaterStringDato(behandling.virkningstidspunkt.dato)
+    ? formaterDato(behandling.virkningstidspunkt.dato)
     : undefined
   const [oppdaterStatusResult, oppdaterStatusRequest] = useApiCall(oppdaterStatus)
   const virkningstidspunktEtterNyRegelDato = () => {

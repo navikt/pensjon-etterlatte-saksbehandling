@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Alert, BodyShort, Box, Heading, HStack } from '@navikt/ds-react'
 import { IBrev } from '~shared/types/Brev'
 import { BrevSpraakModal } from '~components/person/brev/spraak/BrevSpraakModal'
-import { formaterSpraak } from '~utils/formattering'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 interface Props {
   brev: IBrev

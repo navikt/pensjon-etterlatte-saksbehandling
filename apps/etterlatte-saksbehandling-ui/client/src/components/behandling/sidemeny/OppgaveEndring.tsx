@@ -3,7 +3,7 @@ import { isSuccess, mapSuccess, Result } from '~shared/api/apiUtils'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEndringer } from '~shared/api/oppgaver'
-import { formaterDatoMedKlokkeslett } from '~utils/formattering'
+import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { BodyShort, Box, Detail } from '@navikt/ds-react'
 import styled from 'styled-components'
 

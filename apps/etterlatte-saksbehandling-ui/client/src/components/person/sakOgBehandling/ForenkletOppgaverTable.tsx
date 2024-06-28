@@ -7,7 +7,6 @@ import {
   Oppgavetype,
 } from '~shared/types/oppgave'
 import { Alert, HStack, Table } from '@navikt/ds-react'
-import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { Saksbehandler } from '~shared/types/saksbehandler'
@@ -21,6 +20,8 @@ import { finnOgOppdaterOppgave, sorterOppgaverEtterOpprettet } from '~components
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import styled from 'styled-components'
+import { formaterDato } from '~utils/formatering/dato'
+import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
@@ -80,7 +81,7 @@ export const ForenkletOppgaverTable = ({
       <Table.Body>
         {filtrerteOppgaver.map((oppgave: OppgaveDTO) => (
           <Table.Row key={oppgave.id}>
-            <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
+            <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
             <Table.DataCell>
               <FristWrapper dato={oppgave.frist} />
             </Table.DataCell>

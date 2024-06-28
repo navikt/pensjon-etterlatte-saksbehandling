@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router'
 import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
-import { formaterMaanedDato } from '~utils/formattering'
+import { formaterMaanedDato } from '~utils/formatering/dato'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,

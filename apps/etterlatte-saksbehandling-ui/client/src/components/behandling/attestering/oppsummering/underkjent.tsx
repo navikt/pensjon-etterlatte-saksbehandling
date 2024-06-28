@@ -1,5 +1,6 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { formaterBehandlingstype, formaterDatoMedKlokkeslett } from '~utils/formattering'
+import { formaterBehandlingstype } from '~utils/formatering/formatering'
+import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'

@@ -1,5 +1,5 @@
 import { behandlingErRedigerbar } from '../felles/utils'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
@@ -39,7 +39,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
-    ? formaterStringDato(behandling.virkningstidspunkt.dato)
+    ? formaterDato(behandling.virkningstidspunkt.dato)
     : undefined
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visSimulering = useFeatureEnabledMedDefault('vis-utbetaling-simulering', false)

@@ -2,7 +2,7 @@ import { BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from 
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { ConfigContext } from '~clientConfig'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
@@ -61,7 +61,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
           <InfoGrid>
             <div>
               <Label>Reg.dato</Label>
-              <BodyShort>{formaterStringDato(opprettet)}</BodyShort>
+              <BodyShort>{formaterDato(opprettet)}</BodyShort>
             </div>
             <div>
               <Label>Frist</Label>

@@ -2,7 +2,7 @@ import { Alert, Button, Heading, HStack, Label, Select, Textarea, VStack } from 
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -121,7 +121,7 @@ export const SettPaaVent = ({ oppgave }: Props) => {
                   Oppgaven står på vent!
                 </Heading>
                 <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
-                <Info label="Ny frist" tekst={formaterStringDato(oppgave.frist)} />
+                <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
               </Alert>
             </>
           )}

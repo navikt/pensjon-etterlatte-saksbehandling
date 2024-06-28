@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
 import { ISakMedUtlandstilknytning, SakType } from '~shared/types/sak'
@@ -95,7 +95,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
               <div>
                 <Alert variant="info" size="small" inline>
                   Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
-                  {formaterStringDato(data.virkningstidspunkt)}
+                  {formaterDato(data.virkningstidspunkt)}
                 </Alert>
               </div>
             </>

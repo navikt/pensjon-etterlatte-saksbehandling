@@ -17,7 +17,8 @@ import React, { useState } from 'react'
 import { IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
+import { NOK } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -201,7 +202,7 @@ export const AvkortingInntekt = ({
                     </Table.DataCell>
                     <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
                     <Table.DataCell key="Periode">
-                      {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -{' '}
+                      {inntektsgrunnlag.fom && formaterDato(inntektsgrunnlag.fom)} -{' '}
                       {inntektsgrunnlag.tom && formaterDato(lastDayOfMonth(new Date(inntektsgrunnlag.tom)))}
                     </Table.DataCell>
                     <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
@@ -210,7 +211,7 @@ export const AvkortingInntekt = ({
                         <Info
                           tekst={inntektsgrunnlag.kilde.ident}
                           label=""
-                          undertekst={`saksbehandler: ${formaterStringDato(inntektsgrunnlag.kilde.tidspunkt)}`}
+                          undertekst={`saksbehandler: ${formaterDato(inntektsgrunnlag.kilde.tidspunkt)}`}
                         />
                       )}
                     </Table.DataCell>
@@ -282,7 +283,7 @@ export const AvkortingInntekt = ({
                     />
                     <VStack gap="4">
                       <Label>Fra og med dato</Label>
-                      <BodyShort>{formaterStringDato(virkningstidspunkt(behandling).dato)}</BodyShort>
+                      <BodyShort>{formaterDato(virkningstidspunkt(behandling).dato)}</BodyShort>
                     </VStack>
                   </HStack>
                 </FormWrapper>

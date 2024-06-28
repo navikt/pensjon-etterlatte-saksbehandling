@@ -15,7 +15,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { formaterMaanedDato } from '~utils/formattering'
+import { formaterMaanedDato } from '~utils/formatering/dato'
 
 type SoeskenjusteringPeriodeProps = {
   control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>

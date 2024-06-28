@@ -4,7 +4,7 @@ import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { formaterDatoMedTidspunkt } from '~utils/formattering'
+import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 
 interface Vurdering {
   saksbehandler: string

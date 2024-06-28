@@ -7,7 +7,7 @@ import {
 import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
-import { formaterMaanedDato } from '~utils/formattering'
+import { formaterMaanedDato } from '~utils/formatering/dato'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()

@@ -3,7 +3,7 @@ import { hentGrunnlagsendringshendelserInstitusjonsoppholdForSak } from '~shared
 import React, { useEffect } from 'react'
 import { InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 
@@ -45,17 +45,17 @@ const Insthendelser = (props: { sakid: number }) => {
                       <Table.Row key={hendelse.id}>
                         <Table.HeaderCell scope="row">
                           {inst.oppholdBeriket.startdato
-                            ? formaterStringDato(inst.oppholdBeriket.startdato)
+                            ? formaterDato(inst.oppholdBeriket.startdato)
                             : 'Ingen startdato'}
                         </Table.HeaderCell>
                         <Table.DataCell>
                           {inst.oppholdBeriket.faktiskSluttdato
-                            ? formaterStringDato(inst.oppholdBeriket.faktiskSluttdato)
+                            ? formaterDato(inst.oppholdBeriket.faktiskSluttdato)
                             : 'Ingen sluttdato'}
                         </Table.DataCell>
                         <Table.DataCell>
                           {inst.oppholdBeriket.forventetSluttdato
-                            ? formaterStringDato(inst.oppholdBeriket.forventetSluttdato)
+                            ? formaterDato(inst.oppholdBeriket.forventetSluttdato)
                             : 'Ingen forventet sluttdato'}
                         </Table.DataCell>
                         <Table.DataCell>

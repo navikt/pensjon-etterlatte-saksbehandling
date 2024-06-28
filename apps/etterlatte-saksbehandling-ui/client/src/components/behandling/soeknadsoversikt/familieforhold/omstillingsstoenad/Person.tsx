@@ -2,7 +2,6 @@ import { PersonIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
 import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { IPdlPerson } from '~shared/types/Person'
@@ -10,6 +9,8 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { Result } from '~shared/api/apiUtils'
 import { ILand } from '~shared/api/trygdetid'
+import { formaterFnr } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -65,7 +66,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
           <Label size="small" as="p">
             Kilde
           </Label>
-          {kilde.type.toUpperCase()} {formaterStringDato(kilde.tidspunkt)}
+          {kilde.type.toUpperCase()} {formaterDato(kilde.tidspunkt)}
         </Detail>
       </PersonInfoWrapper>
     </PersonBorder>

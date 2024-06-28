@@ -4,12 +4,13 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
-import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { formaterSakstype, formaterSpraak } from '~utils/formatering/formatering'
+import { formaterDato } from '~utils/formatering/dato'
 
 export default function OppsummeringOppgavebehandling() {
   const { journalpost, oppgave, nyBehandlingRequest, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -42,7 +43,7 @@ export default function OppsummeringOppgavebehandling() {
         <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
         <Info label="Språk" tekst={formaterSpraak(spraak)} />
-        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
+        <Info label="Mottatt dato" tekst={formaterDato(mottattDato)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />
         <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />

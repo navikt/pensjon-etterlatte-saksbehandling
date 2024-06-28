@@ -7,7 +7,6 @@ import { BostedsadresseDataCell } from '~components/person/personopplysninger/co
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { Tabell } from '~shared/tabell/Tabell'
 
 export const Foreldre = ({
   avdoed,
@@ -24,13 +23,19 @@ export const Foreldre = ({
 
   return (
     <Personopplysning heading="Foreldre" icon={<PersonIcon />}>
-      <Tabell
-        size="small"
-        colHeaders={['Navn', 'Fødselsnummer', 'Bostedsadresse']}
-        dataRows={
-          <>
-            {!!avdoed?.length ? (
-              avdoed.map((doed, index) => (
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Fødselsnummer</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Bostedsadresse</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Foreldreansvar</Table.ColumnHeader>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {!!avdoed?.length ? (
+            <>
+              {avdoed.map((doed: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <HStack gap="4">
@@ -47,48 +52,48 @@ export const Foreldre = ({
                   <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
                   <Table.DataCell>-</Table.DataCell>
                 </Table.Row>
-              ))
-            ) : (
-              <Table.Row>
-                <Table.DataCell colSpan={4}>
-                  <Heading size="small">Ingen avdøde</Heading>
-                </Table.DataCell>
-              </Table.Row>
-            )}
-            {!!gjenlevende?.length ? (
-              <>
-                {gjenlevende.map((levende: Familiemedlem, index: number) => (
-                  <Table.Row key={index}>
-                    <Table.DataCell>
-                      <HStack gap="4">
-                        {levende.fornavn} {levende.etternavn}
-                      </HStack>
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <HStack gap="4">
-                        <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
-                        {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
-                      </HStack>
-                    </Table.DataCell>
-                    {!!levende.bostedsadresse ? (
-                      <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
-                    ) : (
-                      <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
-                    )}
-                    <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
-                  </Table.Row>
-                ))}
-              </>
-            ) : (
-              <Table.Row>
-                <Table.DataCell colSpan={4}>
-                  <Heading size="small">Ingen gjenlevende</Heading>
-                </Table.DataCell>
-              </Table.Row>
-            )}
-          </>
-        }
-      />
+              ))}
+            </>
+          ) : (
+            <Table.Row>
+              <Table.DataCell colSpan={4}>
+                <Heading size="small">Ingen avdøde</Heading>
+              </Table.DataCell>
+            </Table.Row>
+          )}
+          {!!gjenlevende?.length ? (
+            <>
+              {gjenlevende.map((levende: Familiemedlem, index: number) => (
+                <Table.Row key={index}>
+                  <Table.DataCell>
+                    <HStack gap="4">
+                      {levende.fornavn} {levende.etternavn}
+                    </HStack>
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    <HStack gap="4">
+                      <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
+                      {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
+                    </HStack>
+                  </Table.DataCell>
+                  {!!levende.bostedsadresse ? (
+                    <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
+                  ) : (
+                    <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
+                  )}
+                  <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
+                </Table.Row>
+              ))}
+            </>
+          ) : (
+            <Table.Row>
+              <Table.DataCell colSpan={4}>
+                <Heading size="small">Ingen gjenlevende</Heading>
+              </Table.DataCell>
+            </Table.Row>
+          )}
+        </Table.Body>
+      </Table>
     </Personopplysning>
   )
 }

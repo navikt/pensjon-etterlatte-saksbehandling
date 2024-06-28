@@ -1,10 +1,10 @@
-import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
@@ -110,19 +110,25 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         )}
 
         <TekstWrapper>
-          <Heading size="small" spacing>
-            OPPFØLGING
-          </Heading>
-          <BodyLong spacing>
-            Etterlatte skal følges opp og minnes på aktivitetskravet med informasjonsbrev når det er gått 3 til 4
-            måneder etter dødsfallet. Interne oppfølgingsoppgaver opprettes automatisk ut fra dødstidspunktet og må
-            vurderes før informasjonsbrevet sendes ut. Automatiske oppgaver blir opprettet som følge av hva du
-            registrerer om brukers situasjon.
-            <br />
-            <br />
-            Er det andre grunner til at den etterlatte skal følges opp utenfor normalen, så kan oppfølgingsoppgave lages
-            her:
-          </BodyLong>
+          <Heading size="small">Oppfølging</Heading>
+          <Box paddingBlock="4">
+            <ReadMore header="Mer om oppfølging">
+              <BodyLong spacing>
+                Etterlatte skal følges opp og minnes på aktivitetskravet med informasjonsbrev rundt 4 måneder og igjen
+                rundt 10 måneder etter dødsfallet. Interne oppfølgingsoppgaver opprettes automatisk ut fra
+                dødstidspunktet, og brukers situasjon må vurderes før informasjonsbrevet sendes ut. Automatiske oppgaver
+                blir opprettet som følge av hva du registrerer om brukers situasjon.
+              </BodyLong>
+              <BodyLong spacing>
+                Det skal sendes et eget informasjonsbrev til de som ikke har aktivitetsplikt. Det opprettes en
+                automatisk oppgave for å sende ut disse brevene rundt 6 måneder etter dødsfallet.
+              </BodyLong>
+              <BodyLong spacing>
+                Er det andre grunner til at den etterlatte skal følges opp utenfor normalen, blant annet om bruker er
+                midlertidig unntatt fra aktivitetsplikten, så må du opprette oppfølgingsoppgave i Gosys.
+              </BodyLong>
+            </ReadMore>
+          </Box>
           <Button
             variant="secondary"
             size="small"
@@ -134,14 +140,38 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Button>
         </TekstWrapper>
 
+        {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+          <TekstWrapper>
+            <Heading size="small">Status på informasjonsbrev</Heading>
+            <BodyLong>
+              Se hvilken dato infobrevet er sendt for å vurdere når du skal sende oppgave til lokalkontor (tre uker
+              etter infobrevet er sendt ut), og når du eventuelt skal sende varsel om stans (tre uker før vedtak),
+            </BodyLong>
+          </TekstWrapper>
+        )}
+
         <TekstWrapper>
           <Heading size="small" spacing>
-            Er oppfølging av lokalkontor nødvendig?
+            Trengs det oppfølging fra lokalkontor?
           </Heading>
           <BodyLong spacing>
             Trenger etterlatte ekstra oppfølging skal man sende oppgave til lokalkontor. Dette gjelder de som er utenfor
-            arbeidslivet og/ eller ikke har andre ytelser fra Nav.
+            arbeidslivet og/ eller ikke har varige ytelser fra Nav. Det er lokalkontor som skal følge opp disse
+            brukerne, og de må derfor vite om at bruker har omstillingsstønad.
           </BodyLong>
+          {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+            <BodyLong spacing>
+              Kopier inn i vurderingen over det alternativet som gjelder:
+              <List>
+                <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
+                <List.Item>
+                  Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at de
+                  må informere oss hvis brukers situasjon endrer seg
+                </List.Item>
+                <List.Item>Nei, unødvendig å sende oppgave</List.Item>
+              </List>
+            </BodyLong>
+          )}
           <Button
             variant="secondary"
             size="small"

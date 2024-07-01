@@ -6,7 +6,7 @@ import {
   oppdaterOpplysningsgrunnlag,
 } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { Alert, BodyShort, Button, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -76,9 +76,11 @@ const DifferanseVisning = ({
 
   return (
     <>
-      <OppdatertGrunnlagAlert variant="warning">
-        OBS! Grunnlaget for trygdetiden har blitt oppdatert. Sjekk at både faktisk og fremtidig trygdetid er korrekt.
-      </OppdatertGrunnlagAlert>
+      <Box maxWidth="42.5rem">
+        <Alert variant="warning">
+          OBS! Grunnlaget for trygdetiden har blitt oppdatert. Sjekk at både faktisk og fremtidig trygdetid er korrekt.
+        </Alert>
+      </Box>
 
       <Heading size="small" level="4">
         Eksisterende grunnlag

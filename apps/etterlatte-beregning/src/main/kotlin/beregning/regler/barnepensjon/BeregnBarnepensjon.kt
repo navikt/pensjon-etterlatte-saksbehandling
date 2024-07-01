@@ -85,9 +85,9 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "2"),
     ) benytter barnepensjonSats og trygdetidsFaktor og grunnbeloep med { sats, trygdetidsfaktor, grunnbeloep ->
         val redusertYtelseMotTrygdetidsfaktor = sats.multiply(trygdetidsfaktor)
-        val tiProsentAvG = grunnbeloep.grunnbeloepPerMaaned.times(0.10)
-        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG) {
-            Beregningstall(tiProsentAvG)
+        val tiProsentAvG = Beregningstall(grunnbeloep.grunnbeloepPerMaaned).multiply(Beregningstall(0.10))
+        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG.toInteger()) {
+            tiProsentAvG
         } else {
             redusertYtelseMotTrygdetidsfaktor
         }

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.LocalDate
@@ -41,13 +41,7 @@ data class OppdaterSamordningsmelding(
     val pid: String,
     val tpNr: String,
     val samId: Long,
+    val vedtakId: Long,
     val refusjonskrav: Boolean,
-    val periodisertBelopListe: List<Refusjonstrekk>,
-)
-
-data class Refusjonstrekk(
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val belop: Double,
-    val kravstillerReferanse: String,
+    val kommentar: String,
 )

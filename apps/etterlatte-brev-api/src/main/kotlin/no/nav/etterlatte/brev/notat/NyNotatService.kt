@@ -72,6 +72,8 @@ class NyNotatService(
     suspend fun opprett(
         sakId: Long,
         mal: NotatMal,
+        tittel: String = "Mangler tittel",
+        paragraf: String = "Tomt notat",
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = sakService.hentSak(sakId, bruker)
@@ -80,7 +82,7 @@ class NyNotatService(
             notatRepository.opprett(
                 NyttNotat(
                     sak.id,
-                    "Mangler tittel",
+                    tittel,
                     payload =
                         when (mal) {
                             NotatMal.TOM_MAL ->
@@ -88,7 +90,7 @@ class NyNotatService(
                                     listOf(
                                         Slate.Element(
                                             Slate.ElementType.PARAGRAPH,
-                                            listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, "Tomt notat")),
+                                            listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, paragraf)),
                                         ),
                                     ),
                                 )

@@ -129,7 +129,12 @@ fun Route.notatRoute(
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
                     val mal = NotatMal.valueOf(call.request.queryParameters["mal"]!!)
 
-                    val notat = nyNotatService.opprett(sakId, mal, brukerTokenInfo)
+                    val notat =
+                        nyNotatService.opprett(
+                            sakId = sakId,
+                            mal = mal,
+                            bruker = brukerTokenInfo,
+                        )
 
                     call.respond(notat)
                 }

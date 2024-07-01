@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.mockk.mockk
+import no.nav.etterlatte.insert
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
@@ -58,6 +59,12 @@ class MigrertYrkesskadeTest(
                 vilkaar = listOf(vilkaarMigrertYrkesskade),
             )
         repository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        Assertions.assertFalse(service.erMigrertYrkesskadefordel(behandlingId))
+        dataSource.insert("migrert_yrkesskade", params = {
+            mapOf(
+                "behandling_id" to behandlingId,
+            )
+        })
         Assertions.assertTrue(service.erMigrertYrkesskadefordel(behandlingId))
     }
 }

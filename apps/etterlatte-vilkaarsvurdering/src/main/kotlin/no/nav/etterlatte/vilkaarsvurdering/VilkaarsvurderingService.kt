@@ -2,7 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -18,7 +17,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -41,14 +39,7 @@ class VilkaarsvurderingService(
 
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 
-    fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean =
-        vilkaarsvurderingRepository
-            .hent(behandlingId)
-            ?.vilkaar
-            ?.filter { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
-            ?.filter { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
-            ?.any { it.vurdering?.saksbehandler?.equals(Vedtaksloesning.PESYS.name, true) == true }
-            ?: false
+    fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean = vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(behandlingId)
 
     fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean =
         vilkaarsvurderingRepository

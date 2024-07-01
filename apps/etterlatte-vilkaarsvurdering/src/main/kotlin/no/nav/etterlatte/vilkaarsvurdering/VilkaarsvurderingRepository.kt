@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -27,7 +28,9 @@ import javax.sql.DataSource
 class VilkaarsvurderingRepository(
     private val ds: DataSource,
     private val delvilkaarRepository: DelvilkaarRepository,
-) {
+) : Transactions<VilkaarsvurderingRepository> {
+    override fun <R> inTransaction(block: VilkaarsvurderingRepository.(TransactionalSession) -> R): R = ds.transaction { this.block(it) }
+
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
@@ -43,6 +46,21 @@ class VilkaarsvurderingRepository(
                     )
                 }
         }
+
+    fun hentMigrertYrkesskadefordel(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        hent(
+            queryString = Queries.HENT_MIGRERT_YRKESSKADE,
+            params =
+                mapOf(
+                    "behandling_id" to behandlingId,
+                ),
+        ) {
+            true
+        } ?: false
+    }
 
     private fun hentNonNull(
         behandlingId: UUID,
@@ -372,6 +390,10 @@ class VilkaarsvurderingRepository(
             SELECT id, behandling_id, virkningstidspunkt, grunnlag_versjon, resultat_utfall, 
                 resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler 
             FROM vilkaarsvurdering WHERE behandling_id = :behandling_id
+        """
+
+        const val HENT_MIGRERT_YRKESSKADE = """
+            SELECT behandling_id FROM migrert_yrkesskade WHERE behandling_id = :behandling_id
         """
 
         const val HENT_VILKAAR = """

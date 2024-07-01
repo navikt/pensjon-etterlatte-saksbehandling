@@ -20,7 +20,7 @@ import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { FaktiskTrygdetid } from '~components/behandling/trygdetid/FaktiskTrygdetid'
+import { FaktiskTrygdetid } from '~components/behandling/trygdetid/faktiskTrygdetid/FaktiskTrygdetid'
 
 interface Props {
   redigerbar: boolean

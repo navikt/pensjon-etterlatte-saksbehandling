@@ -20,6 +20,7 @@ import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { FaktiskTrygdetid } from '~components/behandling/trygdetid/FaktiskTrygdetid'
 
 interface Props {
   redigerbar: boolean
@@ -99,6 +100,13 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
+
+          <FaktiskTrygdetid
+            trygdetid={trygdetid}
+            oppdaterTrygdetid={oppdaterTrygdetid}
+            redigerbar={redigerbar}
+            landListe={landListe}
+          />
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
@@ -24,12 +26,22 @@ class OmstillingsstoenadService(
             }
 
         val doedsfallsmaaned = jobb.behandlingsmaaned.minusMonths(monthsToSubtract)
-        val saker = grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = doedsfallsmaaned)
+        val saker =
+            runBlocking {
+                retryOgPakkUt {
+                    grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = doedsfallsmaaned)
+                }
+            }
 
         logger.info("Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned")
 
         // filtrer bort saker som ikke er aktuelle
-        val sakerMap = behandlingKlient.hentSaker(saker)
+        val sakerMap =
+            runBlocking {
+                retryOgPakkUt {
+                    behandlingKlient.hentSaker(saker)
+                }
+            }
         val aktuelleSaker =
             saker.filter {
                 sakerMap[it]?.sakType == jobb.type.sakType

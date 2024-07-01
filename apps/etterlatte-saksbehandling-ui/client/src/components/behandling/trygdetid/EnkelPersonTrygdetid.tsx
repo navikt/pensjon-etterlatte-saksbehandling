@@ -111,13 +111,6 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
-            redigerbar={redigerbar}
-          />
-          <TrygdetidGrunnlagListe
-            trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
             landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             redigerbar={redigerbar}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BodyShort, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Button, Heading, HStack, ReadMore, VStack } from '@navikt/ds-react'
 import { CalendarIcon, PlusIcon } from '@navikt/aksel-icons'
 import { ILand, ITrygdetid, ITrygdetidGrunnlagType, slettTrygdetidsgrunnlag } from '~shared/api/trygdetid'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -50,12 +50,12 @@ export const FaktiskTrygdetid = ({ redigerbar, trygdetid, oppdaterTrygdetid, lan
         <CalendarIcon aria-hidden height="1.5rem" width="1.5rem" />
         <Heading size="small">Faktisk trygdetid</Heading>
       </HStack>
-      <BodyShort>
+      <ReadMore header="Mer om faktisk trygdetid">
         Legg til aktuell trygdetid fra aktuelle land (inkludert Norge) fra avdøde var 16 år frem til og med måneden før
         hen døde. Hvis trygdetid fra flere land med ulike avtaler, må det foretas beregning innen hver avtale. Huk da av
         for &quot;Ikke med i prorata&quot; for trygdetidsperioder i land som ikke skal med i de ulike beregningene. Velg
         beste alternativ for prorata-beregning.
-      </BodyShort>
+      </ReadMore>
 
       <FaktiskTrygdetidTable
         faktiskTrygdetidPerioder={faktiskTrygdetidPerioder}

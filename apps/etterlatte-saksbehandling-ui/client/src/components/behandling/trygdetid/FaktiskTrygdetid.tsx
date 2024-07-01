@@ -40,7 +40,7 @@ export const FaktiskTrygdetid = ({ redigerbar, trygdetid, oppdaterTrygdetid, lan
     .filter((trygdetid) => trygdetid.type === ITrygdetidGrunnlagType.FAKTISK)
     .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
 
-  const kanLeggeTilNyTrydgetidPeriode = redigerbar && !visRedigerTrydgetid
+  const kanLeggeTilNyTrydgetidPeriode = redigerbar && !visRedigerTrydgetid.vis
 
   const slettTrygdetid = (trygdetidGrunnlagId: string) => {
     slettTrygdetidsgrunnlagRequest(

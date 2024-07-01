@@ -1,7 +1,7 @@
 import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import { IAdresse } from '~shared/types/IAdresse'
-import { formaterDato } from '~utils/formatering/dato'
+import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { IconSize } from '~shared/types/Icon'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
@@ -70,32 +70,23 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
     )
   }
 
-  const alder = hentAlderForDato(barn.foedselsdato)
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
 
   return (
     <Table.Row>
       <Table.DataCell>
-        {barn.fornavn} {barn.etternavn} ({alder} år)
+        {barn.fornavn} {barn.etternavn} ({hentAlderForDato(barn.foedselsdato)} år)
       </Table.DataCell>
       <Table.DataCell>
         <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
       </Table.DataCell>
       <Table.DataCell>{adresse}</Table.DataCell>
       <Table.DataCell>
-        {!!aktivAdresse
-          ? aktivAdresse.gyldigFraOgMed
-            ? formaterDato(aktivAdresse.gyldigFraOgMed)
-            : '-'
-          : 'Mangler adresse'}
+        {!!aktivAdresse ? formaterDatoMedFallback(aktivAdresse.gyldigFraOgMed, '-') : 'Mangler adresse'}
       </Table.DataCell>
       <Table.DataCell>
-        {!!aktivAdresse
-          ? aktivAdresse.gyldigTilOgMed
-            ? formaterDato(aktivAdresse.gyldigTilOgMed)
-            : '-'
-          : 'Mangler adresse'}
+        {!!aktivAdresse ? formaterDatoMedFallback(aktivAdresse.gyldigTilOgMed, '-') : 'Mangler adresse'}
       </Table.DataCell>
       <Table.DataCell>{erGjenlevendesBarn ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
     </Table.Row>

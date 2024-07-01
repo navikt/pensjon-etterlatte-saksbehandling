@@ -1,4 +1,4 @@
-import { BodyShort, Checkbox, CheckboxGroup, Heading } from '@navikt/ds-react'
+import { Checkbox, CheckboxGroup } from '@navikt/ds-react'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useState } from 'react'
 
@@ -13,7 +13,7 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
     trygdetid.beregnetTrygdetid?.resultat.yrkesskade ?? undefined
   )
 
-  return !redigerbar ? (
+  return (
     <CheckboxGroup
       legend="Skyldtes dødsfallet en godkjent yrkesskade/sykdom"
       description={
@@ -34,12 +34,5 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
         Godkjent yrkesskade/sykdom
       </Checkbox>
     </CheckboxGroup>
-  ) : (
-    <div>
-      <Heading size="small" level="4" spacing>
-        Hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom gir dette automatisk 40 års trygdetid.
-      </Heading>
-      <BodyShort>{yrkesskade ? 'Yrkesskade' : 'Ikke yrkesskade'}</BodyShort>
-    </div>
   )
 }

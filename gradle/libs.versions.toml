@@ -6,7 +6,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.8' }
 
 [versions]
 jackson-version = "2.17.1"
-jupiter-version = "5.10.2"
+jupiter-version = "5.10.3"
 kotlinx-version = "1.8.1"
 ktor2-version = "2.3.12"
 bcpkix-version = "1.78.1"
@@ -19,8 +19,8 @@ tjenestespesifikasjoner-version = "1.9c76d3b"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.15.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.15.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.15.2" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.15.2" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -91,7 +91,7 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module ="com.github.navi
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.7" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.8" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }

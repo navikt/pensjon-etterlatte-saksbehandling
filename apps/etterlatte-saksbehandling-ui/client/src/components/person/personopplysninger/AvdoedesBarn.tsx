@@ -4,7 +4,7 @@ import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { Heading, HStack, Table } from '@navikt/ds-react'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactNode => {

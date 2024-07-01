@@ -53,7 +53,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
             )
           ) : (
             <Table.Row>
-              <Table.DataCell aria-colspan={4} colSpan={4} align="center">
+              <Table.DataCell aria-colspan={4} colSpan={4}>
                 Mangler data om sivilstand
               </Table.DataCell>
             </Table.Row>

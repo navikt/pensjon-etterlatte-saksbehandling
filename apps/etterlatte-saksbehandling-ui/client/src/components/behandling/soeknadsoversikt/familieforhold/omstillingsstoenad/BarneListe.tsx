@@ -1,23 +1,14 @@
-import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-react'
+import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
-import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
+import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { IconSize } from '~shared/types/Icon'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { formaterFnr } from '~utils/formatering/formatering'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
-const FnrWrapper = styled.div`
-  display: flex;
-`
-
-type Props = {
-  familieforhold: Familieforhold
-}
-
-export const BarneListe = ({ familieforhold }: Props) => {
+export const BarneListe = ({ familieforhold }: { familieforhold: Familieforhold }) => {
   const barneListe = familieforhold.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])
 
   return (
@@ -34,7 +25,8 @@ export const BarneListe = ({ familieforhold }: Props) => {
             <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
             <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
             <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
             <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -45,7 +37,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
             ))
           ) : (
             <Table.Row>
-              <Table.DataCell colSpan={5} aria-colspan={5} align="center">
+              <Table.DataCell colSpan={6} aria-colspan={6}>
                 Avdøde har ingen barn
               </Table.DataCell>
             </Table.Row>
@@ -57,10 +49,9 @@ export const BarneListe = ({ familieforhold }: Props) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
-  const barnetsFnr = barn.foedselsnummer
-
   // Søker er alltid gjenlevende for OMS
-  const erGjenlevendesBarn = familieforhold.soeker?.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
+  const erGjenlevendesBarn =
+    familieforhold.soeker?.opplysning.familieRelasjon?.barn?.includes(barn.foedselsnummer) ?? false
 
   if (!!barn.doedsdato) {
     return (
@@ -69,13 +60,9 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
           {barn.fornavn} {barn.etternavn} <DoedsdatoTag doedsdato={barn.doedsdato} />
         </Table.DataCell>
         <Table.DataCell>
-          <FnrWrapper>
-            <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
-              {formaterFnr(barn.foedselsnummer)}
-            </Link>
-            <CopyButton copyText={barn.foedselsnummer} size="small" />
-          </FnrWrapper>
+          <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
         </Table.DataCell>
+        <Table.DataCell>-</Table.DataCell>
         <Table.DataCell>-</Table.DataCell>
         <Table.DataCell>-</Table.DataCell>
         <Table.DataCell>{erGjenlevendesBarn ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
@@ -83,30 +70,24 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
     )
   }
 
-  const alder = hentAlderForDato(barn.foedselsdato)
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
-  const periode = aktivAdresse
-    ? `${formaterKanskjeStringDato(aktivAdresse.gyldigFraOgMed)} - ${
-        aktivAdresse?.gyldigTilOgMed ? formaterDato(aktivAdresse!!.gyldigTilOgMed!!) : 'nå'
-      }`
-    : 'Mangler adresse'
 
   return (
     <Table.Row>
       <Table.DataCell>
-        {barn.fornavn} {barn.etternavn} ({alder} år)
+        {barn.fornavn} {barn.etternavn} ({hentAlderForDato(barn.foedselsdato)} år)
       </Table.DataCell>
       <Table.DataCell>
-        <FnrWrapper>
-          <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
-            {formaterFnr(barn.foedselsnummer)}
-          </Link>
-          <CopyButton copyText={barn.foedselsnummer} size="small" />
-        </FnrWrapper>
+        <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
       </Table.DataCell>
       <Table.DataCell>{adresse}</Table.DataCell>
-      <Table.DataCell>{periode}</Table.DataCell>
+      <Table.DataCell>
+        {!!aktivAdresse ? formaterDatoMedFallback(aktivAdresse.gyldigFraOgMed, '-') : 'Mangler adresse'}
+      </Table.DataCell>
+      <Table.DataCell>
+        {!!aktivAdresse ? formaterDatoMedFallback(aktivAdresse.gyldigTilOgMed, '-') : 'Mangler adresse'}
+      </Table.DataCell>
       <Table.DataCell>{erGjenlevendesBarn ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
     </Table.Row>
   )

@@ -1,6 +1,6 @@
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { genbehandlingTypeTilLesbartNavn } from '~components/person/sakOgBehandling/behandlingsslistemappere'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'

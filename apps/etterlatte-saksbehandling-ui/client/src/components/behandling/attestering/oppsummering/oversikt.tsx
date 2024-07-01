@@ -5,7 +5,7 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 import { Alert, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
@@ -88,15 +88,11 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <HStack gap="4" justify="space-between">
           <div>
             <Label size="small">Virkningstidspunkt</Label>
-            <Detail>
-              {behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
-            </Detail>
+            <Detail>{behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}</Detail>
           </div>
           <div>
             <Label size="small">Vedtaksdato</Label>
-            <Detail>
-              {behandlingsInfo.datoAttestert ? formaterDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
-            </Detail>
+            <Detail>{behandlingsInfo.datoAttestert ? formaterDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}</Detail>
           </div>
         </HStack>
 

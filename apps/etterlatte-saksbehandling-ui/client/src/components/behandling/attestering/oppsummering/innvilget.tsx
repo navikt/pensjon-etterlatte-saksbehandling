@@ -2,10 +2,10 @@ import { formaterBehandlingstype } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
   switch (vedtaksresultat) {

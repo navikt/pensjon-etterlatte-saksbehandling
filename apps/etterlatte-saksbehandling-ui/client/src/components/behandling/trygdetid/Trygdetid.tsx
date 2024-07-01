@@ -150,7 +150,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <TrygdetidBox paddingInline="16">
-      <VStack gap="4">
+      <VStack gap="12">
         {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         <LovtekstMedLenke
           tittel="Avdødes trygdetid"

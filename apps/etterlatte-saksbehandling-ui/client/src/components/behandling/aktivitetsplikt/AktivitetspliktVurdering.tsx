@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
@@ -251,6 +251,11 @@ export const AktivitetspliktVurdering = ({
                         </option>
                       ))}
                   </Select>
+                  <Alert variant="warning">
+                    Lag oppfølgingsoppgave i Gosys med frist utfra angitt sluttdato for unntaksperiode, eller sett en
+                    passende frist.
+                  </Alert>
+
                   <ControlledDatoVelger
                     name="sluttdato"
                     label="Angi sluttdato for unntaksperiode"

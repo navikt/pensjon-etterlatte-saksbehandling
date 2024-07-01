@@ -83,7 +83,13 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
         <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
       </Table.DataCell>
       <Table.DataCell>{adresse}</Table.DataCell>
-      <Table.DataCell>{!!aktivAdresse ? formaterDato(aktivAdresse.gyldigFraOgMed) : 'Mangler adresse'}</Table.DataCell>
+      <Table.DataCell>
+        {!!aktivAdresse
+          ? aktivAdresse.gyldigFraOgMed
+            ? formaterDato(aktivAdresse.gyldigFraOgMed)
+            : '-'
+          : 'Mangler adresse'}
+      </Table.DataCell>
       <Table.DataCell>
         {!!aktivAdresse
           ? aktivAdresse.gyldigTilOgMed

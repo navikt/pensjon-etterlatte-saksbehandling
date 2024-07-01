@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, HStack, Table } from '@navikt/ds-react'
-import { formaterDato } from '~utils/formatering/dato'
+import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem, Sivilstand } from '~shared/types/familieOpplysninger'
@@ -34,7 +34,7 @@ export const Sivilstatus = ({
               {sivilstand.map((stand: Sivilstand, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>{startCase(lowerCase(stand.sivilstatus))}</Table.DataCell>
-                  <Table.DataCell>{!!stand.gyldigFraOgMed && formaterDato(stand.gyldigFraOgMed)}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(stand.gyldigFraOgMed, 'Mangler dato')}</Table.DataCell>
                   <Table.DataCell>
                     <HStack gap="4">
                       {!!stand.relatertVedSivilstand && (

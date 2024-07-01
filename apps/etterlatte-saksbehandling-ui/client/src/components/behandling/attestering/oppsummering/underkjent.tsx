@@ -1,4 +1,3 @@
-import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { formaterBehandlingstype } from '~utils/formatering/formatering'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -8,6 +7,8 @@ import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import React from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { SidebarPanel } from '~shared/components/Sidebar'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const { ident: innloggetId } = useInnloggetSaksbehandler()
@@ -21,35 +22,41 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
   const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
   return (
-    <Wrapper $innvilget={false}>
-      <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
-      <UnderOverskrift $innvilget={false}>Underkjent</UnderOverskrift>
-
-      {underkjentSiste && <Tekst>{formaterDatoMedKlokkeslett(underkjentSiste.opprettet)}</Tekst>}
-
-      <div className="flex">
+    <SidebarPanel $border style={{ borderLeft: '5px solid #881d0c' }}>
+      <VStack gap="4">
         <div>
-          <Info>Attestant</Info>
-          <Tekst>{attestant}</Tekst>
-        </div>
-        <div>
-          <Info>Saksbehandler</Info>
-          <Tekst>{saksbehandler}</Tekst>
-        </div>
-      </div>
+          <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+          <Heading size="xsmall">Underkjent</Heading>
 
-      {erReturnert && underkjentSiste && (
-        <>
-          <div className="info">
-            <Info>Årsak til retur</Info>
-            <Tekst>{underkjentSiste.valgtBegrunnelse}</Tekst>
+          {underkjentSiste && <Detail>{formaterDatoMedKlokkeslett(underkjentSiste.opprettet)}</Detail>}
+        </div>
+
+        <HStack gap="4" justify="space-between">
+          <div>
+            <Label size="small">Attestant</Label>
+            <Detail>{attestant}</Detail>
           </div>
-          <Tekst>{underkjentSiste.kommentar}</Tekst>
-        </>
-      )}
-      <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
+          <div>
+            <Label size="small">Saksbehandler</Label>
+            <Detail>{saksbehandler}</Detail>
+          </div>
+        </HStack>
 
-      <SettPaaVent oppgave={oppgave} />
-    </Wrapper>
+        {erReturnert && underkjentSiste && (
+          <div>
+            <Label size="small">Årsak til retur</Label>
+            <Detail>{underkjentSiste.valgtBegrunnelse}</Detail>
+            <Detail>{underkjentSiste.kommentar}</Detail>
+          </div>
+        )}
+
+        <HStack gap="4" align="center">
+          <Label size="small">Sakid:</Label>
+          <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
+        </HStack>
+
+        <SettPaaVent oppgave={oppgave} />
+      </VStack>
+    </SidebarPanel>
   )
 }

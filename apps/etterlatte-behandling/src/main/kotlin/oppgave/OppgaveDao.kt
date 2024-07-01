@@ -278,8 +278,8 @@ class OppgaveDaoImpl(
                     prepareStatement(
                         """
                         SELECT 
-                            COUNT(*) FILTER (WHERE status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT')) AS "antallOppgavelistaOppgaver",
-                            COUNT(*) FILTER (WHERE saksbehandler = ? AND status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT') ) AS "antallMinOppgavelisteOppgaver"
+                            COUNT(*) FILTER (WHERE status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT', 'ATTESTERING', 'UNDERKJENT')) AS "antallOppgavelistaOppgaver",
+                            COUNT(*) FILTER (WHERE saksbehandler = ? AND status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT', 'ATTESTERING', 'UNDERKJENT') ) AS "antallMinOppgavelisteOppgaver"
                         FROM oppgave
                         """.trimIndent(),
                     )

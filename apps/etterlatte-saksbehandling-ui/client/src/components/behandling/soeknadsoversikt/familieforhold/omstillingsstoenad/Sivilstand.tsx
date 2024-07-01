@@ -3,7 +3,7 @@ import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
-import { formaterDato } from '~utils/formatering/dato'
+import { formaterDatoMedFallback } from '~utils/formatering/dato'
 
 type Props = {
   familieforhold: Familieforhold
@@ -31,22 +31,22 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {sivilstand ? (
+          {!!sivilstand ? (
             sivilstand.map(
               (ss, index) =>
                 ss && (
                   <Table.Row key={index}>
                     <Table.DataCell>{ss.sivilstatus}</Table.DataCell>
-                    <Table.DataCell>
-                      {ss.gyldigFraOgMed ? formaterDato(ss.gyldigFraOgMed) : ' Mangler dato'}
-                    </Table.DataCell>
+                    <Table.DataCell>{formaterDatoMedFallback(ss.gyldigFraOgMed, 'Mangler dato')}</Table.DataCell>
                     <Table.DataCell>
                       {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
                         ? `${avdoed.fornavn} ${avdoed.etternavn}`
                         : 'Annen person'}
                     </Table.DataCell>
                     <Table.DataCell>
-                      {ss.relatertVedSiviltilstand === avdoed.foedselsnummer ? formaterDato(avdoed.doedsdato!) : ''}
+                      {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
+                        ? formaterDatoMedFallback(avdoed.doedsdato, 'Mangler dato')
+                        : ''}
                     </Table.DataCell>
                   </Table.Row>
                 )

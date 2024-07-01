@@ -102,7 +102,7 @@ export default function SamordningOppdaterMeldingModal({
               </Button>
               <Button
                 variant="primary"
-                disabled={erRefusjonskrav === undefined || !kommentar.length}
+                disabled={!erRefusjonskrav || !kommentar.length}
                 onClick={oppdaterMelding}
                 loading={isPending(oppdaterSamordningsmeldingStatus)}
               >

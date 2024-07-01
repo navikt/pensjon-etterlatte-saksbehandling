@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.regler.barnepensjon
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class PeriodisertBarnepensjonGrunnlag(
@@ -81,8 +83,14 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "2"),
-    ) benytter barnepensjonSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
-        sats.multiply(trygdetidsfaktor)
+    ) benytter barnepensjonSats og trygdetidsFaktor og grunnbeloep med { sats, trygdetidsfaktor, grunnbeloep ->
+        val redusertYtelseMotTrygdetidsfaktor = sats.multiply(trygdetidsfaktor)
+        val tiProsentAvG = grunnbeloep.grunnbeloepPerMaaned.times(0.10)
+        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG) {
+            Beregningstall(tiProsentAvG)
+        } else {
+            redusertYtelseMotTrygdetidsfaktor
+        }
     }
 
 val kroneavrundetBarnepensjonRegelMedInstitusjon =

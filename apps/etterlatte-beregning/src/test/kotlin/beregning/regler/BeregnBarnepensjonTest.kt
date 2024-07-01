@@ -125,7 +125,7 @@ internal class BeregnBarnepensjonTest {
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 464.5.toBeregningstall()
+        resultat.verdi shouldBe 929.0000000000000000.toBeregningstall()
     }
 
     @Test

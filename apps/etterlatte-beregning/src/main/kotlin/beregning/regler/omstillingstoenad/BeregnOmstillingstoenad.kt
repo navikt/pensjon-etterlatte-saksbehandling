@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad
 
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.omstillingstoenadSatsRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class Avdoed(
@@ -82,8 +84,14 @@ val beregnOmstillingstoenadRegelMedInstitusjon =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
-    ) benytter omstillingstoenadSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
-        sats.multiply(trygdetidsfaktor)
+    ) benytter omstillingstoenadSats og trygdetidsFaktor og grunnbeloep med { sats, trygdetidsfaktor, grunnbeloep ->
+        val redusertYtelseMotTrygdetidsfaktor = sats.multiply(trygdetidsfaktor)
+        val tiProsentAvG = grunnbeloep.grunnbeloepPerMaaned.times(0.10)
+        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG) {
+            Beregningstall(tiProsentAvG)
+        } else {
+            redusertYtelseMotTrygdetidsfaktor
+        }
     }
 
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =

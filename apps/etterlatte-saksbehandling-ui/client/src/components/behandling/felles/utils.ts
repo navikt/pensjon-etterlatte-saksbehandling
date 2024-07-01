@@ -78,6 +78,7 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.AVBRUTT
   )
 }
+
 export const behandlingErIverksatt = (behandlingStatus: IBehandlingStatus): boolean =>
   behandlingStatus === IBehandlingStatus.IVERKSATT
 

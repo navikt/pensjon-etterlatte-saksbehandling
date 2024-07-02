@@ -45,7 +45,8 @@ data class BarnepensjonGrunnlag(
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
 )
 
-val beregnBarnepensjon1967Regel =
+@Deprecated("Ikke i bruk lenger")
+val deprecatedBeregnBarnepensjon1967Regel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
@@ -54,7 +55,7 @@ val beregnBarnepensjon1967Regel =
         sats.multiply(trygdetidsfaktor)
     }
 
-val beregnBarnepensjon1967RegelMedInstitusjon =
+val beregnBarnepensjon =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
@@ -63,17 +64,17 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
         sats.multiply(trygdetidsfaktor)
     }
 
-val barnepensjonSatsMedInstitusjonsopphold =
+val beregnGunstigstBarnepensjon =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-GUNSTIGHET-INSTITUSJON", versjon = "3"),
-    ) benytter beregnBarnepensjon1967RegelMedInstitusjon og institusjonsoppholdSatsRegel og erBrukerIInstitusjon med
-        { barnepensjonSats, barnepensjonMedInstitusjonsoppholdSats, harInstitusjonshopphold ->
+    ) benytter beregnBarnepensjon og institusjonsoppholdSatsRegel og erBrukerIInstitusjon med
+        { beregnetBarnepensjon, beregnetBarnepensjonMedInstitusjonsopphold, harInstitusjonshopphold ->
             if (harInstitusjonshopphold) {
-                barnepensjonMedInstitusjonsoppholdSats.coerceAtMost(barnepensjonSats)
+                beregnetBarnepensjonMedInstitusjonsopphold.coerceAtMost(beregnetBarnepensjon)
             } else {
-                barnepensjonSats
+                beregnetBarnepensjon
             }
         }
 
@@ -82,6 +83,6 @@ val kroneavrundetBarnepensjonRegelMedInstitusjon =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Gjør en kroneavrunding av barnepensjonen inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON", versjon = "2"),
-    ) benytter barnepensjonSatsMedInstitusjonsopphold med { beregnetBarnepensjon ->
+    ) benytter beregnGunstigstBarnepensjon med { beregnetBarnepensjon ->
         beregnetBarnepensjon.round(decimals = 0).toInteger()
     }

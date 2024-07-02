@@ -1,21 +1,21 @@
 package no.nav.etterlatte.kafka
 
-import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaConsumerEgneAnsatte(
-    env: Map<String, String>,
+    topic: String,
     private val behandlingKlient: BehandlingKlient,
-    kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
+    kafkaProperties: Properties,
     pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L),
     closed: AtomicBoolean = AtomicBoolean(false),
 ) : Kafkakonsument<String>(
         logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
-        consumer = KafkaConsumer<String, String>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
-        topic = env.requireEnvValue("SKJERMING_TOPIC"),
+        consumer = KafkaConsumer<String, String>(kafkaProperties),
+        topic = topic,
         pollTimeoutInSeconds = pollTimeoutInSeconds,
         closed = closed,
     ) {

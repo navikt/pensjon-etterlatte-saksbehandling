@@ -5,8 +5,10 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
 import no.nav.etterlatte.kafka.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
+import no.nav.etterlatte.kafka.KafkaEnvironment
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
@@ -53,7 +55,8 @@ fun startEgenAnsattLytter(
     startLytting(
         konsument =
             KafkaConsumerEgneAnsatte(
-                env = env,
+                topic = env.requireEnvValue("SKJERMING_TOPIC"),
+                kafkaProperties = KafkaEnvironment().generateKafkaConsumerProperties(env),
                 behandlingKlient = behandlingKlient,
             ),
         logger = logger,

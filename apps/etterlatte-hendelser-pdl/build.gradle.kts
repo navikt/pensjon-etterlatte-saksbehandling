@@ -31,12 +31,13 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.kafka.avroserializer)
 
-    testImplementation(libs.kafka.embeddedenv)
+    testImplementation(libs.test.testcontainer.kafka)
     testImplementation(libs.el.api)
     testImplementation(libs.el.impl)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
+    testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }
 
 tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

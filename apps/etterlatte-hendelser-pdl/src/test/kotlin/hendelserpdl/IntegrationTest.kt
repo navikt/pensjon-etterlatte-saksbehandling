@@ -15,9 +15,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
-import no.nav.etterlatte.kafka.Avrokonstanter
-import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
-import no.nav.etterlatte.kafka.KafkaContainerHelper
+import no.nav.etterlatte.kafka.KafkaConsumerEnvironmentTest
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.SCHEMA_REGISTRY_URL
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
@@ -33,14 +31,10 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
-import java.util.Properties
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
@@ -53,10 +47,9 @@ class IntegrationTest {
         val personhendelseKonsument =
             PersonhendelseKonsument(
                 LEESAH_TOPIC_PERSON,
-                KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(
-                    mapOf(
-                        "LEESAH_KAFKA_GROUP_ID" to KafkaContainerHelper.GROUP_ID,
-                    ),
+                KafkaConsumerEnvironmentTest().konfigurer(
+                    kafkaContainer,
+                    KafkaAvroDeserializer::class.java.canonicalName,
                 ),
                 PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient),
             )
@@ -106,28 +99,6 @@ class IntegrationTest {
                     hendelse == forventetMeldingPaaRapid
                 },
             )
-        }
-    }
-
-    class KafkaConsumerEnvironmentTest : KafkaConsumerConfiguration {
-        override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
-            val trettiSekunder = 30000
-
-            val properties =
-                Properties().apply {
-                    put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
-                    put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
-                    put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaContainerHelper.CLIENT_ID)
-                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL)
-                    put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
-                    put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
-                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
-                    put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
-                    put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
-                    put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
-                }
-            return properties
         }
     }
 

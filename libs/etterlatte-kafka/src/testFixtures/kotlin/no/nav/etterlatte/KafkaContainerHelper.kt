@@ -2,6 +2,7 @@ package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.SCHEMA_REGISTRY_URL
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
@@ -15,6 +16,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.utility.DockerImageName
+import java.time.Duration
 import java.util.Properties
 
 class KafkaContainerHelper {
@@ -78,18 +80,20 @@ class KafkaConsumerEnvironmentTest {
         kafkaContainer: KafkaContainer,
         deserializerClass: String,
     ): Properties {
-        val tiSekunder = 10000
+        val trettiSekunder = Duration.ofSeconds(30).toMillis().toInt()
 
         val properties =
             Properties().apply {
                 put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
                 put(ConsumerConfig.GROUP_ID_CONFIG, KafkaContainerHelper.GROUP_ID)
-                put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-test-v1")
+                put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaContainerHelper.CLIENT_ID)
+                put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL)
                 put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                 put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
-                put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, tiSekunder)
+                put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
+                put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
                 put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
             }
         return properties

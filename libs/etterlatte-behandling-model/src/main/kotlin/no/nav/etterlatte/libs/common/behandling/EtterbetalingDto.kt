@@ -11,7 +11,6 @@ data class EtterbetalingDto(
     val inneholderKrav: Boolean?,
     val frivilligSkattetrekk: Boolean?,
     val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
-    val skatteTrekkFomTomDatoSatt: Boolean?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )
 

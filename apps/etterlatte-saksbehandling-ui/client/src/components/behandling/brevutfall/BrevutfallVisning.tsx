@@ -94,14 +94,6 @@ export const BrevutfallVisning = (props: {
                       )}
                     </BodyShort>
                   </VStack>
-                  {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk && (
-                    <VStack gap="2">
-                      <Label>Er det lagt inn til og med dato på skattetrekk?</Label>
-                      <BodyShort>
-                        {brevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt ? 'Ja' : 'Nei'}
-                      </BodyShort>
-                    </VStack>
-                  )}
                 </>
               )}
             </>

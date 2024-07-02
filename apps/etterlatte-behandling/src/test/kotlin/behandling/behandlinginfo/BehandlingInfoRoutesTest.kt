@@ -119,8 +119,6 @@ internal class BehandlingInfoRoutesTest {
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt shouldBe
-                dto.etterbetaling?.skatteTrekkFomTomDatoSatt
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
@@ -179,7 +177,6 @@ internal class BehandlingInfoRoutesTest {
             etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
             etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
             etterbetaling.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
-            etterbetaling.skatteTrekkFomTomDatoSatt shouldBe dto.etterbetaling?.skatteTrekkFomTomDatoSatt
             etterbetaling.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
         }
     }
@@ -219,7 +216,6 @@ internal class BehandlingInfoRoutesTest {
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
             frivilligSkattetrekk = true,
             etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
-            skatteTrekkFomTomDatoSatt = true,
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
@@ -241,7 +237,6 @@ internal class BehandlingInfoRoutesTest {
                     inneholderKrav = true,
                     frivilligSkattetrekk = true,
                     etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
-                    skatteTrekkFomTomDatoSatt = true,
                     kilde = null,
                 ),
         )

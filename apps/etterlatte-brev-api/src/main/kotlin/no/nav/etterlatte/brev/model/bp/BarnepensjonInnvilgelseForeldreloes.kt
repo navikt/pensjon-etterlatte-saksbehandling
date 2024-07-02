@@ -62,9 +62,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         trygdetid,
                         erForeldreloes = true,
                     ),
-                etterbetaling =
-                    etterbetaling
-                        ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =

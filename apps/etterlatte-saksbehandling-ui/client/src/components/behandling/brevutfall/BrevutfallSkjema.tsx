@@ -30,7 +30,6 @@ interface BrevutfallSkjemaData {
   kravIEtterbetaling: ISvar | null
   frivilligSkattetrekk: ISvar | null
   etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
-  skatteTrekkFomTomDatoSatt: ISvar | null
   aldersgruppe?: Aldersgruppe | null
   feilutbetalingValg?: FeilutbetalingValg | null
   feilutbetalingKommentar: string | null
@@ -79,12 +78,6 @@ export const BrevutfallSkjema = ({
             ? ISvar.JA
             : ISvar.NEI,
       etterbetalingPeriodeValg: brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg,
-      skatteTrekkFomTomDatoSatt:
-        brevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt === undefined
-          ? undefined
-          : brevutfallOgEtterbetaling.etterbetaling?.skatteTrekkFomTomDatoSatt
-            ? ISvar.JA
-            : ISvar.NEI,
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
@@ -116,8 +109,6 @@ export const BrevutfallSkjema = ({
               inneholderKrav: data.kravIEtterbetaling === ISvar.JA,
               frivilligSkattetrekk: data.frivilligSkattetrekk === ISvar.JA,
               etterbetalingPeriodeValg: data.etterbetalingPeriodeValg,
-              skatteTrekkFomTomDatoSatt:
-                data.frivilligSkattetrekk === ISvar.JA ? data.skatteTrekkFomTomDatoSatt === ISvar.JA : null,
             }
           : null,
     }
@@ -253,24 +244,6 @@ export const BrevutfallSkjema = ({
                         </>
                       }
                     />
-                    {watch('frivilligSkattetrekk') == ISvar.JA && (
-                      <ControlledRadioGruppe
-                        name="skatteTrekkFomTomDatoSatt"
-                        control={control}
-                        errorVedTomInput="Du må velge om det er lagt inn til og med dato på skattetrekk"
-                        legend={<HStack gap="2">Er det lagt inn til og med dato på skattetrekk?</HStack>}
-                        radios={
-                          <>
-                            <Radio size="small" value={ISvar.JA}>
-                              Ja
-                            </Radio>
-                            <Radio size="small" value={ISvar.NEI}>
-                              Nei
-                            </Radio>
-                          </>
-                        }
-                      />
-                    )}
                   </>
                 )}
               </HStack>

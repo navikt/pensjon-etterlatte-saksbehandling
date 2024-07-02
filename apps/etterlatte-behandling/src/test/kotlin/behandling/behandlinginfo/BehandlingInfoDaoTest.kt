@@ -155,7 +155,6 @@ internal class BehandlingInfoDaoTest(
             inneholderKrav = true,
             frivilligSkattetrekk = true,
             etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
-            skatteTrekkFomTomDatoSatt = true,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

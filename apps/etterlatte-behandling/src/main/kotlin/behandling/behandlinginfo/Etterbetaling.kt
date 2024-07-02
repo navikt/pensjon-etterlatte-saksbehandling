@@ -14,7 +14,6 @@ data class Etterbetaling(
     val inneholderKrav: Boolean?,
     val frivilligSkattetrekk: Boolean?,
     val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
-    val skatteTrekkFomTomDatoSatt: Boolean?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {
     init {
@@ -34,7 +33,6 @@ data class Etterbetaling(
             inneholderKrav: Boolean?,
             frivilligSkattetrekk: Boolean?,
             etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
-            skatteTrekkFomTomDatoSatt: Boolean?,
             kilde: Grunnlagsopplysning.Saksbehandler,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
@@ -47,7 +45,6 @@ data class Etterbetaling(
                 inneholderKrav = inneholderKrav,
                 frivilligSkattetrekk = frivilligSkattetrekk,
                 etterbetalingPeriodeValg = etterbetalingPeriodeValg,
-                skatteTrekkFomTomDatoSatt = skatteTrekkFomTomDatoSatt,
                 kilde = kilde,
             )
         }

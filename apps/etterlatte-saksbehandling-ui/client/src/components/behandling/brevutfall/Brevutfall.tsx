@@ -55,7 +55,6 @@ export interface Etterbetaling {
   inneholderKrav: boolean | null
   frivilligSkattetrekk: boolean | null
   etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
-  skatteTrekkFomTomDatoSatt: boolean | null
 }
 
 const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {

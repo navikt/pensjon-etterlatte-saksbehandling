@@ -91,7 +91,7 @@ val beregnOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
-        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID", versjon = "2"),
     ) benytter omstillingstoenadSats og trygdetidsFaktor og grunnbeloep med { satsOgInstJaNei, trygdetidsfaktor, grunnbeloep ->
         val redusertYtelseMotTrygdetidsfaktor = satsOgInstJaNei.sats.multiply(trygdetidsfaktor)
         if (satsOgInstJaNei.harInstitusjonsopphold) {

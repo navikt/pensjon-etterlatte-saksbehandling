@@ -90,7 +90,7 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "2"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "3"),
     ) benytter barnepensjonSats og trygdetidsFaktor og grunnbeloep med { satsOgInstJaNei, trygdetidsfaktor, grunnbeloep ->
         val redusertYtelseMotTrygdetidsfaktor = satsOgInstJaNei.sats.multiply(trygdetidsfaktor)
         if (satsOgInstJaNei.harInstitusjonsopphold) {

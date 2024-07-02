@@ -9,7 +9,6 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.samordning.KafkaContainerHelper.Companion.SAMORDNINGVEDTAK_HENDELSE_TOPIC
 import no.nav.etterlatte.samordning.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.samordning.KafkaContainerHelper.Companion.kafkaProducer
 import no.nav.etterlatte.samordning.KafkaEnvironment.JsonDeserializer
@@ -28,6 +27,11 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SamordningHendelseIntegrationTest {
     private val klientId = "etterlatte-test-v1"
+
+    companion object {
+        const val SAMORDNINGVEDTAK_HENDELSE_TOPIC = "sam-vedtak-samhandlersvar"
+        private val kafkaContainer = kafkaContainer(SAMORDNINGVEDTAK_HENDELSE_TOPIC)
+    }
 
     @Test
     fun `Motta meldinger og sende videre relevante paa river`() {

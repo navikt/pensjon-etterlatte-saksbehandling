@@ -21,27 +21,24 @@ import org.testcontainers.utility.DockerImageName
 
 class KafkaContainerHelper {
     companion object {
-        const val SAMORDNINGVEDTAK_HENDELSE_TOPIC = "sam-vedtak-samhandlersvar"
-
         const val GROUP_ID = "etterlatte-v1"
 
-        private var adminClient: AdminClient
-
-        val kafkaContainer =
+        fun kafkaContainer(topic: String) =
             KafkaContainer(
                 DockerImageName.parse("confluentinc/cp-kafka:7.4.3"),
             ).waitingFor(HostPortWaitStrategy())
                 .apply {
                     start()
-                    adminClient =
+                    val adminClient =
                         AdminClient.create(mapOf(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to this.bootstrapServers))
-                    createTopic(SAMORDNINGVEDTAK_HENDELSE_TOPIC)
+                    createTopic(adminClient, topic)
                 }
 
-        private fun createTopic(vararg topics: String) {
-            val newTopics =
-                topics
-                    .map { topic -> NewTopic(topic, 1, 1.toShort()) }
+        private fun createTopic(
+            adminClient: AdminClient,
+            vararg topics: String,
+        ) {
+            val newTopics = topics.map { topic -> NewTopic(topic, 1, 1.toShort()) }
             adminClient.createTopics(newTopics)
         }
 

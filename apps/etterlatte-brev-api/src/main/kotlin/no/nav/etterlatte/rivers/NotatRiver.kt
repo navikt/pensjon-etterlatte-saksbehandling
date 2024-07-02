@@ -31,15 +31,18 @@ class NotatRiver(
     ) {
         try {
             val sakId = packet["sakId"].asLong()
+            val vedtakId = packet["vedtakId"].asLong()
             val samordningsmeldingId = packet["samordningsmeldingId"].asLong()
             val kommentar = packet["kommentar"].asText()
+
+            logger.info("Oppretter notat for sak $sakId, samID $samordningsmeldingId")
 
             runBlocking {
                 val notat =
                     notatService.opprett(
                         sakId = sakId,
                         mal = NotatMal.TOM_MAL,
-                        tittel = "Manuelt samordnet $samordningsmeldingId",
+                        tittel = "Manuell samordning - vedtak $vedtakId",
                         paragraf = kommentar,
                         bruker = Systembruker.brev,
                     )

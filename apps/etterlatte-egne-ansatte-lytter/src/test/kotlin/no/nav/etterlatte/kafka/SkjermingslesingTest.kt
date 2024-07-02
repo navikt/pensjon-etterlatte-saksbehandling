@@ -10,6 +10,7 @@ import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,7 +29,7 @@ class SkjermingslesingTest {
     @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val fnr = "09508229892"
-        val producer = spyk(KafkaProducerTestImpl<String>(false, kafkaContainer))
+        val producer = spyk(KafkaProducerTestImpl<String>(kafkaContainer, StringSerializer::class.java.canonicalName))
         producer.sendMelding(PDL_PERSON_TOPIC, fnr, "value")
 
         val behandlingKlient = mockk<BehandlingKlient>()

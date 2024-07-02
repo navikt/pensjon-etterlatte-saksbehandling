@@ -18,7 +18,7 @@ import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.KafkaContainerHelper
-import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.CONFLUENT_PLATFORM_VERSION
+import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.SCHEMA_REGISTRY_URL
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
 import no.nav.etterlatte.kafka.LocalKafkaConfig
@@ -36,48 +36,29 @@ import no.nav.person.pdl.leesah.doedsfall.Doedsfall
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.containers.Network
-import org.testcontainers.containers.wait.strategy.Wait
 import java.time.Instant
 import java.time.LocalDate
 import java.util.Properties
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
-    private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
-
-    @BeforeEach
-    fun setup() {
-        mockPdlResponse()
-    }
+    private val pdlTjenesterKlient: PdlTjenesterKlient = mockPdlResponse()
 
     @Test
     fun `skal opprette doedshendelse paa leesah, konsumere den, mappe om og publisere paa rapid`() {
-        val env =
-            mapOf(
-                "KAFKA_BROKERS" to kafkaContainer.bootstrapServers,
-                "LEESAH_KAFKA_GROUP_ID" to KafkaContainerHelper.GROUP_ID,
-                "KAFKA_SCHEMA_REGISTRY" to SCHEMA_REGISTRY.host,
-                "LEESAH_TOPIC_PERSON" to LEESAH_TOPIC_PERSON,
-            )
+        val rapidsKafkaProducer = spyk(LocalKafkaConfig(kafkaContainer.bootstrapServers).rapidsAndRiversProducer("etterlatte.dodsmelding"))
 
-        val leesahKafkaProducer = producerForLeesah()
-        val rapidsKafkaProducer =
-            spyk(
-                LocalKafkaConfig(kafkaContainer.bootstrapServers).rapidsAndRiversProducer("etterlatte.dodsmelding"),
-            )
-
-        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient)
         val personhendelseKonsument =
             PersonhendelseKonsument(
                 LEESAH_TOPIC_PERSON,
-                KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env),
-                personHendelseFordeler,
+                KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(
+                    mapOf(
+                        "LEESAH_KAFKA_GROUP_ID" to KafkaContainerHelper.GROUP_ID,
+                    ),
+                ),
+                PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient),
             )
 
         val personHendelse =
@@ -107,7 +88,13 @@ class IntegrationTest {
                     ),
             )
 
-        leesahKafkaProducer.sendMelding(LEESAH_TOPIC_PERSON, "key", personHendelse)
+        val producerForLeesah =
+            KafkaProducerTestImpl<Personhendelse>(
+                kafkaContainer,
+                serialiseringsklasse = KafkaAvroSerializer::class.java.canonicalName,
+                schemaRegistryUrl = SCHEMA_REGISTRY_URL,
+            )
+        producerForLeesah.sendMelding(LEESAH_TOPIC_PERSON, "key", personHendelse)
 
         lesHendelserFraLeesah(personhendelseKonsument)
 
@@ -130,8 +117,8 @@ class IntegrationTest {
                 Properties().apply {
                     put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
                     put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
-                    put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-pdl-hendelser")
-                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY.host)
+                    put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaContainerHelper.CLIENT_ID)
+                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL)
                     put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                     put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
@@ -144,18 +131,7 @@ class IntegrationTest {
         }
     }
 
-    private fun producerForLeesah() = KafkaProducerTestImpl<Personhendelse>(true, kafkaContainer, KafkaAvroSerializer::class)
-//        KafkaProducer<String, Personhendelse>(
-//            mapOf(
-//                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
-//                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
-//                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
-//                Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
-//                ProducerConfig.ACKS_CONFIG to "all",
-//            ),
-//        )
-
-    private fun mockPdlResponse() {
+    private fun mockPdlResponse(): PdlTjenesterKlient {
         val httpClient =
             HttpClient(MockEngine) {
                 engine {
@@ -176,49 +152,11 @@ class IntegrationTest {
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             }
 
-        pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "http://etterlatte-pdltjenester")
+        return PdlTjenesterKlient(httpClient, "http://etterlatte-pdltjenester")
     }
 
     companion object {
         const val LEESAH_TOPIC_PERSON = "pdl.leesah-v1"
-
-//        val kafkaEnv =
-//            KafkaEnvironment(
-//                noOfBrokers = 1,
-//                topicNames = listOf(LEESAH_TOPIC_PERSON),
-//                withSecurity = false,
-//                autoStart = true,
-//                withSchemaRegistry = true,
-//            )
-        val SCHEMA_REGISTRY: SchemaRegistryContainer = SchemaRegistryContainer(CONFLUENT_PLATFORM_VERSION)
         private val kafkaContainer = kafkaContainer(LEESAH_TOPIC_PERSON)
-    }
-}
-
-class SchemaRegistryContainer(
-    version: String = CONFLUENT_PLATFORM_VERSION,
-) : GenericContainer<SchemaRegistryContainer?>(SCHEMA_REGISTRY_IMAGE + ":" + version) {
-    init {
-        waitingFor(Wait.forHttp("/subjects").forStatusCode(200))
-        withExposedPorts(SCHEMA_REGISTRY_PORT)
-    }
-
-    fun withKafka(kafka: KafkaContainer): SchemaRegistryContainer =
-        withKafka(kafka.getNetwork(), kafka.getNetworkAliases().get(0) + ":9092")
-
-    fun withKafka(
-        network: Network?,
-        bootstrapServers: String,
-    ): SchemaRegistryContainer {
-        withNetwork(network)
-        withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
-        withEnv("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
-        withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$bootstrapServers")
-        return self()!!
-    }
-
-    companion object {
-        const val SCHEMA_REGISTRY_IMAGE: String = "confluentinc/cp-schema-registry"
-        const val SCHEMA_REGISTRY_PORT: Int = 8081
     }
 }

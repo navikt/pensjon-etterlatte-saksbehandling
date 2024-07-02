@@ -7,7 +7,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning, hentOverstyrBeregningGrunnlag, opprettOverstyrBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OverstyrBeregning, OverstyrBeregningGrunnlagPostDTO } from '~shared/types/Beregning'
+import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
@@ -26,7 +26,6 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const [overstyrtBeregningRest, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
 
   const [overstyrtBeregning, setOverstyrtBeregning] = useState<OverstyrBeregning | undefined>(undefined)
-  const [, setOverstyrtBeregningGrunnlag] = useState<OverstyrBeregningGrunnlagPostDTO | undefined>(undefined)
 
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
@@ -51,8 +50,6 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
     getOverstyrBeregningGrunnlag(behandling.id, (result) => {
       if (result) {
-        setOverstyrtBeregningGrunnlag(result)
-
         if (erBehandlingFerdigstilt) {
           setVisOverstyrtBeregningGrunnlag(result.perioder.length > 0)
         }

@@ -50,7 +50,7 @@ val deprecatedBeregnBarnepensjon1967Regel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID", versjon = "3"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID", versjon = "2"),
     ) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
         sats.multiply(trygdetidsfaktor)
     }
@@ -59,7 +59,7 @@ val beregnBarnepensjon =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "3"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "2"),
     ) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
         sats.multiply(trygdetidsfaktor)
     }
@@ -70,8 +70,8 @@ val beregnGunstigstBarnepensjon =
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-GUNSTIGHET-INSTITUSJON", versjon = "3"),
     ) benytter beregnBarnepensjon og institusjonsoppholdSatsRegel og erBrukerIInstitusjon med
-        { beregnetBarnepensjon, beregnetBarnepensjonMedInstitusjonsopphold, harInstitusjonshopphold ->
-            if (harInstitusjonshopphold) {
+        { beregnetBarnepensjon, beregnetBarnepensjonMedInstitusjonsopphold, harInstitusjonsopphold ->
+            if (harInstitusjonsopphold) {
                 beregnetBarnepensjonMedInstitusjonsopphold.coerceAtMost(beregnetBarnepensjon)
             } else {
                 beregnetBarnepensjon

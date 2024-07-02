@@ -94,6 +94,10 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: TJENESTEPENSJON_URL
       value: https://tp-api.prod-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
@@ -131,5 +135,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling
       external:
         - host: tp-api.prod-fss-pub.nais.io

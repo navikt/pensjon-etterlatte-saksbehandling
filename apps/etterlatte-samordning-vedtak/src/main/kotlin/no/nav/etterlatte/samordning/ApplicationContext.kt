@@ -4,6 +4,8 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.samordning.sak.BehandlingKlient
+import no.nav.etterlatte.samordning.sak.BehandlingService
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
 import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingKlient
@@ -33,4 +35,14 @@ class ApplicationContext(
     private val tpKlient = TjenestepensjonKlient(config, tpHttpClient)
 
     val samordningVedtakService = SamordningVedtakService(vedtaksvurderingKlient, tpKlient)
+
+    private val behandlingHttpClient =
+        httpClientClientCredentials(
+            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = config.getString("behandling.outbound"),
+        )
+    private val behandlingKlient = BehandlingKlient(config, behandlingHttpClient)
+    val behandlingService = BehandlingService(behandlingKlient)
 }

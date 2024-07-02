@@ -2,16 +2,20 @@ package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.utility.DockerImageName
+import java.util.Properties
 
 class KafkaContainerHelper {
     companion object {
@@ -66,5 +70,28 @@ class KafkaProducerTestImpl<T>(
         verdi: T,
     ) = runBlocking(context = Dispatchers.IO) {
         produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
+    }
+}
+
+class KafkaConsumerEnvironmentTest {
+    fun konfigurer(
+        kafkaContainer: KafkaContainer,
+        deserializerClass: String,
+    ): Properties {
+        val tiSekunder = 10000
+
+        val properties =
+            Properties().apply {
+                put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
+                put(ConsumerConfig.GROUP_ID_CONFIG, KafkaContainerHelper.GROUP_ID)
+                put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-test-v1")
+                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
+                put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
+                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, tiSekunder)
+                put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
+            }
+        return properties
     }
 }

@@ -4,25 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import io.ktor.server.application.Application
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.etterlatte.kafka.Avrokonstanter
-import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
-import no.nav.etterlatte.kafka.KafkaContainerHelper
+import no.nav.etterlatte.kafka.KafkaConsumerEnvironmentTest
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.samordning.KafkaEnvironment.JsonDeserializer
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Serializer
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
-import java.util.Properties
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -43,10 +36,9 @@ class SamordningHendelseIntegrationTest {
             SamordningHendelseKonsument(
                 topic = SAMORDNINGVEDTAK_HENDELSE_TOPIC,
                 kafkaProperties =
-                    KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(
-                        mapOf(
-                            "KAFKA_GROUP_ID" to KafkaContainerHelper.GROUP_ID,
-                        ),
+                    KafkaConsumerEnvironmentTest().konfigurer(
+                        kafkaContainer,
+                        KafkaEnvironmentJsonDeserializer::class.java.canonicalName,
                     ),
                 handler = SamordningHendelseHandler(rapidsKafkaProducer),
             )
@@ -81,26 +73,6 @@ class SamordningHendelseIntegrationTest {
                     hendelse.get("vedtakId").asLong() == 99900022201L
                 },
             )
-        }
-    }
-
-    class KafkaConsumerEnvironmentTest : KafkaConsumerConfiguration {
-        override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
-            val tiSekunder = 10000
-
-            val properties =
-                Properties().apply {
-                    put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
-                    put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_GROUP_ID"])
-                    put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-test-v1")
-                    put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
-                    put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer::class.java)
-                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
-                    put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, tiSekunder)
-                    put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
-                }
-            return properties
         }
     }
 }

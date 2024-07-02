@@ -24,8 +24,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SamordningHendelseIntegrationTest {
-    private val klientId = "etterlatte-test-v1"
-
     companion object {
         const val SAMORDNINGVEDTAK_HENDELSE_TOPIC = "sam-vedtak-samhandlersvar"
         private val kafkaContainer = kafkaContainer(SAMORDNINGVEDTAK_HENDELSE_TOPIC)
@@ -53,7 +51,6 @@ class SamordningHendelseIntegrationTest {
         val produsent = KafkaProducerTestImpl<SamordningVedtakHendelse>(true, kafkaContainer)
         produsent.sendMelding(
             SAMORDNINGVEDTAK_HENDELSE_TOPIC,
-            1,
             UUID.randomUUID().toString(),
             SamordningVedtakHendelse().apply {
                 fagomrade = "PENSJON"
@@ -63,7 +60,6 @@ class SamordningHendelseIntegrationTest {
         )
         produsent.sendMelding(
             SAMORDNINGVEDTAK_HENDELSE_TOPIC,
-            1,
             UUID.randomUUID().toString(),
             SamordningVedtakHendelse().apply {
                 fagomrade = "EYO"

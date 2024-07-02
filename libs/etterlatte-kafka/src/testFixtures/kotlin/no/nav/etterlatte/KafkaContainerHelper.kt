@@ -22,7 +22,7 @@ import org.testcontainers.utility.DockerImageName
 
 class KafkaContainerHelper {
     companion object {
-        const val CLIENT_ID = "etterlatte-v1"
+        const val CLIENT_ID = "etterlatte-test-v1"
         const val GROUP_ID = "etterlatte-v1"
 
         fun kafkaContainer(topic: String) =
@@ -85,20 +85,11 @@ class KafkaProducerTestImpl<T>(
 
     fun sendMelding(
         topic: String,
-        partition: Int,
         nøkkel: String,
         verdi: T,
-    ) {
-        runBlocking(context = Dispatchers.IO) {
-            produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
-        }
+    ) = runBlocking(context = Dispatchers.IO) {
+        produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
     }
-
-    fun sendMelding(
-        topic: String,
-        nøkkel: String,
-        verdi: T,
-    ) = sendMelding(topic, 1, nøkkel, verdi)
 }
 
 class JsonSerializer<T> : Serializer<T> {

@@ -57,6 +57,20 @@ val OmstillingstoenadSatsMedInstitusjonsopphold =
         institusjonsoppholdSats.coerceAtMost(standardSats)
     }
 
+val kroneavrundetOmstillingstoenadRegel =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Gjør en kroneavrunding av beregningen",
+        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING"),
+    ) benytter beregnOmstillingstoenadRegel med { beregnetOmstillingstoenad ->
+        beregnetOmstillingstoenad.round(decimals = 0).toInteger()
+    }
+
+data class SatsInstitusjonsoppholdEllerIkke(
+    val sats: Beregningstall,
+    val harInstitusjonsopphold: Boolean,
+)
+
 val omstillingstoenadSats =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -67,16 +81,10 @@ val omstillingstoenadSats =
             satsInstitusjonsopphold,
             harInstitusjonshopphold,
         ->
-        if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold
-    }
-
-val kroneavrundetOmstillingstoenadRegel =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "Gjør en kroneavrunding av beregningen",
-        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING"),
-    ) benytter beregnOmstillingstoenadRegel med { beregnetOmstillingstoenad ->
-        beregnetOmstillingstoenad.round(decimals = 0).toInteger()
+        SatsInstitusjonsoppholdEllerIkke(
+            if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold,
+            harInstitusjonshopphold,
+        )
     }
 
 val beregnOmstillingstoenadRegelMedInstitusjon =
@@ -84,11 +92,15 @@ val beregnOmstillingstoenadRegelMedInstitusjon =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
-    ) benytter omstillingstoenadSats og trygdetidsFaktor og grunnbeloep med { sats, trygdetidsfaktor, grunnbeloep ->
-        val redusertYtelseMotTrygdetidsfaktor = sats.multiply(trygdetidsfaktor)
-        val tiProsentAvG = grunnbeloep.grunnbeloepPerMaaned.times(0.10)
-        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG) {
-            Beregningstall(tiProsentAvG)
+    ) benytter omstillingstoenadSats og trygdetidsFaktor og grunnbeloep med { satsOgInstJaNei, trygdetidsfaktor, grunnbeloep ->
+        val redusertYtelseMotTrygdetidsfaktor = satsOgInstJaNei.sats.multiply(trygdetidsfaktor)
+        if (satsOgInstJaNei.harInstitusjonsopphold) {
+            val tiProsentAvG = Beregningstall(grunnbeloep.grunnbeloepPerMaaned).multiply(Beregningstall(0.10))
+            if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG.toInteger()) {
+                tiProsentAvG
+            } else {
+                redusertYtelseMotTrygdetidsfaktor
+            }
         } else {
             redusertYtelseMotTrygdetidsfaktor
         }

@@ -65,6 +65,11 @@ val barnepensjonSatsMedInstitusjonsopphold =
         institusjonsoppholdSats.coerceAtMost(standardSats)
     }
 
+data class SatsInstitusjonsoppholdEllerIkke(
+    val sats: Beregningstall,
+    val harInstitusjonsopphold: Boolean,
+)
+
 val barnepensjonSats =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
@@ -75,7 +80,10 @@ val barnepensjonSats =
             satsInstitusjonsopphold,
             harInstitusjonshopphold,
         ->
-        if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold
+        SatsInstitusjonsoppholdEllerIkke(
+            if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold,
+            harInstitusjonshopphold,
+        )
     }
 
 val beregnBarnepensjon1967RegelMedInstitusjon =
@@ -83,11 +91,15 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON", versjon = "2"),
-    ) benytter barnepensjonSats og trygdetidsFaktor og grunnbeloep med { sats, trygdetidsfaktor, grunnbeloep ->
-        val redusertYtelseMotTrygdetidsfaktor = sats.multiply(trygdetidsfaktor)
-        val tiProsentAvG = Beregningstall(grunnbeloep.grunnbeloepPerMaaned).multiply(Beregningstall(0.10))
-        if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG.toInteger()) {
-            tiProsentAvG
+    ) benytter barnepensjonSats og trygdetidsFaktor og grunnbeloep med { satsOgInstJaNei, trygdetidsfaktor, grunnbeloep ->
+        val redusertYtelseMotTrygdetidsfaktor = satsOgInstJaNei.sats.multiply(trygdetidsfaktor)
+        if (satsOgInstJaNei.harInstitusjonsopphold) {
+            val tiProsentAvG = Beregningstall(grunnbeloep.grunnbeloepPerMaaned).multiply(Beregningstall(0.10))
+            if (redusertYtelseMotTrygdetidsfaktor.toInteger() < tiProsentAvG.toInteger()) {
+                tiProsentAvG
+            } else {
+                redusertYtelseMotTrygdetidsfaktor
+            }
         } else {
             redusertYtelseMotTrygdetidsfaktor
         }

@@ -34,7 +34,6 @@ jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xm
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.0" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.5" }
 el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
 el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
 

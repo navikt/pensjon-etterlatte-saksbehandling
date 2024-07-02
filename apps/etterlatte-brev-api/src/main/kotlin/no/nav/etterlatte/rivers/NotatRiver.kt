@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.NyNotatService
+import no.nav.etterlatte.brev.SamordningsnotatParametre
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -34,6 +35,7 @@ class NotatRiver(
             val vedtakId = packet["vedtakId"].asLong()
             val samordningsmeldingId = packet["samordningsmeldingId"].asLong()
             val kommentar = packet["kommentar"].asText()
+            val saksbehandlerId = packet["saksbehandlerId"].asText()
 
             logger.info("Oppretter notat for sak $sakId, samID $samordningsmeldingId")
 
@@ -41,9 +43,16 @@ class NotatRiver(
                 val notat =
                     notatService.opprett(
                         sakId = sakId,
-                        mal = NotatMal.TOM_MAL,
+                        mal = NotatMal.MANUELL_SAMORDNING,
                         tittel = "Manuell samordning - vedtak $vedtakId",
-                        paragraf = kommentar,
+                        params =
+                            SamordningsnotatParametre(
+                                sakId = sakId,
+                                vedtakId = vedtakId,
+                                samordningsmeldingId = samordningsmeldingId,
+                                kommentar = kommentar,
+                                saksbehandlerId = saksbehandlerId,
+                            ),
                         bruker = Systembruker.brev,
                     )
 

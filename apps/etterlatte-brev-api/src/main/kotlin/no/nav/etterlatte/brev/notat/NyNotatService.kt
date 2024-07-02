@@ -73,7 +73,7 @@ class NyNotatService(
         sakId: Long,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
-        paragraf: String = "Tomt notat",
+        params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = sakService.hentSak(sakId, bruker)
@@ -90,7 +90,7 @@ class NyNotatService(
                                     listOf(
                                         Slate.Element(
                                             Slate.ElementType.PARAGRAPH,
-                                            listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, paragraf)),
+                                            listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, "Tomt notat")),
                                         ),
                                     ),
                                 )
@@ -99,6 +99,10 @@ class NyNotatService(
                                 deserialize(
                                     javaClass.getResource("/notat/nordisk_vedlegg.json")!!.readText(),
                                 )
+
+                            NotatMal.MANUELL_SAMORDNING -> {
+                                opprettSamordningsnotatPayload(params)
+                            }
                         },
                     mal = mal,
                 ),
@@ -106,6 +110,36 @@ class NyNotatService(
             )
 
         return notatRepository.hent(id)
+    }
+
+    private fun opprettSamordningsnotatPayload(params: NotatParametre?): Slate {
+        if (params !is SamordningsnotatParametre) {
+            throw IllegalArgumentException("Samordningsnotat krever SamordningsnotatParametre")
+        }
+        return Slate(
+            listOf(
+                Slate.Element(
+                    Slate.ElementType.HEADING_THREE,
+                    listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, "Manuell samordning")),
+                ),
+                Slate.Element(
+                    Slate.ElementType.BULLETED_LIST,
+                    listOf(
+                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "Saksbehandler: ${params.saksbehandlerId}"),
+                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "SaksID: ${params.sakId}"),
+                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "VedtakID: ${params.vedtakId}"),
+                        Slate.InnerElement(
+                            Slate.ElementType.LIST_ITEM,
+                            "SamordningsmeldingID: ${params.samordningsmeldingId}",
+                        ),
+                    ),
+                ),
+                Slate.Element(
+                    Slate.ElementType.PARAGRAPH,
+                    listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, params.kommentar)),
+                ),
+            ),
+        )
     }
 
     fun oppdaterTittel(
@@ -204,3 +238,13 @@ class NotatAlleredeJournalfoert :
         code = "NOTAT_ALLEREDE_JOURNALFOERT",
         detail = "Notatet er allerede journalført!",
     )
+
+interface NotatParametre
+
+class SamordningsnotatParametre(
+    val sakId: Long,
+    val vedtakId: Long,
+    val samordningsmeldingId: Long,
+    val kommentar: String,
+    val saksbehandlerId: String,
+) : NotatParametre

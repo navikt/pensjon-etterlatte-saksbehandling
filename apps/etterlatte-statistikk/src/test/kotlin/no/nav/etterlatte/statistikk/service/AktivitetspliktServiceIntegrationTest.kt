@@ -10,14 +10,13 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.statistikk.StatistikkDatabaseExtension
 import no.nav.etterlatte.statistikk.database.AktivitetsgradPeriode
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
-import no.nav.etterlatte.statistikk.database.DatabaseExtension
 import no.nav.etterlatte.statistikk.database.VurdertAktivitet
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
@@ -25,6 +24,7 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(StatistikkDatabaseExtension::class)
 class AktivitetspliktServiceIntegrationTest(
     dataSource: DataSource,
 ) {
@@ -251,16 +251,6 @@ class AktivitetspliktServiceIntegrationTest(
             )
             get(sakMedIngenRegistrertAktivitet) shouldBe null
         }
-    }
-
-    @AfterEach
-    fun afterEach() {
-        dbExtension.resetDb()
-    }
-
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
     }
 }
 

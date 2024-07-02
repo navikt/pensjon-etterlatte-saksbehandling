@@ -68,10 +68,10 @@ class KafkaProducerTestImpl<T>(
 
     fun sendMelding(
         topic: String,
-        nøkkel: String,
+        noekkel: String,
         verdi: T,
     ) = runBlocking(context = Dispatchers.IO) {
-        produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
+        produsent.send(ProducerRecord(topic, noekkel, verdi)).get()
     }
 }
 

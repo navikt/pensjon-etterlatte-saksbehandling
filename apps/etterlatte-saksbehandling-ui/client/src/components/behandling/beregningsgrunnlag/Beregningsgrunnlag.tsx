@@ -5,9 +5,9 @@ import { BodyLong, Box, Button, Heading, Select, TextField } from '@navikt/ds-re
 import { formaterDato } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
-import { hentOverstyrBeregning, opprettOverstyrBeregning } from '~shared/api/beregning'
+import { hentOverstyrBeregning, hentOverstyrBeregningGrunnlag, opprettOverstyrBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OverstyrBeregning } from '~shared/types/Beregning'
+import { OverstyrBeregning, OverstyrBeregningGrunnlagPostDTO } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
@@ -17,14 +17,22 @@ import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { statusErRedigerbar } from '~components/behandling/felles/utils'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
 
-  const [overstyrtBeregning, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
-  const [overstyrt, setOverstyrt] = useState<OverstyrBeregning | undefined>(undefined)
+  const [overstyrBeregningGrunnlagRest, getOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
+  const [overstyrtBeregningRest, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
+
+  const [overstyrtBeregning, setOverstyrtBeregning] = useState<OverstyrBeregning | undefined>(undefined)
+  const [, setOverstyrBeregningGrunnlag] = useState<OverstyrBeregningGrunnlagPostDTO | undefined>(undefined)
+
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
+
+  const [visOverstyrtBeregningGrunnlag, setVisOverstyrtBeregningGrunnlag] = useState<Boolean>(false)
+  const [erBehandlingFerdigstilt] = useState<Boolean>(!statusErRedigerbar(behandling.status))
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterDato(behandling.virkningstidspunkt.dato)
@@ -33,10 +41,30 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   useEffect(() => {
     getOverstyrtBeregning(behandling.id, (result) => {
       if (result) {
-        setOverstyrt(result)
+        setOverstyrtBeregning(result)
+
+        if (!erBehandlingFerdigstilt) {
+          setVisOverstyrtBeregningGrunnlag(true)
+        }
+      }
+    })
+
+    getOverstyrBeregningGrunnlag(behandling.id, (result) => {
+      if (result) {
+        setOverstyrBeregningGrunnlag(result)
+
+        if (erBehandlingFerdigstilt) {
+          setVisOverstyrtBeregningGrunnlag(result.perioder.length > 0)
+        }
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (!erBehandlingFerdigstilt && overstyrtBeregning) {
+      setVisOverstyrtBeregningGrunnlag(true)
+    }
+  }, [overstyrtBeregning])
 
   return (
     <>
@@ -47,19 +75,17 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <>
-        {isSuccess(overstyrtBeregning) && (
+        {isSuccess(overstyrtBeregningRest && overstyrBeregningGrunnlagRest) && (
           <>
-            {visOverstyrKnapp && !overstyrt && (
-              <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+            {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
+              <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
             )}
-            {overstyrt && (
-              <OverstyrBeregningGrunnlag
-                behandling={behandling}
-                overstyrBeregning={overstyrt}
-                setOverstyrt={setOverstyrt}
-              />
+
+            {visOverstyrtBeregningGrunnlag && (
+              <OverstyrBeregningGrunnlag behandling={behandling} setOverstyrt={setOverstyrtBeregning} />
             )}
-            {!overstyrt &&
+
+            {!visOverstyrtBeregningGrunnlag &&
               {
                 [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,
                 [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
@@ -68,7 +94,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         )}{' '}
         :
         {isFailureHandler({
-          apiResult: overstyrtBeregning,
+          apiResult: overstyrtBeregningRest,
           errorMessage: 'Det oppsto en feil.',
         })}
       </>

@@ -22,11 +22,11 @@ import { statusErRedigerbar } from '~components/behandling/felles/utils'
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
 
-  const [overstyrBeregningGrunnlagRest, getOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
+  const [overstyrtBeregningGrunnlagRest, getOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [overstyrtBeregningRest, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
 
   const [overstyrtBeregning, setOverstyrtBeregning] = useState<OverstyrBeregning | undefined>(undefined)
-  const [, setOverstyrBeregningGrunnlag] = useState<OverstyrBeregningGrunnlagPostDTO | undefined>(undefined)
+  const [, setOverstyrtBeregningGrunnlag] = useState<OverstyrBeregningGrunnlagPostDTO | undefined>(undefined)
 
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
@@ -51,7 +51,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
     getOverstyrBeregningGrunnlag(behandling.id, (result) => {
       if (result) {
-        setOverstyrBeregningGrunnlag(result)
+        setOverstyrtBeregningGrunnlag(result)
 
         if (erBehandlingFerdigstilt) {
           setVisOverstyrtBeregningGrunnlag(result.perioder.length > 0)
@@ -75,7 +75,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <>
-        {isSuccess(overstyrtBeregningRest && overstyrBeregningGrunnlagRest) && (
+        {isSuccess(overstyrtBeregningRest && overstyrtBeregningGrunnlagRest) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
               <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />

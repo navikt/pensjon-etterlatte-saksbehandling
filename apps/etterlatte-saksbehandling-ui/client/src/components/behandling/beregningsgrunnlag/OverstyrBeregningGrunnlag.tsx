@@ -67,7 +67,6 @@ function fjernWhitespaceFraUtbetaltBeloep(
 
 const OverstyrBeregningGrunnlag = (props: {
   behandling: IBehandlingReducer
-  /*overstyrBeregning: OverstyrBeregning*/
   setOverstyrt: Dispatch<SetStateAction<OverstyrBeregning | undefined>>
 }) => {
   const { behandling, setOverstyrt } = props

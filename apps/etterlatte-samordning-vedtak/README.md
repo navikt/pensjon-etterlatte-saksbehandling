@@ -1,10 +1,15 @@
 # Samordning-vedtak
+Samordning-vedtak er en app som tilbyr konsumering av etterlatte sine data utad
 
 Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.
 
+
 ## Autentisering
 
+For eksterne
 Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
+
+For interne må det legges inn i yaml filene slik som beskrevet her https://docs.nais.io/auth/entra-id/
 
 ### Autorisasjon
 
@@ -71,6 +76,8 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | 020-VEDTAK-TILGANG      | 403             | Ikke tilgang til vedtak/etterspurt data                  |
 | 021-VEDTAK-FORESPOERSEL | 400             | Feil ved spørring mot vedtak                             |
 | 022-VEDTAK-IKKE-FUNNET  | 404             | Kunne ikke finne vedtaksressurs                          |
+| 030-BEHANDLING-TILGANG  | 404             | Ikke tilgang til sak                                     |
+| 030-BEHANDLING-FORESPOERSEL  | 404             | Feil ved spørring mot behandling                         |
 
 ### Eksempel-payload ved feil
 

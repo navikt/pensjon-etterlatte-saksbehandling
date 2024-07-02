@@ -23,7 +23,6 @@ dependencies {
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     implementation(libs.kafka.clients)
-    testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.kafka.avroserializer)
 
     testFixturesImplementation(libs.test.testcontainer.kafka)

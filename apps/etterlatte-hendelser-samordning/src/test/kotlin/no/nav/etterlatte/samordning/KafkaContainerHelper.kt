@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.config.SaslConfigs
+import org.apache.kafka.common.serialization.Serializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
@@ -20,8 +21,6 @@ import org.testcontainers.utility.DockerImageName
 
 class KafkaContainerHelper {
     companion object {
-        const val KAFKA_TOPIC_OPPDATERINGER = "pia.brreg-oppdatering"
-        const val KAFKA_TOPIC_ALLE_VIRKSOMHETER = "pia.brreg-alle-virksomheter"
         const val SAMORDNINGVEDTAK_HENDELSE_TOPIC = "sam-vedtak-samhandlersvar"
 
         const val GROUP_ID = "etterlatte-v1"
@@ -46,37 +45,39 @@ class KafkaContainerHelper {
             adminClient.createTopics(newTopics)
         }
 
-        fun <T> KafkaContainer.kafkaProducer(klientId: String) =
-            object : KafkaProdusent<T> {
-                private val produsent =
-                    KafkaProducer<String, T>(
-                        mapOf(
-                            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to this@kafkaProducer.bootstrapServers,
-                            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to SamJsonSerializer::class.java,
-                            ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
-                            ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
-                            ProducerConfig.CLIENT_ID_CONFIG to klientId,
-                        ),
-                    )
+        fun <T> KafkaContainer.kafkaProducer(
+            klientId: String,
+            serialiserer: Serializer<T>,
+        ) = object : KafkaProdusent<T> {
+            private val produsent =
+                KafkaProducer<String, T>(
+                    mapOf(
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to this@kafkaProducer.bootstrapServers,
+                        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to serialiserer::class.java,
+                        ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
+                        ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
+                        ProducerConfig.CLIENT_ID_CONFIG to klientId,
+                    ),
+                )
 
-                override fun sendMelding(
-                    topic: String,
-                    partition: Int,
-                    nøkkel: String,
-                    verdi: T,
-                ) {
-                    runBlocking(context = Dispatchers.IO) {
-                        produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
-                    }
+            override fun sendMelding(
+                topic: String,
+                partition: Int,
+                nøkkel: String,
+                verdi: T,
+            ) {
+                runBlocking(context = Dispatchers.IO) {
+                    produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
                 }
-
-                override fun sendMelding(
-                    topic: String,
-                    nøkkel: String,
-                    verdi: T,
-                ) = sendMelding(topic, 1, nøkkel, verdi)
             }
+
+            override fun sendMelding(
+                topic: String,
+                nøkkel: String,
+                verdi: T,
+            ) = sendMelding(topic, 1, nøkkel, verdi)
+        }
 
         fun KafkaContainer.kafkaKonsument(klientId: String) =
             KafkaConsumer<String, String>(

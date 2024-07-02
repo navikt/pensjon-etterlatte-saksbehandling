@@ -48,7 +48,7 @@ class SamordningHendelseIntegrationTest {
                 handler = SamordningHendelseHandler(rapidsKafkaProducer),
             )
 
-        val produsent = kafkaContainer.kafkaProducer<SamordningVedtakHendelse>(klientId)
+        val produsent = kafkaContainer.kafkaProducer(klientId, SamJsonSerializer())
         produsent.sendMelding(
             SAMORDNINGVEDTAK_HENDELSE_TOPIC,
             1,

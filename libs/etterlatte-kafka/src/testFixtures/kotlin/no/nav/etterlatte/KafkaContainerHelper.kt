@@ -24,10 +24,11 @@ class KafkaContainerHelper {
     companion object {
         const val CLIENT_ID = "etterlatte-test-v1"
         const val GROUP_ID = "etterlatte-v1"
+        const val CONFLUENT_PLATFORM_VERSION = "7.4.3"
 
         fun kafkaContainer(topic: String) =
             KafkaContainer(
-                DockerImageName.parse("confluentinc/cp-kafka:7.4.3"),
+                DockerImageName.parse("confluentinc/cp-kafka:${CONFLUENT_PLATFORM_VERSION}"),
             ).waitingFor(HostPortWaitStrategy())
                 .apply {
                     start()

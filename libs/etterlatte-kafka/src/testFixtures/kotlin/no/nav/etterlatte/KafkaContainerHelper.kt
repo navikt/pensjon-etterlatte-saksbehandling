@@ -2,6 +2,7 @@ package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.objectMapper
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
@@ -44,14 +45,21 @@ class KafkaContainerHelper {
 
         fun <T> KafkaContainer.kafkaProducer(
             klientId: String,
-            serialiserer: Serializer<T>,
+            serialiserJson: Boolean,
         ) = object : KafkaProdusent<T> {
+            val serializer =
+                if (serialiserJson) {
+                    JsonSerializer<T>()
+                } else {
+                    StringSerializer()
+                }
+
             private val produsent =
                 KafkaProducer<String, T>(
                     mapOf(
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to this@kafkaProducer.bootstrapServers,
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to serialiserer::class.java,
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to serializer::class.java,
                         ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
                         ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
                         ProducerConfig.CLIENT_ID_CONFIG to klientId,
@@ -106,4 +114,17 @@ interface KafkaProdusent<T> {
         nøkkel: String,
         verdi: T,
     )
+}
+
+class JsonSerializer<T> : Serializer<T> {
+    override fun serialize(
+        topic: String,
+        data: T?,
+    ): ByteArray {
+        try {
+            return objectMapper.writeValueAsBytes(data)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Error serializing JSON message", e)
+        }
+    }
 }

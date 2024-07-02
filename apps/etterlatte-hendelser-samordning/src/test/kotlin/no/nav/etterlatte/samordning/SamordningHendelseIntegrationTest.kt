@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.samordning.KafkaEnvironment.JsonDeserializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.Serializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -51,7 +50,7 @@ class SamordningHendelseIntegrationTest {
                 handler = SamordningHendelseHandler(rapidsKafkaProducer),
             )
 
-        val produsent = kafkaContainer.kafkaProducer(klientId, SamJsonSerializer())
+        val produsent = kafkaContainer.kafkaProducer<SamordningVedtakHendelse>(klientId, true)
         produsent.sendMelding(
             SAMORDNINGVEDTAK_HENDELSE_TOPIC,
             1,
@@ -103,19 +102,6 @@ class SamordningHendelseIntegrationTest {
                     put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
                 }
             return properties
-        }
-    }
-}
-
-class SamJsonSerializer : Serializer<SamordningVedtakHendelse> {
-    override fun serialize(
-        topic: String,
-        data: SamordningVedtakHendelse?,
-    ): ByteArray {
-        try {
-            return objectMapper.writeValueAsBytes(data)
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Error serializing JSON message", e)
         }
     }
 }

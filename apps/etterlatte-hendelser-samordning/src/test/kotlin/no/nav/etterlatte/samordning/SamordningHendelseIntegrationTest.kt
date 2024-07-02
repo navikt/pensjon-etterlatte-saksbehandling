@@ -5,12 +5,13 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
+import no.nav.etterlatte.kafka.KafkaContainerHelper
+import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
+import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaProducer
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.samordning.KafkaContainerHelper.Companion.kafkaContainer
-import no.nav.etterlatte.samordning.KafkaContainerHelper.Companion.kafkaProducer
 import no.nav.etterlatte.samordning.KafkaEnvironment.JsonDeserializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -19,8 +20,6 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException
-import org.testcontainers.shaded.org.apache.commons.lang3.SerializationException
 import java.util.Properties
 import java.util.UUID
 
@@ -115,8 +114,8 @@ class SamJsonSerializer : Serializer<SamordningVedtakHendelse> {
     ): ByteArray {
         try {
             return objectMapper.writeValueAsBytes(data)
-        } catch (e: JsonProcessingException) {
-            throw SerializationException("Error serializing JSON message", e)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Error serializing JSON message", e)
         }
     }
 }

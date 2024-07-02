@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning
+package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

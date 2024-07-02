@@ -30,4 +30,5 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }

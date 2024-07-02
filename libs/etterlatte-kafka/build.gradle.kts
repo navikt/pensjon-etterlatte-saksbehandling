@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm")
     id("etterlatte.libs")
+    id("java-library")
+    id("java-test-fixtures")
 }
 
 repositories {
@@ -23,6 +25,10 @@ dependencies {
     implementation(libs.kafka.clients)
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.kafka.avroserializer)
+
+    testFixturesImplementation(libs.test.testcontainer.kafka)
+
+    testFixturesImplementation(libs.ktor2.servercontentnegotiation)
 }
 
 tasks {

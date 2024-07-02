@@ -22,6 +22,7 @@ import org.testcontainers.utility.DockerImageName
 
 class KafkaContainerHelper {
     companion object {
+        const val CLIENT_ID = "etterlatte-v1"
         const val GROUP_ID = "etterlatte-v1"
 
         fun kafkaContainer(topic: String) =
@@ -43,47 +44,6 @@ class KafkaContainerHelper {
             adminClient.createTopics(newTopics)
         }
 
-        fun <T> KafkaContainer.kafkaProducer(
-            klientId: String,
-            serialiserJson: Boolean,
-        ) = object : KafkaProdusent<T> {
-            val serializer =
-                if (serialiserJson) {
-                    JsonSerializer<T>()
-                } else {
-                    StringSerializer()
-                }
-
-            private val produsent =
-                KafkaProducer<String, T>(
-                    mapOf(
-                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to this@kafkaProducer.bootstrapServers,
-                        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to serializer::class.java,
-                        ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
-                        ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
-                        ProducerConfig.CLIENT_ID_CONFIG to klientId,
-                    ),
-                )
-
-            override fun sendMelding(
-                topic: String,
-                partition: Int,
-                nøkkel: String,
-                verdi: T,
-            ) {
-                runBlocking(context = Dispatchers.IO) {
-                    produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
-                }
-            }
-
-            override fun sendMelding(
-                topic: String,
-                nøkkel: String,
-                verdi: T,
-            ) = sendMelding(topic, 1, nøkkel, verdi)
-        }
-
         fun KafkaContainer.kafkaKonsument(klientId: String) =
             KafkaConsumer<String, String>(
                 mapOf(
@@ -101,19 +61,44 @@ class KafkaContainerHelper {
     }
 }
 
-interface KafkaProdusent<T> {
-    fun sendMelding(
-        topic: String,
-        nøkkel: String,
-        verdi: T,
-    )
+class KafkaProducerTestImpl<T>(
+    serialiserJson: Boolean,
+    kafkaContainer: KafkaContainer,
+) {
+    private val serializer =
+        if (serialiserJson) {
+            JsonSerializer<T>()
+        } else {
+            StringSerializer()
+        }
+    private val produsent =
+        KafkaProducer<String, T>(
+            mapOf(
+                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaContainer.bootstrapServers,
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to serializer::class.java,
+                ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
+                ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
+                ProducerConfig.CLIENT_ID_CONFIG to KafkaContainerHelper.CLIENT_ID,
+            ),
+        )
 
     fun sendMelding(
         topic: String,
         partition: Int,
         nøkkel: String,
         verdi: T,
-    )
+    ) {
+        runBlocking(context = Dispatchers.IO) {
+            produsent.send(ProducerRecord(topic, nøkkel, verdi)).get()
+        }
+    }
+
+    fun sendMelding(
+        topic: String,
+        nøkkel: String,
+        verdi: T,
+    ) = sendMelding(topic, 1, nøkkel, verdi)
 }
 
 class JsonSerializer<T> : Serializer<T> {

@@ -7,7 +7,7 @@ import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.KafkaContainerHelper
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
-import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaProducer
+import no.nav.etterlatte.kafka.KafkaProducerTestImpl
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.kafka.startLytting
@@ -50,7 +50,7 @@ class SamordningHendelseIntegrationTest {
                 handler = SamordningHendelseHandler(rapidsKafkaProducer),
             )
 
-        val produsent = kafkaContainer.kafkaProducer<SamordningVedtakHendelse>(klientId, true)
+        val produsent = KafkaProducerTestImpl<SamordningVedtakHendelse>(true, kafkaContainer)
         produsent.sendMelding(
             SAMORDNINGVEDTAK_HENDELSE_TOPIC,
             1,

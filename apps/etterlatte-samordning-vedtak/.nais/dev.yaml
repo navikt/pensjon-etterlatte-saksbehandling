@@ -9,7 +9,7 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # Skru av etterhvert, skal nås via etterlatte-gw
+    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # For TP-leverandører
     - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
   liveness:
     path: /health/isalive

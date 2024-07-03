@@ -4,13 +4,12 @@ import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, s
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
@@ -194,9 +193,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
             )}
             {trygdetider.length > 1 && visFlereTrygdetider && (
               <>
-                <Heading size="medium" level="2">
-                  Det finnes flere avdøde - husk å oppdatere begge to
-                </Heading>
+                <Box maxWidth="fit-content">
+                  <Alert variant="info">Det finnes flere avdøde, husk å oppdatere for alle</Alert>
+                </Box>
 
                 <Tabs defaultValue={trygdetider[0].ident}>
                   <Tabs.List>

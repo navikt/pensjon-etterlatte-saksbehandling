@@ -81,9 +81,10 @@ internal fun Route.behandlingRoutes(
             throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
         }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+            val skalKopiere = call.receive<Boolean>()
             val behandlingOgOppgave =
                 inTransaction {
-                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
+                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiere)
                 }
             call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }

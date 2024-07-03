@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -378,7 +379,7 @@ class PesysKlientTest : PesysKlient {
 }
 
 class KrrklientTest : KrrKlient {
-    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? =
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon =
         DigitalKontaktinformasjon(
             personident = "",
             aktiv = true,
@@ -406,6 +407,15 @@ class AxsysKlientTest : AxsysKlient {
         get() = "endpoint"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+}
+
+class VilkaarsvurderingTest : VilkaarsvurderingKlient {
+    override suspend fun kopierVilkaarsvurdering(
+        kopierTilBehandling: UUID,
+        kopierFraBehandling: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

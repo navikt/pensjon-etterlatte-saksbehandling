@@ -97,7 +97,7 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler(harRolleEgenAnsatt = true))
 
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
@@ -121,7 +121,7 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler("ident", harRolleStrengtFortrolig = true))
 
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
@@ -145,7 +145,7 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
@@ -169,7 +169,7 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
@@ -193,7 +193,7 @@ internal class BehandlingServiceImplTest {
     fun `skal hente behandlinger i sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
                 foerstegangsbehandling(sakId = 1),
@@ -626,7 +626,7 @@ internal class BehandlingServiceImplTest {
                 revurderingAarsak = Revurderingaarsak.REGULERING,
             )
 
-        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
+        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
         assertEquals(behandling1, behandlingService.hentSisteIverksatte(1))
     }
@@ -634,7 +634,7 @@ internal class BehandlingServiceImplTest {
     @Test
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
         nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
-        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
@@ -695,12 +695,12 @@ internal class BehandlingServiceImplTest {
         val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
         val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
 
-        every { behandlingDaoMock.alleBehandlingerISak(sak1.id) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
                 foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
                 foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
             )
-        every { behandlingDaoMock.alleBehandlingerISak(sak2.id) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sak2.id) } returns
             listOf(
                 foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
             )
@@ -711,8 +711,8 @@ internal class BehandlingServiceImplTest {
         assertEquals(1, sakMedBehandlinger.behandlinger.size)
 
         verify(exactly = 1) {
-            behandlingDaoMock.alleBehandlingerISak(sak1.id)
-            behandlingDaoMock.alleBehandlingerISak(sak2.id)
+            behandlingDaoMock.hentBehandlingerForSak(sak1.id)
+            behandlingDaoMock.hentBehandlingerForSak(sak2.id)
         }
     }
 
@@ -722,7 +722,7 @@ internal class BehandlingServiceImplTest {
 
         val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
 
-        every { behandlingDaoMock.alleBehandlingerISak(sak.id) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(
                 foerstegangsbehandling(
                     sakId = sak.id,
@@ -735,7 +735,7 @@ internal class BehandlingServiceImplTest {
         assertEquals(sak.id, sakMedBehandlinger.sak.id)
         assertEquals(1, sakMedBehandlinger.behandlinger.size)
 
-        verify(exactly = 1) { behandlingDaoMock.alleBehandlingerISak(sak.id) }
+        verify(exactly = 1) { behandlingDaoMock.hentBehandlingerForSak(sak.id) }
     }
 
     @Test
@@ -825,7 +825,7 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
-        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns tidligereBehandlinger
+        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger
     }
 
     private fun mockPersongalleri() =

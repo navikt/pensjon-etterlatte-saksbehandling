@@ -64,7 +64,7 @@ val beregnBarnepensjon =
         sats.multiply(trygdetidsfaktor)
     }
 
-val beregnGunstigstBarnepensjon =
+val beregnRiktigBarnepensjonOppMotInstitusjonsopphold =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
@@ -83,6 +83,6 @@ val kroneavrundetBarnepensjonRegelMedInstitusjon =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Gjør en kroneavrunding av barnepensjonen inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON", versjon = "2"),
-    ) benytter beregnGunstigstBarnepensjon med { beregnetBarnepensjon ->
+    ) benytter beregnRiktigBarnepensjonOppMotInstitusjonsopphold med { beregnetBarnepensjon ->
         beregnetBarnepensjon.round(decimals = 0).toInteger()
     }

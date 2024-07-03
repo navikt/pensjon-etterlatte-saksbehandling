@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon
-import no.nav.etterlatte.beregning.regler.barnepensjon.beregnGunstigstBarnepensjon
+import no.nav.etterlatte.beregning.regler.barnepensjon.beregnRiktigBarnepensjonOppMotInstitusjonsopphold
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
@@ -90,7 +90,7 @@ internal class BeregnBarnepensjonTest {
     @Test
     fun `kan beregne med institusjonsopphold, 40 aars trygdetid og 3 soesken`() {
         val resultat =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull =
@@ -110,7 +110,7 @@ internal class BeregnBarnepensjonTest {
     @Test
     fun `kan beregne med institusjonsopphold, 20 aars trygdetid og 3 soesken`() {
         val resultat =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull =
@@ -131,7 +131,7 @@ internal class BeregnBarnepensjonTest {
     @Test
     fun `Skal beholde beregnet barnepensjon om institusjonsopphold gir gunstigere beregning`() {
         val resultat =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         trygdeTid = Beregningstall(2),
@@ -144,9 +144,9 @@ internal class BeregnBarnepensjonTest {
     }
 
     @Test
-    fun `kan beregneny med institusjonsopphold med vanlig reduksjon, 20 aars trygdetid på nytt regelverk`() {
+    fun `kan beregne barnepensjon med institusjonsopphold med vanlig reduksjon, 20 aars trygdetid på nytt regelverk`() {
         val resultat =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         trygdeTid = Beregningstall(20),
@@ -161,7 +161,7 @@ internal class BeregnBarnepensjonTest {
     @Test
     fun `skal ikke gi større beløp med institusjonsopphold ingen reduksjon enn vanlig søskenjustering`() {
         val resultatMedInst =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull =
@@ -177,7 +177,7 @@ internal class BeregnBarnepensjonTest {
             )
 
         val resultatUtenInst =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull =
@@ -198,7 +198,7 @@ internal class BeregnBarnepensjonTest {
     @Test
     fun `søskenjustering påvirker ikke utbetalt beløp når redusert sats gis (10 prosent av G)`() {
         val resultatMedSoeskenjustering =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull =
@@ -214,7 +214,7 @@ internal class BeregnBarnepensjonTest {
             )
 
         val resultatUtenSoeskenjustering =
-            beregnGunstigstBarnepensjon.anvend(
+            beregnRiktigBarnepensjonOppMotInstitusjonsopphold.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
                         soeskenKull = listOf(),

@@ -182,7 +182,7 @@ internal class BehandlingDaoTest(
                 status = BehandlingStatus.OPPRETTET,
             )
 
-        behandlingRepo.lagreGyldighetsproeving(gyldighetsproevingBehanding.id, gyldighetsproevingBehanding.gyldighetsproeving())
+        behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
         val lagretGyldighetsproving =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
@@ -238,13 +238,13 @@ internal class BehandlingDaoTest(
             behandlingRepo.opprettBehandling(b)
         }
 
-        var behandling = behandlingRepo.hentBehandlingerForSak(sak1)
+        var behandling = behandlingRepo.alleBehandlingerISak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
         behandlingRepo.lagreStatus(avbruttbehandling)
-        behandling = behandlingRepo.hentBehandlingerForSak(sak1)
+        behandling = behandlingRepo.alleBehandlingerISak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
     }
@@ -303,7 +303,7 @@ internal class BehandlingDaoTest(
             )
         }
 
-        val behandlinger = behandlingRepo.hentBehandlingerForSak(sak1)
+        val behandlinger = behandlingRepo.alleBehandlingerISak(sak1)
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(4, behandlinger.size) },
@@ -336,10 +336,10 @@ internal class BehandlingDaoTest(
         }
 
         val foerstegangsbehandlinger =
-            behandlingRepo.hentBehandlingerForSak(sak1).filter {
+            behandlingRepo.alleBehandlingerISak(sak1).filter {
                 it.type == BehandlingType.FØRSTEGANGSBEHANDLING
             }
-        val revurderinger = behandlingRepo.hentBehandlingerForSak(sak1).filter { it.type == BehandlingType.REVURDERING }
+        val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },
@@ -394,9 +394,9 @@ internal class BehandlingDaoTest(
             )
         }
 
-        val lagredeBehandlinger = behandlingRepo.hentBehandlingerForSak(sak1)
+        val lagredeBehandlinger = behandlingRepo.alleBehandlingerISak(sak1)
         val alleLoependeBehandlinger =
-            behandlingRepo.hentBehandlingerForSak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
+            behandlingRepo.alleBehandlingerISak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)
     }
@@ -519,7 +519,7 @@ internal class BehandlingDaoTest(
             .tilVilkaarsvurdert()
             .let {
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
-                behandlingRepo.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
+                behandlingRepo.lagreGyldighetsproving(it)
                 kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
                 behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
             }

@@ -121,6 +121,21 @@ fun klageHttpClientTest() =
         }
     }
 
+fun tilbakekrevingHttpClientTest() =
+    HttpClient(MockEngine) {
+        engine {
+            addHandler {
+                respondOk()
+            }
+        }
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(objectMapper),
+            )
+        }
+    }
+
 fun migreringHttpClientTest() =
     HttpClient(MockEngine) {
         engine {

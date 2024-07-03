@@ -8,8 +8,6 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
@@ -59,8 +57,6 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
-    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -237,10 +233,9 @@ class BehandlingFactory(
     fun opprettOmgjoeringAvslag(
         sakId: Long,
         saksbehandler: Saksbehandler,
-        skalKopiere: Boolean,
     ): Behandling {
         val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
-        val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
+        val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
         val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
         if (foerstegangsbehandlinger.isEmpty()) {
             throw AvslagOmgjoering.IngenFoerstegangsbehandling()
@@ -257,15 +252,12 @@ class BehandlingFactory(
             throw AvslagOmgjoering.HarAapenBehandling()
         }
 
-        val sisteAvslaatte =
-            behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.minByOrNull { it.behandlingOpprettet }
-
         val foerstegangsbehandlingViOmgjoerer =
             foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
-        val nyFoerstegangsbehandling =
+        val behandling =
             checkNotNull(
                 opprettFoerstegangsbehandling(
-                    behandlingerUnderBehandling = emptyList(),
+                    harBehandlingUnderbehandling = listOf(),
                     sak = sak,
                     mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
                     kilde = Vedtaksloesning.GJENNY,
@@ -275,45 +267,29 @@ class BehandlingFactory(
                 "Behandlingen vi akkurat opprettet fins ikke :("
             }
 
-        if (skalKopiere && sisteAvslaatte != null) {
-            sisteAvslaatte.kommerBarnetTilgode?.let {
-                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandling.id))
-            }
-            sisteAvslaatte.virkningstidspunkt?.let { behandlingDao.lagreNyttVirkningstidspunkt(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatte.utlandstilknytning?.let { behandlingDao.lagreUtlandstilknytning(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatte.gyldighetsproeving()?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, it) }
-            runBlocking {
-                vilkaarsvurderingKlient.kopierVilkaarsvurdering(
-                    nyFoerstegangsbehandling.id,
-                    sisteAvslaatte.id,
-                    brukerTokenInfo = saksbehandler,
-                )
-            }
-        }
-
         val persongalleri = runBlocking { grunnlagService.hentPersongalleri(foerstegangsbehandlingViOmgjoerer.id) }
-        grunnlagService.leggInnNyttGrunnlag(nyFoerstegangsbehandling, persongalleri)
+        grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
 
         val oppgave =
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                referanse = nyFoerstegangsbehandling.id.toString(),
-                sakId = nyFoerstegangsbehandling.sak.id,
+                referanse = behandling.id.toString(),
+                sakId = behandling.sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 merknad = "Omgjøring av førstegangsbehandling",
             )
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
 
         behandlingHendelser.sendMeldingForHendelseStatisitkk(
-            nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),
+            behandling.toStatistikkBehandling(persongalleri),
             BehandlingHendelseType.OPPRETTET,
         )
-        return nyFoerstegangsbehandling
+        return behandling
     }
 
     internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
-            behandlingDao.hentBehandlingerForSak(sak.id)
+            behandlingDao.alleBehandlingerISak(sak.id)
 
         return DataHentetForOpprettBehandling(
             sak = sak,
@@ -327,13 +303,13 @@ class BehandlingFactory(
     ) = sakService.finnGjeldendeEnhet(persongalleri.soeker, sakType)
 
     private fun opprettFoerstegangsbehandling(
-        behandlingerUnderBehandling: List<Behandling>,
+        harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
     ): Behandling? {
-        behandlingerUnderBehandling.forEach {
+        harBehandlingUnderbehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
             oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
         }

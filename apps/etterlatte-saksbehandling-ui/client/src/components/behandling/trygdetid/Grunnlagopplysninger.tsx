@@ -1,4 +1,3 @@
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
 import {
   IGrunnlagOpplysninger,
@@ -7,16 +6,10 @@ import {
   oppdaterOpplysningsgrunnlag,
 } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { Alert, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-
-const InfoWrapperWithGap = styled.div`
-  display: flex;
-  gap: 20px;
-  padding: 2em 0 2em 0;
-`
 
 export const Grunnlagopplysninger = ({
   trygdetid,
@@ -28,20 +21,25 @@ export const Grunnlagopplysninger = ({
   redigerbar: boolean
 }) => {
   const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
-  return visDifferanse ? (
-    <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
-  ) : (
-    <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+  return (
+    <VStack gap="4">
+      <Heading size="medium">Grunnlagsopplysninger</Heading>
+      {visDifferanse ? (
+        <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
+      ) : (
+        <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+      )}
+    </VStack>
   )
 }
 
 const OpplysningerTabell = ({ opplysninger }: { opplysninger: IGrunnlagOpplysninger }) => (
-  <InfoWrapperWithGap>
+  <HStack gap="24">
     <Opplysningsgrunnlag label="Fødselsdato" opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
     <Opplysningsgrunnlag label="16 år" opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
     <Opplysningsgrunnlag label="Dødsdato" opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />
     <Opplysningsgrunnlag label="66 år" opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
-  </InfoWrapperWithGap>
+  </HStack>
 )
 
 const Opplysningsgrunnlag = ({
@@ -51,15 +49,19 @@ const Opplysningsgrunnlag = ({
   label: string
   opplysningsgrunnlag: IOpplysningsgrunnlag | undefined
 }) => (
-  <Info
-    label={label}
-    tekst={opplysningsgrunnlag?.opplysning ? formaterDato(opplysningsgrunnlag.opplysning) : 'Ikke registrert'}
-    undertekst={
-      opplysningsgrunnlag?.kilde
-        ? opplysningsgrunnlag?.kilde.type + ': ' + formaterDato(opplysningsgrunnlag?.kilde.tidspunkt)
-        : 'Ikke registrert'
-    }
-  />
+  <>
+    <VStack>
+      <Label size="small">{label}</Label>
+      <BodyShort>
+        {opplysningsgrunnlag?.opplysning ? formaterDato(opplysningsgrunnlag.opplysning) : 'Ikke registrert'}
+      </BodyShort>
+      <Detail>
+        {opplysningsgrunnlag?.kilde
+          ? opplysningsgrunnlag?.kilde.type + ': ' + formaterDato(opplysningsgrunnlag?.kilde.tidspunkt)
+          : 'Ikke registrert'}
+      </Detail>
+    </VStack>
+  </>
 )
 
 const DifferanseVisning = ({
@@ -74,10 +76,11 @@ const DifferanseVisning = ({
 
   return (
     <>
-      <OppdatertGrunnlagAlert variant="warning">
-        OBS! Grunnlaget for trygdetiden har blitt oppdatert. <br />
-        Sjekk at både faktisk og fremtidig trygdetid er korrekt.
-      </OppdatertGrunnlagAlert>
+      <Box maxWidth="42.5rem">
+        <Alert variant="warning">
+          OBS! Grunnlaget for trygdetiden har blitt oppdatert. Sjekk at både faktisk og fremtidig trygdetid er korrekt.
+        </Alert>
+      </Box>
 
       <Heading size="small" level="4">
         Eksisterende grunnlag
@@ -89,22 +92,24 @@ const DifferanseVisning = ({
       </Heading>
       <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
 
-      <Button
-        loading={isPending(oppdatertTrygdetid)}
-        variant="primary"
-        onClick={() =>
-          oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdatertTrygdetid) => {
-            onOppdatert(oppdatertTrygdetid)
-          })
-        }
-      >
-        Bruk nytt grunnlag
-      </Button>
+      <div>
+        <Button
+          loading={isPending(oppdatertTrygdetid)}
+          variant="primary"
+          size="small"
+          onClick={() =>
+            oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdatertTrygdetid) => {
+              onOppdatert(oppdatertTrygdetid)
+            })
+          }
+        >
+          Bruk nytt grunnlag
+        </Button>
+      </div>
     </>
   )
 }
 
 export const OppdatertGrunnlagAlert = styled(Alert)`
-  margin: 2em 4em 0 4em;
-  max-width: fit-content;
+  max-width: 42.5rem;
 `

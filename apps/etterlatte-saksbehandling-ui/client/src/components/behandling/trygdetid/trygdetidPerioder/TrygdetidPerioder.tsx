@@ -97,7 +97,7 @@ export const TrygdetidPerioder = ({
             oppdaterTrygdetid(trygdetid)
           }}
           avbryt={() => setVisRedigerTrydgetid(initialVisRedigerTrygdetid)}
-          trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+          trygdetidGrunnlagType={trygdetidGrunnlagType}
           landListe={landListe}
         />
       )}

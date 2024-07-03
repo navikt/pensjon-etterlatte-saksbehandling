@@ -1,6 +1,12 @@
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
-import { ILand, ITrygdetid, overstyrTrygdetid, setTrygdetidYrkesskade } from '~shared/api/trygdetid'
+import {
+  ILand,
+  ITrygdetid,
+  ITrygdetidGrunnlagType,
+  overstyrTrygdetid,
+  setTrygdetidYrkesskade,
+} from '~shared/api/trygdetid'
 import { OverstyrtTrygdetid } from '~components/behandling/trygdetid/OverstyrtTrygdetid'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -13,8 +19,7 @@ import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { FaktiskTrygdetid } from '~components/behandling/trygdetid/faktiskTrygdetid/FaktiskTrygdetid'
-import { FremtidigTrygdetid } from '~components/behandling/trygdetid/fremtidigTrygdetid/FremtidigTrygdetid'
+import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
 
 interface Props {
   redigerbar: boolean
@@ -95,17 +100,19 @@ export const EnkelPersonTrygdetid = (props: Props) => {
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 
-          <FaktiskTrygdetid
+          <TrygdetidPerioder
             trygdetid={trygdetid}
             oppdaterTrygdetid={oppdaterTrygdetid}
-            redigerbar={redigerbar}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             landListe={landListe}
+            redigerbar={redigerbar}
           />
 
-          <FremtidigTrygdetid
+          <TrygdetidPerioder
             trygdetid={trygdetid}
             oppdaterTrygdetid={oppdaterTrygdetid}
-            landListe={landListe}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             redigerbar={redigerbar}
           />
 

@@ -1,27 +1,31 @@
 import React, { Dispatch, SetStateAction } from 'react'
+import { ILand, ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType } from '~shared/api/trygdetid'
+import { isPending, Result } from '~shared/api/apiUtils'
+import { VisRedigerTrygdetid } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
 import { BodyShort, Box, Button, Detail, HStack, Label, Table } from '@navikt/ds-react'
-import { ILand, ITrygdetid, ITrygdetidGrunnlag } from '~shared/api/trygdetid'
+import { FaktiskTrygdetidExpandableRowContent } from '~components/behandling/trygdetid/trygdetidPerioder/components/FaktiskTrygdetidExpandableRowContent'
+import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { isPending, Result } from '~shared/api/apiUtils'
-import { VisRedigerTrygdetid } from '~components/behandling/trygdetid/faktiskTrygdetid/FaktiskTrygdetid'
 
 interface Props {
-  fremtidigTrygdetidPerioder: Array<ITrygdetidGrunnlag>
+  trygdetidPerioder: Array<ITrygdetidGrunnlag>
+  trygdetidGrunnlagType: ITrygdetidGrunnlagType
   slettTrygdetid: (trygdetidGrunnlagId: string) => void
   slettTrygdetidResult: Result<ITrygdetid>
   setVisRedigerTrydgetid: Dispatch<SetStateAction<VisRedigerTrygdetid>>
-  redigerbar: boolean
   landListe: ILand[]
+  redigerbar: boolean
 }
 
-export const FremtidigTrygdetidTable = ({
-  fremtidigTrygdetidPerioder,
+export const TrygdetidPerioderTable = ({
+  trygdetidPerioder,
+  trygdetidGrunnlagType,
+  setVisRedigerTrydgetid,
   slettTrygdetid,
   slettTrygdetidResult,
-  setVisRedigerTrydgetid,
-  redigerbar,
   landListe,
+  redigerbar,
 }: Props) => {
   return (
     <Table size="small">
@@ -37,31 +41,35 @@ export const FremtidigTrygdetidTable = ({
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {!!fremtidigTrygdetidPerioder?.length ? (
-          fremtidigTrygdetidPerioder.map((fremtidigTrygdetidPeriode: ITrygdetidGrunnlag, index: number) => {
+        {!!trygdetidPerioder?.length ? (
+          trygdetidPerioder.map((trygdetidPeriode: ITrygdetidGrunnlag, index: number) => {
             return (
               <Table.ExpandableRow
                 key={index}
                 content={
-                  <Box maxWidth="42.5rem">
-                    <Label>Begrunnelse</Label>
-                    <BodyShort>{fremtidigTrygdetidPeriode.begrunnelse}</BodyShort>
-                  </Box>
+                  trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK ? (
+                    <FaktiskTrygdetidExpandableRowContent trygdetidPeriode={trygdetidPeriode} />
+                  ) : (
+                    <Box maxWidth="42.5rem">
+                      <Label>Begrunnelse</Label>
+                      <BodyShort>{trygdetidPeriode.begrunnelse}</BodyShort>
+                    </Box>
+                  )
                 }
               >
                 <Table.DataCell>
-                  {landListe.find((land) => land.isoLandkode === fremtidigTrygdetidPeriode.bosted)?.beskrivelse.tekst}
+                  {landListe.find((land) => land.isoLandkode === trygdetidPeriode.bosted)?.beskrivelse.tekst}
                 </Table.DataCell>
-                <Table.DataCell>{formaterDato(fremtidigTrygdetidPeriode.periodeFra)}</Table.DataCell>
-                <Table.DataCell>{formaterDato(fremtidigTrygdetidPeriode.periodeTil)}</Table.DataCell>
+                <Table.DataCell>{formaterDato(trygdetidPeriode.periodeFra)}</Table.DataCell>
+                <Table.DataCell>{formaterDato(trygdetidPeriode.periodeTil)}</Table.DataCell>
                 <Table.DataCell>
-                  {fremtidigTrygdetidPeriode.beregnet
-                    ? `${fremtidigTrygdetidPeriode.beregnet.aar} år, ${fremtidigTrygdetidPeriode.beregnet.maaneder} måneder, ${fremtidigTrygdetidPeriode.beregnet.dager} dager`
+                  {trygdetidPeriode.beregnet
+                    ? `${trygdetidPeriode.beregnet.aar} år, ${trygdetidPeriode.beregnet.maaneder} måneder, ${trygdetidPeriode.beregnet.dager} dager`
                     : '-'}
                 </Table.DataCell>
                 <Table.DataCell>
-                  <BodyShort>{fremtidigTrygdetidPeriode.kilde.ident}</BodyShort>
-                  <Detail>Saksbehandler: {formaterDato(fremtidigTrygdetidPeriode.kilde.tidspunkt)}</Detail>
+                  <BodyShort>{trygdetidPeriode.kilde.ident}</BodyShort>
+                  <Detail>Saksbehandler: {formaterDato(trygdetidPeriode.kilde.tidspunkt)}</Detail>
                 </Table.DataCell>
                 {redigerbar && (
                   <Table.DataCell>
@@ -70,9 +78,7 @@ export const FremtidigTrygdetidTable = ({
                         size="small"
                         variant="secondary"
                         icon={<PencilIcon aria-hidden />}
-                        onClick={() =>
-                          setVisRedigerTrydgetid({ vis: true, trydgetidGrunnlagId: fremtidigTrygdetidPeriode.id })
-                        }
+                        onClick={() => setVisRedigerTrydgetid({ vis: true, trydgetidGrunnlagId: trygdetidPeriode.id })}
                       >
                         Rediger
                       </Button>
@@ -81,7 +87,7 @@ export const FremtidigTrygdetidTable = ({
                         variant="danger"
                         icon={<TrashIcon aria-hidden />}
                         loading={isPending(slettTrygdetidResult)}
-                        onClick={() => slettTrygdetid(`${fremtidigTrygdetidPeriode.id}`)}
+                        onClick={() => slettTrygdetid(`${trygdetidPeriode.id}`)}
                       >
                         Slett
                       </Button>
@@ -93,7 +99,9 @@ export const FremtidigTrygdetidTable = ({
           })
         ) : (
           <Table.Row>
-            <Table.DataCell colSpan={redigerbar ? 7 : 6}>Ingen perioder for fremtidig trygdetid</Table.DataCell>
+            <Table.DataCell colSpan={redigerbar ? 7 : 6}>
+              Ingen perioder for {formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid
+            </Table.DataCell>
           </Table.Row>
         )}
       </Table.Body>

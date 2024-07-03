@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -45,6 +46,8 @@ interface GrunnlagService {
     )
 
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+
+    suspend fun hentAlleSakerForPerson(fnr: String): PersonMedSakerOgRoller
 }
 
 class GrunnlagServiceImpl(
@@ -107,6 +110,8 @@ class GrunnlagServiceImpl(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
     ) = runBlocking { grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling) }
+
+    override suspend fun hentAlleSakerForPerson(fnr: String) = grunnlagKlient.hentPersonSakOgRolle(fnr)
 
     private fun grunnlagsbehovSak(
         sak: Sak,

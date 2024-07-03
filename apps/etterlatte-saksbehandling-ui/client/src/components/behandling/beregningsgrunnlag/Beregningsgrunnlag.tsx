@@ -38,25 +38,23 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
     : undefined
 
   useEffect(() => {
-    getOverstyrtBeregning(behandling.id, (result) => {
-      if (result) {
-        setOverstyrtBeregning(result)
-
-        if (!erBehandlingFerdigstilt) {
-          setVisOverstyrtBeregningGrunnlag(true)
-        }
-      }
-    })
-
-    getOverstyrBeregningGrunnlag(behandling.id, (result) => {
-      if (result) {
-        if (erBehandlingFerdigstilt) {
+    if (erBehandlingFerdigstilt) {
+      getOverstyrBeregningGrunnlag(behandling.id, (result) => {
+        if (result) {
           setVisOverstyrtBeregningGrunnlag(result.perioder.length > 0)
         }
-      }
-    })
+      })
+    } else {
+      getOverstyrtBeregning(behandling.id, (result) => {
+        if (result) {
+          setOverstyrtBeregning(result)
+          setVisOverstyrtBeregningGrunnlag(true)
+        }
+      })
+    }
   }, [])
 
+  /* For å håndtere første aktivering av overstyrt beregning */
   useEffect(() => {
     if (!erBehandlingFerdigstilt && overstyrtBeregning) {
       setVisOverstyrtBeregningGrunnlag(true)
@@ -72,7 +70,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <>
-        {isSuccess(overstyrtBeregningRest && overstyrtBeregningGrunnlagRest) && (
+        {(isSuccess(overstyrtBeregningRest) || isSuccess(overstyrtBeregningGrunnlagRest)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
               <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />

@@ -65,7 +65,7 @@ export const AvkortingInntekt = ({
 
   const fulltAar = () => {
     if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 0
       return innvilgelseFraJanuar
     } else {
       const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12

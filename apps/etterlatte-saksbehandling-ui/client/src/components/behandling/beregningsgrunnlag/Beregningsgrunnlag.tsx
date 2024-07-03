@@ -22,8 +22,8 @@ import { statusErRedigerbar } from '~components/behandling/felles/utils'
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
 
-  const [overstyrtBeregningGrunnlagRest, getOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
-  const [overstyrtBeregningRest, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
+  const [overstyrtBeregningGrunnlagResponse, getOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
+  const [overstyrtBeregningResponse, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
 
   const [overstyrtBeregning, setOverstyrtBeregning] = useState<OverstyrBeregning | undefined>(undefined)
 
@@ -70,7 +70,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <>
-        {(isSuccess(overstyrtBeregningRest) || isSuccess(overstyrtBeregningGrunnlagRest)) && (
+        {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
               <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
@@ -89,7 +89,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         )}{' '}
         :
         {isFailureHandler({
-          apiResult: overstyrtBeregningRest,
+          apiResult: overstyrtBeregningResponse,
           errorMessage: 'Det oppsto en feil.',
         })}
       </>

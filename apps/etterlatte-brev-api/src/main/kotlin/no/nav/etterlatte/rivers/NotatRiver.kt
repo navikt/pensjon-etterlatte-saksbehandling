@@ -16,7 +16,7 @@ class NotatRiver(
     rapidsConnection: RapidsConnection,
     private val notatService: NyNotatService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
+    private val logger = LoggerFactory.getLogger(NotatRiver::class.java)
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET) {

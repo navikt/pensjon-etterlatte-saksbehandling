@@ -1,5 +1,5 @@
 import { Info } from '../../Info'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 

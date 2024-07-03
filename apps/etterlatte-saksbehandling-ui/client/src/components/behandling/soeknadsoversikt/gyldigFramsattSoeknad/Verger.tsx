@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { VStack } from '@navikt/ds-react'
 
 interface Props {

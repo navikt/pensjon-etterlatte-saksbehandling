@@ -97,7 +97,13 @@ function SamordningTabell({
                 {redigerbar && (
                   <Table.DataCell>
                     {!mld.svartDato && (
-                      <SamordningOppdaterMeldingModal fnr={fnr} sakId={sakId} mld={mld} refresh={refresh} />
+                      <SamordningOppdaterMeldingModal
+                        fnr={fnr}
+                        sakId={sakId}
+                        mld={mld}
+                        vedtakId={vedtak.vedtakId}
+                        refresh={refresh}
+                      />
                     )}
                   </Table.DataCell>
                 )}

@@ -584,7 +584,7 @@ class AktivitetspliktServiceTest {
                     sakId = sakId,
                     forrigeBehandling = forrigeBehandling,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                    virkningstidspunkt = request.behandlingsmaaned.atDay(1),
+                    virkningstidspunkt = request.behandlingsmaaned.atDay(1).plusMonths(1),
                     kilde = Vedtaksloesning.GJENNY,
                     persongalleri = persongalleri,
                     frist = frist,

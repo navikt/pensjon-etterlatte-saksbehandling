@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID
@@ -577,5 +578,38 @@ class VedtaksvurderingRepository(
             ).also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
+    }
+
+    fun lagreManuellBehandlingSamordningsmelding(
+        oppdatering: OppdaterSamordningsmelding,
+        brukerTokenInfo: BrukerTokenInfo,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        opprett(
+            query = """
+                    INSERT INTO samordning_manuell (opprettet_av, vedtakId, samId, refusjonskrav, kommentar) 
+                    VALUES (:opprettetAv, :vedtakId, :samId, :refusjonskrav, :kommentar)
+                    """,
+            params =
+                mapOf(
+                    "opprettetAv" to brukerTokenInfo.ident(),
+                    "vedtakId" to oppdatering.vedtakId,
+                    "samId" to oppdatering.samId,
+                    "refusjonskrav" to oppdatering.refusjonskrav,
+                    "kommentar" to oppdatering.kommentar,
+                ),
+            loggtekst = "Lagt til innslag for manuell behandling av samordningsmelding",
+        )
+    }
+
+    fun slettManuellBehandlingSamordningsmelding(
+        samId: Long,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        oppdater(
+            query = "DELETE FROM samordning_manuell WHERE samId = :samId",
+            params = mapOf("samId" to samId),
+            loggtekst = "Sletter innslag for manuell samordning pga feil ved ekstern oppdatering",
+        )
     }
 }

@@ -2,7 +2,7 @@ import { Info } from '../../Info'
 import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>

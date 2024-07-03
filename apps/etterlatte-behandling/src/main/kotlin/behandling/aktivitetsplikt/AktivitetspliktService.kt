@@ -349,7 +349,7 @@ class AktivitetspliktService(
                 }
             }
 
-        val aktivitetspliktDato = request.behandlingsmaaned.atDay(1)
+        val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
         return if (oppfyllerAktivitetsplikt(request.sakId, aktivitetspliktDato)) {
             OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
         } else {

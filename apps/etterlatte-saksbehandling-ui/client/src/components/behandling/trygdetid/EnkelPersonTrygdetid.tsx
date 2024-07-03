@@ -20,6 +20,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
+import { VStack } from '@navikt/ds-react'
 
 interface Props {
   redigerbar: boolean
@@ -95,7 +96,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   return (
     <>
       {trygdetid && (
-        <>
+        <VStack gap="12">
           <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
@@ -136,7 +137,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}
-        </>
+        </VStack>
       )}
     </>
   )

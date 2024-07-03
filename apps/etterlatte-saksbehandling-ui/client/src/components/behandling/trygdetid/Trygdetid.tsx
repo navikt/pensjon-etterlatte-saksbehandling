@@ -194,9 +194,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
             )}
             {trygdetider.length > 1 && visFlereTrygdetider && (
               <>
-                <HeadingWrapper size="medium" level="2">
+                <Heading size="medium" level="2">
                   Det finnes flere avdøde - husk å oppdatere begge to
-                </HeadingWrapper>
+                </Heading>
 
                 <Tabs defaultValue={trygdetider[0].ident}>
                   <Tabs.List>
@@ -206,18 +206,16 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                   </Tabs.List>
                   {trygdetider.map((trygdetid) => (
                     <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
-                      <HeadingWrapper size="small" level="3">
-                        Trygdetid for {mapNavn(trygdetid.ident)}
-                      </HeadingWrapper>
-
-                      <EnkelPersonTrygdetid
-                        redigerbar={redigerbar}
-                        behandling={behandling}
-                        trygdetid={trygdetid}
-                        landListe={landListe}
-                        virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-                        fetchTrygdetider={fetchTrygdetider}
-                      />
+                      <Box paddingBlock="6 0">
+                        <EnkelPersonTrygdetid
+                          redigerbar={redigerbar}
+                          behandling={behandling}
+                          trygdetid={trygdetid}
+                          landListe={landListe}
+                          virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+                          fetchTrygdetider={fetchTrygdetider}
+                        />
+                      </Box>
                     </Tabs.Panel>
                   ))}
                 </Tabs>

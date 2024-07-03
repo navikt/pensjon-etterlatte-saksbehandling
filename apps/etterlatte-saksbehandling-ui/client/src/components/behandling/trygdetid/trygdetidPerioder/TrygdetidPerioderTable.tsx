@@ -100,7 +100,7 @@ export const TrygdetidPerioderTable = ({
         ) : (
           <Table.Row>
             <Table.DataCell colSpan={redigerbar ? 7 : 6}>
-              Ingen perioder for {formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid
+              Ingen perioder for {formaterEnumTilLesbarString(trygdetidGrunnlagType).toLowerCase()} trygdetid
             </Table.DataCell>
           </Table.Row>
         )}

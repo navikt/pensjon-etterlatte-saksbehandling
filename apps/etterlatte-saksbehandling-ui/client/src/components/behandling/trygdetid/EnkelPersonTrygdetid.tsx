@@ -1,13 +1,6 @@
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
-import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
-import {
-  ILand,
-  ITrygdetid,
-  ITrygdetidGrunnlagType,
-  overstyrTrygdetid,
-  setTrygdetidYrkesskade,
-} from '~shared/api/trygdetid'
+import { ILand, ITrygdetid, overstyrTrygdetid, setTrygdetidYrkesskade } from '~shared/api/trygdetid'
 import { OverstyrtTrygdetid } from '~components/behandling/trygdetid/OverstyrtTrygdetid'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -21,6 +14,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { FaktiskTrygdetid } from '~components/behandling/trygdetid/faktiskTrygdetid/FaktiskTrygdetid'
+import { FremtidigTrygdetid } from '~components/behandling/trygdetid/fremtidigTrygdetid/FremtidigTrygdetid'
 
 interface Props {
   redigerbar: boolean
@@ -108,13 +102,13 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             landListe={landListe}
           />
 
-          <TrygdetidGrunnlagListe
+          <FremtidigTrygdetid
             trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            oppdaterTrygdetid={oppdaterTrygdetid}
+            landListe={landListe}
             redigerbar={redigerbar}
           />
+
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
             sakType={behandling.sakType}

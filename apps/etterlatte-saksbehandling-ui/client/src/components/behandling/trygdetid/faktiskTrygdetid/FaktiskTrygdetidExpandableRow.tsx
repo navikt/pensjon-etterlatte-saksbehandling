@@ -47,7 +47,7 @@ export const FaktiskTrygdetidExpandableRow = ({
       }
     >
       <Table.DataCell>
-        {landListe.find((land) => land.isoLandkode == faktiskTrygdetidPeriode.bosted)?.beskrivelse.tekst}
+        {landListe.find((land) => land.isoLandkode === faktiskTrygdetidPeriode.bosted)?.beskrivelse.tekst}
       </Table.DataCell>
       <Table.DataCell>{formaterDato(faktiskTrygdetidPeriode.periodeFra)}</Table.DataCell>
       <Table.DataCell>{formaterDato(faktiskTrygdetidPeriode.periodeTil)}</Table.DataCell>

@@ -21,7 +21,9 @@ class NotatRiver(
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET) {
             validate { it.requireKey("sakId") }
+            validate { it.requireKey("vedtakId") }
             validate { it.requireKey("samordningsmeldingId") }
+            validate { it.requireKey("saksbehandlerId") }
             validate { it.requireKey("kommentar") }
         }
     }

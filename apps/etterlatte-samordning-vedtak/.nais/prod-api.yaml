@@ -9,8 +9,8 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.nav.no"   # Skru av etterhvert, skal nås via etterlatte-gw
-    - "https://etterlatte-samordning-vedtak.intern.nav.no"
+    - "https://etterlatte-api.nav.no"   # Skru av etterhvert, skal nås via etterlatte-gw
+    - "https://etterlatte-api.intern.nav.no"
   liveness:
     path: /health/isalive
     initialDelay: 5

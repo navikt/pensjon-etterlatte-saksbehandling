@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
 import no.nav.etterlatte.brev.notat.PdfGenRequest
 import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
+import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -110,36 +111,6 @@ class NyNotatService(
             )
 
         return notatRepository.hent(id)
-    }
-
-    private fun opprettSamordningsnotatPayload(params: NotatParametre?): Slate {
-        if (params !is SamordningsnotatParametre) {
-            throw IllegalArgumentException("Samordningsnotat krever SamordningsnotatParametre")
-        }
-        return Slate(
-            listOf(
-                Slate.Element(
-                    Slate.ElementType.HEADING_THREE,
-                    listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, "Manuell samordning")),
-                ),
-                Slate.Element(
-                    Slate.ElementType.BULLETED_LIST,
-                    listOf(
-                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "Saksbehandler: ${params.saksbehandlerId}"),
-                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "SaksID: ${params.sakId}"),
-                        Slate.InnerElement(Slate.ElementType.LIST_ITEM, "VedtakID: ${params.vedtakId}"),
-                        Slate.InnerElement(
-                            Slate.ElementType.LIST_ITEM,
-                            "SamordningsmeldingID: ${params.samordningsmeldingId}",
-                        ),
-                    ),
-                ),
-                Slate.Element(
-                    Slate.ElementType.PARAGRAPH,
-                    listOf(Slate.InnerElement(Slate.ElementType.PARAGRAPH, params.kommentar)),
-                ),
-            ),
-        )
     }
 
     fun oppdaterTittel(
@@ -240,11 +211,3 @@ class NotatAlleredeJournalfoert :
     )
 
 interface NotatParametre
-
-class SamordningsnotatParametre(
-    val sakId: Long,
-    val vedtakId: Long,
-    val samordningsmeldingId: Long,
-    val kommentar: String,
-    val saksbehandlerId: String,
-) : NotatParametre

@@ -2,8 +2,8 @@ package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.SamordningsnotatParametre
 import no.nav.etterlatte.brev.notat.NotatMal
+import no.nav.etterlatte.brev.notat.SamordningsnotatParametre
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging

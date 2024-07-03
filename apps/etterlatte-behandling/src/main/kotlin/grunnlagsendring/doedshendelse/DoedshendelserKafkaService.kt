@@ -71,7 +71,7 @@ class DoedshendelserKafkaServiceImpl(
         borIUtlandet: Boolean,
         erOver18aar: Boolean,
     ) {
-        val brevmal: String = Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_18_OG_20_VED_REGELENDRINGER.name
+        val brevmal: String = Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT.name
         val innhold =
             mapOf(
                 BOR_I_UTLAND_KEY to borIUtlandet,

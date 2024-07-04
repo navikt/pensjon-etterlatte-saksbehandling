@@ -36,12 +36,13 @@ import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -121,6 +122,7 @@ class ApplicationBuilder {
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
@@ -133,7 +135,7 @@ class ApplicationBuilder {
             grunnlagKlient,
             beregningService,
             behandlingService,
-            trygdetidKlient,
+            trygdetidService,
             adresseService,
             vilkaarsvurderingKlient,
         )
@@ -186,7 +188,7 @@ class ApplicationBuilder {
             brevDataMapperFerdigstilling,
             behandlingService,
         )
-    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidKlient)
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)

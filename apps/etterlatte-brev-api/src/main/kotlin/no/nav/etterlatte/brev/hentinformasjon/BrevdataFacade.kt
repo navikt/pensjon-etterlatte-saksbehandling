@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -52,7 +53,7 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
-    private val trygdetidKlient: TrygdetidKlient,
+    private val trygdetidService: TrygdetidService,
     private val adresseService: AdresseService,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) {
@@ -326,7 +327,7 @@ class BrevdataFacade(
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+    ) = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
 
     suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,

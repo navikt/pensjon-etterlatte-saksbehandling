@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.avsender
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Spraak
@@ -30,6 +29,4 @@ data class RedigerbarTekstRequest(
     val loependeIPesys: Boolean,
     val systemkilde: Vedtaksloesning,
     val avdoede: List<Avdoed>,
-) {
-    fun avsender() = avsender(brukerTokenInfo, forenkletVedtak, enhet)
-}
+)

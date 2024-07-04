@@ -161,7 +161,7 @@ class Brevoppretter(
                 RedigerbarTekstRequest(
                     brukerTokenInfo = bruker,
                     brevkode = kode,
-                    brevdata = brevDataMapping,
+                    brevdataMapper = brevDataMapping,
                     soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                     sakId = sakId,
                     spraak = generellBrevData.spraak,

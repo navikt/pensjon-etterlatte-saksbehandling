@@ -16,7 +16,7 @@ import java.util.UUID
 data class RedigerbarTekstRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: EtterlatteBrevKode,
-    val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+    val brevdataMapper: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     val soekerOgEventuellVerge: SoekerOgEventuellVerge,
     val sakId: Long,
     val spraak: Spraak,

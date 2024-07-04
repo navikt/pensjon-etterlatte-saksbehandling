@@ -233,8 +233,8 @@ class OversendelseBrevServiceImpl(
                             enhet,
                         )
                     },
-                    brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
-                    brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+                    brevKodeMapper = { Brevkoder.OVERSENDELSE_KLAGE },
+                    brevDataMapper = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
                 )
             }
         return pdf

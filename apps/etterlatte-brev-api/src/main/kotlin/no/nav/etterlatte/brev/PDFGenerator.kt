@@ -31,8 +31,8 @@ class PDFGenerator(
         id: BrevID,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
-        brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+        brevKodeMapper: (BrevkodeRequest) -> Brevkoder,
+        brevDataMapper: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (ForenkletVedtak?, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
@@ -45,8 +45,8 @@ class PDFGenerator(
                 id,
                 bruker,
                 avsenderRequest,
-                brevKode,
-                brevData,
+                brevKodeMapper,
+                brevDataMapper,
                 lagrePdfHvisVedtakFattet,
             )
         db.lagrePdfOgFerdigstillBrev(id, pdf)

@@ -5,9 +5,6 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
-import no.nav.etterlatte.brev.hentinformasjon.BeregningsperiodeBroekMangler
-import no.nav.etterlatte.brev.hentinformasjon.SamletTeoretiskTrygdetidMangler
-import no.nav.etterlatte.brev.hentinformasjon.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -169,3 +166,23 @@ private fun hentBenyttetTrygdetidOgProratabroek(
         BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
         null -> beregningsperiode.trygdetid to null
     }
+
+class SamletTeoretiskTrygdetidMangler :
+    UgyldigForespoerselException(
+        code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
+        detail = "Samlet teoretisk trygdetid mangler i beregningen",
+    )
+
+class BeregningsperiodeBroekMangler :
+    UgyldigForespoerselException(
+        code = "BEREGNINGSPERIODE_BROEK_MANGLER",
+        detail = "Beregningsperioden mangler brøk",
+    )
+
+class UgyldigBeregningsMetode :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_BEREGNINGS_METODE",
+        detail =
+            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+                "siden best velger mellom nasjonal eller prorata når det beregnes.",
+    )

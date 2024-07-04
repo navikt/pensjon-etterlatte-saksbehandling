@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -167,23 +166,3 @@ class BrevdataFacade(
             }
         }
 }
-
-class UgyldigBeregningsMetode :
-    UgyldigForespoerselException(
-        code = "UGYLDIG_BEREGNINGS_METODE",
-        detail =
-            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-                "siden best velger mellom nasjonal eller prorata når det beregnes.",
-    )
-
-class SamletTeoretiskTrygdetidMangler :
-    UgyldigForespoerselException(
-        code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
-        detail = "Samlet teoretisk trygdetid mangler i beregningen",
-    )
-
-class BeregningsperiodeBroekMangler :
-    UgyldigForespoerselException(
-        code = "BEREGNINGSPERIODE_BROEK_MANGLER",
-        detail = "Beregningsperioden mangler brøk",
-    )

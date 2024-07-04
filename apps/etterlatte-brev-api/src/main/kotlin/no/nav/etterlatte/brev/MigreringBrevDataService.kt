@@ -2,14 +2,14 @@ package no.nav.etterlatte.brev
 
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class MigreringBrevDataService(
-    private val brevdataFacade: BrevdataFacade,
+    private val beregningService: BeregningService,
 ) {
     suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
@@ -25,7 +25,7 @@ class MigreringBrevDataService(
                 }
 
             val utbetalingsinfo =
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     generellBrevData.behandlingId!!,
                     virkningstidspunkt,
                     brukerTokenInfo,

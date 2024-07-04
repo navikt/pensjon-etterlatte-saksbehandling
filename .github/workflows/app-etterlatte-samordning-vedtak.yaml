@@ -61,6 +61,7 @@ jobs:
 
   deploy-api-dev:
     name: dev-gcp
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read

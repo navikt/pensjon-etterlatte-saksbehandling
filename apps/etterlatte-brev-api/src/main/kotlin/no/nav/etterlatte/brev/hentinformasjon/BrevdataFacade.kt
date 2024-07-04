@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
@@ -51,7 +51,7 @@ class BrevdataFacade(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningService: BeregningService,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
     private val sakService: SakService,
     private val trygdetidKlient: TrygdetidKlient,
     private val adresseService: AdresseService,
@@ -62,7 +62,7 @@ class BrevdataFacade(
     suspend fun hentBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevutfallDto? = behandlingKlient.hentBrevutfall(behandlingId, brukerTokenInfo)
+    ): BrevutfallDto? = behandlingService.hentBrevutfall(behandlingId, brukerTokenInfo)
 
     suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
@@ -72,7 +72,7 @@ class BrevdataFacade(
     suspend fun hentEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtterbetalingDTO? = behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
+    ): EtterbetalingDTO? = behandlingService.hentEtterbetaling(behandlingId, brukerTokenInfo)
 
     suspend fun hentGenerellBrevData(
         sakId: Long,
@@ -129,7 +129,7 @@ class BrevdataFacade(
                             vedtak == null
                     )
                 ) {
-                    behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                    behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
                 } else {
                     null
                 }
@@ -268,7 +268,7 @@ class BrevdataFacade(
     suspend fun hentKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Klage = behandlingKlient.hentKlage(klageId, brukerTokenInfo)
+    ): Klage = behandlingService.hentKlage(klageId, brukerTokenInfo)
 
     suspend fun finnForrigeUtbetalingsinfo(
         sakId: Long,
@@ -277,7 +277,7 @@ class BrevdataFacade(
         sakType: SakType,
     ): Utbetalingsinfo? =
         beregningService.finnUtbetalingsinfoNullable(
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
             sakType,
@@ -314,7 +314,7 @@ class BrevdataFacade(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo? {
-        val forrigeIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
+        val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
         return beregningService.finnAvkortingsinfoNullable(
             forrigeIverksatteBehandlingId,
             sakType,
@@ -332,7 +332,7 @@ class BrevdataFacade(
     suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+    ) = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> =

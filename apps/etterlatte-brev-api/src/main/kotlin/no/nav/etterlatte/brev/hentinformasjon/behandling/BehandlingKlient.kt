@@ -122,7 +122,7 @@ class BehandlingKlient(
             }
         }
 
-    suspend fun hentKlage(
+    internal suspend fun hentKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Klage =

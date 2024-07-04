@@ -65,7 +65,9 @@ spec:
     limits:
       memory: 640Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 4
     min: 2
   env:

@@ -7,6 +7,8 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -38,12 +40,12 @@ class BrevbakerService(
                     brevkode,
                     brevdata(this),
                     adresseService.hentAvsender(
-                        generellBrevData.avsenderRequest(brukerTokenInfo),
+                        avsenderRequest(),
                     ),
-                    generellBrevData.personerISak.soekerOgEventuellVerge(),
-                    generellBrevData.sak.id,
-                    generellBrevData.spraak,
-                    generellBrevData.sak.sakType,
+                    soekerOgEventuellVerge,
+                    sakId,
+                    spraak,
+                    sakType,
                 )
             }
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
@@ -56,4 +58,10 @@ data class RedigerbarTekstRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: EtterlatteBrevKode,
     val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-)
+    val soekerOgEventuellVerge: SoekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+    val sakId: Long = generellBrevData.sak.id,
+    val spraak: Spraak = generellBrevData.spraak,
+    val sakType: SakType = generellBrevData.sak.sakType,
+) {
+    fun avsenderRequest() = generellBrevData.avsenderRequest(brukerTokenInfo)
+}

@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
@@ -40,6 +41,7 @@ data class BrevDataFerdigstillingRequest(
 )
 
 class BrevDataMapperFerdigstillingVedtak(
+    private val beregningService: BeregningService,
     private val brevdataFacade: BrevdataFacade,
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
@@ -87,11 +89,19 @@ class BrevDataMapperFerdigstillingVedtak(
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val trygdetid = async { fetcher.hentTrygdetid() }
-        val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val utbetalingsinfo =
+            async {
+                beregningService.finnUtbetalingsinfo(
+                    behandlingId,
+                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
             barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
@@ -110,17 +120,34 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun barnepensjonRevurdering(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
-        val trygdetid = async { fetcher.hentTrygdetid() }
-        val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt!!
+        val utbetalingsinfo =
+            async {
+                beregningService.finnUtbetalingsinfo(
+                    behandlingId,
+                    virkningstidspunkt,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val forrigeUtbetalingsinfo =
+            async {
+                brevdataFacade.finnForrigeUtbetalingsinfo(
+                    generellBrevData.sak.id,
+                    virkningstidspunkt,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonRevurdering.fra(
             innholdMedVedlegg,
@@ -138,16 +165,24 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun barnepensjonInnvilgelse(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val trygdetid = async { fetcher.hentTrygdetid() }
-        val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val utbetalingsinfo =
+            async {
+                beregningService.finnUtbetalingsinfo(
+                    behandlingId,
+                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
             BarnepensjonInnvilgelseForeldreloes.fra(
@@ -189,12 +224,11 @@ class BrevDataMapperFerdigstillingVedtak(
     )
 
     private suspend fun barnepensjonOpphoer(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         BarnepensjonOpphoer.fra(
             innholdMedVedlegg,
@@ -205,15 +239,25 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun omstillingsstoenadInnvilgelse(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-        val trygdetid = async { fetcher.hentTrygdetid() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
+        val avkortingsinfo =
+            async {
+                brevdataFacade.finnAvkortingsinfo(
+                    behandlingId,
+                    generellBrevData.sak.sakType,
+                    virkningstidspunkt,
+                    generellBrevData.forenkletVedtak.type,
+                    bruker,
+                )
+            }
+        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -226,17 +270,36 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun omstillingsstoenadRevurdering(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-        val forrigeAvkortingsinfo = async { fetcher.hentForrigeAvkortinginfo() }
-        val trygdetid = async { fetcher.hentTrygdetid() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
-        val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
+        val avkortingsinfo =
+            async {
+                brevdataFacade.finnAvkortingsinfo(
+                    behandlingId,
+                    generellBrevData.sak.sakType,
+                    virkningstidspunkt,
+                    generellBrevData.forenkletVedtak.type,
+                    bruker,
+                )
+            }
+        val forrigeAvkortingsinfo =
+            async {
+                brevdataFacade.finnForrigeAvkortingsinfo(
+                    generellBrevData.sak.id,
+                    generellBrevData.sak.sakType,
+                    virkningstidspunkt,
+                    generellBrevData.forenkletVedtak.type,
+                    bruker,
+                )
+            }
+        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
+        val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
@@ -254,12 +317,11 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun omstillingsstoenadOpphoer(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         OmstillingsstoenadOpphoer.fra(
             innholdMedVedlegg,

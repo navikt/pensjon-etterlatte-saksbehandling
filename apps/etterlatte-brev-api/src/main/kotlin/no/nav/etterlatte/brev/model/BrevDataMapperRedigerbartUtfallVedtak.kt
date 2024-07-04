@@ -75,12 +75,20 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         }
 
     private suspend fun barnepensjonInnvilgelse(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val utbetalingsinfo =
+            async {
+                brevdataFacade.finnUtbetalingsinfo(
+                    behandlingId,
+                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
             BarnepensjonForeldreloesRedigerbar.fra(
@@ -98,11 +106,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     }
 
     private suspend fun barnepensjonOpphoer(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
             requireNotNull(brevutfall.await()),
@@ -110,13 +117,21 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     }
 
     private suspend fun barnepensjonEndring(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
+        val utbetalingsinfo =
+            async {
+                brevdataFacade.finnUtbetalingsinfo(
+                    behandlingId,
+                    generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
 
         BarnepensjonRevurderingRedigerbartUtfall.fra(
             etterbetaling.await(),
@@ -129,10 +144,28 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val utbetalingsinfo =
+            async {
+                brevdataFacade.finnUtbetalingsinfo(
+                    behandlingId,
+                    generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
+                    bruker,
+                    generellBrevData.sak.sakType,
+                )
+            }
+        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
+        val avkortingsinfo =
+            async {
+                brevdataFacade.finnAvkortingsinfo(
+                    behandlingId,
+                    generellBrevData.sak.sakType,
+                    virkningstidspunkt,
+                    generellBrevData.forenkletVedtak.type,
+                    bruker,
+                )
+            }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             generellBrevData,
@@ -146,10 +179,20 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
-        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-        val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val behandlingId = generellBrevData.behandlingId!!
+        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
+        val avkortingsinfo =
+            async {
+                brevdataFacade.finnAvkortingsinfo(
+                    behandlingId,
+                    generellBrevData.sak.sakType,
+                    virkningstidspunkt,
+                    generellBrevData.forenkletVedtak.type,
+                    bruker,
+                )
+            }
+        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
@@ -162,8 +205,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
-        val brevutfall = async { fetcher.hentBrevutfall() }
+        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
             requireNotNull(brevutfall.await()),

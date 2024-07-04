@@ -30,6 +30,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -84,6 +85,7 @@ internal class VedtaksbrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val brevdataFacade = mockk<BrevdataFacade>()
+    private val beregningService = mockk<BeregningService>()
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
@@ -103,7 +105,7 @@ internal class VedtaksbrevServiceTest {
             redigerbartVedleggHenter,
         )
 
-    private val brevDataMapperFerdigstilling = spyk(BrevDataMapperFerdigstillingVedtak(brevdataFacade))
+    private val brevDataMapperFerdigstilling = spyk(BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade))
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
@@ -296,7 +298,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
+            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
             coEvery { brevdataFacade.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns

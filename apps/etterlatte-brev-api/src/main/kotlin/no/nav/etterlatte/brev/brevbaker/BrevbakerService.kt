@@ -1,24 +1,13 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.EtterlatteBrevKode
+import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.avsender
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
-import java.util.UUID
 
 class BrevbakerService(
     private val brevbakerKlient: BrevbakerKlient,
@@ -41,39 +30,17 @@ class BrevbakerService(
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
-            with(redigerbarTekstRequest) {
-                BrevbakerRequest.fra(
-                    brevkode,
-                    brevdata(this),
-                    adresseService.hentAvsender(avsender()),
-                    soekerOgEventuellVerge,
-                    sakId,
-                    spraak,
-                    sakType,
-                )
-            }
+            BrevbakerRequest.fra(
+                redigerbarTekstRequest.brevkode,
+                redigerbarTekstRequest.brevdata(redigerbarTekstRequest),
+                adresseService.hentAvsender(redigerbarTekstRequest.avsender()),
+                redigerbarTekstRequest.soekerOgEventuellVerge,
+                redigerbarTekstRequest.sakId,
+                redigerbarTekstRequest.spraak,
+                redigerbarTekstRequest.sakType,
+            )
+
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
-}
-
-data class RedigerbarTekstRequest(
-    val brukerTokenInfo: BrukerTokenInfo,
-    val brevkode: EtterlatteBrevKode,
-    val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-    val soekerOgEventuellVerge: SoekerOgEventuellVerge,
-    val sakId: Long,
-    val spraak: Spraak,
-    val sakType: SakType,
-    val forenkletVedtak: ForenkletVedtak?,
-    val enhet: String,
-    val utlandstilknytningType: UtlandstilknytningType?,
-    val revurderingaarsak: Revurderingaarsak?,
-    val behandlingId: UUID?,
-    val erForeldreloes: Boolean,
-    val loependeIPesys: Boolean,
-    val systemkilde: Vedtaksloesning,
-    val avdoede: List<Avdoed>,
-) {
-    fun avsender() = avsender(brukerTokenInfo, forenkletVedtak, enhet)
 }

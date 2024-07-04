@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageService
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -73,6 +74,8 @@ class BehandlingFactoryTest {
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
+    private val kommerBarnetTilGodeServiceMock = mockk<KommerBarnetTilGodeService>()
+    private val vilkaarsvurderingKlientMock = mockk<VilkaarsvurderingKlient>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
     private val grunnlagService = mockk<GrunnlagServiceImpl>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>()
@@ -124,8 +127,8 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             mockk(),
-            vilkaarsvurderingKlient = mockk(),
-            kommerBarnetTilGodeService = mockk(),
+            vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
+            kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
         )
 
     @BeforeEach
@@ -144,6 +147,8 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             grunnlagService,
+            vilkaarsvurderingKlientMock,
+            kommerBarnetTilGodeServiceMock,
         )
         clearAllMocks()
     }
@@ -509,6 +514,75 @@ class BehandlingFactoryTest {
         verify {
             sakServiceMock.finnSak(sak.id)
             behandlingDaoMock.hentBehandlingerForSak(sak.id)
+        }
+    }
+
+    @Test
+    fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering hvis flagg er satt`() {
+        val sak = sak()
+        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+        val revurdering =
+            revurdering(
+                sak = sak,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                status = BehandlingStatus.AVBRUTT,
+            )
+
+        every { sakServiceMock.finnSak(sak.id) } returns sak
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
+        every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
+        every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
+        every { kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any()) } just Runs
+        coEvery { vilkaarsvurderingKlientMock.kopierVilkaarsvurdering(any(), any(), any()) } just Runs
+
+        val opprettBehandlingSlot = slot<OpprettBehandling>()
+        every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
+        coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } just runs
+        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+            OppgaveIntern(
+                id = UUID.randomUUID(),
+                status = Status.PAA_VENT,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                saksbehandler = null,
+                forrigeSaksbehandlerIdent = null,
+                referanse = "",
+                merknad = null,
+                opprettet = Tidspunkt.now(),
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fnr = null,
+                frist = null,
+            )
+        every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
+
+        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, true)
+        opprettetBehandling.sak.id shouldBe sak.id
+        opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+        opprettBehandlingSlot.captured.sakId shouldBe sak.id
+        opprettBehandlingSlot.captured.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+
+        verify {
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.hentBehandlingerForSak(sak.id)
+            behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any())
+            oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+        }
+        coVerify {
+            vilkaarsvurderingKlientMock.kopierVilkaarsvurdering(any(), any(), any())
+            grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
         }
     }
 

@@ -19,6 +19,18 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
+fun avsenderRequest(
+    bruker: BrukerTokenInfo,
+    forenkletVedtak: ForenkletVedtak?,
+    enhet: String,
+) = forenkletVedtak?.let {
+    AvsenderRequest(
+        saksbehandlerIdent = it.saksbehandlerIdent,
+        sakenhet = it.sakenhet,
+        attestantIdent = it.attestantIdent,
+    )
+} ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = enhet)
+
 data class GenerellBrevData(
     val sak: Sak,
     val personerISak: PersonerISak,
@@ -29,14 +41,7 @@ data class GenerellBrevData(
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
 ) {
-    fun avsenderRequest(bruker: BrukerTokenInfo) =
-        forenkletVedtak?.let {
-            AvsenderRequest(
-                saksbehandlerIdent = it.saksbehandlerIdent,
-                sakenhet = it.sakenhet,
-                attestantIdent = it.attestantIdent,
-            )
-        } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
+    fun avsenderRequest(bruker: BrukerTokenInfo) = avsenderRequest(bruker, forenkletVedtak, sak.enhet)
 
     // TODO På tide å fjerne?
     // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.

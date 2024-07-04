@@ -5,12 +5,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
@@ -535,7 +535,7 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
     val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     val grunnlagKlient: GrunnlagKlient = mockk()
     val beregningService: BeregningService = mockk()
-    val behandlingKlient: BehandlingKlient = mockk()
+    val behandlingService: BehandlingService = mockk()
     val sakService: SakService = mockk()
     val trygdetidKlient: TrygdetidKlient = mockk()
     val vilkaarsvurderingKlient: VilkaarsvurderingKlient = mockk()
@@ -544,7 +544,7 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         vedtaksvurderingKlient,
         grunnlagKlient,
         beregningService,
-        behandlingKlient,
+        behandlingService,
         sakService,
         trygdetidKlient,
         addresseService,

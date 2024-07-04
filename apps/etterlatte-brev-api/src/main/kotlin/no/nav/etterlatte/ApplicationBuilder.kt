@@ -40,6 +40,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
@@ -121,6 +122,7 @@ class ApplicationBuilder {
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
     private val sakService = SakService(behandlingKlient)
+    private val behandlingService = BehandlingService(behandlingKlient)
 
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
@@ -132,7 +134,7 @@ class ApplicationBuilder {
             vedtakKlient,
             grunnlagKlient,
             beregningService,
-            behandlingKlient,
+            behandlingService,
             sakService,
             trygdetidKlient,
             adresseService,
@@ -185,12 +187,12 @@ class ApplicationBuilder {
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
-            behandlingKlient,
+            behandlingService,
         )
     private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidKlient)
 
     private val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperFerdigstillVarsel)
+        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
@@ -217,7 +219,7 @@ class ApplicationBuilder {
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
             brevdataFacade = brevdataFacade,
-            behandlingKlient = behandlingKlient,
+            behandlingService = behandlingService,
         )
 
     private val notatRepository = NotatRepository(datasource)
@@ -233,7 +235,7 @@ class ApplicationBuilder {
                 RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
             ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingKlient)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)

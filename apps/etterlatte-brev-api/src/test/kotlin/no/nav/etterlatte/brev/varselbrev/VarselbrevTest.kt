@@ -12,10 +12,10 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
@@ -97,9 +97,9 @@ class VarselbrevTest(
                 brevbaker,
                 redigerbartVedleggHenter,
             )
-        val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())
     }
 
     @Test

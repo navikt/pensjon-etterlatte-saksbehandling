@@ -21,9 +21,9 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService.BrevPayload
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -57,7 +57,7 @@ internal class BrevRouteTest {
     private val brevdistribuerer = mockk<Brevdistribuerer>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
 
     @BeforeAll
     fun before() {
@@ -273,7 +273,7 @@ internal class BrevRouteTest {
                 brevdistribuerer,
                 tilgangssjekker,
                 grunnlagKlient,
-                behandlingKlient,
+                behandlingService,
             )
         }
 

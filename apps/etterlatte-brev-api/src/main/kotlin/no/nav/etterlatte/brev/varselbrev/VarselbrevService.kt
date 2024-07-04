@@ -7,8 +7,8 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -19,7 +19,7 @@ import java.util.UUID
 internal class VarselbrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperFerdigstillVarsel: BrevDataMapperFerdigstillVarsel,
 ) {
@@ -30,7 +30,7 @@ internal class VarselbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VarselbrevResponse {
-        val sakType = behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType
+        val sakType = behandlingService.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
 
         return brevoppretter
@@ -61,7 +61,7 @@ internal class VarselbrevService(
     } else {
         val erAktivitetsplikt =
             behandlingId
-                ?.let { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) }
+                ?.let { behandlingService.hentBehandling(behandlingId, brukerTokenInfo) }
                 ?.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
 
         if (erAktivitetsplikt) {

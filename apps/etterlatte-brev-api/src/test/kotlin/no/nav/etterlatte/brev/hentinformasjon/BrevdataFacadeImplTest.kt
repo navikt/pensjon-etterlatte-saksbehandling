@@ -11,8 +11,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.mapSpraak
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
@@ -57,7 +57,7 @@ internal class BrevdataFacadeImplTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningService = mockk<BeregningService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val sakService = mockk<SakService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val adresseService = mockk<AdresseService>()
@@ -68,7 +68,7 @@ internal class BrevdataFacadeImplTest {
             vedtaksvurderingKlient,
             grunnlagKlient,
             beregningService,
-            behandlingKlient,
+            behandlingService,
             sakService,
             trygdetidKlient,
             adresseService,
@@ -91,11 +91,11 @@ internal class BrevdataFacadeImplTest {
             sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
+            behandlingService.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
-        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns lagBehandling()
-        coEvery { behandlingKlient.hentBrevutfall(any(), any()) } returns hentBrevutfall()
+        coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
+        coEvery { behandlingService.hentBehandling(any(), any()) } returns lagBehandling()
+        coEvery { behandlingService.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         val grunnlag = opprettGrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
@@ -140,7 +140,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { sakService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagKlient.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
-        coEvery { behandlingKlient.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
+        coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
 
         val generellBrevData =
             runBlocking {

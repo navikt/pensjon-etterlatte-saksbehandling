@@ -102,14 +102,14 @@ internal class VedtaksbrevServiceTest {
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, behandlingService, adresseService)
+    private val datainnhenterForBrevoppretting =
+        DatainnhenterForBrevoppretting(brevdataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
     private val brevoppretter =
         Brevoppretter(
             adresseService,
             db,
-            brevdataFacade,
             behandlingService,
-            brevbakerService,
-            redigerbartVedleggHenter,
+            datainnhenterForBrevoppretting,
         )
 
     private val brevDataMapperFerdigstilling =

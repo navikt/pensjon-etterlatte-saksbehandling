@@ -42,6 +42,8 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -56,7 +58,6 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -120,6 +121,7 @@ class ApplicationBuilder {
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
+    private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
@@ -134,7 +136,6 @@ class ApplicationBuilder {
             behandlingService,
             trygdetidKlient,
             adresseService,
-            vilkaarsvurderingKlient,
         )
 
     private val db = BrevRepository(datasource)
@@ -156,7 +157,8 @@ class ApplicationBuilder {
     private val brevDataMapperRedigerbartUtfallVedtak =
         BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, behandlingService, beregningService, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, behandlingService, brevdataFacade)
+    private val brevDataMapperFerdigstilling =
+        BrevDataMapperFerdigstillingVedtak(beregningService, behandlingService, vilkaarsvurderingService, brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 

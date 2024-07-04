@@ -1,4 +1,4 @@
-package no.nav.etterlatte.klienter
+package no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
@@ -31,7 +31,7 @@ class VilkaarsvurderingKlient(
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    suspend fun hentVilkaarsvurdering(
+    internal suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto {

@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
@@ -44,6 +45,7 @@ data class BrevDataFerdigstillingRequest(
 class BrevDataMapperFerdigstillingVedtak(
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val brevdataFacade: BrevdataFacade,
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
@@ -260,7 +262,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
-        val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -303,7 +305,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
-        val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,

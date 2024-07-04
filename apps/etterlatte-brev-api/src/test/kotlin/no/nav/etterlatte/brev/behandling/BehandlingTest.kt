@@ -13,7 +13,6 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
@@ -536,7 +535,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
     val beregningService: BeregningService = mockk()
     val behandlingService: BehandlingService = mockk()
     val trygdetidKlient: TrygdetidKlient = mockk()
-    val vilkaarsvurderingKlient: VilkaarsvurderingKlient = mockk()
 
     return BrevdataFacade(
         vedtaksvurderingKlient,
@@ -545,6 +543,5 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         behandlingService,
         trygdetidKlient,
         addresseService,
-        vilkaarsvurderingKlient,
     )
 }

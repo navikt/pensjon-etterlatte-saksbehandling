@@ -18,7 +18,6 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -36,7 +35,6 @@ import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
@@ -52,14 +50,8 @@ class BrevdataFacade(
     private val behandlingService: BehandlingService,
     private val trygdetidKlient: TrygdetidKlient,
     private val adresseService: AdresseService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
-    suspend fun hentVilkaarsvurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): VilkaarsvurderingDto? = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
     suspend fun hentGenerellBrevData(
         sakId: Long,

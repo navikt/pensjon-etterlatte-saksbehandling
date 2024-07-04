@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
@@ -90,14 +89,14 @@ class Brevoppretter(
                     sakId = sakId,
                     behandlingId = behandlingId,
                     prosessType = BrevProsessType.REDIGERBAR,
-                    soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                    mottaker = finnMottaker(generellBrevData.sak.sakType, generellBrevData.personerISak),
+                    soekerFnr = soekerFnr,
+                    mottaker = finnMottaker(sakType, personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                     brevtype = brevtype,
                 )
-            return Pair(db.opprettBrev(nyttBrev), generellBrevData.sak.enhet)
+            return Pair(db.opprettBrev(nyttBrev), enhet)
         }
 
     suspend fun hentNyttInnhold(
@@ -178,9 +177,12 @@ class Brevoppretter(
             val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData, kode.brevtype) }
 
             OpprettBrevRequest(
-                generellBrevData,
-                BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
-                innholdVedlegg.await(),
+                innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
+                innholdVedlegg = innholdVedlegg.await(),
+                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
+                sakType = generellBrevData.sak.sakType,
+                enhet = generellBrevData.sak.enhet,
+                personerISak = generellBrevData.personerISak,
             )
         }
     }
@@ -216,9 +218,12 @@ class Brevoppretter(
 }
 
 private data class OpprettBrevRequest(
-    val generellBrevData: GenerellBrevData,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val soekerFnr: String,
+    val sakType: SakType,
+    val enhet: String,
+    val personerISak: PersonerISak,
 )
 
 class KanIkkeOppretteVedtaksbrev(

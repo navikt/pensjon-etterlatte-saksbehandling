@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
 
@@ -33,7 +32,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
             loependeIPesys: Boolean,
             utlandstilknytning: Utlandstilknytning?,
             behandlingId: UUID?,
-            saksbehandlerIdent: String?,
+            erSystembruker: Boolean,
         ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
                 BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
@@ -56,7 +55,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                         "Mangler utlandstilknytning for behandling=$behandlingId"
                     }.type
 
-                if (saksbehandlerIdent == Fagsaksystem.EY.navn && defaultBrevdataOmregning.erForeldreloes) {
+                if (erSystembruker && defaultBrevdataOmregning.erForeldreloes) {
                     throw IllegalStateException(
                         "Vi har en automatisk migrering som setter foreldreløs. " +
                             "Dette skal ikke skje, siden dette brevet må redigeres av saksbehandler",

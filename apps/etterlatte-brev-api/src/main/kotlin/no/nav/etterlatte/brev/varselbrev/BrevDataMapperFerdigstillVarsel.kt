@@ -13,7 +13,6 @@ import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.erBosattUtland
 import java.time.YearMonth
 
 class BrevDataMapperFerdigstillVarsel(

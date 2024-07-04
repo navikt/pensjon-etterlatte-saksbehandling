@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselU
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.behandling.erBosattUtland
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 
@@ -31,3 +30,5 @@ object BrevDataMapperRedigerbartUtfallVarsel {
             }
     }
 }
+
+fun UtlandstilknytningType?.erBosattUtland() = this == UtlandstilknytningType.BOSATT_UTLAND

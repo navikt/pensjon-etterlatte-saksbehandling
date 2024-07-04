@@ -60,7 +60,7 @@ jobs:
     secrets: inherit
 
   deploy-api-dev:
-    name: dev-gcp
+    name: deploy-api-dev
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -76,7 +76,7 @@ jobs:
           VAR: image=${{ inputs.image }}
 
   deploy-api-prod:
-    name: prod-gcp
+    name: deploy-api-prod
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: deploy-api-dev
     runs-on: ubuntu-latest

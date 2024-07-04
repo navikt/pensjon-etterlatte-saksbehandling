@@ -60,6 +60,7 @@ jobs:
     secrets: inherit
 
   deploy-api-dev:
+    if: github.event_name != 'pull_request'
     name: deploy-api-dev
     needs: build
     runs-on: ubuntu-latest

@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
@@ -34,6 +35,7 @@ class Brevoppretter(
     private val adresseService: AdresseService,
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
+    private val behandlingService: BehandlingService,
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
@@ -49,7 +51,7 @@ class Brevoppretter(
         }
 
         if (brukerTokenInfo is Saksbehandler) {
-            val kanRedigeres = brevdataFacade.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+            val kanRedigeres = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }

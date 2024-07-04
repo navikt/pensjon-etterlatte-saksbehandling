@@ -154,9 +154,9 @@ class ApplicationBuilder {
     private val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     private val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, behandlingService, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, behandlingService, brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
@@ -166,10 +166,10 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, behandlingService)
 
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(adresseService, db, brevdataFacade, behandlingService, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)

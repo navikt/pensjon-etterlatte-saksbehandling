@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -44,11 +45,12 @@ internal class BrevServiceTest {
     private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataFacade = mockk<BrevdataFacade>()
+    private val behandlingService = mockk<BehandlingService>()
     private val pdfGenerator = mockk<PDFGenerator>()
     private val brevbakerService = mockk<BrevbakerService>()
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevDataFacade)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, behandlingService)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(adresseService, db, brevDataFacade, behandlingService, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(

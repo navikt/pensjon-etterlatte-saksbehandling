@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
@@ -58,20 +57,10 @@ class BrevdataFacade(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentBrevutfall(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BrevutfallDto? = behandlingService.hentBrevutfall(behandlingId, brukerTokenInfo)
-
     suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto? = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
-
-    suspend fun hentEtterbetaling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtterbetalingDTO? = behandlingService.hentEtterbetaling(behandlingId, brukerTokenInfo)
 
     suspend fun hentGenerellBrevData(
         sakId: Long,
@@ -82,7 +71,7 @@ class BrevdataFacade(
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingKlient.hentVedtak(it, brukerTokenInfo) } }
-            val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
+            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val grunnlag =
                 when (vedtakDeferred?.await()?.type) {

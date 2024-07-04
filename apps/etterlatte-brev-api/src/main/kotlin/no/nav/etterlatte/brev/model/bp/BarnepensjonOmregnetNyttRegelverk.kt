@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -12,9 +11,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
@@ -28,11 +25,11 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     companion object {
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
-            personerISak: PersonerISak,
             loependeIPesys: Boolean,
-            utlandstilknytning: Utlandstilknytning?,
+            utlandstilknytningType: UtlandstilknytningType?,
             behandlingId: UUID?,
             erSystembruker: Boolean,
+            erForeldreloes: Boolean,
         ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
                 BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
@@ -40,20 +37,16 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                     erBosattUtlandet = false,
                     erForeldreloes =
-                        personerISak.soeker.foreldreloes ||
-                            (
-                                personerISak.avdoede.size > 1 &&
-                                    personerISak.verge !is ForelderVerge
-                            ),
+                    erForeldreloes,
                 )
 
             // TODO På tide å fjerne?
             if (loependeIPesys) {
                 val pesysUtbetaltFoerReform = 0
                 val pesysUtenlandstilknytning =
-                    requireNotNull(utlandstilknytning) {
-                        "Mangler utlandstilknytning for behandling=$behandlingId"
-                    }.type
+                    requireNotNull(utlandstilknytningType) {
+                        "Mangler utlandstilknytning-type for behandling=$behandlingId"
+                    }
 
                 if (erSystembruker && defaultBrevdataOmregning.erForeldreloes) {
                     throw IllegalStateException(

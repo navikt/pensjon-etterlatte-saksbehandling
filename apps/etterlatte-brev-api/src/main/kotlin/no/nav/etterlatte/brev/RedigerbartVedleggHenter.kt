@@ -451,7 +451,6 @@ class RedigerbartVedleggHenter(
             payload =
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(
                     RedigerbarTekstRequest(
-                        generellBrevData = generellBrevData,
                         brukerTokenInfo = bruker,
                         brevkode = kode,
                         brevdata = { ManueltBrevData() },
@@ -463,6 +462,11 @@ class RedigerbartVedleggHenter(
                         enhet = enhet,
                         utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                         revurderingaarsak = generellBrevData.revurderingsaarsak,
+                        behandlingId = generellBrevData.behandlingId,
+                        erForeldreloes = generellBrevData.erForeldreloes(),
+                        loependeIPesys = generellBrevData.loependeIPesys(),
+                        systemkilde = generellBrevData.systemkilde,
+                        avdoede = generellBrevData.personerISak.avdoede,
                     ),
                 ),
         )

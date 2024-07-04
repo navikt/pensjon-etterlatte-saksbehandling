@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -20,7 +19,8 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbart
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -34,32 +34,37 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
-            if (generellBrevData.loependeIPesys()) {
+            if (loependeIPesys) {
                 fraPesys(
                     brukerTokenInfo = brukerTokenInfo,
-                    erForeldreloes = generellBrevData.erForeldreloes(),
-                    virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                    behandlingId = generellBrevData.behandlingId!!,
-                    sakType = generellBrevData.sak.sakType,
-                    systemkilde = generellBrevData.systemkilde,
-                    loependeIPesys = generellBrevData.loependeIPesys(),
-                    avdoede = generellBrevData.personerISak.avdoede,
-                    personerISak = generellBrevData.personerISak,
-                    utlandstilknytning = generellBrevData.utlandstilknytning,
-                    erSystembruker = generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn,
+                    erForeldreloes = erForeldreloes,
+                    virkningstidspunkt = forenkletVedtak?.virkningstidspunkt,
+                    behandlingId = behandlingId!!,
+                    sakType = sakType,
+                    systemkilde = systemkilde,
+                    loependeIPesys = true,
+                    avdoede = avdoede,
+                    utlandstilknytningType = utlandstilknytningType,
+                    erSystembruker = forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn,
+                    erForeldreloesUtenForeldreverge =
+                        soekerOgEventuellVerge.soeker.foreldreloes ||
+                            (avdoede.size > 1 && soekerOgEventuellVerge.verge !is ForelderVerge),
+                    // Er litt usikker på hvorfor denne bruker en annen foreldreløs-sjekk enn resten av koden,
+                    // men frister lite å endre på det nå når migreringa/gjenopprettinga fra pesys
+                    // nærmer seg veldig ferdig
                 )
             } else {
                 brevData(
-                    brukerTokenInfo,
-                    generellBrevData.sak.sakType,
-                    generellBrevData.forenkletVedtak?.type,
-                    generellBrevData.forenkletVedtak!!.virkningstidspunkt,
-                    generellBrevData.behandlingId!!,
-                    generellBrevData.erForeldreloes(),
-                    generellBrevData.systemkilde,
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.personerISak.avdoede,
-                    generellBrevData.forenkletVedtak.klage,
+                    brukerTokenInfo = brukerTokenInfo,
+                    sakType = sakType,
+                    vedtakType = forenkletVedtak?.type,
+                    virkningstidspunkt = forenkletVedtak!!.virkningstidspunkt,
+                    behandlingId = behandlingId!!,
+                    erForeldreloes = erForeldreloes,
+                    systemkilde = systemkilde,
+                    loependeIPesys = false,
+                    avdoede = avdoede,
+                    klage = forenkletVedtak.klage,
                 )
             }
         }
@@ -73,32 +78,32 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         systemkilde: Vedtaksloesning,
         loependeIPesys: Boolean,
         avdoede: List<Avdoed>,
-        personerISak: PersonerISak,
-        utlandstilknytning: Utlandstilknytning?,
+        utlandstilknytningType: UtlandstilknytningType?,
         erSystembruker: Boolean,
+        erForeldreloesUtenForeldreverge: Boolean,
     ): BrevDataRedigerbar {
         if (erForeldreloes) {
             return barnepensjonInnvilgelse(
-                brukerTokenInfo,
-                virkningstidspunkt,
-                behandlingId,
-                sakType,
-                erForeldreloes,
-                systemkilde,
-                loependeIPesys,
-                avdoede,
+                bruker = brukerTokenInfo,
+                virkningstidspunkt = virkningstidspunkt,
+                behandlingId = behandlingId,
+                sakType = sakType,
+                erForeldreloes = true,
+                vedtaksloesning = systemkilde,
+                loependeIPesys = loependeIPesys,
+                avdoede = avdoede,
             )
         }
         return migreringBrevDataService.opprettMigreringBrevdata(
-            brukerTokenInfo,
-            systemkilde,
-            virkningstidspunkt,
-            behandlingId,
-            sakType,
-            personerISak,
-            loependeIPesys,
-            utlandstilknytning,
-            erSystembruker,
+            brukerTokenInfo = brukerTokenInfo,
+            systemkilde = systemkilde,
+            muligVirkningstidspunkt = virkningstidspunkt,
+            behandlingId = behandlingId,
+            sakType = sakType,
+            loependeIPesys = loependeIPesys,
+            utlandstilknytningType = utlandstilknytningType,
+            erSystembruker = erSystembruker,
+            erForeldreloes = erForeldreloesUtenForeldreverge,
         )
     }
 

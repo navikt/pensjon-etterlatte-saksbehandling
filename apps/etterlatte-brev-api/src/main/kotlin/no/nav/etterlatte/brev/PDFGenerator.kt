@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -33,7 +34,7 @@ class PDFGenerator(
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
+        lagrePdfHvisVedtakFattet: (ForenkletVedtak?, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
         if (!brev.mottaker.erGyldig()) {
@@ -59,7 +60,7 @@ class PDFGenerator(
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
+        lagrePdfHvisVedtakFattet: (ForenkletVedtak?, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
 
@@ -109,7 +110,7 @@ class PDFGenerator(
 
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
-            .also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
+            .also { lagrePdfHvisVedtakFattet(generellBrevData.forenkletVedtak, brev, it) }
     }
 
     private fun hentLagretInnhold(brev: Brev) =

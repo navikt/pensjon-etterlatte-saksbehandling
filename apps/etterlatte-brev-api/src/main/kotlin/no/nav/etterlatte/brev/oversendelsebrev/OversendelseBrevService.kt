@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
@@ -73,7 +72,6 @@ class OversendelseBrevServiceImpl(
     private val brevRepository: BrevRepository,
     private val pdfGenerator: PDFGenerator,
     private val adresseService: AdresseService,
-    private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
 ) : OversendelseBrevService {

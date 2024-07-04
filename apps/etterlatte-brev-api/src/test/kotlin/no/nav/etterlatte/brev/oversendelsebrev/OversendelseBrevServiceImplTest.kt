@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
@@ -47,7 +46,6 @@ class OversendelseBrevServiceImplTest(
     val sakId = 148L
     private val behandlingId = UUID.randomUUID()
     private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
-    private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
     private val brevRepository = spyk(BrevRepository(dataSource))
     private val behandlingService = mockk<BehandlingService>()
@@ -57,7 +55,6 @@ class OversendelseBrevServiceImplTest(
             brevRepository,
             mockk(),
             adresseService,
-            brevdataFacade,
             behandlingService,
             grunnlagService,
         )

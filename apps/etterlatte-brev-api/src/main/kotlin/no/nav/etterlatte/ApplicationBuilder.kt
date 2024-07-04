@@ -224,7 +224,6 @@ class ApplicationBuilder {
             brevRepository = db,
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
-            brevdataFacade = brevdataFacade,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
         )

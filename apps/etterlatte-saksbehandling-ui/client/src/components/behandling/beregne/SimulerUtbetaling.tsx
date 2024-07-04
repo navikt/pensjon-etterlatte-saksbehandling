@@ -5,7 +5,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Heading, Table, Box, Label } from '@navikt/ds-react'
+import { BodyShort, Heading, Table, Box, Label, ErrorMessage } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
@@ -66,7 +66,12 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
         {mapResult(simuleringStatus, {
           pending: <Spinner visible={true} label="Simulerer..." />,
-          success: (simuleringrespons) => <SimuleringBeregning data={simuleringrespons} />,
+          success: (simuleringrespons) =>
+            simuleringrespons ? (
+              <SimuleringBeregning data={simuleringrespons} />
+            ) : (
+              <ErrorMessage size="small">Simuleringstjenesten ga ikke svar.</ErrorMessage>
+            ),
           error: () => <ApiErrorAlert>Feil ved simulering</ApiErrorAlert>,
         })}
       </Box>

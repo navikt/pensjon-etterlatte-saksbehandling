@@ -5,7 +5,8 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselUtfall
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.erBosattUtland
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 
@@ -13,7 +14,7 @@ object BrevDataMapperRedigerbartUtfallVarsel {
     fun hentBrevDataRedigerbar(
         sakType: SakType,
         bruker: BrukerTokenInfo,
-        utlandstilknytning: Utlandstilknytning?,
+        utlandstilknytning: UtlandstilknytningType?,
         revurderingsaarsak: Revurderingaarsak? = null,
     ) = when (sakType) {
         SakType.BARNEPENSJON ->

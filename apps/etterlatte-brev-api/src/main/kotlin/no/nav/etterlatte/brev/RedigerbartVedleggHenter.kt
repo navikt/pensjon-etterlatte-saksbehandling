@@ -461,6 +461,8 @@ class RedigerbartVedleggHenter(
                         sakType = sakType,
                         forenkletVedtak = forenkletVedtak,
                         enhet = enhet,
+                        utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                        revurderingaarsak = generellBrevData.revurderingsaarsak,
                     ),
                 ),
         )

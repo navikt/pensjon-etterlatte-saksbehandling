@@ -45,8 +45,8 @@ internal class VarselbrevService(
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
                     sakType,
                     brukerTokenInfo,
-                    it.generellBrevData.utlandstilknytning,
-                    it.generellBrevData.revurderingsaarsak,
+                    it.utlandstilknytningType,
+                    it.revurderingaarsak,
                 )
             }.first
     }

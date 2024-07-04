@@ -70,6 +70,8 @@ class VarselbrevTest(
                                 listOf(),
                                 null,
                             )
+                        every { it.utlandstilknytning } returns null
+                        every { it.revurderingsaarsak } returns null
                     }
             }
         val brevbaker =

@@ -170,6 +170,8 @@ class Brevoppretter(
                             sakType = generellBrevData.sak.sakType,
                             forenkletVedtak = generellBrevData.forenkletVedtak,
                             enhet = generellBrevData.sak.enhet,
+                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                            revurderingaarsak = generellBrevData.revurderingsaarsak,
                         ),
                     )
                 }

@@ -10,7 +10,9 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -64,6 +66,8 @@ data class RedigerbarTekstRequest(
     val sakType: SakType,
     val forenkletVedtak: ForenkletVedtak?,
     val enhet: String,
+    val utlandstilknytningType: UtlandstilknytningType?,
+    val revurderingaarsak: Revurderingaarsak?,
 ) {
     fun avsender() = avsender(brukerTokenInfo, forenkletVedtak, enhet)
 }

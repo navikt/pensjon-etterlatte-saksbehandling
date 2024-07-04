@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
@@ -58,7 +59,7 @@ internal class BrevdataFacadeImplTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningService = mockk<BeregningService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val trygdetidService = mockk<TrygdetidService>()
     private val adresseService = mockk<AdresseService>()
 
     private val service =
@@ -67,7 +68,7 @@ internal class BrevdataFacadeImplTest {
             grunnlagKlient,
             beregningService,
             behandlingService,
-            trygdetidKlient,
+            trygdetidService,
             adresseService,
         )
 
@@ -97,7 +98,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
+        coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns emptyList()
 
         val generellBrevData =
             runBlocking {

@@ -36,10 +36,11 @@ import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
@@ -122,6 +123,7 @@ class ApplicationBuilder {
 
     private val behandlingService = BehandlingService(behandlingKlient)
     private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -136,7 +138,7 @@ class ApplicationBuilder {
             grunnlagKlient,
             beregningService,
             behandlingService,
-            trygdetidKlient,
+            trygdetidService,
             adresseService,
         )
 
@@ -187,7 +189,7 @@ class ApplicationBuilder {
             brevDataMapperFerdigstilling,
             behandlingService,
         )
-    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidKlient)
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)

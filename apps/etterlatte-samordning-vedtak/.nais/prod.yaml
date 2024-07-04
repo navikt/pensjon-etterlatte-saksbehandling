@@ -39,6 +39,9 @@ spec:
   replicas:
     min: 2
     max: 4
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 80
   maskinporten:
     enabled: true
     scopes:

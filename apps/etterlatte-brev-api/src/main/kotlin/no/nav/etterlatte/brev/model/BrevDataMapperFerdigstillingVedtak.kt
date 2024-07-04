@@ -60,19 +60,33 @@ class BrevDataMapperFerdigstillingVedtak(
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
             if (generellBrevData.loependeIPesys()) {
-                return fraPesys(bruker, generellBrevData, innholdMedVedlegg)
+                return fraPesys(
+                    bruker,
+                    innholdMedVedlegg,
+                    generellBrevData.behandlingId!!,
+                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    generellBrevData.sak.sakType,
+                    generellBrevData.erForeldreloes(),
+                    generellBrevData.systemkilde,
+                    generellBrevData.utlandstilknytning?.type,
+                    generellBrevData.loependeIPesys(),
+                    generellBrevData.personerISak.avdoede,
+                    generellBrevData.personerISak.soeker.under18,
+                )
             }
             return when (kode.ferdigstilling) {
                 BARNEPENSJON_REVURDERING ->
                     barnepensjonRevurdering(
                         bruker,
-                        generellBrevData,
                         innholdMedVedlegg,
                         generellBrevData.behandlingId!!,
                         generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
                         generellBrevData.sak.sakType,
                         generellBrevData.utlandstilknytning?.type,
                         generellBrevData.revurderingsaarsak,
+                        generellBrevData.sak.id,
+                        generellBrevData.erForeldreloes(),
+                        generellBrevData.personerISak.avdoede,
                     )
                 BARNEPENSJON_INNVILGELSE,
                 BARNEPENSJON_INNVILGELSE_FORELDRELOES,
@@ -165,59 +179,68 @@ class BrevDataMapperFerdigstillingVedtak(
     // TODO På tide å fjerne? Nei
     private suspend fun fraPesys(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        sakType: SakType,
+        erForeldreloes: Boolean,
+        systemkilde: Vedtaksloesning,
+        utlandstilknytningType: UtlandstilknytningType?,
+        loependeIPesys: Boolean,
+        avdoede: List<Avdoed>,
+        soekerErUnder18: Boolean?,
     ) = coroutineScope {
-        val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
                 beregningService.finnUtbetalingsinfo(
                     behandlingId,
-                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    virkningstidspunkt,
                     bruker,
-                    generellBrevData.sak.sakType,
+                    sakType,
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
-        if (generellBrevData.erForeldreloes()) {
+        if (erForeldreloes) {
             barnepensjonInnvilgelse(
                 bruker,
                 innholdMedVedlegg,
-                generellBrevData.systemkilde,
-                generellBrevData.behandlingId!!,
-                generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
-                generellBrevData.sak.sakType,
-                generellBrevData.erForeldreloes(),
-                generellBrevData.utlandstilknytning?.type,
-                generellBrevData.loependeIPesys(),
-                generellBrevData.personerISak.avdoede,
+                systemkilde,
+                behandlingId,
+                virkningstidspunkt,
+                sakType,
+                erForeldreloes,
+                utlandstilknytningType,
+                loependeIPesys,
+                avdoede,
             )
         } else {
             BarnepensjonOmregnetNyttRegelverk.fra(
                 innhold = innholdMedVedlegg,
-                erUnder18Aar = generellBrevData.personerISak.soeker.under18,
+                erUnder18Aar = soekerErUnder18,
                 utbetalingsinfo = utbetalingsinfo.await(),
                 etterbetaling = etterbetaling.await(),
                 trygdetid = requireNotNull(trygdetid.await()),
                 grunnbeloep = grunnbeloep.await(),
-                utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-                avdoede = generellBrevData.personerISak.avdoede,
+                utlandstilknytning = utlandstilknytningType,
+                avdoede = avdoede,
             )
         }
     }
 
     private suspend fun barnepensjonRevurdering(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         utlandstilknytningType: UtlandstilknytningType?,
         revurderingaarsak: Revurderingaarsak?,
+        sakId: Long,
+        erForeldreloes: Boolean,
+        avdoede: List<Avdoed>,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -231,7 +254,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val forrigeUtbetalingsinfo =
             async {
                 beregningService.finnUtbetalingsinfoNullable(
-                    behandlingService.hentSisteIverksatteBehandling(generellBrevData.sak.id, bruker).id,
+                    behandlingService.hentSisteIverksatteBehandling(sakId, bruker).id,
                     virkningstidspunkt,
                     bruker,
                     sakType,
@@ -252,8 +275,8 @@ class BrevDataMapperFerdigstillingVedtak(
             utlandstilknytningType,
             requireNotNull(brevutfall.await()),
             revurderingaarsak,
-            generellBrevData.erForeldreloes(),
-            generellBrevData.personerISak.avdoede,
+            erForeldreloes,
+            avdoede,
         )
     }
 

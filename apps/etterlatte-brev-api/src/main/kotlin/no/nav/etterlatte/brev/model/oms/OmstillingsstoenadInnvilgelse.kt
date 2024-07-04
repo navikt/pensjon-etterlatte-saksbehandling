@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.fromDto
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -35,12 +34,11 @@ data class OmstillingsstoenadInnvilgelse(
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
-            generellBrevData: GenerellBrevData,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
-            brevutfall: BrevutfallDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -61,7 +59,7 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val avdoed = generellBrevData.personerISak.avdoede.single()
+            val avdoed = avdoede.single()
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
@@ -74,7 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                avdoed = avdoede.minBy { it.doedsdato },
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),

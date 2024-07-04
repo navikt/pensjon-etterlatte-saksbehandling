@@ -266,17 +266,15 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
-        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
-            generellBrevData,
             avkortingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()).single(),
-            requireNotNull(brevutfall.await()),
             requireNotNull(vilkaarsvurdering.await()),
+            generellBrevData.personerISak.avdoede,
         )
     }
 
@@ -337,7 +335,7 @@ class BrevDataMapperFerdigstillingVedtak(
 
         OmstillingsstoenadOpphoer.fra(
             innholdMedVedlegg,
-            generellBrevData,
+            generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1),
             generellBrevData.utlandstilknytning,
             requireNotNull(brevutfall.await()),
         )

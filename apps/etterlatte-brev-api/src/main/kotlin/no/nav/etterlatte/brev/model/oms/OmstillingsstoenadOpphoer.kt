@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -24,7 +23,7 @@ data class OmstillingsstoenadOpphoer(
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
-            generellBrevData: GenerellBrevData,
+            virkningsdato: LocalDate?,
             utlandstilknytning: Utlandstilknytning?,
             brevutfall: BrevutfallDto,
         ): OmstillingsstoenadOpphoer {
@@ -39,7 +38,7 @@ data class OmstillingsstoenadOpphoer(
                         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                     ),
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
+                virkningsdato = requireNotNull(virkningsdato),
                 feilutbetaling = feilutbetaling,
             )
         }

@@ -23,7 +23,7 @@ class BeregningService(
 ) {
     suspend fun hentGrunnbeloep(bruker: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(bruker)
 
-    suspend fun hentBeregning(
+    internal suspend fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)

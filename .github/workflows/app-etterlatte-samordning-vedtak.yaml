@@ -77,7 +77,7 @@ jobs:
   deploy-api-prod:
     name: prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: deploy-to-dev-gcp
+    needs: deploy-api-dev
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -145,7 +145,7 @@ class VedtaksbrevService(
         }) {
             if (brevtype == Brevtype.VARSEL) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
-                    it.generellBrevData.sak.sakType,
+                    it.sakType,
                     brukerTokenInfo,
                     it.generellBrevData.utlandstilknytning,
                     it.generellBrevData.revurderingsaarsak,

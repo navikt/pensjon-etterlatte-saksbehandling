@@ -161,10 +161,16 @@ class Brevoppretter(
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         RedigerbarTekstRequest(
-                            generellBrevData,
-                            bruker,
-                            kode,
-                            brevDataMapping,
+                            generellBrevData = generellBrevData,
+                            brukerTokenInfo = bruker,
+                            brevkode = kode,
+                            brevdata = brevDataMapping,
+                            soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                            sakId = sakId,
+                            spraak = generellBrevData.spraak,
+                            sakType = generellBrevData.sak.sakType,
+                            forenkletVedtak = generellBrevData.forenkletVedtak,
+                            enhet = generellBrevData.sak.enhet,
                         ),
                     )
                 }

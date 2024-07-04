@@ -2,7 +2,9 @@ package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.avsenderRequest
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
@@ -39,9 +41,7 @@ class BrevbakerService(
                 BrevbakerRequest.fra(
                     brevkode,
                     brevdata(this),
-                    adresseService.hentAvsender(
-                        avsenderRequest(),
-                    ),
+                    adresseService.hentAvsender(avsender()),
                     soekerOgEventuellVerge,
                     sakId,
                     spraak,
@@ -58,10 +58,12 @@ data class RedigerbarTekstRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: EtterlatteBrevKode,
     val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-    val soekerOgEventuellVerge: SoekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
-    val sakId: Long = generellBrevData.sak.id,
-    val spraak: Spraak = generellBrevData.spraak,
-    val sakType: SakType = generellBrevData.sak.sakType,
+    val soekerOgEventuellVerge: SoekerOgEventuellVerge,
+    val sakId: Long,
+    val spraak: Spraak,
+    val sakType: SakType,
+    val forenkletVedtak: ForenkletVedtak?,
+    val enhet: String,
 ) {
-    fun avsenderRequest() = generellBrevData.avsenderRequest(brukerTokenInfo)
+    fun avsender() = avsenderRequest(brukerTokenInfo, forenkletVedtak, enhet)
 }

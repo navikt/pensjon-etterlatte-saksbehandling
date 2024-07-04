@@ -172,6 +172,12 @@ class RedigerbartVedleggHenter(
                         brukerTokenInfo = bruker,
                         brevkode = kode,
                         brevdata = { ManueltBrevData() },
+                        soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                        sakId = generellBrevData.sak.id,
+                        spraak = generellBrevData.spraak,
+                        sakType = generellBrevData.sak.sakType,
+                        forenkletVedtak = generellBrevData.forenkletVedtak,
+                        enhet = generellBrevData.sak.enhet,
                     ),
                 ),
         )

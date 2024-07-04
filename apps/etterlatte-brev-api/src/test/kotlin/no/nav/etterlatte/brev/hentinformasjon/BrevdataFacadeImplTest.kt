@@ -58,7 +58,6 @@ internal class BrevdataFacadeImplTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningService = mockk<BeregningService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val sakService = mockk<SakService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val adresseService = mockk<AdresseService>()
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
@@ -69,7 +68,6 @@ internal class BrevdataFacadeImplTest {
             grunnlagKlient,
             beregningService,
             behandlingService,
-            sakService,
             trygdetidKlient,
             adresseService,
             vilkaarsvurderingKlient,
@@ -88,7 +86,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
-            sakService.hentSak(any(), any())
+            behandlingService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingService.hentSisteIverksatteBehandling(any(), any())
@@ -137,7 +135,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
-        coEvery { sakService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagKlient.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()

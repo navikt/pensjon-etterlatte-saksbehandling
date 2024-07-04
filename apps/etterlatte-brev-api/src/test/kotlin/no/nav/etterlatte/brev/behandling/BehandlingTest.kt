@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -536,7 +535,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
     val grunnlagKlient: GrunnlagKlient = mockk()
     val beregningService: BeregningService = mockk()
     val behandlingService: BehandlingService = mockk()
-    val sakService: SakService = mockk()
     val trygdetidKlient: TrygdetidKlient = mockk()
     val vilkaarsvurderingKlient: VilkaarsvurderingKlient = mockk()
 
@@ -545,7 +543,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         grunnlagKlient,
         beregningService,
         behandlingService,
-        sakService,
         trygdetidKlient,
         addresseService,
         vilkaarsvurderingKlient,

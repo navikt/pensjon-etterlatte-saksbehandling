@@ -52,7 +52,6 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
-    private val sakService: SakService,
     private val trygdetidKlient: TrygdetidKlient,
     private val adresseService: AdresseService,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
@@ -81,7 +80,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData =
         coroutineScope {
-            val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
+            val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingKlient.hentVedtak(it, brukerTokenInfo) } }
             val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
 

@@ -36,7 +36,6 @@ import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
@@ -120,7 +119,6 @@ class ApplicationBuilder {
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
-    private val sakService = SakService(behandlingKlient)
     private val behandlingService = BehandlingService(behandlingKlient)
 
     private val beregningService = BeregningService(beregningKlient)
@@ -134,7 +132,6 @@ class ApplicationBuilder {
             grunnlagKlient,
             beregningService,
             behandlingService,
-            sakService,
             trygdetidKlient,
             adresseService,
             vilkaarsvurderingKlient,
@@ -193,7 +190,7 @@ class ApplicationBuilder {
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
-    private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+    private val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
         BrevService(
@@ -223,7 +220,7 @@ class ApplicationBuilder {
 
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
-    private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, sakService)
+    private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())

@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatID
@@ -30,7 +30,7 @@ class NyNotatService(
     private val notatRepository: NotatRepository,
     private val pdfGeneratorKlient: PdfGeneratorKlient,
     private val dokarkivService: DokarkivService,
-    private val sakService: SakService,
+    private val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -74,7 +74,7 @@ class NyNotatService(
         mal: NotatMal,
         bruker: BrukerTokenInfo,
     ): Notat {
-        val sak = sakService.hentSak(sakId, bruker)
+        val sak = behandlingService.hentSak(sakId, bruker)
 
         val id =
             notatRepository.opprett(
@@ -146,7 +146,7 @@ class NyNotatService(
 
         notatRepository.lagreInnhold(id, pdf)
 
-        val sak = sakService.hentSak(notat.sakId, bruker)
+        val sak = behandlingService.hentSak(notat.sakId, bruker)
 
         return dokarkivService
             .journalfoer(mapTilJournalpostRequest(sak, notat, pdf))

@@ -74,6 +74,7 @@ class VarselbrevTest(
                         every { it.utlandstilknytning } returns null
                         every { it.revurderingsaarsak } returns null
                         every { it.systemkilde } returns Vedtaksloesning.GJENNY
+                        every { it.behandlingId } returns null
                     }
             }
         val brevbaker =
@@ -90,15 +91,15 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
-                        any().sak.sakType,
-                        any().behandlingId,
-                        any().revurderingsaarsak,
-                        any().forenkletVedtak?.type,
-                        any().sak.id,
-                        any().spraak,
-                        any().forenkletVedtak,
-                        any().sak.enhet,
-                        any().personerISak.soekerOgEventuellVerge(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
                     )
                 } returns listOf()
             }

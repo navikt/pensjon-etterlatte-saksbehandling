@@ -46,11 +46,6 @@ class GrunnlagService(
         bruker: BrukerTokenInfo,
     ) = klient.hentGrunnlagForSak(sakId, bruker)
 
-    suspend fun hentGrunnlag(
-        behandlingId: UUID,
-        bruker: BrukerTokenInfo,
-    ) = klient.hentGrunnlag(behandlingId, bruker)
-
     suspend fun oppdaterGrunnlagForSak(
         sak: Sak,
         bruker: BrukerTokenInfo,

@@ -12,11 +12,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-class NotatRiver(
+class SamordningsnotatRiver(
     rapidsConnection: RapidsConnection,
     private val notatService: NyNotatService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(NotatRiver::class.java)
+    private val logger = LoggerFactory.getLogger(SamordningsnotatRiver::class.java)
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET) {

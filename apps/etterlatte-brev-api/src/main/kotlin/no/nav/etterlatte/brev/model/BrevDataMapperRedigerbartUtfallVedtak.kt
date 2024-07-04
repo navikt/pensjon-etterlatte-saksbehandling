@@ -85,7 +85,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
                     bruker,
@@ -129,7 +129,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,
@@ -151,7 +151,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,

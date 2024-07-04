@@ -37,8 +37,8 @@ spec:
       cpu: 10m
       memory: 320Mi
   replicas:
-    min: 1
-    max: 2
+    min: 2
+    max: 4
   maskinporten:
     enabled: true
     scopes:

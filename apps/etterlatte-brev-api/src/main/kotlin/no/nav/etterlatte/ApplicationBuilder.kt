@@ -36,6 +36,7 @@ import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -124,6 +125,7 @@ class ApplicationBuilder {
     private val behandlingService = BehandlingService(behandlingKlient)
     private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
+    private val grunnlagService = GrunnlagService(grunnlagKlient)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -135,7 +137,7 @@ class ApplicationBuilder {
     private val brevdataFacade =
         BrevdataFacade(
             vedtaksvurderingService,
-            grunnlagKlient,
+            grunnlagService,
             behandlingService,
             adresseService,
         )
@@ -223,12 +225,13 @@ class ApplicationBuilder {
             adresseService = adresseService,
             brevdataFacade = brevdataFacade,
             behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
         )
 
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
+    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
@@ -238,7 +241,7 @@ class ApplicationBuilder {
                 RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
             ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingService)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)

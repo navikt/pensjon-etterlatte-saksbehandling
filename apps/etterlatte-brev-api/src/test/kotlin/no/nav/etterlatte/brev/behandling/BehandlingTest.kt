@@ -6,10 +6,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
-import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
@@ -531,14 +529,12 @@ internal class BehandlingTest {
 
 fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): BrevdataFacade {
     val vedtaksvurderingService: VedtaksvurderingService = mockk()
-    val grunnlagKlient: GrunnlagKlient = mockk()
-    val beregningService: BeregningService = mockk()
+    val grunnlagService: GrunnlagService = mockk()
     val behandlingService: BehandlingService = mockk()
-    val trygdetidService: TrygdetidService = mockk()
 
     return BrevdataFacade(
         vedtaksvurderingService,
-        grunnlagKlient,
+        grunnlagService,
         behandlingService,
         addresseService,
     )

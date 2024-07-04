@@ -39,7 +39,7 @@ import java.util.UUID
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val behandlingService: BehandlingService,
     private val adresseService: AdresseService,
 ) {
@@ -58,7 +58,7 @@ class BrevdataFacade(
                 behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val vedtakType = vedtakDeferred?.await()?.type
-            val grunnlag = hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
+            val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
             val sak = sakDeferred.await()
             val brevutfallDto = brevutfallDeferred?.await()
             val verge = hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
@@ -181,29 +181,6 @@ class BrevdataFacade(
                         systemkilde = systemkilde,
                         utlandstilknytning = behandling?.utlandstilknytning,
                     )
-            }
-        }
-
-    private suspend fun hentGrunnlag(
-        vedtakType: VedtakType?,
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID?,
-    ): Grunnlag =
-        coroutineScope {
-            when (vedtakType) {
-                VedtakType.TILBAKEKREVING,
-                VedtakType.AVVIST_KLAGE,
-                ->
-                    async {
-                        grunnlagKlient.hentGrunnlagForSak(
-                            sakId,
-                            brukerTokenInfo,
-                        )
-                    }.await()
-
-                null -> async { grunnlagKlient.hentGrunnlagForSak(sakId, brukerTokenInfo) }.await()
-                else -> async { grunnlagKlient.hentGrunnlag(behandlingId!!, brukerTokenInfo) }.await()
             }
         }
 

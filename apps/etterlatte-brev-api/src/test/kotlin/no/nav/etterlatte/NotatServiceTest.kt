@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.notat.StrukturertBrev
@@ -47,7 +47,7 @@ class NotatServiceTest(
     private val brevRepository: BrevRepository = BrevRepository(dataSource)
     private val adresseService: AdresseService = mockk()
     private val brevbakerService: BrevbakerService = mockk()
-    private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val grunnlagService: GrunnlagService = mockk()
     private val dokarkivKlient: DokarkivKlient = mockk()
 
     private val notatService =
@@ -55,7 +55,7 @@ class NotatServiceTest(
             brevRepository = brevRepository,
             adresseService = adresseService,
             brevbakerService = brevbakerService,
-            grunnlagKlient = grunnlagKlient,
+            grunnlagService = grunnlagService,
             dokarkivKlient = dokarkivKlient,
         )
 
@@ -75,7 +75,7 @@ class NotatServiceTest(
             )
 
         val dummyPdf = Pdf("Hello world".toByteArray())
-        coEvery { grunnlagKlient.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { brevbakerService.genererPdf(any(), any()) } returns dummyPdf
         coEvery { dokarkivKlient.opprettJournalpost(any(), any()) } returns
             OpprettJournalpostResponse(
@@ -120,7 +120,7 @@ class NotatServiceTest(
             )
 
         val dummyPdf = Pdf("Hello world".toByteArray())
-        coEvery { grunnlagKlient.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { brevbakerService.genererPdf(any(), any()) } returns dummyPdf
         coEvery { dokarkivKlient.opprettJournalpost(any(), any()) } throws Exception("Å nei")
 

@@ -14,8 +14,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker

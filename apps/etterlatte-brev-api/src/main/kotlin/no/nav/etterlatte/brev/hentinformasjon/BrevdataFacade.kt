@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning

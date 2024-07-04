@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.notat.StrukturertBrev

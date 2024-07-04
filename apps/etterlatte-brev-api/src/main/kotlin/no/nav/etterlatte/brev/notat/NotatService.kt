@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID

@@ -35,11 +35,11 @@ import no.nav.etterlatte.brev.dokument.SafKlient
 import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.hentinformasjon
+package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

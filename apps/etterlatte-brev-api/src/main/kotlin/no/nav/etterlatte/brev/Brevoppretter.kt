@@ -184,7 +184,6 @@ class Brevoppretter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        generellBrevData,
                         kode.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.behandlingId,
@@ -195,6 +194,11 @@ class Brevoppretter(
                         generellBrevData.forenkletVedtak,
                         generellBrevData.sak.enhet,
                         generellBrevData.personerISak.soekerOgEventuellVerge(),
+                        generellBrevData.utlandstilknytning?.type,
+                        generellBrevData.erForeldreloes(),
+                        generellBrevData.loependeIPesys(),
+                        generellBrevData.systemkilde,
+                        generellBrevData.personerISak.avdoede,
                     )
                 }
 

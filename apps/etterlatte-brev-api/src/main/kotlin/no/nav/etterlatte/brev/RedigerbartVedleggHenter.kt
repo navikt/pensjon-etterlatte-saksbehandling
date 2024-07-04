@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,7 +27,6 @@ class RedigerbartVedleggHenter(
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
         brevtype: Brevtype,
         sakType: SakType,
         behandlingId: UUID?,
@@ -37,6 +37,11 @@ class RedigerbartVedleggHenter(
         forenkletVedtak: ForenkletVedtak?,
         enhet: String,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        utlandstilknytningType: UtlandstilknytningType?,
+        erForeldreloes: Boolean,
+        loependeIPesys: Boolean,
+        systemkilde: Vedtaksloesning,
+        avdoede: List<Avdoed>,
     ): List<BrevInnholdVedlegg> {
         val brevkoder: List<Pair<EtterlatteBrevKode, BrevVedleggKey>> =
             when (sakType) {
@@ -130,7 +135,6 @@ class RedigerbartVedleggHenter(
                 hentInnholdFraBrevbakeren(
                     kode = it.first,
                     key = it.second,
-                    generellBrevData = generellBrevData,
                     bruker = bruker,
                     soekerOgEventuellVerge = soekerOgEventuellVerge,
                     sakId = sakId,
@@ -138,8 +142,13 @@ class RedigerbartVedleggHenter(
                     sakType = sakType,
                     forenkletVedtak = forenkletVedtak,
                     enhet = enhet,
-                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                    revurderingaarsak = generellBrevData.revurderingsaarsak,
+                    utlandstilknytningType = utlandstilknytningType,
+                    revurderingaarsak = revurderingaarsak,
+                    behandlingId = behandlingId,
+                    erForeldreloes = erForeldreloes,
+                    loependeIPesys = loependeIPesys,
+                    systemkilde = systemkilde,
+                    avdoede = avdoede,
                 )
             }.toList()
     }
@@ -147,7 +156,6 @@ class RedigerbartVedleggHenter(
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,
         key: BrevVedleggKey,
-        generellBrevData: GenerellBrevData,
         bruker: BrukerTokenInfo,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
         sakId: Long,
@@ -157,6 +165,11 @@ class RedigerbartVedleggHenter(
         enhet: String,
         utlandstilknytningType: UtlandstilknytningType?,
         revurderingaarsak: Revurderingaarsak?,
+        behandlingId: UUID?,
+        erForeldreloes: Boolean,
+        loependeIPesys: Boolean,
+        systemkilde: Vedtaksloesning,
+        avdoede: List<Avdoed>,
     ): BrevInnholdVedlegg =
         BrevInnholdVedlegg(
             tittel = kode.tittel!!,
@@ -175,11 +188,11 @@ class RedigerbartVedleggHenter(
                         enhet = enhet,
                         utlandstilknytningType = utlandstilknytningType,
                         revurderingaarsak = revurderingaarsak,
-                        behandlingId = generellBrevData.behandlingId,
-                        erForeldreloes = generellBrevData.erForeldreloes(),
-                        loependeIPesys = generellBrevData.loependeIPesys(),
-                        systemkilde = generellBrevData.systemkilde,
-                        avdoede = generellBrevData.personerISak.avdoede,
+                        behandlingId = behandlingId,
+                        erForeldreloes = erForeldreloes,
+                        loependeIPesys = loependeIPesys,
+                        systemkilde = systemkilde,
+                        avdoede = avdoede,
                     ),
                 ),
         )

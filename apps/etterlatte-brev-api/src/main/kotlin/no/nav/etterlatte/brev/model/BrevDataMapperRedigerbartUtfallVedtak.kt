@@ -5,7 +5,6 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
@@ -22,7 +21,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class BrevDataMapperRedigerbartUtfallVedtak(
-    private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,

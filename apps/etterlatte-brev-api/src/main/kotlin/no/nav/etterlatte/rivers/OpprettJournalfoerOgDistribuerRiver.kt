@@ -113,7 +113,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 brevKode,
                 sakId,
                 brukerTokenInfo,
-                brevOgData.second.sak.enhet,
+                brevOgData.second,
                 brevOgData.first.id,
             )
         ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(

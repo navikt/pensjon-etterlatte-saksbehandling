@@ -12,14 +12,12 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -72,9 +70,7 @@ class InformasjonsbrevTest(
                 } returns
                     Pair(
                         mockk<Brev>().also { every { it.id } returns brevId },
-                        mockk<GenerellBrevData>().also {
-                            every { it.sak } returns Sak("", SakType.OMSTILLINGSSTOENAD, 1L, "enhet1")
-                        },
+                        "enhet1",
                     )
             }
         val pdfGenerator =

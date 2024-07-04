@@ -109,7 +109,8 @@ spec:
           namespace: team-inntekt
           cluster: dev-fss
           permissions:
-            roles: les-bp-sak-for-person
+            roles:
+              - les-bp-sak-for-person
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss

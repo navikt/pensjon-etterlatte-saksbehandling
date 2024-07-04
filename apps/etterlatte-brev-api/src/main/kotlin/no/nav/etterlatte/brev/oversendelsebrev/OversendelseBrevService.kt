@@ -9,8 +9,13 @@ import no.nav.etterlatte.brev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.mapAvdoede
+import no.nav.etterlatte.brev.behandling.mapInnsender
+import no.nav.etterlatte.brev.behandling.mapSoeker
+import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -23,6 +28,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -69,6 +75,7 @@ class OversendelseBrevServiceImpl(
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
+    private val grunnlagService: GrunnlagService,
 ) : OversendelseBrevService {
     override fun hentOversendelseBrev(behandlingId: UUID): Brev? =
         brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
@@ -85,14 +92,8 @@ class OversendelseBrevServiceImpl(
             return eksisterendeBrev
         }
         val klage = behandlingService.hentKlage(behandlingId, brukerTokenInfo)
+        val (spraak, personerISak) = hentSpraakOgPersonerISak(klage, brukerTokenInfo)
 
-        val generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
-                sakId = klage.sak.id,
-                // Setter behandlingId som null for å unngå å hente en behandling med klageId'en
-                behandlingId = null,
-                brukerTokenInfo = brukerTokenInfo,
-            )
         val brev =
             brevRepository.opprettBrev(
                 OpprettNyttBrev(
@@ -100,18 +101,46 @@ class OversendelseBrevServiceImpl(
                     behandlingId = behandlingId,
                     soekerFnr = klage.sak.ident,
                     prosessType = BrevProsessType.AUTOMATISK,
-                    mottaker = finnMottaker(klage.sak.sakType, generellBrevData.personerISak),
+                    mottaker = finnMottaker(klage.sak.sakType, personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(
                             tittel = EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER.tittel ?: "Klage oversendelse",
-                            spraak = generellBrevData.spraak,
+                            spraak = spraak,
                         ),
                     innholdVedlegg = listOf(),
                     brevtype = Brevtype.OVERSENDELSE_KLAGE,
                 ),
             )
         return brev
+    }
+
+    suspend fun hentSpraakOgPersonerISak(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pair<Spraak, PersonerISak> {
+        val grunnlag =
+            grunnlagService.hentGrunnlag(
+                vedtakType = null,
+                sakId = klage.sak.id,
+                bruker = brukerTokenInfo,
+                // Setter behandlingId som null for å unngå å hente en behandling med klageId'en
+                behandlingId = null,
+            )
+        val verge =
+            brevdataFacade.hentVergeForSak(
+                sakType = behandlingService.hentSak(klage.sak.id, brukerTokenInfo).sakType,
+                brevutfallDto = null,
+                grunnlag = grunnlag,
+            )
+        val personerISak =
+            PersonerISak(
+                innsender = grunnlag.mapInnsender(),
+                soeker = grunnlag.mapSoeker(null),
+                avdoede = grunnlag.mapAvdoede(),
+                verge = verge,
+            )
+        return Pair(grunnlag.mapSpraak(), personerISak)
     }
 
     override suspend fun pdf(

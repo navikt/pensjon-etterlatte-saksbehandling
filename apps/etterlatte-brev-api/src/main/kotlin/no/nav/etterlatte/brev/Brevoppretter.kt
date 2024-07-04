@@ -160,14 +160,9 @@ class Brevoppretter(
             val redigerbarTekstRequest =
                 RedigerbarTekstRequest(
                     brukerTokenInfo = bruker,
-                    brevkode = kode,
-                    brevdataMapper = brevDataMapping,
                     soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
-                    sakId = sakId,
-                    spraak = generellBrevData.spraak,
                     sakType = generellBrevData.sak.sakType,
                     forenkletVedtak = generellBrevData.forenkletVedtak,
-                    enhet = generellBrevData.sak.enhet,
                     utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                     revurderingaarsak = generellBrevData.revurderingsaarsak,
                     behandlingId = behandlingId,

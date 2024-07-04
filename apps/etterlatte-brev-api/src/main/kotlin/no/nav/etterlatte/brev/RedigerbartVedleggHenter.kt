@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.avsender
+import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.pensjon.brevbaker.api.model.Felles
 import java.util.UUID
 
 class RedigerbartVedleggHenter(
@@ -130,13 +132,19 @@ class RedigerbartVedleggHenter(
                 hentInnholdFraBrevbakeren(
                     kode = it.first,
                     key = it.second,
-                    bruker = bruker,
-                    soekerOgEventuellVerge = soekerOgEventuellVerge,
-                    sakId = sakId,
                     spraak = spraak,
-                    sakType = sakType,
-                    forenkletVedtak = forenkletVedtak,
-                    enhet = enhet,
+                    felles =
+                        BrevbakerHelpers.mapFelles(
+                            sakId = sakId,
+                            soeker = soekerOgEventuellVerge.soeker,
+                            avsender = adresseService.hentAvsender(avsender(bruker, forenkletVedtak, enhet)),
+                            vergeNavn =
+                                soekerOgEventuellVerge.finnVergesNavn(
+                                    it.first,
+                                    soekerOgEventuellVerge,
+                                    sakType,
+                                ),
+                        ),
                 )
             }.toList()
     }
@@ -144,13 +152,8 @@ class RedigerbartVedleggHenter(
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,
         key: BrevVedleggKey,
-        bruker: BrukerTokenInfo,
-        soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        sakId: Long,
         spraak: Spraak,
-        sakType: SakType,
-        forenkletVedtak: ForenkletVedtak?,
-        enhet: String,
+        felles: Felles,
     ): BrevInnholdVedlegg =
         BrevInnholdVedlegg(
             tittel = kode.tittel!!,
@@ -158,13 +161,10 @@ class RedigerbartVedleggHenter(
             payload =
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
-                        brevKode = kode,
-                        brevData = ManueltBrevData(),
-                        avsender = adresseService.hentAvsender(avsender(bruker, forenkletVedtak, enhet)),
-                        soekerOgEventuellVerge = soekerOgEventuellVerge,
-                        sakId = sakId,
+                        kode = kode,
+                        letterData = ManueltBrevData(),
+                        felles = felles,
                         spraak = spraak,
-                        sakType = sakType,
                     ),
                 ),
         )

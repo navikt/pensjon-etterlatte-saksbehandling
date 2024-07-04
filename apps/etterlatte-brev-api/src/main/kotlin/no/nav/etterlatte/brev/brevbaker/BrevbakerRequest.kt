@@ -19,6 +19,18 @@ data class BrevbakerRequest internal constructor(
 ) {
     companion object {
         fun fra(
+            kode: EtterlatteBrevKode,
+            letterData: BrevData,
+            felles: Felles,
+            spraak: Spraak,
+        ) = BrevbakerRequest(
+            kode = kode,
+            letterData = letterData,
+            felles = felles,
+            language = LanguageCode.spraakToLanguageCode(spraak),
+        )
+
+        fun fra(
             brevKode: EtterlatteBrevKode,
             brevData: BrevData,
             avsender: Avsender,
@@ -36,7 +48,7 @@ data class BrevbakerRequest internal constructor(
                         soeker = soekerOgEventuellVerge.soeker,
                         avsender = avsender,
                         vergeNavn =
-                            finnVergesNavn(
+                            soekerOgEventuellVerge.finnVergesNavn(
                                 brevKode,
                                 soekerOgEventuellVerge,
                                 sakType,
@@ -44,40 +56,6 @@ data class BrevbakerRequest internal constructor(
                     ),
                 language = LanguageCode.spraakToLanguageCode(spraak),
             )
-
-        private fun finnVergesNavn(
-            brevKode: EtterlatteBrevKode,
-            soekerOgEventuellVerge: SoekerOgEventuellVerge,
-            sakType: SakType,
-        ): String? {
-            val harVerge = harVerge(soekerOgEventuellVerge, sakType)
-            return if (erMigrering(brevKode) && harVerge) {
-                soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge"
-            } else if (harVerge) {
-                soekerOgEventuellVerge.verge?.navn()
-                    ?: (soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge")
-            } else {
-                null
-            }
-        }
-
-        private fun harVerge(
-            soekerOgEventuellVerge: SoekerOgEventuellVerge,
-            sakType: SakType,
-        ): Boolean {
-            // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
-            val skalHaForelderVerge =
-                sakType == SakType.BARNEPENSJON && soekerOgEventuellVerge.soeker.under18 != false
-            return soekerOgEventuellVerge.verge != null || skalHaForelderVerge
-        }
-
-        private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =
-            brevKode in
-                listOf(
-                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
-                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
-                )
 
         fun fraStrukturertBrev(
             strukturertBrev: StrukturertBrev,
@@ -113,4 +91,38 @@ enum class LanguageCode {
 data class SoekerOgEventuellVerge(
     val soeker: Soeker,
     val verge: Verge?,
-)
+) {
+    fun finnVergesNavn(
+        brevKode: EtterlatteBrevKode,
+        soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        sakType: SakType,
+    ): String? {
+        val harVerge = harVerge(soekerOgEventuellVerge, sakType)
+        return if (erMigrering(brevKode) && harVerge) {
+            soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge"
+        } else if (harVerge) {
+            soekerOgEventuellVerge.verge?.navn()
+                ?: (soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge")
+        } else {
+            null
+        }
+    }
+
+    private fun harVerge(
+        soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        sakType: SakType,
+    ): Boolean {
+        // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
+        val skalHaForelderVerge =
+            sakType == SakType.BARNEPENSJON && soekerOgEventuellVerge.soeker.under18 != false
+        return soekerOgEventuellVerge.verge != null || skalHaForelderVerge
+    }
+
+    private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =
+        brevKode in
+            listOf(
+                EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
+                EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+            )
+}

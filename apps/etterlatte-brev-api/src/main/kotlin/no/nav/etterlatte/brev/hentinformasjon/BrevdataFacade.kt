@@ -3,12 +3,9 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.erOver18
-import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -18,34 +15,19 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.UkjentVergemaal
-import no.nav.etterlatte.libs.common.person.Verge
-import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.sikkerLogg
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,
     private val behandlingService: BehandlingService,
-    private val adresseService: AdresseService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
@@ -184,46 +166,6 @@ class BrevdataFacade(
                     )
             }
         }
-
-    suspend fun hentVergeForSak(
-        sakType: SakType,
-        brevutfallDto: BrevutfallDto?,
-        grunnlag: Grunnlag,
-    ): Verge? {
-        val verger =
-            hentVerger(
-                grunnlag.soeker
-                    .hentSoekerPdlV1()!!
-                    .verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
-                grunnlag.soeker.hentFoedselsnummer()?.verdi,
-            )
-        return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident!!
-            val vergenavn =
-                adresseService
-                    .hentMottakerAdresse(sakType, vergeFnr.value)
-                    .navn
-            Vergemaal(
-                vergenavn,
-                vergeFnr,
-            )
-        } else if (verger.size > 1) {
-            logger.info(
-                "Fant flere verger for bruker med fnr ${grunnlag.soeker.hentFoedselsnummer()?.verdi} i " +
-                    "mapping av verge til brev.",
-            )
-            sikkerLogg.info(
-                "Fant flere verger for bruker med fnr ${
-                    grunnlag.soeker.hentFoedselsnummer()?.verdi?.value
-                } i mapping av verge til brev.",
-            )
-            UkjentVergemaal()
-        } else if (sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(brevutfallDto)) {
-            grunnlag.hentForelderVerge()
-        } else {
-            null
-        }
-    }
 }
 
 class UgyldigBeregningsMetode :

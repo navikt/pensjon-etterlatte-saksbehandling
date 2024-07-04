@@ -140,7 +140,6 @@ class ApplicationBuilder {
             vedtaksvurderingService,
             grunnlagService,
             behandlingService,
-            adresseService,
         )
 
     private val db = BrevRepository(datasource)

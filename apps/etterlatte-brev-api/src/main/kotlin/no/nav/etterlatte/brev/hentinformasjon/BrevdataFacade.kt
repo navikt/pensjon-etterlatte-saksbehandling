@@ -61,7 +61,7 @@ class BrevdataFacade(
             val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
             val sak = sakDeferred.await()
             val brevutfallDto = brevutfallDeferred?.await()
-            val verge = hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
+            val verge = grunnlagService.hentVergeForSak(sak.sakType, brevutfallDto, grunnlag)
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),

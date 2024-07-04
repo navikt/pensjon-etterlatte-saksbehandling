@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
@@ -50,6 +51,7 @@ class OversendelseBrevServiceImplTest(
     private val adresseService = mockk<AdresseService>()
     private val brevRepository = spyk(BrevRepository(dataSource))
     private val behandlingService = mockk<BehandlingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val service =
         OversendelseBrevServiceImpl(
             brevRepository,
@@ -57,6 +59,7 @@ class OversendelseBrevServiceImplTest(
             adresseService,
             brevdataFacade,
             behandlingService,
+            grunnlagService,
         )
 
     @BeforeEach

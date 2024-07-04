@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -56,8 +57,8 @@ class GrunnlagmapperTest {
         coEvery {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
-        val verge = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, opplysningsgrunnlag)!! }
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val verge = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, opplysningsgrunnlag)!! }
 
         Assertions.assertTrue(verge is UkjentVergemaal)
     }
@@ -85,10 +86,10 @@ class GrunnlagmapperTest {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
 
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
         val verge =
             runBlocking {
-                brevdataFacade.hentVergeForSak(
+                grunnlagService.hentVergeForSak(
                     SakType.BARNEPENSJON,
                     null,
                     opplysningsgrunnlag,

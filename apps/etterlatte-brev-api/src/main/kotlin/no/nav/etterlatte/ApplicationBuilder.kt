@@ -125,7 +125,6 @@ class ApplicationBuilder {
     private val behandlingService = BehandlingService(behandlingKlient)
     private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
-    private val grunnlagService = GrunnlagService(grunnlagKlient)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -133,6 +132,8 @@ class ApplicationBuilder {
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
     private val datasource = DataSourceBuilder.createDataSource(env)
+
+    private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
 
     private val brevdataFacade =
         BrevdataFacade(

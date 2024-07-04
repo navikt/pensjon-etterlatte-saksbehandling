@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.avsender
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
@@ -64,7 +65,7 @@ class VedtaksbrevService(
         pdfGenerator.genererPdf(
             id = id,
             bruker = bruker,
-            avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+            avsenderRequest = { brukerToken, vedtak, enhet -> avsender(brukerToken, vedtak, enhet) },
             brevKode = { brevKodeMapperVedtak.brevKode(it) },
             brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtak, brev, pdf ->

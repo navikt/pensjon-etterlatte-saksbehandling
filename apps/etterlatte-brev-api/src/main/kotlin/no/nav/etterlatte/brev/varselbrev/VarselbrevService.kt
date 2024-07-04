@@ -6,7 +6,9 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.avsender
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
@@ -74,8 +76,8 @@ internal class VarselbrevService(
     suspend fun ferdigstillOgGenererPDF(
         brevId: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+            { brukerToken, vedtak, enhet -> avsender(brukerToken, vedtak, enhet) },
     ) = pdfGenerator.ferdigstillOgGenererPDF(
         id = brevId,
         bruker = bruker,
@@ -90,8 +92,8 @@ internal class VarselbrevService(
     suspend fun genererPdf(
         brevId: Long,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+            { brukerToken, forenkletVedtak, enhet -> avsender(brukerToken, forenkletVedtak, enhet) },
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,

@@ -31,7 +31,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
             pdfGenerator.ferdigstillOgGenererPDF(
                 id = brevId,
                 bruker = brukerTokenInfo,
-                avsenderRequest = { _, _ ->
+                avsenderRequest = { _, _, _ ->
                     AvsenderRequest(
                         saksbehandlerIdent = Fagsaksystem.EY.navn,
                         sakenhet = enhet,

@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-fun avsenderRequest(
+fun avsender(
     bruker: BrukerTokenInfo,
     forenkletVedtak: ForenkletVedtak?,
     enhet: String,
@@ -41,7 +41,7 @@ data class GenerellBrevData(
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
 ) {
-    fun avsenderRequest(bruker: BrukerTokenInfo) = avsenderRequest(bruker, forenkletVedtak, sak.enhet)
+    fun avsenderRequest(bruker: BrukerTokenInfo) = avsender(bruker, forenkletVedtak, sak.enhet)
 
     // TODO På tide å fjerne?
     // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.

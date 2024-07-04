@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.avsenderRequest
+import no.nav.etterlatte.brev.behandling.avsender
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
@@ -65,5 +65,5 @@ data class RedigerbarTekstRequest(
     val forenkletVedtak: ForenkletVedtak?,
     val enhet: String,
 ) {
-    fun avsender() = avsenderRequest(brukerTokenInfo, forenkletVedtak, enhet)
+    fun avsender() = avsender(brukerTokenInfo, forenkletVedtak, enhet)
 }

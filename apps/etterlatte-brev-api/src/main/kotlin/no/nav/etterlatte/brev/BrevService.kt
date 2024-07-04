@@ -122,7 +122,7 @@ class BrevService(
             id,
             bruker,
             avsenderRequest = { bruker, vedtak, enhet -> avsender(bruker, vedtak, enhet) },
-            brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
+            brevKodeMapper = { Brevkoder.TOMT_INFORMASJONSBREV },
             brevDataMapper = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 

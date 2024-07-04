@@ -95,7 +95,7 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKode = {
+        brevKodeMapper = {
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },

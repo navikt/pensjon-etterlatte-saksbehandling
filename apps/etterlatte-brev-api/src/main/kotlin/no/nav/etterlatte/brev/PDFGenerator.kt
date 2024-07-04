@@ -57,7 +57,7 @@ class PDFGenerator(
         id: BrevID,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
-        brevKode: (BrevkodeRequest) -> Brevkoder,
+        brevKodeMapper: (BrevkodeRequest) -> Brevkoder,
         brevDataMapper: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (ForenkletVedtak?, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
@@ -77,7 +77,7 @@ class PDFGenerator(
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet))
 
         val brevkodePar =
-            brevKode(
+            brevKodeMapper(
                 BrevkodeRequest(
                     generellBrevData.loependeIPesys(),
                     generellBrevData.erForeldreloes(),

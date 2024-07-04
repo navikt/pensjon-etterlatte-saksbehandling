@@ -176,12 +176,13 @@ class Brevoppretter(
                     systemkilde = generellBrevData.systemkilde,
                     avdoede = generellBrevData.personerISak.avdoede,
                 )
+            val brevData: BrevDataRedigerbar = brevDataMapping(redigerbarTekstRequest)
             val innhold =
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         BrevbakerRequest.fra(
                             brevKode = kode,
-                            brevData = brevDataMapping(redigerbarTekstRequest),
+                            brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
                                     avsender(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),

@@ -1,0 +1,137 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-api
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - "https://etterlatte-api.nav.no"   # For TP-leverandører
+    - "https://etterlatte-api.intern.nav.no"
+  liveness:
+    path: /health/isalive
+    initialDelay: 5
+  readiness:
+    path: /health/isready
+    initialDelay: 5
+  prometheus:
+    enabled: true
+    path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  secureLogs:
+    enabled: true
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 10m
+      memory: 320Mi
+  replicas:
+    min: 2
+    max: 4
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: "vedtaksinformasjon.read"
+          enabled: true
+          product: "etterlatteytelser"
+          allowedIntegrations:
+            - maskinporten
+          atMaxAge: 60
+          consumers:
+            - name: SPK
+              orgno: "982583462"
+            - name: OSLO PENSJONSFORSIKRING AS
+              orgno: "982759412"
+            - name: KLP
+              orgno: "938708606"
+            - name: GABLER PENSJONSTJENESTER AS
+              orgno: "916833520"
+            - name: Storebrand Pensjonstjenester AS
+              orgno: "931936492"
+            - name: Storebrand Livsforsikring AS
+              orgno: "958995369"
+            - name: Arendal kommunale pensjonskasse
+              orgno: "940380014"
+            - name: Elverum kommunale pensjonskasse
+              orgno: "940360293"
+            - name: Maritim pensjonskasse
+              orgno: "940415683"
+            - name: Garantikassen for fiskere
+              orgno: "974652382"
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e #SAKSBEHANDLER
+          - id: e4eb614b-d37d-4721-ba1b-df8f0fd16f85 # 0000-GA-GJENNY_SAKSBEHANDLER
+
+        extra:
+          - "NAVident"
+          - "azp_name"
+  tokenx:
+    enabled: true
+  env:
+    - name: MASKINPORTEN_WELL_KNOWN_URL
+      value: https://maskinporten.no/.well-known/oauth-authorization-server
+    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+      value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: TJENESTEPENSJON_URL
+      value: https://tp-api.prod-fss-pub.nais.io
+    - name: TJENESTEPENSJON_SCOPE
+      value: api://prod-fss.pensjonsamhandling.tp/.default
+    - name: ROLLE_PENSJONSAKSBEHANDLER
+      value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
+  accessPolicy:
+    inbound:
+      rules:
+        - application: pensjon-pen
+          namespace: pensjondeployer
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjonskalkulator-backend
+          namespace: pensjonskalkulator
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: tilleggsstonader-integrasjoner
+          namespace: tilleggsstonader
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+    outbound:
+      rules:
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling
+      external:
+        - host: tp-api.prod-fss-pub.nais.io

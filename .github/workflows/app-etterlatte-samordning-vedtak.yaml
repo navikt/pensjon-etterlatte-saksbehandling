@@ -59,3 +59,39 @@ jobs:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit
 
+  deploy-api-dev:
+    name: dev-gcp
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/dev-api.yaml
+          VAR: image=${{ inputs.image }}
+
+  deploy-api-prod:
+    name: prod-gcp
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: deploy-to-dev-gcp
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andstor/file-existence-action@v3
+        id: check_files
+        with:
+          files: "apps/${{ github.workflow }}/.nais/prod.yaml"
+      - uses: nais/deploy/actions/deploy@v2
+        if: steps.check_files.outputs.files_exists == 'true'
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/prod-api.yaml
+          VAR: image=${{ inputs.image }}

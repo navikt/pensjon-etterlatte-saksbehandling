@@ -4,6 +4,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.avsender
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -155,26 +157,39 @@ class Brevoppretter(
         val kode = brevKode(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
+            val redigerbarTekstRequest =
+                RedigerbarTekstRequest(
+                    brukerTokenInfo = bruker,
+                    brevkode = kode,
+                    brevdata = brevDataMapping,
+                    soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                    sakId = sakId,
+                    spraak = generellBrevData.spraak,
+                    sakType = generellBrevData.sak.sakType,
+                    forenkletVedtak = generellBrevData.forenkletVedtak,
+                    enhet = generellBrevData.sak.enhet,
+                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                    revurderingaarsak = generellBrevData.revurderingsaarsak,
+                    behandlingId = behandlingId,
+                    erForeldreloes = generellBrevData.erForeldreloes(),
+                    loependeIPesys = generellBrevData.loependeIPesys(),
+                    systemkilde = generellBrevData.systemkilde,
+                    avdoede = generellBrevData.personerISak.avdoede,
+                )
             val innhold =
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
-                        RedigerbarTekstRequest(
-                            brukerTokenInfo = bruker,
-                            brevkode = kode,
-                            brevdata = brevDataMapping,
+                        BrevbakerRequest.fra(
+                            brevKode = kode,
+                            brevData = brevDataMapping(redigerbarTekstRequest),
+                            avsender =
+                                adresseService.hentAvsender(
+                                    avsender(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                ),
                             soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                             sakId = sakId,
                             spraak = generellBrevData.spraak,
                             sakType = generellBrevData.sak.sakType,
-                            forenkletVedtak = generellBrevData.forenkletVedtak,
-                            enhet = generellBrevData.sak.enhet,
-                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                            revurderingaarsak = generellBrevData.revurderingsaarsak,
-                            behandlingId = behandlingId,
-                            erForeldreloes = generellBrevData.erForeldreloes(),
-                            loependeIPesys = generellBrevData.loependeIPesys(),
-                            systemkilde = generellBrevData.systemkilde,
-                            avdoede = generellBrevData.personerISak.avdoede,
                         ),
                     )
                 }
@@ -193,11 +208,6 @@ class Brevoppretter(
                         generellBrevData.forenkletVedtak,
                         generellBrevData.sak.enhet,
                         generellBrevData.personerISak.soekerOgEventuellVerge(),
-                        generellBrevData.utlandstilknytning?.type,
-                        generellBrevData.erForeldreloes(),
-                        generellBrevData.loependeIPesys(),
-                        generellBrevData.systemkilde,
-                        generellBrevData.personerISak.avdoede,
                     )
                 }
 

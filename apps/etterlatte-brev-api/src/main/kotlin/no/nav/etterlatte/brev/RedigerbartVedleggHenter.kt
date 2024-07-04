@@ -2,8 +2,10 @@ package no.nav.etterlatte.brev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.avsender
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -11,11 +13,9 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
@@ -23,6 +23,7 @@ import java.util.UUID
 class RedigerbartVedleggHenter(
     private val brevbakerService: BrevbakerService,
     private val behandlingService: BehandlingService,
+    private val adresseService: AdresseService,
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
@@ -36,11 +37,6 @@ class RedigerbartVedleggHenter(
         forenkletVedtak: ForenkletVedtak?,
         enhet: String,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        utlandstilknytningType: UtlandstilknytningType?,
-        erForeldreloes: Boolean,
-        loependeIPesys: Boolean,
-        systemkilde: Vedtaksloesning,
-        avdoede: List<Avdoed>,
     ): List<BrevInnholdVedlegg> {
         val brevkoder: List<Pair<EtterlatteBrevKode, BrevVedleggKey>> =
             when (sakType) {
@@ -141,13 +137,6 @@ class RedigerbartVedleggHenter(
                     sakType = sakType,
                     forenkletVedtak = forenkletVedtak,
                     enhet = enhet,
-                    utlandstilknytningType = utlandstilknytningType,
-                    revurderingaarsak = revurderingaarsak,
-                    behandlingId = behandlingId,
-                    erForeldreloes = erForeldreloes,
-                    loependeIPesys = loependeIPesys,
-                    systemkilde = systemkilde,
-                    avdoede = avdoede,
                 )
             }.toList()
     }
@@ -162,36 +151,20 @@ class RedigerbartVedleggHenter(
         sakType: SakType,
         forenkletVedtak: ForenkletVedtak?,
         enhet: String,
-        utlandstilknytningType: UtlandstilknytningType?,
-        revurderingaarsak: Revurderingaarsak?,
-        behandlingId: UUID?,
-        erForeldreloes: Boolean,
-        loependeIPesys: Boolean,
-        systemkilde: Vedtaksloesning,
-        avdoede: List<Avdoed>,
     ): BrevInnholdVedlegg =
         BrevInnholdVedlegg(
             tittel = kode.tittel!!,
             key = key,
             payload =
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(
-                    RedigerbarTekstRequest(
-                        brukerTokenInfo = bruker,
-                        brevkode = kode,
-                        brevdata = { ManueltBrevData() },
+                    BrevbakerRequest.fra(
+                        brevKode = kode,
+                        brevData = ManueltBrevData(),
+                        avsender = adresseService.hentAvsender(avsender(bruker, forenkletVedtak, enhet)),
                         soekerOgEventuellVerge = soekerOgEventuellVerge,
                         sakId = sakId,
                         spraak = spraak,
                         sakType = sakType,
-                        forenkletVedtak = forenkletVedtak,
-                        enhet = enhet,
-                        utlandstilknytningType = utlandstilknytningType,
-                        revurderingaarsak = revurderingaarsak,
-                        behandlingId = behandlingId,
-                        erForeldreloes = erForeldreloes,
-                        loependeIPesys = loependeIPesys,
-                        systemkilde = systemkilde,
-                        avdoede = avdoede,
                     ),
                 ),
         )

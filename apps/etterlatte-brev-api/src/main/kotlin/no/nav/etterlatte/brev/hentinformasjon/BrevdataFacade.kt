@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -15,7 +14,6 @@ import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -39,14 +37,12 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val adresseService: AdresseService,
 ) {
@@ -241,23 +237,6 @@ class BrevdataFacade(
         } else {
             null
         }
-    }
-
-    suspend fun finnForrigeAvkortingsinfo(
-        sakId: Long,
-        sakType: SakType,
-        virkningstidspunkt: YearMonth,
-        vedtakType: VedtakType,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo? {
-        val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
-        return beregningService.finnAvkortingsinfoNullable(
-            forrigeIverksatteBehandlingId,
-            sakType,
-            virkningstidspunkt,
-            vedtakType,
-            brukerTokenInfo,
-        )
     }
 }
 

@@ -136,7 +136,6 @@ class ApplicationBuilder {
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagKlient,
-            beregningService,
             behandlingService,
             adresseService,
         )

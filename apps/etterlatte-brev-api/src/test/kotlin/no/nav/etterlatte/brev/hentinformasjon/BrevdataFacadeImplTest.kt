@@ -66,7 +66,6 @@ internal class BrevdataFacadeImplTest {
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagKlient,
-            beregningService,
             behandlingService,
             adresseService,
         )

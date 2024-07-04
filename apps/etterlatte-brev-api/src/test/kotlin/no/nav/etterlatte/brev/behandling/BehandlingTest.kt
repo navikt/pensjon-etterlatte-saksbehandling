@@ -539,7 +539,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
     return BrevdataFacade(
         vedtaksvurderingService,
         grunnlagKlient,
-        beregningService,
         behandlingService,
         addresseService,
     )

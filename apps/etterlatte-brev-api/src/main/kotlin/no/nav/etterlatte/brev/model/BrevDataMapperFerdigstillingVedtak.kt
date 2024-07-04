@@ -296,8 +296,9 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val forrigeAvkortingsinfo =
             async {
-                brevdataFacade.finnForrigeAvkortingsinfo(
-                    generellBrevData.sak.id,
+                val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(generellBrevData.sak.id, bruker).id
+                beregningService.finnAvkortingsinfoNullable(
+                    forrigeIverksatteBehandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,
                     generellBrevData.forenkletVedtak.type,

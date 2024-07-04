@@ -5,8 +5,12 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
-import no.nav.etterlatte.brev.hentinformasjon.hentBenyttetTrygdetidOgProratabroek
+import no.nav.etterlatte.brev.hentinformasjon.BeregningsperiodeBroekMangler
+import no.nav.etterlatte.brev.hentinformasjon.SamletTeoretiskTrygdetidMangler
+import no.nav.etterlatte.brev.hentinformasjon.UgyldigBeregningsMetode
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -144,3 +148,24 @@ class BeregningService(
         )
     }
 }
+
+private fun hentBenyttetTrygdetidOgProratabroek(
+    beregningsperiode: no.nav.etterlatte.libs.common.beregning.Beregningsperiode,
+): Pair<Int, IntBroek?> =
+    when (beregningsperiode.beregningsMetode) {
+        BeregningsMetode.NASJONAL ->
+            Pair(
+                beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                null,
+            )
+
+        BeregningsMetode.PRORATA -> {
+            Pair(
+                beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
+            )
+        }
+
+        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
+        null -> beregningsperiode.trygdetid to null
+    }

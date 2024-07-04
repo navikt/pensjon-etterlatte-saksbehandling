@@ -16,11 +16,9 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -38,7 +36,6 @@ import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
@@ -57,7 +54,8 @@ class BrevdataFacade(
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
-            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
+            val brevutfallDeferred =
+                behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val grunnlag =
                 when (vedtakDeferred?.await()?.type) {
@@ -239,25 +237,6 @@ class BrevdataFacade(
         }
     }
 }
-
-fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> =
-    when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL ->
-            Pair(
-                beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
-                null,
-            )
-
-        BeregningsMetode.PRORATA -> {
-            Pair(
-                beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
-                beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
-            )
-        }
-
-        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
-        null -> beregningsperiode.trygdetid to null
-    }
 
 class UgyldigBeregningsMetode :
     UgyldigForespoerselException(

@@ -87,33 +87,34 @@ class PDFGenerator(
             )
 
         val sak = generellBrevData.sak
+        val brevData: BrevDataFerdigstilling =
+            brevDataMapper(
+                BrevDataFerdigstillingRequest(
+                    bruker = bruker,
+                    innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    kode = brevkodePar,
+                    loependeIPesys = generellBrevData.loependeIPesys(),
+                    behandlingId = generellBrevData.behandlingId!!,
+                    virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                    sakId = sak.id,
+                    sakType = sak.sakType,
+                    erForeldreloes = generellBrevData.erForeldreloes(),
+                    systemkilde = generellBrevData.systemkilde,
+                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                    avdoede = generellBrevData.personerISak.avdoede,
+                    soeker = generellBrevData.personerISak.soeker,
+                    revurderingaarsak = generellBrevData.revurderingsaarsak,
+                    vedtakType = generellBrevData.forenkletVedtak?.type,
+                    harVerge = generellBrevData.personerISak.verge != null,
+                    tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
+                    klage = generellBrevData.forenkletVedtak?.klage,
+                    tittel = brev.tittel,
+                ),
+            )
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
-                brevData =
-                    brevDataMapper(
-                        BrevDataFerdigstillingRequest(
-                            bruker = bruker,
-                            innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                            kode = brevkodePar,
-                            loependeIPesys = generellBrevData.loependeIPesys(),
-                            behandlingId = generellBrevData.behandlingId!!,
-                            virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                            sakId = sak.id,
-                            sakType = sak.sakType,
-                            erForeldreloes = generellBrevData.erForeldreloes(),
-                            systemkilde = generellBrevData.systemkilde,
-                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                            avdoede = generellBrevData.personerISak.avdoede,
-                            soeker = generellBrevData.personerISak.soeker,
-                            revurderingaarsak = generellBrevData.revurderingsaarsak,
-                            vedtakType = generellBrevData.forenkletVedtak?.type,
-                            harVerge = generellBrevData.personerISak.verge != null,
-                            tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
-                            klage = generellBrevData.forenkletVedtak?.klage,
-                            tittel = brev.tittel,
-                        ),
-                    ),
+                brevData = brevData,
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,

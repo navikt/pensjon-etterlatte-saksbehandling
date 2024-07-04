@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -33,10 +33,11 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
@@ -44,10 +45,24 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class BrevDataFerdigstillingRequest(
-    val generellBrevData: GenerellBrevData,
     val bruker: BrukerTokenInfo,
     val innholdMedVedlegg: InnholdMedVedlegg,
     val kode: Brevkoder,
+    val loependeIPesys: Boolean,
+    val behandlingId: UUID,
+    val virkningstidspunkt: YearMonth?,
+    val sakId: Long,
+    val sakType: SakType,
+    val erForeldreloes: Boolean,
+    val systemkilde: Vedtaksloesning,
+    val utlandstilknytningType: UtlandstilknytningType?,
+    val avdoede: List<Avdoed>,
+    val soeker: Soeker,
+    val revurderingaarsak: Revurderingaarsak?,
+    val vedtakType: VedtakType?,
+    val harVerge: Boolean, // generellBrevData.personerISak.verge != null
+    val tilbakekreving: Tilbakekreving?,
+    val klage: Klage?,
     val tittel: String? = null,
 )
 
@@ -59,19 +74,19 @@ class BrevDataMapperFerdigstillingVedtak(
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
-            if (generellBrevData.loependeIPesys()) {
+            if (loependeIPesys) {
                 return fraPesys(
                     bruker,
                     innholdMedVedlegg,
-                    generellBrevData.behandlingId!!,
-                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
-                    generellBrevData.sak.sakType,
-                    generellBrevData.erForeldreloes(),
-                    generellBrevData.systemkilde,
-                    generellBrevData.utlandstilknytning?.type,
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.personerISak.avdoede,
-                    generellBrevData.personerISak.soeker.under18,
+                    behandlingId,
+                    virkningstidspunkt!!,
+                    sakType,
+                    erForeldreloes,
+                    systemkilde,
+                    utlandstilknytningType,
+                    loependeIPesys = true,
+                    avdoede,
+                    soeker.under18,
                 )
             }
             return when (kode.ferdigstilling) {
@@ -79,14 +94,14 @@ class BrevDataMapperFerdigstillingVedtak(
                     barnepensjonRevurdering(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.behandlingId!!,
-                        generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
-                        generellBrevData.sak.sakType,
-                        generellBrevData.utlandstilknytning?.type,
-                        generellBrevData.revurderingsaarsak,
-                        generellBrevData.sak.id,
-                        generellBrevData.erForeldreloes(),
-                        generellBrevData.personerISak.avdoede,
+                        behandlingId,
+                        virkningstidspunkt!!,
+                        sakType,
+                        utlandstilknytningType,
+                        revurderingaarsak,
+                        sakId,
+                        erForeldreloes,
+                        avdoede,
                     )
                 BARNEPENSJON_INNVILGELSE,
                 BARNEPENSJON_INNVILGELSE_FORELDRELOES,
@@ -94,81 +109,81 @@ class BrevDataMapperFerdigstillingVedtak(
                     barnepensjonInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.systemkilde,
-                        generellBrevData.behandlingId!!,
-                        generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
-                        generellBrevData.sak.sakType,
-                        generellBrevData.erForeldreloes(),
-                        generellBrevData.utlandstilknytning?.type,
-                        generellBrevData.loependeIPesys(),
-                        generellBrevData.personerISak.avdoede,
+                        systemkilde,
+                        behandlingId,
+                        virkningstidspunkt!!,
+                        sakType,
+                        erForeldreloes,
+                        utlandstilknytningType,
+                        loependeIPesys = false,
+                        avdoede,
                     )
                 BARNEPENSJON_AVSLAG ->
                     barnepensjonAvslag(
                         innholdMedVedlegg,
-                        generellBrevData.personerISak.soeker.under18,
-                        generellBrevData.utlandstilknytning?.type,
+                        soeker.under18,
+                        utlandstilknytningType,
                     )
                 BARNEPENSJON_OPPHOER ->
                     barnepensjonOpphoer(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.behandlingId!!,
-                        generellBrevData.utlandstilknytning?.type,
-                        generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1),
+                        behandlingId,
+                        utlandstilknytningType,
+                        virkningstidspunkt?.atDay(1),
                     )
 
                 OMSTILLINGSSTOENAD_INNVILGELSE ->
                     omstillingsstoenadInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.behandlingId!!,
-                        generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
-                        generellBrevData.sak.sakType,
-                        generellBrevData.forenkletVedtak.type,
-                        generellBrevData.personerISak.avdoede,
+                        behandlingId,
+                        virkningstidspunkt!!,
+                        sakType,
+                        vedtakType!!,
+                        avdoede,
                     )
 
                 OMSTILLINGSSTOENAD_REVURDERING ->
                     omstillingsstoenadRevurdering(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.behandlingId!!,
-                        generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
-                        generellBrevData.sak.sakType,
-                        generellBrevData.forenkletVedtak.type,
-                        generellBrevData.sak.id,
-                        generellBrevData.revurderingsaarsak,
-                        generellBrevData.personerISak.avdoede,
+                        behandlingId,
+                        virkningstidspunkt!!,
+                        sakType,
+                        vedtakType!!,
+                        sakId,
+                        revurderingaarsak,
+                        avdoede,
                     )
 
                 OMSTILLINGSSTOENAD_AVSLAG ->
                     OmstillingsstoenadAvslag.fra(
                         innholdMedVedlegg.innhold(),
-                        generellBrevData.utlandstilknytning?.type,
+                        utlandstilknytningType,
                     )
                 OMSTILLINGSSTOENAD_OPPHOER ->
                     omstillingsstoenadOpphoer(
                         bruker,
                         innholdMedVedlegg,
-                        generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1),
-                        generellBrevData.utlandstilknytning,
-                        generellBrevData.behandlingId!!,
+                        virkningstidspunkt?.atDay(1),
+                        behandlingId,
+                        utlandstilknytningType,
                     )
 
                 TILBAKEKREVING_FERDIG ->
                     TilbakekrevingBrevDTO.fra(
-                        muligTilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
-                        sakType = generellBrevData.sak.sakType,
-                        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-                        soeker = generellBrevData.personerISak.soeker,
+                        muligTilbakekreving = tilbakekreving,
+                        sakType = sakType,
+                        utlandstilknytning = utlandstilknytningType,
+                        soeker = soeker,
                         innholdMedVedlegg.innhold(),
                     )
 
                 AVVIST_KLAGE_FERDIG ->
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
-                        generellBrevData.forenkletVedtak?.klage,
+                        klage,
                     )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
@@ -450,16 +465,16 @@ class BrevDataMapperFerdigstillingVedtak(
         bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         virkningsdato: LocalDate?,
-        utlandstilknytning: Utlandstilknytning?,
         behandlingId: UUID,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadOpphoer.fra(
             innholdMedVedlegg,
             virkningsdato,
-            utlandstilknytning,
             requireNotNull(brevutfall.await()),
+            utlandstilknytningType,
         )
     }
 }

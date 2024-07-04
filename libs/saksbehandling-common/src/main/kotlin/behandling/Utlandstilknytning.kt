@@ -7,7 +7,7 @@ data class Utlandstilknytning(
     val kilde: Grunnlagsopplysning.Kilde,
     val begrunnelse: String,
 ) {
-    fun erBosattUtland() = this.type == UtlandstilknytningType.BOSATT_UTLAND
+    fun erBosattUtland() = this.type.erBosattUtland()
 }
 
 enum class UtlandstilknytningType {
@@ -15,3 +15,5 @@ enum class UtlandstilknytningType {
     UTLANDSTILSNITT,
     BOSATT_UTLAND,
 }
+
+fun UtlandstilknytningType?.erBosattUtland() = this == UtlandstilknytningType.BOSATT_UTLAND

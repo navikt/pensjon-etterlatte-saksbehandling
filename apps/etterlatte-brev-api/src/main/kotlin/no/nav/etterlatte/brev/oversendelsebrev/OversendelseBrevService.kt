@@ -273,7 +273,7 @@ data class OversendelseBrevFerdigstillingData(
                 }
 
             return OversendelseBrevFerdigstillingData(
-                sakType = request.generellBrevData.sak.sakType,
+                sakType = request.sakType,
                 klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 vedtakDato =
                     checkNotNull(
@@ -286,8 +286,8 @@ data class OversendelseBrevFerdigstillingData(
                         "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
                     },
                 innstillingTekst = innstilling.innstillingTekst,
-                under18Aar = request.generellBrevData.personerISak.soeker.under18 ?: false,
-                harVerge = request.generellBrevData.personerISak.verge != null,
+                under18Aar = request.soeker.under18 ?: false,
+                harVerge = request.harVerge,
                 // TODO: støtte bosatt utland klage
                 bosattIUtlandet = false,
             )

@@ -72,7 +72,11 @@ internal class NyNotatServiceTest(
 
         val nyttNotat =
             runBlocking {
-                nyNotatService.opprett(sakId, NotatMal.TOM_MAL, saksbehandler)
+                nyNotatService.opprett(
+                    sakId = sakId,
+                    mal = NotatMal.TOM_MAL,
+                    bruker = saksbehandler,
+                )
             }
 
         assertEquals(sakId, nyttNotat.sakId)
@@ -92,14 +96,18 @@ internal class NyNotatServiceTest(
     }
 
     @Test
-    fun `Oppdater tittel på notat`() {
+    fun `Oppdater tittel paa notat`() {
         val sakId = Random.nextLong()
 
         coEvery { sakServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
 
         val nyttNotat =
             runBlocking {
-                nyNotatService.opprett(sakId, NotatMal.TOM_MAL, saksbehandler)
+                nyNotatService.opprett(
+                    sakId = sakId,
+                    mal = NotatMal.TOM_MAL,
+                    bruker = saksbehandler,
+                )
             }
         assertEquals("Mangler tittel", nyttNotat.tittel)
 
@@ -119,7 +127,7 @@ internal class NyNotatServiceTest(
     }
 
     @Test
-    fun `Journalfør notat`() {
+    fun `Journalfoer notat`() {
         val sakId = Random.nextLong()
 
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
@@ -127,7 +135,14 @@ internal class NyNotatServiceTest(
         coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
         coEvery { pdfGeneratorKlientMock.genererPdf(any()) } returns "pdf".toByteArray()
 
-        val nyttNotat = runBlocking { nyNotatService.opprett(sakId, NotatMal.TOM_MAL, saksbehandler) }
+        val nyttNotat =
+            runBlocking {
+                nyNotatService.opprett(
+                    sakId = sakId,
+                    mal = NotatMal.TOM_MAL,
+                    bruker = saksbehandler,
+                )
+            }
         val payload = nyNotatService.hentPayload(nyttNotat.id)
 
         runBlocking { nyNotatService.journalfoer(nyttNotat.id, saksbehandler) }

@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
 import no.nav.etterlatte.brev.notat.PdfGenRequest
 import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
+import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -72,6 +73,8 @@ class NyNotatService(
     suspend fun opprett(
         sakId: Long,
         mal: NotatMal,
+        tittel: String = "Mangler tittel",
+        params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = sakService.hentSak(sakId, bruker)
@@ -80,7 +83,7 @@ class NyNotatService(
             notatRepository.opprett(
                 NyttNotat(
                     sak.id,
-                    "Mangler tittel",
+                    tittel,
                     payload =
                         when (mal) {
                             NotatMal.TOM_MAL ->
@@ -97,6 +100,10 @@ class NyNotatService(
                                 deserialize(
                                     javaClass.getResource("/notat/nordisk_vedlegg.json")!!.readText(),
                                 )
+
+                            NotatMal.MANUELL_SAMORDNING -> {
+                                opprettSamordningsnotatPayload(params)
+                            }
                         },
                     mal = mal,
                 ),
@@ -202,3 +209,5 @@ class NotatAlleredeJournalfoert :
         code = "NOTAT_ALLEREDE_JOURNALFOERT",
         detail = "Notatet er allerede journalført!",
     )
+
+interface NotatParametre

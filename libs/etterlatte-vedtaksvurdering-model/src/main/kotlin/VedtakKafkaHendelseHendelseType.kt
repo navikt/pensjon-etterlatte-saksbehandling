@@ -10,6 +10,7 @@ enum class VedtakKafkaHendelseHendelseType : EventnameHendelseType {
     SAMORDNET,
     IVERKSATT,
     SAMORDNING_MOTTATT,
+    SAMORDNING_MANUELT_BEHANDLET,
     ;
 
     override fun lagEventnameForType() = "VEDTAK:$name"

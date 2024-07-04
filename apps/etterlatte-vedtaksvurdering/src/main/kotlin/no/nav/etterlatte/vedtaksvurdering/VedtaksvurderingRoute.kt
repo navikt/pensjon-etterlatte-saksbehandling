@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -61,7 +62,18 @@ fun Route.vedtaksvurderingRoute(
             withSakId(behandlingKlient) { sakId ->
                 val oppdatering = requireNotNull(call.receive<OppdaterSamordningsmelding>())
                 logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
-                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo)
+                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
+                    rapidService.sendGenerellHendelse(
+                        VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET,
+                        mapOf(
+                            "sakId" to sakId,
+                            "vedtakId" to oppdatering.vedtakId,
+                            "samordningsmeldingId" to oppdatering.samId,
+                            "saksbehandlerId" to brukerTokenInfo.ident(),
+                            "kommentar" to oppdatering.kommentar,
+                        ),
+                    )
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }

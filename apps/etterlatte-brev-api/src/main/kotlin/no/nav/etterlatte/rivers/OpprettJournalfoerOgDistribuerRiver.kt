@@ -112,8 +112,9 @@ class OpprettJournalfoerOgDistribuerRiver(
             ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
                 brevKode,
                 sakId,
-                brevOgData,
                 brukerTokenInfo,
+                brevOgData.second.sak.enhet,
+                brevOgData.first.id,
             )
         ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
             brevKode,

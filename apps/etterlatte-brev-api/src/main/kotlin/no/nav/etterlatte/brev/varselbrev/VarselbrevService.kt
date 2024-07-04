@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.avsender
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -31,7 +30,7 @@ internal class VarselbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VarselbrevResponse {
+    ): Brev {
         val sakType = behandlingService.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
 
@@ -49,9 +48,7 @@ internal class VarselbrevService(
                     it.generellBrevData.utlandstilknytning,
                     it.generellBrevData.revurderingsaarsak,
                 )
-            }.let {
-                VarselbrevResponse(it.first, it.second, brevkode)
-            }
+            }.first
     }
 
     private suspend fun hentBrevkode(
@@ -105,9 +102,3 @@ internal class VarselbrevService(
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }
-
-data class VarselbrevResponse(
-    val brev: Brev,
-    val generellBrevData: GenerellBrevData,
-    val brevkoder: Brevkoder,
-)

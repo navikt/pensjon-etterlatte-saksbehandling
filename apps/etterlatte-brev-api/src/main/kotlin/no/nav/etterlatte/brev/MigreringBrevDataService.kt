@@ -31,7 +31,14 @@ class MigreringBrevDataService(
                     brukerTokenInfo,
                     generellBrevData.sak.sakType,
                 )
-            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(generellBrevData, utbetalingsinfo)
+            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(
+                utbetalingsinfo,
+                generellBrevData.personerISak,
+                generellBrevData.loependeIPesys(),
+                generellBrevData.utlandstilknytning,
+                generellBrevData.behandlingId,
+                generellBrevData.forenkletVedtak?.saksbehandlerIdent,
+            )
         }
     }
 }

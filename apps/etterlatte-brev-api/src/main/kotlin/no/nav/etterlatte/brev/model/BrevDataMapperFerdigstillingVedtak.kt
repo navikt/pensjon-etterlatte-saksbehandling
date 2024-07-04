@@ -76,7 +76,11 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg,
                     )
 
-                OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
+                OMSTILLINGSSTOENAD_AVSLAG ->
+                    OmstillingsstoenadAvslag.fra(
+                        innholdMedVedlegg.innhold(),
+                        generellBrevData.utlandstilknytning?.type,
+                    )
                 OMSTILLINGSSTOENAD_OPPHOER -> omstillingsstoenadOpphoer(bruker, generellBrevData, innholdMedVedlegg)
 
                 TILBAKEKREVING_FERDIG ->
@@ -85,7 +89,11 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg.innhold(),
                     )
 
-                AVVIST_KLAGE_FERDIG -> AvvistKlageFerdigData.fra(generellBrevData, innholdMedVedlegg)
+                AVVIST_KLAGE_FERDIG ->
+                    AvvistKlageFerdigData.fra(
+                        innholdMedVedlegg,
+                        generellBrevData.forenkletVedtak?.klage,
+                    )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
             }
@@ -241,9 +249,9 @@ class BrevDataMapperFerdigstillingVedtak(
 
         BarnepensjonOpphoer.fra(
             innholdMedVedlegg,
-            generellBrevData,
             generellBrevData.utlandstilknytning?.type,
             requireNotNull(brevutfall.await()),
+            generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1),
         )
     }
 

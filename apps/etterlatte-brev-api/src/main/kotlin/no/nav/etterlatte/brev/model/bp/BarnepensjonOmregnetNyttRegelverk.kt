@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -12,11 +12,13 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.util.UUID
 
 data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     val utbetaltFoerReform: Kroner,
@@ -26,8 +28,12 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
+            personerISak: PersonerISak,
+            loependeIPesys: Boolean,
+            utlandstilknytning: Utlandstilknytning?,
+            behandlingId: UUID?,
+            saksbehandlerIdent: String?,
         ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
                 BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
@@ -35,24 +41,22 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                     erBosattUtlandet = false,
                     erForeldreloes =
-                        generellBrevData.personerISak.soeker.foreldreloes ||
+                        personerISak.soeker.foreldreloes ||
                             (
-                                generellBrevData.personerISak.avdoede.size > 1 &&
-                                    generellBrevData.personerISak.verge !is ForelderVerge
+                                personerISak.avdoede.size > 1 &&
+                                    personerISak.verge !is ForelderVerge
                             ),
                 )
 
             // TODO På tide å fjerne?
-            if (generellBrevData.loependeIPesys()) {
+            if (loependeIPesys) {
                 val pesysUtbetaltFoerReform = 0
                 val pesysUtenlandstilknytning =
-                    requireNotNull(generellBrevData.utlandstilknytning) {
-                        "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
+                    requireNotNull(utlandstilknytning) {
+                        "Mangler utlandstilknytning for behandling=$behandlingId"
                     }.type
 
-                if (generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn &&
-                    defaultBrevdataOmregning.erForeldreloes
-                ) {
+                if (saksbehandlerIdent == Fagsaksystem.EY.navn && defaultBrevdataOmregning.erForeldreloes) {
                     throw IllegalStateException(
                         "Vi har en automatisk migrering som setter foreldreløs. " +
                             "Dette skal ikke skje, siden dette brevet må redigeres av saksbehandler",

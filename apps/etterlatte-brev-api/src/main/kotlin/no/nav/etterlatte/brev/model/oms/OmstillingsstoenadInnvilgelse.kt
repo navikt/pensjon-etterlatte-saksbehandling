@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
@@ -108,14 +107,14 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                avdoed = avdoede.minBy { it.doedsdato },
                 utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
                 etterbetaling = etterbetaling != null,
             )

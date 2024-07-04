@@ -57,7 +57,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -69,8 +69,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
                     VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData)
-                    VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(generellBrevData)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(generellBrevData.personerISak.avdoede)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -96,15 +96,17 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
         if (generellBrevData.erForeldreloes()) {
             BarnepensjonForeldreloesRedigerbar.fra(
-                generellBrevData,
                 etterbetaling.await(),
                 utbetalingsinfo = utbetalingsinfo.await(),
+                generellBrevData.systemkilde,
+                generellBrevData.loependeIPesys(),
             )
         } else {
             BarnepensjonInnvilgelseRedigerbartUtfall.fra(
-                generellBrevData,
                 utbetalingsinfo.await(),
                 etterbetaling.await(),
+                generellBrevData.systemkilde,
+                generellBrevData.personerISak.avdoede,
             )
         }
     }
@@ -172,10 +174,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
-            generellBrevData,
             utbetalingsinfo.await(),
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
+            generellBrevData.personerISak.avdoede,
         )
     }
 

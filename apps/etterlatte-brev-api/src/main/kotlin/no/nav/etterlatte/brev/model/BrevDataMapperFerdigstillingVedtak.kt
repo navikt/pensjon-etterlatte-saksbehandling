@@ -143,8 +143,8 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val forrigeUtbetalingsinfo =
             async {
-                brevdataFacade.finnForrigeUtbetalingsinfo(
-                    generellBrevData.sak.id,
+                beregningService.finnUtbetalingsinfoNullable(
+                    behandlingService.hentSisteIverksatteBehandling(generellBrevData.sak.id, bruker).id,
                     virkningstidspunkt,
                     bruker,
                     generellBrevData.sak.sakType,

@@ -272,8 +272,6 @@ class BrevdataFacade(
         sakType: SakType,
     ): Utbetalingsinfo = beregningService.finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker, sakType)
 
-    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
-
     suspend fun finnAvkortingsinfo(
         behandlingId: UUID,
         sakType: SakType,

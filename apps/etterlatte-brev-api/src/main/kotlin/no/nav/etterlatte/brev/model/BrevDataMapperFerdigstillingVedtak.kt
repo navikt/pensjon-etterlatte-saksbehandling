@@ -102,7 +102,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
-        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {

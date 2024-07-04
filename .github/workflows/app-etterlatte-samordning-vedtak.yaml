@@ -79,7 +79,7 @@ jobs:
   deploy-api-prod:
     name: deploy-api-prod
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: deploy-api-dev
+    needs: [deploy-api-dev, build]
     runs-on: ubuntu-latest
     permissions:
       contents: read

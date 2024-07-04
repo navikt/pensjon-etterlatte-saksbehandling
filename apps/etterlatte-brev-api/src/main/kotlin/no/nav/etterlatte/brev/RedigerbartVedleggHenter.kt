@@ -36,6 +36,11 @@ class RedigerbartVedleggHenter(
                             bruker,
                             generellBrevData,
                             generellBrevData.personerISak.soekerOgEventuellVerge(),
+                            generellBrevData.sak.id,
+                            generellBrevData.spraak,
+                            generellBrevData.sak.sakType,
+                            generellBrevData.forenkletVedtak,
+                            generellBrevData.sak.enhet,
                         )
                     VedtakType.OPPHOER ->
                         vedleggOpphoerOmstillingsstoenad(
@@ -150,16 +155,21 @@ class RedigerbartVedleggHenter(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        sakId: Long,
+        spraak: Spraak,
+        sakType: SakType,
+        forenkletVedtak: ForenkletVedtak?,
+        enhet: String,
     ) = listOf(
         hentInnholdBeregningVedleggOms(
             bruker,
             generellBrevData,
             soekerOgEventuellVerge,
-            generellBrevData.sak.id,
-            generellBrevData.spraak,
-            generellBrevData.sak.sakType,
-            generellBrevData.forenkletVedtak,
-            generellBrevData.sak.enhet,
+            sakId,
+            spraak,
+            sakType,
+            forenkletVedtak,
+            enhet,
         ),
     )
 

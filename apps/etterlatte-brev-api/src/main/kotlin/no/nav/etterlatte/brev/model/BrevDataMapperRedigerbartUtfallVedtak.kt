@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
@@ -159,7 +161,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,
@@ -185,7 +187,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,

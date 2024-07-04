@@ -9,7 +9,7 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - "https://etterlatte-api.ekstern.dev.nav.no"  # Skru av etterhvert, skal nås via etterlatte-gw
+    - "https://etterlatte-api.ekstern.dev.nav.no"  # For TP-leverandører
     - "https://etterlatte-api.intern.dev.nav.no"
   liveness:
     path: /health/isalive
@@ -37,8 +37,8 @@ spec:
       cpu: 10m
       memory: 320Mi
   replicas:
-    min: 1
-    max: 2
+    min: 2
+    max: 4
   maskinporten:
     enabled: true
     scopes:

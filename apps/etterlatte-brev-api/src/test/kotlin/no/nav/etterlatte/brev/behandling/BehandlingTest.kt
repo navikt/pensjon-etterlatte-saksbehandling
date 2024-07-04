@@ -541,7 +541,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         grunnlagKlient,
         beregningService,
         behandlingService,
-        trygdetidService,
         addresseService,
     )
 }

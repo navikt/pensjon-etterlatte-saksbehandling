@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
-import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -50,7 +49,6 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
-    private val trygdetidService: TrygdetidService,
     private val adresseService: AdresseService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -275,11 +273,6 @@ class BrevdataFacade(
             brukerTokenInfo,
         )
     }
-
-    suspend fun finnTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> =

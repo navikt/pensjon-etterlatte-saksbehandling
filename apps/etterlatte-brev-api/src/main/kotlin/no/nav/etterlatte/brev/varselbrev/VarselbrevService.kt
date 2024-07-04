@@ -99,6 +99,6 @@ internal class VarselbrevService(
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
-        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
+        brevDataMapper = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }

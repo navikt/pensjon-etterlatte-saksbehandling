@@ -171,7 +171,7 @@ class OversendelseBrevServiceImpl(
             bruker = brukerTokenInfo,
             avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
             brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
-            brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+            brevDataMapper = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
         )
     }
 

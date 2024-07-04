@@ -123,7 +123,7 @@ class BrevService(
             bruker,
             avsenderRequest = { bruker, vedtak, enhet -> avsender(bruker, vedtak, enhet) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            brevDataMapper = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
     suspend fun ferdigstill(

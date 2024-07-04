@@ -90,6 +90,15 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
+                        any().sak.sakType,
+                        any().behandlingId,
+                        any().revurderingsaarsak,
+                        any().forenkletVedtak?.type,
+                        any().sak.id,
+                        any().spraak,
+                        any().forenkletVedtak,
+                        any().sak.enhet,
+                        any().personerISak.soekerOgEventuellVerge(),
                     )
                 } returns listOf()
             }

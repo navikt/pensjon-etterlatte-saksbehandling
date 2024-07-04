@@ -9,7 +9,6 @@ jackson-version = "2.17.1"
 jupiter-version = "5.10.3"
 kotlinx-version = "1.8.1"
 ktor2-version = "2.3.12"
-bcpkix-version = "1.78.1"
 navfelles-token-version = "5.0.1"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.8"
@@ -81,7 +80,7 @@ metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_
 
 messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.6" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.5.1" }
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.0" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024061408021718344972.64ebbdb34321" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
@@ -105,11 +104,6 @@ test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.2" }
 openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.1.0" }
-
-#Workarounds
-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-version"}
-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcpkix-version"}
-bcutil = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bcpkix-version"}
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

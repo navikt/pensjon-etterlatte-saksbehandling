@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -32,6 +31,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTORequest
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
@@ -48,7 +48,6 @@ class BrevDataMapperFerdigstillingVedtak(
     private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidService: TrygdetidService,
-    private val brevdataFacade: BrevdataFacade,
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
@@ -80,7 +79,11 @@ class BrevDataMapperFerdigstillingVedtak(
                 OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
                 OMSTILLINGSSTOENAD_OPPHOER -> omstillingsstoenadOpphoer(bruker, generellBrevData, innholdMedVedlegg)
 
-                TILBAKEKREVING_FERDIG -> TilbakekrevingBrevDTO.fra(generellBrevData, innholdMedVedlegg.innhold())
+                TILBAKEKREVING_FERDIG ->
+                    TilbakekrevingBrevDTO.fra(
+                        TilbakekrevingBrevDTORequest(generellBrevData),
+                        innholdMedVedlegg.innhold(),
+                    )
 
                 AVVIST_KLAGE_FERDIG -> AvvistKlageFerdigData.fra(generellBrevData, innholdMedVedlegg)
 

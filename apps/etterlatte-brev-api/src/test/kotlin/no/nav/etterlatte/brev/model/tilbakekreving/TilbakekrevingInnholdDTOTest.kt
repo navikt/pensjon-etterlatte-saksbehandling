@@ -1,27 +1,15 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Innsender
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 class TilbakekrevingInnholdDTOTest {
     @Test
@@ -101,34 +89,15 @@ class TilbakekrevingInnholdDTOTest {
         fun brevData(
             perioder: List<TilbakekrevingPeriode> = listOf(tilbakekrevingperiode()),
             vurdering: TilbakekrevingVurdering = tilbakekrevingvurdering(),
-        ) = GenerellBrevData(
-            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, 123L, "4808"),
-            personerISak =
-                PersonerISak(
-                    Innsender(Foedselsnummer("11057523044")),
-                    Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
-                    listOf(Avdoed(Foedselsnummer(""), "DØD TESTPERSON", LocalDate.now().minusMonths(1))),
-                    verge = null,
+        ) = TilbakekrevingBrevDTORequest(
+            tilbakekreving =
+                tilbakekreving(
+                    vurdering = vurdering,
+                    perioder = perioder,
                 ),
-            behandlingId = UUID.randomUUID(),
-            forenkletVedtak =
-                ForenkletVedtak(
-                    1,
-                    VedtakStatus.FATTET_VEDTAK,
-                    VedtakType.TILBAKEKREVING,
-                    "4808",
-                    "saksbehandler",
-                    attestantIdent = null,
-                    vedtaksdato = null,
-                    virkningstidspunkt = YearMonth.now(),
-                    tilbakekreving =
-                        tilbakekreving(
-                            vurdering = vurdering,
-                            perioder = perioder,
-                        ),
-                ),
-            spraak = Spraak.NB,
-            systemkilde = Vedtaksloesning.GJENNY,
+            sakType = SakType.OMSTILLINGSSTOENAD,
+            utlandstilknytning = null,
+            soeker = Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
         )
     }
 }

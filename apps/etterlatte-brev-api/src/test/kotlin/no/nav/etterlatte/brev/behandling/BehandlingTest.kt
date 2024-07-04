@@ -8,9 +8,9 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -530,14 +530,14 @@ internal class BehandlingTest {
 }
 
 fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): BrevdataFacade {
-    val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
+    val vedtaksvurderingService: VedtaksvurderingService = mockk()
     val grunnlagKlient: GrunnlagKlient = mockk()
     val beregningService: BeregningService = mockk()
     val behandlingService: BehandlingService = mockk()
     val trygdetidKlient: TrygdetidKlient = mockk()
 
     return BrevdataFacade(
-        vedtaksvurderingKlient,
+        vedtaksvurderingService,
         grunnlagKlient,
         beregningService,
         behandlingService,

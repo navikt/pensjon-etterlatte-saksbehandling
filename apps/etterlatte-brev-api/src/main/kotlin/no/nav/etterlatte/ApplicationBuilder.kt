@@ -37,11 +37,11 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
@@ -123,6 +123,8 @@ class ApplicationBuilder {
     private val behandlingService = BehandlingService(behandlingKlient)
     private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 
+    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
@@ -130,7 +132,7 @@ class ApplicationBuilder {
 
     private val brevdataFacade =
         BrevdataFacade(
-            vedtakKlient,
+            vedtaksvurderingService,
             grunnlagKlient,
             beregningService,
             behandlingService,
@@ -163,8 +165,6 @@ class ApplicationBuilder {
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService)
-
-    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 

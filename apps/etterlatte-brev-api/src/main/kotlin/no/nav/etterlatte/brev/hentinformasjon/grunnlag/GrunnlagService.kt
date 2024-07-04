@@ -3,8 +3,12 @@ package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
+import no.nav.etterlatte.brev.behandling.mapAvdoede
+import no.nav.etterlatte.brev.behandling.mapInnsender
+import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -40,6 +44,17 @@ class GrunnlagService(
             else -> async { klient.hentGrunnlag(behandlingId!!, bruker) }.await()
         }
     }
+
+    suspend fun hentPersonerISak(
+        grunnlag: Grunnlag,
+        brevutfallDto: BrevutfallDto?,
+        sakType: SakType?,
+    ) = PersonerISak(
+        innsender = grunnlag.mapInnsender(),
+        soeker = grunnlag.mapSoeker(brevutfallDto),
+        avdoede = grunnlag.mapAvdoede(),
+        verge = sakType?.let { hentVergeForSak(it, brevutfallDto, grunnlag) },
+    )
 
     suspend fun hentGrunnlagForSak(
         sakId: Long,

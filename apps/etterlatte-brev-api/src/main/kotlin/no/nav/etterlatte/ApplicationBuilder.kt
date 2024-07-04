@@ -270,7 +270,7 @@ class ApplicationBuilder {
                     )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
-                    brevdataFacade,
+                    grunnlagService,
                     brevoppretter,
                     ferdigstillJournalfoerOgDistribuerBrev,
                 )

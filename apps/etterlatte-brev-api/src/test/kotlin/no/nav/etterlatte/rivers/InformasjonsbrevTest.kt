@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
@@ -93,7 +93,7 @@ class InformasjonsbrevTest(
         val brevdistribuerer = mockk<Brevdistribuerer>().also { every { it.distribuer(brevId) } returns "" }
         OpprettJournalfoerOgDistribuerRiver(
             testRapid,
-            mockk<BrevdataFacade>(),
+            mockk<GrunnlagService>(),
             brevoppretter,
             FerdigstillJournalfoerOgDistribuerBrev(
                 pdfGenerator,

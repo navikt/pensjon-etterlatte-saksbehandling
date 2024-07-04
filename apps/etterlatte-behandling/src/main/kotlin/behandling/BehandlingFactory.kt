@@ -257,7 +257,7 @@ class BehandlingFactory(
             throw AvslagOmgjoering.HarAapenBehandling()
         }
 
-        val sisteAvslaatte =
+        val sisteAvslaatteBehandling =
             behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.minByOrNull { it.behandlingOpprettet }
 
         val foerstegangsbehandlingViOmgjoerer =
@@ -275,17 +275,17 @@ class BehandlingFactory(
                 "Behandlingen vi akkurat opprettet fins ikke :("
             }
 
-        if (skalKopiere && sisteAvslaatte != null) {
-            sisteAvslaatte.kommerBarnetTilgode?.let {
+        if (skalKopiere && sisteAvslaatteBehandling != null) {
+            sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
                 kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandling.id))
             }
-            sisteAvslaatte.virkningstidspunkt?.let { behandlingDao.lagreNyttVirkningstidspunkt(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatte.utlandstilknytning?.let { behandlingDao.lagreUtlandstilknytning(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatte.gyldighetsproeving()?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, it) }
+            sisteAvslaatteBehandling.virkningstidspunkt?.let { behandlingDao.lagreNyttVirkningstidspunkt(nyFoerstegangsbehandling.id, it) }
+            sisteAvslaatteBehandling.utlandstilknytning?.let { behandlingDao.lagreUtlandstilknytning(nyFoerstegangsbehandling.id, it) }
+            sisteAvslaatteBehandling.gyldighetsproeving()?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, it) }
             runBlocking {
                 vilkaarsvurderingKlient.kopierVilkaarsvurdering(
                     nyFoerstegangsbehandling.id,
-                    sisteAvslaatte.id,
+                    sisteAvslaatteBehandling.id,
                     brukerTokenInfo = saksbehandler,
                 )
             }

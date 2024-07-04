@@ -195,7 +195,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -366,7 +366,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class PesysKlientTest : PesysKlient {
@@ -406,7 +406,7 @@ class AxsysKlientTest : AxsysKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class VilkaarsvurderingTest : VilkaarsvurderingKlient {
@@ -415,7 +415,17 @@ class VilkaarsvurderingTest : VilkaarsvurderingKlient {
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        // NO-OP
     }
+
+    override val serviceName: String
+        get() = "Vilkårsvurderinglient"
+    override val beskrivelse: String
+        get() = "Snakker med vilkårsvurdering"
+    override val endpoint: String
+        get() = "vilkårsvurdering"
+
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {
@@ -449,5 +459,5 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }

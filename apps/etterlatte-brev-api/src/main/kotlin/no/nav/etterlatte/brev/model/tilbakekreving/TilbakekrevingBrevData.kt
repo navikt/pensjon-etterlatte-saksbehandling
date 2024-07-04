@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
@@ -12,20 +11,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
-
-data class TilbakekrevingBrevDTORequest(
-    val tilbakekreving: Tilbakekreving?,
-    val sakType: SakType,
-    val utlandstilknytning: UtlandstilknytningType?,
-    val soeker: Soeker,
-) {
-    constructor(generellBrevData: GenerellBrevData) : this(
-        tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
-        sakType = generellBrevData.sak.sakType,
-        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-        soeker = generellBrevData.personerISak.soeker,
-    )
-}
 
 data class TilbakekrevingBrevDTO(
     override val innhold: List<Slate.Element>,
@@ -40,20 +25,23 @@ data class TilbakekrevingBrevDTO(
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
-            request: TilbakekrevingBrevDTORequest,
+            muligTilbakekreving: Tilbakekreving?,
+            sakType: SakType,
+            utlandstilknytning: UtlandstilknytningType?,
+            soeker: Soeker,
             redigerbart: List<Slate.Element>,
         ): TilbakekrevingBrevDTO {
             val tilbakekreving =
-                request.tilbakekreving
+                muligTilbakekreving
                     ?: throw BrevDataTilbakerevingHarManglerException("Vedtak mangler tilbakekreving")
 
             val perioderSortert = tilbakekreving.perioder.sortedBy { it.maaned }
 
             return TilbakekrevingBrevDTO(
                 innhold = redigerbart,
-                sakType = request.sakType,
-                bosattUtland = request.utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                brukerNavn = request.soeker.formaterNavn(),
+                sakType = sakType,
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerNavn = soeker.formaterNavn(),
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
                 varselVedlagt = tilbakekreving.vurdering?.forhaandsvarsel != null,
                 datoVarselEllerVedtak = requireNotNull(tilbakekreving.vurdering?.forhaandsvarselDato),

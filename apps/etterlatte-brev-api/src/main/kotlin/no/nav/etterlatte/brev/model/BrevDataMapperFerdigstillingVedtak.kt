@@ -31,7 +31,6 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTORequest
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
@@ -85,7 +84,10 @@ class BrevDataMapperFerdigstillingVedtak(
 
                 TILBAKEKREVING_FERDIG ->
                     TilbakekrevingBrevDTO.fra(
-                        TilbakekrevingBrevDTORequest(generellBrevData),
+                        muligTilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
+                        sakType = generellBrevData.sak.sakType,
+                        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                        soeker = generellBrevData.personerISak.soeker,
                         innholdMedVedlegg.innhold(),
                     )
 

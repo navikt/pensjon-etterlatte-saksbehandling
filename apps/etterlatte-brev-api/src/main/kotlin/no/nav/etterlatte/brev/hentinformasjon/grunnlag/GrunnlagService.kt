@@ -45,11 +45,6 @@ class GrunnlagService(
         }
     }
 
-    suspend fun hentGrunnlag(
-        behandlingId: UUID?,
-        bruker: BrukerTokenInfo,
-    ) = klient.hentGrunnlag(behandlingId!!, bruker)
-
     suspend fun hentPersonerISak(
         grunnlag: Grunnlag,
         brevutfallDto: BrevutfallDto?,

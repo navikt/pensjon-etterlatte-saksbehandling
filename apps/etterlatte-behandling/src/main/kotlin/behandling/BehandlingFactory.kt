@@ -296,8 +296,13 @@ class BehandlingFactory(
                 OmgjoerBehandling(nyFoerstegangsbehandling, sisteAvslaatteBehandling, foerstegangsbehandlingViOmgjoerer)
             }
 
+        val persongalleri =
+            runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
+        grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri)
+
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
+                // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
                 vilkaarsvurderingKlient.kopierVilkaarsvurdering(
                     kopierTilBehandling = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
@@ -305,9 +310,6 @@ class BehandlingFactory(
                 )
             }
         }
-        val persongalleri =
-            runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
-        grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri)
 
         behandlingHendelser.sendMeldingForHendelseStatisitkk(
             behandlingerForOmgjoering.nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),

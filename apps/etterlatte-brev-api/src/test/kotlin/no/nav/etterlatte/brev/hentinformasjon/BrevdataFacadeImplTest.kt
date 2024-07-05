@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
@@ -56,7 +57,7 @@ import java.util.UUID
 
 internal class BrevdataFacadeImplTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val beregningService = mockk<BeregningService>()
     private val behandlingService = mockk<BehandlingService>()
     private val trygdetidService = mockk<TrygdetidService>()
@@ -66,7 +67,7 @@ internal class BrevdataFacadeImplTest {
     private val service =
         BrevdataFacade(
             vedtaksvurderingKlient,
-            grunnlagKlient,
+            grunnlagService,
             beregningService,
             behandlingService,
             trygdetidService,
@@ -81,7 +82,7 @@ internal class BrevdataFacadeImplTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(vedtaksvurderingKlient, grunnlagKlient, beregningService)
+        confirmVerified(vedtaksvurderingKlient, grunnlagService, beregningService)
     }
 
     @Test
@@ -97,7 +98,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingService.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         val grunnlag = opprettGrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
+        coEvery { grunnlagService.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns emptyList()
@@ -128,7 +129,7 @@ internal class BrevdataFacadeImplTest {
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak?.attestantIdent)
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(BEHANDLING_ID, any())
+            grunnlagService.hentGrunnlag(BEHANDLING_ID, any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }
@@ -138,7 +139,7 @@ internal class BrevdataFacadeImplTest {
         val tilbakekreving = tilbakekreving()
         coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
-        coEvery { grunnlagKlient.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { grunnlagService.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
 
         val generellBrevData =
@@ -167,7 +168,7 @@ internal class BrevdataFacadeImplTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlagForSak(SAK_ID, any())
+            grunnlagService.hentGrunnlagForSak(SAK_ID, any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }

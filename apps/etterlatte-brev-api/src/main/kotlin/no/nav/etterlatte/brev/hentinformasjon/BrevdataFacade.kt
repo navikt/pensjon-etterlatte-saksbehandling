@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
@@ -50,7 +51,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregn
 
 class BrevdataFacade(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val trygdetidService: TrygdetidService,
@@ -91,14 +92,14 @@ class BrevdataFacade(
                     VedtakType.AVVIST_KLAGE,
                     ->
                         async {
-                            grunnlagKlient.hentGrunnlagForSak(
+                            grunnlagService.hentGrunnlagForSak(
                                 sakId,
                                 brukerTokenInfo,
                             )
                         }.await()
 
-                    null -> async { grunnlagKlient.hentGrunnlagForSak(sakId, brukerTokenInfo) }.await()
-                    else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
+                    null -> async { grunnlagService.hentGrunnlagForSak(sakId, brukerTokenInfo) }.await()
+                    else -> async { grunnlagService.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
                 }
             val sak = sakDeferred.await()
             val brevutfallDto = brevutfallDeferred?.await()

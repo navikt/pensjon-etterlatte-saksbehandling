@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -40,7 +40,7 @@ class NotatService(
     private val brevRepository: BrevRepository,
     private val adresseService: AdresseService,
     private val brevbakerService: BrevbakerService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val dokarkivKlient: DokarkivKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -177,7 +177,7 @@ class NotatService(
                         attestantIdent = null,
                     ),
             )
-        val grunnlag = grunnlagKlient.hentGrunnlagForSak(sakId, saksbehandler)
+        val grunnlag = grunnlagService.hentGrunnlagForSak(sakId, saksbehandler)
         val soeker = grunnlag.mapSoeker(null)
         return BrevbakerHelpers.mapFelles(sakId, soeker, avsender)
     }

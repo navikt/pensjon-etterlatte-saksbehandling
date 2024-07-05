@@ -41,6 +41,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
@@ -127,12 +128,14 @@ class ApplicationBuilder {
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
+    private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
+
     private val datasource = DataSourceBuilder.createDataSource(env)
 
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
-            grunnlagKlient,
+            grunnlagService,
             beregningService,
             behandlingService,
             trygdetidService,
@@ -224,7 +227,7 @@ class ApplicationBuilder {
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
+    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
@@ -234,7 +237,7 @@ class ApplicationBuilder {
                 RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
             ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingService)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)

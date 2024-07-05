@@ -148,6 +148,7 @@ enum class OppdragKlassifikasjonskode(
     FORSKUDDSSKATT("FSKTSKAT"),
     FEILKONTO("KL_KODE_FEIL_PEN"),
     MOTPOSTERING("TBMOTOBS", tekniskArt = true),
+    BFRISKAT("BFRISKAT"),
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -161,6 +162,7 @@ enum class OppdragKlassifikasjonskode(
                 "FSKTSKAT" -> FORSKUDDSSKATT
                 "KL_KODE_FEIL_PEN" -> FEILKONTO
                 "TBMOTOBS" -> MOTPOSTERING
+                "BFRISKAT" -> BFRISKAT
                 else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }

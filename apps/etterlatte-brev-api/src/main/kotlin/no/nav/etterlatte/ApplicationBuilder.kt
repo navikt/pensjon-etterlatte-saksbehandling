@@ -139,7 +139,6 @@ class ApplicationBuilder {
             beregningService,
             behandlingService,
             trygdetidService,
-            adresseService,
             vilkaarsvurderingKlient,
         )
 

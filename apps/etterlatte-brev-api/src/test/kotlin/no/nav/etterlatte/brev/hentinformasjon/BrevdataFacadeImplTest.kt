@@ -71,7 +71,6 @@ internal class BrevdataFacadeImplTest {
             beregningService,
             behandlingService,
             trygdetidService,
-            adresseService,
             vilkaarsvurderingKlient,
         )
 
@@ -98,7 +97,8 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingService.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         val grunnlag = opprettGrunnlag()
-        coEvery { grunnlagService.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
+        coEvery { grunnlagService.hentGrunnlag(any(), any(), BRUKERTokenInfo, BEHANDLING_ID) } returns grunnlag
+        coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns emptyList()
@@ -129,7 +129,8 @@ internal class BrevdataFacadeImplTest {
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak?.attestantIdent)
 
         coVerify(exactly = 1) {
-            grunnlagService.hentGrunnlag(BEHANDLING_ID, any())
+            grunnlagService.hentGrunnlag(any(), any(), any(), BEHANDLING_ID)
+            grunnlagService.hentVergeForSak(any(), any(), any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }
@@ -139,7 +140,8 @@ internal class BrevdataFacadeImplTest {
         val tilbakekreving = tilbakekreving()
         coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
-        coEvery { grunnlagService.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTokenInfo, any()) } returns opprettGrunnlag()
+        coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
         coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
 
         val generellBrevData =
@@ -168,7 +170,8 @@ internal class BrevdataFacadeImplTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagService.hentGrunnlagForSak(SAK_ID, any())
+            grunnlagService.hentGrunnlag(any(), SAK_ID, any(), any())
+            grunnlagService.hentVergeForSak(any(), any(), any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }

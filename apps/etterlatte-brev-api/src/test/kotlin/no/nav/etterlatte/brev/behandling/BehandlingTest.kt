@@ -222,11 +222,11 @@ internal class BehandlingTest {
             adresseService.hentMottakerAdresse(any<SakType>(), vergesFnr.value)
         } returns Mottaker("Viggo Verge", null, null, mockk())
 
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
-        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals("Viggo Verge", vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
+        val vergeOmstillingsstoenad = runBlocking { grunnlagService.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertEquals("Viggo Verge", vergeOmstillingsstoenad!!.navn())
     }
 
@@ -288,11 +288,11 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
-        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
+        val vergeOmstillingsstoenad = runBlocking { grunnlagService.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -341,12 +341,12 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
-        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon)
 
         val vergeOmstillingsstoenad =
-            runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
+            runBlocking { grunnlagService.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -402,16 +402,16 @@ internal class BehandlingTest {
                 Feilutbetaling(FeilutbetalingValg.NEI, null),
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
 
         val vergeBarnepensjon =
             runBlocking {
-                brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, brevutfallDto, grunnlag)
+                grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, brevutfallDto, grunnlag)
             }
         assertNull(vergeBarnepensjon)
 
         val vergeOmstillingsstoenad =
-            runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
+            runBlocking { grunnlagService.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -450,11 +450,11 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val brevdataFacade = mockBrevDataFacadeKunAdresseService(adresseService)
-        val vergeBarnepensjon = runBlocking { brevdataFacade.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
+        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon, "Verge skal ikke settes for barnepensjon hvis barnet er over 18 år")
 
-        val vergeOmstillingsstoenad = runBlocking { brevdataFacade.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
+        val vergeOmstillingsstoenad = runBlocking { grunnlagService.hentVergeForSak(SakType.OMSTILLINGSSTOENAD, null, grunnlag) }
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -544,7 +544,6 @@ fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): Brevda
         beregningService,
         behandlingService,
         trygdetidService,
-        addresseService,
         vilkaarsvurderingKlient,
     )
 }

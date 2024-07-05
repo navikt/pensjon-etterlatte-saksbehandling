@@ -44,6 +44,8 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -58,7 +60,6 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -131,6 +132,7 @@ class ApplicationBuilder {
 
     private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+    private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 
     private val datasource = DataSourceBuilder.createDataSource(env)
 
@@ -141,7 +143,7 @@ class ApplicationBuilder {
             beregningService,
             behandlingService,
             trygdetidService,
-            vilkaarsvurderingKlient,
+            vilkaarsvurderingService,
         )
 
     private val db = BrevRepository(datasource)

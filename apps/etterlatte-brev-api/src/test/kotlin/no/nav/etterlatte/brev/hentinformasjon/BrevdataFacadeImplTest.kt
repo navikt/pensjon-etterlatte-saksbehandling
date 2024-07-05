@@ -16,9 +16,9 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -61,7 +61,7 @@ internal class BrevdataFacadeImplTest {
     private val beregningService = mockk<BeregningService>()
     private val behandlingService = mockk<BehandlingService>()
     private val trygdetidService = mockk<TrygdetidService>()
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
 
     private val service =
         BrevdataFacade(
@@ -70,7 +70,7 @@ internal class BrevdataFacadeImplTest {
             beregningService,
             behandlingService,
             trygdetidService,
-            vilkaarsvurderingKlient,
+            vilkaarsvurderingService,
         )
 
     @BeforeEach

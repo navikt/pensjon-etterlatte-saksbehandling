@@ -17,9 +17,9 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -43,7 +43,7 @@ class BrevdataFacade(
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val trygdetidService: TrygdetidService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     suspend fun hentBrevutfall(
         behandlingId: UUID,
@@ -53,7 +53,7 @@ class BrevdataFacade(
     suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VilkaarsvurderingDto? = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
+    ): VilkaarsvurderingDto? = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
     suspend fun hentEtterbetaling(
         behandlingId: UUID,

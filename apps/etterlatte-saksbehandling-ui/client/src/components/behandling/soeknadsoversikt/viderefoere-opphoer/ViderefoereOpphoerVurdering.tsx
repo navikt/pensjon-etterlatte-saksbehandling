@@ -1,7 +1,6 @@
 import { IBehandlingStatus, IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
-import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
+import { Heading, Label, UNSAFE_Combobox } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
@@ -32,13 +31,13 @@ export const ViderefoereOpphoerVurdering = ({
   const dispatch = useAppDispatch()
 
   const [opphoerstidspunkt] = useState<Date | null>(behandling.opphoerFom ? new Date(behandling.opphoerFom.dato) : null)
-  const [vilkaar, setVilkaar] = useState<string | undefined>(viderefoertOpphoer?.vilkaar)
-  const [radioError, setRadioError] = useState<string>('')
+  const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
+  const [vilkaarError, setVilkaarError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
   const [setUtlandstilknytningStatus, setUtlandstilknytning, resetToInitial] = useApiCall(lagreUtlandstilknytning)
 
   const lagre = (onSuccess?: () => void) => {
-    !opphoerstidspunkt ? setRadioError('Du må velge et svar') : setRadioError('')
+    !opphoerstidspunkt ? setVilkaarError('Du må velge et vilkår som ikke lenger blir oppfylt') : setVilkaarError('')
 
     if (vilkaar !== undefined)
       return setUtlandstilknytning({ behandlingId, begrunnelse, svar: vilkaar }, (utlandstilknyningstype) => {
@@ -51,11 +50,13 @@ export const ViderefoereOpphoerVurdering = ({
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
     setVilkaar(viderefoertOpphoer?.vilkaar)
-    setRadioError('')
+    setVilkaarError('')
     setBegrunnelse(viderefoertOpphoer?.begrunnelse || '')
     setVurdert(viderefoertOpphoer !== null)
     onSuccess?.()
   }
+
+  const options = Object.keys(VilkaarType).map((k) => k)
 
   return (
     <VurderingsboksWrapper
@@ -91,22 +92,17 @@ export const ViderefoereOpphoerVurdering = ({
         <Heading level="3" size="small">
           Er dette et videreført opphold?
         </Heading>
-        <RadioGroupWrapper>
-          <RadioGroup
-            legend=""
-            size="small"
-            className="radioGroup"
-            onChange={(event) => {
-              setVilkaar(VilkaarType[event as VilkaarType])
-              setRadioError('')
-            }}
-            value={vilkaar || ''}
-            error={radioError ? radioError : false}
-          >
-            <Radio value={VilkaarType.BP_FORMAAL_2024}>BP formål 24</Radio>
-            <Radio value={VilkaarType.BP_DOEDSFALL_FORELDER_2024}>BP dødsfall forelder 24</Radio>
-          </RadioGroup>
-        </RadioGroupWrapper>
+        <UNSAFE_Combobox
+          label="Velg vilkåret som gjør at saken opphører"
+          options={options}
+          onToggleSelected={(option) => {
+            setVilkaar(VilkaarType[option as VilkaarType])
+            setVilkaarError('')
+          }}
+          selectedOptions={!!vilkaar ? [vilkaar!] : []}
+          isLoading={false}
+          error={vilkaarError ? vilkaarError : false}
+        />
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

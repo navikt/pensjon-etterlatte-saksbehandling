@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -37,7 +38,7 @@ import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
 
 class BrevdataFacade(
-    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
@@ -67,7 +68,7 @@ class BrevdataFacade(
     ): GenerellBrevData =
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
-            val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingKlient.hentVedtak(it, brukerTokenInfo) } }
+            val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
             val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
 
             val vedtakType = vedtakDeferred?.await()?.type

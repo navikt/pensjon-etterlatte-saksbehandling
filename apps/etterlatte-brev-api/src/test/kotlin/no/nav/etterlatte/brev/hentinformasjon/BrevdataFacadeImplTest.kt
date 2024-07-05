@@ -9,13 +9,13 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -56,17 +56,16 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BrevdataFacadeImplTest {
-    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val beregningService = mockk<BeregningService>()
     private val behandlingService = mockk<BehandlingService>()
     private val trygdetidService = mockk<TrygdetidService>()
-    private val adresseService = mockk<AdresseService>()
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
         BrevdataFacade(
-            vedtaksvurderingKlient,
+            vedtaksvurderingService,
             grunnlagService,
             beregningService,
             behandlingService,
@@ -81,7 +80,7 @@ internal class BrevdataFacadeImplTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(vedtaksvurderingKlient, grunnlagService, beregningService)
+        confirmVerified(vedtaksvurderingService, grunnlagService, beregningService)
     }
 
     @Test
@@ -95,7 +94,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
         coEvery { behandlingService.hentBehandling(any(), any()) } returns lagBehandling()
         coEvery { behandlingService.hentBrevutfall(any(), any()) } returns hentBrevutfall()
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
+        coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         val grunnlag = opprettGrunnlag()
         coEvery { grunnlagService.hentGrunnlag(any(), any(), BRUKERTokenInfo, BEHANDLING_ID) } returns grunnlag
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
@@ -131,7 +130,7 @@ internal class BrevdataFacadeImplTest {
         coVerify(exactly = 1) {
             grunnlagService.hentGrunnlag(any(), any(), any(), BEHANDLING_ID)
             grunnlagService.hentVergeForSak(any(), any(), any())
-            vedtaksvurderingKlient.hentVedtak(any(), any())
+            vedtaksvurderingService.hentVedtak(any(), any())
         }
     }
 
@@ -139,7 +138,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
         coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
+        coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTokenInfo, any()) } returns opprettGrunnlag()
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
         coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
@@ -172,7 +171,7 @@ internal class BrevdataFacadeImplTest {
         coVerify(exactly = 1) {
             grunnlagService.hentGrunnlag(any(), SAK_ID, any(), any())
             grunnlagService.hentVergeForSak(any(), any(), any())
-            vedtaksvurderingKlient.hentVedtak(any(), any())
+            vedtaksvurderingService.hentVedtak(any(), any())
         }
     }
 

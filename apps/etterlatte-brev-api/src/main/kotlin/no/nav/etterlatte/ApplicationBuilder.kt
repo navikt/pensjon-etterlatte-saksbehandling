@@ -35,8 +35,6 @@ import no.nav.etterlatte.brev.dokument.SafKlient
 import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -44,6 +42,8 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -128,13 +128,15 @@ class ApplicationBuilder {
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
+
     private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
+    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val datasource = DataSourceBuilder.createDataSource(env)
 
     private val brevdataFacade =
         BrevdataFacade(
-            vedtakKlient,
+            vedtaksvurderingService,
             grunnlagService,
             beregningService,
             behandlingService,
@@ -166,8 +168,6 @@ class ApplicationBuilder {
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService)
-
-    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 

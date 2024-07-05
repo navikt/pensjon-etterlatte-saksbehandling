@@ -5,15 +5,9 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
@@ -528,22 +522,4 @@ internal class BehandlingTest {
             Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
             jsonNode,
         )
-}
-
-fun mockBrevDataFacadeKunAdresseService(addresseService: AdresseService): BrevdataFacade {
-    val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
-    val grunnlagService: GrunnlagService = mockk()
-    val beregningService: BeregningService = mockk()
-    val behandlingService: BehandlingService = mockk()
-    val trygdetidService: TrygdetidService = mockk()
-    val vilkaarsvurderingKlient: VilkaarsvurderingKlient = mockk()
-
-    return BrevdataFacade(
-        vedtaksvurderingKlient,
-        grunnlagService,
-        beregningService,
-        behandlingService,
-        trygdetidService,
-        vilkaarsvurderingKlient,
-    )
 }

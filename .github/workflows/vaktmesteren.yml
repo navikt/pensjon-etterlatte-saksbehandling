@@ -24,3 +24,4 @@ jobs:
           repository: ${{ github.repository }}
           keep_minimum_runs: 30
           dry_run: ${{ github.event.inputs.dry_run }}
+          delete_workflow_pattern: etterlatte-tidshendelser

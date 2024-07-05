@@ -139,6 +139,11 @@ interface BehandlingService {
         utlandstilknytning: Utlandstilknytning,
     )
 
+    fun oppdaterViderefoertOpphoer(
+        behandlingId: UUID,
+        viderefoertOpphoer: ViderefoertOpphoer,
+    )
+
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -705,6 +710,22 @@ internal class BehandlingServiceImpl(
             .oppdaterUtlandstilknytning(utlandstilknytning)
             .also {
                 behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
+                behandlingDao.lagreStatus(it)
+            }
+    }
+
+    override fun oppdaterViderefoertOpphoer(
+        behandlingId: UUID,
+        viderefoertOpphoer: ViderefoertOpphoer,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
+
+        behandling
+            .oppdaterVidereførtOpphoer(viderefoertOpphoer)
+            .also {
+                behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)
             }
     }

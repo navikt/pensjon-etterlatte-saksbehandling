@@ -35,6 +35,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.sql.Date
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -289,6 +291,29 @@ class BehandlingDao(
         }
     }
 
+    fun lagreViderefoertOpphoer(
+        behandlingId: UUID,
+        viderefoertOpphoer: ViderefoertOpphoer,
+    ) {
+        lagreOpphoerFom(behandlingId, viderefoertOpphoer.dato)
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        "INSERT INTO viderefoert_opphoer " +
+                            "(dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar) VALUES (?, ?, ?, ?, ?, ?)",
+                    )
+                statement.setString(1, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
+                statement.setJsonb(2, viderefoertOpphoer.kilde)
+                statement.setString(3, viderefoertOpphoer.begrunnelse)
+                statement.setDate(4, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
+                statement.setObject(5, behandlingId)
+                statement.setString(6, viderefoertOpphoer.vilkaar)
+                statement.updateSuccessful()
+            }
+        }
+    }
+
     fun lagreSendeBrev(
         behandlingId: UUID,
         skalSendeBrev: Boolean,
@@ -348,3 +373,5 @@ fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLoc
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+fun PreparedStatement.updateSuccessful() = require(this.executeUpdate() == 1)

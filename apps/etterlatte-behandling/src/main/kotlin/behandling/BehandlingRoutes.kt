@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -45,6 +46,9 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
 enum class BehandlingFeatures(
     private val key: String,
@@ -235,6 +239,38 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        post("/viderefoert-opphoer") {
+            kunSkrivetilgang {
+                logger.debug("Prøver å fastsette videreført opphør")
+                val body = call.receive<ViderefoertOpphoerRequest>()
+
+                try {
+                    val viderefoertOpphoer =
+                        ViderefoertOpphoer(
+                            behandlingId = behandlingId,
+                            dato = body.dato,
+                            begrunnelse = body.begrunnelse,
+                            vilkaar = body.vilkaar,
+                            kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
+                            kravdato = body.kravdato,
+                        )
+
+                    inTransaction {
+                        behandlingService.oppdaterViderefoertOpphoer(behandlingId, viderefoertOpphoer)
+                    }
+
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = viderefoertOpphoer.toJson(),
+                    )
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                }
+            }
+        }
+
         post("/boddellerarbeidetutlandet") {
             kunSkrivetilgang {
                 logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
@@ -347,3 +383,21 @@ internal fun Route.behandlingRoutes(
         }
     }
 }
+
+data class ViderefoertOpphoerRequest(
+    @JsonProperty("dato") private val _dato: String,
+    val begrunnelse: String?,
+    val kravdato: LocalDate? = null,
+    val vilkaar: String,
+) {
+    val dato: YearMonth = _dato.tilYearMonth()
+}
+
+data class ViderefoertOpphoer(
+    val behandlingId: UUID,
+    val dato: YearMonth,
+    val vilkaar: String,
+    val begrunnelse: String?,
+    val kilde: Grunnlagsopplysning.Kilde,
+    val kravdato: LocalDate?,
+)

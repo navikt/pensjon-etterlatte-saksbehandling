@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Checkbox, Heading, Modal } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOmgjoeringFoerstegangsbehandling } from '~shared/api/revurdering'
@@ -9,10 +9,11 @@ import { useNavigate } from 'react-router-dom'
 export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: boolean }) {
   const { sakId, harAapenBehandling } = props
   const [open, setOpen] = useState(false)
+  const [skalKopiere, setSkalkopiereGrunnlag] = useState(false)
   const [opprettOmgjoeringStatus, opprettOmgjoering] = useApiCall(opprettOmgjoeringFoerstegangsbehandling)
   const navigate = useNavigate()
   function opprett() {
-    opprettOmgjoering({ sakId })
+    opprettOmgjoering({ sakId, skalKopiere })
   }
 
   function lukkModal() {
@@ -35,6 +36,9 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
             Hvis det kun er avslåtte / avbrutte førstegangsbehandlinger i saken må en eventuell omgjøring gjøres som en
             ny førstegangsbehandling.
           </BodyShort>
+          <Checkbox checked={skalKopiere} onChange={() => setSkalkopiereGrunnlag(!skalKopiere)}>
+            Kopier vurdering og vilkårsvurdering fra forrige avslag
+          </Checkbox>
           {harAapenBehandling && (
             <Alert variant="warning">
               Saken har allerede en åpen behandling. Denne må avsluttes eller avbrytes før en omgjøring kan startes.

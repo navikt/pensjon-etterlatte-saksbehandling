@@ -212,7 +212,7 @@ internal class BehandlingServiceImpl(
             listOf(behandling).filterForEnheter().firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
+    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.hentBehandlingerForSak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? = hentBehandlingForId(behandlingId)
 

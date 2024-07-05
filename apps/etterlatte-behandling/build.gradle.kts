@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
+    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

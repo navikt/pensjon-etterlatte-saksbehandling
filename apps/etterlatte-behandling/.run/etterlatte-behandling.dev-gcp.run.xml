@@ -44,6 +44,8 @@
       <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="PEN_CLIENT_ID" value="ddd52335-cfe8-4ee9-9e68-416a5ab26efa" />
       <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi" />
       <env name="KRR_ENDPOINT_URL" value="http://digdir-krr-proxy.team-rocket" />

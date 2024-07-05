@@ -13,7 +13,9 @@ spec:
   replicas:
     max: 4
     min: 2
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
   ingresses:
     - https://etterlatte-saksbehandling.intern.nav.no
     - https://gjenny.intern.nav.no

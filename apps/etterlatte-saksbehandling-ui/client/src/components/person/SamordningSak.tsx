@@ -9,12 +9,10 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Samordningsvedtak } from '~components/vedtak/typer'
 import SamordningOppdaterMeldingModal from '~components/person/SamordningOppdaterMeldingModal'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const SamordningSak = ({ fnr, sakResult }: { fnr: string; sakResult: Result<SakMedBehandlinger> }) => {
   const [samordningdataStatus, hent] = useApiCall(hentSamordningsdataForSak)
   const [sakId, setSakId] = useState<number>()
-  const visRedigeringsmulighet = useFeatureEnabledMedDefault('samordning-rediger-melding', false)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -29,13 +27,7 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
 
       {mapResult(samordningdataStatus, {
         success: (data) => (
-          <SamordningTabell
-            fnr={fnr}
-            sakId={sakId!}
-            samordningsdata={data}
-            refresh={() => hent(sakId!)}
-            redigerbar={visRedigeringsmulighet}
-          />
+          <SamordningTabell fnr={fnr} sakId={sakId!} samordningsdata={data} refresh={() => hent(sakId!)} />
         ),
         pending: <Spinner visible={true} label="Henter samordningsdata" />,
         error: () => <ApiErrorAlert>Kunne ikke hente samordningsdata</ApiErrorAlert>,
@@ -49,13 +41,11 @@ function SamordningTabell({
   sakId,
   samordningsdata,
   refresh,
-  redigerbar,
 }: {
   fnr: string
   sakId: number
   samordningsdata: Array<Samordningsvedtak>
   refresh: () => void
-  redigerbar: boolean
 }) {
   return samordningsdata.length == 0 ? (
     <p>Ingen samordningsmeldinger</p>
@@ -72,7 +62,7 @@ function SamordningTabell({
           <Table.HeaderCell>Mottatt dato</Table.HeaderCell>
           <Table.HeaderCell>Purret dato</Table.HeaderCell>
           <Table.HeaderCell>Refusjonskrav</Table.HeaderCell>
-          {redigerbar && <Table.HeaderCell>Overstyr</Table.HeaderCell>}
+          <Table.HeaderCell>Overstyr</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -94,19 +84,17 @@ function SamordningTabell({
                 <Table.DataCell>{mld.svartDato && formaterDato(mld.svartDato)}</Table.DataCell>
                 <Table.DataCell>{mld.purretDato && formaterDato(mld.purretDato)}</Table.DataCell>
                 <Table.DataCell>{mld.svartDato && (mld.refusjonskrav ? 'Ja' : 'Nei')}</Table.DataCell>
-                {redigerbar && (
-                  <Table.DataCell>
-                    {!mld.svartDato && (
-                      <SamordningOppdaterMeldingModal
-                        fnr={fnr}
-                        sakId={sakId}
-                        mld={mld}
-                        vedtakId={vedtak.vedtakId}
-                        refresh={refresh}
-                      />
-                    )}
-                  </Table.DataCell>
-                )}
+                <Table.DataCell>
+                  {!mld.svartDato && (
+                    <SamordningOppdaterMeldingModal
+                      fnr={fnr}
+                      sakId={sakId}
+                      mld={mld}
+                      vedtakId={vedtak.vedtakId}
+                      refresh={refresh}
+                    />
+                  )}
+                </Table.DataCell>
               </Table.Row>
             ))
           )}

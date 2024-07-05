@@ -22,6 +22,7 @@ data class DoedshendelseInternal internal constructor(
     val brevId: Long? = null,
     val sakId: Long? = null,
     val kontrollpunkter: List<DoedshendelseKontrollpunkt>? = null,
+    val migrertMellomAttenOgTjue: Boolean = false,
 ) {
     companion object {
         fun nyHendelse(
@@ -39,6 +40,7 @@ data class DoedshendelseInternal internal constructor(
             endringstype = endringstype,
             opprettet = Tidspunkt.now(),
             endret = Tidspunkt.now(),
+            migrertMellomAttenOgTjue = false,
         )
     }
 

@@ -239,75 +239,108 @@ class BehandlingFactory(
         saksbehandler: Saksbehandler,
         skalKopiere: Boolean,
     ): Behandling {
-        val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
-        val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
-        val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
-        if (foerstegangsbehandlinger.isEmpty()) {
-            throw AvslagOmgjoering.IngenFoerstegangsbehandling()
-        }
-        val foerstegangsbehandlingerIkkeAvslaattAvbrutt =
-            foerstegangsbehandlinger.filter { it.status !in listOf(BehandlingStatus.AVBRUTT, BehandlingStatus.AVSLAG) }
-        if (foerstegangsbehandlingerIkkeAvslaattAvbrutt.isNotEmpty()) {
-            throw AvslagOmgjoering.FoerstegangsbehandlingFeilStatus(
-                sakId,
-                foerstegangsbehandlingerIkkeAvslaattAvbrutt.first().id,
-            )
-        }
-        if (behandlingerISak.any { it.status.aapenBehandling() }) {
-            throw AvslagOmgjoering.HarAapenBehandling()
-        }
+        val behandlingerForOmgjoering =
+            inTransaction {
+                val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
+                val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
+                val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+                if (foerstegangsbehandlinger.isEmpty()) {
+                    throw AvslagOmgjoering.IngenFoerstegangsbehandling()
+                }
+                val foerstegangsbehandlingerIkkeAvslaattAvbrutt =
+                    foerstegangsbehandlinger.filter {
+                        it.status !in
+                            listOf(
+                                BehandlingStatus.AVBRUTT,
+                                BehandlingStatus.AVSLAG,
+                            )
+                    }
+                if (foerstegangsbehandlingerIkkeAvslaattAvbrutt.isNotEmpty()) {
+                    throw AvslagOmgjoering.FoerstegangsbehandlingFeilStatus(
+                        sakId,
+                        foerstegangsbehandlingerIkkeAvslaattAvbrutt.first().id,
+                    )
+                }
+                if (behandlingerISak.any { it.status.aapenBehandling() }) {
+                    throw AvslagOmgjoering.HarAapenBehandling()
+                }
 
-        val sisteAvslaatteBehandling =
-            behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.minByOrNull { it.behandlingOpprettet }
+                val sisteAvslaatteBehandling =
+                    behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.minByOrNull { it.behandlingOpprettet }
 
-        val foerstegangsbehandlingViOmgjoerer =
-            foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
-        val nyFoerstegangsbehandling =
-            checkNotNull(
-                opprettFoerstegangsbehandling(
-                    behandlingerUnderBehandling = emptyList(),
-                    sak = sak,
-                    mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
-                    kilde = Vedtaksloesning.GJENNY,
-                    prosessType = Prosesstype.MANUELL,
-                ),
-            ) {
-                "Behandlingen vi akkurat opprettet fins ikke :("
+                val foerstegangsbehandlingViOmgjoerer =
+                    foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
+                val nyFoerstegangsbehandling =
+                    checkNotNull(
+                        opprettFoerstegangsbehandling(
+                            behandlingerUnderBehandling = emptyList(),
+                            sak = sak,
+                            mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
+                            kilde = Vedtaksloesning.GJENNY,
+                            prosessType = Prosesstype.MANUELL,
+                        ),
+                    ) {
+                        "Behandlingen vi akkurat opprettet fins ikke :("
+                    }
+
+                kopierFoerstegangsbehandlingOversikt(skalKopiere, sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                val oppgave =
+                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                        referanse = nyFoerstegangsbehandling.id.toString(),
+                        sakId = nyFoerstegangsbehandling.sak.id,
+                        oppgaveKilde = OppgaveKilde.BEHANDLING,
+                        merknad = "Omgjøring av førstegangsbehandling",
+                    )
+                oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
+
+                OmgjoerBehandling(nyFoerstegangsbehandling, sisteAvslaatteBehandling, foerstegangsbehandlingViOmgjoerer)
             }
 
-        if (skalKopiere && sisteAvslaatteBehandling != null) {
-            sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
-                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandling.id))
-            }
-            sisteAvslaatteBehandling.virkningstidspunkt?.let { behandlingDao.lagreNyttVirkningstidspunkt(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatteBehandling.utlandstilknytning?.let { behandlingDao.lagreUtlandstilknytning(nyFoerstegangsbehandling.id, it) }
-            sisteAvslaatteBehandling.gyldighetsproeving()?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, it) }
+        if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
                 vilkaarsvurderingKlient.kopierVilkaarsvurdering(
-                    nyFoerstegangsbehandling.id,
-                    sisteAvslaatteBehandling.id,
+                    kopierTilBehandling = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+                    kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
                     brukerTokenInfo = saksbehandler,
                 )
             }
         }
-
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(foerstegangsbehandlingViOmgjoerer.id) }
-        grunnlagService.leggInnNyttGrunnlag(nyFoerstegangsbehandling, persongalleri)
-
-        val oppgave =
-            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                referanse = nyFoerstegangsbehandling.id.toString(),
-                sakId = nyFoerstegangsbehandling.sak.id,
-                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                merknad = "Omgjøring av førstegangsbehandling",
-            )
-        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
+        val persongalleri =
+            runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
+        grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri)
 
         behandlingHendelser.sendMeldingForHendelseStatisitkk(
-            nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),
+            behandlingerForOmgjoering.nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),
             BehandlingHendelseType.OPPRETTET,
         )
-        return nyFoerstegangsbehandling
+        return behandlingerForOmgjoering.nyFoerstegangsbehandling
+    }
+
+    private fun kopierFoerstegangsbehandlingOversikt(
+        skalKopiere: Boolean,
+        sisteAvslaatteBehandling: Behandling?,
+        nyFoerstegangsbehandlingId: UUID,
+    ) {
+        if (skalKopiere && sisteAvslaatteBehandling != null) {
+            sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
+                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
+            }
+            sisteAvslaatteBehandling.virkningstidspunkt?.let {
+                behandlingDao.lagreNyttVirkningstidspunkt(
+                    nyFoerstegangsbehandlingId,
+                    it,
+                )
+            }
+            sisteAvslaatteBehandling.utlandstilknytning?.let {
+                behandlingDao.lagreUtlandstilknytning(
+                    nyFoerstegangsbehandlingId,
+                    it,
+                )
+            }
+            sisteAvslaatteBehandling
+                .gyldighetsproeving()
+                ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+        }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
@@ -356,6 +389,12 @@ class BehandlingFactory(
         }
     }
 }
+
+data class OmgjoerBehandling(
+    val nyFoerstegangsbehandling: Behandling,
+    val sisteAvslaatteBehandling: Behandling?,
+    val foerstegangsbehandlingViOmgjoerer: Behandling,
+)
 
 data class BehandlingOgOppgave(
     val behandling: Behandling,

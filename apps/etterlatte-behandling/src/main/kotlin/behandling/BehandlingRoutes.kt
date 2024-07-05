@@ -86,10 +86,7 @@ internal fun Route.behandlingRoutes(
         }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val skalKopiereRequest = call.receive<OmgjoeringRequest>()
-            val behandlingOgOppgave =
-                inTransaction {
-                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
-                }
+            val behandlingOgOppgave = behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
             call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }

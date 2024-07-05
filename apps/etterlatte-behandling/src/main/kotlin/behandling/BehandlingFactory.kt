@@ -266,7 +266,7 @@ class BehandlingFactory(
                 }
 
                 val sisteAvslaatteBehandling =
-                    behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.minByOrNull { it.behandlingOpprettet }
+                    behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.maxByOrNull { it.behandlingOpprettet }
 
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }

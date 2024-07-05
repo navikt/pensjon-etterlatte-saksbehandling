@@ -4,7 +4,6 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl.Companion.logger
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import java.util.UUID
 
 interface VilkaarsvurderingKlient : Pingable {
@@ -40,12 +40,12 @@ class VilkaarsvurderingKlientImpl(
             .post(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$kopierTilBehandling/kopier"),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = mapOf("forrigeBehandling" to kopierFraBehandling).toJson(),
+                postBody = OpprettVilkaarsvurderingFraBehandling(forrigeBehandling = kopierFraBehandling),
             ).mapError { error -> throw error }
     }
 
     override val serviceName: String
-        get() = "Vilkårsvurderinglient"
+        get() = "VilkårsvurderingKlient"
     override val beskrivelse: String
         get() = "Snakker med vilkårsvurdering"
     override val endpoint: String

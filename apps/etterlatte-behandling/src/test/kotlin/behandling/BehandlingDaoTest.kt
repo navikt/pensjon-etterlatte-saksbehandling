@@ -164,7 +164,7 @@ internal class BehandlingDaoTest(
         val lagretPersongalleriBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        val gyldighetsproevingBehanding =
+        val gyldighetsproevingBehandling =
             lagretPersongalleriBehandling.copy(
                 gyldighetsproeving =
                     GyldighetsResultat(
@@ -182,12 +182,12 @@ internal class BehandlingDaoTest(
                 status = BehandlingStatus.OPPRETTET,
             )
 
-        behandlingRepo.lagreGyldighetsproeving(gyldighetsproevingBehanding.id, gyldighetsproevingBehanding.gyldighetsproeving())
+        behandlingRepo.lagreGyldighetsproeving(gyldighetsproevingBehandling.id, gyldighetsproevingBehandling.gyldighetsproeving())
         val lagretGyldighetsproving =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
         assertEquals(
-            gyldighetsproevingBehanding.gyldighetsproeving,
+            gyldighetsproevingBehandling.gyldighetsproeving,
             lagretGyldighetsproving.gyldighetsproeving,
         )
     }

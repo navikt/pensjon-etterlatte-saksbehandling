@@ -24,8 +24,8 @@ import kotlin.math.absoluteValue
 enum class MellomAttenOgTjueVedReformtidspunktFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
-    KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse-mellom-18-og-20"),
-    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave-mellom-18-og-20"),
+    KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse-mellom-atten-og-tjue-ved-reformtidspunkt"),
+    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave-mellom-atten-og-tjue-ved-reformtidspunkt"),
     ;
 
     override fun key(): String = key
@@ -58,7 +58,7 @@ class OpprettDoedshendelseService(
         val beroerteBarn = finnBeroerteBarn(avdoed)
 
         if (beroerteBarn.isEmpty()) {
-            logger.info("Avdøde har ingen barn. Avbryter.")
+            logger.info("Avdøde har ingen berørte barn. Avbryter.")
             return
         }
 
@@ -104,6 +104,7 @@ class OpprettDoedshendelseService(
                     beroertFnr = person.fnr,
                     relasjon = person.relasjon,
                     endringstype = endringstype,
+                    migrertMellomAttenOgTjue = true,
                 ),
             )
         }
@@ -123,6 +124,7 @@ class OpprettDoedshendelseService(
                     beroertFnr = person.fnr,
                     relasjon = person.relasjon,
                     endringstype = endringstype,
+                    migrertMellomAttenOgTjue = true,
                 ),
             )
         }
@@ -133,6 +135,7 @@ class OpprettDoedshendelseService(
                 beroertFnr = avdoedFnr,
                 relasjon = Relasjon.AVDOED,
                 endringstype = endringstype,
+                migrertMellomAttenOgTjue = true,
             ),
         )
     }

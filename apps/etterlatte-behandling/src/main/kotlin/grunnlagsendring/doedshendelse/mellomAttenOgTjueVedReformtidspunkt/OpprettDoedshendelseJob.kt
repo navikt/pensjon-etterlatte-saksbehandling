@@ -8,6 +8,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedRefo
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -25,18 +26,18 @@ class OpprettDoedshendelseJob(
     private val interval: Duration,
     dataSource: DataSource,
     val sakTilgangDao: SakTilgangDao,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $interval")
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
-            initialDelay = initialDelay,
+            initialDelay = 0,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
@@ -49,19 +50,20 @@ class OpprettDoedshendelseJob(
 
     private fun run() {
         withLogContext(correlationId = getCorrelationId(), kv = mapOf("migrering" to "true")) {
-            inTransaction {
-                val listeOverAvdoede =
+            val listeOverAvdoede =
+                inTransaction {
                     mellom18og20PaaReformtidspunktDao.hentAvdoede(
                         listOf(OpprettDoedshendelseStatus.NY),
                     )
-
-                listeOverAvdoede.forEach { fnr ->
-                    try {
-                        mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.STARTET)
-                        logger.info("Starter håndtering av dødshendelse for person ${fnr.maskerFnr()}")
-                        opprettDoedshendelseService.opprettDoedshendelse(fnr)
-                        mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.OPPRETTET)
-                    } catch (e: Exception) {
+                }
+            listeOverAvdoede.forEach { fnr ->
+                try {
+                    inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.STARTET) }
+                    logger.info("Starter håndtering av dødshendelse for person ${fnr.maskerFnr()}")
+                    opprettDoedshendelseService.opprettDoedshendelse(fnr)
+                    inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.OPPRETTET) }
+                } catch (e: Exception) {
+                    inTransaction {
                         mellom18og20PaaReformtidspunktDao.oppdater(
                             fnr,
                             OpprettDoedshendelseStatus.FEILET,

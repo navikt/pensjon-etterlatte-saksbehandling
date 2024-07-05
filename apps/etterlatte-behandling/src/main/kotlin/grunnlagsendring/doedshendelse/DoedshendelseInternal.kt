@@ -31,6 +31,7 @@ data class DoedshendelseInternal internal constructor(
             beroertFnr: String,
             relasjon: Relasjon,
             endringstype: Endringstype,
+            migrertMellomAttenOgTjue: Boolean = false,
         ) = DoedshendelseInternal(
             avdoedFnr = avdoedFnr,
             avdoedDoedsdato = avdoedDoedsdato,
@@ -40,7 +41,7 @@ data class DoedshendelseInternal internal constructor(
             endringstype = endringstype,
             opprettet = Tidspunkt.now(),
             endret = Tidspunkt.now(),
-            migrertMellomAttenOgTjue = false,
+            migrertMellomAttenOgTjue = migrertMellomAttenOgTjue,
         )
     }
 

@@ -20,13 +20,10 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -35,7 +32,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
@@ -268,42 +264,3 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }
-
-fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> =
-    when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL ->
-            Pair(
-                beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
-                null,
-            )
-
-        BeregningsMetode.PRORATA -> {
-            Pair(
-                beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
-                beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
-            )
-        }
-
-        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
-        null -> beregningsperiode.trygdetid to null
-    }
-
-class UgyldigBeregningsMetode :
-    UgyldigForespoerselException(
-        code = "UGYLDIG_BEREGNINGS_METODE",
-        detail =
-            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-                "siden best velger mellom nasjonal eller prorata når det beregnes.",
-    )
-
-class SamletTeoretiskTrygdetidMangler :
-    UgyldigForespoerselException(
-        code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
-        detail = "Samlet teoretisk trygdetid mangler i beregningen",
-    )
-
-class BeregningsperiodeBroekMangler :
-    UgyldigForespoerselException(
-        code = "BEREGNINGSPERIODE_BROEK_MANGLER",
-        detail = "Beregningsperioden mangler brøk",
-    )

@@ -109,7 +109,7 @@ spec:
           cluster: prod-fss
           permissions:
             roles:
-              - les-bp-sak-for-person
+              - les-oms-sak-for-person
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss

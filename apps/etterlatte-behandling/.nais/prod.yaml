@@ -214,4 +214,4 @@ spec:
         - application: etterlatte-klage
         - application: etterlatte-brev-api
         - application: etterlatte-utbetaling
-        - application: etterlatte-samordning-vedtak
+        - application: etterlatte-api

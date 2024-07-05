@@ -105,12 +105,30 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: arbeid-og-inntekt
+        - application: arbeid-og-inntekt-q1
           namespace: team-inntekt
           cluster: dev-fss
           permissions:
             roles:
-              - les-bp-sak-for-person
+              - les-oms-sak-for-person
+        - application: arbeid-og-inntekt-q2
+          namespace: team-inntekt
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-sak-for-person
+        - application: arbeid-og-inntekt-q4
+          namespace: team-inntekt
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-sak-for-person
+        - application: arbeid-og-inntekt-ascension
+          namespace: team-inntekt
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-sak-for-person
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss

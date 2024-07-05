@@ -114,7 +114,7 @@ export const ViderefoereOpphoerVurdering = ({
         />
         {isFailureHandler({
           apiResult: setUtlandstilknytningStatus,
-          errorMessage: 'Kunne ikke lagre utlandstilknytning',
+          errorMessage: 'Kunne ikke lagre opphørsdato',
         })}
       </>
     </VurderingsboksWrapper>

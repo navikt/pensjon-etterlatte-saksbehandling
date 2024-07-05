@@ -224,55 +224,58 @@ const OverstyrBeregningGrunnlag = (props: {
                   </Table.Body>
                 </Table>
               ) : null}
-              {behandles && (
-                <Button
-                  type="button"
-                  icon={<PlusCircleIcon title="legg til" />}
-                  iconPosition="left"
-                  variant="tertiary"
-                  onClick={() => {
-                    setVisFeil(false)
-                    append([
-                      {
-                        fom: nesteFomDato(sisteFom, sisteTom),
-                        tom: undefined,
-                        data: {
-                          utbetaltBeloep: '0',
-                          trygdetid: '0',
-                          trygdetidForIdent: '',
-                          prorataBroekNevner: '',
-                          prorataBroekTeller: '',
-                          beskrivelse: '',
-                          aarsak: 'VELG_AARSAK',
-                        },
-                      },
-                    ])
-                  }}
-                >
-                  Legg til beregningsperiode
-                </Button>
-              )}
-              {behandles && (
-                <HStack gap="4" align="center">
-                  <Button
-                    type="submit"
-                    size="small"
-                    onClick={handleSubmit(ferdigstillForm)}
-                    loading={isPending(persistOverstyrBeregningGrunnlag)}
-                  >
-                    Lagre
-                  </Button>
 
+              {behandles && (
+                <VStack gap="4" align="start">
                   <Button
+                    type="button"
+                    icon={<PlusCircleIcon title="legg til" />}
+                    iconPosition="left"
                     variant="tertiary"
-                    loading={isPending(slettResultat)}
                     onClick={() => {
-                      slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
+                      setVisFeil(false)
+                      append([
+                        {
+                          fom: nesteFomDato(sisteFom, sisteTom),
+                          tom: undefined,
+                          data: {
+                            utbetaltBeloep: '0',
+                            trygdetid: '0',
+                            trygdetidForIdent: '',
+                            prorataBroekNevner: '',
+                            prorataBroekTeller: '',
+                            beskrivelse: '',
+                            aarsak: 'VELG_AARSAK',
+                          },
+                        },
+                      ])
                     }}
                   >
-                    Skru av overstyrt beregning
+                    Legg til beregningsperiode
                   </Button>
-                </HStack>
+                  <HStack gap="4" align="center">
+                    <Button
+                      variant="tertiary"
+                      size="small"
+                      loading={isPending(slettResultat)}
+                      onClick={() => {
+                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
+                      }}
+                    >
+                      Skru av overstyrt beregning
+                    </Button>
+
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      size="small"
+                      onClick={handleSubmit(ferdigstillForm)}
+                      loading={isPending(persistOverstyrBeregningGrunnlag)}
+                    >
+                      Lagre
+                    </Button>
+                  </HStack>
+                </VStack>
               )}
               {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
             </FormWrapper>
@@ -284,6 +287,7 @@ const OverstyrBeregningGrunnlag = (props: {
           </>
         )
       )}
+
       {isPending(persistOverstyrBeregningGrunnlag) && <Spinner visible={true} label="Lagre grunnlag" />}
       {isFailureHandler({
         errorMessage: 'En feil har oppstått ved lagring av grunnlag',
@@ -293,19 +297,22 @@ const OverstyrBeregningGrunnlag = (props: {
         errorMessage: 'Kunne ikke opprette ny beregning',
         apiResult: endreBeregning,
       })}
-      {behandles ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
-          >
-            Beregn
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {behandles ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
+            >
+              Beregn
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

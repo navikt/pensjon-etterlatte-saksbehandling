@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag

@@ -123,6 +123,10 @@ spec:
           permissions:
             roles:
               - samordning-read
+        - application: etterlatte-api    # tar over for samordning-vedtak
+          permissions:
+            roles:
+              - samordning-read
         - application: etterlatte-vedtaksvurdering-kafka
           permissions:
             roles:

@@ -40,7 +40,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -262,21 +262,25 @@ const OverstyrBeregningGrunnlag = (props: {
                   >
                     Lagre
                   </Button>
-                  {behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                    <Button
-                      variant="tertiary"
-                      loading={isPending(slettResultat)}
-                      onClick={() => {
-                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
-                      }}
-                    >
-                      Skru av overstyrt beregning
-                    </Button>
-                  )}
+
+                  <Button
+                    variant="tertiary"
+                    loading={isPending(slettResultat)}
+                    onClick={() => {
+                      slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
+                    }}
+                  >
+                    Skru av overstyrt beregning
+                  </Button>
                 </HStack>
               )}
               {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
             </FormWrapper>
+
+            {isFailureHandler({
+              errorMessage: 'En feil har oppstått',
+              apiResult: slettResultat,
+            })}
           </>
         )
       )}

@@ -2,9 +2,9 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
@@ -29,7 +29,7 @@ class VedtaksbrevService(
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -187,7 +187,7 @@ class VedtaksbrevService(
         if (!brev.kanEndres()) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
         }
-        val behandlingKanEndres = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+        val behandlingKanEndres = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
         if (!behandlingKanEndres) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
         }

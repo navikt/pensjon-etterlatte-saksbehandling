@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.BlockTilSlateKonverterer
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
@@ -30,7 +29,8 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
@@ -90,7 +90,7 @@ internal class VedtaksbrevServiceTest {
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade)
@@ -113,7 +113,7 @@ internal class VedtaksbrevServiceTest {
             pdfGenerator,
             BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService),
             brevDataMapperFerdigstilling,
-            behandlingKlient,
+            behandlingService,
         )
 
     @BeforeEach
@@ -199,7 +199,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
             every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
             coEvery {
-                behandlingKlient.hentVedtaksbehandlingKanRedigeres(BEHANDLING_ID, SAKSBEHANDLER)
+                behandlingService.hentVedtaksbehandlingKanRedigeres(BEHANDLING_ID, SAKSBEHANDLER)
             } returns true
 
             runBlocking { vedtaksbrevService.settVedtaksbrevTilSlettet(BEHANDLING_ID, SAKSBEHANDLER) }

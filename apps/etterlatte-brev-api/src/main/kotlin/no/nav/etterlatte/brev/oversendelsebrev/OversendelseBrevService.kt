@@ -9,9 +9,9 @@ import no.nav.etterlatte.brev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
@@ -68,7 +68,7 @@ class OversendelseBrevServiceImpl(
     private val pdfGenerator: PDFGenerator,
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
 ) : OversendelseBrevService {
     override fun hentOversendelseBrev(behandlingId: UUID): Brev? =
         brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
@@ -224,7 +224,7 @@ class OversendelseBrevServiceImpl(
         if (!brev.kanEndres()) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
         }
-        val behandlingKanEndres = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+        val behandlingKanEndres = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
         if (!behandlingKanEndres) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
         }

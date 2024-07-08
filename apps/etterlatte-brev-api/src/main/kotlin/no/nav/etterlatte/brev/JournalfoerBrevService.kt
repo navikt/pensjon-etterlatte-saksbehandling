@@ -12,7 +12,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
@@ -27,7 +27,7 @@ import java.util.Base64
 
 class JournalfoerBrevService(
     private val db: BrevRepository,
-    private val sakService: SakService,
+    private val behandlingService: BehandlingService,
     private val dokarkivService: DokarkivService,
     private val service: VedtaksbrevService,
 ) {
@@ -41,7 +41,7 @@ class JournalfoerBrevService(
         if (brev.brevtype == Brevtype.NOTAT) {
             throw IllegalArgumentException("Kan ikke journalføre et notat som et brev (id = $id).")
         }
-        val sak = sakService.hentSak(brev.sakId, bruker)
+        val sak = behandlingService.hentSak(brev.sakId, bruker)
 
         return journalfoer(brev, sak).journalpostId
     }
@@ -67,7 +67,7 @@ class JournalfoerBrevService(
             return null
         }
 
-        val sak = sakService.hentSak(brev.sakId, Systembruker.brev)
+        val sak = behandlingService.hentSak(brev.sakId, Systembruker.brev)
 
         return journalfoer(brev, sak)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }

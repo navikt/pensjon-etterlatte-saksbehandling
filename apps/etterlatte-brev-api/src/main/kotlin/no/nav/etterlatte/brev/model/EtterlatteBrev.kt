@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.hentinformasjon.UgyldigBeregningsMetode
+import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException

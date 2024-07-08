@@ -16,4 +16,9 @@ class VedtaksvurderingService(
 
         return Pair(saksbehandlerIdent, vedtakDto.status)
     }
+
+    suspend fun hentVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
 }

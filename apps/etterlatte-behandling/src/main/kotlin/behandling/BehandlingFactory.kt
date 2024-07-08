@@ -208,7 +208,7 @@ class BehandlingFactory(
                     prosessType,
                 )
                     ?: return null
-            grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+            runBlocking { grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri) }
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
@@ -298,7 +298,7 @@ class BehandlingFactory(
 
         val persongalleri =
             runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
-        grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri)
+        runBlocking { grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri) }
 
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {

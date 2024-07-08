@@ -154,8 +154,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
-        coVerify { grunnlagService.hentPersongalleri(any()) }
+        coVerify {
+            grunnlagService.hentPersongalleri(any())
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+        }
         verify {
             oppgaveService.opprettOppgave(
                 revurdering.id.toString(),
@@ -167,8 +169,8 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
             oppgaveService.hentOppgave(any())
+            aktivitetspliktDao.kopierAktiviteter(behandling!!.id, revurdering.id)
         }
-        verify { aktivitetspliktDao.kopierAktiviteter(behandling!!.id, revurdering.id) }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
             verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
@@ -258,12 +260,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
-            verify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
-            verify { oppgaveService.hentOppgaverForSak(sak.id) }
-            verify { oppgaveService.hentOppgave(any()) }
-            coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
+                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
+                oppgaveService.hentOppgaverForSak(sak.id)
+                oppgaveService.hentOppgave(any())
                 oppgaveService.opprettOppgave(
                     revurdering.id.toString(),
                     sak.id,
@@ -272,6 +272,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     null,
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
+            }
+            coVerify {
+                grunnlagService.hentPersongalleri(any())
+                grunnlagService.leggInnNyttGrunnlag(any(), any())
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -365,13 +369,15 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     hendelse.id,
                 )
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
-            coVerify { grunnlagService.hentPersongalleri(any()) }
-            verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
-            verify { grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling!!.id) }
-            verify { oppgaveService.hentOppgaverForSak(sak.id) }
-            verify { oppgaveService.hentOppgave(any()) }
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
+            coVerify {
+                grunnlagService.hentPersongalleri(any())
+                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any())
+                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id)
+            }
             verify {
+                oppgaveService.hentOppgaverForSak(sak.id)
+                oppgaveService.hentOppgave(any())
+                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.opprettOppgave(
                     behandling!!.id.toString(),
                     sak.id,
@@ -379,15 +385,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.FOERSTEGANGSBEHANDLING,
                     null,
                 )
-            }
-            verify {
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    behandling!!.id.toString(),
+                    behandling.id.toString(),
                     sak.id,
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
-            }
-            verify {
                 oppgaveService.opprettOppgave(
                     revurdering.id.toString(),
                     sak.id,
@@ -395,11 +397,16 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.REVURDERING,
                     null,
                 )
-            }
-            verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any()) }
-            verify {
+                oppgaveService.opprettOppgave(
+                    revurdering.id.toString(),
+                    sak.id,
+                    OppgaveKilde.BEHANDLING,
+                    OppgaveType.REVURDERING,
+                    null,
+                )
+                oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
                 hendelser.sendMeldingForHendelseStatisitkk(
-                    behandling!!.toStatistikkBehandling(
+                    behandling.toStatistikkBehandling(
                         persongalleri(),
                     ),
                     BehandlingHendelseType.OPPRETTET,
@@ -454,8 +461,10 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
-        coVerify { grunnlagService.hentPersongalleri(any()) }
+        coVerify {
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+            grunnlagService.hentPersongalleri(any())
+        }
         verify {
             oppgaveService.opprettOppgave(
                 revurdering.id.toString(),

@@ -467,7 +467,7 @@ internal class BehandlingServiceImpl(
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
-                grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+                runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
                 behandlingDao.lagreStatus(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
@@ -499,12 +499,14 @@ internal class BehandlingServiceImpl(
                                 periode = null,
                             ),
                         )
-                    grunnlagService.leggTilNyeOpplysninger(
-                        behandlingId,
-                        NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
-                    )
+                    runBlocking {
+                        grunnlagService.leggTilNyeOpplysninger(
+                            behandlingId,
+                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                        )
+                    }
 
-                    grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+                    runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
                     behandlingDao.lagreStatus(behandling)
                 }
         }

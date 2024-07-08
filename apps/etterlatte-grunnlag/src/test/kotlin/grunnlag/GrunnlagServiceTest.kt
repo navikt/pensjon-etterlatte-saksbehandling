@@ -70,7 +70,6 @@ internal class GrunnlagServiceTest {
         RealGrunnlagService(
             pdltjenesterKlient = pdlTjenesterKlientImpl,
             opplysningDao = opplysningDaoMock,
-            sporingslogg = mockk(),
             grunnlagHenter = grunnlagHenter,
         )
 

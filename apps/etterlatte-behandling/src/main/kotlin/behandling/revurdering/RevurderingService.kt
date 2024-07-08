@@ -350,14 +350,16 @@ class RevurderingService(
                 leggInnGrunnlag = {
                     when (revurderingAarsak) {
                         Revurderingaarsak.REGULERING ->
-                            grunnlagService.laasTilGrunnlagIBehandling(
-                                it,
-                                checkNotNull(forrigeBehandling) {
-                                    "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
-                                        "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
-                                },
-                            )
-                        else -> grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                            runBlocking {
+                                grunnlagService.laasTilGrunnlagIBehandling(
+                                    it,
+                                    checkNotNull(forrigeBehandling) {
+                                        "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
+                                            "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
+                                    },
+                                )
+                            }
+                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) }
                     }
                 },
                 sendMeldingForHendelse = {

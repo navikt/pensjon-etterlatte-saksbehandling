@@ -63,8 +63,8 @@ internal class SakServiceTest {
         clearAllMocks()
         val grunnlagservice =
             mockk<GrunnlagService> {
-                every { leggInnNyttGrunnlagSak(any(), any()) } just runs
-                every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+                coEvery { leggInnNyttGrunnlagSak(any(), any()) } just runs
+                coEvery { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
             }
         val krrKlient =
             mockk<KrrKlient> {

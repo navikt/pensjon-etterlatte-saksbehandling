@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.fromDto
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -39,7 +38,6 @@ data class OmstillingsstoenadInnvilgelse(
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
-            brevutfall: BrevutfallDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =

@@ -166,15 +166,17 @@ class DoedshendelseJobService(
                 innsender = Vedtaksloesning.GJENNY.name,
             )
 
-        grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri)
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
 
         val spraak = hentSpraak(doedshendelse)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        grunnlagService.leggTilNyeOpplysningerBareSak(
-            sakId = opprettetSak.id,
-            opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
-        )
+        runBlocking {
+            grunnlagService.leggTilNyeOpplysningerBareSak(
+                sakId = opprettetSak.id,
+                opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
+            )
+        }
         return opprettetSak
     }
 

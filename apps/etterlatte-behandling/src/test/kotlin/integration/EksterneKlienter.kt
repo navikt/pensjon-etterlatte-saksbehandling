@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -194,7 +195,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -365,7 +366,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class PesysKlientTest : PesysKlient {
@@ -378,7 +379,7 @@ class PesysKlientTest : PesysKlient {
 }
 
 class KrrklientTest : KrrKlient {
-    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? =
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon =
         DigitalKontaktinformasjon(
             personident = "",
             aktiv = true,
@@ -405,7 +406,26 @@ class AxsysKlientTest : AxsysKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+}
+
+class VilkaarsvurderingTest : VilkaarsvurderingKlient {
+    override suspend fun kopierVilkaarsvurdering(
+        kopierTilBehandling: UUID,
+        kopierFraBehandling: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        // NO-OP
+    }
+
+    override val serviceName: String
+        get() = "Vilkårsvurderinglient"
+    override val beskrivelse: String
+        get() = "Snakker med vilkårsvurdering"
+    override val endpoint: String
+        get() = "vilkårsvurdering"
+
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {
@@ -439,5 +459,5 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }

@@ -131,7 +131,8 @@ internal class GyldighetsproevingServiceImplTest {
             )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
-        every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
+        every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } just Runs
+        every { behandlingDaoMock.lagreStatus(any()) } just Runs
 
         every {
             user.enheter()
@@ -169,7 +170,8 @@ internal class GyldighetsproevingServiceImplTest {
 
         verify(exactly = 1) {
             behandlingDaoMock.hentBehandling(id)
-            behandlingDaoMock.lagreGyldighetsproving(any())
+            behandlingDaoMock.lagreStatus(any())
+            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
         }
     }
 

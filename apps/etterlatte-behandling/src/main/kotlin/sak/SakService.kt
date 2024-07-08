@@ -180,14 +180,16 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident)) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        grunnlagService.leggTilNyeOpplysningerBareSak(
-            sakId = sak.id,
-            opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
-        )
+        runBlocking {
+            grunnlagService.leggTilNyeOpplysningerBareSak(
+                sakId = sak.id,
+                opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
+            )
+        }
         return sak
     }
 

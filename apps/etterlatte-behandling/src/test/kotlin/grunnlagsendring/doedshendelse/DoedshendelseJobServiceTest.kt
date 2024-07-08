@@ -65,8 +65,8 @@ class DoedshendelseJobServiceTest {
 
     private val grunnlagService =
         mockk<GrunnlagService> {
-            every { leggInnNyttGrunnlagSak(any(), any()) } just runs
-            every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+            coEvery { leggInnNyttGrunnlagSak(any(), any()) } just runs
+            coEvery { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
         }
 
     private val pdlTjenesterKlient =

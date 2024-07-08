@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Alert, Box, Button, ErrorSummary, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, ErrorSummary, HStack, Modal, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -17,7 +17,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from './PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
@@ -95,6 +95,7 @@ const OverstyrBeregningGrunnlag = (props: {
   const { next } = useBehandlingRoutes()
 
   const dispatch = useAppDispatch()
+  const modalRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
     fetchOverstyrBeregningGrunnlag(behandling.id, (result) => {
@@ -259,15 +260,35 @@ const OverstyrBeregningGrunnlag = (props: {
                   </Button>
                   <HStack gap="4" align="center">
                     <Button
-                      variant="tertiary"
                       size="small"
+                      variant="tertiary"
                       loading={isPending(slettResultat)}
-                      onClick={() => {
-                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
-                      }}
+                      onClick={() => modalRef.current?.showModal()}
                     >
                       Skru av overstyrt beregning
                     </Button>
+                    <Modal ref={modalRef} header={{ heading: 'Ønsker du å skru av overstyrt beregning?' }}>
+                      <Modal.Body>
+                        <BodyLong>
+                          Beregningsperioder vil bli permanent slettet. Gjelder saken en revurdering MÅ
+                          virkningstidspunkt settes tilbake til sakens første virkningstidspunkt
+                        </BodyLong>
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          loading={isPending(slettResultat)}
+                          onClick={() => slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
+                        >
+                          Skru av overstyrt beregning
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={() => modalRef.current?.close()}>
+                          {' '}
+                          Avbryt{' '}
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
 
                     <Button
                       type="submit"

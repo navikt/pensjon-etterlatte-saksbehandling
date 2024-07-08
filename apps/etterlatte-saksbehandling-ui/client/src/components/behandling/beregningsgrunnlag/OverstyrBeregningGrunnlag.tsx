@@ -173,9 +173,28 @@ const OverstyrBeregningGrunnlag = (props: {
     return tom ? addMonths(tom, 1) : fom
   }
 
+  const leggTilBeregningsperiode = () => {
+    setVisFeil(false)
+    append([
+      {
+        fom: nesteFomDato(sisteFom, sisteTom),
+        tom: undefined,
+        data: {
+          utbetaltBeloep: '0',
+          trygdetid: '0',
+          trygdetidForIdent: '',
+          prorataBroekNevner: '',
+          prorataBroekTeller: '',
+          beskrivelse: '',
+          aarsak: 'VELG_AARSAK',
+        },
+      },
+    ])
+  }
+
   return (
     <>
-      <Box paddingInline="16" paddingBlock="0 4">
+      <Box paddingInline="16" paddingBlock="0 4" style={{ maxWidth: '42.5em' }}>
         <VStack gap="5">
           <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
         </VStack>
@@ -233,22 +252,7 @@ const OverstyrBeregningGrunnlag = (props: {
                     iconPosition="left"
                     variant="tertiary"
                     onClick={() => {
-                      setVisFeil(false)
-                      append([
-                        {
-                          fom: nesteFomDato(sisteFom, sisteTom),
-                          tom: undefined,
-                          data: {
-                            utbetaltBeloep: '0',
-                            trygdetid: '0',
-                            trygdetidForIdent: '',
-                            prorataBroekNevner: '',
-                            prorataBroekTeller: '',
-                            beskrivelse: '',
-                            aarsak: 'VELG_AARSAK',
-                          },
-                        },
-                      ])
+                      leggTilBeregningsperiode()
                     }}
                   >
                     Legg til beregningsperiode

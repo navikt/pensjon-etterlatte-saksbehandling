@@ -34,7 +34,9 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
   }
 
   const arkiverteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
-    return hendelser.filter((hendelse) => [STATUS_IRRELEVANT, HISTORISK_REVURDERING].includes(hendelse.status))
+    return hendelser.filter((hendelse) =>
+      [STATUS_IRRELEVANT, HISTORISK_REVURDERING, 'SJEKKET_AV_JOBB'].includes(hendelse.status)
+    )
   }
 
   useEffect(() => {

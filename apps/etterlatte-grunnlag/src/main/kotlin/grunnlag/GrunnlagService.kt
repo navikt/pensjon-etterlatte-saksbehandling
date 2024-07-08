@@ -34,10 +34,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.sporingslogg.Decision
-import no.nav.etterlatte.libs.sporingslogg.HttpMethod
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
@@ -115,7 +111,6 @@ interface GrunnlagService {
 class RealGrunnlagService(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val opplysningDao: OpplysningDao,
-    private val sporingslogg: Sporingslogg,
     private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
@@ -555,32 +550,6 @@ class RealGrunnlagService(
         logger.info("Låser grunnlagsversjon for behandling (id=$behandlingId)")
         opplysningDao.laasGrunnlagVersjonForBehandling(behandlingId)
     }
-
-    private fun vellykkaRequest(
-        ident: String,
-        navIdent: String,
-    ) = Sporingsrequest(
-        kallendeApplikasjon = "grunnlag",
-        oppdateringstype = HttpMethod.POST,
-        brukerId = navIdent,
-        hvemBlirSlaattOpp = ident,
-        endepunkt = "/person",
-        resultat = Decision.Permit,
-        melding = "Hent person var vellykka",
-    )
-
-    private fun feilendeRequest(
-        ident: String,
-        navIdent: String,
-    ) = Sporingsrequest(
-        kallendeApplikasjon = "grunnlag",
-        oppdateringstype = HttpMethod.POST,
-        brukerId = navIdent,
-        hvemBlirSlaattOpp = ident,
-        endepunkt = "/person",
-        resultat = Decision.Deny,
-        melding = "Hent person feilet",
-    )
 }
 
 private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteridentifikator): Grunnlagsopplysning<JsonNode> =
@@ -646,16 +615,8 @@ data class GrunnlagsopplysningerPersonPdl(
     val personRolle: PersonRolle,
 )
 
-data class NavnOpplysningDTO(
-    val sakId: Long,
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-    val foedselsnummer: String,
-)
-
 class LaastGrunnlagKanIkkeEndres(
-    val behandlingId: UUID,
+    behandlingId: UUID,
 ) : IkkeTillattException(
         code = "LAAST_GRUNNLAG_KAN_IKKE_ENDRES",
         detail = """

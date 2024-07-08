@@ -53,31 +53,4 @@ class VedtaksvurderingKlient(
             )
         }
     }
-
-    internal suspend fun hentVedtak(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
-        try {
-            logger.info("Henter vedtak for behandlingId=$behandlingId")
-
-            return downstreamResourceClient
-                .get(
-                    Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/"),
-                    brukerTokenInfo,
-                ).mapBoth(
-                    success = { resource -> deserialize(resource.response.toString()) },
-                    failure = { errorResponse -> throw errorResponse },
-                )
-        } catch (re: ResponseException) {
-            logger.warn("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
-
-            throw ForespoerselException(
-                status = re.response.status.value,
-                code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
-                detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
-                meta = mapOf("behandlingId" to behandlingId),
-            )
-        }
-    }
 }

@@ -213,7 +213,6 @@ class BrevDataMapperFerdigstillingVedtak(
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
-        val brevutfall = async { fetcher.hentBrevutfall() }
         val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
 
         OmstillingsstoenadInnvilgelse.fra(
@@ -222,7 +221,6 @@ class BrevDataMapperFerdigstillingVedtak(
             avkortingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()).single(),
-            requireNotNull(brevutfall.await()),
             requireNotNull(vilkaarsvurdering.await()),
         )
     }

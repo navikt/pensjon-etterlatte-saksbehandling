@@ -14,5 +14,3 @@ class FantIkkePersonException(
         code = PdlFeilAarsak.FANT_IKKE_PERSON.name,
         detail = detail,
     )
-
-class PdlInternalServerError : Exception()

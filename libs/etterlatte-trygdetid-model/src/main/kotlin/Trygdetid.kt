@@ -111,20 +111,6 @@ data class DetaljertBeregnetTrygdetidResultat(
     val beregnetSamletTrygdetidNorge: Int?,
 ) {
     companion object {
-        fun fraSamletTrygdetidNorge(anvendtTrygdetid: Int) =
-            DetaljertBeregnetTrygdetidResultat(
-                faktiskTrygdetidNorge = null,
-                faktiskTrygdetidTeoretisk = null,
-                fremtidigTrygdetidNorge = null,
-                fremtidigTrygdetidTeoretisk = null,
-                samletTrygdetidNorge = anvendtTrygdetid,
-                samletTrygdetidTeoretisk = null,
-                prorataBroek = null,
-                overstyrt = true,
-                yrkesskade = false,
-                beregnetSamletTrygdetidNorge = null,
-            )
-
         fun fraSamletTrygdetidProrata(
             anvendtTrygdetid: Int,
             prorataBroek: IntBroek?,

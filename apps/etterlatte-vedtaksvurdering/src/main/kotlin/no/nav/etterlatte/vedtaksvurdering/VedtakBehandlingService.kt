@@ -721,13 +721,6 @@ class ManglerAvkortetYtelse :
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
     )
 
-class ForeldreloesTrygdetid(
-    behandlingId: UUID,
-) : UgyldigForespoerselException(
-        code = "FORELDRELOES_TRYGDETID",
-        detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
-    )
-
 enum class VedtakFeatureToggle(
     private val key: String,
 ) : FeatureToggle {

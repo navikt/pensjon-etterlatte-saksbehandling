@@ -144,8 +144,3 @@ enum class HentetStatus {
     HENTET,
     IKKE_FUNNET,
 }
-
-enum class PatchetStatus {
-    IKKE_PATCHET,
-    PATCHET,
-}

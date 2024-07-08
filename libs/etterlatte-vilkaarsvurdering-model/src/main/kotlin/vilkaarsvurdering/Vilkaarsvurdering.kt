@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -71,18 +70,4 @@ enum class Utfall {
 enum class VilkaarsvurderingUtfall {
     OPPFYLT,
     IKKE_OPPFYLT,
-}
-
-data class Vilkaarsgrunnlag<T>(
-    val id: UUID,
-    val opplysningsType: VilkaarOpplysningType,
-    val kilde: Grunnlagsopplysning.Kilde,
-    val opplysning: T,
-)
-
-enum class VilkaarOpplysningType {
-    SOEKNAD_MOTTATT_DATO,
-    SOEKER_FOEDSELSDATO,
-    AVDOED_DOEDSDATO,
-    VIRKNINGSTIDSPUNKT,
 }

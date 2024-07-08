@@ -95,10 +95,6 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
-    - name: PERSONDATA_URL
-      value: https://pensjon-persondata.prod-fss-pub.nais.io
-    - name: PERSONDATA_OUTBOUND_SCOPE
-      value: api://prod-fss.pensjon-person.pensjon-persondata/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -117,5 +113,4 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-persondata.prod-fss-pub.nais.io
 

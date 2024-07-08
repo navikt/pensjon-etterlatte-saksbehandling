@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -26,10 +25,8 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -69,11 +66,6 @@ internal class BeregningsGrunnlagServiceTest {
             vedtaksvurderingKlient,
             grunnlagKlient,
         )
-
-    private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {
-        val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), "", "")
-        return Opplysning.Konstant(randomUUID(), kilde, a.toJsonNode())
-    }
 
     @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {

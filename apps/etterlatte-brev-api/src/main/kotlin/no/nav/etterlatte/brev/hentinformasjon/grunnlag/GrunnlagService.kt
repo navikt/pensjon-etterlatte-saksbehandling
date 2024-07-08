@@ -1,14 +1,8 @@
 package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
-import no.nav.etterlatte.brev.behandling.mapAvdoede
-import no.nav.etterlatte.brev.behandling.mapInnsender
-import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -34,27 +28,14 @@ class GrunnlagService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         behandlingId: UUID?,
-    ) = coroutineScope {
-        when (vedtakType) {
-            VedtakType.TILBAKEKREVING,
-            VedtakType.AVVIST_KLAGE,
-            -> async { hentGrunnlagForSak(sakId, bruker) }.await()
+    ) = when (vedtakType) {
+        VedtakType.TILBAKEKREVING,
+        VedtakType.AVVIST_KLAGE,
+        -> hentGrunnlagForSak(sakId, bruker)
 
-            null -> async { hentGrunnlagForSak(sakId, bruker) }.await()
-            else -> async { klient.hentGrunnlag(behandlingId!!, bruker) }.await()
-        }
+        null -> hentGrunnlagForSak(sakId, bruker)
+        else -> klient.hentGrunnlag(behandlingId!!, bruker)
     }
-
-    suspend fun hentPersonerISak(
-        grunnlag: Grunnlag,
-        brevutfallDto: BrevutfallDto?,
-        sakType: SakType?,
-    ) = PersonerISak(
-        innsender = grunnlag.mapInnsender(),
-        soeker = grunnlag.mapSoeker(brevutfallDto),
-        avdoede = grunnlag.mapAvdoede(),
-        verge = sakType?.let { hentVergeForSak(it, brevutfallDto, grunnlag) },
-    )
 
     suspend fun hentGrunnlagForSak(
         sakId: Long,

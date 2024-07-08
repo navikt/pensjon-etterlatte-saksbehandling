@@ -194,7 +194,7 @@ const OverstyrBeregningGrunnlag = (props: {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="0 4" style={{ maxWidth: '42.5em' }}>
+      <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
         <VStack gap="5">
           <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
         </VStack>

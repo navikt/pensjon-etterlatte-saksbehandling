@@ -34,8 +34,6 @@ enum class BehandlingStatus {
                 FATTET_VEDTAK,
             )
 
-        fun avbruttEllerAvslaatt() = listOf(AVBRUTT, AVSLAG)
-
         fun iverksattEllerAttestert() =
             listOf(
                 IVERKSATT,

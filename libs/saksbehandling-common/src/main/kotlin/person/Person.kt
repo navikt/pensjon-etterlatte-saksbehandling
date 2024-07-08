@@ -289,10 +289,3 @@ private fun harVergensFnr(
     }
     return !manglerFnr
 }
-
-private val alleVergeOmfangMedOekonomiskeInteresser =
-    listOf(
-        "utlendingssakerPersonligeOgOekonomiskeInteresser",
-        "personligeOgOekonomiskeInteresser",
-        "oekonomiskeInteresser",
-    )

@@ -2,8 +2,6 @@ package no.nav.etterlatte.klage
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -14,16 +12,6 @@ class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
-
-    val featureToggleService =
-        FeatureToggleService.initialiser(
-            properties =
-                FeatureToggleProperties(
-                    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-                    host = config.getString("funksjonsbrytere.unleash.host"),
-                    apiKey = config.getString("funksjonsbrytere.unleash.token"),
-                ),
-        )
 
     private val kabalHttpClient =
         httpClientClientCredentials(

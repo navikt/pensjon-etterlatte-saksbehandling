@@ -25,13 +25,9 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
@@ -39,7 +35,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
@@ -74,21 +69,6 @@ internal class BeregningsGrunnlagServiceTest {
             vedtaksvurderingKlient,
             grunnlagKlient,
         )
-
-    private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
-        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
-            listOf(
-                mapOf(
-                    Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
-                    Opplysningstype.PERSONROLLE to konstantOpplysning(PersonRolle.AVDOED),
-                    Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
-                ),
-            )
-
-        return GrunnlagTestData(opplysningsmapAvdoedeOverrides = grunnlag.hentAvdoede() + nyligAvdoed).hentOpplysningsgrunnlag()
-    }
 
     private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {
         val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), "", "")

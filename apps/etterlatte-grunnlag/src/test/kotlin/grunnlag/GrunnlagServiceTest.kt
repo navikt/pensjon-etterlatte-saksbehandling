@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import mockPerson
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -66,7 +65,6 @@ import java.util.UUID
 internal class GrunnlagServiceTest {
     private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
-    private val persondataKlient = mockk<PersondataKlient>()
     private val grunnlagHenter = mockk<GrunnlagHenter>()
     private val grunnlagService =
         RealGrunnlagService(
@@ -739,7 +737,6 @@ internal class GrunnlagServiceTest {
         assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size == 1)
         verify { pdlTjenesterKlientImpl wasNot called }
         verify { pdlTjenesterKlientImpl wasNot called }
-        verify { persondataKlient wasNot called }
     }
 
     @Nested

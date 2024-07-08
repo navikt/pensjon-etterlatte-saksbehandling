@@ -1,5 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory
 inline val PipelineContext<*, ApplicationCall>.enheter: List<String>
     get() =
         call.request.queryParameters["enheter"]?.split(",") ?: emptyList()
+
+const val IDENT = "ident"
 
 internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerService) {
     val logger = LoggerFactory.getLogger(this::class.java)
@@ -35,6 +38,12 @@ internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServic
                     saksbehandlerService.hentKomplettSaksbehandler(brukerTokenInfo.ident())
                 }
             call.respond(saksbehandler)
+        }
+
+        get("/saksbehandler/navnforident/{$IDENT}") {
+            val ident = call.parameters[IDENT]!!
+            val navnForIdent = saksbehandlerService.hentNavnForIdent(ident) ?: call.respond(HttpStatusCode.NoContent)
+            call.respond(navnForIdent)
         }
     }
 }

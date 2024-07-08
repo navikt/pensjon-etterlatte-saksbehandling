@@ -27,6 +27,8 @@ interface SaksbehandlerService {
     fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo>
 
     fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet>
+
+    fun hentNavnForIdent(ident: String): String?
 }
 
 class SaksbehandlerServiceImpl(
@@ -80,6 +82,8 @@ class SaksbehandlerServiceImpl(
             }
         }
     }
+
+    override fun hentNavnForIdent(ident: String): String? = dao.hentSaksbehandlerNavn(ident)
 
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         dao.hentSaksbehandlerEnheter(ident)

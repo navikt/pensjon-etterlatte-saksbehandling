@@ -8,9 +8,10 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 type Props = {
   beslutning: IBeslutning | undefined
   behandlingsInfo: IBehandlingInfo
+  behandlendeSaksbehandler?: string
 }
 
-export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning }: Props) => {
+export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning, behandlendeSaksbehandler }: Props) => {
   if (
     behandlingsInfo.status === IBehandlingStatus.ATTESTERT ||
     behandlingsInfo.status === IBehandlingStatus.TIL_SAMORDNING ||
@@ -23,5 +24,5 @@ export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning }: Props) 
   if (behandlingsInfo.status === IBehandlingStatus.RETURNERT || beslutning === IBeslutning.underkjenn) {
     return <Underkjent behandlingsInfo={behandlingsInfo} />
   }
-  return <Oversikt behandlingsInfo={behandlingsInfo} />
+  return <Oversikt behandlingsInfo={behandlingsInfo} behandlendeSaksbehandler={behandlendeSaksbehandler} />
 }

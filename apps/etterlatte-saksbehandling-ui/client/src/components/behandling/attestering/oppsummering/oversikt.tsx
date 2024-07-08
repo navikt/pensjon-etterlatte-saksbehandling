@@ -4,15 +4,26 @@ import { formaterDatoMedKlokkeslett, formaterDato } from '~utils/formatering/dat
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
+import { hentNavnforIdent } from '~shared/api/user'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
+export const Oversikt = ({
+  behandlingsInfo,
+  behandlendeSaksbehandler,
+}: {
+  behandlingsInfo: IBehandlingInfo
+  behandlendeSaksbehandler?: string
+}) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const oppgave = useSelectorOppgaveUnderBehandling()
 
@@ -38,6 +49,12 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         return 'Under behandling'
     }
   }
+  const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
+  useEffect(() => {
+    if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
+      hentNavnForIdent(behandlendeSaksbehandler)
+    }
+  }, [])
 
   return (
     <SidebarPanel $border>
@@ -69,6 +86,25 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         </Box>
 
         <HStack gap="4" justify="space-between" wrap={false}>
+          {behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler && (
+            <>
+              {mapApiResult(
+                res,
+                <Spinner visible={true} label="Henter saksbehandler" />,
+                () => (
+                  <ApiErrorAlert>Kunne ikke hent saksbehandlende saksbehandler</ApiErrorAlert>
+                ),
+                (saksbehandlernavn) => {
+                  return (
+                    <>
+                      <Label size="small">Saksbehandlende saksbehandler</Label>
+                      <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
+                    </>
+                  )
+                }
+              )}
+            </>
+          )}
           <div>
             <Label size="small">Saksbehandler</Label>
             {!!oppgave?.saksbehandler ? (

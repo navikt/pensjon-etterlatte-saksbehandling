@@ -109,7 +109,11 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     <Sidebar>
       {behandlingsinfo && (
         <>
-          <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
+          <Behandlingsoppsummering
+            behandlingsInfo={behandlingsinfo}
+            beslutning={beslutning}
+            behandlendeSaksbehandler={vedtak?.behandlendeSaksbehandler}
+          />
           {kanAttestere && (
             <>
               {mapApiResult(

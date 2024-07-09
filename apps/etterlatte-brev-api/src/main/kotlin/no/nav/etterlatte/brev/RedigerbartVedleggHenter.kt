@@ -123,7 +123,12 @@ class RedigerbartVedleggHenter(
                 generellBrevData,
                 bruker,
             ),
-            hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData),
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                generellBrevData,
+                bruker,
+            ),
         )
     } else {
         listOf(
@@ -140,7 +145,14 @@ class RedigerbartVedleggHenter(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData))
+        listOf(
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                generellBrevData,
+                bruker,
+            ),
+        )
     } else {
         emptyList()
     }
@@ -161,16 +173,6 @@ class RedigerbartVedleggHenter(
     ) = hentInnholdFraBrevbakeren(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-        generellBrevData,
-        bruker,
-    )
-
-    private suspend fun hentInnholdForhaandsvarselFeilutbetalingVedleggBp(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
         generellBrevData,
         bruker,
     )

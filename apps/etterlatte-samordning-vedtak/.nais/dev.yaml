@@ -105,6 +105,8 @@ spec:
       value: api://dev-fss.pensjonsamhandling.tp-q1/.default
     - name: ROLLE_PENSJONSAKSBEHANDLER
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
+    - name: ROLLE_GJENNYSAKSBEHANDLER
+      value: 5b6745de-b65d-40eb-a6f5-860c8b61c27f
   accessPolicy:
     inbound:
       rules:

@@ -89,7 +89,7 @@ interface SakService {
 
     fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
 
-    fun finnSakerOmsOgHvisAvoed(ident: String): List<Long>
+    fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long>
 }
 
 class ManglerTilgangTilEnhet(
@@ -162,7 +162,7 @@ class SakServiceImpl(
         }
     }
 
-    override fun finnSakerOmsOgHvisAvoed(ident: String): List<Long> {
+    override fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long> {
         val saker = finnSakerForPerson(ident, SakType.OMSTILLINGSSTOENAD).filterForEnheter()
         val sakerOgRollerForPerson = runBlocking { grunnlagService.hentAlleSakerForPerson(ident) }
         val sakerOgRollerGruppert = sakerOgRollerForPerson.sakiderOgRoller.distinct()

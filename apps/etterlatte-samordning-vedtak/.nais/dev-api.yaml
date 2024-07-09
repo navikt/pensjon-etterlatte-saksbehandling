@@ -102,33 +102,23 @@ spec:
       value: api://dev-fss.pensjonsamhandling.tp-q1/.default
     - name: ROLLE_PENSJONSAKSBEHANDLER
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
+    - name: ROLLE_GJENNYSAKSBEHANDLER
+      value: 5b6745de-b65d-40eb-a6f5-860c8b61c27f
   accessPolicy:
     inbound:
       rules:
         - application: arbeid-og-inntekt-q1
           namespace: team-inntekt
           cluster: dev-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: arbeid-og-inntekt-q2
           namespace: team-inntekt
           cluster: dev-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: arbeid-og-inntekt-q4
           namespace: team-inntekt
           cluster: dev-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: arbeid-og-inntekt-ascension
           namespace: team-inntekt
           cluster: dev-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss

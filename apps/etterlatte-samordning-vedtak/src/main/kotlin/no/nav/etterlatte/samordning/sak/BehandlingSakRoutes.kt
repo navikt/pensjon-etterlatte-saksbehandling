@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.request.receive
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
@@ -23,7 +24,7 @@ fun Route.behandlingSakRoutes(
         get("/person/sak") {
             kunSaksbehandler {
                 val fnrOgSaktype = call.receive<FoedselsnummerDTO>()
-                behandlingService.hentSakforPerson(fnrOgSaktype)
+                call.respond(behandlingService.hentSakforPerson(fnrOgSaktype))
             }
         }
     }

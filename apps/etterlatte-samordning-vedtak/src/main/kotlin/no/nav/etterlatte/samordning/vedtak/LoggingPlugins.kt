@@ -55,8 +55,9 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
         createConfiguration = ::PluginConfiguration,
     ) {
         on(UserIdMdcHook) { call ->
+            // TODO: rydd opp senere..
             val user =
-                if (call.request.uri.contains("pensjon")) {
+                if (call.request.uri.contains("pensjon") || call.request.uri.contains("oms")) {
                     val principal = call.principal<TokenValidationContextPrincipal>()
                     if (principal?.context?.issuers?.contains("tokenx") == true) {
                         "Selvbetjening"

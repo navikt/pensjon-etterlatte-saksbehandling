@@ -11,7 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 
 fun Route.behandlingSakRoutes(
     behandlingService: BehandlingService,
@@ -28,10 +27,8 @@ fun Route.behandlingSakRoutes(
             issuers = setOf("azure")
         }
         post("/person/sak") {
-            kunSaksbehandler {
-                val fnrOgSaktype = call.receive<FoedselsnummerDTO>()
-                call.respond(behandlingService.hentSakforPerson(fnrOgSaktype))
-            }
+            val fnrOgSaktype = call.receive<FoedselsnummerDTO>()
+            call.respond(behandlingService.hentSakforPerson(fnrOgSaktype))
         }
     }
 }

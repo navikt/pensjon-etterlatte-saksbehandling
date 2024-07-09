@@ -107,7 +107,7 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
             barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
@@ -152,7 +152,7 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonRevurdering.fra(
@@ -187,7 +187,7 @@ class BrevDataMapperFerdigstillingVedtak(
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
@@ -262,7 +262,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelse.fra(
@@ -303,7 +303,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 

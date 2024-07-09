@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -34,11 +33,6 @@ class BrevdataFacade(
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
 ) {
-    suspend fun hentEtterbetaling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtterbetalingDTO? = behandlingService.hentEtterbetaling(behandlingId, brukerTokenInfo)
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,

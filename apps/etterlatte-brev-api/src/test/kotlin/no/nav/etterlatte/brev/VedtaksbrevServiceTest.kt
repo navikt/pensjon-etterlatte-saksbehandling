@@ -252,7 +252,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns mockk()
+            coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns mockk()
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
@@ -321,7 +321,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
+            coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
                 mockk<BrevutfallDto> {

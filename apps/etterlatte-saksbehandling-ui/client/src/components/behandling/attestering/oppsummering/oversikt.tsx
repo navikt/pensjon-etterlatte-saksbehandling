@@ -30,12 +30,9 @@ export const Oversikt = ({
   const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
   useEffect(() => {
     if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
-      console.log('henter')
       hentNavnForIdent(behandlendeSaksbehandler)
     }
   }, [behandlendeSaksbehandler, behandlingsInfo.status])
-
-  console.log(res.status)
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -96,7 +93,7 @@ export const Oversikt = ({
                 res,
                 <Spinner visible={true} label="Henter saksbehandler" />,
                 () => (
-                  <ApiErrorAlert>Kunne ikke hent saksbehandlende saksbehandler</ApiErrorAlert>
+                  <ApiErrorAlert>Kunne ikke hente saksbehandlende saksbehandler</ApiErrorAlert>
                 ),
                 (saksbehandlernavn) => {
                   return (

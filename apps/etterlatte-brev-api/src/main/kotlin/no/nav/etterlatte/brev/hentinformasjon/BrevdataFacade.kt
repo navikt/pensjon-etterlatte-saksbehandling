@@ -236,9 +236,4 @@ class BrevdataFacade(
             brukerTokenInfo,
         )
     }
-
-    suspend fun hentVedtaksbehandlingKanRedigeres(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }

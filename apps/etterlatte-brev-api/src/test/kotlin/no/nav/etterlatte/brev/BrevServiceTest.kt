@@ -50,7 +50,7 @@ internal class BrevServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(adresseService, db, brevDataFacade, behandlingService, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(

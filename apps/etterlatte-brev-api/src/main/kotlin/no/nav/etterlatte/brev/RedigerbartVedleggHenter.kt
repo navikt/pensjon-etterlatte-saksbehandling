@@ -60,7 +60,15 @@ class RedigerbartVedleggHenter(
 
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> vedleggInnvilgelseBarnepensjon(bruker, generellBrevData)
+                    VedtakType.INNVILGELSE ->
+                        listOf(
+                            hentInnholdFraBrevbakeren(
+                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                generellBrevData,
+                                bruker,
+                            ),
+                        )
                     VedtakType.OPPHOER -> vedleggOpphoerBarnepensjon(bruker, generellBrevData)
                     VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
                     else -> {
@@ -137,18 +145,6 @@ class RedigerbartVedleggHenter(
             ),
         )
     }
-
-    private suspend fun vedleggInnvilgelseBarnepensjon(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = listOf(
-        hentInnholdFraBrevbakeren(
-            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-            BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-            generellBrevData,
-            bruker,
-        ),
-    )
 
     private suspend fun vedleggEndringBarnepensjon(
         bruker: BrukerTokenInfo,

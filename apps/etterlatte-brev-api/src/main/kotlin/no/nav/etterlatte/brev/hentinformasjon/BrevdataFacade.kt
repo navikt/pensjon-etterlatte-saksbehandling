@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -171,19 +170,6 @@ class BrevdataFacade(
                     )
             }
         }
-
-    suspend fun finnForrigeUtbetalingsinfo(
-        sakId: Long,
-        virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
-    ): Utbetalingsinfo? =
-        beregningService.finnUtbetalingsinfoNullable(
-            behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
-            virkningstidspunkt,
-            brukerTokenInfo,
-            sakType,
-        )
 
     suspend fun finnForrigeAvkortingsinfo(
         sakId: Long,

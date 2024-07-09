@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Alert, Box, Button, ErrorSummary, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, ErrorSummary, HStack, List, Modal, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -17,7 +17,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from './PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
@@ -31,7 +31,7 @@ import {
   hentOverstyrBeregningGrunnlag,
   lagreOverstyrBeregningGrunnlag,
   opprettEllerEndreBeregning,
-  slettOverstyrtBeregning,
+  deaktiverOverstyrtBeregning,
 } from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -40,12 +40,13 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -87,7 +88,7 @@ const OverstyrBeregningGrunnlag = (props: {
       overstyrBeregningForm: mapListeFraDto(perioder ?? []),
     },
   })
-  const [slettResultat, slettOverstyrtBereging] = useApiCall(slettOverstyrtBeregning)
+  const [deaktiverOverstyrtBeregningResultat, deaktiverOverstyrtBereging] = useApiCall(deaktiverOverstyrtBeregning)
 
   const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
@@ -95,6 +96,7 @@ const OverstyrBeregningGrunnlag = (props: {
   const { next } = useBehandlingRoutes()
 
   const dispatch = useAppDispatch()
+  const modalRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
     fetchOverstyrBeregningGrunnlag(behandling.id, (result) => {
@@ -173,11 +175,40 @@ const OverstyrBeregningGrunnlag = (props: {
     return tom ? addMonths(tom, 1) : fom
   }
 
+  const leggTilBeregningsperiode = () => {
+    setVisFeil(false)
+    append([
+      {
+        fom: nesteFomDato(sisteFom, sisteTom),
+        tom: undefined,
+        data: {
+          utbetaltBeloep: '0',
+          trygdetid: '0',
+          trygdetidForIdent: '',
+          prorataBroekNevner: '',
+          prorataBroekTeller: '',
+          beskrivelse: '',
+          aarsak: 'VELG_AARSAK',
+        },
+      },
+    ])
+  }
+
   return (
     <>
-      <Box paddingInline="16" paddingBlock="0 4">
+      <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
         <VStack gap="5">
-          <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
+          <Alert variant="warning">
+            <VStack gap="4">
+              Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
+              revurderes fra første virkningstidspunkt /konverteringstidspunkt.
+              <List as="ul" size="small" title="Saker som trenger overstyrt beregning er:">
+                {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+                  <List.Item key={key}>{value}</List.Item>
+                ))}
+              </List>
+            </VStack>
+          </Alert>
         </VStack>
       </Box>
 
@@ -224,62 +255,73 @@ const OverstyrBeregningGrunnlag = (props: {
                   </Table.Body>
                 </Table>
               ) : null}
+
               {behandles && (
-                <Button
-                  type="button"
-                  icon={<PlusCircleIcon title="legg til" />}
-                  iconPosition="left"
-                  variant="tertiary"
-                  onClick={() => {
-                    setVisFeil(false)
-                    append([
-                      {
-                        fom: nesteFomDato(sisteFom, sisteTom),
-                        tom: undefined,
-                        data: {
-                          utbetaltBeloep: '0',
-                          trygdetid: '0',
-                          trygdetidForIdent: '',
-                          prorataBroekNevner: '',
-                          prorataBroekTeller: '',
-                          beskrivelse: '',
-                          aarsak: 'VELG_AARSAK',
-                        },
-                      },
-                    ])
-                  }}
-                >
-                  Legg til beregningsperiode
-                </Button>
-              )}
-              {behandles && (
-                <HStack gap="4" align="center">
+                <VStack gap="4" align="start">
                   <Button
-                    type="submit"
-                    size="small"
-                    onClick={handleSubmit(ferdigstillForm)}
-                    loading={isPending(persistOverstyrBeregningGrunnlag)}
+                    type="button"
+                    icon={<PlusCircleIcon title="legg til" />}
+                    iconPosition="left"
+                    variant="tertiary"
+                    onClick={() => {
+                      leggTilBeregningsperiode()
+                    }}
                   >
-                    Lagre
+                    Legg til beregningsperiode
                   </Button>
-                  {behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                    <Button
-                      variant="tertiary"
-                      loading={isPending(slettResultat)}
-                      onClick={() => {
-                        slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))
-                      }}
-                    >
+                  <HStack gap="4" align="center">
+                    <Button size="small" variant="tertiary" onClick={() => modalRef.current?.showModal()}>
                       Skru av overstyrt beregning
                     </Button>
-                  )}
-                </HStack>
+                    <Modal
+                      ref={modalRef}
+                      header={{ heading: 'Er du sikker på at du vil skru av overstyrt beregning?' }}
+                    >
+                      <Modal.Body>
+                        <BodyLong>
+                          Beregningsperioder vil bli permanent slettet. Virkningstidspunkt for revurdering MÅ settes
+                          tilbake til sakens første virkningstidspunkt.
+                        </BodyLong>
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          loading={isPending(deaktiverOverstyrtBeregningResultat)}
+                          onClick={() => deaktiverOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
+                        >
+                          Skru av overstyrt beregning
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={() => modalRef.current?.close()}>
+                          {' '}
+                          Avbryt{' '}
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      size="small"
+                      onClick={handleSubmit(ferdigstillForm)}
+                      loading={isPending(persistOverstyrBeregningGrunnlag)}
+                    >
+                      Lagre
+                    </Button>
+                  </HStack>
+                </VStack>
               )}
               {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
             </FormWrapper>
+
+            {isFailureHandler({
+              errorMessage: 'En feil har oppstått',
+              apiResult: deaktiverOverstyrtBeregningResultat,
+            })}
           </>
         )
       )}
+
       {isPending(persistOverstyrBeregningGrunnlag) && <Spinner visible={true} label="Lagre grunnlag" />}
       {isFailureHandler({
         errorMessage: 'En feil har oppstått ved lagring av grunnlag',
@@ -289,19 +331,22 @@ const OverstyrBeregningGrunnlag = (props: {
         errorMessage: 'Kunne ikke opprette ny beregning',
         apiResult: endreBeregning,
       })}
-      {behandles ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
-          >
-            Beregn
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {behandles ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
+            >
+              Beregn
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

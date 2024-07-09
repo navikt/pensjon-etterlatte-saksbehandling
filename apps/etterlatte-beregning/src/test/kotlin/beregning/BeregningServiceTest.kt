@@ -265,6 +265,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
         every { beregningRepository.deaktiverOverstyrtBeregning(any()) } just runs
+        every { beregningRepository.slettOverstyrtBeregningsgrunnlag(any()) } just runs
 
         runBlocking {
             val overstyrBeregning =

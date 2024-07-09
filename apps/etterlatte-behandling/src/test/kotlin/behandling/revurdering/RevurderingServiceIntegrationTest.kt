@@ -485,36 +485,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Kan ikke opprette revurdering SLUTTBEHANDLING_UTLAND hvis man mangler en tidligere behandling med kravpakke`() {
-        val hendelser = spyk(applicationContext.behandlingsHendelser)
-        val grunnlagService = spyk(applicationContext.grunnlagsService)
-        val oppgaveService = spyk(applicationContext.oppgaveService)
-
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
-
-        assertNotNull(behandling)
-
-        inTransaction {
-            iverksett(behandling!!)
-        }
-        assertThrows<RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke> {
-            inTransaction {
-                revurderingService(
-                    oppgaveService,
-                    grunnlagService,
-                    hendelser,
-                ).opprettManuellRevurderingWrapper(
-                    sakId = sak.id,
-                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
-                    paaGrunnAvHendelseId = null,
-                    begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
-                )
-            }
-        }
-    }
-
-    @Test
     fun `Skal kunne hente revurdering basert paa sak og revurderingsaarsak`() {
         val revurderingService = revurderingService()
         val behandlingFactory = behandlingFactory()

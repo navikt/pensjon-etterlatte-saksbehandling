@@ -269,13 +269,15 @@ internal fun Route.sakWebRoutes(
             }
 
             post("/getsak/oms") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val saker =
-                        inTransaction { sakService.finnSakerOmsOgHvisAvdoed(fnr.value) }.also {
-                            requestLogger.loggRequest(brukerTokenInfo, fnr, "api/personer/getsak/oms")
-                        }
+                kunSaksbehandler {
+                    withFoedselsnummerInternal(tilgangService) { fnr ->
+                        val saker =
+                            inTransaction { sakService.finnSakerOmsOgHvisAvdoed(fnr.value) }.also {
+                                requestLogger.loggRequest(brukerTokenInfo, fnr, "api/personer/getsak/oms")
+                            }
 
-                    call.respond(saker)
+                        call.respond(saker)
+                    }
                 }
             }
 

@@ -69,7 +69,6 @@ internal class BrevdataFacadeImplTest {
             grunnlagService,
             beregningService,
             behandlingService,
-            trygdetidService,
             vilkaarsvurderingService,
         )
 

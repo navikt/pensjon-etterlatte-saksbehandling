@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -37,7 +36,6 @@ class BrevdataFacade(
     private val grunnlagService: GrunnlagService,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
-    private val trygdetidService: TrygdetidService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     suspend fun hentBrevutfall(
@@ -238,11 +236,6 @@ class BrevdataFacade(
             brukerTokenInfo,
         )
     }
-
-    suspend fun finnTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
 
     suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,

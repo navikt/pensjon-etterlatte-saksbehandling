@@ -142,7 +142,6 @@ class ApplicationBuilder {
             grunnlagService,
             beregningService,
             behandlingService,
-            trygdetidService,
             vilkaarsvurderingService,
         )
 
@@ -165,7 +164,7 @@ class ApplicationBuilder {
     private val brevDataMapperRedigerbartUtfallVedtak =
         BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, beregningService, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, trygdetidService, brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 

@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
@@ -42,6 +43,7 @@ data class BrevDataFerdigstillingRequest(
 
 class BrevDataMapperFerdigstillingVedtak(
     private val beregningService: BeregningService,
+    private val trygdetidService: TrygdetidService,
     private val brevdataFacade: BrevdataFacade,
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
@@ -99,7 +101,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     generellBrevData.sak.sakType,
                 )
             }
-        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
 
@@ -144,7 +146,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     generellBrevData.sak.sakType,
                 )
             }
-        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
@@ -179,7 +181,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     generellBrevData.sak.sakType,
                 )
             }
-        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
@@ -255,7 +257,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     bruker,
                 )
             }
-        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }
 
@@ -296,7 +298,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     bruker,
                 )
             }
-        val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { brevdataFacade.hentVilkaarsvurdering(behandlingId, bruker) }

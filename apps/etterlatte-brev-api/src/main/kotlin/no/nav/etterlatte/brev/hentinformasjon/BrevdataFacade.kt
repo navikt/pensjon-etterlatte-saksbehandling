@@ -20,7 +20,6 @@ import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.Vilkaarsvurderin
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -38,11 +37,6 @@ class BrevdataFacade(
     private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
-    suspend fun hentBrevutfall(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BrevutfallDto? = behandlingService.hentBrevutfall(behandlingId, brukerTokenInfo)
-
     suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -62,7 +56,7 @@ class BrevdataFacade(
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
-            val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
+            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val vedtakType = vedtakDeferred?.await()?.type
             val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)

@@ -27,6 +27,16 @@ export const Oversikt = ({
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const oppgave = useSelectorOppgaveUnderBehandling()
 
+  const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
+  useEffect(() => {
+    if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
+      console.log('henter')
+      hentNavnForIdent(behandlendeSaksbehandler)
+    }
+  }, [behandlendeSaksbehandler, behandlingsInfo.status])
+
+  console.log(res.status)
+
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.FATTET_VEDTAK:
@@ -49,12 +59,6 @@ export const Oversikt = ({
         return 'Under behandling'
     }
   }
-  const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
-  useEffect(() => {
-    if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
-      hentNavnForIdent(behandlendeSaksbehandler)
-    }
-  }, [])
 
   return (
     <SidebarPanel $border>
@@ -85,8 +89,8 @@ export const Oversikt = ({
           </HStack>
         </Box>
 
-        <HStack gap="4" justify="space-between" wrap={false}>
-          {behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler && (
+        <VStack gap="4" justify="space-between">
+          {behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler ? (
             <>
               {mapApiResult(
                 res,
@@ -97,29 +101,44 @@ export const Oversikt = ({
                 (saksbehandlernavn) => {
                   return (
                     <>
-                      <Label size="small">Saksbehandlende saksbehandler</Label>
-                      <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
+                      <HStack gap="4" justify="space-between">
+                        <div>
+                          <Label size="small">Attestant</Label>
+                          {!!oppgave?.saksbehandler ? (
+                            <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+                          ) : (
+                            <Alert size="small" variant="warning">
+                              Oppgaven er ikke tildelt
+                            </Alert>
+                          )}
+                        </div>
+                        <div>
+                          <Label size="small">Saksbehandler</Label>
+                          <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
+                        </div>
+                      </HStack>
                     </>
                   )
                 }
               )}
             </>
+          ) : (
+            <div>
+              <Label size="small">Saksbehandler</Label>
+              {!!oppgave?.saksbehandler ? (
+                <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+              ) : (
+                <Alert size="small" variant="warning">
+                  Oppgaven er ikke tildelt
+                </Alert>
+              )}
+            </div>
           )}
-          <div>
-            <Label size="small">Saksbehandler</Label>
-            {!!oppgave?.saksbehandler ? (
-              <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
-            ) : (
-              <Alert size="small" variant="warning">
-                Oppgaven er ikke tildelt
-              </Alert>
-            )}
-          </div>
           <div>
             <Label size="small">Kilde</Label>
             <Detail>{behandlingsInfo.kilde}</Detail>
           </div>
-        </HStack>
+        </VStack>
 
         <HStack gap="4" justify="space-between">
           <div>

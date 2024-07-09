@@ -253,7 +253,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,
@@ -284,7 +284,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,

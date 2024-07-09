@@ -259,7 +259,7 @@ internal class VedtaksbrevServiceTest {
                     every { aldersgruppe } returns Aldersgruppe.UNDER_18
                 }
             if (sakType == SakType.OMSTILLINGSSTOENAD) {
-                coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
+                coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
                     Avkortingsinfo(LocalDate.now(), listOf())
             }
             runBlocking {

@@ -58,7 +58,14 @@ class RedigerbartVedleggHenter(
                     VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
                     else -> {
                         if (brevtype == Brevtype.VARSEL) {
-                            listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
                         } else {
                             emptyList()
                         }
@@ -96,19 +103,36 @@ class RedigerbartVedleggHenter(
     private suspend fun vedleggInnvilgelseBarnepensjon(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
+    ) = listOf(
+        hentInnholdFraBrevbakeren(
+            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+            BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+            generellBrevData,
+            bruker,
+        ),
+    )
 
     private suspend fun vedleggEndringBarnepensjon(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
         listOf(
-            hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData),
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                generellBrevData,
+                bruker,
+            ),
             hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData),
         )
     } else {
         listOf(
-            hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData),
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                generellBrevData,
+                bruker,
+            ),
         )
     }
 
@@ -147,16 +171,6 @@ class RedigerbartVedleggHenter(
     ) = hentInnholdFraBrevbakeren(
         EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
         BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-        generellBrevData,
-        bruker,
-    )
-
-    private suspend fun hentInnholdBeregningAvTrygdetidBp(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-        BrevVedleggKey.BP_BEREGNING_TRYGDETID,
         generellBrevData,
         bruker,
     )

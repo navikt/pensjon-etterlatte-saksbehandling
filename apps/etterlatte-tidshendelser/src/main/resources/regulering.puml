@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor Utvikler
+database "Tidshendelser-db" as Tidshendelser
+participant Behandling
+database "Behandling-DB" as behandlingdb
+participant Vilkårsvurdering
+participant Trygdetid
+participant Beregning
+participant Vedtak
+
+Utvikler -> Tidshendelser: Finn saker til regulering
+Tidshendelser -> Behandling: Lagre saker til regulering
+Behandling -> Behandling: Lagre alle saker som klar til regulering
+
+Utvikler -> Tidshendelser: Lagre reguleringskonfigurasjon
+Utvikler -> Tidshendelser: Start regulering
+Tidshendelser -> Behandling: Regulering starta
+Behandling -> Behandling: Tilbakestill pågående behandlinger
+Behandling -> Behandling: Finn saker
+Behandling -> Vedtak: Sak funnet
+Vedtak -> Vedtak: Tilbakestill vedtak for pågående behandlinger
+Vedtak -> Vedtak: Har sak <X> løpende vedtak?
+note left of Vedtak
+Hvis nei avbrytes flyten,
+og vi lagrer status som
+IKKE_LOEPENDE_VEDTAK
+end note
+Vedtak -> Beregning: Sak <X>har løpende vedtak, har den overstyrt beregning og åpen behandling?
+note left of Beregning
+Hvis ja avbrytes flyten,
+og saksbehandler må ferdigstille
+før vi gjør mer med denne saka
+end note
+Beregning -> Behandling: Opprett reguleringsbehandling
+Behandling -> Vilkårsvurdering: Kopiér vilkårsvurdering fra forrige behandling
+Vilkårsvurdering -> Trygdetid: Kopiér trygdetid fra forrige behandling
+Trygdetid -> Beregning: Beregn på nytt med ny g
+Beregning -> Beregning: Kontrollsjekk summene
+Beregning -> Vedtak: Opprett, fatt og attester vedtak
+Vedtak -> Behandling: Lagre ferdigstilt regulering med data
+Utvikler -> behandlingdb: Manuell kontrollsjekk av omregningskjoering-tabellen
+
+@enduml

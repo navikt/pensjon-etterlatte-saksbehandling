@@ -160,7 +160,7 @@ class ApplicationBuilder {
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     private val brevDataMapperRedigerbartUtfallVedtak =
         BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)

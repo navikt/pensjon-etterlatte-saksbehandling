@@ -91,7 +91,7 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()

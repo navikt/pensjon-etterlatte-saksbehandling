@@ -58,7 +58,31 @@ class RedigerbartVedleggHenter(
                         if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                             emptyList()
                         } else {
-                            vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
+                            if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                                listOf(
+                                    hentInnholdFraBrevbakeren(
+                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                        BrevVedleggKey.OMS_BEREGNING,
+                                        generellBrevData,
+                                        bruker,
+                                    ),
+                                    hentInnholdFraBrevbakeren(
+                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                                        generellBrevData,
+                                        bruker,
+                                    ),
+                                )
+                            } else {
+                                listOf(
+                                    hentInnholdFraBrevbakeren(
+                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                        BrevVedleggKey.OMS_BEREGNING,
+                                        generellBrevData,
+                                        bruker,
+                                    ),
+                                )
+                            }
                         }
                     }
                     else -> {
@@ -108,35 +132,6 @@ class RedigerbartVedleggHenter(
                 }
             }
         }
-
-    private suspend fun vedleggEndringOmstillingsstoenad(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                BrevVedleggKey.OMS_BEREGNING,
-                generellBrevData,
-                bruker,
-            ),
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    } else {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                BrevVedleggKey.OMS_BEREGNING,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    }
 
     private suspend fun vedleggEndringBarnepensjon(
         bruker: BrukerTokenInfo,

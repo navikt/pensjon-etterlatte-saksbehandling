@@ -28,147 +28,140 @@ class RedigerbartVedleggHenter(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         brevtype: Brevtype,
-    ): List<BrevInnholdVedlegg> =
-        when (generellBrevData.sak.sakType) {
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE ->
-                        listOf(
-                            hentInnholdFraBrevbakeren(
-                                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                                BrevVedleggKey.OMS_BEREGNING,
-                                generellBrevData,
-                                bruker,
-                            ),
-                        )
-                    VedtakType.OPPHOER ->
-                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+    ): List<BrevInnholdVedlegg> {
+        val vedlegg: List<Pair<EtterlatteBrevKode, BrevVedleggKey>> =
+            when (generellBrevData.sak.sakType) {
+                SakType.OMSTILLINGSSTOENAD -> {
+                    when (generellBrevData.forenkletVedtak?.type) {
+                        VedtakType.INNVILGELSE ->
                             listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                                    BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                                    generellBrevData,
-                                    bruker,
+                                Pair(
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                    BrevVedleggKey.OMS_BEREGNING,
                                 ),
                             )
-                        } else {
-                            emptyList()
-                        }
-                    VedtakType.ENDRING -> {
-                        if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
-                            emptyList()
-                        } else {
+
+                        VedtakType.OPPHOER ->
                             if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
                                 listOf(
-                                    hentInnholdFraBrevbakeren(
-                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                                        BrevVedleggKey.OMS_BEREGNING,
-                                        generellBrevData,
-                                        bruker,
-                                    ),
-                                    hentInnholdFraBrevbakeren(
+                                    Pair(
                                         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                                         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                                        generellBrevData,
-                                        bruker,
+                                    ),
+                                )
+                            } else {
+                                emptyList()
+                            }
+
+                        VedtakType.ENDRING -> {
+                            if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+                                emptyList()
+                            } else {
+                                if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                                    listOf(
+                                        Pair(
+                                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                            BrevVedleggKey.OMS_BEREGNING,
+                                        ),
+                                        Pair(
+                                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                                        ),
+                                    )
+                                } else {
+                                    listOf(
+                                        Pair(
+                                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                            BrevVedleggKey.OMS_BEREGNING,
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+
+                        else -> {
+                            if (brevtype == Brevtype.VARSEL) {
+                                listOf(
+                                    Pair(
+                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                        BrevVedleggKey.OMS_BEREGNING,
+                                    ),
+                                )
+                            } else {
+                                emptyList()
+                            }
+                        }
+                    }
+                }
+
+                SakType.BARNEPENSJON -> {
+                    when (generellBrevData.forenkletVedtak?.type) {
+                        VedtakType.INNVILGELSE ->
+                            listOf(
+                                Pair(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                ),
+                            )
+
+                        VedtakType.OPPHOER ->
+                            if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                                listOf(
+                                    Pair(
+                                        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                                    ),
+                                )
+                            } else {
+                                emptyList()
+                            }
+
+                        VedtakType.ENDRING ->
+                            if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                                listOf(
+                                    Pair(
+                                        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                        BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                    ),
+                                    Pair(
+                                        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
                                     ),
                                 )
                             } else {
                                 listOf(
-                                    hentInnholdFraBrevbakeren(
-                                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                                        BrevVedleggKey.OMS_BEREGNING,
-                                        generellBrevData,
-                                        bruker,
+                                    Pair(
+                                        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                        BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                                     ),
                                 )
                             }
-                        }
-                    }
-                    else -> {
-                        if (brevtype == Brevtype.VARSEL) {
-                            listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-                                    BrevVedleggKey.OMS_BEREGNING,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                            )
-                        } else {
-                            emptyList()
-                        }
-                    }
-                }
-            }
 
-            SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE ->
-                        listOf(
-                            hentInnholdFraBrevbakeren(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                                generellBrevData,
-                                bruker,
-                            ),
-                        )
-                    VedtakType.OPPHOER ->
-                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-                            listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                                    BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                            )
-                        } else {
-                            emptyList()
-                        }
-                    VedtakType.ENDRING ->
-                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-                            listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                                    BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                            )
-                        } else {
-                            listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                            )
-                        }
-                    else -> {
-                        if (brevtype == Brevtype.VARSEL) {
-                            listOf(
-                                hentInnholdFraBrevbakeren(
-                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                                    generellBrevData,
-                                    bruker,
-                                ),
-                            )
-                        } else {
-                            emptyList()
+                        else -> {
+                            if (brevtype == Brevtype.VARSEL) {
+                                listOf(
+                                    Pair(
+                                        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                        BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                    ),
+                                )
+                            } else {
+                                emptyList()
+                            }
                         }
                     }
                 }
             }
-        }
+        return vedlegg
+            .map {
+                hentInnholdFraBrevbakeren(
+                    kode = it.first,
+                    key = it.second,
+                    generellBrevData = generellBrevData,
+                    bruker = bruker,
+                )
+            }.toList()
+    }
 
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,

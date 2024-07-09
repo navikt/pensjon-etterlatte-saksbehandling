@@ -115,7 +115,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService),
+            BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, beregningService, migreringBrevDataService),
             brevDataMapperFerdigstilling,
             behandlingService,
         )
@@ -308,7 +308,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
+            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
             coEvery { brevdataFacade.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             val brevutfallDto =

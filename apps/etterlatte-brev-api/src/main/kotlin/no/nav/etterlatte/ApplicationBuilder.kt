@@ -163,7 +163,7 @@ class ApplicationBuilder {
     private val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     private val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, beregningService, migreringBrevDataService)
 
     private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade)
 

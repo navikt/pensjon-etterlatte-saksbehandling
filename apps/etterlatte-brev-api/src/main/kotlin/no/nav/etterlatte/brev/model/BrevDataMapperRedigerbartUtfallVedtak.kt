@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,
+    private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
@@ -81,7 +83,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
                     bruker,
@@ -125,7 +127,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,
@@ -147,7 +149,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,

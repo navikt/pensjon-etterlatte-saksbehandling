@@ -19,7 +19,12 @@ fun Route.behandlingSakRoutes(
 ) {
     route("api/oms") {
         install(AuthorizationPlugin) {
-            roles = setOf(config.getString("roller.pensjon-saksbehandler"), config.getString("roller.gjenny-saksbehandler"))
+            roles =
+                setOf(
+                    "les-oms-sak-for-person",
+                    config.getString("roller.pensjon-saksbehandler"),
+                    config.getString("roller.gjenny-saksbehandler"),
+                )
             issuers = setOf("azure")
         }
         post("/person/sak") {

@@ -50,7 +50,7 @@ export const hentOverstyrBeregning = async (behandlingId: string): Promise<ApiRe
   return apiClient.get<OverstyrBeregning | null>(`/beregning/${behandlingId}/overstyrt`)
 }
 
-export const slettOverstyrtBeregning = async (behandlingId: string): Promise<ApiResponse<void>> => {
+export const deaktiverOverstyrtBeregning = async (behandlingId: string): Promise<ApiResponse<void>> => {
   return apiClient.delete<void>(`/beregning/${behandlingId}/overstyrt`)
 }
 

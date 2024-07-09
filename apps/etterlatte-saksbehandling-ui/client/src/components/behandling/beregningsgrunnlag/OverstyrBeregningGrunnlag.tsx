@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Alert, BodyLong, Box, Button, ErrorSummary, HStack, Modal, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, ErrorSummary, HStack, List, Modal, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -17,7 +17,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from './PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
@@ -31,7 +31,7 @@ import {
   hentOverstyrBeregningGrunnlag,
   lagreOverstyrBeregningGrunnlag,
   opprettEllerEndreBeregning,
-  slettOverstyrtBeregning,
+  deaktiverOverstyrtBeregning,
 } from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -46,6 +46,7 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -87,7 +88,7 @@ const OverstyrBeregningGrunnlag = (props: {
       overstyrBeregningForm: mapListeFraDto(perioder ?? []),
     },
   })
-  const [slettResultat, slettOverstyrtBereging] = useApiCall(slettOverstyrtBeregning)
+  const [deaktiverOverstyrtBeregningResultat, deaktiverOverstyrtBereging] = useApiCall(deaktiverOverstyrtBeregning)
 
   const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
@@ -197,7 +198,17 @@ const OverstyrBeregningGrunnlag = (props: {
     <>
       <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
         <VStack gap="5">
-          <Alert variant="warning">Dette beregningsgrunnlaget er manuelt overstyrt</Alert>
+          <Alert variant="warning">
+            <VStack gap="4">
+              Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
+              revurderes fra første virkningstidspunkt /konverteringstidspunkt.
+              <List as="ul" size="small" title="Saker som trenger overstyrt beregning er:">
+                {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+                  <List.Item key={key}>{value}</List.Item>
+                ))}
+              </List>
+            </VStack>
+          </Alert>
         </VStack>
       </Box>
 
@@ -259,27 +270,25 @@ const OverstyrBeregningGrunnlag = (props: {
                     Legg til beregningsperiode
                   </Button>
                   <HStack gap="4" align="center">
-                    <Button
-                      size="small"
-                      variant="tertiary"
-                      loading={isPending(slettResultat)}
-                      onClick={() => modalRef.current?.showModal()}
-                    >
+                    <Button size="small" variant="tertiary" onClick={() => modalRef.current?.showModal()}>
                       Skru av overstyrt beregning
                     </Button>
-                    <Modal ref={modalRef} header={{ heading: 'Ønsker du å skru av overstyrt beregning?' }}>
+                    <Modal
+                      ref={modalRef}
+                      header={{ heading: 'Er du sikker på at du vil skru av overstyrt beregning?' }}
+                    >
                       <Modal.Body>
                         <BodyLong>
-                          Beregningsperioder vil bli permanent slettet. Gjelder saken en revurdering MÅ
-                          virkningstidspunkt settes tilbake til sakens første virkningstidspunkt
+                          Beregningsperioder vil bli permanent slettet. Virkningstidspunkt for revurdering MÅ settes
+                          tilbake til sakens første virkningstidspunkt.
                         </BodyLong>
                       </Modal.Body>
                       <Modal.Footer>
                         <Button
                           type="button"
                           variant="danger"
-                          loading={isPending(slettResultat)}
-                          onClick={() => slettOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
+                          loading={isPending(deaktiverOverstyrtBeregningResultat)}
+                          onClick={() => deaktiverOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
                         >
                           Skru av overstyrt beregning
                         </Button>
@@ -307,7 +316,7 @@ const OverstyrBeregningGrunnlag = (props: {
 
             {isFailureHandler({
               errorMessage: 'En feil har oppstått',
-              apiResult: slettResultat,
+              apiResult: deaktiverOverstyrtBeregningResultat,
             })}
           </>
         )

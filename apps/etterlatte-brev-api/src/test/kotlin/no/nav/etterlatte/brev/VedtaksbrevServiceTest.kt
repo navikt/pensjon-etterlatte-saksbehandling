@@ -97,7 +97,7 @@ internal class VedtaksbrevServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade, adresseService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
     private val brevoppretter =
         Brevoppretter(
             adresseService,
@@ -239,11 +239,13 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { brevdataFacade.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns mockk()
-            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+            val brevutfallDto =
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
                     every { aldersgruppe } returns Aldersgruppe.UNDER_18
                 }
+            coEvery { behandlingService.hentBrevutfall(any(), any()) } returns brevutfallDto
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns brevutfallDto
             if (sakType == SakType.OMSTILLINGSSTOENAD) {
                 coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
                     Avkortingsinfo(LocalDate.now(), listOf())
@@ -309,11 +311,13 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
             coEvery { brevdataFacade.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
-            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+            val brevutfallDto =
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
                     every { aldersgruppe } returns Aldersgruppe.UNDER_18
                 }
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns brevutfallDto
+            coEvery { behandlingService.hentBrevutfall(any(), any()) } returns brevutfallDto
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -608,10 +612,12 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrev(any()) } returns brev
             every { db.hentBrevInnhold(any()) } returns BrevInnhold("Tittel", Spraak.NB, Slate(emptyList()))
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
-            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+            val brevutfallDto =
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
                 }
+            coEvery { behandlingService.hentBrevutfall(any(), any()) } returns brevutfallDto
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns brevutfallDto
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returnsMany
                 listOf(

@@ -173,7 +173,7 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade, adresseService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
 
     private val brevoppretter =
         Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)

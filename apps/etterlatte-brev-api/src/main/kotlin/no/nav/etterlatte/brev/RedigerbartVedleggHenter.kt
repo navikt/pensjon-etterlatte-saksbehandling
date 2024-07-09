@@ -43,7 +43,14 @@ class RedigerbartVedleggHenter(
                     }
                     else -> {
                         if (brevtype == Brevtype.VARSEL) {
-                            listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                    BrevVedleggKey.OMS_BEREGNING,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
                         } else {
                             emptyList()
                         }
@@ -77,7 +84,14 @@ class RedigerbartVedleggHenter(
     private suspend fun vedleggInnvilgelseOmstillingsstoenad(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
+    ) = listOf(
+        hentInnholdFraBrevbakeren(
+            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+            BrevVedleggKey.OMS_BEREGNING,
+            generellBrevData,
+            bruker,
+        ),
+    )
 
     private suspend fun vedleggOpphoerOmstillingsstoenad(
         bruker: BrukerTokenInfo,
@@ -100,7 +114,12 @@ class RedigerbartVedleggHenter(
         generellBrevData: GenerellBrevData,
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
         listOf(
-            hentInnholdBeregningVedleggOms(bruker, generellBrevData),
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                BrevVedleggKey.OMS_BEREGNING,
+                generellBrevData,
+                bruker,
+            ),
             hentInnholdFraBrevbakeren(
                 EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                 BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
@@ -109,7 +128,14 @@ class RedigerbartVedleggHenter(
             ),
         )
     } else {
-        listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
+        listOf(
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                BrevVedleggKey.OMS_BEREGNING,
+                generellBrevData,
+                bruker,
+            ),
+        )
     }
 
     private suspend fun vedleggInnvilgelseBarnepensjon(
@@ -168,16 +194,6 @@ class RedigerbartVedleggHenter(
     } else {
         emptyList()
     }
-
-    private suspend fun hentInnholdBeregningVedleggOms(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-        BrevVedleggKey.OMS_BEREGNING,
-        generellBrevData,
-        bruker,
-    )
 
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,

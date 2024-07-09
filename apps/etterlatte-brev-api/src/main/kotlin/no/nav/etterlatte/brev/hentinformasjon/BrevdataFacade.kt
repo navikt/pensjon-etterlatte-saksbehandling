@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -194,11 +193,6 @@ class BrevdataFacade(
                     )
             }
         }
-
-    suspend fun hentKlage(
-        klageId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Klage = behandlingService.hentKlage(klageId, brukerTokenInfo)
 
     suspend fun finnForrigeUtbetalingsinfo(
         sakId: Long,

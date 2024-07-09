@@ -65,7 +65,7 @@ class OversendelseBrevServiceImplTest(
 
     @BeforeEach
     fun setUp() {
-        coEvery { brevdataFacade.hentKlage(any(), any()) } returns klage()
+        coEvery { behandlingService.hentKlage(any(), any()) } returns klage()
         coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns brevData()
         coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns opprettMottaker()
         coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true

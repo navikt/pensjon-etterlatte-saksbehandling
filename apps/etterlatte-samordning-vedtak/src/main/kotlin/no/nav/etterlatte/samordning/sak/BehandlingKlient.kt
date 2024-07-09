@@ -27,7 +27,7 @@ class BehandlingKlient(
         logger.info("Henter saker for person: ${ident.foedselsnummer.maskerFnr()}")
         return try {
             httpClient
-                .post("$behandlingUrl/sak/personer/getsak/oms") {
+                .post("$behandlingUrl/personer/getsak/oms") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(ident.foedselsnummer))

@@ -83,7 +83,14 @@ class RedigerbartVedleggHenter(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData))
+        listOf(
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                generellBrevData,
+                bruker,
+            ),
+        )
     } else {
         emptyList()
     }
@@ -94,7 +101,12 @@ class RedigerbartVedleggHenter(
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
         listOf(
             hentInnholdBeregningVedleggOms(bruker, generellBrevData),
-            hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData),
+            hentInnholdFraBrevbakeren(
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                generellBrevData,
+                bruker,
+            ),
         )
     } else {
         listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
@@ -163,16 +175,6 @@ class RedigerbartVedleggHenter(
     ) = hentInnholdFraBrevbakeren(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
         BrevVedleggKey.OMS_BEREGNING,
-        generellBrevData,
-        bruker,
-    )
-
-    private suspend fun hentInnholdForhaandsvarselFeilutbetalingVedleggOms(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
         generellBrevData,
         bruker,
     )

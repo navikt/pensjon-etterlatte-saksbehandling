@@ -142,7 +142,6 @@ class ApplicationBuilder {
             grunnlagService,
             beregningService,
             behandlingService,
-            vilkaarsvurderingService,
         )
 
     private val db = BrevRepository(datasource)
@@ -165,7 +164,7 @@ class ApplicationBuilder {
         BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, behandlingService, beregningService, migreringBrevDataService)
 
     private val brevDataMapperFerdigstilling =
-        BrevDataMapperFerdigstillingVedtak(beregningService, trygdetidService, behandlingService, brevdataFacade)
+        BrevDataMapperFerdigstillingVedtak(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService, brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 

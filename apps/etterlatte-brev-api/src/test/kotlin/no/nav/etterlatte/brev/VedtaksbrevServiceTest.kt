@@ -34,6 +34,7 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
@@ -97,6 +98,7 @@ internal class VedtaksbrevServiceTest {
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
@@ -111,7 +113,15 @@ internal class VedtaksbrevServiceTest {
         )
 
     private val brevDataMapperFerdigstilling =
-        spyk(BrevDataMapperFerdigstillingVedtak(beregningService, trygdetidService, behandlingService, brevdataFacade))
+        spyk(
+            BrevDataMapperFerdigstillingVedtak(
+                beregningService,
+                trygdetidService,
+                behandlingService,
+                vilkaarsvurderingService,
+                brevdataFacade,
+            ),
+        )
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,

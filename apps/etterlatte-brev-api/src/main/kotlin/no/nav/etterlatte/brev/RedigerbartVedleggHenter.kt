@@ -32,7 +32,15 @@ class RedigerbartVedleggHenter(
         when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> vedleggInnvilgelseOmstillingsstoenad(bruker, generellBrevData)
+                    VedtakType.INNVILGELSE ->
+                        listOf(
+                            hentInnholdFraBrevbakeren(
+                                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                BrevVedleggKey.OMS_BEREGNING,
+                                generellBrevData,
+                                bruker,
+                            ),
+                        )
                     VedtakType.OPPHOER -> vedleggOpphoerOmstillingsstoenad(bruker, generellBrevData)
                     VedtakType.ENDRING -> {
                         if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
@@ -88,18 +96,6 @@ class RedigerbartVedleggHenter(
                 }
             }
         }
-
-    private suspend fun vedleggInnvilgelseOmstillingsstoenad(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = listOf(
-        hentInnholdFraBrevbakeren(
-            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-            BrevVedleggKey.OMS_BEREGNING,
-            generellBrevData,
-            bruker,
-        ),
-    )
 
     private suspend fun vedleggOpphoerOmstillingsstoenad(
         bruker: BrukerTokenInfo,

@@ -114,7 +114,32 @@ class RedigerbartVedleggHenter(
                             ),
                         )
                     VedtakType.OPPHOER -> vedleggOpphoerBarnepensjon(bruker, generellBrevData)
-                    VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
+                    VedtakType.ENDRING ->
+                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                    BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
+                        } else {
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                    BrevVedleggKey.BP_BEREGNING_TRYGDETID,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
+                        }
                     else -> {
                         if (brevtype == Brevtype.VARSEL) {
                             listOf(
@@ -132,35 +157,6 @@ class RedigerbartVedleggHenter(
                 }
             }
         }
-
-    private suspend fun vedleggEndringBarnepensjon(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                generellBrevData,
-                bruker,
-            ),
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    } else {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
-                BrevVedleggKey.BP_BEREGNING_TRYGDETID,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    }
 
     private suspend fun vedleggOpphoerBarnepensjon(
         bruker: BrukerTokenInfo,

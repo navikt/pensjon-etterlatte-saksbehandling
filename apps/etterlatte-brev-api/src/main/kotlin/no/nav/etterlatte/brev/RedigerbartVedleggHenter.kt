@@ -41,7 +41,19 @@ class RedigerbartVedleggHenter(
                                 bruker,
                             ),
                         )
-                    VedtakType.OPPHOER -> vedleggOpphoerOmstillingsstoenad(bruker, generellBrevData)
+                    VedtakType.OPPHOER ->
+                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                    BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
+                        } else {
+                            emptyList()
+                        }
                     VedtakType.ENDRING -> {
                         if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                             emptyList()
@@ -96,22 +108,6 @@ class RedigerbartVedleggHenter(
                 }
             }
         }
-
-    private suspend fun vedleggOpphoerOmstillingsstoenad(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    } else {
-        emptyList()
-    }
 
     private suspend fun vedleggEndringOmstillingsstoenad(
         bruker: BrukerTokenInfo,

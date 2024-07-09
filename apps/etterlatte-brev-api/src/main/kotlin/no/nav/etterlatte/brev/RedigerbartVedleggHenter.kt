@@ -113,7 +113,19 @@ class RedigerbartVedleggHenter(
                                 bruker,
                             ),
                         )
-                    VedtakType.OPPHOER -> vedleggOpphoerBarnepensjon(bruker, generellBrevData)
+                    VedtakType.OPPHOER ->
+                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                            listOf(
+                                hentInnholdFraBrevbakeren(
+                                    EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                    BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                                    generellBrevData,
+                                    bruker,
+                                ),
+                            )
+                        } else {
+                            emptyList()
+                        }
                     VedtakType.ENDRING ->
                         if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
                             listOf(
@@ -157,22 +169,6 @@ class RedigerbartVedleggHenter(
                 }
             }
         }
-
-    private suspend fun vedleggOpphoerBarnepensjon(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(
-            hentInnholdFraBrevbakeren(
-                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
-                BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                generellBrevData,
-                bruker,
-            ),
-        )
-    } else {
-        emptyList()
-    }
 
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,

@@ -55,7 +55,7 @@ class BehandlingManglendeTilgang(
 class BehandlingUgyldigForespoersel(
     detail: String,
 ) : IkkeFunnetException(
-        code = "030-BEHANDLING-FORESPOERSEL",
+        code = "031-BEHANDLING-FORESPOERSEL",
         detail = detail,
         meta = getMeta(),
     )

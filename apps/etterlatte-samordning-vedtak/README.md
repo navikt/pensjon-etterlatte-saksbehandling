@@ -62,22 +62,22 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 
 ## Feilkoder
 
-| Kode                    | HTTP-statuskode | Beskrivelse                                              |
-|-------------------------|-----------------|----------------------------------------------------------|
-| GE-MASKINPORTEN-SCOPE   | 401             | Manglende/feil scope                                     |
-| 001-TPNR-MANGLER        | 400             | Ikke angitt header med gjeldende ordningsnummer          |
-| 002-FNR-MANGLER         | 400             | Ikke angitt header med fødselsnummer det skal spørres på |
-| 003-FOMDATO-MANGLER     | 400             | Ikke angitt fomDato som query parameter                  |
-| 004-FEIL_SAKSTYPE       | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
-| 005-PAADATO-MANGLER     | 400             | Ikke angitt paaDato som query parameter                  |
-| 010-TP-TILGANG          | 403             | Ikke tilgang til TP/etterspurt data                      |
-| 011-TP-FORESPOERSEL     | 400             | Feil ved spørring mot TP                                 |
-| 012-TP-IKKE-FUNNET      | 404             | Kunne ikke finne TP-ressurs                              |
-| 020-VEDTAK-TILGANG      | 403             | Ikke tilgang til vedtak/etterspurt data                  |
-| 021-VEDTAK-FORESPOERSEL | 400             | Feil ved spørring mot vedtak                             |
-| 022-VEDTAK-IKKE-FUNNET  | 404             | Kunne ikke finne vedtaksressurs                          |
-| 030-BEHANDLING-TILGANG  | 404             | Ikke tilgang til sak                                     |
-| 030-BEHANDLING-FORESPOERSEL  | 404             | Feil ved spørring mot behandling                         |
+| Kode                        | HTTP-statuskode | Beskrivelse                                              |
+|-----------------------------|-----------------|----------------------------------------------------------|
+| GE-MASKINPORTEN-SCOPE       | 401             | Manglende/feil scope                                     |
+| 001-TPNR-MANGLER            | 400             | Ikke angitt header med gjeldende ordningsnummer          |
+| 002-FNR-MANGLER             | 400             | Ikke angitt header med fødselsnummer det skal spørres på |
+| 003-FOMDATO-MANGLER         | 400             | Ikke angitt fomDato som query parameter                  |
+| 004-FEIL_SAKSTYPE           | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
+| 005-PAADATO-MANGLER         | 400             | Ikke angitt paaDato som query parameter                  |
+| 010-TP-TILGANG              | 403             | Ikke tilgang til TP/etterspurt data                      |
+| 011-TP-FORESPOERSEL         | 400             | Feil ved spørring mot TP                                 |
+| 012-TP-IKKE-FUNNET          | 404             | Kunne ikke finne TP-ressurs                              |
+| 020-VEDTAK-TILGANG          | 403             | Ikke tilgang til vedtak/etterspurt data                  |
+| 021-VEDTAK-FORESPOERSEL     | 400             | Feil ved spørring mot vedtak                             |
+| 022-VEDTAK-IKKE-FUNNET      | 404             | Kunne ikke finne vedtaksressurs                          |
+| 030-BEHANDLING-TILGANG      | 404             | Ikke tilgang til sak                                     |
+| 031-BEHANDLING-FORESPOERSEL | 404             | Feil ved spørring mot behandling                         |
 
 ### Eksempel-payload ved feil
 

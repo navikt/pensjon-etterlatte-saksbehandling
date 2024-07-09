@@ -100,7 +100,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
-        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
@@ -145,7 +145,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
-        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
 
@@ -180,7 +180,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { brevdataFacade.finnTrygdetid(behandlingId, bruker) }
-        val grunnbeloep = async { brevdataFacade.hentGrunnbeloep(bruker) }
+        val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
 

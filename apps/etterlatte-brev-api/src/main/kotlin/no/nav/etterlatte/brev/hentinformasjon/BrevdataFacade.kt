@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -12,24 +11,20 @@ import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import java.time.YearMonth
 import java.util.UUID
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,
-    private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
 ) {
     suspend fun hentGenerellBrevData(
@@ -170,21 +165,4 @@ class BrevdataFacade(
                     )
             }
         }
-
-    suspend fun finnForrigeAvkortingsinfo(
-        sakId: Long,
-        sakType: SakType,
-        virkningstidspunkt: YearMonth,
-        vedtakType: VedtakType,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo? {
-        val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
-        return beregningService.finnAvkortingsinfoNullable(
-            forrigeIverksatteBehandlingId,
-            sakType,
-            virkningstidspunkt,
-            vedtakType,
-            brukerTokenInfo,
-        )
-    }
 }

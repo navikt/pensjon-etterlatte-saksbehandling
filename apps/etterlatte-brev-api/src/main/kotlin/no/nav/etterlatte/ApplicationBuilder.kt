@@ -169,11 +169,11 @@ class ApplicationBuilder {
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
+    private val brevbakerService = BrevbakerService(brevbaker)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade, adresseService)
 
     private val brevoppretter =
         Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)

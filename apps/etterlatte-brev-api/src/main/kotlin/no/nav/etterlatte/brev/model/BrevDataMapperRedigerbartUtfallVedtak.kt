@@ -3,8 +3,8 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall

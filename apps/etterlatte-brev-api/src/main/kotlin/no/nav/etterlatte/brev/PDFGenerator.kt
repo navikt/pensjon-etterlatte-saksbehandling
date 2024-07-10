@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -94,11 +95,26 @@ class PDFGenerator(
                 brevData =
                     brevData(
                         BrevDataFerdigstillingRequest(
-                            generellBrevData,
-                            bruker,
-                            InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                            brevkodePar,
-                            brev.tittel,
+                            loependeIPesys = generellBrevData.loependeIPesys(),
+                            behandlingId = generellBrevData.behandlingId,
+                            sakType = generellBrevData.sak.sakType,
+                            erForeldreloes = generellBrevData.erForeldreloes(),
+                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                            avdoede = generellBrevData.personerISak.avdoede,
+                            systemkilde = generellBrevData.systemkilde,
+                            soekerUnder18 = generellBrevData.personerISak.soeker.under18,
+                            soekerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
+                            sakId = generellBrevData.sak.id,
+                            virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                            vedtakType = generellBrevData.forenkletVedtak?.type,
+                            revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                            tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
+                            klage = generellBrevData.forenkletVedtak?.klage,
+                            harVerge = generellBrevData.personerISak.verge != null,
+                            bruker = bruker,
+                            innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                            kode = brevkodePar,
+                            tittel = brev.tittel,
                         ),
                     ),
                 avsender = avsender,

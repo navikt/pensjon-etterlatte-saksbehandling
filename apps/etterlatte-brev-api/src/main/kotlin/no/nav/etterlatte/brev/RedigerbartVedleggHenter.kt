@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest.Companion.finnVergesNavn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class RedigerbartVedleggHenter(
     private val brevbakerService: BrevbakerService,
-    private val brevdataFacade: BrevdataFacade,
     private val adresseService: AdresseService,
+    private val behandlingService: BehandlingService,
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
@@ -209,7 +209,7 @@ class RedigerbartVedleggHenter(
         generellBrevData: GenerellBrevData,
     ): Boolean =
         coroutineScope {
-            val brevutfall = async { generellBrevData.behandlingId?.let { brevdataFacade.hentBrevutfall(it, bruker) } }
+            val brevutfall = async { generellBrevData.behandlingId?.let { behandlingService.hentBrevutfall(it, bruker) } }
             val brevutfallHentet = requireNotNull(brevutfall.await())
             brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL
         }

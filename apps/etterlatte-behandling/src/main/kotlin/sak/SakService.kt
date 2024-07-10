@@ -16,6 +16,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -41,7 +42,7 @@ interface SakService {
         sakType: SakType? = null,
     ): List<Sak>
 
-    fun finnSaker(person: String): List<Sak>
+    fun finnSaker(ident: String): List<Sak>
 
     fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
@@ -55,7 +56,7 @@ interface SakService {
     ): String
 
     fun finnSak(
-        person: String,
+        ident: String,
         type: SakType,
     ): Sak?
 
@@ -87,6 +88,8 @@ interface SakService {
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 
     fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
+
+    fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long>
 }
 
 class ManglerTilgangTilEnhet(
@@ -149,9 +152,9 @@ class SakServiceImpl(
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
 
     private fun finnSakForPerson(
-        person: String,
+        ident: String,
         sakType: SakType,
-    ) = finnSakerForPerson(person, sakType).let {
+    ) = finnSakerForPerson(ident, sakType).let {
         if (it.isEmpty()) {
             null
         } else {
@@ -159,12 +162,22 @@ class SakServiceImpl(
         }
     }
 
-    private fun finnSakerForPerson(
-        person: String,
-        sakType: SakType? = null,
-    ) = dao.finnSaker(person, sakType)
+    override fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long> {
+        val saker = finnSakerForPerson(ident, SakType.OMSTILLINGSSTOENAD).filterForEnheter()
+        val sakerOgRollerForPerson = runBlocking { grunnlagService.hentAlleSakerForPerson(ident) }
+        val sakerOgRollerGruppert = sakerOgRollerForPerson.sakiderOgRoller.distinct()
+        val avdoedSak = sakerOgRollerGruppert.filter { it.rolle == Saksrolle.AVDOED }
+        val sakerForAvdoed = avdoedSak.map { it.sakId }
 
-    override fun finnSaker(person: String): List<Sak> = finnSakerForPerson(person).filterForEnheter()
+        return saker.map { it.id } + sakerForAvdoed
+    }
+
+    override fun finnSaker(ident: String): List<Sak> = finnSakerForPerson(ident).filterForEnheter()
+
+    private fun finnSakerForPerson(
+        ident: String,
+        sakType: SakType? = null,
+    ) = dao.finnSaker(ident, sakType)
 
     override fun markerSakerMedSkjerming(
         sakIder: List<Long>,
@@ -369,9 +382,9 @@ class SakServiceImpl(
     override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> = dao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
-        person: String,
+        ident: String,
         type: SakType,
-    ): Sak? = finnSakForPerson(person, type).sjekkEnhet()
+    ): Sak? = finnSakForPerson(ident, type).sjekkEnhet()
 
     override fun finnSak(id: Long): Sak? = dao.hentSak(id).sjekkEnhet()
 

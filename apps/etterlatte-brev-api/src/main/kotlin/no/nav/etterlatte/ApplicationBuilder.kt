@@ -140,10 +140,7 @@ class ApplicationBuilder {
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
-            beregningService,
             behandlingService,
-            trygdetidService,
-            vilkaarsvurderingService,
         )
 
     private val db = BrevRepository(datasource)
@@ -160,12 +157,18 @@ class ApplicationBuilder {
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     private val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade)
+    private val brevDataMapperFerdigstilling =
+        BrevDataMapperFerdigstillingVedtak(
+            beregningService,
+            trygdetidService,
+            behandlingService,
+            vilkaarsvurderingService,
+        )
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
@@ -173,10 +176,10 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade, adresseService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
 
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(adresseService, db, brevdataFacade, behandlingService, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
@@ -221,8 +224,8 @@ class ApplicationBuilder {
             brevRepository = db,
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
-            brevdataFacade = brevdataFacade,
             behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
         )
 
     private val notatRepository = NotatRepository(datasource)
@@ -268,7 +271,7 @@ class ApplicationBuilder {
                     )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
-                    brevdataFacade,
+                    grunnlagService,
                     brevoppretter,
                     ferdigstillJournalfoerOgDistribuerBrev,
                 )

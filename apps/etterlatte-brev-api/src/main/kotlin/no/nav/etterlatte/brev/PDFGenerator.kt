@@ -2,9 +2,10 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -16,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -30,10 +32,10 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
+        lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
         if (!brev.mottaker.erGyldig()) {
@@ -56,10 +58,10 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
+        lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
 
@@ -74,7 +76,7 @@ class PDFGenerator(
 
         val generellBrevData =
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, behandlingId, brev.spraak, bruker) }
-        val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
+        val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet))
 
         val brevkodePar =
             brevKode(
@@ -93,11 +95,26 @@ class PDFGenerator(
                 brevData =
                     brevData(
                         BrevDataFerdigstillingRequest(
-                            generellBrevData,
-                            bruker,
-                            InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                            brevkodePar,
-                            brev.tittel,
+                            loependeIPesys = generellBrevData.loependeIPesys(),
+                            behandlingId = generellBrevData.behandlingId,
+                            sakType = generellBrevData.sak.sakType,
+                            erForeldreloes = generellBrevData.erForeldreloes(),
+                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                            avdoede = generellBrevData.personerISak.avdoede,
+                            systemkilde = generellBrevData.systemkilde,
+                            soekerUnder18 = generellBrevData.personerISak.soeker.under18,
+                            soekerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
+                            sakId = generellBrevData.sak.id,
+                            virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                            vedtakType = generellBrevData.forenkletVedtak?.type,
+                            revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                            tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
+                            klage = generellBrevData.forenkletVedtak?.klage,
+                            harVerge = generellBrevData.personerISak.verge != null,
+                            bruker = bruker,
+                            innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                            kode = brevkodePar,
+                            tittel = brev.tittel,
                         ),
                     ),
                 avsender = avsender,
@@ -109,7 +126,14 @@ class PDFGenerator(
 
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
-            .also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
+            .also {
+                lagrePdfHvisVedtakFattet(
+                    generellBrevData.forenkletVedtak?.status,
+                    generellBrevData.forenkletVedtak?.saksbehandlerIdent,
+                    brev,
+                    it,
+                )
+            }
     }
 
     private fun hentLagretInnhold(brev: Brev) =

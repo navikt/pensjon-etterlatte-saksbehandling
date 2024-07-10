@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
@@ -77,9 +76,10 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
+            avdoede: List<Avdoed>,
+            systemkilde: Vedtaksloesning,
         ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
@@ -95,7 +95,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 avdoed =
-                    generellBrevData.personerISak.avdoede.minByOrNull { it.doedsdato }
+                    avdoede.minByOrNull { it.doedsdato }
                         ?: throw UgyldigForespoerselException(
                             code = "AVDOED_MED_DOEDSDATO_MANGLER",
                             detail = "Ingen avdød med dødsdato",
@@ -114,7 +114,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
                         ),
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
-                erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
+                erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
             )
         }

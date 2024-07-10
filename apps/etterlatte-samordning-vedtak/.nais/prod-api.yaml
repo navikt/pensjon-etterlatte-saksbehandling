@@ -101,15 +101,14 @@ spec:
       value: api://prod-fss.pensjonsamhandling.tp/.default
     - name: ROLLE_PENSJONSAKSBEHANDLER
       value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
+    - name: ROLLE_GJENNYSAKSBEHANDLER
+      value: e4eb614b-d37d-4721-ba1b-df8f0fd16f85
   accessPolicy:
     inbound:
       rules:
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss
-          permissions:
-            roles:
-              - les-bp-sak-for-person
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss

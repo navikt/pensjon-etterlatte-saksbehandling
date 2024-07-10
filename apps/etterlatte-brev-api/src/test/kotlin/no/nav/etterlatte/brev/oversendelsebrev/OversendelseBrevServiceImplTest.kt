@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
@@ -31,6 +32,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.BeforeEach
@@ -52,6 +55,7 @@ class OversendelseBrevServiceImplTest(
     private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
     private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val brevRepository = spyk(BrevRepository(dataSource))
     private val behandlingService = mockk<BehandlingService>()
     private val service =
@@ -59,13 +63,13 @@ class OversendelseBrevServiceImplTest(
             brevRepository,
             mockk(),
             adresseService,
-            brevdataFacade,
             behandlingService,
+            grunnlagService,
         )
 
     @BeforeEach
     fun setUp() {
-        coEvery { brevdataFacade.hentKlage(any(), any()) } returns klage()
+        coEvery { behandlingService.hentKlage(any(), any()) } returns klage()
         coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns brevData()
         coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns opprettMottaker()
         coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
@@ -73,10 +77,26 @@ class OversendelseBrevServiceImplTest(
 
     @Test
     fun `slett oversendelsesbrev`() {
-        runBlocking { service.opprettOversendelseBrev(behandlingId, saksbehandler) }
+        val serviceSpy =
+            spyk(service).also {
+                coEvery { it.hentSpraakOgPersonerISak(any(), any()) } returns
+                    Pair(
+                        Spraak.NN,
+                        PersonerISak(
+                            innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                            soeker = Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                            avdoede =
+                                listOf(
+                                    Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "DØD TESTPERSON", LocalDate.now().minusMonths(1)),
+                                ),
+                            verge = null,
+                        ),
+                    )
+            }
+        runBlocking { serviceSpy.opprettOversendelseBrev(behandlingId, saksbehandler) }
         val oversendelsesbrev = brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).single()
 
-        runBlocking { service.slettOversendelseBrev(behandlingId, saksbehandler) }
+        runBlocking { serviceSpy.slettOversendelseBrev(behandlingId, saksbehandler) }
 
         brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE) shouldBe emptyList()
         verify { brevRepository.settBrevSlettet(oversendelsesbrev.id, any()) }

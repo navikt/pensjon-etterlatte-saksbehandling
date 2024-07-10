@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,7 +27,14 @@ import java.util.UUID
 class TilbakekrevingInnholdDTOTest {
     @Test
     fun `skal inneholde saktype`() {
-        TilbakekrevingBrevDTO.fra(brevData(), emptyList()).sakType shouldBe SakType.OMSTILLINGSSTOENAD
+        TilbakekrevingBrevDTO
+            .fra(
+                emptyList(),
+                brevData().forenkletVedtak?.tilbakekreving,
+                brevData().sak.sakType,
+                brevData().utlandstilknytning?.type,
+                brevData().personerISak.soeker.formaterNavn(),
+            ).sakType shouldBe SakType.OMSTILLINGSSTOENAD
     }
 
     @Test
@@ -46,7 +54,14 @@ class TilbakekrevingInnholdDTOTest {
                     ),
             )
 
-        val data = TilbakekrevingBrevDTO.fra(brevData, emptyList())
+        val data =
+            TilbakekrevingBrevDTO.fra(
+                emptyList(),
+                brevData.forenkletVedtak?.tilbakekreving,
+                brevData.sak.sakType,
+                brevData.utlandstilknytning?.type,
+                brevData.personerISak.soeker.formaterNavn(),
+            )
 
         data.tilbakekreving.perioder.size shouldBe 1
         with(data.tilbakekreving.perioder[0]) {
@@ -86,7 +101,14 @@ class TilbakekrevingInnholdDTOTest {
                         ),
                     ),
             )
-        TilbakekrevingBrevDTO.fra(brevData, emptyList()).tilbakekreving.summer shouldBe
+        TilbakekrevingBrevDTO
+            .fra(
+                emptyList(),
+                brevData.forenkletVedtak?.tilbakekreving,
+                brevData.sak.sakType,
+                brevData.utlandstilknytning?.type,
+                brevData.personerISak.soeker.formaterNavn(),
+            ).tilbakekreving.summer shouldBe
             TilbakekrevingBeloeperData(
                 feilutbetaling = Kroner(200),
                 bruttoTilbakekreving = Kroner(400),

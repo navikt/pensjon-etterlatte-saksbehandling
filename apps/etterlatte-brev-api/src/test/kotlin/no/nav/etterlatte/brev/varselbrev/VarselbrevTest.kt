@@ -103,15 +103,16 @@ class VarselbrevTest(
                     )
                 } returns listOf()
             }
+        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val brevoppretter =
             Brevoppretter(
                 adresseService,
                 brevRepository,
                 brevdataFacade,
+                behandlingService,
                 brevbaker,
                 redigerbartVedleggHenter,
             )
-        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
         service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())
     }
@@ -132,6 +133,6 @@ class VarselbrevTest(
             }
 
         val henta = service.hentVarselbrev(behandling)
-        assertEquals(varselbrev.brev, henta.first())
+        assertEquals(varselbrev, henta.first())
     }
 }

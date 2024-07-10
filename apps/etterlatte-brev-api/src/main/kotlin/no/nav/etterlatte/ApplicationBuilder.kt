@@ -219,8 +219,8 @@ class ApplicationBuilder {
             brevRepository = db,
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
-            brevdataFacade = brevdataFacade,
             behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
         )
 
     private val notatRepository = NotatRepository(datasource)

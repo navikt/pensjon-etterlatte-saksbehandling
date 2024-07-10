@@ -70,7 +70,7 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                         is Systembruker -> bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name) ?: bruker.sub
                         is Saksbehandler ->
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
-                                ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha navident for å være saksbehandler")
+                                ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.NAVident.name} for å være saksbehandler")
                         else -> throw IllegalStateException("Feil brukertype, se brukertokeninfo.of(xyz).")
                     }
                 } else if (principal?.context?.issuers?.contains(Issuers.MASKINPORTEN.issuerName) == true) {

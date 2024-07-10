@@ -10,7 +10,7 @@ data class SaksbehandlerMedRoller(
     fun harRolle(rolle: AzureGroup): Boolean {
         val claims = saksbehandler.getClaims()
         return saksbehandlerGroupIdsByKey[rolle]
-            ?.let { return claims?.containsClaim(Claims.roles.name, it) ?: false }
+            ?.let { return claims?.containsClaim(Claims.groups.name, it) ?: false }
             ?: false
     }
 

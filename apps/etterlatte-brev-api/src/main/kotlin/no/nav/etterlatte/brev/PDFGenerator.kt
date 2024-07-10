@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.erForeldreloes
+import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.formaterNavn
@@ -81,8 +83,8 @@ class PDFGenerator(
         val brevkodePar =
             brevKodeMapping(
                 BrevkodeRequest(
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.erForeldreloes(),
+                    loependeIPesys(generellBrevData.systemkilde, generellBrevData.behandlingId, generellBrevData.revurderingsaarsak),
+                    erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
                 ),
@@ -95,10 +97,15 @@ class PDFGenerator(
                 brevData =
                     brevDataMapping(
                         BrevDataFerdigstillingRequest(
-                            loependeIPesys = generellBrevData.loependeIPesys(),
+                            loependeIPesys =
+                                loependeIPesys(
+                                    generellBrevData.systemkilde,
+                                    generellBrevData.behandlingId,
+                                    generellBrevData.revurderingsaarsak,
+                                ),
                             behandlingId = generellBrevData.behandlingId,
                             sakType = generellBrevData.sak.sakType,
-                            erForeldreloes = generellBrevData.erForeldreloes(),
+                            erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                             utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                             avdoede = generellBrevData.personerISak.avdoede,
                             systemkilde = generellBrevData.systemkilde,

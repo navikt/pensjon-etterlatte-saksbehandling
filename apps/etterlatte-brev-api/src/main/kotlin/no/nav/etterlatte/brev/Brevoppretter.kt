@@ -4,7 +4,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.erForeldreloes
+import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
+import no.nav.etterlatte.brev.behandling.somTittel
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -147,14 +150,24 @@ class Brevoppretter(
 
         val brevkodeRequest =
             BrevkodeRequest(
-                generellBrevData.loependeIPesys(),
-                generellBrevData.erForeldreloes(),
+                loependeIPesys(
+                    systemkilde = generellBrevData.systemkilde,
+                    behandlingId = generellBrevData.behandlingId,
+                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                ),
+                erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                 generellBrevData.sak.sakType,
                 generellBrevData.forenkletVedtak?.type,
             )
 
         val kode = brevKodeMapping(brevkodeRequest)
-        val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
+        val tittel =
+            kode.tittel ?: (
+                generellBrevData.forenkletVedtak
+                    ?.type
+                    ?.somTittel()
+                    ?.let { "Vedtak om $it" } ?: "Tittel mangler"
+            )
         return coroutineScope {
             val brevDataRedigerbarRequest =
                 BrevDataRedigerbarRequest(
@@ -165,8 +178,13 @@ class Brevoppretter(
                     utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                     revurderingsaarsak = generellBrevData.revurderingsaarsak,
                     behandlingId = behandlingId,
-                    erForeldreloes = generellBrevData.erForeldreloes(),
-                    loependeIPesys = generellBrevData.loependeIPesys(),
+                    erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
+                    loependeIPesys =
+                        loependeIPesys(
+                            generellBrevData.systemkilde,
+                            generellBrevData.behandlingId,
+                            generellBrevData.revurderingsaarsak,
+                        ),
                     systemkilde = generellBrevData.systemkilde,
                     avdoede = generellBrevData.personerISak.avdoede,
                 )

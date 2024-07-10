@@ -40,25 +40,23 @@ data class GenerellBrevData(
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
-) {
-    // TODO På tide å fjerne?
-    // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
-    fun loependeIPesys() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
+)
 
-    fun vedtakstype() =
-        forenkletVedtak
-            ?.type
-            ?.name
-            ?.lowercase()
-            ?.replace("_", " ")
+// TODO På tide å fjerne?
+// Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
+fun loependeIPesys(
+    systemkilde: Vedtaksloesning,
+    behandlingId: UUID?,
+    revurderingsaarsak: Revurderingaarsak?,
+) = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 
-    fun erForeldreloes() =
-        with(personerISak) {
-            // TODO soeker.foreldreloes benyttes nå kun hvis valgt ved manuell behandling. Må også brukes ved ukjent forelder etter søknad
-            soeker.foreldreloes ||
-                avdoede.size > 1
-        }
-}
+// TODO soeker.foreldreloes benyttes nå kun hvis valgt ved manuell behandling. Må også brukes ved ukjent forelder etter søknad
+fun erForeldreloes(
+    soeker: Soeker,
+    avdoede: List<Avdoed>,
+) = soeker.foreldreloes || avdoede.size > 1
+
+fun VedtakType?.somTittel() = this?.name?.lowercase()?.replace("_", " ")
 
 data class ForenkletVedtak(
     val id: Long,

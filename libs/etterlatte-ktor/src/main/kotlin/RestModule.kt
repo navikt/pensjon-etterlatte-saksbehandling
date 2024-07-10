@@ -78,8 +78,8 @@ fun Application.restModule(
             call.request.header("Authorization")?.let {
                 val token = JwtToken(it.substringAfterLast("Bearer "))
                 val jwtTokenClaims = token.jwtTokenClaims
-                jwtTokenClaims.get(Claims.NAVident.name) as? String // human
-                    ?: token.jwtTokenClaims.get(Claims.azp_name.name) as? String // system/app-user
+                jwtTokenClaims.getClaimAsString(Claims.NAVident) // human
+                    ?: token.jwtTokenClaims.getClaimAsString(Claims.azp_name) // system/app-user
             }
         }
     }

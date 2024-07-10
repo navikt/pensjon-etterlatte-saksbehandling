@@ -37,11 +37,11 @@ inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
         val oidSub =
             claims
                 ?.let {
-                    val oid = it.getClaim(Claims.oid)
-                    val sub = it.getClaim(Claims.sub)
+                    val oid = it.getClaimAsString(Claims.oid)
+                    val sub = it.getClaimAsString(Claims.sub)
                     Pair(oid, sub)
                 }
-        val saksbehandler = claims?.getClaim(Claims.NAVident)
+        val saksbehandler = claims?.getClaimAsString(Claims.NAVident)
 
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
@@ -52,4 +52,4 @@ inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
         )
     }
 
-fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)
+fun JwtTokenClaims.getClaimAsString(claim: Claims) = getStringClaim(claim.name)

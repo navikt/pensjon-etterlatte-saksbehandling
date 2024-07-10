@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.Issuers
+import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -62,7 +63,7 @@ class SaksbehandlerMedEnheterOgRoller(
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
 
-    override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)!!.getStringClaim(Claims.NAVident.name)
+    override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)!!.getClaimAsString(Claims.NAVident)
 
     private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 

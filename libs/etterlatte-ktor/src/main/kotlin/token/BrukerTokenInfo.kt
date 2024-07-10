@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
+import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class BrukerTokenInfo {
@@ -29,7 +30,7 @@ sealed class BrukerTokenInfo {
             claims: JwtTokenClaims?,
         ): BrukerTokenInfo =
             if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getStringClaim(Claims.azp_name.name) ?: sub, claims)
+                Systembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -55,7 +56,7 @@ data class Systembruker(
     override fun getClaims() = jwtTokenClaims
 
     override val roller: List<String>
-        get() = getClaims()?.getAsList("roles") ?: emptyList()
+        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
 
     override fun erSammePerson(ident: String?) = false
 
@@ -88,7 +89,7 @@ data class Saksbehandler(
     override fun getClaims() = jwtTokenClaims
 
     override val roller: List<String>
-        get() = getClaims()?.getAsList("groups") ?: emptyList()
+        get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 }
 
 enum class Claims {
@@ -97,6 +98,20 @@ enum class Claims {
    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
     */
     NAVident,
+
+    /*
+    JSON array of group identifiers that the user is a member of.
+    https://docs.nais.io/auth/entra-id/reference/?h=groups#claims
+     */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    groups,
+
+    /*
+    Roles will appear in the roles claim as an array of strings within the application's token.
+    https://docs.nais.io/auth/entra-id/reference/?h=groups#custom-roles
+     */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    roles,
 
     /*
     The value of this claim is the (human-readable) name of the consumer application that requested the token.

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
 import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -66,9 +67,9 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Selvbetjening" // Altså en borger/privatperson
                 } else if (principal?.context?.issuers?.contains(Issuers.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim(Claims.azp_name.name) ?: bruker.sub
+                        is Systembruker -> bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name) ?: bruker.sub
                         is Saksbehandler ->
-                            bruker.jwtTokenClaims?.getStringClaim(Claims.NAVident.name)
+                            bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha navident for å være saksbehandler")
                         else -> throw IllegalStateException("Feil brukertype, se brukertokeninfo.of(xyz).")
                     }

@@ -96,9 +96,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
         if (generellBrevData.erForeldreloes()) {
             BarnepensjonForeldreloesRedigerbar.fra(
-                generellBrevData,
                 etterbetaling.await(),
                 utbetalingsinfo = utbetalingsinfo.await(),
+                generellBrevData.systemkilde,
+                generellBrevData.loependeIPesys(),
             )
         } else {
             BarnepensjonInnvilgelseRedigerbartUtfall.fra(

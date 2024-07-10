@@ -19,8 +19,11 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfa
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.YearMonth
 import java.util.UUID
 
@@ -33,15 +36,25 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         with(redigerbarTekstRequest) {
             if (generellBrevData.loependeIPesys()) {
                 fraPesys(
-                    generellBrevData,
-                    brukerTokenInfo,
-                    generellBrevData.erForeldreloes(),
-                    generellBrevData.behandlingId!!,
-                    generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                    generellBrevData.sak.sakType,
-                    generellBrevData.systemkilde,
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.personerISak.avdoede,
+                    brukerTokenInfo = brukerTokenInfo,
+                    erForeldreloes = generellBrevData.erForeldreloes(),
+                    behandlingId = generellBrevData.behandlingId!!,
+                    virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                    sakType = generellBrevData.sak.sakType,
+                    systemkilde = generellBrevData.systemkilde,
+                    loependeIPesys = generellBrevData.loependeIPesys(),
+                    avdoede = generellBrevData.personerISak.avdoede,
+                    utlandstilknytningType = generellBrevData.utlandstilknytning!!.type,
+                    erForeldreloesUtenForeldreverge =
+                        generellBrevData.personerISak.soeker.foreldreloes ||
+                            (
+                                generellBrevData.personerISak.avdoede.size > 1 &&
+                                    generellBrevData.personerISak.verge !is ForelderVerge
+                            ),
+                    // Er litt usikker på hvorfor denne bruker en annen foreldreløs-sjekk enn resten av koden,
+                    // men frister lite å endre på det nå når migreringa/gjenopprettinga fra pesys
+                    // nærmer seg veldig ferdig
+                    erSystembruker = generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn,
                 )
             } else {
                 brevData(generellBrevData, brukerTokenInfo)
@@ -49,7 +62,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         }
 
     private suspend fun fraPesys(
-        generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
         erForeldreloes: Boolean,
         behandlingId: UUID,
@@ -58,6 +70,9 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         systemkilde: Vedtaksloesning,
         loependeIPesys: Boolean,
         avdoede: List<Avdoed>,
+        utlandstilknytningType: UtlandstilknytningType,
+        erForeldreloesUtenForeldreverge: Boolean,
+        erSystembruker: Boolean,
     ): BrevDataRedigerbar {
         if (erForeldreloes) {
             return barnepensjonInnvilgelse(
@@ -71,7 +86,17 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 avdoede,
             )
         }
-        return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, brukerTokenInfo)
+        return migreringBrevDataService.opprettMigreringBrevdata(
+            brukerTokenInfo = brukerTokenInfo,
+            systemkilde = systemkilde,
+            virkningstidspunkt = virkningstidspunkt!!,
+            behandlingId = behandlingId,
+            sakType = sakType,
+            loependeIPesys = loependeIPesys,
+            utlandstilknytningType = utlandstilknytningType,
+            erForeldreloes = erForeldreloesUtenForeldreverge,
+            erSystembruker = erSystembruker,
+        )
     }
 
     private suspend fun brevData(

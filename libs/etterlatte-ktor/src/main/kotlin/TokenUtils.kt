@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
-enum class Issuers(
+enum class Issuer(
     val issuerName: String,
 ) {
     AZURE("azure"),
@@ -33,7 +33,7 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
-        val claims = this.hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)
+        val claims = this.hentTokenClaimsForIssuerName(Issuer.AZURE)
         val oidSub =
             claims
                 ?.let {

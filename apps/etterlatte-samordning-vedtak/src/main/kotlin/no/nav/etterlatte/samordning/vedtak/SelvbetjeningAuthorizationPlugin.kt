@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.Issuers
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 /**
@@ -46,6 +46,6 @@ val SelvbetjeningAuthorizationPlugin =
     }
 
 class PluginConfiguration {
-    var issuer: String = Issuers.TOKENX.issuerName
+    var issuer: String = Issuer.TOKENX.issuerName
     var validator: (ApplicationCall, Folkeregisteridentifikator) -> Boolean = { _, _ -> false }
 }

@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.ktor.Issuers
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -47,7 +47,7 @@ class SystemUser(
 ) : ExternalUser(identifiedBy) {
     override fun name(): String =
         identifiedBy
-            .hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)
+            .hentTokenClaimsForIssuerName(Issuer.AZURE)
             ?.getStringClaim(Claims.azp_name.name) // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
 }
@@ -63,7 +63,7 @@ class SaksbehandlerMedEnheterOgRoller(
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
 
-    override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)!!.getClaimAsString(Claims.NAVident)
+    override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(Issuer.AZURE)!!.getClaimAsString(Claims.NAVident)
 
     private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
@@ -103,7 +103,7 @@ fun decideUser(
     saksbehandlerService: SaksbehandlerService,
     brukerTokenInfo: BrukerTokenInfo,
 ): ExternalUser =
-    if (principal.context.issuers.contains(Issuers.AZURE.issuerName)) {
+    if (principal.context.issuers.contains(Issuer.AZURE.issuerName)) {
         if (brukerTokenInfo is Systembruker) {
             SystemUser(principal.context, brukerTokenInfo)
         } else {

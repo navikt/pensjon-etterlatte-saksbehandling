@@ -16,7 +16,7 @@ import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.ktor.Issuers
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
 import no.nav.etterlatte.libs.ktor.STARTTIME
@@ -63,17 +63,16 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
             val principal = call.principal<TokenValidationContextPrincipal>()
 
             val user =
-                if (principal?.context?.issuers?.contains(Issuers.TOKENX.issuerName) == true) {
+                if (principal?.context?.issuers?.contains(Issuer.TOKENX.issuerName) == true) {
                     "Selvbetjening" // Altså en borger/privatperson
-                } else if (principal?.context?.issuers?.contains(Issuers.AZURE.issuerName) == true) {
+                } else if (principal?.context?.issuers?.contains(Issuer.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
                         is Systembruker -> bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name) ?: bruker.sub
                         is Saksbehandler ->
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.NAVident.name} for å være saksbehandler")
-                        else -> throw IllegalStateException("Feil brukertype, se brukertokeninfo.of(xyz).")
                     }
-                } else if (principal?.context?.issuers?.contains(Issuers.MASKINPORTEN.issuerName) == true) {
+                } else if (principal?.context?.issuers?.contains(Issuer.MASKINPORTEN.issuerName) == true) {
                     call.orgNummer
                 } else {
                     LOGGER.warn("Ukjent issuer ${principal?.context?.issuers}")

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.ktor
 
-import no.nav.etterlatte.libs.ktor.Issuers
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
@@ -14,7 +14,7 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
 ): String =
     this
         .issueToken(
-            issuerId = Issuers.AZURE.issuerName,
+            issuerId = Issuer.AZURE.issuerName,
             audience = CLIENT_ID,
             claims =
                 mapOf(
@@ -30,7 +30,7 @@ fun MockOAuth2Server.issueSystembrukerToken(
 ): String =
     this
         .issueToken(
-            issuerId = Issuers.AZURE.issuerName,
+            issuerId = Issuer.AZURE.issuerName,
             audience = CLIENT_ID,
             claims =
                 mapOf(

@@ -155,7 +155,11 @@ class BrevDataMapperFerdigstillingVedtak(
 
                 TILBAKEKREVING_FERDIG -> TilbakekrevingBrevDTO.fra(generellBrevData, innholdMedVedlegg.innhold())
 
-                AVVIST_KLAGE_FERDIG -> AvvistKlageFerdigData.fra(generellBrevData, innholdMedVedlegg)
+                AVVIST_KLAGE_FERDIG ->
+                    AvvistKlageFerdigData.fra(
+                        innholdMedVedlegg,
+                        generellBrevData.forenkletVedtak?.klage,
+                    )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
             }

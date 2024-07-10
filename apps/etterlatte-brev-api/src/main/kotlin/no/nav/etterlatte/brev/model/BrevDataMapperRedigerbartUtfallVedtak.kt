@@ -57,7 +57,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -70,7 +70,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(generellBrevData)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()

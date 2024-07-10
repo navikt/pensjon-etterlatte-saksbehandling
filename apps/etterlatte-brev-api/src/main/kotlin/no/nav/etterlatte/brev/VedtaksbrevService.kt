@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -68,12 +67,13 @@ class VedtaksbrevService(
             avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
             brevKode = { brevKodeMapperVedtak.brevKode(it) },
             brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
-        ) { generellBrevData, brev, pdf ->
+        ) { vedtakStatus, saksbehandler, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,
-                generellBrevData.forenkletVedtak!!,
                 pdf,
                 bruker,
+                vedtakStatus!!,
+                saksbehandler!!,
             )
         }
 
@@ -158,22 +158,23 @@ class VedtaksbrevService(
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,
-        vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
+        vedtakStatus: VedtakStatus,
+        saksbehandlerVedtak: String,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
-            logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
+            logger.info("Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }
 
-        if (!brukerTokenInfo.erSammePerson(vedtak.saksbehandlerIdent)) {
+        if (!brukerTokenInfo.erSammePerson(saksbehandlerVedtak)) {
             logger.info("Lagrer PDF for brev med id=$brevId")
 
             db.lagrePdf(brevId, pdf)
         } else {
             logger.warn(
-                "Kan ikke ferdigstille/låse brev når saksbehandler (${vedtak.saksbehandlerIdent})" +
+                "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerVedtak)" +
                     " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }

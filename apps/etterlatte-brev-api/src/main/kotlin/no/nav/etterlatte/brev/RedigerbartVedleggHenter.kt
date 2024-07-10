@@ -3,21 +3,24 @@ package no.nav.etterlatte.brev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest.Companion.finnVergesNavn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.util.UUID
 
 class RedigerbartVedleggHenter(
     private val brevbakerService: BrevbakerService,
@@ -26,28 +29,52 @@ class RedigerbartVedleggHenter(
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
         brevtype: Brevtype,
+        sakType: SakType,
+        vedtakType: VedtakType?,
+        behandlingId: UUID?,
+        revurderingaarsak: Revurderingaarsak?,
+        soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        sakId: Long,
+        forenkletVedtak: ForenkletVedtak?,
+        enhet: String,
+        spraak: Spraak,
     ): List<BrevInnholdVedlegg> {
-        val vedlegg = finnVedlegg(generellBrevData, bruker, brevtype)
+        val vedlegg =
+            finnVedlegg(
+                bruker,
+                brevtype,
+                sakType,
+                vedtakType,
+                behandlingId,
+                revurderingaarsak,
+            )
         return vedlegg
             .map {
                 hentInnholdFraBrevbakeren(
                     kode = it.first,
                     key = it.second,
-                    generellBrevData = generellBrevData,
                     bruker = bruker,
+                    soekerOgEventuellVerge = soekerOgEventuellVerge,
+                    sakId = sakId,
+                    forenkletVedtak = forenkletVedtak,
+                    enhet = enhet,
+                    sakType = sakType,
+                    spraak = spraak,
                 )
             }.toList()
     }
 
     private suspend fun RedigerbartVedleggHenter.finnVedlegg(
-        generellBrevData: GenerellBrevData,
         bruker: BrukerTokenInfo,
         brevtype: Brevtype,
-    ) = when (generellBrevData.sak.sakType) {
+        sakType: SakType,
+        vedtakType: VedtakType?,
+        behandlingId: UUID?,
+        revurderingaarsak: Revurderingaarsak?,
+    ) = when (sakType) {
         SakType.OMSTILLINGSSTOENAD -> {
-            when (generellBrevData.forenkletVedtak?.type) {
+            when (vedtakType) {
                 VedtakType.INNVILGELSE ->
                     listOf(
                         Pair(
@@ -57,7 +84,7 @@ class RedigerbartVedleggHenter(
                     )
 
                 VedtakType.OPPHOER ->
-                    if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                    if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
                                 EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
@@ -69,10 +96,10 @@ class RedigerbartVedleggHenter(
                     }
 
                 VedtakType.ENDRING -> {
-                    if (brevtype == Brevtype.VARSEL && generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+                    if (brevtype == Brevtype.VARSEL && revurderingaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                         emptyList()
                     } else {
-                        if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                        if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                             listOf(
                                 Pair(
                                     EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
@@ -110,7 +137,7 @@ class RedigerbartVedleggHenter(
         }
 
         SakType.BARNEPENSJON -> {
-            when (generellBrevData.forenkletVedtak?.type) {
+            when (vedtakType) {
                 VedtakType.INNVILGELSE ->
                     listOf(
                         Pair(
@@ -120,7 +147,7 @@ class RedigerbartVedleggHenter(
                     )
 
                 VedtakType.OPPHOER ->
-                    if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                    if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
                                 EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
@@ -132,7 +159,7 @@ class RedigerbartVedleggHenter(
                     }
 
                 VedtakType.ENDRING ->
-                    if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+                    if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
                                 EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
@@ -171,11 +198,15 @@ class RedigerbartVedleggHenter(
     private suspend fun hentInnholdFraBrevbakeren(
         kode: EtterlatteBrevKode,
         key: BrevVedleggKey,
-        generellBrevData: GenerellBrevData,
         bruker: BrukerTokenInfo,
-    ): BrevInnholdVedlegg {
-        val soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge()
-        return BrevInnholdVedlegg(
+        soekerOgEventuellVerge: SoekerOgEventuellVerge,
+        sakId: Long,
+        forenkletVedtak: ForenkletVedtak?,
+        enhet: String,
+        sakType: SakType,
+        spraak: Spraak,
+    ): BrevInnholdVedlegg =
+        BrevInnholdVedlegg(
             tittel = kode.tittel!!,
             key = key,
             payload =
@@ -185,31 +216,30 @@ class RedigerbartVedleggHenter(
                         letterData = ManueltBrevData(),
                         felles =
                             BrevbakerHelpers.mapFelles(
-                                sakId = generellBrevData.sak.id,
-                                soeker = generellBrevData.personerISak.soeker,
+                                sakId = sakId,
+                                soeker = soekerOgEventuellVerge.soeker,
                                 avsender =
                                     adresseService.hentAvsender(
-                                        opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                        opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
                                     ),
                                 vergeNavn =
                                     finnVergesNavn(
                                         kode,
                                         soekerOgEventuellVerge,
-                                        generellBrevData.sak.sakType,
+                                        sakType,
                                     ),
                             ),
-                        spraak = generellBrevData.spraak,
+                        spraak = spraak,
                     ),
                 ),
         )
-    }
 
     private suspend fun harFeilutbetalingMedVarsel(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID?,
     ): Boolean =
         coroutineScope {
-            val brevutfall = async { generellBrevData.behandlingId?.let { behandlingService.hentBrevutfall(it, bruker) } }
+            val brevutfall = async { behandlingId?.let { behandlingService.hentBrevutfall(it, bruker) } }
             val brevutfallHentet = requireNotNull(brevutfall.await())
             brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL
         }

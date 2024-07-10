@@ -191,7 +191,22 @@ class Brevoppretter(
                     )
                 }
 
-            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData, kode.brevtype) }
+            val innholdVedlegg =
+                async {
+                    redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
+                        bruker,
+                        kode.brevtype,
+                        generellBrevData.sak.sakType,
+                        generellBrevData.forenkletVedtak?.type,
+                        generellBrevData.behandlingId,
+                        generellBrevData.revurderingsaarsak,
+                        generellBrevData.personerISak.soekerOgEventuellVerge(),
+                        generellBrevData.sak.id,
+                        generellBrevData.forenkletVedtak,
+                        generellBrevData.sak.enhet,
+                        generellBrevData.spraak,
+                    )
+                }
 
             OpprettBrevRequest(
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,

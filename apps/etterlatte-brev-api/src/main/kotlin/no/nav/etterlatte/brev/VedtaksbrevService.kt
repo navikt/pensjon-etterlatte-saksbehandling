@@ -65,12 +65,7 @@ class VedtaksbrevService(
         pdfGenerator.genererPdf(
             id = id,
             bruker = bruker,
-            avsenderRequest = {
-                    brukerToken,
-                    generellBrevData,
-                ->
-                opprettAvsenderRequest(brukerToken, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet)
-            },
+            avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
             brevKode = { brevKodeMapperVedtak.brevKode(it) },
             brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { generellBrevData, brev, pdf ->

@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -73,13 +73,8 @@ internal class VarselbrevService(
     suspend fun ferdigstillOgGenererPDF(
         brevId: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            {
-                    brukerToken,
-                    generellBrevData,
-                ->
-                opprettAvsenderRequest(brukerToken, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet)
-            },
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+            { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
     ) = pdfGenerator.ferdigstillOgGenererPDF(
         id = brevId,
         bruker = bruker,
@@ -94,13 +89,8 @@ internal class VarselbrevService(
     suspend fun genererPdf(
         brevId: Long,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            {
-                    brukerToken,
-                    generellBrevData,
-                ->
-                opprettAvsenderRequest(brukerToken, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet)
-            },
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+            { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,
@@ -112,7 +102,3 @@ internal class VarselbrevService(
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }
-
-data class VarselbrevResponse(
-    val brev: Brev,
-)

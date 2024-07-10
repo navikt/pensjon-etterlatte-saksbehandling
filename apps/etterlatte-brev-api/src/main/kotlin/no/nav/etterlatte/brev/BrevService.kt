@@ -121,7 +121,7 @@ class BrevService(
         pdfGenerator.genererPdf(
             id,
             bruker,
-            avsenderRequest = { b, g -> opprettAvsenderRequest(b, g.forenkletVedtak, g.sak.enhet) },
+            avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
             brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )

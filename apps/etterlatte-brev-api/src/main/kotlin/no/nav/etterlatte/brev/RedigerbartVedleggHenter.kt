@@ -5,9 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest.Companion.finnVergesNavn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -212,24 +210,16 @@ class RedigerbartVedleggHenter(
             payload =
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(
                     BrevbakerRequest.fra(
-                        kode = kode,
-                        letterData = ManueltBrevData(),
-                        felles =
-                            BrevbakerHelpers.mapFelles(
-                                sakId = sakId,
-                                soeker = soekerOgEventuellVerge.soeker,
-                                avsender =
-                                    adresseService.hentAvsender(
-                                        opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
-                                    ),
-                                vergeNavn =
-                                    finnVergesNavn(
-                                        kode,
-                                        soekerOgEventuellVerge,
-                                        sakType,
-                                    ),
+                        brevKode = kode,
+                        brevData = ManueltBrevData(),
+                        avsender =
+                            adresseService.hentAvsender(
+                                opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
                             ),
+                        soekerOgEventuellVerge = soekerOgEventuellVerge,
+                        sakId = sakId,
                         spraak = spraak,
+                        sakType = sakType,
                     ),
                 ),
         )

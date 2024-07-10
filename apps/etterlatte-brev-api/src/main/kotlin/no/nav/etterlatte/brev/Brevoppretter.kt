@@ -67,7 +67,6 @@ class Brevoppretter(
         ).first
     }
 
-    // TODO: Trur denne heller enn EtterlatteBrevKode bør ta inn Brevkoder
     suspend fun opprettBrev(
         sakId: Long,
         behandlingId: UUID?,

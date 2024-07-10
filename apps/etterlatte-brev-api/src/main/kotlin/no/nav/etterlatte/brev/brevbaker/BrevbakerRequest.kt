@@ -19,6 +19,18 @@ data class BrevbakerRequest internal constructor(
 ) {
     companion object {
         fun fra(
+            kode: EtterlatteBrevKode,
+            letterData: BrevData,
+            felles: Felles,
+            spraak: Spraak,
+        ) = BrevbakerRequest(
+            kode = kode,
+            letterData = letterData,
+            felles = felles,
+            language = LanguageCode.spraakToLanguageCode(spraak),
+        )
+
+        fun fra(
             brevKode: EtterlatteBrevKode,
             brevData: BrevData,
             avsender: Avsender,
@@ -45,7 +57,7 @@ data class BrevbakerRequest internal constructor(
                 language = LanguageCode.spraakToLanguageCode(spraak),
             )
 
-        private fun finnVergesNavn(
+        fun finnVergesNavn(
             brevKode: EtterlatteBrevKode,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,

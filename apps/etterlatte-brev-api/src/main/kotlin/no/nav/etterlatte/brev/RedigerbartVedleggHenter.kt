@@ -2,9 +2,13 @@ package no.nav.etterlatte.brev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
+import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest.Companion.finnVergesNavn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -18,6 +22,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 class RedigerbartVedleggHenter(
     private val brevbakerService: BrevbakerService,
     private val brevdataFacade: BrevdataFacade,
+    private val adresseService: AdresseService,
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
@@ -161,20 +166,36 @@ class RedigerbartVedleggHenter(
         key: BrevVedleggKey,
         generellBrevData: GenerellBrevData,
         bruker: BrukerTokenInfo,
-    ): BrevInnholdVedlegg =
-        BrevInnholdVedlegg(
+    ): BrevInnholdVedlegg {
+        val soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge()
+        return BrevInnholdVedlegg(
             tittel = kode.tittel!!,
             key = key,
             payload =
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(
-                    RedigerbarTekstRequest(
-                        generellBrevData = generellBrevData,
-                        brukerTokenInfo = bruker,
-                        brevkode = kode,
-                        brevdata = { ManueltBrevData() },
+                    BrevbakerRequest.fra(
+                        kode = kode,
+                        letterData = ManueltBrevData(),
+                        felles =
+                            BrevbakerHelpers.mapFelles(
+                                sakId = generellBrevData.sak.id,
+                                soeker = generellBrevData.personerISak.soeker,
+                                avsender =
+                                    adresseService.hentAvsender(
+                                        opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                    ),
+                                vergeNavn =
+                                    finnVergesNavn(
+                                        kode,
+                                        soekerOgEventuellVerge,
+                                        generellBrevData.sak.sakType,
+                                    ),
+                            ),
+                        spraak = generellBrevData.spraak,
                     ),
                 ),
         )
+    }
 
     private suspend fun harFeilutbetalingMedVarsel(
         bruker: BrukerTokenInfo,

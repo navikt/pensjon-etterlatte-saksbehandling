@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -91,9 +90,10 @@ data class BarnepensjonForeldreloesRedigerbar(
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             etterbetaling: EtterbetalingDTO?,
             utbetalingsinfo: Utbetalingsinfo,
+            vedtaksloesning: Vedtaksloesning,
+            loependeIPesys: Boolean,
         ): BarnepensjonForeldreloesRedigerbar {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
 
@@ -114,8 +114,8 @@ data class BarnepensjonForeldreloesRedigerbar(
                 erEtterbetaling = etterbetaling != null,
                 flerePerioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
-                vedtattIPesys = generellBrevData.loependeIPesys(),
+                erGjenoppretting = vedtaksloesning == Vedtaksloesning.GJENOPPRETTA,
+                vedtattIPesys = loependeIPesys,
             )
         }
     }

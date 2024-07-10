@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevdataMedInnhold
 import no.nav.etterlatte.brev.model.Slate
@@ -13,15 +13,12 @@ class OmstillingsstoenadInformasjonDoedsfall(
     BrevdataMedInnhold {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             borIutland: Boolean,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInformasjonDoedsfall =
             OmstillingsstoenadInformasjonDoedsfall(
                 innhold = emptyList(),
-                avdoedNavn =
-                    generellBrevData.personerISak.avdoede
-                        .first()
-                        .navn,
+                avdoedNavn = avdoede.first().navn,
                 borIutland = borIutland,
             )
     }

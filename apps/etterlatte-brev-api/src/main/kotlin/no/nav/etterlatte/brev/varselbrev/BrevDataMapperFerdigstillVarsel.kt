@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import java.time.YearMonth
 
 class BrevDataMapperFerdigstillVarsel(
@@ -21,7 +22,7 @@ class BrevDataMapperFerdigstillVarsel(
 ) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            when (request.generellBrevData.sak.sakType) {
+            when (request.sakType) {
                 SakType.BARNEPENSJON -> hentBrevDataFerdigstillingBarnepensjon(request)
                 SakType.OMSTILLINGSSTOENAD -> hentBrevdataFerdigstillingOmstillingsstoenad(request)
             }
@@ -29,7 +30,7 @@ class BrevDataMapperFerdigstillVarsel(
 
     private suspend fun hentBrevdataFerdigstillingOmstillingsstoenad(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            if (request.generellBrevData.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
+            if (request.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                 OmstillingsstoenadAktivitetspliktVarsel(
                     request.innholdMedVedlegg.innhold(),
                 )
@@ -43,7 +44,7 @@ class BrevDataMapperFerdigstillVarsel(
 
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val behandlingId = requireNotNull(request.generellBrevData.behandlingId)
+            val behandlingId = requireNotNull(request.behandlingId)
             val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
             val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, request.bruker) }
             val utbetalingsinfo =
@@ -54,7 +55,7 @@ class BrevDataMapperFerdigstillVarsel(
                         // Virkningstidspunkt-feltet blir per no ikkje brukt i dette brevet.
                         // Pga gjenbruk av objekt etc er det ikkje trivielt å skrive oss bort frå det heller
                         request.bruker,
-                        request.generellBrevData.sak.sakType,
+                        request.sakType,
                     )
                 }
             BarnepensjonVarsel(
@@ -62,15 +63,15 @@ class BrevDataMapperFerdigstillVarsel(
                 beregning =
                     barnepensjonBeregning(
                         innhold = request.innholdMedVedlegg,
-                        avdoede = request.generellBrevData.personerISak.avdoede,
+                        avdoede = request.avdoede,
                         utbetalingsinfo = utbetalingsinfo.await(),
                         grunnbeloep = grunnbeloep.await(),
                         beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
                         trygdetid = requireNotNull(trygdetid.await()),
-                        erForeldreloes = request.generellBrevData.erForeldreloes(),
+                        erForeldreloes = request.erForeldreloes,
                     ),
-                erUnder18Aar = request.generellBrevData.personerISak.soeker.under18 ?: true,
-                erBosattUtlandet = request.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,
+                erUnder18Aar = request.soekerUnder18 ?: true,
+                erBosattUtlandet = request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }
 }

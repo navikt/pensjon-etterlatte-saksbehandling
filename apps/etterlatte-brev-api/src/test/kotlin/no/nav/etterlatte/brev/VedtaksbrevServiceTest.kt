@@ -119,7 +119,6 @@ internal class VedtaksbrevServiceTest {
                 trygdetidService,
                 behandlingService,
                 vilkaarsvurderingService,
-                brevdataFacade,
             ),
         )
     private val vedtaksbrevService =
@@ -129,7 +128,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, behandlingService, beregningService, migreringBrevDataService),
+            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService),
             brevDataMapperFerdigstilling,
             behandlingService,
         )

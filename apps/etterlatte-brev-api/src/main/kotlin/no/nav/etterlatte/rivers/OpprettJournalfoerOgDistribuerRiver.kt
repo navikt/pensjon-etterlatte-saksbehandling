@@ -7,7 +7,8 @@ import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.EtterlatteBrevKode
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
@@ -36,7 +37,7 @@ class OpprettJournalfoerOgDistribuerRiverException(
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val rapidsConnection: RapidsConnection,
-    private val brevdataFacade: BrevdataFacade,
+    private val grunnlagService: GrunnlagService,
     private val brevoppretter: Brevoppretter,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLoggingOgFeilhaandtering() {
@@ -112,8 +113,9 @@ class OpprettJournalfoerOgDistribuerRiver(
             ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
                 brevKode,
                 sakId,
-                brevOgData,
                 brukerTokenInfo,
+                brevOgData.second,
+                brevOgData.first.id,
             )
         ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
             brevKode,
@@ -150,28 +152,21 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland: Boolean,
         erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
-        generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
-                sakId = sakId,
-                behandlingId = null,
-                brukerTokenInfo = Systembruker.brev,
-            ),
         borIutland,
         erOver18aar,
+        hentAvdoede(sakId),
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
         sakId: Long,
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
-        generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
-                sakId = sakId,
-                behandlingId = null,
-                brukerTokenInfo = Systembruker.brev,
-            ),
         borIutland,
+        hentAvdoede(sakId),
     )
+
+    private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
+        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, Systembruker.brev), null, null).avdoede
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

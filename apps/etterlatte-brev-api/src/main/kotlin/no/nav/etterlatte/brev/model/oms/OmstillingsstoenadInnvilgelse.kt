@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
@@ -34,11 +33,11 @@ data class OmstillingsstoenadInnvilgelse(
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
-            generellBrevData: GenerellBrevData,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -59,7 +58,7 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val avdoed = generellBrevData.personerISak.avdoede.single()
+            val avdoed = avdoede.single()
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
@@ -72,7 +71,7 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                avdoed = avdoede.minBy { it.doedsdato },
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
@@ -108,14 +107,14 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                avdoed = avdoede.minBy { it.doedsdato },
                 utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
                 etterbetaling = etterbetaling != null,
             )

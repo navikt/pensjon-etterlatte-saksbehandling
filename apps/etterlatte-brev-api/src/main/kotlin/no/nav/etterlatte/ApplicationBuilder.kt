@@ -160,10 +160,15 @@ class ApplicationBuilder {
     private val migreringBrevDataService = MigreringBrevDataService(beregningService)
 
     private val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, behandlingService, beregningService, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService)
 
     private val brevDataMapperFerdigstilling =
-        BrevDataMapperFerdigstillingVedtak(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService, brevdataFacade)
+        BrevDataMapperFerdigstillingVedtak(
+            beregningService,
+            trygdetidService,
+            behandlingService,
+            vilkaarsvurderingService,
+        )
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
@@ -219,8 +224,8 @@ class ApplicationBuilder {
             brevRepository = db,
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
-            brevdataFacade = brevdataFacade,
             behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
         )
 
     private val notatRepository = NotatRepository(datasource)
@@ -266,7 +271,7 @@ class ApplicationBuilder {
                     )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
-                    brevdataFacade,
+                    grunnlagService,
                     brevoppretter,
                     ferdigstillJournalfoerOgDistribuerBrev,
                 )

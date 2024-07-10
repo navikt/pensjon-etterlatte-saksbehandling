@@ -7,10 +7,10 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.samordning.ApplicationContext
 import no.nav.etterlatte.samordning.sak.behandlingSakRoutes
+import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
+import no.nav.etterlatte.samordning.userIdMdcPlugin
 import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
-import no.nav.etterlatte.samordning.vedtak.serverRequestLoggerPlugin
-import no.nav.etterlatte.samordning.vedtak.userIdMdcPlugin
 
 fun main() {
     Server(ApplicationContext(Miljoevariabler(System.getenv()))).run()

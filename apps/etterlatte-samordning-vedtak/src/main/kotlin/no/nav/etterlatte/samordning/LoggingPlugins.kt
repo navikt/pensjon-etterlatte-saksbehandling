@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning.vedtak
+package no.nav.etterlatte.samordning
 
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
@@ -15,6 +15,7 @@ import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
 import no.nav.etterlatte.libs.ktor.STARTTIME
@@ -23,8 +24,11 @@ import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
 import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.getClaim
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.samordning.vedtak.orgNummer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import org.slf4j.MDC
 
@@ -55,21 +59,21 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
         createConfiguration = ::PluginConfiguration,
     ) {
         on(UserIdMdcHook) { call ->
-            // TODO: rydd opp senere..
+            val principal = call.principal<TokenValidationContextPrincipal>()
+
             val user =
-                if (call.request.uri.contains("pensjon") || call.request.uri.contains("oms")) {
-                    val principal = call.principal<TokenValidationContextPrincipal>()
-                    if (principal?.context?.issuers?.contains("tokenx") == true) {
-                        "Selvbetjening"
-                    } else {
-                        when (val bruker = call.brukerTokenInfo) {
-                            is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
-                            is Saksbehandler -> "Saksbehandler"
-                            else -> "Ukjent"
-                        }
+                if (principal?.context?.issuers?.contains("tokenx") == true) {
+                    "Selvbetjening" // Altså en borger/privatperson
+                } else if (principal?.context?.issuers?.contains(AZURE_ISSUER) == true) {
+                    when (val bruker = call.brukerTokenInfo) {
+                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
+                        is Saksbehandler -> bruker.jwtTokenClaims?.getClaim(Claims.NAVident) ?: ""
+                        else -> "Ukjent"
                     }
-                } else {
+                } else if (principal?.context?.issuers?.contains("maskinporten") == true) {
                     call.orgNummer
+                } else {
+                    "Ukjent"
                 }
 
             MDC.put(X_USER, user)

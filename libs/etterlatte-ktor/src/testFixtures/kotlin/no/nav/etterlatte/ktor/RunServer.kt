@@ -11,7 +11,7 @@ import io.ktor.server.application.log
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.Issuers
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
@@ -20,7 +20,7 @@ fun ApplicationTestBuilder.runServerWithModule(
     function: Application.() -> Unit,
 ): HttpClient {
     environment {
-        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
+        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuers.AZURE.issuerName, CLIENT_ID)
     }
     application {
         function()
@@ -39,7 +39,7 @@ fun ApplicationTestBuilder.runServer(
     routes: Route.() -> Unit,
 ): HttpClient {
     environment {
-        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
+        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuers.AZURE.issuerName, CLIENT_ID)
     }
     application {
         restModule(this.log, routePrefix = routePrefix, withMetrics = withMetrics) {

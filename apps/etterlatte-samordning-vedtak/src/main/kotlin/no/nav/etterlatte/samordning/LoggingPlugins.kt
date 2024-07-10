@@ -15,8 +15,8 @@ import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.MASKINPORTEN
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.ktor.Issuers
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
 import no.nav.etterlatte.libs.ktor.STARTTIME
@@ -62,17 +62,20 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
             val principal = call.principal<TokenValidationContextPrincipal>()
 
             val user =
-                if (principal?.context?.issuers?.contains("tokenx") == true) {
+                if (principal?.context?.issuers?.contains(Issuers.TOKENX.issuerName) == true) {
                     "Selvbetjening" // Altså en borger/privatperson
-                } else if (principal?.context?.issuers?.contains(AZURE_ISSUER) == true) {
+                } else if (principal?.context?.issuers?.contains(Issuers.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
                         is Systembruker -> bruker.jwtTokenClaims?.getStringClaim(Claims.azp_name.name) ?: bruker.sub
-                        is Saksbehandler -> bruker.jwtTokenClaims?.getStringClaim(Claims.NAVident.name) ?: ""
-                        else -> "Ukjent"
+                        is Saksbehandler ->
+                            bruker.jwtTokenClaims?.getStringClaim(Claims.NAVident.name)
+                                ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha navident for å være saksbehandler")
+                        else -> throw IllegalStateException("Feil brukertype, se brukertokeninfo.of(xyz).")
                     }
-                } else if (principal?.context?.issuers?.contains(MASKINPORTEN) == true) {
+                } else if (principal?.context?.issuers?.contains(Issuers.MASKINPORTEN.issuerName) == true) {
                     call.orgNummer
                 } else {
+                    LOGGER.warn("Ukjent issuer ${principal?.context?.issuers}")
                     "Ukjent"
                 }
 

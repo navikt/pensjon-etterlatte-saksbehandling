@@ -188,7 +188,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     oppgaveRoutes(applicationContext.oppgaveService)
     grunnlagsendringshendelseRoute(
         grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
-        omregningService = applicationContext.omregningService,
     )
     doedshendelseRoute(doedshendelseService = applicationContext.doedshendelseService)
     egenAnsattRoute(

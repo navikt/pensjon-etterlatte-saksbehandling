@@ -9,8 +9,13 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
-const val AZURE_ISSUER = "azure"
-const val MASKINPORTEN = "maskinporten"
+enum class Issuers(
+    val issuerName: String,
+) {
+    AZURE("azure"),
+    MASKINPORTEN("maskinporten"),
+    TOKENX("tokenx"),
+}
 
 fun hentAccessToken(call: ApplicationCall) =
     call.request.parseAuthorizationHeader().let {
@@ -28,7 +33,7 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
-        val claims = this.hentTokenClaimsForIssuerName(AZURE_ISSUER)
+        val claims = this.hentTokenClaimsForIssuerName(Issuers.AZURE.issuerName)
         val oidSub =
             claims
                 ?.let {

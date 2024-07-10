@@ -27,4 +27,5 @@ enum class NotatMal(
 ) {
     TOM_MAL("tom_mal"),
     NORDISK_VEDLEGG("nordisk_vedlegg"),
+    MANUELL_SAMORDNING("manuell_samordning"),
 }

@@ -24,11 +24,7 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.jackson)
 
-    implementation(libs.mq.jakarta.client) {
-        exclude("org.bouncycastle:bcutil-jdk18on")
-        exclude("org.bouncycastle:bcpkix-jdk18on")
-        exclude("org.bouncycastle:bcprov-jdk18on")
-    }
+    implementation(libs.mq.jakarta.client)
     implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsimulering)
@@ -48,10 +44,4 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
-
-    // Avhengigheter fra patching av sårbarheter i IBM MQ.
-    // Vi bør kunne ta bort alle disse og exclude-lista for neste IBM MQ-versjon
-    implementation(libs.bcpkix)
-    implementation(libs.bcprov)
-    implementation(libs.bcutil)
 }

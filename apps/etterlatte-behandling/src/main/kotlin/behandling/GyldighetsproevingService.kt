@@ -82,7 +82,8 @@ class GyldighetsproevingServiceImpl(
         this
             .oppdaterGyldighetsproeving(gyldighetsproeving)
             .also {
-                behandlingDao.lagreGyldighetsproving(it)
+                behandlingDao.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
+                behandlingDao.lagreStatus(it)
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
     }

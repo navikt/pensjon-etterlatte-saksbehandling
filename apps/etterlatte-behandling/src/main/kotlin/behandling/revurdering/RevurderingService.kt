@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -66,10 +65,6 @@ class RevurderingManglerIverksattBehandling(
         code = "REVURDERING_MANGLER_IVERKSATT_BEHANDLING",
         detail = "Sak $sakId kan ikke revurderes uten en iverksatt behandling",
     )
-
-class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(
-    message: String,
-) : Exception(message)
 
 class UgyldigBehandlingTypeForRevurdering :
     IkkeTillattException(
@@ -175,7 +170,7 @@ class RevurderingService(
         if (!aarsak.gyldigForSakType(sakType)) {
             throw BadRequestException("$aarsak er ikke støttet for $sakType")
         }
-        kanOppretteRevurderingForAarsak(sakId, aarsak)
+        kanOppretteRevurderingForAarsak(aarsak)
         return opprettManuellRevurdering(
             sakId = forrigeIverksatteBehandling.sak.id,
             forrigeBehandling = forrigeIverksatteBehandling,
@@ -189,20 +184,8 @@ class RevurderingService(
         )
     }
 
-    private fun kanOppretteRevurderingForAarsak(
-        sakId: Long,
-        aarsak: Revurderingaarsak,
-    ) {
-        if (aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
-            val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
-            behandlingerForSak.find { behandling ->
-                (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
-            }
-                ?: throw RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(
-                    "Sak " +
-                        "$sakId må ha en førstegangsbehandling som har huket av for skalSendeKravpakke for å kunne opprette ${aarsak.name}",
-                )
-        } else if (aarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+    private fun kanOppretteRevurderingForAarsak(aarsak: Revurderingaarsak) {
+        if (aarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
             throw UgyldigForespoerselException(
                 code = "OMGJOERING_KLAGE_MAA_OPPRETTES_FRA_OPPGAVE",
                 detail = "Omgjøring etter klage må opprettes fra en omgjøringsoppgave for å koble omgjøringen til klagen riktig.",
@@ -350,14 +333,16 @@ class RevurderingService(
                 leggInnGrunnlag = {
                     when (revurderingAarsak) {
                         Revurderingaarsak.REGULERING ->
-                            grunnlagService.laasTilGrunnlagIBehandling(
-                                it,
-                                checkNotNull(forrigeBehandling) {
-                                    "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
-                                        "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
-                                },
-                            )
-                        else -> grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                            runBlocking {
+                                grunnlagService.laasTilGrunnlagIBehandling(
+                                    it,
+                                    checkNotNull(forrigeBehandling) {
+                                        "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
+                                            "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
+                                    },
+                                )
+                            }
+                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) }
                     }
                 },
                 sendMeldingForHendelse = {

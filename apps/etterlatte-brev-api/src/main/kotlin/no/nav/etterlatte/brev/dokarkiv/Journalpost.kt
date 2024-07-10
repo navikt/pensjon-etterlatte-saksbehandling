@@ -152,13 +152,6 @@ sealed class DokumentVariant {
         override val filtype: String = "PDFA"
         override val variantformat: String = "ARKIV"
     }
-
-    data class OriginalJson(
-        override val fysiskDokument: String,
-    ) : DokumentVariant() {
-        override val filtype: String = "JSON"
-        override val variantformat: String = "ORIGINAL"
-    }
 }
 
 enum class JournalPostType(

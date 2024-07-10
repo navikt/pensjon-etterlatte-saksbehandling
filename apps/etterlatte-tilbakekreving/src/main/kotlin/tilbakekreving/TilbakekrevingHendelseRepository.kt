@@ -4,10 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
-import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.tidspunktOrNull
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -78,61 +77,62 @@ class TilbakekrevingHendelseRepository(
             }
         }
 
-    fun hentSisteTilbakekrevingHendelse(
-        sakId: Long,
-        type: TilbakekrevingHendelseType,
-    ): TilbakekrevingHendelse? {
-        dataSource.connection.use {
-            val stmt =
-                it
-                    .prepareStatement(
-                        """
-                        SELECT id, opprettet, sak_id, payload, status, type, jms_timestamp 
+    fun hentSisteTilbakekrevingHendelse(sakId: Long): TilbakekrevingHendelse? =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement =
+                    """
+                    SELECT id, opprettet, sak_id, payload, status, type, jms_timestamp 
                         FROM tilbakekreving_hendelse 
-                        WHERE sak_id = ? AND type = ?
+                        WHERE sak_id = :sakId
                         ORDER BY jms_timestamp DESC
-                        """.trimIndent(),
-                    ).apply {
-                        setLong(1, sakId)
-                        setString(2, type.name)
-                    }
-
-            return stmt.executeQuery().singleOrNull {
-                TilbakekrevingHendelse(
-                    id = UUID.fromString(getString("id")),
-                    opprettet = getTidspunkt("opprettet"),
-                    sakId = getLong("sak_id"),
-                    payload = getString("payload"),
-                    status = TilbakekrevingHendelseStatus.valueOf(getString("status")),
-                    type = TilbakekrevingHendelseType.valueOf(getString("type")),
-                    jmsTimestamp = getTidspunktOrNull("jms_timestamp"),
+                        LIMIT 1
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "sakId" to sakId,
+                    ),
+            ).let {
+                session.run(
+                    it
+                        .map { row ->
+                            TilbakekrevingHendelse(
+                                id = UUID.fromString(row.string("id")),
+                                opprettet = row.tidspunkt("opprettet"),
+                                sakId = row.long("sak_id"),
+                                payload = row.string("payload"),
+                                status = TilbakekrevingHendelseStatus.valueOf(row.string("status")),
+                                type = TilbakekrevingHendelseType.valueOf(row.string("type")),
+                                jmsTimestamp = row.tidspunktOrNull("jms_timestamp"),
+                            )
+                        }.asSingle,
                 )
             }
         }
-    }
 
     fun ferdigstillTilbakekrevingHendelse(
         sakId: Long,
         id: UUID,
-    ) = using(sessionOf(dataSource)) { session ->
-        queryOf(
-            statement =
-                """
-                UPDATE tilbakekreving_hendelse 
-                SET status = '${TilbakekrevingHendelseStatus.FERDIGSTILT.name}' 
-                WHERE id = ?
-                """.trimIndent(),
-            paramMap =
-                mapOf(
-                    "id" to id,
-                ),
-        ).let { query ->
-            session.update(query).also {
-                require(it == 1) {
-                    "Feil under oppdatering av hendelse for sak $sakId"
+    ): UUID =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement =
+                    """
+                    UPDATE tilbakekreving_hendelse 
+                    SET status = '${TilbakekrevingHendelseStatus.FERDIGSTILT.name}' 
+                    WHERE id = :id
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "id" to id,
+                    ),
+            ).let { query ->
+                session.update(query).also {
+                    require(it == 1) {
+                        "Feil under oppdatering av hendelse for sak $sakId"
+                    }
                 }
+                id
             }
-            id
         }
-    }
 }

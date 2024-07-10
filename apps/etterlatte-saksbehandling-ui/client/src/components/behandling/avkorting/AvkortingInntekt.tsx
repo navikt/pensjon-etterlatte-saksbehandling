@@ -65,7 +65,7 @@ export const AvkortingInntekt = ({
 
   const fulltAar = () => {
     if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 1
+      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 0
       return innvilgelseFraJanuar
     } else {
       const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12
@@ -115,7 +115,11 @@ export const AvkortingInntekt = ({
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
-        avkortingGrunnlag: data,
+        avkortingGrunnlag: {
+          ...data,
+          fratrekkInnAar: data.fratrekkInnAar ?? 0,
+          fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
+        },
       },
       (respons) => {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
@@ -243,7 +247,7 @@ export const AvkortingInntekt = ({
                     />
                     <TekstFelt
                       {...register('fratrekkInnAar', {
-                        required: { value: true, message: 'Må fylles ut' },
+                        required: { value: !fulltAar(), message: 'Må fylles ut' },
                         max: { value: watch('aarsinntekt') || 0, message: 'Kan ikke være høyere enn årsinntekt' },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
@@ -267,7 +271,7 @@ export const AvkortingInntekt = ({
                     />
                     <TekstFelt
                       {...register('fratrekkInnAarUtland', {
-                        required: { value: true, message: 'Må fylles ut' },
+                        required: { value: !fulltAar(), message: 'Må fylles ut' },
                         max: {
                           value: watch('inntektUtland') || 0,
                           message: 'Kan ikke være høyere enn årsinntekt utland',

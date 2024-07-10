@@ -6,10 +6,9 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.8' }
 
 [versions]
 jackson-version = "2.17.1"
-jupiter-version = "5.10.2"
+jupiter-version = "5.10.3"
 kotlinx-version = "1.8.1"
 ktor2-version = "2.3.12"
-bcpkix-version = "1.78.1"
 navfelles-token-version = "5.0.1"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.8"
@@ -19,8 +18,8 @@ tjenestespesifikasjoner-version = "1.9c76d3b"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.15.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.15.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.15.2" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.15.2" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -31,12 +30,11 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-version" }
 jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
 
-kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.0" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.5" }
-el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
-el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
+el-api = { module = "jakarta.el:jakarta.el-api", version = "5.0.0"}
+el-impl = { module = "org.glassfish.expressly:expressly", version = "5.0.0" }
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }
 
@@ -82,7 +80,7 @@ metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_
 
 messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.6" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.5.1" }
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.0" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024061408021718344972.64ebbdb34321" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
@@ -91,7 +89,7 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module ="com.github.navi
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.7" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.8" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
@@ -101,15 +99,11 @@ test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", vers
 test-mockk = { module = "io.mockk:mockk", version = "1.13.11" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
+test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.2" }
-openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.0.0" }
-
-#Workarounds
-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-version"}
-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcpkix-version"}
-bcutil = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bcpkix-version"}
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.1.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

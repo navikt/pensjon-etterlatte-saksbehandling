@@ -65,7 +65,9 @@ spec:
       cpu: 50m
       memory: 448Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 2
     min: 2
   env:
@@ -81,10 +83,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
-    - name: PERSONDATA_URL
-      value: https://pensjon-persondata-q2.dev-fss-pub.nais.io
-    - name: PERSONDATA_OUTBOUND_SCOPE
-      value: api://dev-fss.pensjon-person.pensjon-persondata-q2/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -111,5 +109,4 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-persondata-q2.dev-fss-pub.nais.io
 

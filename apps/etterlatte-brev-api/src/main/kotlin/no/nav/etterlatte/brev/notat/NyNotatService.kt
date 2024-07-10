@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatID
@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
 import no.nav.etterlatte.brev.notat.PdfGenRequest
 import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
+import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -30,7 +31,7 @@ class NyNotatService(
     private val notatRepository: NotatRepository,
     private val pdfGeneratorKlient: PdfGeneratorKlient,
     private val dokarkivService: DokarkivService,
-    private val sakService: SakService,
+    private val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -72,15 +73,17 @@ class NyNotatService(
     suspend fun opprett(
         sakId: Long,
         mal: NotatMal,
+        tittel: String = "Mangler tittel",
+        params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
-        val sak = sakService.hentSak(sakId, bruker)
+        val sak = behandlingService.hentSak(sakId, bruker)
 
         val id =
             notatRepository.opprett(
                 NyttNotat(
                     sak.id,
-                    "Mangler tittel",
+                    tittel,
                     payload =
                         when (mal) {
                             NotatMal.TOM_MAL ->
@@ -97,6 +100,10 @@ class NyNotatService(
                                 deserialize(
                                     javaClass.getResource("/notat/nordisk_vedlegg.json")!!.readText(),
                                 )
+
+                            NotatMal.MANUELL_SAMORDNING -> {
+                                opprettSamordningsnotatPayload(params)
+                            }
                         },
                     mal = mal,
                 ),
@@ -146,7 +153,7 @@ class NyNotatService(
 
         notatRepository.lagreInnhold(id, pdf)
 
-        val sak = sakService.hentSak(notat.sakId, bruker)
+        val sak = behandlingService.hentSak(notat.sakId, bruker)
 
         return dokarkivService
             .journalfoer(mapTilJournalpostRequest(sak, notat, pdf))
@@ -202,3 +209,5 @@ class NotatAlleredeJournalfoert :
         code = "NOTAT_ALLEREDE_JOURNALFOERT",
         detail = "Notatet er allerede journalført!",
     )
+
+interface NotatParametre

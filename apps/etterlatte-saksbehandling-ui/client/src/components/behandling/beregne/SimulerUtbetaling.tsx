@@ -1,23 +1,27 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSimulertUtbetaling, simulerUtbetaling } from '~shared/api/utbetaling'
-import { isInitial, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Button, Heading, Table, Box, Label } from '@navikt/ds-react'
+import { BodyShort, Heading, Table, Box, Label, ErrorMessage } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { useAppSelector } from '~store/Store'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const [simuleringStatus, simulerUtbetalingRequest] = useApiCall(simulerUtbetaling)
   const [lagretSimuleringStatus, hentLagretSimulerUtbetaling] = useApiCall(hentSimulertUtbetaling)
   const [, setLagretSimulerUtbetaling] = useState<SimulertBeregning | null>()
+
+  // For OMS, lytte etter oppdatert beregning/avkorting
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
 
   function behandlingStatusFerdigEllerVedtakFattet() {
     return erFerdigBehandlet(behandling.status) || behandling.status === IBehandlingStatus.FATTET_VEDTAK
@@ -30,14 +34,14 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
           setLagretSimulerUtbetaling(result)
         }
       })
+    } else {
+      simuler()
     }
-  }, [behandling.status])
+  }, [behandling.status, avkorting])
 
   const simuler = () => {
-    if (isInitial(simuleringStatus)) {
-      if (behandling.status === IBehandlingStatus.BEREGNET || behandling.status === IBehandlingStatus.AVKORTET) {
-        simulerUtbetalingRequest(behandling.id)
-      }
+    if (behandling.status === IBehandlingStatus.BEREGNET || behandling.status === IBehandlingStatus.AVKORTET) {
+      simulerUtbetalingRequest(behandling.id)
     }
   }
 
@@ -60,14 +64,14 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
             error: () => <ApiErrorAlert>Feil ved henting av lagret simulering</ApiErrorAlert>,
           })}
 
-        {!behandlingStatusFerdigEllerVedtakFattet() && (
-          <Button variant="secondary" size="small" onClick={simuler}>
-            Simuler
-          </Button>
-        )}
         {mapResult(simuleringStatus, {
           pending: <Spinner visible={true} label="Simulerer..." />,
-          success: (simuleringrespons) => <SimuleringBeregning data={simuleringrespons} />,
+          success: (simuleringrespons) =>
+            simuleringrespons ? (
+              <SimuleringBeregning data={simuleringrespons} />
+            ) : (
+              <ErrorMessage size="small">Simuleringstjenesten ga ikke svar.</ErrorMessage>
+            ),
           error: () => <ApiErrorAlert>Feil ved simulering</ApiErrorAlert>,
         })}
       </Box>

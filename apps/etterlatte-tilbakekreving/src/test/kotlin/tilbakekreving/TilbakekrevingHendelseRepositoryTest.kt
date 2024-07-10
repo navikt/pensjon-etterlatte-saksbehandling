@@ -27,7 +27,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
     }
 
     @Test
-    fun `skal lagre hendelse for mottatt kravgrunnlag`() {
+    fun `skal lagre og ferdigstille hendelse for mottatt kravgrunnlag`() {
         val sakId = 1L
         val kravgrunnlag = "<kravgrunnlag>payload</kravgrunnlag>"
         val jmsTimestamp = Tidspunkt.now()
@@ -40,7 +40,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         )
 
         val tilbakekrevingHendelse =
-            repository.hentSisteTilbakekrevingHendelse(sakId, TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT)
+            repository.hentSisteTilbakekrevingHendelse(sakId)
 
         tilbakekrevingHendelse?.id shouldNotBe null
         tilbakekrevingHendelse?.opprettet shouldNotBe null
@@ -49,10 +49,16 @@ internal class TilbakekrevingHendelseRepositoryTest(
         tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
         tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.NY
         tilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestamp
+
+        repository.ferdigstillTilbakekrevingHendelse(sakId, tilbakekrevingHendelse!!.id)
+        val ferdigstiltTilbakekrevingHendelse =
+            repository.hentSisteTilbakekrevingHendelse(sakId)
+
+        ferdigstiltTilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.FERDIGSTILT
     }
 
     @Test
-    fun `skal lagre hendelse for mottatt kravOgVedtakStatus`() {
+    fun `skal lagre og ferdigstille hendelse for mottatt kravOgVedtakStatus`() {
         val sakId = 1L
         val melding = "payload"
         val jmsTimestamp = Tidspunkt.now()
@@ -65,7 +71,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         )
 
         val tilbakekrevingHendelse =
-            repository.hentSisteTilbakekrevingHendelse(sakId, TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT)
+            repository.hentSisteTilbakekrevingHendelse(sakId)
 
         tilbakekrevingHendelse?.id shouldNotBe null
         tilbakekrevingHendelse?.opprettet shouldNotBe null
@@ -74,6 +80,12 @@ internal class TilbakekrevingHendelseRepositoryTest(
         tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT
         tilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.NY
         tilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestamp
+
+        repository.ferdigstillTilbakekrevingHendelse(sakId, tilbakekrevingHendelse!!.id)
+        val ferdigstiltTilbakekrevingHendelse =
+            repository.hentSisteTilbakekrevingHendelse(sakId)
+
+        ferdigstiltTilbakekrevingHendelse?.status shouldBe TilbakekrevingHendelseStatus.FERDIGSTILT
     }
 
     @Test
@@ -84,7 +96,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         repository.lagreTilbakekrevingHendelse(sakId, vedtakRequest, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
 
         val tilbakekrevingHendelse =
-            repository.hentSisteTilbakekrevingHendelse(sakId, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
+            repository.hentSisteTilbakekrevingHendelse(sakId)
 
         tilbakekrevingHendelse?.id shouldNotBe null
         tilbakekrevingHendelse?.opprettet shouldNotBe null
@@ -102,7 +114,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
         repository.lagreTilbakekrevingHendelse(sakId, vedtakResponse, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING)
 
         val tilbakekrevingHendelse =
-            repository.hentSisteTilbakekrevingHendelse(sakId, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING)
+            repository.hentSisteTilbakekrevingHendelse(sakId)
 
         tilbakekrevingHendelse?.id shouldNotBe null
         tilbakekrevingHendelse?.opprettet shouldNotBe null
@@ -116,29 +128,43 @@ internal class TilbakekrevingHendelseRepositoryTest(
     fun `skal hente siste hendelse for sak basert paa jms timestamp`() {
         val sakId = 1L
         val kravgrunnlag = "<kravgrunnlag>payload</kravgrunnlag>"
-        val jmsTimestampKravgrunnlag = Tidspunkt.now().plus(1, ChronoUnit.MINUTES)
+        val jmsTimestampKravgrunnlag = Tidspunkt.now()
+
+        val hendelseIdKravgrunnlag =
+            repository.lagreTilbakekrevingHendelse(
+                sakId,
+                kravgrunnlag,
+                TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
+                jmsTimestampKravgrunnlag,
+            )
+
+        repository.ferdigstillTilbakekrevingHendelse(sakId, hendelseIdKravgrunnlag)
+
+        val jmsTimestampStatus1 = Tidspunkt.now().plus(1, ChronoUnit.MINUTES)
+
+        val hendelseIdStatus1 =
+            repository.lagreTilbakekrevingHendelse(
+                sakId,
+                kravgrunnlag,
+                TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
+                jmsTimestampStatus1,
+            )
+
+        repository.ferdigstillTilbakekrevingHendelse(sakId, hendelseIdStatus1)
+
+        val jmsTimestampStatus2 = Tidspunkt.now().plus(2, ChronoUnit.MINUTES)
 
         repository.lagreTilbakekrevingHendelse(
             sakId,
             kravgrunnlag,
-            TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
-            jmsTimestampKravgrunnlag,
-        )
-
-        val status = "payload"
-        val jmsTimestampStatus = Tidspunkt.now()
-
-        repository.lagreTilbakekrevingHendelse(
-            sakId,
-            status,
             TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
-            jmsTimestampStatus,
+            jmsTimestampStatus2,
         )
 
         val sisteTilbakekrevingHendelse =
-            repository.hentSisteTilbakekrevingHendelse(sakId, TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT)
+            repository.hentSisteTilbakekrevingHendelse(sakId)
 
-        sisteTilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
-        sisteTilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestampKravgrunnlag
+        sisteTilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT
+        sisteTilbakekrevingHendelse?.jmsTimestamp shouldBe jmsTimestampStatus2
     }
 }

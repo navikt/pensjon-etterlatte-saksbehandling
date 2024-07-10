@@ -164,7 +164,7 @@ internal class BehandlingDaoTest(
         val lagretPersongalleriBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        val gyldighetsproevingBehanding =
+        val gyldighetsproevingBehandling =
             lagretPersongalleriBehandling.copy(
                 gyldighetsproeving =
                     GyldighetsResultat(
@@ -182,12 +182,12 @@ internal class BehandlingDaoTest(
                 status = BehandlingStatus.OPPRETTET,
             )
 
-        behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
+        behandlingRepo.lagreGyldighetsproeving(gyldighetsproevingBehandling.id, gyldighetsproevingBehandling.gyldighetsproeving())
         val lagretGyldighetsproving =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
         assertEquals(
-            gyldighetsproevingBehanding.gyldighetsproeving,
+            gyldighetsproevingBehandling.gyldighetsproeving,
             lagretGyldighetsproving.gyldighetsproeving,
         )
     }
@@ -238,13 +238,13 @@ internal class BehandlingDaoTest(
             behandlingRepo.opprettBehandling(b)
         }
 
-        var behandling = behandlingRepo.alleBehandlingerISak(sak1)
+        var behandling = behandlingRepo.hentBehandlingerForSak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
         behandlingRepo.lagreStatus(avbruttbehandling)
-        behandling = behandlingRepo.alleBehandlingerISak(sak1)
+        behandling = behandlingRepo.hentBehandlingerForSak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
     }
@@ -303,7 +303,7 @@ internal class BehandlingDaoTest(
             )
         }
 
-        val behandlinger = behandlingRepo.alleBehandlingerISak(sak1)
+        val behandlinger = behandlingRepo.hentBehandlingerForSak(sak1)
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(4, behandlinger.size) },
@@ -336,10 +336,10 @@ internal class BehandlingDaoTest(
         }
 
         val foerstegangsbehandlinger =
-            behandlingRepo.alleBehandlingerISak(sak1).filter {
+            behandlingRepo.hentBehandlingerForSak(sak1).filter {
                 it.type == BehandlingType.FØRSTEGANGSBEHANDLING
             }
-        val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
+        val revurderinger = behandlingRepo.hentBehandlingerForSak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },
@@ -394,9 +394,9 @@ internal class BehandlingDaoTest(
             )
         }
 
-        val lagredeBehandlinger = behandlingRepo.alleBehandlingerISak(sak1)
+        val lagredeBehandlinger = behandlingRepo.hentBehandlingerForSak(sak1)
         val alleLoependeBehandlinger =
-            behandlingRepo.alleBehandlingerISak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
+            behandlingRepo.hentBehandlingerForSak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)
     }
@@ -519,7 +519,7 @@ internal class BehandlingDaoTest(
             .tilVilkaarsvurdert()
             .let {
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
-                behandlingRepo.lagreGyldighetsproving(it)
+                behandlingRepo.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
                 kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
                 behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
             }

@@ -15,7 +15,6 @@ import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
@@ -28,7 +27,6 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -59,24 +57,12 @@ class ApplicationBuilder {
         )
     }
 
-    val persondataKlient =
-        PersondataKlient(
-            httpClient =
-                httpClientClientCredentials(
-                    azureAppClientId = config.getString("azure.app.client.id"),
-                    azureAppJwk = config.getString("azure.app.jwk"),
-                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                    azureAppScope = config.getString("persondata.outbound.scope"),
-                ),
-            apiUrl = config.getString("persondata.resource.url"),
-        )
-
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
     private val grunnlagService =
-        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter)
+        RealGrunnlagService(pdltjenesterKlient, opplysningDao, grunnlagHenter)
 
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)

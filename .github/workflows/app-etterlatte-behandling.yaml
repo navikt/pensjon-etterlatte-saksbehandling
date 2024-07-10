@@ -27,6 +27,7 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

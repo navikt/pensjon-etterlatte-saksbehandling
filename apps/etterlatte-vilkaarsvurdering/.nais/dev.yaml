@@ -65,7 +65,9 @@ spec:
     limits:
       memory: 640Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 4
     min: 2
   env:
@@ -85,6 +87,7 @@ spec:
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
+        - application: etterlatte-behandling
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-vilkaarsvurdering-kafka

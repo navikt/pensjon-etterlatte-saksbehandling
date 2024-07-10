@@ -30,7 +30,7 @@ class BeregningRepository(
         dataSource.transaction { tx ->
             val beregningsperioder =
                 queryOf(
-                    statement = Queries.hentBeregning,
+                    statement = Queries.hentBeregningsperioder,
                     paramMap = mapOf("behandlingId" to behandlingId),
                 ).let { query ->
                     tx.run(query.map { toBeregningsperiode(it) }.asList).ifEmpty {
@@ -43,7 +43,7 @@ class BeregningRepository(
     fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
         dataSource.transaction { tx ->
             queryOf(
-                statement = Queries.slettBeregning,
+                statement = Queries.slettBeregningperioder,
                 paramMap = mapOf("behandlingId" to beregning.behandlingId),
             ).let { query ->
                 tx.run(query.asUpdate)
@@ -55,6 +55,17 @@ class BeregningRepository(
             tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
         }
         return hent(beregning.behandlingId)!!
+    }
+
+    fun slettOverstyrtBeregningsgrunnlag(behandlingId: UUID) {
+        dataSource.transaction { tx ->
+            queryOf(
+                statement = Queries.slettOverstyrBeregningsgrunnlag,
+                paramMap = mapOf("behandlings_id" to behandlingId),
+            ).let { query ->
+                tx.run(query.asUpdate)
+            }
+        }
     }
 
     fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? =
@@ -283,7 +294,7 @@ private enum class BeregningsperiodeDatabaseColumns(
 }
 
 private object Queries {
-    val hentBeregning = """
+    val hentBeregningsperioder = """
         SELECT * 
         FROM beregningsperiode 
         WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
@@ -324,9 +335,14 @@ private object Queries {
              :regelVersjon::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB) 
     """
 
-    val slettBeregning = """
+    val slettBeregningperioder = """
         DELETE FROM beregningsperiode 
         WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
+    """
+
+    val slettOverstyrBeregningsgrunnlag = """
+        DELETE FROM overstyr_beregningsgrunnlag 
+        WHERE behandlings_id = :behandlings_id::UUID
     """
 
     val hentOverstyrBeregning =

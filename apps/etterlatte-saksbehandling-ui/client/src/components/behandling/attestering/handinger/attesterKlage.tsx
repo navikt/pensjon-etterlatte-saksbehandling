@@ -1,6 +1,5 @@
-import { Alert, Button, HStack } from '@navikt/ds-react'
+import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -28,17 +27,15 @@ export const AttesterKlage = ({ klage, kommentar }: { klage: Klage; kommentar: s
   }
 
   return (
-    <BeslutningWrapper>
+    <div>
       {error && (
         <Alert variant="error" style={{ marginTop: '1rem' }}>
           {error}
         </Alert>
       )}
-      <HStack align="start">
-        <Button variant="primary" onClick={() => setModalisOpen(true)}>
-          Attester vedtak
-        </Button>
-      </HStack>
+      <Button variant="primary" onClick={() => setModalisOpen(true)}>
+        Attester vedtak
+      </Button>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
         beskrivelse="Vedtaksbrevet sendes ut automatisk"
@@ -49,6 +46,6 @@ export const AttesterKlage = ({ klage, kommentar }: { klage: Klage; kommentar: s
         open={modalisOpen}
         loading={isPending(attesterVedtakStatus)}
       />
-    </BeslutningWrapper>
+    </div>
   )
 }

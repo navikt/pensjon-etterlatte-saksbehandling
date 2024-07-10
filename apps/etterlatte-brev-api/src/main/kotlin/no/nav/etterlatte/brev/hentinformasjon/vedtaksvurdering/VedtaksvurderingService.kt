@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.hentinformasjon
+package no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo

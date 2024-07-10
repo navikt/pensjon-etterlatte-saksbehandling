@@ -1,6 +1,5 @@
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
-import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import {
   ILand,
   ITrygdetid,
@@ -20,6 +19,8 @@ import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
+import { VStack } from '@navikt/ds-react'
 
 interface Props {
   redigerbar: boolean
@@ -95,25 +96,27 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   return (
     <>
       {trygdetid && (
-        <>
+        <VStack gap="12">
           <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 
-          <TrygdetidGrunnlagListe
+          <TrygdetidPerioder
             trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe}
+            oppdaterTrygdetid={oppdaterTrygdetid}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+            landListe={landListe}
             redigerbar={redigerbar}
           />
-          <TrygdetidGrunnlagListe
+
+          <TrygdetidPerioder
             trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
+            oppdaterTrygdetid={oppdaterTrygdetid}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             redigerbar={redigerbar}
           />
+
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
             sakType={behandling.sakType}
@@ -134,7 +137,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}
-        </>
+        </VStack>
       )}
     </>
   )

@@ -5,8 +5,9 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
@@ -155,14 +156,37 @@ class Brevoppretter(
         val kode = brevKode(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
+            val redigerbarTekstRequest =
+                RedigerbarTekstRequest(
+                    brukerTokenInfo = bruker,
+                    soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                    sakType = generellBrevData.sak.sakType,
+                    forenkletVedtak = generellBrevData.forenkletVedtak,
+                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                    behandlingId = behandlingId,
+                    erForeldreloes = generellBrevData.erForeldreloes(),
+                    loependeIPesys = generellBrevData.loependeIPesys(),
+                    systemkilde = generellBrevData.systemkilde,
+                    avdoede = generellBrevData.personerISak.avdoede,
+                    generellBrevData = generellBrevData,
+                )
+            val brevData: BrevDataRedigerbar = brevDataMapping(redigerbarTekstRequest)
+
             val innhold =
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            bruker,
-                            kode,
-                            brevDataMapping,
+                        BrevbakerRequest.fra(
+                            brevKode = kode,
+                            brevData = brevData,
+                            avsender =
+                                adresseService.hentAvsender(
+                                    opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                ),
+                            soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                            sakId = sakId,
+                            spraak = generellBrevData.spraak,
+                            sakType = generellBrevData.sak.sakType,
                         ),
                     )
                 }

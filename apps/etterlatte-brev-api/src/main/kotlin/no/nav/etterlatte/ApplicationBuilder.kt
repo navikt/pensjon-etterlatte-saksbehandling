@@ -34,14 +34,18 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafKlient
 import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
-import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -56,7 +60,6 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -74,6 +77,7 @@ import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
+import no.nav.etterlatte.rivers.SamordningsnotatRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
@@ -119,23 +123,27 @@ class ApplicationBuilder {
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
-    private val sakService = SakService(behandlingKlient)
+    private val behandlingService = BehandlingService(behandlingKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
+
+    private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
+    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+    private val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
+
     private val datasource = DataSourceBuilder.createDataSource(env)
 
     private val brevdataFacade =
         BrevdataFacade(
-            vedtakKlient,
-            grunnlagKlient,
+            vedtaksvurderingService,
+            grunnlagService,
             beregningService,
-            behandlingKlient,
-            sakService,
-            trygdetidKlient,
-            adresseService,
-            vilkaarsvurderingKlient,
+            behandlingService,
+            trygdetidService,
+            vilkaarsvurderingService,
         )
 
     private val db = BrevRepository(datasource)
@@ -157,17 +165,15 @@ class ApplicationBuilder {
     private val brevDataMapperRedigerbartUtfallVedtak =
         BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(beregningService, brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
-
-    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+    private val brevbakerService = BrevbakerService(brevbaker)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade, adresseService)
 
     private val brevoppretter =
         Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
@@ -184,14 +190,14 @@ class ApplicationBuilder {
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
-            behandlingKlient,
+            behandlingService,
         )
-    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidKlient)
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperFerdigstillVarsel)
+        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
-    private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+    private val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
         BrevService(
@@ -216,13 +222,13 @@ class ApplicationBuilder {
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
             brevdataFacade = brevdataFacade,
-            behandlingKlient = behandlingKlient,
+            behandlingService = behandlingService,
         )
 
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
-    private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, sakService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
+    private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
+    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
@@ -232,7 +238,7 @@ class ApplicationBuilder {
                 RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
             ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingKlient)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
@@ -270,6 +276,7 @@ class ApplicationBuilder {
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
+                SamordningsnotatRiver(this, nyNotatService)
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

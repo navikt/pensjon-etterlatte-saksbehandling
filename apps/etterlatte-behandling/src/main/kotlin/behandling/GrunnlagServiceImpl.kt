@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
@@ -13,33 +12,33 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import java.util.UUID
 
 interface GrunnlagService {
-    fun leggInnNyttGrunnlagSak(
+    suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
     )
 
-    fun leggInnNyttGrunnlag(
+    suspend fun leggInnNyttGrunnlag(
         behandling: Behandling,
         persongalleri: Persongalleri,
     )
 
-    fun oppdaterGrunnlag(
+    suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         sakId: Long,
         sakType: SakType,
     )
 
-    fun leggTilNyeOpplysninger(
+    suspend fun leggTilNyeOpplysninger(
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
     )
 
-    fun leggTilNyeOpplysningerBareSak(
+    suspend fun leggTilNyeOpplysningerBareSak(
         sakId: Long,
         opplysninger: NyeSaksopplysninger,
     )
 
-    fun laasTilGrunnlagIBehandling(
+    suspend fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
     )
@@ -50,52 +49,42 @@ interface GrunnlagService {
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlientImpl,
 ) : GrunnlagService {
-    override fun leggInnNyttGrunnlagSak(
+    override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
     ) {
-        runBlocking {
-            val grunnlagsbehov = grunnlagsbehovSak(sak, persongalleri)
-            grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov)
-        }
+        val grunnlagsbehov = grunnlagsbehovSak(sak, persongalleri)
+        grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov)
     }
 
-    override fun leggInnNyttGrunnlag(
+    override suspend fun leggInnNyttGrunnlag(
         behandling: Behandling,
         persongalleri: Persongalleri,
     ) {
-        runBlocking {
-            val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
-            grunnlagKlient.leggInnNyttGrunnlag(behandling.id, grunnlagsbehov)
-        }
+        val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
+        grunnlagKlient.leggInnNyttGrunnlag(behandling.id, grunnlagsbehov)
     }
 
-    override fun oppdaterGrunnlag(
+    override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         sakId: Long,
         sakType: SakType,
     ) {
-        runBlocking {
-            grunnlagKlient.oppdaterGrunnlag(
-                behandlingId,
-                OppdaterGrunnlagRequest(sakId, sakType),
-            )
-        }
+        grunnlagKlient.oppdaterGrunnlag(
+            behandlingId,
+            OppdaterGrunnlagRequest(sakId, sakType),
+        )
     }
 
-    override fun leggTilNyeOpplysninger(
+    override suspend fun leggTilNyeOpplysninger(
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
-    ) = runBlocking {
-        grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger)
-    }
+    ) = grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger)
 
-    override fun leggTilNyeOpplysningerBareSak(
+    override suspend fun leggTilNyeOpplysningerBareSak(
         sakId: Long,
         opplysninger: NyeSaksopplysninger,
-    ) = runBlocking {
-        grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
-    }
+    ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri =
         grunnlagKlient
@@ -103,10 +92,10 @@ class GrunnlagServiceImpl(
             ?.opplysning
             ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
 
-    override fun laasTilGrunnlagIBehandling(
+    override suspend fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,
         forrigeBehandling: UUID,
-    ) = runBlocking { grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling) }
+    ) = grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling)
 
     private fun grunnlagsbehovSak(
         sak: Sak,

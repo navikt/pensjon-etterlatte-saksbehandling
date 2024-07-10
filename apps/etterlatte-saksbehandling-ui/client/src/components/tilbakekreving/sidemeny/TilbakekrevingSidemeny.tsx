@@ -1,6 +1,6 @@
 import { CollapsibleSidebar, Scroller, SidebarContent, SidebarTools } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Heading } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, Label } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
@@ -15,8 +15,7 @@ import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { Info, Tekst } from '~components/behandling/attestering/styled'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -77,7 +76,7 @@ export function TilbakekrevingSidemeny() {
               <SakTypeTag sakType={tilbakekreving.sak.sakType} />
             </div>
             <div className="info">
-              <Info>Saksbehandler</Info>
+              <Label size="small">Saksbehandler</Label>
               {mapApiResult(
                 oppgaveResult,
                 <Spinner visible={true} label="Henter oppgave" />,
@@ -86,7 +85,7 @@ export function TilbakekrevingSidemeny() {
                 ),
                 (oppgave) =>
                   !!oppgave?.saksbehandler ? (
-                    <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+                    <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
                   ) : (
                     <Alert size="small" variant="warning">
                       Ingen saksbehandler har tatt denne oppgaven
@@ -95,7 +94,7 @@ export function TilbakekrevingSidemeny() {
               )}
             </div>
             <div>
-              <Info>Sakid:</Info>
+              <Label size="small">Sakid:</Label>
               <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
             </div>
 

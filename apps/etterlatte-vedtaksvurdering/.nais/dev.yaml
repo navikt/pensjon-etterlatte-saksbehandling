@@ -67,7 +67,9 @@ spec:
       cpu: 20m
       memory: 448Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 1
     min: 1
   env:
@@ -111,6 +113,10 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-testdata-behandler
         - application: etterlatte-samordning-vedtak
+          permissions:
+            roles:
+              - samordning-read
+        - application: etterlatte-api    # tar over for samordning-vedtak
           permissions:
             roles:
               - samordning-read

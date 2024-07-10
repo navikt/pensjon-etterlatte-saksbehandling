@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.hentinformasjon
+package no.nav.etterlatte.brev.hentinformasjon.beregning
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -84,7 +84,7 @@ class BeregningKlient(
         }
     }
 
-    suspend fun hentYtelseMedGrunnlag(
+    internal suspend fun hentYtelseMedGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): YtelseMedGrunnlagDto {

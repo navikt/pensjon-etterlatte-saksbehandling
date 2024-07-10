@@ -56,7 +56,6 @@ import no.nav.etterlatte.testdata.dolly.TestnavClient
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature
-import no.nav.etterlatte.testdata.features.samordning.SamordningMottattFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
@@ -100,7 +99,6 @@ val features: List<TestDataFeature> =
         OpprettSoeknadFeature,
         DollyFeature(dollyService),
         OpprettOgBehandle(dollyService, Familieoppretter(dollyService)),
-        SamordningMottattFeature,
     )
 
 fun main() {

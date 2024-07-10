@@ -55,6 +55,10 @@ enum class BehandlingFeatures(
     override fun key(): String = key
 }
 
+data class OmgjoeringRequest(
+    val skalKopiere: Boolean,
+)
+
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     gyldighetsproevingService: GyldighetsproevingService,
@@ -81,10 +85,8 @@ internal fun Route.behandlingRoutes(
             throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
         }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-            val behandlingOgOppgave =
-                inTransaction {
-                    behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler)
-                }
+            val skalKopiereRequest = call.receive<OmgjoeringRequest>()
+            val behandlingOgOppgave = behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
             call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }

@@ -19,8 +19,6 @@ class GrunnlagHenterTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
 
-    private val vergesFnr = "09498230323"
-
     @Test
     fun fetchGrunnlag_shouldGetRelevantInfo() {
         val sakType = SakType.BARNEPENSJON

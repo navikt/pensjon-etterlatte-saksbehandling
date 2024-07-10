@@ -34,7 +34,9 @@ spec:
       cpu: 25m
       memory: 384Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 2
     min: 2
   azure:

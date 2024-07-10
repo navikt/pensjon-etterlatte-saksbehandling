@@ -75,7 +75,9 @@ spec:
     limits:
       memory: 1024Mi
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 4
     min: 2
   env:
@@ -146,6 +148,10 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-klage/.default
     - name: ETTERLATTE_KLAGE_API_URL
       value: http://etterlatte-klage
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
     - name: OPPGAVE_CLIENT_ID
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
@@ -171,6 +177,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag

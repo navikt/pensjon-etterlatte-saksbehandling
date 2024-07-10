@@ -1,6 +1,5 @@
-import { Alert, Button, HStack } from '@navikt/ds-react'
+import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -34,17 +33,17 @@ export const AttesterTilbakekreving = ({
   }
 
   return (
-    <BeslutningWrapper>
+    <div>
       {error && (
         <Alert variant="error" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           {error}
         </Alert>
       )}
-      <HStack align="start">
-        <Button variant="primary" onClick={() => setModalisOpen(true)}>
-          Iverksett vedtak
-        </Button>
-      </HStack>
+
+      <Button variant="primary" onClick={() => setModalisOpen(true)}>
+        Iverksett vedtak
+      </Button>
+
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
         beskrivelse="Vedtak sendes økonomi, mens vedtaksbrev sendes dersom dette er valgt."
@@ -55,6 +54,6 @@ export const AttesterTilbakekreving = ({
         open={modalisOpen}
         loading={isPending(attesterVedtakStatus)}
       />
-    </BeslutningWrapper>
+    </div>
   )
 }

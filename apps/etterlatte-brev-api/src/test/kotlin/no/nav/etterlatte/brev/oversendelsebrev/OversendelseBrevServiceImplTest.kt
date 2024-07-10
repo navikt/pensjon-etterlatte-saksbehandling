@@ -15,9 +15,9 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
@@ -53,14 +53,14 @@ class OversendelseBrevServiceImplTest(
     private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
     private val brevRepository = spyk(BrevRepository(dataSource))
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val service =
         OversendelseBrevServiceImpl(
             brevRepository,
             mockk(),
             adresseService,
             brevdataFacade,
-            behandlingKlient,
+            behandlingService,
         )
 
     @BeforeEach
@@ -68,7 +68,7 @@ class OversendelseBrevServiceImplTest(
         coEvery { brevdataFacade.hentKlage(any(), any()) } returns klage()
         coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns brevData()
         coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns opprettMottaker()
-        coEvery { behandlingKlient.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
+        coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
     }
 
     @Test

@@ -43,4 +43,16 @@ class VedtaksvurderingRapidService(
                 ) + extraParams,
             ).toJson(),
     )
+
+    fun sendGenerellHendelse(
+        hendelsestype: VedtakKafkaHendelseHendelseType,
+        parametre: Map<String, Any>,
+    ) = publiser(
+        UUID.randomUUID(),
+        JsonMessage
+            .newMessage(
+                parametre +
+                    hendelsestype.lagParMedEventNameKey(),
+            ).toJson(),
+    )
 }

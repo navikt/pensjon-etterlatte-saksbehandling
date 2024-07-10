@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.oppgave.OppgaveService
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
@@ -24,6 +25,8 @@ class DoedshendelseReminderService(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun setupKontekstAndRun(context: Context) {
         Kontekst.set(context)
         run()
@@ -40,7 +43,14 @@ class DoedshendelseReminderService(
     }
 
     private fun lagOppgaveOmIkkeSoekt(hendelse: DoedshendelseReminder) {
-        val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId!!)
+        if (hendelse.sakId == null) {
+            logger.info(
+                "Kan ikke opprette oppfølgingsoppgave for hendelse uten sakId. " +
+                    "Trolig fordi det er en gammel hendelse som ikke har sakId pga. feature toggle. HendelseId: ${hendelse.id}",
+            )
+            return
+        }
+        val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
             val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)

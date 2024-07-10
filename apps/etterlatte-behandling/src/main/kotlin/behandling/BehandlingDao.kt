@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -69,7 +70,7 @@ class BehandlingDao(
             }
         }
 
-    fun alleBehandlingerISak(sakid: Long): List<Behandling> =
+    fun hentBehandlingerForSak(sakid: Long): List<Behandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -224,24 +225,25 @@ class BehandlingDao(
             }
         }
 
-    fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
-                        UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
-                        WHERE id = ?
-                        """.trimIndent(),
-                    )
+    fun lagreGyldighetsproeving(
+        behandlingId: UUID,
+        gyldighetsproeving: GyldighetsResultat?,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE behandling SET gyldighetssproving = ?, sist_endret = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
 
-                stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
-                stmt.setString(2, behandling.status.name)
-                stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
-                stmt.setObject(4, behandling.id)
-                require(stmt.executeUpdate() == 1)
-            }
+            stmt.setObject(1, objectMapper.writeValueAsString(gyldighetsproeving))
+            stmt.setTidspunkt(2, Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt())
+            stmt.setObject(3, behandlingId)
+            require(stmt.executeUpdate() == 1)
         }
+    }
 
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)

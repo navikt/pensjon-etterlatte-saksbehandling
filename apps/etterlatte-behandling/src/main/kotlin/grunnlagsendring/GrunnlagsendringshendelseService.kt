@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -39,13 +38,6 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.util.UUID
-
-class KunneIkkeLukkeOppgaveForhendelse(
-    message: String,
-) : UgyldigForespoerselException(
-        code = "FEIL_MED_OPPGAVE_UNDER_LUKKING",
-        detail = message,
-    )
 
 class GrunnlagsendringshendelseService(
     private val oppgaveService: OppgaveService,

@@ -1,13 +1,5 @@
 package no.nav.etterlatte.klage.modell
 
-enum class Aarsak {
-    FEIL_I_LOVANDVENDELSE,
-    FEIL_REGELVERKSFORSTÅELSE,
-    FEIL_ELLER_ENDRET_FAKTA,
-    FEIL_PROSESSUELL,
-    ANNET,
-}
-
 enum class BehandlingEventType {
     KLAGEBEHANDLING_AVSLUTTET,
     ANKEBEHANDLING_OPPRETTET,

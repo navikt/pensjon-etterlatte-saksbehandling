@@ -74,3 +74,5 @@ fun <T> TransactionalSession.hentListe(
         }
 
 fun Row.tidspunkt(columnLabel: String) = sqlTimestamp(columnLabel).toTidspunkt()
+
+fun Row.tidspunktOrNull(columnLabel: String) = sqlTimestampOrNull(columnLabel)?.toTidspunkt()

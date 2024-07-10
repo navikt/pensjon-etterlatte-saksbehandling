@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.hentinformasjon
+package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config

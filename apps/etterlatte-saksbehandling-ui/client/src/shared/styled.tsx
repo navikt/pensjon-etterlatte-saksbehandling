@@ -32,6 +32,7 @@ export const MainContent = styled(Box)`
 
 export const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
   background: var(--a-white);
+  border-left: 1px solid var(--a-border-subtle);
   max-height: fit-content;
   min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `

@@ -5,7 +5,7 @@ import org.slf4j.Logger
 import kotlin.system.exitProcess
 
 fun <T> startLytting(
-    konsument: Kafkakonsument<T>,
+    konsument: Kafkakonsument<in T>,
     logger: Logger,
 ) {
     withLogContext {

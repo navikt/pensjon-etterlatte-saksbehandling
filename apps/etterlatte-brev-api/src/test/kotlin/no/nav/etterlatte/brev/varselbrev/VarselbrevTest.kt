@@ -9,23 +9,26 @@ import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,6 +53,13 @@ class VarselbrevTest(
         val adresseService =
             mockk<AdresseService>().also {
                 coEvery { it.hentMottakerAdresse(any(), any()) } returns tomMottaker(SOEKER_FOEDSELSNUMMER)
+                coEvery { it.hentAvsender(any()) } returns
+                    Avsender(
+                        kontor = "",
+                        telefonnummer = Telefonnummer("12345678"),
+                        saksbehandler = null,
+                        attestant = null,
+                    )
             }
         val brevdataFacade =
             mockk<BrevdataFacade>().also {
@@ -70,6 +80,10 @@ class VarselbrevTest(
                                 listOf(),
                                 null,
                             )
+                        every { it.utlandstilknytning } returns null
+                        every { it.revurderingsaarsak } returns null
+                        every { it.systemkilde } returns Vedtaksloesning.GJENNY
+                        every { it.behandlingId } returns null
                     }
             }
         val brevbaker =
@@ -97,9 +111,9 @@ class VarselbrevTest(
                 brevbaker,
                 redigerbartVedleggHenter,
             )
-        val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())
     }
 
     @Test

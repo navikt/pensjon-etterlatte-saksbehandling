@@ -4,7 +4,7 @@ import { PersonGroupIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { lowerCase, upperFirst } from 'lodash'
-import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 export const Vergemaal = ({
   vergemaalEllerFremtidsfullmakt,

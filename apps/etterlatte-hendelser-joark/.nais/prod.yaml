@@ -35,7 +35,9 @@ spec:
     requests:
       cpu: 25m
   replicas:
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
     max: 1
     min: 1
   env:

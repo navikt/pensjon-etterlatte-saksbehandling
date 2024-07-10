@@ -39,7 +39,7 @@ class KravgrunnlagConsumerTest {
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()
 
         verify(exactly = 1) {
-            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any())
+            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any())
             tilbakekrevingHendelseRepository.lagreTilbakekrevingHendelse(any(), any(), any(), any())
             kravgrunnlagService.haandterKravgrunnlag(any())
             tilbakekrevingHendelseRepository.ferdigstillTilbakekrevingHendelse(any(), any())
@@ -57,7 +57,7 @@ class KravgrunnlagConsumerTest {
 
     @Test
     fun `skal feile ved mottak av kravgrunnlag dersom forrige hendelse for sak ikke er ferdigstilt`() {
-        every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any()) } returns
+        every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any()) } returns
             tilbakekrevingHendelse(
                 type = TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT,
                 status = TilbakekrevingHendelseStatus.NY,
@@ -67,7 +67,7 @@ class KravgrunnlagConsumerTest {
 
         verify(exactly = 4) {
             // 3 retries
-            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any())
+            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any())
         }
         verify(exactly = 0) {
             tilbakekrevingHendelseRepository.lagreTilbakekrevingHendelse(any(), any(), any(), any())
@@ -78,7 +78,7 @@ class KravgrunnlagConsumerTest {
 
     @Test
     fun `skal feile ved mottak av kravOgVedtakStatus dersom forrige hendelse for sak ikke er ferdigstilt`() {
-        every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any()) } returns
+        every { tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any()) } returns
             tilbakekrevingHendelse(
                 type = TilbakekrevingHendelseType.KRAV_VEDTAK_STATUS_MOTTATT,
                 status = TilbakekrevingHendelseStatus.NY,
@@ -88,7 +88,7 @@ class KravgrunnlagConsumerTest {
 
         verify(exactly = 4) {
             // 3 retries
-            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any(), any())
+            tilbakekrevingHendelseRepository.hentSisteTilbakekrevingHendelse(any())
         }
         verify(exactly = 0) {
             tilbakekrevingHendelseRepository.lagreTilbakekrevingHendelse(any(), any(), any(), any())

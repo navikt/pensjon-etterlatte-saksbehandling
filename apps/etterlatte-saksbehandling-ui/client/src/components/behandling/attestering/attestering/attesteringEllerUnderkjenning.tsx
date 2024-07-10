@@ -1,7 +1,7 @@
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
-import { Alert, BodyShort } from '@navikt/ds-react'
+import { Alert, BodyShort, VStack } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
@@ -32,7 +32,7 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
   return (
     <SidebarPanel>
       {oppgaveErTildeltInnloggetBruker ? (
-        <>
+        <VStack gap="4">
           {oppgave?.status === Oppgavestatus.PAA_VENT ? (
             <Alert variant="warning" size="small" inline>
               Kan ikke attestere en oppgave som står på vent
@@ -42,7 +42,6 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
               Kontroller opplysninger og faglige vurderinger gjort under behandling.
             </Alert>
           )}
-          <br />
 
           {lastPage ? (
             <Beslutningsvalg
@@ -59,7 +58,7 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
           {attestantOgSaksbehandlerErSammePerson && (
             <Alert variant="warning">Du kan ikke attestere en sak som du har saksbehandlet</Alert>
           )}
-        </>
+        </VStack>
       ) : (
         <Alert variant="warning">
           {oppgave?.saksbehandler ? (

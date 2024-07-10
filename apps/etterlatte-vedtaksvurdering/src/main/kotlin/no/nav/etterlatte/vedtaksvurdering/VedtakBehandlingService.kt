@@ -28,9 +28,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenligner
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
@@ -410,7 +407,14 @@ class VedtakBehandlingService(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+        repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
+
+        try {
+            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+        } catch (e: Exception) {
+            repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
+            throw e
+        }
     }
 
     suspend fun iverksattVedtak(
@@ -715,13 +719,6 @@ class ManglerAvkortetYtelse :
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
-    )
-
-class ForeldreloesTrygdetid(
-    behandlingId: UUID,
-) : UgyldigForespoerselException(
-        code = "FORELDRELOES_TRYGDETID",
-        detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
     )
 
 enum class VedtakFeatureToggle(

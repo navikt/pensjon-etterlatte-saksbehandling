@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.RedigerbarTekstRequest
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -17,9 +18,12 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslagRedigerbartUtfal
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
+import java.util.UUID
 
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,
@@ -41,7 +45,16 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevDataRedigerbar {
         if (generellBrevData.erForeldreloes()) {
-            return barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
+            return barnepensjonInnvilgelse(
+                brukerTokenInfo,
+                generellBrevData.behandlingId!!,
+                generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                generellBrevData.sak.sakType,
+                generellBrevData.erForeldreloes(),
+                generellBrevData.systemkilde,
+                generellBrevData.loependeIPesys(),
+                generellBrevData.personerISak.avdoede,
+            )
         }
         return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, brukerTokenInfo)
     }
@@ -53,11 +66,27 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
-                    VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
-                    VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData)
+                    VedtakType.INNVILGELSE ->
+                        barnepensjonInnvilgelse(
+                            brukerTokenInfo,
+                            generellBrevData.behandlingId!!,
+                            generellBrevData.forenkletVedtak.virkningstidspunkt,
+                            generellBrevData.sak.sakType,
+                            generellBrevData.erForeldreloes(),
+                            generellBrevData.systemkilde,
+                            generellBrevData.loependeIPesys(),
+                            generellBrevData.personerISak.avdoede,
+                        )
+                    VedtakType.ENDRING ->
+                        barnepensjonEndring(
+                            brukerTokenInfo,
+                            generellBrevData.behandlingId!!,
+                            generellBrevData.forenkletVedtak.virkningstidspunkt,
+                            generellBrevData.sak.sakType,
+                        )
+                    VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData.behandlingId)
                     VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -66,11 +95,26 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
-                    VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
-                    VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData)
+                    VedtakType.INNVILGELSE ->
+                        omstillingsstoenadInnvilgelse(
+                            brukerTokenInfo,
+                            generellBrevData.behandlingId!!,
+                            generellBrevData.forenkletVedtak.virkningstidspunkt!!,
+                            generellBrevData.sak.sakType,
+                            generellBrevData.forenkletVedtak.type,
+                            generellBrevData.personerISak.avdoede,
+                        )
+                    VedtakType.ENDRING ->
+                        omstillingsstoenadEndring(
+                            brukerTokenInfo,
+                            generellBrevData.behandlingId!!,
+                            generellBrevData.forenkletVedtak.virkningstidspunkt!!,
+                            generellBrevData.sak.sakType,
+                            generellBrevData.forenkletVedtak.type,
+                        )
+                    VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData.behandlingId!!)
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(generellBrevData.personerISak.avdoede)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak?.klage)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData.forenkletVedtak.klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -80,42 +124,47 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
     private suspend fun barnepensjonInnvilgelse(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth?,
+        sakType: SakType,
+        erForeldreloes: Boolean,
+        systemkilde: Vedtaksloesning,
+        loependeIPesys: Boolean,
+        avdoede: List<Avdoed>,
     ) = coroutineScope {
-        val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
                 beregningService.finnUtbetalingsinfo(
                     behandlingId,
-                    generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
+                    virkningstidspunkt!!,
                     bruker,
-                    generellBrevData.sak.sakType,
+                    sakType,
                 )
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
-        if (generellBrevData.erForeldreloes()) {
+        if (erForeldreloes) {
             BarnepensjonForeldreloesRedigerbar.fra(
                 etterbetaling.await(),
                 utbetalingsinfo = utbetalingsinfo.await(),
-                generellBrevData.systemkilde,
-                generellBrevData.loependeIPesys(),
+                systemkilde,
+                loependeIPesys,
             )
         } else {
             BarnepensjonInnvilgelseRedigerbartUtfall.fra(
                 utbetalingsinfo.await(),
                 etterbetaling.await(),
-                generellBrevData.personerISak.avdoede,
-                generellBrevData.systemkilde,
+                avdoede,
+                systemkilde,
             )
         }
     }
 
     private suspend fun barnepensjonOpphoer(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID?,
     ) = coroutineScope {
-        val brevutfall = async { behandlingService.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId!!, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
             requireNotNull(brevutfall.await()),
@@ -124,18 +173,19 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
     private suspend fun barnepensjonEndring(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth?,
+        sakType: SakType,
     ) = coroutineScope {
-        val behandlingId = generellBrevData.behandlingId!!
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
                 beregningService.finnUtbetalingsinfo(
                     behandlingId,
-                    generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
+                    virkningstidspunkt!!,
                     bruker,
-                    generellBrevData.sak.sakType,
+                    sakType,
                 )
             }
 
@@ -148,26 +198,28 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
     private suspend fun omstillingsstoenadInnvilgelse(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        sakType: SakType,
+        vedtakType: VedtakType,
+        avdoede: List<Avdoed>,
     ) = coroutineScope {
-        val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
                 beregningService.finnUtbetalingsinfo(
                     behandlingId,
-                    generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
+                    virkningstidspunkt,
                     bruker,
-                    generellBrevData.sak.sakType,
+                    sakType,
                 )
             }
-        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
                 beregningService.finnAvkortingsinfo(
                     behandlingId,
-                    generellBrevData.sak.sakType,
+                    sakType,
                     virkningstidspunkt,
-                    generellBrevData.forenkletVedtak.type,
+                    vedtakType,
                     bruker,
                 )
             }
@@ -177,23 +229,24 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             utbetalingsinfo.await(),
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            generellBrevData.personerISak.avdoede,
+            avdoede,
         )
     }
 
     private suspend fun omstillingsstoenadEndring(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        sakType: SakType,
+        vedtakType: VedtakType,
     ) = coroutineScope {
-        val behandlingId = generellBrevData.behandlingId!!
-        val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
                 beregningService.finnAvkortingsinfo(
                     behandlingId,
-                    generellBrevData.sak.sakType,
+                    sakType,
                     virkningstidspunkt,
-                    generellBrevData.forenkletVedtak.type,
+                    vedtakType,
                     bruker,
                 )
             }
@@ -209,9 +262,9 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
     private suspend fun omstillingsstoenadOpphoer(
         bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
     ) = coroutineScope {
-        val brevutfall = async { behandlingService.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
             requireNotNull(brevutfall.await()),

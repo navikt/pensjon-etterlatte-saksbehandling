@@ -34,11 +34,11 @@ data class OmstillingsstoenadInnvilgelse(
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
-            generellBrevData: GenerellBrevData,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            avdoede: List<Avdoed>,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -59,7 +59,7 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val avdoed = generellBrevData.personerISak.avdoede.single()
+            val avdoed = avdoede.single()
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
@@ -72,7 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                avdoed = avdoede.minBy { it.doedsdato },
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),

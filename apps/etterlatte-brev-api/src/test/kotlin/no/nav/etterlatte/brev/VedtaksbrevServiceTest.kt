@@ -119,7 +119,6 @@ internal class VedtaksbrevServiceTest {
                 trygdetidService,
                 behandlingService,
                 vilkaarsvurderingService,
-                brevdataFacade,
             ),
         )
     private val vedtaksbrevService =

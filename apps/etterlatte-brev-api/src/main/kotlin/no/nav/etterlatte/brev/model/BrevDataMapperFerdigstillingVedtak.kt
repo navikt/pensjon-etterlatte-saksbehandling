@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.formaterNavn
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -57,7 +56,6 @@ class BrevDataMapperFerdigstillingVedtak(
     private val trygdetidService: TrygdetidService,
     private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
-    private val brevdataFacade: BrevdataFacade,
 ) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {

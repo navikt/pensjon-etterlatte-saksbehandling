@@ -54,7 +54,7 @@ class VedtaksbrevService(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
-            brevKode = { brevKodeMapperVedtak.brevKode(it).redigering },
+            brevKodeMapper = { brevKodeMapperVedtak.brevKode(it).redigering },
         ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     suspend fun genererPdf(
@@ -65,7 +65,7 @@ class VedtaksbrevService(
             id = id,
             bruker = bruker,
             avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-            brevKode = { brevKodeMapperVedtak.brevKode(it) },
+            brevKodeMapper = { brevKodeMapperVedtak.brevKode(it) },
             brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtakStatus, saksbehandler, brev, pdf ->
             lagrePdfHvisVedtakFattet(

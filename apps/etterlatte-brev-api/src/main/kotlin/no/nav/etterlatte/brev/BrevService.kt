@@ -39,7 +39,7 @@ class BrevService(
                 sakId = sakId,
                 behandlingId = null,
                 bruker = bruker,
-                brevKode = { brevkode },
+                brevKodeMapper = { brevkode },
                 brevtype = brevkode.brevtype,
                 brevDataMapping = brevDataMapping,
             ).first
@@ -122,7 +122,7 @@ class BrevService(
             id,
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
-            brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
+            brevKodeMapper = { Brevkoder.TOMT_INFORMASJONSBREV },
             brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 

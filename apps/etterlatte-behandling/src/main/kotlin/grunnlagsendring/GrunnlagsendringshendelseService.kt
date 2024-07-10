@@ -193,7 +193,9 @@ class GrunnlagsendringshendelseService(
             }
         }
 
-        if (sakIder.isNotEmpty() && gradering != AdressebeskyttelseGradering.UGRADERT) {
+        if (sakIder.isNotEmpty() &&
+            gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+        ) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
     }

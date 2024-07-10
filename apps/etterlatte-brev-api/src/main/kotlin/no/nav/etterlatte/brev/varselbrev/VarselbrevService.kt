@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
@@ -73,7 +74,12 @@ internal class VarselbrevService(
         brevId: BrevID,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+            {
+                    brukerToken,
+                    generellBrevData,
+                ->
+                opprettAvsenderRequest(brukerToken, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet)
+            },
     ) = pdfGenerator.ferdigstillOgGenererPDF(
         id = brevId,
         bruker = bruker,
@@ -89,7 +95,12 @@ internal class VarselbrevService(
         brevId: Long,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
-            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+            {
+                    brukerToken,
+                    generellBrevData,
+                ->
+                opprettAvsenderRequest(brukerToken, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet)
+            },
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,

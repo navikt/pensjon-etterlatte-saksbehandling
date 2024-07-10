@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
@@ -120,7 +121,7 @@ class BrevService(
         pdfGenerator.genererPdf(
             id,
             bruker,
-            avsenderRequest = { b, g -> g.avsenderRequest(b) },
+            avsenderRequest = { b, g -> opprettAvsenderRequest(b, g.forenkletVedtak, g.sak.enhet) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
             brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )

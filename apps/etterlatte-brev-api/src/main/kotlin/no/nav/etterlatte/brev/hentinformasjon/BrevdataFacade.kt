@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -77,18 +78,15 @@ class BrevdataFacade(
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
 
-            when (vedtak?.type) {
-                VedtakType.INNVILGELSE,
-                VedtakType.OPPHOER,
-                VedtakType.AVSLAG,
-                VedtakType.ENDRING,
-                ->
-                    (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
-                        GenerellBrevData(
-                            sak = sak,
-                            personerISak = personerISak,
-                            behandlingId = behandlingId,
-                            forenkletVedtak =
+            val forenkletVedtak: Pair<ForenkletVedtak?, Revurderingaarsak?> =
+                when (vedtak?.type) {
+                    VedtakType.INNVILGELSE,
+                    VedtakType.OPPHOER,
+                    VedtakType.AVSLAG,
+                    VedtakType.ENDRING,
+                    ->
+                        (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
+                            Pair(
                                 ForenkletVedtak(
                                     vedtak.id,
                                     vedtak.status,
@@ -100,19 +98,12 @@ class BrevdataFacade(
                                     virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                                     revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                                 ),
-                            spraak = spraak,
-                            revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
-                            systemkilde = systemkilde,
-                            utlandstilknytning = behandling?.utlandstilknytning,
-                        )
-                    }
+                                vedtakInnhold.behandling.revurderingsaarsak,
+                            )
+                        }
 
-                VedtakType.TILBAKEKREVING ->
-                    GenerellBrevData(
-                        sak = sak,
-                        personerISak = personerISak,
-                        behandlingId = behandlingId,
-                        forenkletVedtak =
+                    VedtakType.TILBAKEKREVING ->
+                        Pair(
                             ForenkletVedtak(
                                 vedtak.id,
                                 vedtak.status,
@@ -126,16 +117,11 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                                     ),
                             ),
-                        spraak = spraak,
-                        systemkilde = systemkilde,
-                    )
+                            null,
+                        )
 
-                VedtakType.AVVIST_KLAGE ->
-                    GenerellBrevData(
-                        sak = sak,
-                        personerISak = personerISak,
-                        behandlingId = behandlingId,
-                        forenkletVedtak =
+                    VedtakType.AVVIST_KLAGE ->
+                        Pair(
                             ForenkletVedtak(
                                 vedtak.id,
                                 vedtak.status,
@@ -149,20 +135,21 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                                     ),
                             ),
-                        spraak = spraak,
-                        systemkilde = systemkilde,
-                    )
+                            null,
+                        )
 
-                null ->
-                    GenerellBrevData(
-                        sak = sak,
-                        personerISak = personerISak,
-                        behandlingId = behandlingId,
-                        forenkletVedtak = null,
-                        spraak = spraak,
-                        systemkilde = systemkilde,
-                        utlandstilknytning = behandling?.utlandstilknytning,
-                    )
-            }
+                    null -> Pair(null, null)
+                }
+
+            GenerellBrevData(
+                sak = sak,
+                personerISak = personerISak,
+                behandlingId = behandlingId,
+                forenkletVedtak = forenkletVedtak.first,
+                spraak = spraak,
+                revurderingsaarsak = forenkletVedtak.second,
+                systemkilde = systemkilde,
+                utlandstilknytning = behandling?.utlandstilknytning,
+            )
         }
 }

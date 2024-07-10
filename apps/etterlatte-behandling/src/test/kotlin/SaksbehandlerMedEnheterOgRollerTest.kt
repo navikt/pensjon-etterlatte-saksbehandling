@@ -23,6 +23,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
     )
     @MethodSource("saksbehandlere")
     fun `saksbehandler faar riktig skrive og lesetilgang enheter`(
+        beskrivelse: String,
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
@@ -39,7 +40,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         } returns "NAVIdent"
 
         every {
-            identifiedBy.hentTokenClaimsForIssuerName(any())
+            identifiedBy.hentTokenClaimsForIssuerName(any<String>())
         } returns tokenClaims
 
         every {

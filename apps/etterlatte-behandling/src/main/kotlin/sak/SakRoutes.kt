@@ -268,6 +268,17 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
+            post("/getsak/oms") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val saker =
+                        inTransaction { sakService.finnSakerOmsOgHvisAvdoed(fnr.value) }.also {
+                            requestLogger.loggRequest(brukerTokenInfo, fnr, "api/personer/getsak/oms")
+                        }
+
+                    call.respond(saker)
+                }
+            }
+
             post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
                     val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()

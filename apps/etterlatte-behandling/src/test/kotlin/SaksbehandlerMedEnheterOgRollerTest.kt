@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -31,6 +32,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
     ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
+        mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
         val tokenClaims = mockk<JwtTokenClaims>()
         val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>()
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
@@ -40,7 +42,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         } returns "NAVIdent"
 
         every {
-            identifiedBy.hentTokenClaimsForIssuerName(any<String>())
+            identifiedBy.hentTokenClaimsForIssuerName(any())
         } returns tokenClaims
 
         every {

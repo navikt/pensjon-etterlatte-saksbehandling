@@ -12,11 +12,9 @@ fun ApplicationCall.hentTokenClaimsForIssuerName(issuer: Issuer): JwtTokenClaims
         ?.context
         ?.let { it.hentTokenClaimsForIssuerName(issuer) }
 
-fun TokenValidationContext?.hentTokenClaimsForIssuerName(issuer: Issuer): JwtTokenClaims? = hentTokenClaimsForIssuerName(issuer.issuerName)
-
-fun TokenValidationContext?.hentTokenClaimsForIssuerName(issuerName: String): JwtTokenClaims? =
+fun TokenValidationContext?.hentTokenClaimsForIssuerName(issuer: Issuer): JwtTokenClaims? =
     this
-        ?.getJwtToken(issuerName)
+        ?.getJwtToken(issuer.issuerName)
         ?.jwtTokenClaims
 
 fun ApplicationCall.firstValidTokenClaims(): JwtTokenClaims? =

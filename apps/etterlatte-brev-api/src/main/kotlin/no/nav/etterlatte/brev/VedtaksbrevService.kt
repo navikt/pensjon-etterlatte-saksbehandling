@@ -24,7 +24,7 @@ import java.util.UUID
 class VedtaksbrevService(
     private val db: BrevRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val brevKodeMapperVedtak: BrevKodeMapperVedtak,
+    private val brevKodeMappingVedtak: BrevKodeMapperVedtak,
     private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
@@ -54,7 +54,7 @@ class VedtaksbrevService(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
-            brevKodeMapper = { brevKodeMapperVedtak.brevKode(it).redigering },
+            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it).redigering },
         ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     suspend fun genererPdf(
@@ -65,7 +65,7 @@ class VedtaksbrevService(
             id = id,
             bruker = bruker,
             avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-            brevKodeMapper = { brevKodeMapperVedtak.brevKode(it) },
+            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
             brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtakStatus, saksbehandler, brev, pdf ->
             lagrePdfHvisVedtakFattet(
@@ -137,7 +137,7 @@ class VedtaksbrevService(
                         Brevkoder.OMS_VARSEL.redigering
                     }
 
-                Brevtype.VEDTAK -> brevKodeMapperVedtak.brevKode(it).redigering
+                Brevtype.VEDTAK -> brevKodeMappingVedtak.brevKode(it).redigering
                 else -> throw UgyldigForespoerselException(
                     "FEIL_BREVKODE_NYTT_INNHOLD",
                     "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",

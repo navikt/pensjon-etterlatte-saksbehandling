@@ -39,7 +39,7 @@ internal class VarselbrevService(
                 sakId = sakId,
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
-                brevKodeMapper = { brevkode.redigering },
+                brevKodeMapping = { brevkode.redigering },
                 brevtype = Brevtype.VARSEL,
             ) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
@@ -79,7 +79,7 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKodeMapper = {
+        brevKodeMapping = {
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
@@ -95,7 +95,7 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKodeMapper = {
+        brevKodeMapping = {
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },

@@ -43,7 +43,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        brevKodeMapper: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
@@ -61,7 +61,7 @@ class Brevoppretter(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            brevKodeMapper = brevKodeMapper,
+            brevKodeMapping = brevKodeMapping,
             brevtype = Brevtype.VEDTAK,
             brevDataMapping = brevDataMapping,
         ).first
@@ -71,7 +71,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapper: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevtype: Brevtype,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
@@ -80,7 +80,7 @@ class Brevoppretter(
                 sakId,
                 behandlingId,
                 bruker,
-                brevKodeMapper,
+                brevKodeMapping,
                 brevDataMapping,
             ),
         ) {
@@ -104,7 +104,7 @@ class Brevoppretter(
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapper: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
@@ -114,7 +114,7 @@ class Brevoppretter(
                 sakId,
                 behandlingId,
                 bruker,
-                brevKodeMapper,
+                brevKodeMapping,
                 brevDataMapping,
                 spraak,
             ),
@@ -138,7 +138,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapper: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
@@ -153,7 +153,7 @@ class Brevoppretter(
                 generellBrevData.forenkletVedtak?.type,
             )
 
-        val kode = brevKodeMapper(brevkodeRequest)
+        val kode = brevKodeMapping(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
             val redigerbarTekstRequest =

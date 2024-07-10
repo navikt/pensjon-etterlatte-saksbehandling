@@ -170,7 +170,7 @@ class ApplicationBuilder {
             vilkaarsvurderingService,
         )
 
-    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
+    private val brevKodeMappingVedtak = BrevKodeMapperVedtak()
 
     private val brevbakerService = BrevbakerService(brevbaker)
 
@@ -188,7 +188,7 @@ class ApplicationBuilder {
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapperVedtak,
+            brevKodeMappingVedtak,
             brevoppretter,
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,

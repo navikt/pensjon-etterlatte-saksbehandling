@@ -84,7 +84,7 @@ class OversendelseBrevServiceImpl(
         if (eksisterendeBrev != null) {
             return eksisterendeBrev
         }
-        val klage = brevdataFacade.hentKlage(behandlingId, brukerTokenInfo)
+        val klage = behandlingService.hentKlage(behandlingId, brukerTokenInfo)
 
         val generellBrevData =
             brevdataFacade.hentGenerellBrevData(
@@ -138,7 +138,7 @@ class OversendelseBrevServiceImpl(
             )
         }
 
-        val klage = brevdataFacade.hentKlage(requireNotNull(brev.behandlingId), brukerTokenInfo)
+        val klage = behandlingService.hentKlage(requireNotNull(brev.behandlingId), brukerTokenInfo)
         return pdfGenerator.genererPdf(
             id = brev.id,
             bruker = brukerTokenInfo,
@@ -192,7 +192,7 @@ class OversendelseBrevServiceImpl(
 
         val klage =
             runBlocking {
-                brevdataFacade.hentKlage(klageId = behandlingId, brukerTokenInfo)
+                behandlingService.hentKlage(klageId = behandlingId, brukerTokenInfo)
             }
 
         val pdf =

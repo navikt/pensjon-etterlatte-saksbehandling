@@ -3,59 +3,30 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import java.time.YearMonth
 import java.util.UUID
 
 class BrevdataFacade(
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,
-    private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
-    private val trygdetidService: TrygdetidService,
-    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
-    suspend fun hentBrevutfall(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BrevutfallDto? = behandlingService.hentBrevutfall(behandlingId, brukerTokenInfo)
-
-    suspend fun hentVilkaarsvurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): VilkaarsvurderingDto? = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
-
-    suspend fun hentEtterbetaling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtterbetalingDTO? = behandlingService.hentEtterbetaling(behandlingId, brukerTokenInfo)
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
@@ -65,7 +36,7 @@ class BrevdataFacade(
         coroutineScope {
             val sakDeferred = async { behandlingService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingService.hentVedtak(it, brukerTokenInfo) } }
-            val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
+            val brevutfallDeferred = behandlingId?.let { async { behandlingService.hentBrevutfall(it, brukerTokenInfo) } }
 
             val vedtakType = vedtakDeferred?.await()?.type
             val grunnlag = grunnlagService.hentGrunnlag(vedtakType, sakId, brukerTokenInfo, behandlingId)
@@ -194,73 +165,4 @@ class BrevdataFacade(
                     )
             }
         }
-
-    suspend fun hentKlage(
-        klageId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Klage = behandlingService.hentKlage(klageId, brukerTokenInfo)
-
-    suspend fun finnForrigeUtbetalingsinfo(
-        sakId: Long,
-        virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
-    ): Utbetalingsinfo? =
-        beregningService.finnUtbetalingsinfoNullable(
-            behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
-            virkningstidspunkt,
-            brukerTokenInfo,
-            sakType,
-        )
-
-    suspend fun finnUtbetalingsinfo(
-        behandlingId: UUID,
-        virkningstidspunkt: YearMonth,
-        bruker: BrukerTokenInfo,
-        sakType: SakType,
-    ): Utbetalingsinfo = beregningService.finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker, sakType)
-
-    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
-
-    suspend fun finnAvkortingsinfo(
-        behandlingId: UUID,
-        sakType: SakType,
-        virkningstidspunkt: YearMonth,
-        vedtakType: VedtakType,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo =
-        beregningService.finnAvkortingsinfo(
-            behandlingId,
-            sakType,
-            virkningstidspunkt,
-            vedtakType,
-            brukerTokenInfo,
-        )
-
-    suspend fun finnForrigeAvkortingsinfo(
-        sakId: Long,
-        sakType: SakType,
-        virkningstidspunkt: YearMonth,
-        vedtakType: VedtakType,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo? {
-        val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
-        return beregningService.finnAvkortingsinfoNullable(
-            forrigeIverksatteBehandlingId,
-            sakType,
-            virkningstidspunkt,
-            vedtakType,
-            brukerTokenInfo,
-        )
-    }
-
-    suspend fun finnTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
-
-    suspend fun hentVedtaksbehandlingKanRedigeres(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }

@@ -6,6 +6,8 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
@@ -21,6 +23,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,
+    private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
@@ -81,14 +85,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak?.virkningstidspunkt!!,
                     bruker,
                     generellBrevData.sak.sakType,
                 )
             }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
         if (generellBrevData.erForeldreloes()) {
             BarnepensjonForeldreloesRedigerbar.fra(
@@ -109,7 +113,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
             requireNotNull(brevutfall.await()),
@@ -121,11 +125,11 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
         val behandlingId = generellBrevData.behandlingId!!
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
-        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,
@@ -147,7 +151,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandlingId = generellBrevData.behandlingId!!
         val utbetalingsinfo =
             async {
-                brevdataFacade.finnUtbetalingsinfo(
+                beregningService.finnUtbetalingsinfo(
                     behandlingId,
                     generellBrevData.forenkletVedtak!!.virkningstidspunkt!!,
                     bruker,
@@ -157,7 +161,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,
@@ -165,7 +169,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     bruker,
                 )
             }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             generellBrevData,
@@ -183,7 +187,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val virkningstidspunkt = generellBrevData.forenkletVedtak!!.virkningstidspunkt!!
         val avkortingsinfo =
             async {
-                brevdataFacade.finnAvkortingsinfo(
+                beregningService.finnAvkortingsinfo(
                     behandlingId,
                     generellBrevData.sak.sakType,
                     virkningstidspunkt,
@@ -191,8 +195,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     bruker,
                 )
             }
-        val etterbetaling = async { brevdataFacade.hentEtterbetaling(behandlingId, bruker) }
-        val brevutfall = async { brevdataFacade.hentBrevutfall(behandlingId, bruker) }
+        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
@@ -205,7 +209,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val brevutfall = async { brevdataFacade.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
             requireNotNull(brevutfall.await()),

@@ -67,10 +67,7 @@ internal class BrevdataFacadeImplTest {
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
-            beregningService,
             behandlingService,
-            trygdetidService,
-            vilkaarsvurderingService,
         )
 
     @BeforeEach

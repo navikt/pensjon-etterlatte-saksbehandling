@@ -76,7 +76,7 @@ class Brevoppretter(
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevtype: Brevtype,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-    ): Pair<Brev, GenerellBrevData> =
+    ): Pair<Brev, String> =
         with(
             hentInnData(
                 sakId,
@@ -98,7 +98,7 @@ class Brevoppretter(
                     innholdVedlegg = innholdVedlegg,
                     brevtype = brevtype,
                 )
-            return Pair(db.opprettBrev(nyttBrev), generellBrevData)
+            return Pair(db.opprettBrev(nyttBrev), generellBrevData.sak.enhet)
         }
 
     suspend fun hentNyttInnhold(

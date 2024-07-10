@@ -67,7 +67,7 @@ class InformasjonsbrevTest(
                         any(),
                         any(),
                     )
-                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, mockk())
+                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, "enhet1")
             }
         val pdfGenerator =
             mockk<PDFGenerator>().also {

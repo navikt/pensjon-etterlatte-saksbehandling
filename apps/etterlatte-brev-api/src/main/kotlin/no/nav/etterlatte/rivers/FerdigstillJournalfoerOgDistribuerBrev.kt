@@ -4,9 +4,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -24,11 +22,11 @@ class FerdigstillJournalfoerOgDistribuerBrev(
     suspend fun ferdigstillOgGenererPDF(
         brevKode: Brevkoder,
         sakId: Long,
-        brevOgData: Pair<Brev, GenerellBrevData>,
         brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+        brevId: BrevID,
     ): BrevID {
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
-        val brevId = brevOgData.first.id
         retryOgPakkUt {
             pdfGenerator.ferdigstillOgGenererPDF(
                 id = brevId,
@@ -36,7 +34,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
                 avsenderRequest = { _, _, _ ->
                     AvsenderRequest(
                         saksbehandlerIdent = Fagsaksystem.EY.navn,
-                        sakenhet = brevOgData.second.sak.enhet,
+                        sakenhet = enhet,
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },

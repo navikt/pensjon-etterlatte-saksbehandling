@@ -32,7 +32,17 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
             if (generellBrevData.loependeIPesys()) {
-                fraPesys(generellBrevData, brukerTokenInfo)
+                fraPesys(
+                    generellBrevData,
+                    brukerTokenInfo,
+                    generellBrevData.erForeldreloes(),
+                    generellBrevData.behandlingId!!,
+                    generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                    generellBrevData.sak.sakType,
+                    generellBrevData.systemkilde,
+                    generellBrevData.loependeIPesys(),
+                    generellBrevData.personerISak.avdoede,
+                )
             } else {
                 brevData(generellBrevData, brukerTokenInfo)
             }
@@ -41,17 +51,24 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     private suspend fun fraPesys(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
+        erForeldreloes: Boolean,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth?,
+        sakType: SakType,
+        systemkilde: Vedtaksloesning,
+        loependeIPesys: Boolean,
+        avdoede: List<Avdoed>,
     ): BrevDataRedigerbar {
-        if (generellBrevData.erForeldreloes()) {
+        if (erForeldreloes) {
             return barnepensjonInnvilgelse(
                 brukerTokenInfo,
-                generellBrevData.behandlingId!!,
-                generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                generellBrevData.sak.sakType,
-                generellBrevData.erForeldreloes(),
-                generellBrevData.systemkilde,
-                generellBrevData.loependeIPesys(),
-                generellBrevData.personerISak.avdoede,
+                behandlingId,
+                virkningstidspunkt,
+                sakType,
+                erForeldreloes,
+                systemkilde,
+                loependeIPesys,
+                avdoede,
             )
         }
         return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, brukerTokenInfo)

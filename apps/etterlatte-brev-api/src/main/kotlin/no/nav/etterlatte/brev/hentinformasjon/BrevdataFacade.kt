@@ -17,7 +17,9 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -78,68 +80,7 @@ class BrevdataFacade(
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
 
-            val forenkletVedtak: Pair<ForenkletVedtak?, Revurderingaarsak?> =
-                when (vedtak?.type) {
-                    VedtakType.INNVILGELSE,
-                    VedtakType.OPPHOER,
-                    VedtakType.AVSLAG,
-                    VedtakType.ENDRING,
-                    ->
-                        (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
-                            Pair(
-                                ForenkletVedtak(
-                                    vedtak.id,
-                                    vedtak.status,
-                                    vedtak.type,
-                                    sak.enhet,
-                                    saksbehandlerIdent,
-                                    attestantIdent,
-                                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                                    virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-                                    revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
-                                ),
-                                vedtakInnhold.behandling.revurderingsaarsak,
-                            )
-                        }
-
-                    VedtakType.TILBAKEKREVING ->
-                        Pair(
-                            ForenkletVedtak(
-                                vedtak.id,
-                                vedtak.status,
-                                vedtak.type,
-                                sak.enhet,
-                                saksbehandlerIdent,
-                                attestantIdent,
-                                vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                                tilbakekreving =
-                                    objectMapper.readValue(
-                                        (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
-                                    ),
-                            ),
-                            null,
-                        )
-
-                    VedtakType.AVVIST_KLAGE ->
-                        Pair(
-                            ForenkletVedtak(
-                                vedtak.id,
-                                vedtak.status,
-                                vedtak.type,
-                                sak.enhet,
-                                saksbehandlerIdent,
-                                null,
-                                vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                                klage =
-                                    objectMapper.readValue(
-                                        (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
-                                    ),
-                            ),
-                            null,
-                        )
-
-                    null -> Pair(null, null)
-                }
+            val forenkletVedtak = vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent)
 
             GenerellBrevData(
                 sak = sak,
@@ -151,5 +92,73 @@ class BrevdataFacade(
                 systemkilde = systemkilde,
                 utlandstilknytning = behandling?.utlandstilknytning,
             )
+        }
+
+    private fun vedtakOgRevurderingsaarsak(
+        vedtak: VedtakDto?,
+        sak: Sak,
+        saksbehandlerIdent: String,
+        attestantIdent: String?,
+    ): Pair<ForenkletVedtak?, Revurderingaarsak?> =
+        when (vedtak?.type) {
+            VedtakType.INNVILGELSE,
+            VedtakType.OPPHOER,
+            VedtakType.AVSLAG,
+            VedtakType.ENDRING,
+            ->
+                (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
+                    Pair(
+                        ForenkletVedtak(
+                            vedtak.id,
+                            vedtak.status,
+                            vedtak.type,
+                            sak.enhet,
+                            saksbehandlerIdent,
+                            attestantIdent,
+                            vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                            virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
+                            revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
+                        ),
+                        vedtakInnhold.behandling.revurderingsaarsak,
+                    )
+                }
+
+            VedtakType.TILBAKEKREVING ->
+                Pair(
+                    ForenkletVedtak(
+                        vedtak.id,
+                        vedtak.status,
+                        vedtak.type,
+                        sak.enhet,
+                        saksbehandlerIdent,
+                        attestantIdent,
+                        vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                        tilbakekreving =
+                            objectMapper.readValue(
+                                (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                            ),
+                    ),
+                    null,
+                )
+
+            VedtakType.AVVIST_KLAGE ->
+                Pair(
+                    ForenkletVedtak(
+                        vedtak.id,
+                        vedtak.status,
+                        vedtak.type,
+                        sak.enhet,
+                        saksbehandlerIdent,
+                        null,
+                        vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                        klage =
+                            objectMapper.readValue(
+                                (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
+                            ),
+                    ),
+                    null,
+                )
+
+            null -> Pair(null, null)
         }
 }

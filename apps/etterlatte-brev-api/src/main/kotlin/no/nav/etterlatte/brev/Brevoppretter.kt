@@ -44,7 +44,7 @@ class Brevoppretter(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -73,7 +73,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevtype: Brevtype,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
         with(
             hentInnData(
@@ -105,7 +105,7 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
 
@@ -139,7 +139,7 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
@@ -156,8 +156,8 @@ class Brevoppretter(
         val kode = brevKodeMapping(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
-            val redigerbarTekstRequest =
-                RedigerbarTekstRequest(
+            val brevDataRedigerbarRequest =
+                BrevDataRedigerbarRequest(
                     brukerTokenInfo = bruker,
                     soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                     sakType = generellBrevData.sak.sakType,
@@ -170,7 +170,7 @@ class Brevoppretter(
                     systemkilde = generellBrevData.systemkilde,
                     avdoede = generellBrevData.personerISak.avdoede,
                 )
-            val brevData: BrevDataRedigerbar = brevDataMapping(redigerbarTekstRequest)
+            val brevData: BrevDataRedigerbar = brevDataMapping(brevDataRedigerbarRequest)
 
             val innhold =
                 async {

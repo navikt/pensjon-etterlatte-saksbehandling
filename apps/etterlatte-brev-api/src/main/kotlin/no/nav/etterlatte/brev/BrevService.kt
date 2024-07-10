@@ -32,7 +32,7 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Brev =
         brevoppretter
             .opprettBrev(

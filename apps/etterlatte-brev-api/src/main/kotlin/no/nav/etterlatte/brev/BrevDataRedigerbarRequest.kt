@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
-data class RedigerbarTekstRequest(
+data class BrevDataRedigerbarRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val soekerOgEventuellVerge: SoekerOgEventuellVerge,
     val sakType: SakType,

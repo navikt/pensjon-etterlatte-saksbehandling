@@ -150,14 +150,14 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland: Boolean,
         erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
-        generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
+        borIutland,
+        erOver18aar,
+        brevdataFacade
+            .hentGenerellBrevData(
                 sakId = sakId,
                 behandlingId = null,
                 brukerTokenInfo = Systembruker.brev,
-            ),
-        borIutland,
-        erOver18aar,
+            ).personerISak.avdoede,
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(

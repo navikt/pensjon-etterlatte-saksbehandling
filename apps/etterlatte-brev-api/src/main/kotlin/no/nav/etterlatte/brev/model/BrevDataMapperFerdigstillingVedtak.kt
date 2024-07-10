@@ -144,7 +144,11 @@ class BrevDataMapperFerdigstillingVedtak(
                         generellBrevData.forenkletVedtak.virkningstidspunkt!!,
                     )
 
-                OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
+                OMSTILLINGSSTOENAD_AVSLAG ->
+                    OmstillingsstoenadAvslag.fra(
+                        innholdMedVedlegg.innhold(),
+                        generellBrevData.utlandstilknytning?.type,
+                    )
                 OMSTILLINGSSTOENAD_OPPHOER ->
                     omstillingsstoenadOpphoer(
                         bruker,

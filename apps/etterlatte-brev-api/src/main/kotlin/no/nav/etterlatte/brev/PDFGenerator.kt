@@ -34,7 +34,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
         brevKodeMapper: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
@@ -48,7 +48,7 @@ class PDFGenerator(
                 bruker,
                 avsenderRequest,
                 brevKodeMapper,
-                brevData,
+                brevDataMapping,
                 lagrePdfHvisVedtakFattet,
             )
         db.lagrePdfOgFerdigstillBrev(id, pdf)
@@ -60,7 +60,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
         brevKodeMapper: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -93,7 +93,7 @@ class PDFGenerator(
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
                 brevData =
-                    brevData(
+                    brevDataMapping(
                         BrevDataFerdigstillingRequest(
                             loependeIPesys = generellBrevData.loependeIPesys(),
                             behandlingId = generellBrevData.behandlingId,

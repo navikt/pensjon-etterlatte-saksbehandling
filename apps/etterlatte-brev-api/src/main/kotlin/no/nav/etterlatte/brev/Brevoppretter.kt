@@ -44,7 +44,7 @@ class Brevoppretter(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevKodeMapper: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -63,7 +63,7 @@ class Brevoppretter(
             bruker = brukerTokenInfo,
             brevKodeMapper = brevKodeMapper,
             brevtype = Brevtype.VEDTAK,
-            brevDataMapping = brevDataMapper,
+            brevDataMapping = brevDataMapping,
         ).first
     }
 

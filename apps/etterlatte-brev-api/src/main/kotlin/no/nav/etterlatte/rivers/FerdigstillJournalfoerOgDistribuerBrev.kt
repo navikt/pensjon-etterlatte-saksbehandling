@@ -39,7 +39,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
                     )
                 },
                 brevKodeMapper = { brevKode },
-                brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         return brevId

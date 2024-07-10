@@ -171,7 +171,7 @@ class OversendelseBrevServiceImpl(
             bruker = brukerTokenInfo,
             avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
             brevKodeMapper = { Brevkoder.OVERSENDELSE_KLAGE },
-            brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+            brevDataMapping = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
         )
     }
 
@@ -229,7 +229,7 @@ class OversendelseBrevServiceImpl(
                     bruker = brukerTokenInfo,
                     avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
                     brevKodeMapper = { Brevkoder.OVERSENDELSE_KLAGE },
-                    brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+                    brevDataMapping = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
                 )
             }
         return pdf

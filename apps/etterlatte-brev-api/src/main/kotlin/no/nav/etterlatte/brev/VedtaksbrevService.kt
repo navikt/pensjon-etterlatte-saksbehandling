@@ -66,7 +66,7 @@ class VedtaksbrevService(
             bruker = bruker,
             avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
             brevKodeMapper = { brevKodeMapperVedtak.brevKode(it) },
-            brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
+            brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtakStatus, saksbehandler, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,

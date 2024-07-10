@@ -83,7 +83,7 @@ internal class VarselbrevService(
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
-        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
+        brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 
     suspend fun genererPdf(
@@ -99,6 +99,6 @@ internal class VarselbrevService(
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
-        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
+        brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }

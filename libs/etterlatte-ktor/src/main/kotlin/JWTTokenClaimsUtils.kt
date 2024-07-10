@@ -6,13 +6,13 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
-fun ApplicationCall.hentTokenClaims(issuerName: String): JwtTokenClaims? =
+fun ApplicationCall.hentTokenClaimsForIssuerName(issuerName: String): JwtTokenClaims? =
     this
         .principal<TokenValidationContextPrincipal>()
         ?.context
-        ?.let { it.hentTokenClaims(issuerName) }
+        ?.let { it.hentTokenClaimsForIssuerName(issuerName) }
 
-fun TokenValidationContext?.hentTokenClaims(issuerName: String): JwtTokenClaims? =
+fun TokenValidationContext?.hentTokenClaimsForIssuerName(issuerName: String): JwtTokenClaims? =
     this
         ?.getJwtToken(issuerName)
         ?.jwtTokenClaims

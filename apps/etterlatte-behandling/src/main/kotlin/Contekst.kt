@@ -2,8 +2,9 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -45,8 +46,8 @@ class SystemUser(
 ) : ExternalUser(identifiedBy) {
     override fun name(): String =
         identifiedBy
-            .hentTokenClaims(AZURE_ISSUER)
-            ?.getStringClaim("azp_name") // format=cluster:namespace:app-name
+            .hentTokenClaimsForIssuerName(AZURE_ISSUER)
+            ?.getStringClaim(Claims.azp_name.name) // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
 }
 
@@ -61,7 +62,7 @@ class SaksbehandlerMedEnheterOgRoller(
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
 
-    override fun name(): String = identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
+    override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(AZURE_ISSUER)!!.getStringClaim(Claims.NAVident.name)
 
     private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 

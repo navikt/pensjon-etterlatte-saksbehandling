@@ -13,8 +13,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
+import no.nav.etterlatte.libs.ktor.MASKINPORTEN
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.route.dato
 
 fun Route.samordningVedtakRoute(
@@ -147,7 +148,7 @@ inline val ApplicationCall.orgNummer: String
     get() {
         val claims =
             this
-                .hentTokenClaims("maskinporten")
+                .hentTokenClaimsForIssuerName(MASKINPORTEN)
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]

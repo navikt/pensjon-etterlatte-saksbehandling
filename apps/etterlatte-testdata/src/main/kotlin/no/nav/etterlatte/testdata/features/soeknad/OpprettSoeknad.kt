@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
@@ -49,7 +50,7 @@ object OpprettSoeknadFeature : TestDataFeature {
                                     barnFnr = it["fnrBarn"]!!,
                                     behandlingssteg = Behandlingssteg.BEHANDLING_OPPRETTA,
                                 ),
-                                mapOf("NavIdent" to (brukerTokenInfo.ident().toByteArray())),
+                                mapOf(Claims.NAVident.name to (brukerTokenInfo.ident().toByteArray())),
                             )
                         }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")

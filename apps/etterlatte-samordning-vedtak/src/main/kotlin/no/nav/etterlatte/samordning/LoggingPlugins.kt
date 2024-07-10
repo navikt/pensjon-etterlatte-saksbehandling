@@ -16,6 +16,7 @@ import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.MASKINPORTEN
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
 import no.nav.etterlatte.libs.ktor.STARTTIME
@@ -24,7 +25,6 @@ import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
 import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.getClaim
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -66,11 +66,11 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Selvbetjening" // Altså en borger/privatperson
                 } else if (principal?.context?.issuers?.contains(AZURE_ISSUER) == true) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
-                        is Saksbehandler -> bruker.jwtTokenClaims?.getClaim(Claims.NAVident) ?: ""
+                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim(Claims.azp_name.name) ?: bruker.sub
+                        is Saksbehandler -> bruker.jwtTokenClaims?.getStringClaim(Claims.NAVident.name) ?: ""
                         else -> "Ukjent"
                     }
-                } else if (principal?.context?.issuers?.contains("maskinporten") == true) {
+                } else if (principal?.context?.issuers?.contains(MASKINPORTEN) == true) {
                     call.orgNummer
                 } else {
                     "Ukjent"

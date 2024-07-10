@@ -1,6 +1,7 @@
 package no.nav.etterlatte.ktor
 
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
@@ -18,7 +19,7 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
             claims =
                 mapOf(
                     "navn" to navn,
-                    "NAVident" to navIdent,
+                    Claims.NAVident.name to navIdent,
                     "groups" to groups,
                 ),
         ).serialize()

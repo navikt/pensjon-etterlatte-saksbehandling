@@ -5,8 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -35,11 +36,11 @@ class SaksbehandlerMedEnheterOgRollerTest {
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         every {
-            tokenClaims.getStringClaim(any())
+            tokenClaims.getStringClaim(Claims.NAVident.name)
         } returns "NAVIdent"
 
         every {
-            identifiedBy.hentTokenClaims(any())
+            identifiedBy.hentTokenClaimsForIssuerName(any())
         } returns tokenClaims
 
         every {

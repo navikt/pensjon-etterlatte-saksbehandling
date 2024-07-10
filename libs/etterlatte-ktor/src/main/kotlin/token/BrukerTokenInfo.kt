@@ -29,7 +29,7 @@ sealed class BrukerTokenInfo {
             claims: JwtTokenClaims?,
         ): BrukerTokenInfo =
             if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getStringClaim("azp_name"), claims)
+                Systembruker(oid!!, sub!!, ident = claims?.getStringClaim(Claims.azp_name.name) ?: sub, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -94,6 +94,10 @@ data class Saksbehandler(
 enum class Claims {
     NAVident,
 
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    azp_name,
+
+    // systembruker applikasjonsnavn
     @Suppress("ktlint:standard:enum-entry-name-case")
     oid,
 

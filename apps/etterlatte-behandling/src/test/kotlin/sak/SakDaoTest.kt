@@ -74,7 +74,6 @@ internal class SakDaoTest(
         val fnrMedBehandling = "1231234"
         val opprettSak = sakRepo.opprettSak(fnrMedBehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val fnrUtenbehandling = "123124124"
-        val sakutenopprettet = sakRepo.opprettSak(fnrUtenbehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -245,7 +244,6 @@ internal class SakDaoTest(
             val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             val saker =
                 sakRepo.hentSaker(

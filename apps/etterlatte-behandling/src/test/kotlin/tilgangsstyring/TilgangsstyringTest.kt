@@ -43,7 +43,6 @@ class TilgangsstyringTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("testdata")
     fun `sjekk for skrivetilgang`(
-        beskrivelse: String,
         route: String,
         user: SaksbehandlerMedEnheterOgRoller,
         sakTilgangDao: SakTilgangDao,

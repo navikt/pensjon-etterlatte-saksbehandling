@@ -23,7 +23,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
     )
     @MethodSource("saksbehandlere")
     fun `saksbehandler faar riktig skrive og lesetilgang enheter`(
-        beskrivelse: String,
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,

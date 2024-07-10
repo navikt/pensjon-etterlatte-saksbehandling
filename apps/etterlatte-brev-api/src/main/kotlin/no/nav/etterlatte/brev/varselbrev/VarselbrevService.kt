@@ -29,7 +29,7 @@ internal class VarselbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VarselbrevResponse {
+    ): Brev {
         val sakType = behandlingService.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
 
@@ -47,9 +47,7 @@ internal class VarselbrevService(
                     it.utlandstilknytningType,
                     it.revurderingsaarsak,
                 )
-            }.let {
-                VarselbrevResponse(it.first, it.second, brevkode)
-            }
+            }.first
     }
 
     private suspend fun hentBrevkode(
@@ -106,6 +104,4 @@ internal class VarselbrevService(
 
 data class VarselbrevResponse(
     val brev: Brev,
-    val generellBrevData: GenerellBrevData,
-    val brevkoder: Brevkoder,
 )

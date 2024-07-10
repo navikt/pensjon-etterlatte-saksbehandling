@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -25,20 +23,23 @@ data class TilbakekrevingBrevDTO(
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             redigerbart: List<Slate.Element>,
+            muligTilbakekreving: Tilbakekreving?,
+            sakType: SakType,
+            utlandstilknytningType: UtlandstilknytningType?,
+            soekerNavn: String,
         ): TilbakekrevingBrevDTO {
             val tilbakekreving =
-                generellBrevData.forenkletVedtak?.tilbakekreving
+                muligTilbakekreving
                     ?: throw BrevDataTilbakerevingHarManglerException("Vedtak mangler tilbakekreving")
 
             val perioderSortert = tilbakekreving.perioder.sortedBy { it.maaned }
 
             return TilbakekrevingBrevDTO(
                 innhold = redigerbart,
-                sakType = generellBrevData.sak.sakType,
-                bosattUtland = generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                brukerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
+                sakType = sakType,
+                bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerNavn = soekerNavn,
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
                 varselVedlagt = tilbakekreving.vurdering?.forhaandsvarsel != null,
                 datoVarselEllerVedtak = requireNotNull(tilbakekreving.vurdering?.forhaandsvarselDato),

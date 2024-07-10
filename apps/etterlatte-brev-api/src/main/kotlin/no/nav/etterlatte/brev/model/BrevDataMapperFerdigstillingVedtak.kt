@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -153,7 +154,14 @@ class BrevDataMapperFerdigstillingVedtak(
                         generellBrevData.utlandstilknytning?.type,
                     )
 
-                TILBAKEKREVING_FERDIG -> TilbakekrevingBrevDTO.fra(generellBrevData, innholdMedVedlegg.innhold())
+                TILBAKEKREVING_FERDIG ->
+                    TilbakekrevingBrevDTO.fra(
+                        innholdMedVedlegg.innhold(),
+                        generellBrevData.forenkletVedtak?.tilbakekreving,
+                        generellBrevData.sak.sakType,
+                        generellBrevData.utlandstilknytning?.type,
+                        generellBrevData.personerISak.soeker.formaterNavn(),
+                    )
 
                 AVVIST_KLAGE_FERDIG ->
                     AvvistKlageFerdigData.fra(

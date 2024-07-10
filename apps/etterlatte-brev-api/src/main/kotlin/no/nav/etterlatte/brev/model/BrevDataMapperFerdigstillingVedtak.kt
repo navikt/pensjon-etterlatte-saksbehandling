@@ -68,8 +68,20 @@ class BrevDataMapperFerdigstillingVedtak(
                 BARNEPENSJON_INNVILGELSE,
                 BARNEPENSJON_INNVILGELSE_FORELDRELOES,
                 -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
-                BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
-                BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(bruker, innholdMedVedlegg, generellBrevData)
+                BARNEPENSJON_AVSLAG ->
+                    barnepensjonAvslag(
+                        innholdMedVedlegg,
+                        generellBrevData.personerISak.soeker.under18,
+                        generellBrevData.utlandstilknytning?.type,
+                    )
+                BARNEPENSJON_OPPHOER ->
+                    barnepensjonOpphoer(
+                        bruker,
+                        innholdMedVedlegg,
+                        generellBrevData.behandlingId!!,
+                        generellBrevData.utlandstilknytning?.type,
+                        generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1),
+                    )
 
                 OMSTILLINGSSTOENAD_INNVILGELSE ->
                     omstillingsstoenadInnvilgelse(
@@ -245,27 +257,30 @@ class BrevDataMapperFerdigstillingVedtak(
 
     private fun barnepensjonAvslag(
         innholdMedVedlegg: InnholdMedVedlegg,
-        generellBrevData: GenerellBrevData,
+        soekerUnder18: Boolean?,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = BarnepensjonAvslag.fra(
         innhold = innholdMedVedlegg,
         // TODO må kunne sette brevutfall ved avslag.
         //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
-        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+        brukerUnder18Aar = soekerUnder18 ?: true,
+        utlandstilknytning = utlandstilknytningType,
     )
 
     private suspend fun barnepensjonOpphoer(
         bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
-        generellBrevData: GenerellBrevData,
+        behandlingId: UUID,
+        utlandstilknytningType: UtlandstilknytningType?,
+        virkningsdato: LocalDate?,
     ) = coroutineScope {
-        val brevutfall = async { behandlingService.hentBrevutfall(generellBrevData.behandlingId!!, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonOpphoer.fra(
             innholdMedVedlegg,
-            generellBrevData,
-            generellBrevData.utlandstilknytning?.type,
+            utlandstilknytningType,
             requireNotNull(brevutfall.await()),
+            virkningsdato,
         )
     }
 

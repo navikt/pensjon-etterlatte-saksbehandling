@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -25,9 +24,9 @@ data class BarnepensjonOpphoer(
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
-            generellBrevData: GenerellBrevData,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
+            virkningsdato: LocalDate?,
         ): BarnepensjonOpphoer {
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
 
@@ -41,7 +40,7 @@ data class BarnepensjonOpphoer(
                     ),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
+                virkningsdato = requireNotNull(virkningsdato),
                 feilutbetaling = feilutbetaling,
             )
         }

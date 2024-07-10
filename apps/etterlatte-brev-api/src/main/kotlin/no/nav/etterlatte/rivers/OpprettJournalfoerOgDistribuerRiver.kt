@@ -164,13 +164,13 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: Long,
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
-        generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
+        borIutland,
+        brevdataFacade
+            .hentGenerellBrevData(
                 sakId = sakId,
                 behandlingId = null,
                 brukerTokenInfo = Systembruker.brev,
-            ),
-        borIutland,
+            ).personerISak.avdoede,
     )
 }
 

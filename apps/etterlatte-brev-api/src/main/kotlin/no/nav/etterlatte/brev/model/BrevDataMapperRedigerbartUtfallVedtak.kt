@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
@@ -26,7 +25,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BrevDataMapperRedigerbartUtfallVedtak(
-    private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,

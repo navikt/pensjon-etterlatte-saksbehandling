@@ -49,16 +49,24 @@ class RedigerbartVedleggHenter(
             )
         return vedlegg
             .map {
-                hentInnholdFraBrevbakeren(
-                    kode = it.first,
+                BrevInnholdVedlegg(
+                    tittel = it.first.tittel!!,
                     key = it.second,
-                    bruker = bruker,
-                    soekerOgEventuellVerge = soekerOgEventuellVerge,
-                    sakId = sakId,
-                    forenkletVedtak = forenkletVedtak,
-                    enhet = enhet,
-                    sakType = sakType,
-                    spraak = spraak,
+                    payload =
+                        brevbakerService.hentRedigerbarTekstFraBrevbakeren(
+                            BrevbakerRequest.fra(
+                                brevKode = it.first,
+                                brevData = ManueltBrevData(),
+                                avsender =
+                                    adresseService.hentAvsender(
+                                        opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
+                                    ),
+                                soekerOgEventuellVerge = soekerOgEventuellVerge,
+                                sakId = sakId,
+                                spraak = spraak,
+                                sakType = sakType,
+                            ),
+                        ),
                 )
             }.toList()
     }
@@ -192,37 +200,6 @@ class RedigerbartVedleggHenter(
             }
         }
     }
-
-    private suspend fun hentInnholdFraBrevbakeren(
-        kode: EtterlatteBrevKode,
-        key: BrevVedleggKey,
-        bruker: BrukerTokenInfo,
-        soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        sakId: Long,
-        forenkletVedtak: ForenkletVedtak?,
-        enhet: String,
-        sakType: SakType,
-        spraak: Spraak,
-    ): BrevInnholdVedlegg =
-        BrevInnholdVedlegg(
-            tittel = kode.tittel!!,
-            key = key,
-            payload =
-                brevbakerService.hentRedigerbarTekstFraBrevbakeren(
-                    BrevbakerRequest.fra(
-                        brevKode = kode,
-                        brevData = ManueltBrevData(),
-                        avsender =
-                            adresseService.hentAvsender(
-                                opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
-                            ),
-                        soekerOgEventuellVerge = soekerOgEventuellVerge,
-                        sakId = sakId,
-                        spraak = spraak,
-                        sakType = sakType,
-                    ),
-                ),
-        )
 
     private suspend fun harFeilutbetalingMedVarsel(
         bruker: BrukerTokenInfo,

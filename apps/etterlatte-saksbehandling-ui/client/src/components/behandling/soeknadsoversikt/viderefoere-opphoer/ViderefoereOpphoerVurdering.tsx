@@ -5,8 +5,8 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterBehandlingsstatus, oppdaterUtlandstilknytning } from '~store/reducers/BehandlingReducer'
-import { lagreUtlandstilknytning } from '~shared/api/behandling'
+import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
+import { lagreViderefoertOpphoer } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { VilkaarType } from '~shared/api/vilkaarsvurdering'
 
@@ -34,14 +34,15 @@ export const ViderefoereOpphoerVurdering = ({
   const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
   const [vilkaarError, setVilkaarError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
-  const [setUtlandstilknytningStatus, setUtlandstilknytning, resetToInitial] = useApiCall(lagreUtlandstilknytning)
+  const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
+  const [kravdato] = useState<string | undefined>()
 
   const lagre = (onSuccess?: () => void) => {
     !opphoerstidspunkt ? setVilkaarError('Du må velge et vilkår som ikke lenger blir oppfylt') : setVilkaarError('')
 
     if (vilkaar !== undefined)
-      return setUtlandstilknytning({ behandlingId, begrunnelse, svar: vilkaar }, (utlandstilknyningstype) => {
-        dispatch(oppdaterUtlandstilknytning(utlandstilknyningstype))
+      return setViderefoertOpphoer({ behandlingId, begrunnelse, vilkaar, kravdato }, (utlandstilknyningstype) => {
+        dispatch(oppdaterViderefoertOpphoer(utlandstilknyningstype))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       })
@@ -113,7 +114,7 @@ export const ViderefoereOpphoerVurdering = ({
           }}
         />
         {isFailureHandler({
-          apiResult: setUtlandstilknytningStatus,
+          apiResult: setViderefoertOpphoerStatus,
           errorMessage: 'Kunne ikke lagre opphørsdato',
         })}
       </>

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
+import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -109,14 +110,16 @@ class VarselbrevTest(
                 } returns listOf()
             }
         val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+
+        val innholdTilRedigerbartBrevHenter =
+            InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbaker, adresseService, redigerbartVedleggHenter)
+
         val brevoppretter =
             Brevoppretter(
                 adresseService,
                 brevRepository,
-                brevdataFacade,
                 behandlingService,
-                brevbaker,
-                redigerbartVedleggHenter,
+                innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()
         service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())

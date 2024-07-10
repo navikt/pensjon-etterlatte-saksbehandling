@@ -170,7 +170,6 @@ class Brevoppretter(
                     loependeIPesys = generellBrevData.loependeIPesys(),
                     systemkilde = generellBrevData.systemkilde,
                     avdoede = generellBrevData.personerISak.avdoede,
-                    generellBrevData = generellBrevData,
                 )
             val brevData: BrevDataRedigerbar = brevDataMapping(redigerbarTekstRequest)
 

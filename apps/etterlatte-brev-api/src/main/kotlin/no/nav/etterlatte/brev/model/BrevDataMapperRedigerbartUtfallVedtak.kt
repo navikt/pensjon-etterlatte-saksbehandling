@@ -34,40 +34,37 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
-            if (generellBrevData.loependeIPesys()) {
+            if (loependeIPesys) {
                 fraPesys(
                     brukerTokenInfo = brukerTokenInfo,
-                    erForeldreloes = generellBrevData.erForeldreloes(),
-                    behandlingId = generellBrevData.behandlingId!!,
-                    virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                    sakType = generellBrevData.sak.sakType,
-                    systemkilde = generellBrevData.systemkilde,
-                    loependeIPesys = generellBrevData.loependeIPesys(),
-                    avdoede = generellBrevData.personerISak.avdoede,
-                    utlandstilknytningType = generellBrevData.utlandstilknytning!!.type,
+                    erForeldreloes = erForeldreloes,
+                    behandlingId = behandlingId!!,
+                    virkningstidspunkt = forenkletVedtak?.virkningstidspunkt,
+                    sakType = sakType,
+                    systemkilde = systemkilde,
+                    loependeIPesys = true,
+                    avdoede = avdoede,
+                    utlandstilknytningType = utlandstilknytningType!!,
                     erForeldreloesUtenForeldreverge =
-                        generellBrevData.personerISak.soeker.foreldreloes ||
-                            (
-                                generellBrevData.personerISak.avdoede.size > 1 &&
-                                    generellBrevData.personerISak.verge !is ForelderVerge
-                            ),
+                        soekerOgEventuellVerge.soeker.foreldreloes ||
+                            (avdoede.size > 1 && soekerOgEventuellVerge.verge !is ForelderVerge),
                     // Er litt usikker på hvorfor denne bruker en annen foreldreløs-sjekk enn resten av koden,
                     // men frister lite å endre på det nå når migreringa/gjenopprettinga fra pesys
                     // nærmer seg veldig ferdig
-                    erSystembruker = generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn,
+                    erSystembruker = forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn,
                 )
             } else {
                 brevData(
                     brukerTokenInfo,
-                    generellBrevData.sak.sakType,
-                    generellBrevData.forenkletVedtak?.type,
-                    generellBrevData.behandlingId!!,
-                    generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                    generellBrevData.erForeldreloes(),
-                    generellBrevData.systemkilde,
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.personerISak.avdoede,
-                    generellBrevData.forenkletVedtak?.klage,
+                    sakType,
+                    forenkletVedtak?.type,
+                    behandlingId!!,
+                    forenkletVedtak?.virkningstidspunkt,
+                    erForeldreloes,
+                    systemkilde,
+                    false,
+                    avdoede,
+                    forenkletVedtak?.klage,
                 )
             }
         }

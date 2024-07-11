@@ -27,7 +27,7 @@ export const ViderefoereOpphoer = ({
       <Vurdering>
         {vurdert && (
           <ViderefoereOpphoerVurdering
-            behandling={behandling}
+            virkningstidspunkt={behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null}
             viderefoertOpphoer={behandling.viderefoertOpphoer}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}

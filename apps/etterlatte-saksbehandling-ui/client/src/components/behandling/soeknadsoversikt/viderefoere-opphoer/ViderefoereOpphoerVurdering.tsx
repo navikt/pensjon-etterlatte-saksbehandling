@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { BodyShort, Heading, Label, MonthPicker, UNSAFE_Combobox, useMonthpicker } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
@@ -19,14 +19,14 @@ const VilkaarTypeTittel: Record<VilkaarType, string> = {
 } as const
 
 export const ViderefoereOpphoerVurdering = ({
-  behandling,
+  virkningstidspunkt,
   viderefoertOpphoer,
   redigerbar,
   setVurdert,
   behandlingId,
 }: {
-  behandling: IDetaljertBehandling
   viderefoertOpphoer: ViderefoertOpphoer | null
+  virkningstidspunkt: Date | null
   redigerbar: boolean
   setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
@@ -34,7 +34,7 @@ export const ViderefoereOpphoerVurdering = ({
   const dispatch = useAppDispatch()
 
   const [opphoerstidspunkt, setOpphoerstidspunkt] = useState<Date | null>(
-    behandling.viderefoertOpphoer ? new Date(behandling.viderefoertOpphoer.dato) : null
+    viderefoertOpphoer ? new Date(viderefoertOpphoer.dato) : null
   )
   const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
   const [vilkaarError, setVilkaarError] = useState<string>('')
@@ -76,7 +76,7 @@ export const ViderefoereOpphoerVurdering = ({
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: behandling.virkningstidspunkt ?? opphoerstidspunkt,
+    fromDate: virkningstidspunkt ?? opphoerstidspunkt,
     toDate: addMonths(new Date(), 6),
     onMonthChange: (date: Date) => setOpphoerstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

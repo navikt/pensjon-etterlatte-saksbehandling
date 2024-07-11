@@ -71,7 +71,6 @@ data class Systembruker(
     companion object {
         val brev = Systembruker(Systembrukere.BREV)
         val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
-        val tekniskRetting = Systembruker(Systembrukere.TEKNISK_RETTING)
         val testdata = Systembruker(Systembrukere.TESTDATA)
         val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
     }
@@ -145,7 +144,6 @@ enum class Systembrukere(
 ) {
     BREV("brev"),
     DOEDSHENDELSE("doedshendelse"),
-    TEKNISK_RETTING("teknisk_retting"),
     TESTDATA("testdata"),
     AUTOMATISK_JOBB("automatisk_jobb"),
 }

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
@@ -32,7 +33,10 @@ class DoedshendelseKontrollpunktService(
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
     private val kontrollpunktOMSService = DoedshendelseKontrollpunktOMSService(pesysKlient, behandlingService)
 
-    fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> =
+    fun identifiserKontrollerpunkter(
+        hendelse: DoedshendelseInternal,
+        bruker: BrukerTokenInfo,
+    ): List<DoedshendelseKontrollpunkt> =
         when (hendelse.relasjon) {
             Relasjon.BARN -> {
                 val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
@@ -42,7 +46,14 @@ class DoedshendelseKontrollpunktService(
                 } else {
                     val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, avdoed, barn)
+                    val fellesKontrollpunkter =
+                        fellesKontrollpunkter(
+                            hendelse,
+                            sak,
+                            avdoed,
+                            barn,
+                            bruker,
+                        )
 
                     barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
                 }
@@ -56,8 +67,22 @@ class DoedshendelseKontrollpunktService(
                 } else {
                     val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                    val fellesKontrollpunkts = fellesKontrollpunkter(hendelse, sak, avdoed, eps)
+                    val omsKontrollpunkter =
+                        kontrollpunktOMSService.identifiser(
+                            hendelse,
+                            sak,
+                            eps,
+                            avdoed,
+                            bruker,
+                        )
+                    val fellesKontrollpunkts =
+                        fellesKontrollpunkter(
+                            hendelse,
+                            sak,
+                            avdoed,
+                            eps,
+                            bruker,
+                        )
 
                     ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkts
                 }
@@ -70,8 +95,22 @@ class DoedshendelseKontrollpunktService(
                     listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
                 } else {
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                    val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, avdoed, samboer)
+                    val omsKontrollpunkter =
+                        kontrollpunktOMSService.identifiser(
+                            hendelse,
+                            sak,
+                            samboer,
+                            avdoed,
+                            bruker,
+                        )
+                    val fellesKontrollpunkter =
+                        fellesKontrollpunkter(
+                            hendelse,
+                            sak,
+                            avdoed,
+                            samboer,
+                            bruker,
+                        )
 
                     avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
                 }
@@ -119,10 +158,11 @@ class DoedshendelseKontrollpunktService(
         sak: Sak?,
         avdoed: PersonDTO,
         gjenlevende: PersonDTO,
+        bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> {
         val duplikatKontrollpunkt = kontrollerDuplikatHendelse(hendelse, sak)
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
-        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende)
+        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende, bruker)
 
         return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt, haandtertAvPesys)
     }
@@ -166,10 +206,16 @@ class DoedshendelseKontrollpunktService(
     private fun behandletAvPesys(
         avdoed: PersonDTO,
         gjenlevende: PersonDTO,
+        bruker: BrukerTokenInfo,
     ): DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys? =
         runBlocking {
             try {
-                if (pesysKlient.erTilstoetendeBehandlet(gjenlevende.foedselsnummer.verdi.value, avdoed.doedsdato!!.verdi)) {
+                if (pesysKlient.erTilstoetendeBehandlet(
+                        gjenlevende.foedselsnummer.verdi.value,
+                        avdoed.doedsdato!!.verdi,
+                        bruker,
+                    )
+                ) {
                     DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys
                 } else {
                     null

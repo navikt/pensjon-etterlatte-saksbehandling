@@ -370,11 +370,15 @@ class NavAnsattKlientTest : NavAnsattKlient {
 }
 
 class PesysKlientTest : PesysKlient {
-    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> = emptyList()
+    override suspend fun hentSaker(
+        fnr: String,
+        bruker: BrukerTokenInfo,
+    ): List<SakSammendragResponse> = emptyList()
 
     override suspend fun erTilstoetendeBehandlet(
         fnr: String,
         doedsdato: LocalDate,
+        bruker: BrukerTokenInfo,
     ): Boolean = false
 }
 

@@ -81,10 +81,6 @@ spec:
         groups:
           - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e #SAKSBEHANDLER
           - id: e4eb614b-d37d-4721-ba1b-df8f0fd16f85 # 0000-GA-GJENNY_SAKSBEHANDLER
-
-        extra:
-          - "NAVident"
-          - "azp_name"
   tokenx:
     enabled: true
   env:

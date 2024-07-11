@@ -1135,8 +1135,8 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Oppgaven skal tildeles opprinnelig saksbehandler etter attestering`() {
-        val saksbehandler = BrukerTokenInfo.of("", "saksbehandler", null, null, null)
-        val attestant = BrukerTokenInfo.of("", "attestant", null, null, null)
+        val saksbehandler = BrukerTokenInfo.of("", "saksbehandler", null, null, null, null)
+        val attestant = BrukerTokenInfo.of("", "attestant", null, null, null, null)
 
         val behandlingId = UUID.randomUUID().toString()
         val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)

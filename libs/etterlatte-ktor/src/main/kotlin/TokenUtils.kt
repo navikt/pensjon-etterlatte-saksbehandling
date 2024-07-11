@@ -42,12 +42,13 @@ inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
                     Pair(oid, sub)
                 }
         val saksbehandler = claims?.getClaimAsString(Claims.NAVident)
-
+        val idtyp = claims?.getClaimAsString(Claims.idtyp)
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
             oid = oidSub?.first,
             sub = oidSub?.second,
             saksbehandler = saksbehandler,
+            idtyp = idtyp,
             claims = claims,
         )
     }

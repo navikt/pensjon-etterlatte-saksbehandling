@@ -70,7 +70,7 @@ internal class VilkaarsvurderingServiceTest(
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+    private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
     private val grunnlagMock: Grunnlag = mockk()
 
     @BeforeAll

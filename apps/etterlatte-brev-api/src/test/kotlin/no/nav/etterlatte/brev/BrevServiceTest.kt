@@ -60,7 +60,7 @@ internal class BrevServiceTest {
             pdfGenerator,
         )
 
-    private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
+    private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null, null)
 
     @BeforeEach
     fun before() {

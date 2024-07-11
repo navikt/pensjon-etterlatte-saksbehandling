@@ -830,6 +830,6 @@ internal class VilkaarsvurderingRoutesTest(
         val dbExtension = DatabaseExtension()
 
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val oboToken = BrukerTokenInfo.of("token", "s1", null, null, null, null)
     }
 }

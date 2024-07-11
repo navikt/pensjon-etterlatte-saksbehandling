@@ -34,9 +34,10 @@ fun MockOAuth2Server.issueSystembrukerToken(
             audience = CLIENT_ID,
             claims =
                 mapOf(
-                    "sub" to mittsystem,
-                    "oid" to mittsystem,
-                    "azp_name" to mittsystem,
+                    Claims.sub.name to mittsystem,
+                    Claims.oid.name to mittsystem,
+                    Claims.azp_name.name to mittsystem,
                     "roles" to roles,
+                    Claims.idtyp.name to "app",
                 ),
         ).serialize()

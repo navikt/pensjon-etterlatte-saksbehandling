@@ -148,8 +148,8 @@ internal class VedtaksbrevServiceTest {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
-        private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
-        private val ATTESTANT = BrukerTokenInfo.of("token", "attestant", null, null, null)
+        private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null, null)
+        private val ATTESTANT = BrukerTokenInfo.of("token", "attestant", null, null, null, null)
         private val utbetalingsinfo =
             Utbetalingsinfo(
                 1,

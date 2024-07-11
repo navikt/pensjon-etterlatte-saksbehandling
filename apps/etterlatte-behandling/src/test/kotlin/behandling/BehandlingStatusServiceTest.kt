@@ -64,7 +64,7 @@ internal class BehandlingStatusServiceTest {
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val behandlingdao = mockk<BehandlingDao>(relaxUnitFun = true)
 
-    private val brukerTokenInfo = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
+    private val brukerTokenInfo = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null, null)
 
     private val sut =
         BehandlingStatusServiceImpl(

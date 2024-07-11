@@ -50,7 +50,7 @@ internal class NyNotatServiceTest(
             behandlingServiceMock,
         )
 
-    private val saksbehandler = BrukerTokenInfo.of("token", "Z123456", null, null, null)
+    private val saksbehandler = BrukerTokenInfo.of("token", "Z123456", null, null, null, null)
 
     @BeforeEach
     fun before() {

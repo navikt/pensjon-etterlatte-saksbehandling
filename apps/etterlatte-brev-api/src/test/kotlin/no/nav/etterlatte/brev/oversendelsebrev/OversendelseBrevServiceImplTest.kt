@@ -52,7 +52,7 @@ class OversendelseBrevServiceImplTest(
 ) {
     val sakId = 148L
     private val behandlingId = UUID.randomUUID()
-    private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
+    private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null, null)
     private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
     private val grunnlagService = mockk<GrunnlagService>()

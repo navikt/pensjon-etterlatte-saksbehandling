@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
+import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
@@ -17,10 +18,7 @@ sealed class BrukerTokenInfo {
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
 
     companion object {
-        private fun erSystembruker(
-            oid: String?,
-            sub: String?,
-        ) = (oid == sub) && (oid != null)
+        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
 
         fun of(
             accessToken: String,
@@ -28,8 +26,9 @@ sealed class BrukerTokenInfo {
             oid: String?,
             sub: String?,
             claims: JwtTokenClaims?,
+            idtyp: String?,
         ): BrukerTokenInfo =
-            if (erSystembruker(oid = oid, sub = sub)) {
+            if (erSystembruker(idtyp = idtyp)) {
                 Systembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
@@ -47,7 +46,14 @@ data class Systembruker(
     val ident: String? = null,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(oid = omraade.oid, sub = omraade.oid)
+    private constructor(omraade: Systembrukere) : this(
+        oid = omraade.oid,
+        sub = omraade.oid,
+        jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
+            ),
+    )
 
     override fun ident() = ident ?: Fagsaksystem.EY.navn
 
@@ -93,6 +99,14 @@ data class Saksbehandler(
 }
 
 enum class Claims {
+   /*
+    This is a special claim used to determine whether a token is a machine-to-machine (app-only) token or a on-behalf-of (user) token.
+    https://docs.nais.io/auth/entra-id/reference/?h=idtyp#claims
+    https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims-reference#v10-and-v20-optional-claims-set
+    */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    idtyp,
+
    /*
    The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims

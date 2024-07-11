@@ -8,27 +8,17 @@ import org.junit.jupiter.api.Test
 
 internal class BrukerTokenInfoTest {
     @Test
-    fun `er maskin-til-maskin viss oid og sub er like`() {
-        assertTrue(BrukerTokenInfo.of("a", "b", "c", "c", null) is Systembruker)
+    fun `er maskin-til-maskin hvis idtype=app`() {
+        assertTrue(BrukerTokenInfo.of("a", "b", "c", "c", null, idtyp = "app") is Systembruker)
     }
 
     @Test
-    fun `er ikke maskin-til-maskin viss oid og sub er ulike`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null) is Systembruker)
+    fun `er ikke maskin-til-maskin hvis idtype != app`() {
+        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null, idtyp = "ikkeapp") is Systembruker)
     }
 
     @Test
-    fun `er ikke maskin-til-maskin viss oid er null, men sub har verdi`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", null, "d", null) is Systembruker)
-    }
-
-    @Test
-    fun `er ikke maskin-til-maskin viss sub er null, men oid har verdi`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", null, null) is Systembruker)
-    }
-
-    @Test
-    fun `er ikke maskin-til-maskin viss både oid og sub er null`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", null, null, null) is Systembruker)
+    fun `er ikke maskin-til-maskin hvis idtype er tomt`() {
+        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null, idtyp = null) is Systembruker)
     }
 }

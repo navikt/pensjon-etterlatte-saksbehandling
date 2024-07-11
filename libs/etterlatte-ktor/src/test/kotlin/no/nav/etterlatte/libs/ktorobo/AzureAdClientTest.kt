@@ -195,7 +195,7 @@ internal class AzureAdClientTest {
             }
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null),
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null, idtyp = null),
                 listOf(),
             )
         }
@@ -213,7 +213,7 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null),
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null, idtyp = null),
                 listOf(),
             )
         }

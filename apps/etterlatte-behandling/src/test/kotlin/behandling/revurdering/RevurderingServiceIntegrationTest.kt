@@ -537,7 +537,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             applicationContext.behandlingService.avbrytBehandling(
                 revurderingen.id,
-                BrukerTokenInfo.of("acc", "saksbehandler", oid = null, sub = "sub", claims = null),
+                BrukerTokenInfo.of("acc", "saksbehandler", oid = null, sub = "sub", claims = null, idtyp = null),
             )
         }
 
@@ -956,7 +956,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 }
                 this.ferdigstillOppgave(
                     id = it.id,
-                    saksbehandler = BrukerTokenInfo.of("acc", saksbehandlerId, oid = null, sub = "sub", claims = null),
+                    saksbehandler = BrukerTokenInfo.of("acc", saksbehandlerId, oid = null, sub = "sub", claims = null, idtyp = null),
                 )
             }
         }

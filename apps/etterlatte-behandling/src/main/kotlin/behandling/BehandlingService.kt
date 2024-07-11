@@ -548,13 +548,14 @@ internal class BehandlingServiceImpl(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
+        val viderefoertOpphoer: ViderefoertOpphoer?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling, viderefoertOpphoer) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -565,7 +566,8 @@ internal class BehandlingServiceImpl(
                     kommerBarnetTilGodeDao
                         .hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling)
+                val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(behandlingId)
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, viderefoertOpphoer)
             }
 
         val sakId = behandling.sak.id
@@ -592,6 +594,7 @@ internal class BehandlingServiceImpl(
             begrunnelse = behandling.begrunnelse(),
             kilde = behandling.kilde,
             sendeBrev = behandling.sendeBrev,
+            viderefoertOpphoer = viderefoertOpphoer,
         )
     }
 

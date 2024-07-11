@@ -51,8 +51,8 @@ export const ViderefoereOpphoerVurdering = ({
     setVilkaarError(valider())
 
     if (vilkaar !== undefined)
-      return setViderefoertOpphoer({ behandlingId, begrunnelse, vilkaar, kravdato }, (utlandstilknyningstype) => {
-        dispatch(oppdaterViderefoertOpphoer(utlandstilknyningstype))
+      return setViderefoertOpphoer({ behandlingId, begrunnelse, vilkaar, kravdato }, (viderefoertOpphoer) => {
+        dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       })

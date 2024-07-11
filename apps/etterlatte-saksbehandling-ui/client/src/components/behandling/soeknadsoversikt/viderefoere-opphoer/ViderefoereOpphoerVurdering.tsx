@@ -1,14 +1,17 @@
 import { IBehandlingStatus, IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { Heading, Label, UNSAFE_Combobox } from '@navikt/ds-react'
+import { BodyShort, Heading, Label, MonthPicker, UNSAFE_Combobox, useMonthpicker } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { lagreViderefoertOpphoer } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { VilkaarType } from '~shared/api/vilkaarsvurdering'
+import { formaterDato } from '~utils/formatering/dato'
+import { addMonths } from 'date-fns'
+import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 
 const VilkaarTypeTittel: Record<VilkaarType, string> = {
   [VilkaarType.BP_FORMAAL_2024]: 'BP formål',
@@ -30,7 +33,9 @@ export const ViderefoereOpphoerVurdering = ({
 }) => {
   const dispatch = useAppDispatch()
 
-  const [opphoerstidspunkt] = useState<Date | null>(behandling.opphoerFom ? new Date(behandling.opphoerFom.dato) : null)
+  const [opphoerstidspunkt, setOpphoerstidspunkt] = useState<Date | null>(
+    behandling.opphoerFom ? new Date(behandling.opphoerFom.dato) : null
+  )
   const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
   const [vilkaarError, setVilkaarError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
@@ -51,11 +56,14 @@ export const ViderefoereOpphoerVurdering = ({
     setVilkaarError(valider())
 
     if (vilkaar !== undefined)
-      return setViderefoertOpphoer({ behandlingId, begrunnelse, vilkaar, kravdato }, (viderefoertOpphoer) => {
-        dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-        onSuccess?.()
-      })
+      return setViderefoertOpphoer(
+        { behandlingId, begrunnelse, vilkaar, kravdato, opphoerstidspunkt },
+        (viderefoertOpphoer) => {
+          dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+          onSuccess?.()
+        }
+      )
   }
 
   const reset = (onSuccess?: () => void) => {
@@ -67,6 +75,18 @@ export const ViderefoereOpphoerVurdering = ({
     onSuccess?.()
   }
 
+  const { monthpickerProps, inputProps } = useMonthpicker({
+    fromDate: behandling.virkningstidspunkt ?? opphoerstidspunkt,
+    toDate: addMonths(new Date(), 6),
+    onMonthChange: (date: Date) => setOpphoerstidspunkt(date),
+    inputFormat: 'dd.MM.yyyy',
+    onValidate: (val) => {
+      if (val.isBefore || val.isAfter) setVilkaarError('Opphørstidspunkt er ikke gyldig')
+      else setVilkaarError('')
+    },
+    defaultSelected: opphoerstidspunkt ?? undefined,
+  } as UseMonthPickerOptions)
+
   const options = Object.keys(VilkaarType).map((k) => k)
 
   return (
@@ -74,6 +94,12 @@ export const ViderefoereOpphoerVurdering = ({
       tittel="Hvilket vilkår?"
       subtittelKomponent={
         <>
+          <div>
+            <Heading size="xsmall">Opphørstidspunkt</Heading>
+            <BodyShort spacing>
+              {viderefoertOpphoer?.dato ? formaterDato(viderefoertOpphoer.dato) : 'Ikke fastsatt'}
+            </BodyShort>
+          </div>
           {viderefoertOpphoer?.vilkaar ? (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {VilkaarTypeTittel[viderefoertOpphoer.vilkaar]}
@@ -103,6 +129,9 @@ export const ViderefoereOpphoerVurdering = ({
         <Heading level="3" size="small">
           Er dette et videreført opphør?
         </Heading>
+        <MonthPicker {...monthpickerProps}>
+          <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
+        </MonthPicker>
         <UNSAFE_Combobox
           label="Velg vilkåret som gjør at saken opphører"
           options={options}

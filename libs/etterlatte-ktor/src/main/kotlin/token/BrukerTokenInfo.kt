@@ -60,14 +60,14 @@ sealed class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
-data class VanligSystembruker(
+data class VanligSystembruker internal constructor(
     override val oid: String,
     override val sub: String,
     override val ident: String? = null,
     override val jwtTokenClaims: JwtTokenClaims? = null,
 ) : Systembruker(oid, sub, ident, jwtTokenClaims)
 
-data class HardkodaSystembruker(
+data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(
         oid = omraade.oid,
@@ -81,6 +81,14 @@ data class HardkodaSystembruker(
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val jobb = HardkodaSystembruker(Systembrukere.JOBB)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+    }
+
+    enum class Systembrukere(
+        val oid: String,
+    ) {
+        TESTDATA("testdata"),
+        RIVER("river"),
+        JOBB("jobb"),
     }
 }
 
@@ -145,12 +153,4 @@ enum class Claims {
 
     @Suppress("ktlint:standard:enum-entry-name-case")
     sub,
-}
-
-enum class Systembrukere(
-    val oid: String,
-) {
-    TESTDATA("testdata"),
-    RIVER("river"),
-    JOBB("jobb"),
 }

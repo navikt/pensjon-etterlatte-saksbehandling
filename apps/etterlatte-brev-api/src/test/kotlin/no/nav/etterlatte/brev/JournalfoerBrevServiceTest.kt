@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
@@ -136,7 +135,7 @@ class JournalfoerBrevServiceTest {
             runBlocking {
                 service.journalfoerVedtaksbrev(
                     vedtak,
-                    no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+                    bruker,
                 )
             }
         }
@@ -170,7 +169,7 @@ class JournalfoerBrevServiceTest {
         runBlocking {
             service.journalfoerVedtaksbrev(
                 vedtak,
-                no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+                bruker,
             )
         }
 
@@ -229,7 +228,7 @@ class JournalfoerBrevServiceTest {
         runBlocking {
             service.journalfoerVedtaksbrev(
                 vedtak,
-                no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+                bruker,
             )
         }
 
@@ -242,7 +241,7 @@ class JournalfoerBrevServiceTest {
         val requestSlot = slot<JournalpostRequest>()
         coVerify(exactly = 1) {
             vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
-            behandlingService.hentSak(forventetBrev.sakId, Systembruker.brev)
+            behandlingService.hentSak(forventetBrev.sakId, bruker)
             dokarkivService.journalfoer(capture(requestSlot))
         }
 

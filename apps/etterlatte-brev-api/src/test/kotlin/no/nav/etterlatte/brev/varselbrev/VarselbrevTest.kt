@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.varselbrev
 
+import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -25,10 +26,12 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.VanligSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -128,7 +131,12 @@ class VarselbrevTest(
                 service.opprettVarselbrev(
                     sak.id,
                     behandling,
-                    Systembruker.brev,
+                    VanligSystembruker(
+                        "",
+                        "",
+                        "bruker1",
+                        JwtTokenClaims(JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build()),
+                    ),
                 )
             }
 

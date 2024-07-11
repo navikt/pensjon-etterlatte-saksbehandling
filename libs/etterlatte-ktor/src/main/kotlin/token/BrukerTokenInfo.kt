@@ -82,7 +82,11 @@ data class HardkodaSystembruker(
             JwtTokenClaims(
                 JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
             ),
-    )
+    ) {
+    companion object {
+        val river = HardkodaSystembruker(Systembrukere.RIVER)
+    }
+}
 
 data class Saksbehandler(
     val accessToken: String,
@@ -153,5 +157,5 @@ enum class Systembrukere(
     BREV("brev"),
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
-    AUTOMATISK_JOBB("automatisk_jobb"),
+    RIVER("river"),
 }

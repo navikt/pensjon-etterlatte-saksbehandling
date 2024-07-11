@@ -46,7 +46,7 @@ internal class OpprettJournalfoerOgDistribuer {
         val brev = lagBrev(behandlingId)
         val journalfoerBrevService =
             mockk<JournalfoerBrevService>().also {
-                coEvery { it.journalfoerVedtaksbrev(any()) } returns
+                coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
                     Pair(
                         OpprettJournalpostResponse(
                             journalpostId = "123",

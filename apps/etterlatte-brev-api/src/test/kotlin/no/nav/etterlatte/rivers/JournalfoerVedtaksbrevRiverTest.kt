@@ -77,7 +77,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any()) } returns Pair(response, 1)
+        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any(), any()) } returns Pair(response, 1)
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -86,7 +86,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         val vedtakCapture = slot<VedtakTilJournalfoering>()
         coVerify(exactly = 1) {
-            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture))
+            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture), any())
         }
 
         val vedtakActual = vedtakCapture.captured

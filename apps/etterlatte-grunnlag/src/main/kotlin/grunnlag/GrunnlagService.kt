@@ -348,21 +348,21 @@ class RealGrunnlagService(
     }
 
     override fun laasTilVersjonForBehandling(
-        behandlingIdRegulering: UUID,
-        behandlingViLaaserTil: UUID,
+        skalLaasesId: UUID,
+        idLaasesTil: UUID,
     ): BehandlingGrunnlagVersjon {
         val laastVersjon =
-            opplysningDao.hentBehandlingVersjon(behandlingViLaaserTil) ?: throw IkkeFunnetException(
+            opplysningDao.hentBehandlingVersjon(idLaasesTil) ?: throw IkkeFunnetException(
                 code = "GRUNNLAGVERSJON_IKKE_FUNNET",
-                detail = "Fant ikke grunnlagsversjonen for behandling $behandlingViLaaserTil",
+                detail = "Fant ikke grunnlagsversjonen for behandling $idLaasesTil",
             )
         opplysningDao.oppdaterVersjonForBehandling(
-            behandlingId = behandlingIdRegulering,
+            behandlingId = skalLaasesId,
             sakId = laastVersjon.sakId,
             hendelsenummer = laastVersjon.hendelsenummer,
         )
-        opplysningDao.laasGrunnlagVersjonForBehandling(behandlingIdRegulering)
-        return checkNotNull(opplysningDao.hentBehandlingVersjon(behandlingIdRegulering)) {
+        opplysningDao.laasGrunnlagVersjonForBehandling(skalLaasesId)
+        return checkNotNull(opplysningDao.hentBehandlingVersjon(skalLaasesId)) {
             "Fant ikke låst grunnlagsversjon vi akkurat la inn :("
         }
     }

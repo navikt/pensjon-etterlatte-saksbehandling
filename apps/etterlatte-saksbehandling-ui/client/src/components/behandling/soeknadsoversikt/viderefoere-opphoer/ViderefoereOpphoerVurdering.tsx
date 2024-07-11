@@ -37,8 +37,18 @@ export const ViderefoereOpphoerVurdering = ({
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
   const [kravdato] = useState<string | undefined>()
 
+  const valider = () => {
+    if (!vilkaar) {
+      return 'Du må velge et vilkår som ikke lenger blir oppfylt'
+    }
+    if (!opphoerstidspunkt) {
+      return 'Du må velge opphørstidspunkt'
+    }
+    return ''
+  }
+
   const lagre = (onSuccess?: () => void) => {
-    !opphoerstidspunkt ? setVilkaarError('Du må velge et vilkår som ikke lenger blir oppfylt') : setVilkaarError('')
+    setVilkaarError(valider())
 
     if (vilkaar !== undefined)
       return setViderefoertOpphoer({ behandlingId, begrunnelse, vilkaar, kravdato }, (utlandstilknyningstype) => {

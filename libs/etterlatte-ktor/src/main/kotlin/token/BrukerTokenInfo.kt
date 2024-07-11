@@ -29,7 +29,7 @@ sealed class BrukerTokenInfo {
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
+                VanligSystembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -40,21 +40,12 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(
-    val oid: String,
-    val sub: String,
-    val ident: String? = null,
-    val jwtTokenClaims: JwtTokenClaims? = null,
+sealed class Systembruker(
+    open val oid: String,
+    open val sub: String,
+    open val ident: String? = null,
+    open val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(
-        oid = omraade.oid,
-        sub = omraade.oid,
-        jwtTokenClaims =
-            JwtTokenClaims(
-                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
-            ),
-    )
-
     override fun ident() = ident ?: Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
@@ -69,12 +60,30 @@ data class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 
     companion object {
-        val brev = Systembruker(Systembrukere.BREV)
-        val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
-        val testdata = Systembruker(Systembrukere.TESTDATA)
-        val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
+        val brev = HardkodaSystembruker(Systembrukere.BREV)
+        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
+        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+        val automatiskJobb = HardkodaSystembruker(Systembrukere.AUTOMATISK_JOBB)
     }
 }
+
+data class VanligSystembruker(
+    override val oid: String,
+    override val sub: String,
+    override val ident: String? = null,
+    override val jwtTokenClaims: JwtTokenClaims? = null,
+) : Systembruker(oid, sub, ident, jwtTokenClaims)
+
+data class HardkodaSystembruker(
+    val omraade: Systembrukere,
+) : Systembruker(
+        oid = omraade.oid,
+        sub = omraade.oid,
+        jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
+            ),
+    )
 
 data class Saksbehandler(
     val accessToken: String,

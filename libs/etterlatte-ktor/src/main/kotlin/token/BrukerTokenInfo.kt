@@ -23,13 +23,11 @@ sealed class BrukerTokenInfo {
         fun of(
             accessToken: String,
             saksbehandler: String?,
-            oid: String?,
-            sub: String?,
             claims: JwtTokenClaims?,
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
+                Systembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -41,21 +39,18 @@ sealed class BrukerTokenInfo {
 }
 
 data class Systembruker(
-    val oid: String,
-    val sub: String,
-    val ident: String? = null,
+    val ident: String,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
     private constructor(omraade: Systembrukere) : this(
-        oid = omraade.oid,
-        sub = omraade.oid,
+        ident = omraade.appName,
         jwtTokenClaims =
             JwtTokenClaims(
                 JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
             ),
     )
 
-    override fun ident() = ident ?: Fagsaksystem.EY.navn
+    override fun ident() = ident
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
@@ -143,7 +138,7 @@ enum class Claims {
 }
 
 enum class Systembrukere(
-    val oid: String,
+    val appName: String,
 ) {
     BREV("brev"),
     MIGRERING("migrering"),

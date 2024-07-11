@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -53,7 +54,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -537,7 +537,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             applicationContext.behandlingService.avbrytBehandling(
                 revurderingen.id,
-                BrukerTokenInfo.of("acc", "saksbehandler", oid = null, sub = "sub", claims = null, idtyp = null),
+                simpleSaksbehandler(),
             )
         }
 
@@ -956,7 +956,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 }
                 this.ferdigstillOppgave(
                     id = it.id,
-                    saksbehandler = BrukerTokenInfo.of("acc", saksbehandlerId, oid = null, sub = "sub", claims = null, idtyp = null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
         }

@@ -9,16 +9,16 @@ import org.junit.jupiter.api.Test
 internal class BrukerTokenInfoTest {
     @Test
     fun `er maskin-til-maskin hvis idtype=app`() {
-        assertTrue(BrukerTokenInfo.of("a", "b", "c", "c", null, idtyp = "app") is Systembruker)
+        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", null, idtyp = "app") is Systembruker)
     }
 
     @Test
     fun `er ikke maskin-til-maskin hvis idtype != app`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null, idtyp = "ikkeapp") is Systembruker)
+        assertFalse(BrukerTokenInfo.of("a", "saksbehandler", null, idtyp = "ikkeapp") is Systembruker)
     }
 
     @Test
     fun `er ikke maskin-til-maskin hvis idtype er tomt`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null, idtyp = null) is Systembruker)
+        assertFalse(BrukerTokenInfo.of("a", "saksbehandler", null, idtyp = null) is Systembruker)
     }
 }

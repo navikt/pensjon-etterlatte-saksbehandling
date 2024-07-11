@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -45,7 +46,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
@@ -290,7 +290,7 @@ internal class BrevdataFacadeImplTest {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val ENHET = "0000"
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTOKEN = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null, null)
+        private val BRUKERTOKEN = simpleSaksbehandlerMedIdent(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
     }

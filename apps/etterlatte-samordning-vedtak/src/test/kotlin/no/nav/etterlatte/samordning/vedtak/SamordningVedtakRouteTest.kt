@@ -274,8 +274,6 @@ class SamordningVedtakRouteTest {
         private fun token(role: String? = null): String {
             val claims = mutableMapOf<String, Any>()
             claims["roles"] = listOf(role)
-            claims[Claims.oid.name] = "pensjon-pen"
-            claims[Claims.sub.name] = "pensjon-pen"
             claims[Claims.idtyp.name] = "app"
 
             return server

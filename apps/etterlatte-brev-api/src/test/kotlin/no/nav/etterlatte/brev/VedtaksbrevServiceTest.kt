@@ -51,6 +51,8 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.simpleAttestant
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -64,7 +66,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -148,8 +149,8 @@ internal class VedtaksbrevServiceTest {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
-        private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null, null)
-        private val ATTESTANT = BrukerTokenInfo.of("token", "attestant", null, null, null, null)
+        private val SAKSBEHANDLER = simpleSaksbehandler()
+        private val ATTESTANT = simpleAttestant()
         private val utbetalingsinfo =
             Utbetalingsinfo(
                 1,

@@ -342,8 +342,8 @@ class BehandlingStatusServiceImpl(
             SakIDListe(
                 tilbakestilte,
                 aapne,
-            ).also { tilbakestilte ->
-                oppgaveService.tilbakestillOppgaverUnderAttestering(tilbakestilte.tilbakestileBehandlinger.map { it.sakId })
+            ).also { tilbakestilteSakIder ->
+                oppgaveService.tilbakestillOppgaverUnderAttestering(tilbakestilteSakIder.tilbakestileBehandlinger.map { it.sakId })
             }
         }
 

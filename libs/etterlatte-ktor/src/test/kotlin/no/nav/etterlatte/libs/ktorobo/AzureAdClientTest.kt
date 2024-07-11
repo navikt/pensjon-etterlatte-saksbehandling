@@ -195,7 +195,7 @@ internal class AzureAdClientTest {
             }
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null, idtyp = "app"),
+                BrukerTokenInfo.of(accessToken = "a", saksbehandler = null, claims = null, idtyp = "app"),
                 listOf(),
             )
         }
@@ -204,7 +204,7 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker OBO viss JWT-claims sub og oid er ulike`() {
+    fun `bruker OBO viss JWT-claim idtype er tom eller ikke lik app`() {
         val client =
             spyk(AzureAdClient(config, FakeAzureAdHttpClient())).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
@@ -213,7 +213,7 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null, idtyp = null),
+                BrukerTokenInfo.of(accessToken = "a", saksbehandler = "s1", claims = null, idtyp = null),
                 listOf(),
             )
         }

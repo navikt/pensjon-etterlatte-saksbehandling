@@ -63,7 +63,6 @@ sealed class Systembruker(
         val brev = HardkodaSystembruker(Systembrukere.BREV)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
-        val automatiskJobb = HardkodaSystembruker(Systembrukere.AUTOMATISK_JOBB)
     }
 }
 

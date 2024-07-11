@@ -601,7 +601,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -639,7 +639,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -663,7 +663,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -676,6 +676,8 @@ class AktivitetspliktServiceTest {
             verify { oppgaveService wasNot Called }
         }
     }
+
+    private fun brukerTokenInfo() = BrukerTokenInfo.of("", "", "a", "a", null, "")
 
     companion object {
         val behandling =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
+import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
@@ -45,7 +46,14 @@ data class Systembruker(
     val ident: String? = null,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(oid = omraade.oid, sub = omraade.oid)
+    private constructor(omraade: Systembrukere) : this(
+        oid = omraade.oid,
+        sub = omraade.oid,
+        jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
+            ),
+    )
 
     override fun ident() = ident ?: Fagsaksystem.EY.navn
 

@@ -100,6 +100,7 @@ export const ViderefoereOpphoerVurdering = ({
               {viderefoertOpphoer?.dato ? formaterDato(viderefoertOpphoer.dato) : 'Ikke fastsatt'}
             </BodyShort>
           </div>
+          <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
           {viderefoertOpphoer?.vilkaar ? (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {VilkaarTypeTittel[viderefoertOpphoer.vilkaar]}

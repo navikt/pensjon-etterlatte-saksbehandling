@@ -58,10 +58,6 @@ sealed class Systembruker(
     override fun erSammePerson(ident: String?) = false
 
     override fun kanEndreOppgaverFor(ident: String?) = true
-
-    companion object {
-        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
-    }
 }
 
 data class VanligSystembruker(
@@ -84,6 +80,7 @@ data class HardkodaSystembruker(
     companion object {
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val jobb = HardkodaSystembruker(Systembrukere.JOBB)
+        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
     }
 }
 
@@ -153,8 +150,6 @@ enum class Claims {
 enum class Systembrukere(
     val oid: String,
 ) {
-    BREV("brev"),
-    DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
     RIVER("river"),
     JOBB("jobb"),

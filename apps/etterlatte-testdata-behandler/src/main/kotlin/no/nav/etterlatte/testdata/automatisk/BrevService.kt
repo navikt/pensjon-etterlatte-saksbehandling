@@ -4,7 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.readValue
 import java.util.UUID
 
@@ -16,18 +16,20 @@ class BrevService(
     suspend fun opprettOgDistribuerVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
+        bruker: BrukerTokenInfo,
     ) {
-        val brev = opprettVedtaksbrev(behandlingId, sakId)
-        genererPDF(behandlingId, brev)
-        ferdigstillBrev(behandlingId)
+        val brev = opprettVedtaksbrev(behandlingId, sakId, bruker)
+        genererPDF(behandlingId, brev, bruker)
+        ferdigstillBrev(behandlingId, bruker)
     }
 
     private suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
+        bruker: BrukerTokenInfo,
     ): Brev =
         klient
-            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), Systembruker.testdata) {}
+            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), bruker) {}
             .mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },
@@ -36,9 +38,12 @@ class BrevService(
     private suspend fun genererPDF(
         behandlingId: UUID,
         brev: Brev,
-    ) = klient.get(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), Systembruker.testdata)
+        bruker: BrukerTokenInfo,
+    ) = klient.get(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), bruker)
 
-    private suspend fun ferdigstillBrev(behandlingId: UUID) =
-        klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), Systembruker.testdata) {
-        }
+    private suspend fun ferdigstillBrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) = klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), bruker) {
+    }
 }

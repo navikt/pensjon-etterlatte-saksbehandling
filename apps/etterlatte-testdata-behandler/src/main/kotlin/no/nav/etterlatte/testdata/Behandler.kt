@@ -3,6 +3,7 @@ package no.nav.etterlatte.testdata
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BehandlingService
@@ -40,37 +41,38 @@ class Behandler(
         if (behandlingssteg in listOf(Behandlingssteg.KLAR, Behandlingssteg.BEHANDLING_OPPRETTA)) {
             return
         }
-        val sak = behandlingService.hentSak(sakId)
+        val bruker = HardkodaSystembruker.testdata
+        val sak = behandlingService.hentSak(sakId, bruker)
         logger.info("Henta sak $sakId")
 
         val doedsdato =
             grunnlagService
-                .hentGrunnlagForBehandling(behandling)
+                .hentGrunnlagForBehandling(behandling, bruker)
                 .hentAvdoede()
                 .first()
                 .hentDoedsdato()
 
-        behandlingService.settKommerBarnetTilGode(behandling)
-        behandlingService.lagreGyldighetsproeving(behandling)
-        behandlingService.lagreUtlandstilknytning(behandling)
-        behandlingService.lagreVirkningstidspunkt(behandling, doedsdato?.verdi!!)
-        behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
+        behandlingService.settKommerBarnetTilGode(behandling, bruker)
+        behandlingService.lagreGyldighetsproeving(behandling, bruker)
+        behandlingService.lagreUtlandstilknytning(behandling, bruker)
+        behandlingService.lagreVirkningstidspunkt(behandling, doedsdato?.verdi!!, bruker)
+        behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId, bruker)
 
         logger.info("Tildelt til saksbehandler, klar til vilkårsvurdering")
-        vilkaarsvurderingService.vilkaarsvurder(behandling)
+        vilkaarsvurderingService.vilkaarsvurder(behandling, bruker)
         logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.VILKAARSVURDERT) {
             return
         }
-        trygdetidService.beregnTrygdetid(behandling)
+        trygdetidService.beregnTrygdetid(behandling, bruker)
         logger.info("Beregna trygdetid for $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.TRYGDETID_OPPRETTA) {
             return
         }
         logger.info("Lagrer beregningsgrunnlag")
-        beregningService.lagreBeregningsgrunnlag(behandling, sak.sakType)
+        beregningService.lagreBeregningsgrunnlag(behandling, sak.sakType, bruker)
         logger.info("Lagra beregningsgrunnlag, klar til beregning")
-        beregningService.beregn(behandling)
+        beregningService.beregn(behandling, bruker)
         logger.info("Beregna behandling $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.BEREGNA) {
             return
@@ -79,24 +81,29 @@ class Behandler(
 
         if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             logger.info("Avkorter $behandling")
-            avkortingService.avkort(behandling)
+            avkortingService.avkort(behandling, bruker)
             logger.info("Avkorta behandling $behandling i sak $sakId")
         }
         if (behandlingssteg == Behandlingssteg.AVKORTA) {
             return
         }
         logger.info("Klar til å lagre brevutfall for $behandling")
-        behandlingService.lagreBrevutfall(behandling, sak.sakType)
+        behandlingService.lagreBrevutfall(behandling, sak.sakType, bruker)
         logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
-        val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling)
+        val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling, bruker)
         RapidUtsender.sendUt(fattaVedtak, packet, context)
         if (behandlingssteg == Behandlingssteg.VEDTAK_FATTA) {
             return
         }
 
         logger.info("Fatta vedtak for behandling $behandling. Klar til å lage og distribuere vedtaksbrev")
-        brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
-        val attestertVedtak = vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
+        brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling, bruker)
+        val attestertVedtak =
+            vedtaksvurderingService.attesterOgIverksettVedtak(
+                sakId,
+                behandling,
+                bruker,
+            )
         logger.info("Ferdig attestert behandling $behandling i sak $sakId")
         RapidUtsender.sendUt(attestertVedtak, packet, context)
     }

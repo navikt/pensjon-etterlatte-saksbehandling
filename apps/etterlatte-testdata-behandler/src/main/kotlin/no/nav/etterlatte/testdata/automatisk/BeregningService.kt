@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnla
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.testdata.BEGRUNNELSE
 import java.util.UUID
 
@@ -17,17 +17,20 @@ class BeregningService(
     private val url: String,
     private val clientId: String,
 ) {
-    suspend fun beregn(behandlingId: UUID) =
-        retryOgPakkUt {
-            klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), Systembruker.testdata) {}.mapBoth(
-                success = {},
-                failure = { throw it },
-            )
-        }
+    suspend fun beregn(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) = retryOgPakkUt {
+        klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), bruker) {}.mapBoth(
+            success = {},
+            failure = { throw it },
+        )
+    }
 
     suspend fun lagreBeregningsgrunnlag(
         behandlingId: UUID,
         sakType: SakType,
+        bruker: BrukerTokenInfo,
     ) = retryOgPakkUt {
         val sakTypeArg =
             when (sakType) {
@@ -38,7 +41,7 @@ class BeregningService(
         klient
             .post(
                 Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/$sakTypeArg"),
-                Systembruker.testdata,
+                bruker,
                 LagreBeregningsGrunnlag(
                     soeskenMedIBeregning = listOf(),
                     institusjonsopphold = listOf(),

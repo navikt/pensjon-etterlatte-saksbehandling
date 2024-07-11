@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
@@ -25,6 +26,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling
+
+    suspend fun hentFoersteVirkningsdato(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FoersteVirkDto
 
     suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
@@ -88,6 +94,38 @@ class BehandlingKlientImpl(
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun hentFoersteVirkningsdato(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): FoersteVirkDto {
+        logger.info("Henter foersteVirkningsdato med saksId=$sakId")
+
+        return retry<FoersteVirkDto> {
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/sak/$sakId/behandlinger/foerstevirk",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente foersteVirkningsdato med saksId=$sakId",
                         it.samlaExceptions(),
                     )
                 }

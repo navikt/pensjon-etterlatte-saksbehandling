@@ -1,9 +1,12 @@
 package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.BehandlingKlientException
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.toYearMonth
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -87,6 +90,7 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
 
         return hentOverstyrBeregning(behandling).takeIf { it != null }
             ?: beregningRepository.opprettOverstyrBeregning(
@@ -119,7 +123,31 @@ class BeregningService(
 
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
         this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
+
+    private suspend fun validerFoersteVirke(
+        behandlingKlient: BehandlingKlient,
+        behandling: DetaljertBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val foersteVirkDto: FoersteVirkDto? =
+            try {
+                behandlingKlient.hentFoersteVirkningsdato(behandling.sak, brukerTokenInfo)
+            } catch (e: BehandlingKlientException) {
+                // hvis en sak ikke har en behandling som er iverksatt, har den heller ingen første virke
+                null
+            }
+
+        if (foersteVirkDto != null && foersteVirkDto.foersteIverksatteVirkISak.toYearMonth() != behandling.virkningstidspunkt?.dato) {
+            throw KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato()
+        }
+    }
 }
+
+class KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_FOERSTE_VIRKNINGSTIDSPUNKT",
+        detail = "For å overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
+    )
 
 class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :
     UgyldigForespoerselException(

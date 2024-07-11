@@ -197,19 +197,17 @@ const OverstyrBeregningGrunnlag = (props: {
   return (
     <>
       <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
-        <VStack gap="5">
-          <Alert variant="warning">
-            <VStack gap="4">
-              Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
-              revurderes fra første virkningstidspunkt /konverteringstidspunkt.
-              <List as="ul" size="small" title="Saker som fortsatt trenger overstyrt beregning er:">
-                {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-                  <List.Item key={key}>{value}</List.Item>
-                ))}
-              </List>
-            </VStack>
-          </Alert>
-        </VStack>
+        <Alert variant="warning">
+          <VStack gap="4">
+            Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
+            revurderes fra første virkningstidspunkt / konverteringstidspunkt.
+            <List as="ul" size="small" title="Saker som fortsatt trenger overstyrt beregning er:">
+              {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+                <List.Item key={key}>{value}</List.Item>
+              ))}
+            </List>
+          </VStack>
+        </Alert>
       </Box>
 
       {mapApiResult(
@@ -392,20 +390,17 @@ function feilIOverstyrBeregningperiode(
 
 const FeilIPerioder = (props: { feil: [number, FeilIPeriodeGrunnlagAlle][] }) => {
   return (
-    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
-      {props.feil.map(([index, feil]) => (
-        <ErrorSummary.Item key={`${index}${feil}`} href={`#overstyrBeregningForm.${index}`}>
-          {teksterFeilIPeriode[feil]}
-        </ErrorSummary.Item>
-      ))}
-    </FeilIPerioderOppsummering>
+    <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
+      <ErrorSummary heading="Du må fikse feil i periodiseringen før du kan beregne">
+        {props.feil.map(([index, feil]) => (
+          <ErrorSummary.Item key={`${index}${feil}`} href={`#overstyrBeregningForm.${index}`}>
+            {teksterFeilIPeriode[feil]}
+          </ErrorSummary.Item>
+        ))}
+      </ErrorSummary>
+    </Box>
   )
 }
-
-const FeilIPerioderOppsummering = styled(ErrorSummary)`
-  margin: 2em auto;
-  width: 30em;
-`
 
 type FeilIPeriodeOverstyrBeregning = (typeof FEIL_I_PERIODE)[number]
 export type FeilIPeriodeGrunnlagAlle =

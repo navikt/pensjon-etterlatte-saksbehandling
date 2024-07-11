@@ -1,5 +1,6 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
+import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -22,8 +23,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.mockPerson
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -31,10 +34,19 @@ class DoedshendelseKontrollpunktOMSServiceTest {
     private val pesysKlient = mockk<PesysKlient>()
     private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService = DoedshendelseKontrollpunktOMSService(pesysKlient, behandlingService)
+    private val bruker =
+        BrukerTokenInfo.of(
+            "",
+            "",
+            "",
+            "",
+            JwtTokenClaims(JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build()),
+            "app",
+        )
 
     @Test
     fun `Skal opprette kontrollpunkt naar identifisert gjenlevende er over 67 aar`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
         val gjenlevende = gjenlevende.copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(68), null))
 
         val kontrollpunkter =
@@ -43,7 +55,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 sak = null,
                 eps = gjenlevende,
                 avdoed = avdoed,
-                bruker = Systembruker.doedshendelse,
+                bruker = bruker,
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon)
@@ -51,7 +63,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
 
     @Test
     fun `Skal opprettet kontrollpunkt dersom identifisert gjenlevende ikke lever`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
         val gjenlevende = gjenlevende.copy(doedsdato = OpplysningDTO(LocalDate.now(), null))
 
         val kontrollpunkter =
@@ -60,7 +72,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 null,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
@@ -68,8 +80,8 @@ class DoedshendelseKontrollpunktOMSServiceTest {
 
     @Test
     fun `Skal opprette kontrollpunkt dersom identifisert gjenlevende har kryssende ytelse i Pesys`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns
             listOf(
                 SakSammendragResponse(
                     sakType = SakSammendragResponse.UFORE_SAKTYPE,
@@ -85,7 +97,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 null,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
@@ -93,7 +105,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
 
     @Test
     fun `Skal ikke opprette kontrollpunkt dersom identifisert gjenlevende har kryssende ytelse i Pesys frem i tid`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns
             listOf(
                 SakSammendragResponse(
                     sakType = SakSammendragResponse.UFORE_SAKTYPE,
@@ -109,18 +121,18 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 null,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldBe emptyList()
         verify(exactly = 0) { behandlingService.hentSisteIverksatte(sak.id) }
-        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) }
+        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) }
         confirmVerified(behandlingService, pesysKlient)
     }
 
     @Test
     fun `Skal opprette kontrollpunkt dersom identifisert gjenlevende har iverksatt behandling i Gjenny`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
         every { behandlingService.hentSisteIverksatte(sak.id) } returns mockk()
 
         val kontrollpunkter =
@@ -129,7 +141,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 sak,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarSakMedIverksattBehandlingIGjenny(sak))
@@ -139,7 +151,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
 
     @Test
     fun `Skal ikke opprette kontrollpunkter dersom det ikke er noen avvik og det ikke finnes noen sak`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
 
         val kontrollpunkter =
             kontrollpunktService.identifiser(
@@ -147,18 +159,18 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 null,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldBe emptyList()
         verify(exactly = 0) { behandlingService.hentSisteIverksatte(sak.id) }
-        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) }
+        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) }
         confirmVerified(behandlingService, pesysKlient)
     }
 
     @Test
     fun `Skal ikke opprette kontrollpunkter dersom det ikke er noen avvik og det finnes en sak`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) } returns listOf()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) } returns listOf()
         every { behandlingService.hentSisteIverksatte(sak.id) } returns null
 
         val kontrollpunkter =
@@ -167,12 +179,12 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 sak,
                 gjenlevende,
                 avdoed,
-                Systembruker.doedshendelse,
+                bruker,
             )
 
         kontrollpunkter shouldBe emptyList()
         verify(exactly = 1) { behandlingService.hentSisteIverksatte(sak.id) }
-        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, Systembruker.doedshendelse) }
+        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, any()) }
         confirmVerified(behandlingService, pesysKlient)
     }
 

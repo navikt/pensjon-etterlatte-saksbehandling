@@ -60,8 +60,6 @@ sealed class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 
     companion object {
-        val brev = HardkodaSystembruker(Systembrukere.BREV)
-        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
     }
 }
@@ -85,6 +83,7 @@ data class HardkodaSystembruker(
     ) {
     companion object {
         val river = HardkodaSystembruker(Systembrukere.RIVER)
+        val jobb = HardkodaSystembruker(Systembrukere.JOBB)
     }
 }
 
@@ -158,4 +157,5 @@ enum class Systembrukere(
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
     RIVER("river"),
+    JOBB("jobb"),
 }

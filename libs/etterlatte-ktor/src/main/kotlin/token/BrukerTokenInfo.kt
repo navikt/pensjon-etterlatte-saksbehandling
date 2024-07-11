@@ -17,7 +17,7 @@ sealed class BrukerTokenInfo {
     companion object {
         private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
 
-        fun of(
+        internal fun of(
             accessToken: String,
             saksbehandler: String?,
             claims: JwtTokenClaims?,

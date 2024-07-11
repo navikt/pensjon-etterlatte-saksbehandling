@@ -20,8 +20,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -46,7 +44,10 @@ class JournalfoerBrevService(
         return journalfoer(brev, sak).journalpostId
     }
 
-    suspend fun journalfoerVedtaksbrev(vedtak: VedtakTilJournalfoering): Pair<OpprettJournalpostResponse, BrevID>? {
+    suspend fun journalfoerVedtaksbrev(
+        vedtak: no.nav.etterlatte.rivers.VedtakTilJournalfoering,
+        bruker: BrukerTokenInfo,
+    ): Pair<OpprettJournalpostResponse, BrevID>? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -67,7 +68,7 @@ class JournalfoerBrevService(
             return null
         }
 
-        val sak = behandlingService.hentSak(brev.sakId, Systembruker.brev)
+        val sak = behandlingService.hentSak(brev.sakId, bruker)
 
         return journalfoer(brev, sak)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }

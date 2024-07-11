@@ -133,7 +133,12 @@ class JournalfoerBrevServiceTest {
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
         assertThrows<NoSuchElementException> {
-            runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+            runBlocking {
+                service.journalfoerVedtaksbrev(
+                    vedtak,
+                    no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+                )
+            }
         }
 
         verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
@@ -162,7 +167,12 @@ class JournalfoerBrevServiceTest {
         val vedtak = opprettVedtak()
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
-        runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+        runBlocking {
+            service.journalfoerVedtaksbrev(
+                vedtak,
+                no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+            )
+        }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
         coVerify(exactly = 0) { dokarkivService.journalfoer(any()) }
@@ -216,7 +226,12 @@ class JournalfoerBrevServiceTest {
         coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
-        runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+        runBlocking {
+            service.journalfoerVedtaksbrev(
+                vedtak,
+                no.nav.etterlatte.libs.ktor.token.Systembruker.Companion.brev,
+            )
+        }
 
         verify(exactly = 1) {
             db.hentBrevInnhold(forventetBrev.id)

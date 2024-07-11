@@ -23,7 +23,7 @@ export const ViderefoereOpphoer = ({
 
   return (
     <LovtekstMedLenke tittel="Opphør f.o.m." hjemler={[]} status={statusIkon(behandling.viderefoertOpphoer)}>
-      <Informasjon>Skal det opphøre?</Informasjon>
+      <Informasjon>Kommer det opphør nært forestående, fordi et av vilkårene snart ikke lenger er oppfylt?</Informasjon>
       <Vurdering>
         {vurdert && (
           <ViderefoereOpphoerVurdering

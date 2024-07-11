@@ -78,6 +78,11 @@ data class HardkodaSystembruker private constructor(
             ),
     ) {
     companion object {
+        /* Obs: Bruk bare disse fra kontekster hvor vi ikke har et BrukerTokenInfo-objekt allerede.
+        Send alltid med brukeren frå requesten der du kan. Disse er for rivers, automatiske jobber
+        og testdata-appene, hvor systemet på eget initiativ starter kjøring, og vi dermed ikke har en
+        eksisterende saksbehandler eller systembruker å hente tokenet fra
+         */
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val jobb = HardkodaSystembruker(Systembrukere.JOBB)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)

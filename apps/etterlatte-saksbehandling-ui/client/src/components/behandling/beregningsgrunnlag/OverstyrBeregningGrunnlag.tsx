@@ -202,7 +202,7 @@ const OverstyrBeregningGrunnlag = (props: {
             <VStack gap="4">
               Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
               revurderes fra første virkningstidspunkt /konverteringstidspunkt.
-              <List as="ul" size="small" title="Saker som trenger overstyrt beregning er:">
+              <List as="ul" size="small" title="Saker som fortsatt trenger overstyrt beregning er:">
                 {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
                   <List.Item key={key}>{value}</List.Item>
                 ))}

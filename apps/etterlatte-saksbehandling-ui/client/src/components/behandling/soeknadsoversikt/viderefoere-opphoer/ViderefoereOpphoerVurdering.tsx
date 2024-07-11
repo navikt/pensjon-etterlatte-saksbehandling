@@ -101,7 +101,7 @@ export const ViderefoereOpphoerVurdering = ({
     >
       <>
         <Heading level="3" size="small">
-          Er dette et videreført opphold?
+          Er dette et videreført opphør?
         </Heading>
         <UNSAFE_Combobox
           label="Velg vilkåret som gjør at saken opphører"

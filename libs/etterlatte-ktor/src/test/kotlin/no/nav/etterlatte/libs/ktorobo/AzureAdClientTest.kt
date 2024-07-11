@@ -1,6 +1,7 @@
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
+import com.nimbusds.jwt.JWTClaimsSet
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
@@ -24,6 +25,8 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.IAzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -193,9 +196,18 @@ internal class AzureAdClientTest {
             spyk(AzureAdClient(config, FakeAzureAdHttpClient())).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
             }
+
+        fun genererClaimSetSystembruker() =
+            JwtTokenClaims(
+                JWTClaimsSet
+                    .Builder()
+                    .claim(Claims.idtyp.name, "app")
+                    .claim(Claims.azp_name.name, "cluster:appname:dev")
+                    .build(),
+            )
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", saksbehandler = null, claims = null, idtyp = "app"),
+                BrukerTokenInfo.of(accessToken = "a", saksbehandler = null, claims = genererClaimSetSystembruker(), idtyp = "app"),
                 listOf(),
             )
         }

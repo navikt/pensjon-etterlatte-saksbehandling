@@ -195,7 +195,7 @@ internal class AzureAdClientTest {
             }
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null, idtyp = null),
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null, idtyp = "app"),
                 listOf(),
             )
         }

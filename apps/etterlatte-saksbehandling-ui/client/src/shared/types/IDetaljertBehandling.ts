@@ -28,7 +28,7 @@ export interface IDetaljertBehandling {
   begrunnelse: string | null
   kilde: Vedtaksloesning
   sendeBrev: boolean
-  opphoerFom: ViderefoertOpphoer | null
+  viderefoertOpphoer: ViderefoertOpphoer | null
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {

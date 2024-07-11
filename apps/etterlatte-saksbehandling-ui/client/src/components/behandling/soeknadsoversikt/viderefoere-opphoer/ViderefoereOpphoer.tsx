@@ -19,16 +19,16 @@ export const ViderefoereOpphoer = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState(behandling.opphoerFom !== null)
+  const [vurdert, setVurdert] = useState(behandling.viderefoertOpphoer !== null)
 
   return (
-    <LovtekstMedLenke tittel="Opphør f.o.m." hjemler={[]} status={statusIkon(behandling.opphoerFom)}>
+    <LovtekstMedLenke tittel="Opphør f.o.m." hjemler={[]} status={statusIkon(behandling.viderefoertOpphoer)}>
       <Informasjon>Skal det opphøre?</Informasjon>
       <Vurdering>
         {vurdert && (
           <ViderefoereOpphoerVurdering
             behandling={behandling}
-            viderefoertOpphoer={behandling.opphoerFom}
+            viderefoertOpphoer={behandling.viderefoertOpphoer}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandling.id}

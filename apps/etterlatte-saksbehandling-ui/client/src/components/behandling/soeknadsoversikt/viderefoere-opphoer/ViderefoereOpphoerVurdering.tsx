@@ -34,7 +34,7 @@ export const ViderefoereOpphoerVurdering = ({
   const dispatch = useAppDispatch()
 
   const [opphoerstidspunkt, setOpphoerstidspunkt] = useState<Date | null>(
-    behandling.opphoerFom ? new Date(behandling.opphoerFom.dato) : null
+    behandling.viderefoertOpphoer ? new Date(behandling.viderefoertOpphoer.dato) : null
   )
   const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
   const [vilkaarError, setVilkaarError] = useState<string>('')

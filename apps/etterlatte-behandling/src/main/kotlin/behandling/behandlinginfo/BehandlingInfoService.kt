@@ -29,7 +29,7 @@ class BehandlingInfoService(
 
         sjekkBehandlingKanEndres(behandling, opphoer)
 
-        val lagretBrevutfall = lagreBrevutfall(behandling, opphoer, brevutfall)
+        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
         val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
 
         oppdaterBehandlingStatus(behandling, opphoer, brukerTokenInfo)
@@ -39,7 +39,6 @@ class BehandlingInfoService(
 
     private fun lagreBrevutfall(
         behandling: Behandling,
-        opphoer: Boolean,
         brevutfall: Brevutfall,
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)

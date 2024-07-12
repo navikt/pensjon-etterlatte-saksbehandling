@@ -38,8 +38,6 @@ spec:
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
           - id: baf0a4b6-71ca-45dd-9731-9f3469627c38 # 0000-GA-PENSJON_NASJONAL_M_LOGG
           - id: f8ceac75-30fe-4f0f-aec6-db706986caf0 # 0000-GA-PENSJON_NASJONAL_U_LOGG
-        extra:
-          - NAVident
     sidecar:
       enabled: true
       autoLogin: true

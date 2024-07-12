@@ -86,7 +86,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
@@ -120,7 +120,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentGrunnlagMedEgneAvdoedesBarn()
 

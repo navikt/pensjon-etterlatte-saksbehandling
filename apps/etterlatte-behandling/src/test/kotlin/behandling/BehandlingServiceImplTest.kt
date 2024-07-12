@@ -847,6 +847,6 @@ internal class BehandlingServiceImplTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        val TOKEN = BrukerTokenInfo.of("a", "b", null, null, null)
+        val TOKEN = BrukerTokenInfo.of("a", "b", null, null, null, null)
     }
 }

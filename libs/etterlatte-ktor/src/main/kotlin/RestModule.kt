@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport
@@ -77,8 +78,8 @@ fun Application.restModule(
             call.request.header("Authorization")?.let {
                 val token = JwtToken(it.substringAfterLast("Bearer "))
                 val jwtTokenClaims = token.jwtTokenClaims
-                jwtTokenClaims.get("NAVident") as? String // human
-                    ?: token.jwtTokenClaims.get("azp_name") as? String // system/app-user
+                jwtTokenClaims.getClaimAsString(Claims.NAVident) // human
+                    ?: token.jwtTokenClaims.getClaimAsString(Claims.azp_name) // system/app-user
             }
         }
     }

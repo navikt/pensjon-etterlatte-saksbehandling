@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 
 data class SaksbehandlerMedRoller(
@@ -9,7 +10,7 @@ data class SaksbehandlerMedRoller(
     fun harRolle(rolle: AzureGroup): Boolean {
         val claims = saksbehandler.getClaims()
         return saksbehandlerGroupIdsByKey[rolle]
-            ?.let { return claims?.containsClaim("groups", it) ?: false }
+            ?.let { return claims?.containsClaim(Claims.groups.name, it) ?: false }
             ?: false
     }
 

@@ -129,6 +129,7 @@ internal class SakServiceTest {
                 sub = "ba",
                 saksbehandler = saksbehandler,
                 claims = null,
+                idtyp = null,
             )
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(

@@ -161,7 +161,7 @@ internal class GenerellBehandlingServiceTest(
         )
         val foerstegangsbehandlingHentet =
             behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
-        val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
         val doedsdato = LocalDate.parse("2016-12-30")
         val personopplysning = personOpplysning(doedsdato = doedsdato)
@@ -254,7 +254,7 @@ internal class GenerellBehandlingServiceTest(
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 
-        val tokenInfo = BrukerTokenInfo.of(randomUUID().toString(), saksbehandler, null, null, null)
+        val tokenInfo = BrukerTokenInfo.of(randomUUID().toString(), saksbehandler, null, null, null, null)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             behandlingId.toString(),

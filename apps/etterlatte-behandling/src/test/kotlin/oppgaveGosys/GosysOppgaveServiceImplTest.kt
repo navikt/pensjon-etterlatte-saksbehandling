@@ -271,7 +271,7 @@ class GosysOppgaveServiceImplTest {
     fun `Flytt oppgave til Gjenny`() {
         val sakId = Random.nextLong()
         val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
-        val brukerTokenInfo = BrukerTokenInfo.of("", "Z123456", null, null, null)
+        val brukerTokenInfo = BrukerTokenInfo.of("", "Z123456", null, null, null, null)
 
         coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
         coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave

@@ -53,7 +53,7 @@ class JournalfoerBrevServiceTest {
     private val dokarkivService = mockk<DokarkivService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
-    private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
+    private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null, null)
 
     @AfterEach
     fun after() {

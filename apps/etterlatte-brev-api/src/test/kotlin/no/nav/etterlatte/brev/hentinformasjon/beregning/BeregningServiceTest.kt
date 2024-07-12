@@ -120,7 +120,7 @@ class BeregningServiceTest {
     private companion object {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null)
+        private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null, null)
         private val BREV_BEREGNINGSPERIODE =
             no.nav.etterlatte.brev.behandling.Beregningsperiode(
                 YearMonth.now().atDay(1),

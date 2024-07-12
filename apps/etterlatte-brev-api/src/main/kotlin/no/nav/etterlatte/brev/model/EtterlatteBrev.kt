@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -13,9 +14,9 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class BarnepensjonEtterbetaling(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val etterbetalingsperioder: List<BarnepensjonBeregningsperiode>,
+    val inneholderKrav: Boolean?,
+    val frivilligSkattetrekk: Boolean?,
+    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
 )
 
 data class OmstillingsstoenadEtterbetaling(

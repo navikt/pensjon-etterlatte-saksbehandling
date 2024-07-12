@@ -3,34 +3,12 @@ package no.nav.etterlatte.brev.model
 import java.time.LocalDate
 
 object Etterbetaling {
-    fun fraBarnepensjonBeregningsperioder(
-        dto: EtterbetalingDTO,
-        perioder: List<BarnepensjonBeregningsperiode>,
-    ) = BarnepensjonEtterbetaling(
-        fraDato = dto.datoFom,
-        tilDato = dto.datoTom,
-        etterbetalingsperioder =
-            perioder
-                .filter { beregningsperiodeErInnenforEtterbetalingsperiode(it.datoFOM, it.datoTOM, dto) }
-                .sortedByDescending { it.datoFOM }
-                .let { list ->
-                    val oppdatertListe = list.toMutableList()
-
-                    // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe
-                        .firstOrNull()
-                        ?.copy(datoTOM = dto.datoTom)
-                        ?.let { oppdatertListe[0] = it }
-
-                    // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                    oppdatertListe
-                        .lastOrNull()
-                        ?.copy(datoFOM = dto.datoFom)
-                        ?.let { oppdatertListe[list.lastIndex] = it }
-
-                    oppdatertListe.toList()
-                },
-    )
+    fun fraBarnepensjonDTO(dto: EtterbetalingDTO) =
+        BarnepensjonEtterbetaling(
+            inneholderKrav = dto.inneholderKrav,
+            frivilligSkattetrekk = dto.frivilligSkattetrekk,
+            etterbetalingPeriodeValg = dto.etterbetalingPeriodeValg,
+        )
 
     fun fraOmstillingsstoenadBeregningsperioder(
         dto: EtterbetalingDTO,

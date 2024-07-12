@@ -8,6 +8,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
+  EtterbetalingPeriodeValg,
   FeilutbetalingValg,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
@@ -20,17 +21,15 @@ import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjel
 import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
 import { FeilutbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/FeilutbetalingHjelpeTekst'
 import { feilutbetalingToString } from '~components/behandling/brevutfall/BrevutfallVisning'
-
-enum HarEtterbetaling {
-  JA = 'JA',
-  NEI = 'NEI',
-  IKKE_VALGT = 'IKKE_VALGT',
-}
+import { ISvar } from '~shared/types/ISvar'
 
 interface BrevutfallSkjemaData {
-  harEtterbetaling: HarEtterbetaling | null
+  harEtterbetaling: ISvar | null
   datoFom?: Date | null
   datoTom?: Date | null
+  kravIEtterbetaling: ISvar | null
+  frivilligSkattetrekk: ISvar | null
+  etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
   aldersgruppe?: Aldersgruppe | null
   feilutbetalingValg?: FeilutbetalingValg | null
   feilutbetalingKommentar: string | null
@@ -62,10 +61,23 @@ export const BrevutfallSkjema = ({
     defaultValues: {
       harEtterbetaling:
         brevutfallOgEtterbetaling.etterbetaling === undefined
-          ? HarEtterbetaling.IKKE_VALGT
+          ? undefined
           : brevutfallOgEtterbetaling.etterbetaling
-            ? HarEtterbetaling.JA
-            : HarEtterbetaling.NEI,
+            ? ISvar.JA
+            : ISvar.NEI,
+      kravIEtterbetaling:
+        brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav === undefined
+          ? undefined
+          : brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav
+            ? ISvar.JA
+            : ISvar.NEI,
+      frivilligSkattetrekk:
+        brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk === undefined
+          ? undefined
+          : brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk
+            ? ISvar.JA
+            : ISvar.NEI,
+      etterbetalingPeriodeValg: brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg,
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
@@ -90,10 +102,13 @@ export const BrevutfallSkjema = ({
           : null,
       },
       etterbetaling:
-        data.harEtterbetaling === HarEtterbetaling.JA
+        data.harEtterbetaling === ISvar.JA
           ? {
               datoFom: formatISO(data.datoFom!, { representation: 'date' }),
               datoTom: formatISO(data.datoTom!, { representation: 'date' }),
+              inneholderKrav: data.kravIEtterbetaling === ISvar.JA,
+              frivilligSkattetrekk: data.frivilligSkattetrekk === ISvar.JA,
+              etterbetalingPeriodeValg: data.etterbetalingPeriodeValg,
             }
           : null,
     }
@@ -148,17 +163,17 @@ export const BrevutfallSkjema = ({
               legend={<EtterbetalingHjelpeTekst />}
               radios={
                 <>
-                  <Radio size="small" value={HarEtterbetaling.JA}>
+                  <Radio size="small" value={ISvar.JA}>
                     Ja
                   </Radio>
-                  <Radio size="small" value={HarEtterbetaling.NEI}>
+                  <Radio size="small" value={ISvar.NEI}>
                     Nei
                   </Radio>
                 </>
               }
             />
 
-            {watch().harEtterbetaling == HarEtterbetaling.JA && (
+            {watch('harEtterbetaling') == ISvar.JA && (
               <HStack gap="4">
                 <ControlledMaanedVelger
                   fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
@@ -179,6 +194,58 @@ export const BrevutfallSkjema = ({
                   validate={validerTom}
                   required
                 />
+                {behandling.sakType == SakType.BARNEPENSJON && (
+                  <>
+                    <ControlledRadioGruppe
+                      name="kravIEtterbetaling"
+                      control={control}
+                      errorVedTomInput="Du må velge om det er krav i etterbetalingen"
+                      legend={<HStack gap="2">Er det krav i etterbetalingen?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={ISvar.JA}>
+                            Ja
+                          </Radio>
+                          <Radio size="small" value={ISvar.NEI}>
+                            Nei
+                          </Radio>
+                        </>
+                      }
+                    />
+                    <ControlledRadioGruppe
+                      name="frivilligSkattetrekk"
+                      control={control}
+                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
+                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={ISvar.JA}>
+                            Ja
+                          </Radio>
+                          <Radio size="small" value={ISvar.NEI}>
+                            Nei
+                          </Radio>
+                        </>
+                      }
+                    />
+                    <ControlledRadioGruppe
+                      name="etterbetalingPeriodeValg"
+                      control={control}
+                      errorVedTomInput="Velg hvor lang etterbetalingsperiode det er"
+                      legend={<HStack gap="2">Hvor mange måneder etterbetales det for?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={EtterbetalingPeriodeValg.UNDER_3_MND}>
+                            Etterbetaling 1 - 2 måneder
+                          </Radio>
+                          <Radio size="small" value={EtterbetalingPeriodeValg.FRA_3_MND}>
+                            Etterbetaling fra 3 måneder
+                          </Radio>
+                        </>
+                      }
+                    />
+                  </>
+                )}
               </HStack>
             )}
           </VStack>
@@ -225,13 +292,13 @@ export const BrevutfallSkjema = ({
               />
             </VStack>
 
-            {watch().feilutbetalingValg && (
+            {watch('feilutbetalingValg') && (
               <Controller
                 name="feilutbetalingKommentar"
                 render={(props) => (
                   <Textarea
                     label="Kommentar"
-                    value={watch().feilutbetalingKommentar ?? ''}
+                    value={watch('feilutbetalingKommentar') ?? ''}
                     style={{ width: '100%' }}
                     {...props}
                     onChange={(e) => {

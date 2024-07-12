@@ -314,6 +314,25 @@ class BehandlingDao(
         }
     }
 
+    fun hentViderefoertOpphoer(behandlingId: UUID) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement("SELECT dato, kilde, begrunnelse, kravdato, vilkaar FROM viderefoert_opphoer WHERE behandling_id = ?")
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().singleOrNull {
+                    ViderefoertOpphoer(
+                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        kilde = getString("kilde").let { objectMapper.readValue(it) },
+                        begrunnelse = getString("begrunnelse"),
+                        kravdato = getDate("kravdato")?.let { it.toLocalDate() },
+                        behandlingId = behandlingId,
+                        vilkaar = getString("vilkaar"),
+                    )
+                }
+            }
+        }
+
     fun lagreSendeBrev(
         behandlingId: UUID,
         skalSendeBrev: Boolean,

@@ -5,12 +5,8 @@ import { useState } from 'react'
 import { Button } from '@navikt/ds-react'
 import { ViderefoereOpphoerVurdering } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVurdering'
 
-const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) => {
-  if (viderefoertOpphoer === null) {
-    return 'warning'
-  }
-  return 'success'
-}
+const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
+  viderefoertOpphoer === null ? 'warning' : 'success'
 
 export const ViderefoereOpphoer = ({
   behandling,

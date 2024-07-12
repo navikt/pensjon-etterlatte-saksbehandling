@@ -123,7 +123,7 @@ const FeilForPeriode = (props: { feil: FeilIPeriodeGrunnlagAlle[] }) => {
   return (
     <>
       {props.feil.map((feil) => (
-        <FeilContainer key={feil}>{teksterFeilIPeriode[feil]}</FeilContainer>
+        <FeilContainer key={feil}>- {teksterFeilIPeriode[feil]}</FeilContainer>
       ))}
     </>
   )
@@ -133,6 +133,7 @@ const FeilContainer = styled.span`
   margin-top: 0.5em;
   word-wrap: break-word;
   display: block;
+  color: #C30000; #nav-red
 `
 
 const ButtonMarginTop = styled(Button)`

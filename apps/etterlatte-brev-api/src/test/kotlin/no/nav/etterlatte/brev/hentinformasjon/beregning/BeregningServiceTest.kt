@@ -5,7 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
@@ -120,7 +120,7 @@ class BeregningServiceTest {
     private companion object {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTokenInfo = simpleSaksbehandlerMedIdent(SAKSBEHANDLER_IDENT)
+        private val BRUKERTokenInfo = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private val BREV_BEREGNINGSPERIODE =
             no.nav.etterlatte.brev.behandling.Beregningsperiode(
                 YearMonth.now().atDay(1),

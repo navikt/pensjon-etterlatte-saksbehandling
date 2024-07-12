@@ -28,7 +28,6 @@ import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.simpleSaksbehandler
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -957,7 +956,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 }
                 this.ferdigstillOppgave(
                     id = it.id,
-                    saksbehandler = simpleSaksbehandlerMedIdent(saksbehandlerId),
+                    saksbehandler = simpleSaksbehandler(saksbehandlerId),
                 )
             }
         }

@@ -22,7 +22,6 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.ktor.simpleSaksbehandler
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -255,7 +254,7 @@ internal class GenerellBehandlingServiceTest(
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 
-        val tokenInfo = simpleSaksbehandlerMedIdent(saksbehandler)
+        val tokenInfo = simpleSaksbehandler(saksbehandler)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             behandlingId.toString(),

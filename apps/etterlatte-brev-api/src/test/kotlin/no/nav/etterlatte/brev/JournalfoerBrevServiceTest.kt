@@ -29,7 +29,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -53,7 +53,7 @@ class JournalfoerBrevServiceTest {
     private val dokarkivService = mockk<DokarkivService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
-    private val bruker = simpleSaksbehandlerMedIdent("Z123456")
+    private val bruker = simpleSaksbehandler("Z123456")
 
     @AfterEach
     fun after() {

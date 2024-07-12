@@ -14,7 +14,7 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -272,7 +272,7 @@ class GosysOppgaveServiceImplTest {
     fun `Flytt oppgave til Gjenny`() {
         val sakId = Random.nextLong()
         val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
-        val brukerTokenInfo = simpleSaksbehandlerMedIdent("Z123456")
+        val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
         coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
         coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave

@@ -17,7 +17,7 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -50,7 +50,7 @@ internal class NyNotatServiceTest(
             behandlingServiceMock,
         )
 
-    private val saksbehandler = simpleSaksbehandlerMedIdent("Z123456")
+    private val saksbehandler = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun before() {

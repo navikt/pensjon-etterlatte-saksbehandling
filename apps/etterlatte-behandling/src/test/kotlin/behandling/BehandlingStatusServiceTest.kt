@@ -14,7 +14,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
@@ -64,7 +64,7 @@ internal class BehandlingStatusServiceTest {
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val behandlingdao = mockk<BehandlingDao>(relaxUnitFun = true)
 
-    private val brukerTokenInfo = simpleSaksbehandlerMedIdent("Z123456")
+    private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
     private val sut =
         BehandlingStatusServiceImpl(

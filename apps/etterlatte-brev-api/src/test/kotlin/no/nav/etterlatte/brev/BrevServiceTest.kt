@@ -23,7 +23,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.ktor.simpleSaksbehandlerMedIdent
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -60,7 +60,7 @@ internal class BrevServiceTest {
             pdfGenerator,
         )
 
-    private val bruker = simpleSaksbehandlerMedIdent("Z123456")
+    private val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun before() {

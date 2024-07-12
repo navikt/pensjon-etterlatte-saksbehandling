@@ -1,12 +1,10 @@
 package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.klienter.BehandlingKlientException
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.toYearMonth
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -14,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class BeregningService(
@@ -90,7 +89,10 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
+
+        if (behandling.behandlingType === BehandlingType.REVURDERING) {
+            validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
+        }
 
         return hentOverstyrBeregning(behandling).takeIf { it != null }
             ?: beregningRepository.opprettOverstyrBeregning(
@@ -129,15 +131,9 @@ class BeregningService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val foersteVirkDto: FoersteVirkDto? =
-            try {
-                behandlingKlient.hentFoersteVirkningsdato(behandling.sak, brukerTokenInfo)
-            } catch (e: BehandlingKlientException) {
-                // hvis en sak ikke har en behandling som er iverksatt, har den heller ingen første virke
-                null
-            }
+        val foersteVirkDto: FoersteVirkDto? = behandlingKlient.hentFoersteVirkningsdato(behandling.sak, brukerTokenInfo)
 
-        if (foersteVirkDto != null && foersteVirkDto.foersteIverksatteVirkISak.toYearMonth() != behandling.virkningstidspunkt?.dato) {
+        if (foersteVirkDto != null && YearMonth.from(foersteVirkDto.foersteIverksatteVirkISak) != behandling.virkningstidspunkt?.dato) {
             throw KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato()
         }
     }

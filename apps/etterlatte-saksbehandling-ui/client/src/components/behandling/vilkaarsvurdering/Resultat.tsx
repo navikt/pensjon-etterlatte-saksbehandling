@@ -212,12 +212,14 @@ export const Resultat = (props: Props) => {
         )}
       </Box>
 
-      {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
-        <OppdatertGrunnlagAlert variant="warning">
-          Virkningstidspunktet er endret og vilkårene må da vurderes på nytt. For å starte ny vurdering må du slette
-          nåværende vilkårsvurdering
-        </OppdatertGrunnlagAlert>
-      )}
+      <Box paddingBlock="4 8" paddingInline="16 4">
+        {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
+          <OppdatertGrunnlagAlert variant="warning">
+            Virkningstidspunktet er endret og vilkårene må da vurderes på nytt. For å starte ny vurdering må du slette
+            nåværende vilkårsvurdering
+          </OppdatertGrunnlagAlert>
+        )}
+      </Box>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (

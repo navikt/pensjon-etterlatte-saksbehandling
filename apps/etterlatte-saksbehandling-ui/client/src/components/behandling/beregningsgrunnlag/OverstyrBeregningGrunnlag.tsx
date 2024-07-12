@@ -286,7 +286,18 @@ const OverstyrBeregningGrunnlag = (props: {
                           type="button"
                           variant="danger"
                           loading={isPending(deaktiverOverstyrtBeregningResultat)}
-                          onClick={() => deaktiverOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
+                          onClick={() =>
+                            deaktiverOverstyrtBereging(
+                              behandling.id,
+                              () => {
+                                setOverstyrt(undefined)
+                                modalRef.current?.close()
+                              },
+                              () => {
+                                modalRef.current?.close()
+                              }
+                            )
+                          }
                         >
                           Skru av overstyrt beregning
                         </Button>

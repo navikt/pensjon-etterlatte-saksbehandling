@@ -8,7 +8,6 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.PeriodisertOmstillingstoenadGrunnlag
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
@@ -181,7 +180,7 @@ class BeregnOmstillingsstoenadService(
                                 trygdetidForIdent = trygdetidGrunnlagForPeriode.ident,
                                 kilde =
                                     Grunnlagsopplysning.RegelKilde(
-                                        navn = kroneavrundetOmstillingstoenadRegel.regelReferanse.id,
+                                        navn = kroneavrundetOmstillingstoenadRegelMedInstitusjon.regelReferanse.id,
                                         ts = beregnetDato,
                                         versjon = periodisertResultat.reglerVersjon,
                                     ),

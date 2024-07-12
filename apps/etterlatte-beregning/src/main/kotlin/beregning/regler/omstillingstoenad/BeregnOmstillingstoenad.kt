@@ -81,7 +81,7 @@ val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse("OMS-BEREGNING-KANSKJEANVENDINSTITUSJON"),
-    ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og omstillingstoenadSatsRegel og erBrukerIInstitusjonOMS med {
+    ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og institusjonsoppholdSatsRegelOMS og erBrukerIInstitusjonOMS med {
             beregnetOmstillingsstoenad,
             beregnetOmstillingsstoenadMedInstitusjonsopphold,
             harInstitusjonshopphold,

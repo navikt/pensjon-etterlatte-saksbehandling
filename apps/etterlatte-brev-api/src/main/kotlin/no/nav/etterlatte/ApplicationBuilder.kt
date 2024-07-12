@@ -195,7 +195,8 @@ class ApplicationBuilder {
             brevDataMapperFerdigstilling,
             behandlingService,
         )
-    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
+    private val brevDataMapperFerdigstillVarsel =
+        BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, vilkaarsvurderingService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)

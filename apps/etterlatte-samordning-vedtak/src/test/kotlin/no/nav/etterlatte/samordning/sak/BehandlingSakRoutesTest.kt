@@ -16,8 +16,10 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
@@ -29,6 +31,7 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -48,6 +51,12 @@ class BehandlingSakRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        confirmVerified()
+        clearAllMocks()
     }
 
     val fnr = "01448203510"
@@ -73,6 +82,7 @@ class BehandlingSakRoutesTest {
                     setBody(FoedselsnummerDTO(fnr).toJson())
                 }
             response.status shouldBe HttpStatusCode.Unauthorized
+            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
         }
     }
 
@@ -98,6 +108,7 @@ class BehandlingSakRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }
             response.status shouldBe HttpStatusCode.Unauthorized
+            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
         }
     }
 
@@ -125,6 +136,7 @@ class BehandlingSakRoutesTest {
                     )
                 }
             response.status shouldBe HttpStatusCode.InternalServerError
+            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
         }
     }
 
@@ -153,6 +165,7 @@ class BehandlingSakRoutesTest {
                     )
                 }
             response.status shouldBe HttpStatusCode.InternalServerError
+            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
         }
     }
 

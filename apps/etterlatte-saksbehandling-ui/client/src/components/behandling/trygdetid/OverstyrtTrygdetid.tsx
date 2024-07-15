@@ -26,7 +26,6 @@ export const OverstyrtTrygdetid = ({
     getValues,
     reset,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<{ overstyrtNorskPoengaar: number | undefined }>({
     defaultValues: {
@@ -79,7 +78,7 @@ export const OverstyrtTrygdetid = ({
                     size="small"
                     icon={<TrashIcon aria-hidden />}
                     onClick={() => {
-                      setValue('overstyrtNorskPoengaar', undefined)
+                      reset({ overstyrtNorskPoengaar: undefined })
                       overstyrTrygdetidPoengaar({ ...trygdetid, overstyrtNorskPoengaar: undefined })
                     }}
                   >

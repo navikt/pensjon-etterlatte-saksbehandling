@@ -35,6 +35,12 @@ export const OverstyrtTrygdetid = ({
 
   const [redigerNorskPoengaar, setRedigerNorskPoengaar] = useState<boolean>(false)
 
+  const validerPoengaarInput = (overstyrNorskPoengaar: number | undefined): string | undefined => {
+    if (!overstyrNorskPoengaar) return 'Du må sette et heltall'
+    else if (overstyrNorskPoengaar < 0) return 'Må være større enn 0'
+    return undefined
+  }
+
   return (
     <form
       onSubmit={handleSubmit((data) => {
@@ -93,7 +99,10 @@ export const OverstyrtTrygdetid = ({
           <>
             <Box width="15rem">
               <TextField
-                {...register('overstyrtNorskPoengaar', { valueAsNumber: true })}
+                {...register('overstyrtNorskPoengaar', {
+                  valueAsNumber: true,
+                  validate: validerPoengaarInput,
+                })}
                 inputMode="numeric"
                 label="Antall år"
                 error={errors.overstyrtNorskPoengaar?.message}

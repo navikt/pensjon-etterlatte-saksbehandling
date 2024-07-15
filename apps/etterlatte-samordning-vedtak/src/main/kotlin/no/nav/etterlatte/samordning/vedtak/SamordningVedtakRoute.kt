@@ -84,7 +84,7 @@ fun Route.samordningVedtakRoute(
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
-            issuers = setOf("azure")
+            issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(SelvbetjeningAuthorizationPlugin) {
             validator = { call, borger -> borger.value == call.fnr }

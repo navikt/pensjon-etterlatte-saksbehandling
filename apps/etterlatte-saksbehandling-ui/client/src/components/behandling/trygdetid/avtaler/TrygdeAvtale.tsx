@@ -1,4 +1,4 @@
-import { FloppydiskIcon, HandshakeIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, HandshakeIcon, PencilIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   Alert,
   Box,
@@ -32,7 +32,6 @@ import { IconSize } from '~shared/types/Icon'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
 import { JaNei } from '~shared/types/ISvar'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
@@ -165,8 +164,8 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
             <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
             {redigerbar && (
               <div>
-                <Button size="small" onClick={rediger} type="button">
-                  Rediger
+                <Button size="small" variant="secondary" onClick={rediger} type="button" icon={<PencilIcon />}>
+                  Rediger avtale
                 </Button>
               </div>
             )}

@@ -21,6 +21,8 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
 import { VStack } from '@navikt/ds-react'
+import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
+import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 
 interface Props {
   redigerbar: boolean
@@ -97,7 +99,10 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     <>
       {trygdetid && (
         <VStack gap="12">
-          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+          <VStack gap="4">
+            {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
+            <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+          </VStack>
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 

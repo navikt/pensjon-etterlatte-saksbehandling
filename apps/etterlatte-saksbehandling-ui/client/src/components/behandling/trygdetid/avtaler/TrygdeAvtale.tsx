@@ -35,6 +35,7 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -150,12 +151,14 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   return (
     <Box paddingBlock="8 0">
       <VStack gap="4">
-        <HStack gap="2">
+        <HStack gap="2" align="center">
           <HandshakeIcon fontSize={IconSize.DEFAULT} />
           <Heading size="small" level="3">
             Vurdering av trygdeavtale (Avdød)
           </Heading>
         </HStack>
+
+        <AvdoedesTrygdetidReadMore />
 
         {!redigering && avtalerListe && avtaleKriterierListe && (
           <>

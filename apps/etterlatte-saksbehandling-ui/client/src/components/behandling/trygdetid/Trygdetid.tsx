@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, sorterLand } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
@@ -20,6 +18,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
+import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
@@ -39,14 +38,6 @@ interface Props {
   behandling: IDetaljertBehandling
   vedtaksresultat: VedtakResultat | null
   virkningstidspunktEtterNyRegelDato: Boolean
-}
-
-const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
-  return (
-    behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ||
-    (behandling.behandlingType === IBehandlingsType.REVURDERING &&
-      behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND)
-  )
 }
 
 const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[]): boolean => {
@@ -150,34 +141,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   return (
     <TrygdetidBox paddingInline="16">
       <VStack gap="12">
-        {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-        <LovtekstMedLenke
-          tittel="Avdødes trygdetid"
-          hjemler={[
-            {
-              tittel: '§ 3-5 Trygdetid ved beregning av ytelser',
-              lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-5',
-            },
-            {
-              tittel: '§ 3-7 Beregning trygdetid',
-              lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-7',
-            },
-            {
-              tittel: 'EØS-forordning 883/2004 artikkel 52',
-              lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_52',
-            },
-          ]}
-          status={null}
-        >
-          <BodyShort>
-            Faktisk trygdetid kan gis fra avdøde fylte 16 år til dødsfall. Hadde avdøde opptjent pensjonspoeng fra fylte
-            67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
-            fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år.
-            Avdødes utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen.
-            Ulike avtaler skal ikke beregnes sammen. Hvis avdøde har uføretrygd, skal som hovedregel trygdetid lagt til
-            grunn i uføretrygden benyttes.
-          </BodyShort>
-        </LovtekstMedLenke>
+        {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
         {landListe && (
           <>

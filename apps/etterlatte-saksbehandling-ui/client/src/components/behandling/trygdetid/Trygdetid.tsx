@@ -37,7 +37,7 @@ interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
   vedtaksresultat: VedtakResultat | null
-  virkningstidspunktEtterNyRegelDato: Boolean
+  virkningstidspunktEtterNyRegelDato: boolean
 }
 
 const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[]): boolean => {

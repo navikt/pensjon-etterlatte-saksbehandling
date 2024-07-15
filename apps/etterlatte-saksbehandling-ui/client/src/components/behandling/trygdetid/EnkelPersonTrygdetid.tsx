@@ -28,7 +28,7 @@ interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
   trygdetid: ITrygdetid
-  virkningstidspunktEtterNyRegelDato: Boolean
+  virkningstidspunktEtterNyRegelDato: boolean
   landListe: ILand[]
   fetchTrygdetider: (behandlingId: string) => void
 }

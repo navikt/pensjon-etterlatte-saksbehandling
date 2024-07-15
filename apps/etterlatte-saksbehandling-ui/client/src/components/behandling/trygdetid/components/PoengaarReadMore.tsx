@@ -2,14 +2,14 @@ import React from 'react'
 import { Box, ReadMore } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 
-export const EksportvurderingReadMore = ({
+export const PoengaarReadMore = ({
   sakType,
   virkningstidspunktEtterNyRegelDato,
 }: {
   sakType: SakType
   virkningstidspunktEtterNyRegelDato?: boolean
 }) => {
-  const eksportVurderingTekst = () => {
+  const poengaarTekst = () => {
     switch (sakType) {
       case SakType.BARNEPENSJON:
         return `Poengår skal registreres kun ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om
@@ -24,7 +24,7 @@ export const EksportvurderingReadMore = ({
 
   return (
     <Box maxWidth="42.5rem">
-      <ReadMore header="Mer om eksportvurdering">{eksportVurderingTekst()}</ReadMore>
+      <ReadMore header="Mer om poengår">{poengaarTekst()}</ReadMore>
     </Box>
   )
 }

@@ -2,7 +2,7 @@ import { Box, Button, Heading, HStack, Label, TextField, VStack } from '@navikt/
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import { EksportvurderingReadMore } from '~components/behandling/trygdetid/components/EksportvurderingReadMore'
+import { PoengaarReadMore } from '~components/behandling/trygdetid/components/PoengaarReadMore'
 import { useForm } from 'react-hook-form'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, TruckIcon, XMarkIcon } from '@navikt/aksel-icons'
 
@@ -55,10 +55,7 @@ export const OverstyrtTrygdetid = ({
             Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
         </HStack>
-        <EksportvurderingReadMore
-          sakType={sakType}
-          virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-        />
+        <PoengaarReadMore sakType={sakType} virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato} />
         {!redigerNorskPoengaar && (
           <>
             <Label>

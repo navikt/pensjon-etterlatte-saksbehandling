@@ -239,8 +239,8 @@ internal class BehandlingInfoServiceTest {
             every { id } returns behandlingId
             every { type } returns behandlingType
             every { sak } returns
-                mockk {
-                    every { this@mockk.sakType } returns sakType
+                mockk sakMock@{
+                    every { this@sakMock.sakType } returns sakType
                 }
             every { status } returns behandlingStatus
             every { revurderingsaarsak() } returns revurderingaarsak

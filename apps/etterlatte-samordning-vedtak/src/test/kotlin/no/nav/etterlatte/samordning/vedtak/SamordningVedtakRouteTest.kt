@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import com.nimbusds.jwt.JWTClaimsSet
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
@@ -22,6 +23,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -272,16 +274,20 @@ class SamordningVedtakRouteTest {
         }
 
         private fun token(role: String? = null): String {
-            val claims = mutableMapOf<String, Any>()
-            claims["roles"] = listOf(role)
-            claims[Claims.oid.name] = "pensjon-pen"
-            claims[Claims.sub.name] = "pensjon-pen"
-            claims[Claims.idtyp.name] = "app"
+            val claimsset =
+                JwtTokenClaims(
+                    JWTClaimsSet
+                        .Builder()
+                        .claim(Claims.idtyp.name, "app")
+                        .claim(Claims.azp_name.name, "cluster:appname:dev")
+                        .claim(Claims.roles.name, listOf(role))
+                        .build(),
+                )
 
             return server
                 .issueToken(
                     issuerId = ISSUER_ID_AZURE,
-                    claims = claims,
+                    claims = claimsset.allClaims,
                 ).serialize()
         }
     }

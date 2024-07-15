@@ -12,6 +12,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -34,7 +35,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -70,7 +70,8 @@ internal class VilkaarsvurderingServiceTest(
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
+
+    private val brukerTokenInfo = simpleSaksbehandler()
     private val grunnlagMock: Grunnlag = mockk()
 
     @BeforeAll

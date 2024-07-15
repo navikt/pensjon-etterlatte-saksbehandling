@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
@@ -37,7 +38,6 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.PaaVent
@@ -64,7 +64,7 @@ internal class BehandlingStatusServiceTest {
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val behandlingdao = mockk<BehandlingDao>(relaxUnitFun = true)
 
-    private val brukerTokenInfo = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null, null)
+    private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
     private val sut =
         BehandlingStatusServiceImpl(

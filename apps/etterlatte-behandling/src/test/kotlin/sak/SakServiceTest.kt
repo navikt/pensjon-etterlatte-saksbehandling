@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
@@ -122,15 +123,7 @@ internal class SakServiceTest {
 
         val saksbehandler = "Z123456"
         val accessToken = "a"
-        val brukerTokenInfo =
-            BrukerTokenInfo.of(
-                accessToken = accessToken,
-                oid = "b",
-                sub = "ba",
-                saksbehandler = saksbehandler,
-                claims = null,
-                idtyp = null,
-            )
+        val brukerTokenInfo = simpleSaksbehandler(saksbehandler)
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(
                 tokenValidationContext,

@@ -67,7 +67,9 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Selvbetjening" // Altså en borger/privatperson
                 } else if (principal?.context?.issuers?.contains(Issuer.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name) ?: bruker.sub
+                        is Systembruker ->
+                            bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name)
+                                ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.azp_name.name} for å være systembruker")
                         is Saksbehandler ->
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.NAVident.name} for å være saksbehandler")

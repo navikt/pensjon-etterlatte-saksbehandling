@@ -15,7 +15,7 @@ type Props = {
 export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
     <TrygdetidBeregnet>
-      <HStack gap="2">
+      <HStack gap="2" align="center">
         <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Beregnet trygdetid

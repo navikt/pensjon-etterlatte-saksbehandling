@@ -1,9 +1,8 @@
 import React from 'react'
 import { Table } from '@navikt/ds-react'
 import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
-import { TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 
-type Props = {
+interface Props {
   beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
 
@@ -17,7 +16,7 @@ export const BeregnetSamletTrygdetid = ({ beregnetTrygdetid }: Props) => {
     : ''
 
   return (
-    <TrygdetidTabell>
+    <Table>
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -54,6 +53,6 @@ export const BeregnetSamletTrygdetid = ({ beregnetTrygdetid }: Props) => {
           </Table.Row>
         </Table.Body>
       </Table>
-    </TrygdetidTabell>
+    </Table>
   )
 }

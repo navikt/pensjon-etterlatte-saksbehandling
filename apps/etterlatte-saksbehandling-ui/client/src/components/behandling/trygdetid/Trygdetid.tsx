@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, sorterLand } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import styled from 'styled-components'
 import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -19,19 +18,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
-
-const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
-  return (
-    <Box paddingInline="16">
-      <VStack gap="2">
-        <Heading size="small" level="3">
-          {overskrift}
-        </Heading>
-        <BodyShort>{beskrivelse}</BodyShort>
-      </VStack>
-    </Box>
-  )
-}
+import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
 
 interface Props {
   redigerbar: boolean
@@ -139,7 +126,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   }
 
   return (
-    <TrygdetidBox paddingInline="16">
+    <Box paddingInline="16" maxWidth="69rem">
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
@@ -183,26 +170,27 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                   ))}
                 </Tabs>
 
-                <OppsummeringWrapper>
-                  <HeadingWrapper size="medium" level="2">
+                <Box paddingBlock="0 8">
+                  <Heading size="medium" level="2" spacing>
                     Oppsummering av trygdetid for flere avdøde
-                  </HeadingWrapper>
-
-                  {trygdetider.map((trygdetid) => (
-                    <div key={trygdetid.ident}>
-                      {trygdetid.beregnetTrygdetid?.resultat ? (
-                        <>
-                          <HeadingWrapper size="small" level="3">
-                            Trygdetid for {mapNavn(trygdetid.ident)}
-                          </HeadingWrapper>
-                          <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
-                        </>
-                      ) : (
-                        <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
-                      )}
-                    </div>
-                  ))}
-                </OppsummeringWrapper>
+                  </Heading>
+                  <VStack gap="8">
+                    {trygdetider.map((trygdetid) => (
+                      <div key={trygdetid.ident}>
+                        {trygdetid.beregnetTrygdetid?.resultat ? (
+                          <>
+                            <Heading size="small" level="3" spacing>
+                              Trygdetid for {mapNavn(trygdetid.ident)}
+                            </Heading>
+                            <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+                          </>
+                        ) : (
+                          <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
+                        )}
+                      </div>
+                    ))}
+                  </VStack>
+                </Box>
               </>
             )}
           </>
@@ -229,19 +217,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
         {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
       </VStack>
-    </TrygdetidBox>
+    </Box>
   )
 }
-
-const HeadingWrapper = styled(Heading)`
-  margin-top: 2em;
-  margin-bottom: 1em;
-`
-
-const OppsummeringWrapper = styled.div`
-  margin-bottom: 2em;
-`
-
-const TrygdetidBox = styled(Box)`
-  max-width: 69rem;
-`

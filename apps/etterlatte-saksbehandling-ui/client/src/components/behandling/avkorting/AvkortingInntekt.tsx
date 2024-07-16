@@ -138,7 +138,8 @@ export const AvkortingInntekt = ({
       </Heading>
       {harInstitusjonsopphold && (
         <Alert variant="error">
-          Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med inntektsavkorting
+          Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med
+          inntektsavkorting, bruk manuel overstyring.
         </Alert>
       )}
       <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />

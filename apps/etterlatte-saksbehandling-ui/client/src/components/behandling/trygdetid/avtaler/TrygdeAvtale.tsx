@@ -217,12 +217,10 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                     label="Kriterier for å omfattes av avtalen"
                     autoComplete="off"
                     value={trygdeavtale.avtaleKriteriaKode}
-                    onChange={(e) => {
-                      setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })
-                    }}
+                    onChange={(e) => setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })}
                   >
                     <TrygdetidAvtaleOptionsView
-                      defaultBeskrivelse="Velg kriteria"
+                      defaultBeskrivelse="Velg kriterie"
                       trygdeavtaleOptions={hentAlleTrygdetidAvtalerKriterierRequest.data}
                     />
                   </Select>
@@ -233,9 +231,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   <RadioGroup
                     legend=""
                     size="small"
-                    onChange={(event) => {
-                      setTrygdeavtale({ ...trygdeavtale, personKrets: event as JaNei })
-                    }}
+                    onChange={(event) => setTrygdeavtale({ ...trygdeavtale, personKrets: event as JaNei })}
                     value={trygdeavtale.personKrets || ''}
                   >
                     <HStack gap="8">

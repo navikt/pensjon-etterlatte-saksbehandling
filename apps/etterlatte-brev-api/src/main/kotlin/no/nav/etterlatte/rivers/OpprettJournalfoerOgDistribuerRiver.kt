@@ -60,6 +60,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
             val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev, packet)
             rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
         }

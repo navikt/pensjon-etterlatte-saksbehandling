@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -29,7 +31,13 @@ fun opprettAvsenderRequest(
         sakenhet = it.sakenhet,
         attestantIdent = it.attestantIdent,
     )
-} ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = enhet)
+} ?: AvsenderRequest(saksbehandlerIdent = hentBrevIdent(bruker), sakenhet = enhet)
+
+private fun hentBrevIdent(bruker: BrukerTokenInfo): String =
+    when (bruker) {
+        is Saksbehandler -> bruker.ident
+        is Systembruker -> bruker.identForBrev()
+    }
 
 data class GenerellBrevData(
     val sak: Sak,

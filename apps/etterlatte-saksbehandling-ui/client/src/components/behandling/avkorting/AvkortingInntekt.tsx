@@ -46,7 +46,7 @@ export const AvkortingInntekt = ({
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
-
+  const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   const dispatch = useAppDispatch()
@@ -136,6 +136,12 @@ export const AvkortingInntekt = ({
       <Heading spacing size="small" level="2">
         Inntektsavkorting
       </Heading>
+      {harInstitusjonsopphold && (
+        <Alert variant="error">
+          Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med
+          inntektsavkorting, bruk manuel overstyring.
+        </Alert>
+      )}
       <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
       <BodyShort spacing>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt

@@ -20,7 +20,7 @@ fun ApplicationTestBuilder.runServerWithModule(
     function: Application.() -> Unit,
 ): HttpClient {
     environment {
-        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuer.AZURE.issuerName, CLIENT_ID)
+        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuer.AZURE.issuerName)
     }
     application {
         function()
@@ -39,7 +39,7 @@ fun ApplicationTestBuilder.runServer(
     routes: Route.() -> Unit,
 ): HttpClient {
     environment {
-        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuer.AZURE.issuerName, CLIENT_ID)
+        config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), Issuer.AZURE.issuerName)
     }
     application {
         restModule(this.log, routePrefix = routePrefix, withMetrics = withMetrics) {

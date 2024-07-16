@@ -6,7 +6,6 @@ import io.ktor.server.config.HoconApplicationConfig
 internal fun buildTestApplicationConfigurationForOauth(
     port: Int,
     issuerId: String,
-    clientId: String,
 ): HoconApplicationConfig =
     HoconApplicationConfig(
         ConfigFactory.parseMap(
@@ -16,7 +15,7 @@ internal fun buildTestApplicationConfigurationForOauth(
                         mapOf(
                             "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
                             "issuer_name" to issuerId,
-                            "accepted_audience" to clientId,
+                            "accepted_audience" to CLIENT_ID,
                         ),
                     ),
             ),

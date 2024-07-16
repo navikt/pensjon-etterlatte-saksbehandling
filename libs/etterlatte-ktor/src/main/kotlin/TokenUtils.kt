@@ -34,19 +34,10 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
         val claims = this.hentTokenClaimsForIssuerName(Issuer.AZURE)
-        val oidSub =
-            claims
-                ?.let {
-                    val oid = it.getClaimAsString(Claims.oid)
-                    val sub = it.getClaimAsString(Claims.sub)
-                    Pair(oid, sub)
-                }
         val saksbehandler = claims?.getClaimAsString(Claims.NAVident)
         val idtyp = claims?.getClaimAsString(Claims.idtyp)
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
-            oid = oidSub?.first,
-            sub = oidSub?.second,
             saksbehandler = saksbehandler,
             idtyp = idtyp,
             claims = claims,

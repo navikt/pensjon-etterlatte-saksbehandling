@@ -25,16 +25,19 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -192,7 +195,19 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns null
-
+            every { oppgaveService.hentOppgave(oppgaveId) } returns
+                OppgaveIntern(
+                    id = UUID.randomUUID(),
+                    status = Status.NY,
+                    enhet = Enheter.defaultEnhet.enhetNr,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.AKTIVITETSPLIKT,
+                    referanse = UUID.randomUUID().toString(),
+                    opprettet = Tidspunkt.now(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    frist = null,
+                )
             service.opprettAktivitetsgradForOppgave(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
 
             verify { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) }
@@ -246,7 +261,19 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns null
-
+            every { oppgaveService.hentOppgave(oppgaveId) } returns
+                OppgaveIntern(
+                    id = UUID.randomUUID(),
+                    status = Status.NY,
+                    enhet = Enheter.defaultEnhet.enhetNr,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.AKTIVITETSPLIKT,
+                    referanse = UUID.randomUUID().toString(),
+                    opprettet = Tidspunkt.now(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    frist = null,
+                )
             service.opprettUnntakForOpppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
 
             verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) }

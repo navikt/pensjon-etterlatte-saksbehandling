@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -35,7 +36,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -161,7 +161,7 @@ internal class GenerellBehandlingServiceTest(
         )
         val foerstegangsbehandlingHentet =
             behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
-        val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
+        val brukerTokenInfo = simpleSaksbehandler()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
         val doedsdato = LocalDate.parse("2016-12-30")
         val personopplysning = personOpplysning(doedsdato = doedsdato)
@@ -254,7 +254,7 @@ internal class GenerellBehandlingServiceTest(
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 
-        val tokenInfo = BrukerTokenInfo.of(randomUUID().toString(), saksbehandler, null, null, null, null)
+        val tokenInfo = simpleSaksbehandler(saksbehandler)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             behandlingId.toString(),

@@ -48,7 +48,7 @@ class SystemUser(
     override fun name(): String =
         identifiedBy
             .hentTokenClaimsForIssuerName(Issuer.AZURE)
-            ?.getStringClaim(Claims.azp_name.name) // format=cluster:namespace:app-name
+            ?.getClaimAsString(Claims.azp_name) // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
 }
 

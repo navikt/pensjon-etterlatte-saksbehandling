@@ -96,7 +96,6 @@ val avkortetYtelseMedRestanse =
             .let { max(it, 0) }
     }
 
-// TODO: her må inst hensyntas 17-13 femte ledd
 val avkortetYtelseMedRestanseOgSanksjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,

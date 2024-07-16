@@ -29,7 +29,7 @@ export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
           </BodyShort>
         </HStack>
       )}
-      <VStack gap="6">
+      <VStack gap="8">
         <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
         <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
         <BeregnetSamletTrygdetid beregnetTrygdetid={beregnetTrygdetid} />

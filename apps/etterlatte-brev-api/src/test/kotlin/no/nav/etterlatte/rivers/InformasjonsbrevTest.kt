@@ -25,6 +25,7 @@ import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository.Databasetabell
 import no.nav.etterlatte.rivers.opprettogjournalfoer.OpprettJournalfoerOgDistribuerRiver
+import no.nav.etterlatte.rivers.opprettogjournalfoer.OpprettJournalfoerOgDistribuerService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,12 +91,14 @@ class InformasjonsbrevTest(
         val brevdistribuerer = mockk<Brevdistribuerer>().also { every { it.distribuer(brevId) } returns "" }
         OpprettJournalfoerOgDistribuerRiver(
             testRapid,
-            mockk<GrunnlagService>(),
-            brevoppretter,
-            FerdigstillJournalfoerOgDistribuerBrev(
-                pdfGenerator,
-                journalfoerBrevService,
-                brevdistribuerer,
+            OpprettJournalfoerOgDistribuerService(
+                mockk<GrunnlagService>(),
+                brevoppretter,
+                FerdigstillJournalfoerOgDistribuerBrev(
+                    pdfGenerator,
+                    journalfoerBrevService,
+                    brevdistribuerer,
+                ),
             ),
         )
 

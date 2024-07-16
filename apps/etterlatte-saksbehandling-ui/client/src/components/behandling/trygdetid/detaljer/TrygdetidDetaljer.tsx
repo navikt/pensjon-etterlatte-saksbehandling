@@ -4,8 +4,7 @@ import { BeregnetFaktiskTrygdetid } from '~components/behandling/trygdetid/detal
 import { BeregnetFremtidigTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFremtidigTrygdetid'
 import { CalendarIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
 import { IconSize } from '~shared/types/Icon'
-import { BodyShort, Heading, HStack } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { BodyShort, Heading, HStack, VStack } from '@navikt/ds-react'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
 
 type Props = {
@@ -14,7 +13,7 @@ type Props = {
 
 export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
-    <TrygdetidBeregnet>
+    <VStack gap="4">
       <HStack gap="2" align="center">
         <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
@@ -30,10 +29,12 @@ export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
           </BodyShort>
         </HStack>
       )}
-      <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
-      <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
-      <BeregnetSamletTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
-    </TrygdetidBeregnet>
+      <VStack gap="6">
+        <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
+        <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
+        <BeregnetSamletTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
+      </VStack>
+    </VStack>
   )
 }
 
@@ -50,20 +51,3 @@ export const formaterBeregnetTrygdetid = (periode?: string) => {
   const [aar, maaneder] = periodeMedAntallAar.slice(1).split(/Y|M/)
   return `${aar} år${maaneder ? ` ${maaneder} måneder` : ''}`
 }
-
-export const TrygdetidTabell = styled.div`
-  margin-top: 2em;
-
-  thead {
-    th {
-      width: 200px;
-    }
-
-    th:first-child {
-      width: 400px;
-    }
-  }
-`
-const TrygdetidBeregnet = styled.div`
-  padding: 2em 0 4em 0;
-`

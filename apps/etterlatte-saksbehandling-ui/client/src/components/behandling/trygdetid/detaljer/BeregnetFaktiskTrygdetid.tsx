@@ -1,13 +1,13 @@
 import React from 'react'
 import { Table } from '@navikt/ds-react'
 import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
-import { formaterBeregnetTrygdetid, TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
+import { formaterBeregnetTrygdetid } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 
 type Props = {
   beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
 export const BeregnetFaktiskTrygdetid = ({ beregnetTrygdetid }: Props) => (
-  <TrygdetidTabell>
+  <Table>
     <Table size="small">
       <Table.Header>
         <Table.Row>
@@ -31,5 +31,5 @@ export const BeregnetFaktiskTrygdetid = ({ beregnetTrygdetid }: Props) => (
         </Table.Row>
       </Table.Body>
     </Table>
-  </TrygdetidTabell>
+  </Table>
 )

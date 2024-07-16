@@ -19,6 +19,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -50,12 +51,12 @@ class SamordningVedtakRouteTest {
     inner class MaskinportenApi {
         @BeforeEach
         fun before() {
-            config = config(server.config.httpServer.port(), ISSUER_ID_MASKINPORTEN)
+            config = config(server.config.httpServer.port(), Issuer.MASKINPORTEN.issuerName)
             applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
-        fun `skal gi 401 naar token mangler`() {
+        fun `skal gi 401 når token mangler`() {
             testApplication {
                 environment { config = applicationConfig }
                 application { samordningVedtakApi() }
@@ -187,7 +188,7 @@ class SamordningVedtakRouteTest {
 
             return server
                 .issueToken(
-                    issuerId = ISSUER_ID_MASKINPORTEN,
+                    issuerId = Issuer.MASKINPORTEN.issuerName,
                     claims = claims,
                 ).serialize()
         }
@@ -200,12 +201,12 @@ class SamordningVedtakRouteTest {
 
         @BeforeEach
         fun before() {
-            config = config(server.config.httpServer.port(), ISSUER_ID_AZURE)
+            config = config(server.config.httpServer.port(), Issuer.AZURE.issuerName)
             applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
-        fun `skal gi 401 naar token mangler`() {
+        fun `skal gi 401 når token mangler`() {
             testApplication {
                 environment { config = applicationConfig }
                 application { samordningVedtakApi() }
@@ -230,7 +231,7 @@ class SamordningVedtakRouteTest {
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${token()}")
+                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken()}")
                         parameter("fomDato", virkFom)
                         header("fnr", fnr)
                     }
@@ -259,7 +260,7 @@ class SamordningVedtakRouteTest {
                         parameter("fomDato", virkFom)
                         header("fnr", fnr)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${token("les-oms-vedtak")}")
+                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-vedtak")}")
                     }
 
                 response.status shouldBe HttpStatusCode.OK
@@ -273,8 +274,8 @@ class SamordningVedtakRouteTest {
             }
         }
 
-        private fun token(role: String? = null): String {
-            val claimsset =
+        private fun systembrukerToken(role: String? = null): String {
+            val claimSet =
                 JwtTokenClaims(
                     JWTClaimsSet
                         .Builder()
@@ -286,8 +287,8 @@ class SamordningVedtakRouteTest {
 
             return server
                 .issueToken(
-                    issuerId = ISSUER_ID_AZURE,
-                    claims = claimsset.allClaims,
+                    issuerId = Issuer.AZURE.issuerName,
+                    claims = claimSet.allClaims,
                 ).serialize()
         }
     }
@@ -310,11 +311,6 @@ class SamordningVedtakRouteTest {
     @AfterAll
     fun after() {
         server.shutdown()
-    }
-
-    companion object {
-        const val ISSUER_ID_MASKINPORTEN = "maskinporten"
-        const val ISSUER_ID_AZURE = "azure"
     }
 }
 

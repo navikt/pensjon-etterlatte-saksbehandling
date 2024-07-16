@@ -5,12 +5,13 @@ import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-internal const val CLIENT_ID = "CLIENT_ID for saksbehandler"
+const val CLIENT_ID = "CLIENT_ID for saksbehandler"
 
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
     navIdent: String = "Saksbehandler01",
     groups: List<String> = listOf(),
+    roles: List<String> = listOf(),
 ): String =
     this
         .issueToken(
@@ -20,7 +21,8 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
                 mapOf(
                     "navn" to navn,
                     Claims.NAVident.name to navIdent,
-                    "groups" to groups,
+                    Claims.groups.name to groups,
+                    Claims.roles.name to roles,
                 ),
         ).serialize()
 

@@ -134,7 +134,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         }
     }
 
-    // Må ha tilsvarende test i BP
     @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - best`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)

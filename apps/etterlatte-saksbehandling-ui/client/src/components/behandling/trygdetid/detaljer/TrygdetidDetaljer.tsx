@@ -2,7 +2,7 @@ import React from 'react'
 import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
 import { BeregnetFaktiskTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFaktiskTrygdetid'
 import { BeregnetFremtidigTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFremtidigTrygdetid'
-import { CalendarIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
+import { CalculatorIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
 import { IconSize } from '~shared/types/Icon'
 import { BodyShort, Heading, HStack, VStack } from '@navikt/ds-react'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
@@ -15,7 +15,7 @@ export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
     <VStack gap="4" paddingBlock="0 8">
       <HStack gap="2" align="center">
-        <CalendarIcon fontSize={IconSize.DEFAULT} />
+        <CalculatorIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Beregnet trygdetid
         </Heading>

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon
 
 import no.nav.etterlatte.beregning.grunnlag.Prosent
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -18,13 +19,13 @@ val institusjonsoppholdRegel: Regel<BarnepensjonGrunnlag, Prosent> =
         finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
     ) { it?.prosentEtterReduksjon() ?: Prosent.hundre }
 
-val erBrukerIInstitusjon: Regel<BarnepensjonGrunnlag, Boolean> =
+val brukerHarTellendeInstitusjonsopphold: Regel<BarnepensjonGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner om bruker har et institusjonsopphold",
         finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
     ) {
-        it != null
+        it != null && it.reduksjon != Reduksjon.NEI_KORT_OPPHOLD
     }
 
 val institusjonsoppholdSatsRegel =

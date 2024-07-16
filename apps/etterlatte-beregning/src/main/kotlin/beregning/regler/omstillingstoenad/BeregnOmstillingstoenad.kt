@@ -81,17 +81,19 @@ val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse("OMS-BEREGNING-KANSKJEANVENDINSTITUSJON"),
-    ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og institusjonsoppholdSatsRegelOMS og erBrukerIInstitusjonOMS med {
-            beregnetOmstillingsstoenad,
-            beregnetOmstillingsstoenadMedInstitusjonsopphold,
-            harInstitusjonshopphold,
-        ->
-        if (harInstitusjonshopphold) {
-            beregnetOmstillingsstoenadMedInstitusjonsopphold.coerceAtMost(beregnetOmstillingsstoenad)
-        } else {
-            beregnetOmstillingsstoenad
+    ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og institusjonsoppholdSatsRegelOMS og
+        brukerHarTellendeInstitusjonsopphold med
+        {
+                beregnetOmstillingsstoenad,
+                beregnetOmstillingsstoenadMedInstitusjonsopphold,
+                harInstitusjonshopphold,
+            ->
+            if (harInstitusjonshopphold) {
+                beregnetOmstillingsstoenadMedInstitusjonsopphold.coerceAtMost(beregnetOmstillingsstoenad)
+            } else {
+                beregnetOmstillingsstoenad
+            }
         }
-    }
 
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(

@@ -69,7 +69,7 @@ val beregnRiktigBarnepensjonOppMotInstitusjonsopphold =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-GUNSTIGHET-INSTITUSJON", versjon = "3"),
-    ) benytter beregnBarnepensjon og institusjonsoppholdSatsRegel og erBrukerIInstitusjon med
+    ) benytter beregnBarnepensjon og institusjonsoppholdSatsRegel og brukerHarTellendeInstitusjonsopphold med
         { beregnetBarnepensjon, beregnetBarnepensjonMedInstitusjonsopphold, harInstitusjonsopphold ->
             if (harInstitusjonsopphold) {
                 beregnetBarnepensjonMedInstitusjonsopphold.coerceAtMost(beregnetBarnepensjon)

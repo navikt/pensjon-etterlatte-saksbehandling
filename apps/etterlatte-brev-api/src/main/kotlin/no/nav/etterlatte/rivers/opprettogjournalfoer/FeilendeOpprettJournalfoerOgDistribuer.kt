@@ -60,6 +60,7 @@ internal class FeilendeOpprettJournalfoerOgDistribuer(
                 rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
             }
         } else {
+            logger.info("Fikk feilende steg ${packet.feilendeSteg} ignorerer ")
             return
         }
     }

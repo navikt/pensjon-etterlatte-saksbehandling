@@ -76,11 +76,13 @@ import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
-import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.opprettogjournalfoer.FeilendeOpprettJournalfoerOgDistribuer
+import no.nav.etterlatte.rivers.opprettogjournalfoer.OpprettJournalfoerOgDistribuerRiver
+import no.nav.etterlatte.rivers.opprettogjournalfoer.OpprettJournalfoerOgDistribuerService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
@@ -272,9 +274,19 @@ class ApplicationBuilder {
                     )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
-                    grunnlagService,
-                    brevoppretter,
-                    ferdigstillJournalfoerOgDistribuerBrev,
+                    OpprettJournalfoerOgDistribuerService(
+                        grunnlagService,
+                        brevoppretter,
+                        ferdigstillJournalfoerOgDistribuerBrev,
+                    ),
+                )
+                FeilendeOpprettJournalfoerOgDistribuer(
+                    this,
+                    OpprettJournalfoerOgDistribuerService(
+                        grunnlagService,
+                        brevoppretter,
+                        ferdigstillJournalfoerOgDistribuerBrev,
+                    ),
                 )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)

@@ -31,6 +31,8 @@ internal fun withRetryOgFeilhaandtering(
             context.publish(packet.toJson())
         } else {
             feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+            sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
+
             try {
                 packet.setEventNameForHendelseType(EventNames.FEILA)
                 packet.feilendeSteg = feilendeSteg

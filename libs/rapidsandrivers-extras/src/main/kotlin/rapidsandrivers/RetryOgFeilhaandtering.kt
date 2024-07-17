@@ -23,11 +23,10 @@ internal fun withRetryOgFeilhaandtering(
     try {
         block()
     } catch (e: Exception) {
-        val antallRetries = kontekst.retries
         val antallKjoeringer = packet[ANTALL_RETRIES_KEY].asInt()
-        if (antallKjoeringer < antallRetries) {
+        if (antallKjoeringer < kontekst.retries) {
             feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. Prøver igjen.", e)
-            Thread.sleep(Duration.ofSeconds((antallKjoeringer + 1).toLong()))
+            Thread.sleep(Duration.ofSeconds((antallKjoeringer + 1L)))
             packet[ANTALL_RETRIES_KEY] = antallKjoeringer + 1
             context.publish(packet.toJson())
         } else {

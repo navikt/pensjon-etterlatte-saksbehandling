@@ -16,6 +16,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -64,17 +65,21 @@ class ViderefoertOpphoerTest(
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         dao.opprettBehandling(behandling = opprettBehandling)
+        val opphoerstidspunkt = YearMonth.of(2024, Month.JUNE)
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
             viderefoertOpphoer =
                 ViderefoertOpphoer(
                     behandlingId = opprettBehandling.id,
-                    dato = YearMonth.of(2024, Month.JUNE),
+                    dato = opphoerstidspunkt,
                     begrunnelse = "for testformål",
                     vilkaar = "BP_FORMAAL_2024",
                     kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
                     kravdato = null,
                 ),
         )
+        val viderefoertOpphoer = dao.hentViderefoertOpphoer(opprettBehandling.id)!!
+        assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
+        assertEquals(opphoerstidspunkt, viderefoertOpphoer.dato)
     }
 }

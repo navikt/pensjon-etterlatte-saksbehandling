@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -13,10 +12,12 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,14 +30,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -67,15 +65,6 @@ internal class BeregningsGrunnlagServiceTest {
             vedtaksvurderingKlient,
             grunnlagKlient,
         )
-    private val bruker =
-        BrukerTokenInfo.of(
-            "",
-            "",
-            "",
-            "",
-            JwtTokenClaims(JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build()),
-            "app",
-        )
 
     @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {
@@ -96,7 +85,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
+        val brukertokeninfo = simpleSaksbehandler()
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
@@ -130,7 +119,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null, null)
+        val brukertokeninfo = simpleSaksbehandler()
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentGrunnlagMedEgneAvdoedesBarn()
 

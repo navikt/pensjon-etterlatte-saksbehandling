@@ -90,7 +90,6 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          dockerfile: apps/${{ env.APP_NAME }}/Dockerfile
           docker_context: apps/${{ env.APP_NAME }}/
           image_suffix: ${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}

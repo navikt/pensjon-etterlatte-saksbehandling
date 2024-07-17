@@ -19,6 +19,8 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.ktor.simpleAttestant
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -31,7 +33,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -1135,8 +1136,8 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Oppgaven skal tildeles opprinnelig saksbehandler etter attestering`() {
-        val saksbehandler = BrukerTokenInfo.of("", "saksbehandler", null, null, null, null)
-        val attestant = BrukerTokenInfo.of("", "attestant", null, null, null, null)
+        val saksbehandler = simpleSaksbehandler()
+        val attestant = simpleAttestant()
 
         val behandlingId = UUID.randomUUID().toString()
         val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)

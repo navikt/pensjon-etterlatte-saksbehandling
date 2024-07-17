@@ -7,6 +7,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { Spraak } from '~shared/types/Brev'
+import { VilkaarType } from '~shared/api/vilkaarsvurdering'
 
 export interface IDetaljertBehandling {
   id: string
@@ -27,6 +28,7 @@ export interface IDetaljertBehandling {
   begrunnelse: string | null
   kilde: Vedtaksloesning
   sendeBrev: boolean
+  viderefoertOpphoer: ViderefoertOpphoer | null
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {
@@ -124,6 +126,13 @@ export interface Virkningstidspunkt {
   kilde: KildeSaksbehandler
   begrunnelse: string
   kravdato: string | null
+}
+
+export interface ViderefoertOpphoer {
+  dato: string
+  kilde: KildeSaksbehandler
+  vilkaar: VilkaarType
+  begrunnelse: string
 }
 
 export enum Vedtaksloesning {

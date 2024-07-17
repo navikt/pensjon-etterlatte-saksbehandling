@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -238,8 +239,8 @@ internal class BehandlingInfoServiceTest {
             every { id } returns behandlingId
             every { type } returns behandlingType
             every { sak } returns
-                mockk {
-                    every { this@mockk.sakType } returns sakType
+                mockk sakMock@{
+                    every { this@sakMock.sakType } returns sakType
                 }
             every { status } returns behandlingStatus
             every { revurderingsaarsak() } returns revurderingaarsak
@@ -267,6 +268,9 @@ internal class BehandlingInfoServiceTest {
         behandlingId = behandlingId,
         fom = fom,
         tom = tom,
+        inneholderKrav = true,
+        frivilligSkattetrekk = true,
+        etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
         kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
     )
 }

@@ -13,7 +13,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
-import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer

@@ -94,6 +94,11 @@ class GrunnlagKlientTest : GrunnlagKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 }
 
 class BeregningKlientTest : BeregningKlient {

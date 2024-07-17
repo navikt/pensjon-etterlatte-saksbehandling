@@ -13,6 +13,8 @@ sealed class BrukerTokenInfo {
 
     abstract val roller: List<String>
 
+    abstract val groups: List<String>
+
     abstract fun accessToken(): String
 
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
@@ -23,13 +25,11 @@ sealed class BrukerTokenInfo {
         fun of(
             accessToken: String,
             saksbehandler: String?,
-            oid: String?,
-            sub: String?,
             claims: JwtTokenClaims?,
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                VanligSystembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
+                VanligSystembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -41,12 +41,10 @@ sealed class BrukerTokenInfo {
 }
 
 sealed class Systembruker(
-    open val oid: String,
-    open val sub: String,
-    open val ident: String? = null,
+    open val ident: String,
     open val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    override fun ident() = ident ?: Fagsaksystem.EY.navn
+    override fun ident() = ident
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
@@ -55,23 +53,23 @@ sealed class Systembruker(
     override val roller: List<String>
         get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
 
+    override val groups: List<String>
+        get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
+
     override fun erSammePerson(ident: String?) = false
 
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
 data class VanligSystembruker internal constructor(
-    override val oid: String,
-    override val sub: String,
     override val ident: String? = null,
     override val jwtTokenClaims: JwtTokenClaims? = null,
-) : Systembruker(oid, sub, ident, jwtTokenClaims)
+) : Systembruker(ident, jwtTokenClaims)
 
 data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(
-        oid = omraade.oid,
-        sub = omraade.oid,
+        ident = omraade.oid,
         jwtTokenClaims =
             JwtTokenClaims(
                 JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
@@ -113,6 +111,9 @@ data class Saksbehandler(
     override fun getClaims() = jwtTokenClaims
 
     override val roller: List<String>
+        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
+
+    override val groups: List<String>
         get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 }
 
@@ -152,7 +153,7 @@ enum class Claims {
     @Suppress("ktlint:standard:enum-entry-name-case")
     azp_name,
 
-    // systembruker applikasjonsnavn
+    // systembruker applikasjonsnavn<
     @Suppress("ktlint:standard:enum-entry-name-case")
     oid,
 

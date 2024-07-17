@@ -185,6 +185,7 @@ const opprettBehandling = (
     utlandstilknytning: null,
     kilde: Vedtaksloesning.GJENNY,
     sendeBrev: true,
+    viderefoertOpphoer: null,
   }
 }
 

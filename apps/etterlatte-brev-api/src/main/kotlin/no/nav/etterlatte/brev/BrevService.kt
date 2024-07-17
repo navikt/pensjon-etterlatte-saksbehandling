@@ -32,14 +32,14 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Brev =
         brevoppretter
             .opprettBrev(
                 sakId = sakId,
                 behandlingId = null,
                 bruker = bruker,
-                brevKode = { brevkode },
+                brevKodeMapping = { brevkode },
                 brevtype = brevkode.brevtype,
                 brevDataMapping = brevDataMapping,
             ).first
@@ -122,8 +122,8 @@ class BrevService(
             id,
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
-            brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
+            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
     suspend fun ferdigstill(

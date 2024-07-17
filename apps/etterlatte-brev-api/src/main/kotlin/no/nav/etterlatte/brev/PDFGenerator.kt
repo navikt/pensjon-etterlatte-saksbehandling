@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.erForeldreloes
+import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.formaterNavn
@@ -33,8 +35,8 @@ class PDFGenerator(
         id: BrevID,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
-        brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+        brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
@@ -47,8 +49,8 @@ class PDFGenerator(
                 id,
                 bruker,
                 avsenderRequest,
-                brevKode,
-                brevData,
+                brevKodeMapping,
+                brevDataMapping,
                 lagrePdfHvisVedtakFattet,
             )
         db.lagrePdfOgFerdigstillBrev(id, pdf)
@@ -59,8 +61,8 @@ class PDFGenerator(
         id: BrevID,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
-        brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+        brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -79,10 +81,10 @@ class PDFGenerator(
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet))
 
         val brevkodePar =
-            brevKode(
+            brevKodeMapping(
                 BrevkodeRequest(
-                    generellBrevData.loependeIPesys(),
-                    generellBrevData.erForeldreloes(),
+                    loependeIPesys(generellBrevData.systemkilde, generellBrevData.behandlingId, generellBrevData.revurderingsaarsak),
+                    erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
                 ),
@@ -93,12 +95,17 @@ class PDFGenerator(
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
                 brevData =
-                    brevData(
+                    brevDataMapping(
                         BrevDataFerdigstillingRequest(
-                            loependeIPesys = generellBrevData.loependeIPesys(),
+                            loependeIPesys =
+                                loependeIPesys(
+                                    generellBrevData.systemkilde,
+                                    generellBrevData.behandlingId,
+                                    generellBrevData.revurderingsaarsak,
+                                ),
                             behandlingId = generellBrevData.behandlingId,
                             sakType = generellBrevData.sak.sakType,
-                            erForeldreloes = generellBrevData.erForeldreloes(),
+                            erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                             utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                             avdoede = generellBrevData.personerISak.avdoede,
                             systemkilde = generellBrevData.systemkilde,

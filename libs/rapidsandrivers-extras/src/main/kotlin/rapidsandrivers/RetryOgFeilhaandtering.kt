@@ -25,7 +25,7 @@ internal fun withRetryOgFeilhaandtering(
     } catch (e: Exception) {
         val antallRetries = kontekst.retries
         val antallKjoeringer = packet[ANTALL_RETRIES_KEY].asInt()
-        if (antallKjoeringer == 0 && antallKjoeringer < antallRetries) {
+        if (antallKjoeringer < antallRetries) {
             Thread.sleep(Duration.ofSeconds((antallKjoeringer + 1).toLong()))
             packet[ANTALL_RETRIES_KEY] = antallKjoeringer + 1
             context.publish(packet.toJson())

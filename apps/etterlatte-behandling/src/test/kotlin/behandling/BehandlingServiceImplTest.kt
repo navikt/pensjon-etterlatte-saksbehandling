@@ -236,7 +236,7 @@ internal class BehandlingServiceImplTest {
 
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
         assertThrows<BehandlingKanIkkeAvbrytesException> {
             behandlingService.avbrytBehandling(avbruttBehandling.id, saksbehandler)
         }
@@ -269,7 +269,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
 
         verify {
             hendelseDaoMock.behandlingAvbrutt(any(), any())
@@ -317,7 +317,7 @@ internal class BehandlingServiceImplTest {
             inTransaction {
                 behandlingService.avbrytBehandling(
                     nyFoerstegangsbehandling.id,
-                    Saksbehandler("", "saksbehandler", null),
+                    simpleSaksbehandler(),
                 )
             }
         }
@@ -346,7 +346,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
 
         verify {
             behandlingHendelser.sendMeldingForHendelseStatisitkk(
@@ -377,7 +377,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }

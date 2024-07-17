@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -19,7 +20,7 @@ import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-val saksbehandler = Saksbehandler("token", "ident", null)
+val saksbehandler = simpleSaksbehandler()
 
 private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 

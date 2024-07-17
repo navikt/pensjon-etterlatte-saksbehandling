@@ -311,7 +311,7 @@ internal class OppgaveServiceTest(
         val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         val annenBehandlingId = UUID.randomUUID().toString()
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         val oppgaveFerdigstilt =
             oppgaveService.opprettOppgave(
@@ -332,7 +332,7 @@ internal class OppgaveServiceTest(
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
             )
-        val saksbehandlerforstegangs = Saksbehandler("", "forstegangssaksbehandler", null)
+        val saksbehandlerforstegangs = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(annenBehandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandlerforstegangs)
         val oppgaveUnderBehandlingAnnenBehandling =
@@ -610,7 +610,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
 
         val sakIdOgReferanse =
@@ -640,7 +640,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
         oppgaveService.tilAttestering(
             referanse,
@@ -732,7 +732,7 @@ internal class OppgaveServiceTest(
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgaveEn.id, saksbehandler1.ident)
         oppgaveService.tildelSaksbehandler(oppgaveTo.id, saksbehandler1.ident)
 
@@ -931,7 +931,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler01", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandler1)
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
@@ -1080,7 +1080,7 @@ internal class OppgaveServiceTest(
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         oppgaveService.tildelSaksbehandler(foerstegangsbehandling.id, saksbehandler.ident)
 

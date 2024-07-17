@@ -26,6 +26,8 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.token.simpleAttestant
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -74,8 +76,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
     private val rapid: TestProdusent<String, String> = spyk(TestProdusent())
 
-    private val saksbehandler = Saksbehandler("tokenSaksbehandler", "saksbehandlerIdent", null)
-    private val attestant = Saksbehandler("tokenAttestant", "attestantIdent", null)
+    private val saksbehandler = simpleSaksbehandler()
+    private val attestant = simpleAttestant()
     private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
     private val enhet = "123456"
 
@@ -410,7 +412,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         runBlocking { service.fattVedtak(tilbakekreving.id, saksbehandler) }
 
         // Tildeler oppgaven til attestant
-        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident) }
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident()) }
 
         // Attesterer vedtaket
         val tilbakekrevingMedAttestertVedtak = runBlocking { service.attesterVedtak(tilbakekreving.id, "kommentar", attestant) }

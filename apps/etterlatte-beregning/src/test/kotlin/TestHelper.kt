@@ -16,6 +16,7 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -102,7 +103,7 @@ fun Int.toBeregningstall(
     roundingMode: RoundingMode = RoundingMode.UNNECESSARY,
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
-val bruker = Saksbehandler("token", "ident", null)
+val bruker = simpleSaksbehandler()
 
 fun avkorting(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),

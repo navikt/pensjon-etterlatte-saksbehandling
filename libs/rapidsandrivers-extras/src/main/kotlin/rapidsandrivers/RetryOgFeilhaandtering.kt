@@ -8,9 +8,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
-const val ETT_SEKUND_MS: Long = 1_000
 val sikkerLogg: Logger = sikkerlogger()
 
 internal fun withRetryOgFeilhaandtering(
@@ -26,7 +26,7 @@ internal fun withRetryOgFeilhaandtering(
         val antallRetries = kontekst.retries
         val antallKjoeringer = packet[ANTALL_RETRIES_KEY].asInt()
         if (antallKjoeringer == 0 && antallKjoeringer < antallRetries) {
-            Thread.sleep((antallKjoeringer + 1) * ETT_SEKUND_MS)
+            Thread.sleep(Duration.ofSeconds((antallKjoeringer + 1).toLong()))
             packet[ANTALL_RETRIES_KEY] = antallKjoeringer + 1
             context.publish(packet.toJson())
         } else {

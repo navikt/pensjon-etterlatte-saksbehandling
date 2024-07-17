@@ -81,7 +81,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         sakId = sakId,
                         behandlingId = null,
                         bruker = brukerTokenInfo,
-                        brevKode = { brevKode.redigering },
+                        brevKodeMapping = { brevKode.redigering },
                         brevtype = brevKode.redigering.brevtype,
                     ) {
                         when (brevKode.redigering) {

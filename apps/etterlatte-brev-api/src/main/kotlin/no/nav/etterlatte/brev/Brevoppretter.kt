@@ -1,31 +1,21 @@
 package no.nav.etterlatte.brev
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
-import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -34,17 +24,15 @@ import java.util.UUID
 class Brevoppretter(
     private val adresseService: AdresseService,
     private val db: BrevRepository,
-    private val brevdataFacade: BrevdataFacade,
     private val behandlingService: BehandlingService,
-    private val brevbaker: BrevbakerService,
-    private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
+    private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
     suspend fun opprettVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -61,27 +49,26 @@ class Brevoppretter(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            brevKode = brevKode,
+            brevKodeMapping = brevKodeMapping,
             brevtype = Brevtype.VEDTAK,
-            brevDataMapping = brevDataMapper,
+            brevDataMapping = brevDataMapping,
         ).first
     }
 
-    // TODO: Trur denne heller enn EtterlatteBrevKode bør ta inn Brevkoder
     suspend fun opprettBrev(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevtype: Brevtype,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
         with(
-            hentInnData(
+            innholdTilRedigerbartBrevHenter.hentInnData(
                 sakId,
                 behandlingId,
                 bruker,
-                brevKode,
+                brevKodeMapping,
                 brevDataMapping,
             ),
         ) {
@@ -105,17 +92,17 @@ class Brevoppretter(
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
 
         with(
-            hentInnData(
+            innholdTilRedigerbartBrevHenter.hentInnData(
                 sakId,
                 behandlingId,
                 bruker,
-                brevKode,
+                brevKodeMapping,
                 brevDataMapping,
                 spraak,
             ),
@@ -131,75 +118,6 @@ class Brevoppretter(
             return BrevService.BrevPayload(
                 innhold.payload ?: db.hentBrevPayload(brevId),
                 innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
-            )
-        }
-    }
-
-    private suspend fun hentInnData(
-        sakId: Long,
-        behandlingId: UUID?,
-        bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-        overstyrSpraak: Spraak? = null,
-    ): OpprettBrevRequest {
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) }
-
-        val brevkodeRequest =
-            BrevkodeRequest(
-                generellBrevData.loependeIPesys(),
-                generellBrevData.erForeldreloes(),
-                generellBrevData.sak.sakType,
-                generellBrevData.forenkletVedtak?.type,
-            )
-
-        val kode = brevKode(brevkodeRequest)
-        val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
-        return coroutineScope {
-            val redigerbarTekstRequest =
-                RedigerbarTekstRequest(
-                    brukerTokenInfo = bruker,
-                    soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
-                    sakType = generellBrevData.sak.sakType,
-                    forenkletVedtak = generellBrevData.forenkletVedtak,
-                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
-                    behandlingId = behandlingId,
-                    erForeldreloes = generellBrevData.erForeldreloes(),
-                    loependeIPesys = generellBrevData.loependeIPesys(),
-                    systemkilde = generellBrevData.systemkilde,
-                    avdoede = generellBrevData.personerISak.avdoede,
-                )
-            val brevData: BrevDataRedigerbar = brevDataMapping(redigerbarTekstRequest)
-
-            val innhold =
-                async {
-                    brevbaker.hentRedigerbarTekstFraBrevbakeren(
-                        BrevbakerRequest.fra(
-                            brevKode = kode,
-                            brevData = brevData,
-                            avsender =
-                                adresseService.hentAvsender(
-                                    opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
-                                ),
-                            soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
-                            sakId = sakId,
-                            spraak = generellBrevData.spraak,
-                            sakType = generellBrevData.sak.sakType,
-                        ),
-                    )
-                }
-
-            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData, kode.brevtype) }
-
-            OpprettBrevRequest(
-                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                sakType = generellBrevData.sak.sakType,
-                enhet = generellBrevData.sak.enhet,
-                personerISak = generellBrevData.personerISak,
-                innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
-                innholdVedlegg = innholdVedlegg.await(),
             )
         }
     }
@@ -233,15 +151,6 @@ class Brevoppretter(
             adresse = Adresse(adresseType = "", landkode = "", land = ""),
         )
 }
-
-private data class OpprettBrevRequest(
-    val soekerFnr: String,
-    val sakType: SakType,
-    val enhet: String,
-    val personerISak: PersonerISak,
-    val innhold: BrevInnhold,
-    val innholdVedlegg: List<BrevInnholdVedlegg>?,
-)
 
 class KanIkkeOppretteVedtaksbrev(
     behandlingId: UUID,

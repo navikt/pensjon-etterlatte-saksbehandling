@@ -38,8 +38,8 @@ class FerdigstillJournalfoerOgDistribuerBrev(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { brevKode },
-                brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                brevKodeMapping = { brevKode },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         return brevId

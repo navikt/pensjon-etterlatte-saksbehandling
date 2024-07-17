@@ -20,6 +20,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -37,7 +38,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -847,6 +847,6 @@ internal class BehandlingServiceImplTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        val TOKEN = BrukerTokenInfo.of("a", "b", null, null, null)
+        val TOKEN = simpleSaksbehandler()
     }
 }

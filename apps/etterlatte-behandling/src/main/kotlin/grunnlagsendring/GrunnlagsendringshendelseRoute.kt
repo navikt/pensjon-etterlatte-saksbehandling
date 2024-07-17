@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -26,10 +25,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 
-internal fun Route.grunnlagsendringshendelseRoute(
-    grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    omregningService: OmregningService,
-) {
+internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
     val logger = routeLogger
 
     route("/grunnlagsendringshendelse") {

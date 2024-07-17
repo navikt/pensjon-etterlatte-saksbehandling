@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -45,7 +46,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
@@ -93,7 +93,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingService.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         val grunnlag = opprettGrunnlag()
-        coEvery { grunnlagService.hentGrunnlag(any(), any(), BRUKERTokenInfo, BEHANDLING_ID) } returns grunnlag
+        coEvery { grunnlagService.hentGrunnlag(any(), any(), BRUKERTOKEN, BEHANDLING_ID) } returns grunnlag
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
@@ -101,7 +101,7 @@ internal class BrevdataFacadeImplTest {
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, null, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, null, BRUKERTOKEN)
             }
 
         Assertions.assertEquals(SAK_ID, generellBrevData.sak.id)
@@ -136,13 +136,13 @@ internal class BrevdataFacadeImplTest {
         val tilbakekreving = tilbakekreving()
         coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
-        coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTokenInfo, any()) } returns opprettGrunnlag()
+        coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTOKEN, any()) } returns opprettGrunnlag()
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
-        coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
+        coEvery { behandlingService.hentBrevutfall(BEHANDLING_ID, BRUKERTOKEN) } returns hentBrevutfall()
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, Spraak.EN, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, Spraak.EN, BRUKERTOKEN)
             }
 
         generellBrevData.sak.id shouldBe SAK_ID
@@ -290,7 +290,7 @@ internal class BrevdataFacadeImplTest {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val ENHET = "0000"
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null)
+        private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
     }

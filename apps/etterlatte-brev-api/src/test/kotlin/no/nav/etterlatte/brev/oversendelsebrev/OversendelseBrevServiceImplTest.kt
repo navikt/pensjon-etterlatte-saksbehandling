@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
@@ -31,7 +32,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -52,7 +52,7 @@ class OversendelseBrevServiceImplTest(
 ) {
     val sakId = 148L
     private val behandlingId = UUID.randomUUID()
-    private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
+    private val saksbehandler = simpleSaksbehandler()
     private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
     private val grunnlagService = mockk<GrunnlagService>()

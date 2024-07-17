@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -56,6 +57,9 @@ internal class BarnepensjonInnvilgetDTOTest {
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
+                        inneholderKrav = true,
+                        frivilligSkattetrekk = true,
+                        etterbetalingPeriodeValg = EtterbetalingPeriodeValg.FRA_3_MND,
                     ),
                 trygdetid =
                     listOf(
@@ -118,14 +122,6 @@ internal class BarnepensjonInnvilgetDTOTest {
 
         Assertions.assertEquals(
             listOf(
-                beregningsperiodeMars2022().toBarnepensjonBeregningsperiode(),
-                beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
-                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
-            ),
-            barnepensjonInnvilgelse.etterbetaling!!.etterbetalingsperioder,
-        )
-        Assertions.assertEquals(
-            listOf(
                 beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
@@ -152,12 +148,6 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsperiode(
             LocalDate.of(2022, Month.MARCH, 1),
             LocalDate.of(2022, Month.APRIL, 30),
-        )
-
-    private fun beregningsperiodeMars2022() =
-        beregningsperiode(
-            LocalDate.of(2022, Month.MARCH, 1),
-            LocalDate.of(2022, Month.MARCH, 31),
         )
 
     private fun beregningsperiodeAprilDesember2022() =

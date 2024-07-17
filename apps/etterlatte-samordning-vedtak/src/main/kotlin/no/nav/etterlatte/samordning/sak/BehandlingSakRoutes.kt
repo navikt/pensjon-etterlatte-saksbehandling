@@ -9,8 +9,23 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
+import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+
+fun generateRoles(config: Config): Set<String> {
+    val defaultRoles =
+        setOf(
+            config.getString("roller.pensjon-saksbehandler"),
+            config.getString("roller.gjenny-saksbehandler"),
+        )
+    if (isProd()) {
+        return defaultRoles
+    } else {
+        return defaultRoles + "les-oms-sak-for-person"
+    }
+}
 
 fun Route.behandlingSakRoutes(
     behandlingService: BehandlingService,
@@ -18,13 +33,8 @@ fun Route.behandlingSakRoutes(
 ) {
     route("api/oms") {
         install(AuthorizationPlugin) {
-            roles =
-                setOf(
-                    "les-oms-sak-for-person",
-                    config.getString("roller.pensjon-saksbehandler"),
-                    config.getString("roller.gjenny-saksbehandler"),
-                )
-            issuers = setOf("azure")
+            roles = generateRoles(config)
+            issuers = setOf(Issuer.AZURE.issuerName)
         }
         post("/person/sak") {
             val fnrOgSaktype = call.receive<FoedselsnummerDTO>()

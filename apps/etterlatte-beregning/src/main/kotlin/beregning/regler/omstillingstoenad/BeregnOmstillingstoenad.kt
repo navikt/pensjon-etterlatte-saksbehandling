@@ -37,6 +37,7 @@ data class OmstillingstoenadGrunnlag(
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
 )
 
+@Deprecated("Ikke i bruk lenger")
 val beregnOmstillingstoenadRegel =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -46,28 +47,7 @@ val beregnOmstillingstoenadRegel =
         sats.multiply(trygdetidsfaktor)
     }
 
-val OmstillingstoenadSatsMedInstitusjonsopphold =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
-        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-GUNSTIGHET-INSTITUSJON"),
-    ) benytter omstillingstoenadSatsRegel og institusjonsoppholdSatsRegelOMS med { standardSats, institusjonsoppholdSats ->
-        institusjonsoppholdSats.coerceAtMost(standardSats)
-    }
-
-val omstillingstoenadSats =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
-        regelReferanse = RegelReferanse("OMS-BEREGNING-KANSKJEANVENDINSTITUSJON"),
-    ) benytter omstillingstoenadSatsRegel og OmstillingstoenadSatsMedInstitusjonsopphold og erBrukerIInstitusjonOMS med {
-            satsIkkeInstitusjonsopphold,
-            satsInstitusjonsopphold,
-            harInstitusjonshopphold,
-        ->
-        if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold
-    }
-
+@Deprecated("Ikke i bruk lenger")
 val kroneavrundetOmstillingstoenadRegel =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -77,20 +57,49 @@ val kroneavrundetOmstillingstoenadRegel =
         beregnetOmstillingstoenad.round(decimals = 0).toInteger()
     }
 
-val beregnOmstillingstoenadRegelMedInstitusjon =
+@Deprecated("Ikke i bruk lenger")
+val OmstillingstoenadSatsMedInstitusjonsopphold =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
+        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-GUNSTIGHET-INSTITUSJON"),
+    ) benytter omstillingstoenadSatsRegel og institusjonsoppholdSatsRegelOMS med { standardSats, institusjonsoppholdSats ->
+        institusjonsoppholdSats.coerceAtMost(standardSats)
+    }
+
+val beregnOmstillingstoenadRegelReduserMotTrygdetid =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
-    ) benytter omstillingstoenadSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
+    ) benytter omstillingstoenadSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
         sats.multiply(trygdetidsfaktor)
     }
+
+val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
+        regelReferanse = RegelReferanse("OMS-BEREGNING-KANSKJEANVENDINSTITUSJON"),
+    ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og institusjonsoppholdSatsRegelOMS og
+        brukerHarTellendeInstitusjonsopphold med
+        {
+                beregnetOmstillingsstoenad,
+                beregnetOmstillingsstoenadMedInstitusjonsopphold,
+                harInstitusjonshopphold,
+            ->
+            if (harInstitusjonshopphold) {
+                beregnetOmstillingsstoenadMedInstitusjonsopphold.coerceAtMost(beregnetOmstillingsstoenad)
+            } else {
+                beregnetOmstillingsstoenad
+            }
+        }
 
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON"),
-    ) benytter beregnOmstillingstoenadRegelMedInstitusjon med { beregnetOmstillingstoenad ->
+    ) benytter beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold med { beregnetOmstillingstoenad ->
         beregnetOmstillingstoenad.round(decimals = 0).toInteger()
     }

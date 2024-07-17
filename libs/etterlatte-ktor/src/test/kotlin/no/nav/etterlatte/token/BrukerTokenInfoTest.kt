@@ -1,34 +1,36 @@
 package no.nav.etterlatte.token
 
+import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BrukerTokenInfoTest {
+    fun genererClaimSetSystembruker() =
+        JwtTokenClaims(
+            JWTClaimsSet
+                .Builder()
+                .claim(Claims.idtyp.name, "app")
+                .claim(Claims.azp_name.name, "cluster:appname:dev")
+                .build(),
+        )
+
     @Test
-    fun `er maskin-til-maskin viss oid og sub er like`() {
-        assertTrue(BrukerTokenInfo.of("a", "b", "c", "c", null) is Systembruker)
+    fun `er maskin-til-maskin hvis idtype=app`() {
+        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", genererClaimSetSystembruker(), idtyp = "app") is Systembruker)
     }
 
     @Test
-    fun `er ikke maskin-til-maskin viss oid og sub er ulike`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", "d", null) is Systembruker)
+    fun `er ikke maskin-til-maskin hvis idtype != app`() {
+        assertFalse(BrukerTokenInfo.of("a", "saksbehandler", null, idtyp = "ikkeapp") is Systembruker)
     }
 
     @Test
-    fun `er ikke maskin-til-maskin viss oid er null, men sub har verdi`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", null, "d", null) is Systembruker)
-    }
-
-    @Test
-    fun `er ikke maskin-til-maskin viss sub er null, men oid har verdi`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", "c", null, null) is Systembruker)
-    }
-
-    @Test
-    fun `er ikke maskin-til-maskin viss både oid og sub er null`() {
-        assertFalse(BrukerTokenInfo.of("a", "b", null, null, null) is Systembruker)
+    fun `er ikke maskin-til-maskin hvis idtype er tomt`() {
+        assertFalse(BrukerTokenInfo.of("a", "saksbehandler", null, idtyp = null) is Systembruker)
     }
 }

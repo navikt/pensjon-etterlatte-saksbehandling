@@ -17,6 +17,7 @@ import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,7 +30,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -86,7 +86,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val brukertokeninfo = simpleSaksbehandler()
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
@@ -120,7 +120,7 @@ internal class BeregningsGrunnlagServiceTest {
                 coEvery { sakType } returns SakType.BARNEPENSJON
             }
         val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        val brukertokeninfo = simpleSaksbehandler()
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentGrunnlagMedEgneAvdoedesBarn()
 

@@ -9,7 +9,13 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
-const val AZURE_ISSUER = "azure"
+enum class Issuer(
+    val issuerName: String,
+) {
+    AZURE("azure"),
+    MASKINPORTEN("maskinporten"),
+    TOKENX("tokenx"),
+}
 
 fun hentAccessToken(call: ApplicationCall) =
     call.request.parseAuthorizationHeader().let {
@@ -27,23 +33,15 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
-        val claims = this.hentTokenClaims(AZURE_ISSUER)
-        val oidSub =
-            claims
-                ?.let {
-                    val oid = it.getClaim(Claims.oid)
-                    val sub = it.getClaim(Claims.sub)
-                    Pair(oid, sub)
-                }
-        val saksbehandler = claims?.getClaim(Claims.NAVident)
-
+        val claims = this.hentTokenClaimsForIssuerName(Issuer.AZURE)
+        val saksbehandler = claims?.getClaimAsString(Claims.NAVident)
+        val idtyp = claims?.getClaimAsString(Claims.idtyp)
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
-            oid = oidSub?.first,
-            sub = oidSub?.second,
             saksbehandler = saksbehandler,
+            idtyp = idtyp,
             claims = claims,
         )
     }
 
-fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)
+fun JwtTokenClaims.getClaimAsString(claim: Claims) = getStringClaim(claim.name)

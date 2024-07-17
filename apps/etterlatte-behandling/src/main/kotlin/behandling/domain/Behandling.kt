@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
+import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -102,6 +103,12 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere utlandstilknytning på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av utlandstilknyting.",
+        )
+
+    open fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere videreført opphør på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
         )
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {

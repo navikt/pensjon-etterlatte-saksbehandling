@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -70,6 +71,11 @@ data class ManuellRevurdering(
     override fun oppdaterUtlandstilknytning(utlandstilknytning: Utlandstilknytning) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(utlandstilknytning = utlandstilknytning)
+        }
+
+    override fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
         }
 
     override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }

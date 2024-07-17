@@ -94,7 +94,7 @@ class ReguleringTest {
 
     @Test
     fun `skal regulere barnepensjon foerstegangsbehandling - ingen soesken`() {
-        val virk = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
+        val virk = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023.minusYears(1)
         val behandling = mockBehandling(virk)
         val grunnlag =
             GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
@@ -110,7 +110,7 @@ class ReguleringTest {
             barnepensjonBeregningsGrunnlag(
                 behandling.id,
                 emptyList(),
-                BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1),
+                BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023.minusYears(1),
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
@@ -145,7 +145,7 @@ class ReguleringTest {
 
             val grunnbeloep22 = hentGjeldendeGrunnbeloep(YearMonth.of(2022, Month.JANUARY)).grunnbeloepPerMaaned
             val grunnbeloep23 =
-                hentGjeldendeGrunnbeloep(BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23).grunnbeloepPerMaaned
+                hentGjeldendeGrunnbeloep(BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023).grunnbeloepPerMaaned
             val faktorGrunnbeloep = grunnbeloep23.toDouble().div(grunnbeloep22)
 
             Assertions.assertTrue(
@@ -170,7 +170,7 @@ class ReguleringTest {
     private fun barnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         soesken: List<String>,
-        virkningstidspunkt: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23,
+        virkningstidspunkt: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023,
     ) = BeregningsGrunnlag(
         behandlingId,
         mockk {
@@ -219,7 +219,7 @@ class ReguleringTest {
     )
 
     private fun mockBehandling(
-        virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23,
+        virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023,
         vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ) = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()

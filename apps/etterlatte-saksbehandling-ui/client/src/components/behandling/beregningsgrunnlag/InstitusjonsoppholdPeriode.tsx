@@ -9,7 +9,7 @@ import {
   UseFormWatch,
 } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
-import { Button, Select, TextField } from '@navikt/ds-react'
+import { Button, HelpText, Select, TextField } from '@navikt/ds-react'
 import { InstitusjonsoppholdGrunnlagData, ReduksjonType } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
@@ -87,7 +87,14 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           {reduksjonValgOppdatert === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
               error={errors?.data?.egenReduksjon?.message}
-              label="Reduksjonsbeløp(oppgi i % av G)"
+              label={
+                <>
+                  Reduksjonsbeløp(oppgi i % av G){' '}
+                  <HelpText>
+                    Oppgi den prosentsatsen av G som ytelsen skal reduseres med for å få riktig beløp i beregningen.{' '}
+                  </HelpText>
+                </>
+              }
               type="text"
               {...register(`institusjonsOppholdForm.${index}.data.egenReduksjon`, {
                 validate: (beloep) => {

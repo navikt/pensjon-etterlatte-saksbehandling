@@ -29,6 +29,8 @@ import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkni
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -120,6 +122,9 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
+        {useFeatureEnabledMedDefault('viderefoer-opphoer', false) && (
+          <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
+        )}
       </Box>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">

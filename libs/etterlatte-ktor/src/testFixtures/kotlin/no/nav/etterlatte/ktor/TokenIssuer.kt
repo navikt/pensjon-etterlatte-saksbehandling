@@ -1,25 +1,28 @@
 package no.nav.etterlatte.ktor
 
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.Issuer
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-internal const val CLIENT_ID = "CLIENT_ID for saksbehandler"
+const val CLIENT_ID = "CLIENT_ID for saksbehandler"
 
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
     navIdent: String = "Saksbehandler01",
     groups: List<String> = listOf(),
+    roles: List<String> = listOf(),
 ): String =
     this
         .issueToken(
-            issuerId = AZURE_ISSUER,
+            issuerId = Issuer.AZURE.issuerName,
             audience = CLIENT_ID,
             claims =
                 mapOf(
                     "navn" to navn,
-                    "NAVident" to navIdent,
-                    "groups" to groups,
+                    Claims.NAVident.name to navIdent,
+                    Claims.groups.name to groups,
+                    Claims.roles.name to roles,
                 ),
         ).serialize()
 
@@ -29,13 +32,12 @@ fun MockOAuth2Server.issueSystembrukerToken(
 ): String =
     this
         .issueToken(
-            issuerId = AZURE_ISSUER,
+            issuerId = Issuer.AZURE.issuerName,
             audience = CLIENT_ID,
             claims =
                 mapOf(
-                    "sub" to mittsystem,
-                    "oid" to mittsystem,
-                    "azp_name" to mittsystem,
+                    Claims.azp_name.name to mittsystem,
                     "roles" to roles,
+                    Claims.idtyp.name to "app",
                 ),
         ).serialize()

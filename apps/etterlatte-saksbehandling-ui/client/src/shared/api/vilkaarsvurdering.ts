@@ -138,3 +138,8 @@ export interface VilkaarsvurderingVurdertResultat {
 export interface MigrertYrkesskadefordel {
   migrertYrkesskadefordel: boolean
 }
+
+export enum VilkaarType {
+  BP_FORMAAL_2024 = 'BP_FORMAAL_2024',
+  BP_DOEDSFALL_FORELDER_2024 = 'BP_DOEDSFALL_FORELDER_2024',
+}

@@ -63,8 +63,9 @@ class AktivitetspliktService(
     suspend fun hentAktivitetspliktDto(
         sakId: Long,
         bruker: BrukerTokenInfo,
+        behandlingId: UUID,
     ): AktivitetspliktDto {
-        val grunnlag = grunnlagKlient.hentGrunnlagForSak(sakId, bruker)
+        val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(behandlingId, bruker)
         val avdoedDoedsdato =
             requireNotNull(
                 grunnlag
@@ -73,7 +74,7 @@ class AktivitetspliktService(
                     ?.hentDoedsdato()
                     ?.verdi,
             ) {
-                "Kunne ikke hente ut avdødes dødsdato for sak med id=$sakId"
+                "Kunne ikke hente ut avdødes dødsdato for behandling med id=$behandlingId"
             }
 
         val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
@@ -167,7 +168,7 @@ class AktivitetspliktService(
         } else {
             aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
         }
-        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
     }
 
     fun slettAktivitet(
@@ -182,7 +183,7 @@ class AktivitetspliktService(
             throw BehandlingKanIkkeEndres()
         }
         aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
-        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
     }
 
     fun opprettAktivitetsgradForOppgave(
@@ -196,7 +197,8 @@ class AktivitetspliktService(
             aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) == null,
         ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
         aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = UUID.fromString(oppgave.referanse)) }
     }
 
     fun upsertAktivitetsgradForBehandling(
@@ -232,7 +234,7 @@ class AktivitetspliktService(
             )
         }
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
     fun opprettUnntakForOpppgave(
@@ -250,8 +252,14 @@ class AktivitetspliktService(
             aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) == null,
         ) { "Unntak finnes allerede for oppgave $oppgaveId" }
         aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
-
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        runBlocking {
+            sendDtoTilStatistikk(
+                sakId = sakId,
+                brukerTokenInfo = brukerTokenInfo,
+                behandlingId = UUID.fromString(oppgave.referanse),
+            )
+        }
     }
 
     fun upsertUnntakForBehandling(
@@ -287,15 +295,16 @@ class AktivitetspliktService(
             aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
     private suspend fun sendDtoTilStatistikk(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
     ) {
         try {
-            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo)
+            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
         } catch (e: Exception) {
             logger.error(

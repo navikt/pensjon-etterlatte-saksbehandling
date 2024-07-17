@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.ktor.token
 
+import com.nimbusds.jwt.JWTClaimsSet
+import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class BrukerTokenInfo {
@@ -11,25 +13,23 @@ sealed class BrukerTokenInfo {
 
     abstract val roller: List<String>
 
+    abstract val groups: List<String>
+
     abstract fun accessToken(): String
 
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
 
     companion object {
-        private fun erSystembruker(
-            oid: String?,
-            sub: String?,
-        ) = (oid == sub) && (oid != null)
+        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
 
         fun of(
             accessToken: String,
             saksbehandler: String?,
-            oid: String?,
-            sub: String?,
             claims: JwtTokenClaims?,
+            idtyp: String?,
         ): BrukerTokenInfo =
-            if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getStringClaim("azp_name"), claims)
+            if (erSystembruker(idtyp = idtyp)) {
+                Systembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -41,21 +41,37 @@ sealed class BrukerTokenInfo {
 }
 
 data class Systembruker(
-    val oid: String,
-    val sub: String,
-    val ident: String? = null,
+    val ident: String,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(oid = omraade.oid, sub = omraade.oid)
+    private constructor(omraade: Systembrukere) : this(
+        ident = omraade.appName,
+        jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
+            ),
+    )
 
-    override fun ident() = ident ?: Fagsaksystem.EY.navn
+    override fun ident() = ident
+
+    fun identForBrev(): String {
+        val systemBrukereInternt = Systembrukere.entries.map { it.appName }
+        if (ident in systemBrukereInternt) {
+            return Fagsaksystem.EY.navn
+        } else {
+            return ident
+        }
+    }
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
     override fun getClaims() = jwtTokenClaims
 
     override val roller: List<String>
-        get() = getClaims()?.getAsList("roles") ?: emptyList()
+        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
+
+    override val groups: List<String>
+        get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 
     override fun erSammePerson(ident: String?) = false
 
@@ -88,12 +104,49 @@ data class Saksbehandler(
     override fun getClaims() = jwtTokenClaims
 
     override val roller: List<String>
-        get() = getClaims()?.getAsList("groups") ?: emptyList()
+        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
+
+    override val groups: List<String>
+        get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 }
 
 enum class Claims {
+   /*
+    This is a special claim used to determine whether a token is a machine-to-machine (app-only) token or a on-behalf-of (user) token.
+    https://docs.nais.io/auth/entra-id/reference/?h=idtyp#claims
+    https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims-reference#v10-and-v20-optional-claims-set
+    */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    idtyp,
+
+   /*
+   The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
+   https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
+    */
     NAVident,
 
+    /*
+    JSON array of group identifiers that the user is a member of.
+    https://docs.nais.io/auth/entra-id/reference/?h=groups#claims
+     */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    groups,
+
+    /*
+    Roles will appear in the roles claim as an array of strings within the application's token.
+    https://docs.nais.io/auth/entra-id/reference/?h=groups#custom-roles
+     */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    roles,
+
+    /*
+    The value of this claim is the (human-readable) name of the consumer application that requested the token.
+    https://docs.nais.io/auth/entra-id/reference/?h=azp_name#claims
+     */
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    azp_name,
+
+    // systembruker applikasjonsnavn
     @Suppress("ktlint:standard:enum-entry-name-case")
     oid,
 
@@ -102,7 +155,7 @@ enum class Claims {
 }
 
 enum class Systembrukere(
-    val oid: String,
+    val appName: String,
 ) {
     BREV("brev"),
     MIGRERING("migrering"),

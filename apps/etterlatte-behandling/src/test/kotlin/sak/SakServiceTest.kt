@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.ktor.client.plugins.ResponseException
@@ -26,7 +27,11 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.ktor.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
@@ -57,15 +62,15 @@ internal class SakServiceTest {
     val saksbehandlerService = mockk<SaksbehandlerService>()
     val skjermingKlient = mockk<SkjermingKlient>()
     val sakDao = mockk<SakDao>()
+    val grunnlagservice = mockk<GrunnlagService>()
 
     @BeforeEach
     fun before() {
         clearAllMocks()
-        val grunnlagservice =
-            mockk<GrunnlagService> {
-                coEvery { leggInnNyttGrunnlagSak(any(), any()) } just runs
-                coEvery { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
-            }
+
+        coEvery { grunnlagservice.leggInnNyttGrunnlagSak(any(), any()) } just runs
+        coEvery { grunnlagservice.leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+
         val krrKlient =
             mockk<KrrKlient> {
                 coEvery { hentDigitalKontaktinformasjon(any()) } returns
@@ -122,14 +127,7 @@ internal class SakServiceTest {
 
         val saksbehandler = "Z123456"
         val accessToken = "a"
-        val brukerTokenInfo =
-            BrukerTokenInfo.of(
-                accessToken = accessToken,
-                oid = "b",
-                sub = "ba",
-                saksbehandler = saksbehandler,
-                claims = null,
-            )
+        val brukerTokenInfo = simpleSaksbehandler(saksbehandler)
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(
                 tokenValidationContext,
@@ -243,6 +241,50 @@ internal class SakServiceTest {
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+    }
+
+    @Test
+    fun `finn OMS sak for ident sak sin ident`() {
+        saksbehandlerKontekst()
+        val sakId: Long = 1
+        coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns PersonMedSakerOgRoller(KONTANT_FOT.value, emptyList())
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(
+                Sak(
+                    id = sakId,
+                    ident = KONTANT_FOT.value,
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                ),
+            )
+
+        val finnSakerOmsOgHvisAvdoed = service.finnSakerOmsOgHvisAvdoed(KONTANT_FOT.value)
+
+        finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
+
+        coVerify { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
+    }
+
+    @Test
+    fun `finn OMS sak for avdød i persongalleri på sak i finnSakerOmsOgHvisAvdoed`() {
+        saksbehandlerKontekst()
+        val sakId: Long = 1
+        coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns
+            PersonMedSakerOgRoller(
+                KONTANT_FOT.value,
+                listOf(
+                    SakidOgRolle(sakId, Saksrolle.AVDOED),
+                ),
+            )
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
+
+        val finnSakerOmsOgHvisAvdoed = service.finnSakerOmsOgHvisAvdoed(KONTANT_FOT.value)
+
+        finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
+
+        coVerify { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
     }
 
     @Test

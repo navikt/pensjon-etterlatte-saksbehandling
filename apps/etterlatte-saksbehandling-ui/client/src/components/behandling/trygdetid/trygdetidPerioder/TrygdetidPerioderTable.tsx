@@ -1,32 +1,49 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { useState } from 'react'
 import { ILand, ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType } from '~shared/api/trygdetid'
 import { isPending, Result } from '~shared/api/apiUtils'
-import { VisRedigerTrygdetid } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
 import { BodyShort, Box, Button, Detail, HStack, Label, Table } from '@navikt/ds-react'
 import { FaktiskTrygdetidExpandableRowContent } from '~components/behandling/trygdetid/trygdetidPerioder/components/FaktiskTrygdetidExpandableRowContent'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+
+interface PeriodeRedigeringModus {
+  redigerPeriode: boolean
+  erAapen: boolean
+  trygdetidGrunnlagId: string
+}
+
+const defaultPeriodeVisningModus: PeriodeRedigeringModus = {
+  redigerPeriode: false,
+  erAapen: false,
+  trygdetidGrunnlagId: '',
+}
 
 interface Props {
+  trygdetidId: string
   trygdetidPerioder: Array<ITrygdetidGrunnlag>
   trygdetidGrunnlagType: ITrygdetidGrunnlagType
+  oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
   slettTrygdetid: (trygdetidGrunnlagId: string) => void
   slettTrygdetidResult: Result<ITrygdetid>
-  setVisRedigerTrydgetid: Dispatch<SetStateAction<VisRedigerTrygdetid>>
   landListe: ILand[]
   redigerbar: boolean
 }
 
 export const TrygdetidPerioderTable = ({
+  trygdetidId,
   trygdetidPerioder,
   trygdetidGrunnlagType,
-  setVisRedigerTrydgetid,
+  oppdaterTrygdetid,
   slettTrygdetid,
   slettTrygdetidResult,
   landListe,
   redigerbar,
 }: Props) => {
+  const [periodeRedigeringModus, setPeriodeRedigeringModus] =
+    useState<PeriodeRedigeringModus>(defaultPeriodeVisningModus)
+
   return (
     <Table size="small">
       <Table.Header>
@@ -46,14 +63,38 @@ export const TrygdetidPerioderTable = ({
             return (
               <Table.ExpandableRow
                 key={index}
+                open={
+                  periodeRedigeringModus.erAapen && trygdetidPeriode.id === periodeRedigeringModus.trygdetidGrunnlagId
+                }
+                onOpenChange={(open) =>
+                  setPeriodeRedigeringModus({
+                    redigerPeriode: open && periodeRedigeringModus.redigerPeriode,
+                    erAapen: open,
+                    trygdetidGrunnlagId: trygdetidPeriode.id,
+                  })
+                }
                 content={
-                  trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK ? (
-                    <FaktiskTrygdetidExpandableRowContent trygdetidPeriode={trygdetidPeriode} />
+                  !periodeRedigeringModus.redigerPeriode ? (
+                    trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK ? (
+                      <FaktiskTrygdetidExpandableRowContent trygdetidPeriode={trygdetidPeriode} />
+                    ) : (
+                      <Box maxWidth="42.5rem">
+                        <Label>Begrunnelse</Label>
+                        <BodyShort>{trygdetidPeriode.begrunnelse}</BodyShort>
+                      </Box>
+                    )
                   ) : (
-                    <Box maxWidth="42.5rem">
-                      <Label>Begrunnelse</Label>
-                      <BodyShort>{trygdetidPeriode.begrunnelse}</BodyShort>
-                    </Box>
+                    <TrygdetidGrunnlag
+                      eksisterendeGrunnlag={trygdetidPeriode}
+                      trygdetidId={trygdetidId}
+                      setTrygdetid={(trygdetid) => {
+                        oppdaterTrygdetid(trygdetid)
+                        setPeriodeRedigeringModus(defaultPeriodeVisningModus)
+                      }}
+                      avbryt={() => setPeriodeRedigeringModus(defaultPeriodeVisningModus)}
+                      trygdetidGrunnlagType={trygdetidGrunnlagType}
+                      landListe={landListe}
+                    />
                   )
                 }
               >
@@ -78,7 +119,13 @@ export const TrygdetidPerioderTable = ({
                         size="small"
                         variant="secondary"
                         icon={<PencilIcon aria-hidden />}
-                        onClick={() => setVisRedigerTrydgetid({ vis: true, trydgetidGrunnlagId: trygdetidPeriode.id })}
+                        onClick={() =>
+                          setPeriodeRedigeringModus({
+                            redigerPeriode: true,
+                            erAapen: true,
+                            trygdetidGrunnlagId: trygdetidPeriode.id,
+                          })
+                        }
                       >
                         Rediger
                       </Button>

@@ -75,11 +75,12 @@ export const TrygdetidPerioder = ({
       )}
 
       <TrygdetidPerioderTable
+        trygdetidId={trygdetid.id}
         trygdetidPerioder={trygdetidPerioder}
         trygdetidGrunnlagType={trygdetidGrunnlagType}
+        oppdaterTrygdetid={oppdaterTrygdetid}
         slettTrygdetid={slettTrygdetid}
         slettTrygdetidResult={slettTrygdetidResult}
-        setVisRedigerTrydgetid={setVisRedigerTrydgetid}
         landListe={landListe}
         redigerbar={redigerbar}
       />

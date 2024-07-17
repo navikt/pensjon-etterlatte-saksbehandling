@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -70,14 +71,26 @@ class DoedshendelseJobService(
                     val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
                     logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                    val doedshendelserSomSkalHaanderes = hendelserErGamleNok(nyeDoedshendelser)
-                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
-                    doedshendelserSomSkalHaanderes
+                    val doedshendelserSomSkalHaandteres = hendelserErGamleNok(nyeDoedshendelser)
+                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaandteres.size}")
+                    doedshendelserSomSkalHaandteres
                 }
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
                     haandterDoedshendelse(doedshendelse)
+                }
+            }
+            if (isProd()) {
+                val hendelserUtenBrev =
+                    inTransaction {
+                        val sakiderSomMaaRekjoeresbrev = listOf(18285L, 18287L, 18263L, 18262L, 18290L, 17812L, 18291L)
+                        doedshendelseDao.hentDoedshendelserMedSakider(sakiderSomMaaRekjoeresbrev)
+                    }
+
+                hendelserUtenBrev.forEach { doedshendelse ->
+                    val sak = inTransaction { sakService.finnSak(doedshendelse.sakId!!) }
+                    sendBrevHvisKravOppfylles(doedshendelse, sak, emptyList())
                 }
             }
         }

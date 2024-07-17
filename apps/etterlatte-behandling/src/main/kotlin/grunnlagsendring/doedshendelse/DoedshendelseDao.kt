@@ -81,6 +81,22 @@ class DoedshendelseDao(
         }
     }
 
+    fun hentDoedshendelserMedSakider(sakider: List<Long>): List<DoedshendelseInternal> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
+                    FROM doedshendelse
+                    WHERE status = any(?)
+                    """.trimIndent(),
+                ).apply {
+                    setArray(1, createArrayOf("text", sakider.toTypedArray()))
+                }.executeQuery()
+                    .toList { asDoedshendelse() }
+            }
+        }
+
     fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> =
         connectionAutoclosing.hentConnection {
             with(it) {

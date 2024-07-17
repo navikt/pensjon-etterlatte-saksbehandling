@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 
+// TODO: la denne oppdatere status for alt brev relatert - den får ferdig før brevet er ferdig
 internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService) {
     val logger = routeLogger
     route("/doedshendelse") {

@@ -7,6 +7,7 @@ import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 enum class Issuer(

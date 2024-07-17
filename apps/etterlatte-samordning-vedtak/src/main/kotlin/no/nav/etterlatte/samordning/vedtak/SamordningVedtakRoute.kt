@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.route.dato
+import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,

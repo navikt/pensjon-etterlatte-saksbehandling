@@ -41,13 +41,13 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl

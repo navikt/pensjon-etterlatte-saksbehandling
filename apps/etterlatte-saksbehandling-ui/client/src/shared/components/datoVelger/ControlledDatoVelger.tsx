@@ -14,6 +14,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   readOnly,
   shouldUnregister = false,
   required = true,
+  size = 'medium',
 }: {
   name: Path<T>
   label: string
@@ -23,6 +24,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   readOnly?: boolean
   shouldUnregister?: boolean
   required?: boolean
+  size?: 'small' | 'medium'
 }): ReactNode => {
   const {
     field,
@@ -70,6 +72,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
         error={error?.message}
         readOnly={readOnly}
         onBlur={handleBlur}
+        size={size}
       />
     </DatePicker>
   )

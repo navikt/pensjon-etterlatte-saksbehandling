@@ -7,7 +7,7 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 fun simpleSaksbehandler(
     ident: String = "saksbehandler",
-    claims: Map<String, String> = mapOf(),
+    claims: Map<String, Any?> = mapOf(),
 ): Saksbehandler =
     BrukerTokenInfo.of(
         accessToken = "token",

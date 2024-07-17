@@ -34,18 +34,28 @@ internal fun withRetryOgFeilhaandtering(
             feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
             sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
 
-            try {
-                packet.setEventNameForHendelseType(EventNames.FEILA)
-                packet.feilendeSteg = feilendeSteg
-                packet[KONTEKST_KEY] = kontekst.name
-                packet.feilmelding = e.stackTraceToString()
-                context.publish(packet.toJson())
-                feilhaandteringLogger.info("Publiserte feila-melding")
-            } catch (e2: Exception) {
-                feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
-            }
+            publiserFeilamelding(packet, feilendeSteg, kontekst, e, context)
             feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
             return
         }
+    }
+}
+
+private fun publiserFeilamelding(
+    packet: JsonMessage,
+    feilendeSteg: String,
+    kontekst: Kontekst,
+    e: Exception,
+    context: MessageContext,
+) {
+    try {
+        packet.setEventNameForHendelseType(EventNames.FEILA)
+        packet.feilendeSteg = feilendeSteg
+        packet[KONTEKST_KEY] = kontekst.name
+        packet.feilmelding = e.stackTraceToString()
+        context.publish(packet.toJson())
+        feilhaandteringLogger.info("Publiserte feila-melding")
+    } catch (e2: Exception) {
+        feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
     }
 }

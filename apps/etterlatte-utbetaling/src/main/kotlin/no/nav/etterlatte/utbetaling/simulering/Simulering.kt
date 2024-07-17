@@ -43,6 +43,7 @@ enum class KlasseType(
     FEIL("Feilutbetaling"),
     MOTP("Motpostering"),
     JUST("Justering"),
+    TREK("Trek"),
 }
 
 private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")

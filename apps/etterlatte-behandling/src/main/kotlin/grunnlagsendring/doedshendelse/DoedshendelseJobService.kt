@@ -88,7 +88,7 @@ class DoedshendelseJobService(
                         doedshendelseDao.hentDoedshendelserMedSakider(sakiderSomMaaRekjoeresbrev)
                     }
 
-                hendelserUtenBrev.forEach { doedshendelse ->
+                hendelserUtenBrev.filter { it.brevId == null }.forEach { doedshendelse ->
                     val sak = inTransaction { sakService.finnSak(doedshendelse.sakId!!) }
                     sendBrevHvisKravOppfylles(doedshendelse, sak, emptyList())
                 }

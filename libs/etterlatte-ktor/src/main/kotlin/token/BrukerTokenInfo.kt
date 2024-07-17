@@ -46,6 +46,15 @@ sealed class Systembruker(
 ) : BrukerTokenInfo() {
     override fun ident() = ident
 
+    fun identForBrev(): String {
+        val systemBrukereInternt = HardkodaSystembruker.Systembrukere.entries.map { it.appName }
+        if (ident in systemBrukereInternt) {
+            return Fagsaksystem.EY.navn
+        } else {
+            return ident
+        }
+    }
+
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
     override fun getClaims() = jwtTokenClaims
@@ -62,14 +71,14 @@ sealed class Systembruker(
 }
 
 data class VanligSystembruker internal constructor(
-    override val ident: String? = null,
+    override val ident: String,
     override val jwtTokenClaims: JwtTokenClaims? = null,
 ) : Systembruker(ident, jwtTokenClaims)
 
 data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(
-        ident = omraade.oid,
+        ident = omraade.appName,
         jwtTokenClaims =
             JwtTokenClaims(
                 JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
@@ -87,7 +96,7 @@ data class HardkodaSystembruker private constructor(
     }
 
     enum class Systembrukere(
-        val oid: String,
+        val appName: String,
     ) {
         TESTDATA("testdata"),
         RIVER("river"),

@@ -9,8 +9,8 @@ import io.ktor.server.application.log
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
 fun ApplicationTestBuilder.runServerWithModule(

@@ -9,8 +9,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.grunnbeloep.grunnbeloep
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll

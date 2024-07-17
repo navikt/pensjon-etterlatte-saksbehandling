@@ -1,13 +1,13 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.ktor.Issuer
-import no.nav.etterlatte.libs.ktor.getClaimAsString
-import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.getClaimAsString
+import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup

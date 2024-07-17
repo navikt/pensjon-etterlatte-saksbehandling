@@ -21,14 +21,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.CLIENT_ID
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.CLIENT_ID
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

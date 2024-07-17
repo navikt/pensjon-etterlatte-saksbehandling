@@ -8,10 +8,10 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 internal fun Route.statistikkRoutes(behandlingService: BehandlingService) {
     val logger = routeLogger

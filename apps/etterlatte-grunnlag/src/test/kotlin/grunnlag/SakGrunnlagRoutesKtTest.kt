@@ -18,8 +18,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server

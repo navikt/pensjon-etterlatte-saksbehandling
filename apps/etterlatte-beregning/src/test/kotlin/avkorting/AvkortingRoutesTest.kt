@@ -13,11 +13,10 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto

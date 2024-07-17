@@ -1,7 +1,7 @@
-package no.nav.etterlatte.ktor
+package no.nav.etterlatte.ktor.token
 
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 

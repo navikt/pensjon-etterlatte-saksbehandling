@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.Issuer
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 /**

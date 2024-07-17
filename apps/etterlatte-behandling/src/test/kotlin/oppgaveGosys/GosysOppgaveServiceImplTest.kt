@@ -14,7 +14,7 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.ktor.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt

@@ -17,8 +17,8 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
-import no.nav.etterlatte.ktor.issueSystembrukerToken
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension

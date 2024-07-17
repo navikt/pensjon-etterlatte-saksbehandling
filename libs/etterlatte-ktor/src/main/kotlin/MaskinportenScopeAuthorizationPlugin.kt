@@ -7,6 +7,7 @@ import io.ktor.server.auth.AuthenticationChecked
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 
 val MaskinportenScopeAuthorizationPlugin =
     createRouteScopedPlugin(

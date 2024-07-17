@@ -23,8 +23,8 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler

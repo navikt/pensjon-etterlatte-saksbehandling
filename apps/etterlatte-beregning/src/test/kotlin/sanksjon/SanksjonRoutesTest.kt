@@ -14,8 +14,8 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.sanksjon.sanksjon

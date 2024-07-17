@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.ktor
+package no.nav.etterlatte.libs.ktor.token
 
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.principal

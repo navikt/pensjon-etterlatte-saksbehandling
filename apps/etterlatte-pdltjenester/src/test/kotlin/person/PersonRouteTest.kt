@@ -12,8 +12,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest

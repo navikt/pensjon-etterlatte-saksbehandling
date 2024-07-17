@@ -20,7 +20,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.ktor.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus

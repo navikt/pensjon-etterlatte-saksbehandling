@@ -12,7 +12,7 @@ import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.DollyService

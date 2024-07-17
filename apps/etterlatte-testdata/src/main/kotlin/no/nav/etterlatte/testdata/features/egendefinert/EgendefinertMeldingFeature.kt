@@ -12,7 +12,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage

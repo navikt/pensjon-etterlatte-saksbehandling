@@ -12,16 +12,6 @@ import { TrygdetidPerioderTable } from '~components/behandling/trygdetid/trygdet
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 
-export interface VisRedigerTrygdetid {
-  vis: boolean
-  trydgetidGrunnlagId: string
-}
-
-export const initialVisRedigerTrygdetid = {
-  vis: false,
-  trydgetidGrunnlagId: '',
-}
-
 interface Props {
   trygdetid: ITrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
@@ -39,7 +29,9 @@ export const TrygdetidPerioder = ({
 }: Props) => {
   const [slettTrygdetidResult, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
 
-  const [visRedigerTrydgetid, setVisRedigerTrydgetid] = useState<VisRedigerTrygdetid>(initialVisRedigerTrygdetid)
+  const [visLeggTilTrygdetidPeriode, setVisLeggTilTrygdetidPeriode] = useState<boolean>(false)
+
+  // const [visRedigerTrydgetid, setVisRedigerTrydgetid] = useState<VisRedigerTrygdetid>(initialVisRedigerTrygdetid)
 
   const trygdetidPerioder = trygdetid.trygdetidGrunnlag
     .filter((trygdetid) => trygdetid.type === trygdetidGrunnlagType)
@@ -47,7 +39,7 @@ export const TrygdetidPerioder = ({
 
   const kanLeggeTilNyPeriode =
     redigerbar &&
-    !visRedigerTrydgetid.vis &&
+    !visLeggTilTrygdetidPeriode &&
     !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidPerioder.length > 0)
 
   const slettTrygdetid = (trygdetidGrunnlagId: string) => {
@@ -87,17 +79,15 @@ export const TrygdetidPerioder = ({
 
       {isFailureHandler({ apiResult: slettTrygdetidResult, errorMessage: 'Feil oppstått i slettingen av trygdetid' })}
 
-      {visRedigerTrydgetid.vis && (
+      {visLeggTilTrygdetidPeriode && (
         <TrygdetidGrunnlag
-          eksisterendeGrunnlag={trygdetidPerioder.find(
-            (trygdetid) => trygdetid.id === visRedigerTrydgetid.trydgetidGrunnlagId
-          )}
+          eksisterendeGrunnlag={undefined}
           trygdetidId={trygdetid.id}
           setTrygdetid={(trygdetid) => {
-            setVisRedigerTrydgetid(initialVisRedigerTrygdetid)
             oppdaterTrygdetid(trygdetid)
+            setVisLeggTilTrygdetidPeriode(false)
           }}
-          avbryt={() => setVisRedigerTrydgetid(initialVisRedigerTrygdetid)}
+          avbryt={() => setVisLeggTilTrygdetidPeriode(false)}
           trygdetidGrunnlagType={trygdetidGrunnlagType}
           landListe={landListe}
         />
@@ -109,7 +99,7 @@ export const TrygdetidPerioder = ({
             size="small"
             variant="secondary"
             icon={<PlusIcon aria-hidden />}
-            onClick={() => setVisRedigerTrydgetid({ vis: true, trydgetidGrunnlagId: '' })}
+            onClick={() => setVisLeggTilTrygdetidPeriode(true)}
           >
             Ny periode
           </Button>

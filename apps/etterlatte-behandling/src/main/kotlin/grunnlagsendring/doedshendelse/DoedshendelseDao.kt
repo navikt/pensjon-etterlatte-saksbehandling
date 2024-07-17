@@ -88,7 +88,7 @@ class DoedshendelseDao(
                     """
                     SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
                     FROM doedshendelse
-                    WHERE status = any(?)
+                    WHERE sak_id = any(?)
                     """.trimIndent(),
                 ).apply {
                     setArray(1, createArrayOf("bigint", sakider.toTypedArray()))

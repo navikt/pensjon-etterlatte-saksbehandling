@@ -1,4 +1,4 @@
-package no.nav.etterlatte.ktor
+package no.nav.etterlatte.ktor.token
 
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 

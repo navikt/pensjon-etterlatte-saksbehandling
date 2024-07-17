@@ -1,6 +1,5 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -11,6 +10,7 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoServiceTest.Companion.bruker
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.Enheter
@@ -22,6 +22,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -33,12 +34,9 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -78,16 +76,6 @@ class DoedshendelseKontrollpunktServiceTest {
             endringstype = Endringstype.OPPRETTET,
         )
 
-    private val bruker =
-        BrukerTokenInfo.of(
-            "",
-            "",
-            "",
-            "",
-            JwtTokenClaims(JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build()),
-            "app",
-        )
-
     @BeforeEach
     fun oppsett() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, any()) } returns emptyList()
@@ -96,14 +84,14 @@ class DoedshendelseKontrollpunktServiceTest {
             pesysKlient.erTilstoetendeBehandlet(
                 doedshendelseInternalOMS.beroertFnr,
                 any(),
-                bruker,
+                simpleSaksbehandler(),
             )
         } returns false
         coEvery {
             pesysKlient.erTilstoetendeBehandlet(
                 doedshendelseInternalBP.beroertFnr,
                 any(),
-                bruker,
+                simpleSaksbehandler(),
             )
         } returns false
 

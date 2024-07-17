@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -628,7 +629,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, simpleSaksbehandler())
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -666,7 +667,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, simpleSaksbehandler())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -690,7 +691,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, brukerTokenInfo())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, simpleSaksbehandler())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -703,8 +704,6 @@ class AktivitetspliktServiceTest {
             verify { oppgaveService wasNot Called }
         }
     }
-
-    private fun brukerTokenInfo() = BrukerTokenInfo.of("", "", "a", "a", null, "")
 
     companion object {
         val behandling =

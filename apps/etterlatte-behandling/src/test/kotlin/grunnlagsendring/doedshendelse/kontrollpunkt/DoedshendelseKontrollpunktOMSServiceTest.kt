@@ -1,6 +1,5 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -19,14 +18,12 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktOMSService
+import no.nav.etterlatte.ktor.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.mockPerson
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -34,15 +31,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
     private val pesysKlient = mockk<PesysKlient>()
     private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService = DoedshendelseKontrollpunktOMSService(pesysKlient, behandlingService)
-    private val bruker =
-        BrukerTokenInfo.of(
-            "",
-            "",
-            "",
-            "",
-            JwtTokenClaims(JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build()),
-            "app",
-        )
+    private val bruker = simpleSaksbehandler()
 
     @Test
     fun `Skal opprette kontrollpunkt naar identifisert gjenlevende er over 67 aar`() {

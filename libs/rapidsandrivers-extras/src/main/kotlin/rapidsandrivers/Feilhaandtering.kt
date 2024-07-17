@@ -1,13 +1,16 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
+val sikkerLogg: Logger = sikkerlogger()
 
 internal fun <T> withFeilhaandtering(
     packet: JsonMessage,
@@ -20,6 +23,7 @@ internal fun <T> withFeilhaandtering(
         Result.success(block())
     } catch (e: Exception) {
         feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+        sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
         try {
             packet.setEventNameForHendelseType(EventNames.FEILA)
             packet.feilendeSteg = feilendeSteg
@@ -28,7 +32,7 @@ internal fun <T> withFeilhaandtering(
             context.publish(packet.toJson())
             feilhaandteringLogger.info("Publiserte feila-melding")
         } catch (e2: Exception) {
-            feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
+            feilhaandteringLogger.error("Feil under feilhåndtering for ${packet.id}", e2)
         }
         feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
         Result.failure(e)

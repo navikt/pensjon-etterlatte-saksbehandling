@@ -6,7 +6,7 @@ enum class Kontekst(
     BREV(1),
     DOEDSHENDELSE(2),
     MIGRERING(1),
-    REGULERING(1),
+    REGULERING(0),
     VENT(0),
     TEST(0),
 }

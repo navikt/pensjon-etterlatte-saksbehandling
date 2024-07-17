@@ -26,6 +26,7 @@ internal class RetryOgFeilhaandteringKtTest {
             throw RuntimeException()
         }
         verify(exactly = 1) { context.publish(any()) }
+        verify(exactly = 1) { context.publish(match { objectMapper.readTree(it)[ANTALL_RETRIES_KEY] == null }) }
     }
 
     @Test

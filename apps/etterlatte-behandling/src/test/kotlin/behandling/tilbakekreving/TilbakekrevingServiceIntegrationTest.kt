@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -522,12 +522,12 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     }
 
     private fun tilbakekrevingsvedtak(
-        saksbehandler: Saksbehandler,
+        saksbehandler: BrukerTokenInfo,
         enhet: String,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 1L,
-            fattetAv = saksbehandler.ident,
+            fattetAv = saksbehandler.ident(),
             enhet = enhet,
             dato = LocalDate.now(),
         )

@@ -13,8 +13,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.module

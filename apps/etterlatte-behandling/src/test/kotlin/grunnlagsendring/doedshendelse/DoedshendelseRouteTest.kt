@@ -20,9 +20,9 @@ import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
-import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.security.mock.oauth2.MockOAuth2Server

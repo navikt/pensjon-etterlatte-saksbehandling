@@ -1,7 +1,7 @@
+
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
-import com.nimbusds.jwt.JWTClaimsSet
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
@@ -18,15 +18,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdOpenIdConfiguration
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.IAzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -197,17 +197,9 @@ internal class AzureAdClientTest {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
             }
 
-        fun genererClaimSetSystembruker() =
-            JwtTokenClaims(
-                JWTClaimsSet
-                    .Builder()
-                    .claim(Claims.idtyp.name, "app")
-                    .claim(Claims.azp_name.name, "cluster:appname:dev")
-                    .build(),
-            )
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", saksbehandler = null, claims = genererClaimSetSystembruker(), idtyp = "app"),
+                systembruker(claims = mapOf(Claims.idtyp.name to "app", Claims.azp_name.name to "cluster:appname:dev")),
                 listOf(),
             )
         }
@@ -225,11 +217,11 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", saksbehandler = "s1", claims = null, idtyp = null),
+                simpleSaksbehandler(ident = "s1"),
                 listOf(),
             )
         }
-        coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "a") }
+        coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "token") }
         coVerify(exactly = 0) { client.getAccessTokenForResource(any()) }
     }
 }

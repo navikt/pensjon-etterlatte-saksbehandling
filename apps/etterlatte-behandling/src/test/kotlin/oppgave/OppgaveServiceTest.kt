@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -33,13 +32,11 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -76,9 +73,8 @@ internal class OppgaveServiceTest(
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
         val groupId = azureGroupToGroupIDMap[azureGroup]!!
-        val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
         return SaksbehandlerMedRoller(
-            Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
+            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf("groups" to groupId)),
             mapOf(azureGroup to groupId),
         )
     }
@@ -673,7 +669,7 @@ internal class OppgaveServiceTest(
         assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigstillOppgave(
                 nyOppgave.id,
-                Saksbehandler("", "Feilsaksbehandler", null),
+                simpleSaksbehandler(ident = "Feilsaksbehandler"),
                 null,
             )
         }
@@ -957,7 +953,7 @@ internal class OppgaveServiceTest(
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                Saksbehandler("", "feilSaksbehandler", null),
+                simpleSaksbehandler(ident = "feilSaksbehandler"),
             )
         }
     }

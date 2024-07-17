@@ -1,6 +1,5 @@
 package no.nav.etterlatte.saksbehandler
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -16,11 +15,10 @@ import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -66,10 +64,9 @@ class SaksbehandlerServiceImplTest(
         } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
-        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", azureAdSaksbehandlerClaim).build()
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+                simpleSaksbehandler(claims = mapOf("groups" to azureAdSaksbehandlerClaim)),
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
@@ -95,10 +92,9 @@ class SaksbehandlerServiceImplTest(
         } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
-        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", azureAdSaksbehandlerClaim).build()
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+                simpleSaksbehandler(claims = mapOf("groups" to azureAdSaksbehandlerClaim)),
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller

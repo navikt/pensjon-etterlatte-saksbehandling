@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgaveGosys
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -19,13 +18,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,9 +66,8 @@ class GosysOppgaveServiceImplTest {
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
         val groupId = azureGroupToGroupIDMap[azureGroup]!!
-        val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
         return SaksbehandlerMedRoller(
-            Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
+            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf("groups" to groupId)),
             mapOf(azureGroup to groupId),
         )
     }

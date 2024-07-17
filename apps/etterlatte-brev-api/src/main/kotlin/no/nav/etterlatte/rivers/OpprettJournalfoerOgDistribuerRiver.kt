@@ -22,7 +22,7 @@ import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
 import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -40,7 +40,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     private val grunnlagService: GrunnlagService,
     private val brevoppretter: Brevoppretter,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

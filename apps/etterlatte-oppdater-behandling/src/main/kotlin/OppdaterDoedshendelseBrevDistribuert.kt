@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.brevId
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -24,7 +24,7 @@ class OppdaterDoedshendelseException(
 internal class OppdaterDoedshendelseBrevDistribuert(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

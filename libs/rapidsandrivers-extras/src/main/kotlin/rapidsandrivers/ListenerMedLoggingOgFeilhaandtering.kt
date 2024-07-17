@@ -51,6 +51,9 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
+        require(kontekst() in setOf(Kontekst.MIGRERING, Kontekst.REGULERING, Kontekst.TEST)) {
+            "Bruk heller ${ListenerMedLogging::class.simpleName}, denne her svelger feilmeldinger"
+        }
         River(rapidsConnection)
             .apply {
                 eventName(hendelsestype.lagEventnameForType())

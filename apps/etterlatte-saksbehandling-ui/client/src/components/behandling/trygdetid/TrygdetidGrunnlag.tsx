@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -136,18 +137,16 @@ export const TrygdetidGrunnlag = ({
           </HGrid>
 
           <HStack gap="4">
-            <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
-              Lagre
+            <Button size="small" onClick={() => avbryt()} variant="secondary" icon={<XMarkIcon aria-hidden />}>
+              Avbryt
             </Button>
             <Button
               size="small"
-              onClick={(event) => {
-                event.preventDefault()
-                avbryt()
-              }}
-              variant="secondary"
+              loading={isPending(trygdetidgrunnlagStatus)}
+              type="submit"
+              icon={<FloppydiskIcon aria-hidden />}
             >
-              Avbryt
+              Lagre
             </Button>
           </HStack>
         </VStack>

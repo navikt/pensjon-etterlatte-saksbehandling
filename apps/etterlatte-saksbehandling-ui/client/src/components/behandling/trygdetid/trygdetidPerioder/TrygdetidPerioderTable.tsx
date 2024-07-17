@@ -84,7 +84,7 @@ export const TrygdetidPerioderTable = ({
                       </Button>
                       <Button
                         size="small"
-                        variant="danger"
+                        variant="secondary"
                         icon={<TrashIcon aria-hidden />}
                         loading={isPending(slettTrygdetidResult)}
                         onClick={() => slettTrygdetid(`${trygdetidPeriode.id}`)}

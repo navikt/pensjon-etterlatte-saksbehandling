@@ -119,7 +119,10 @@ export const TrygdetidPerioderTable = ({
                         size="small"
                         variant="secondary"
                         icon={<PencilIcon aria-hidden />}
-                        disabled={periodeRedigeringModus.redigerPeriode}
+                        disabled={
+                          periodeRedigeringModus.redigerPeriode &&
+                          trygdetidPeriode.id === periodeRedigeringModus.trygdetidGrunnlagId
+                        }
                         onClick={() =>
                           setPeriodeRedigeringModus({
                             redigerPeriode: true,

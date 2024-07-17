@@ -11,19 +11,32 @@ import org.junit.jupiter.api.Test
 internal class RetryOgFeilhaandteringKtTest {
     @Test
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
-        val packet = JsonMessage("{}", MessageProblems(""))
+        val packet =
+            JsonMessage("{}", MessageProblems("")).also {
+                it.interestedIn(ANTALL_RETRIES_KEY)
+            }
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
-        withFeilhaandtering(packet, context, ReguleringHendelseType.BEREGNA.lagEventnameForType(), Kontekst.REGULERING) {
+        withRetryOgFeilhaandtering(
+            packet = packet,
+            context = context,
+            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            kontekst = Kontekst.REGULERING,
+        ) {
             throw RuntimeException()
         }
-        verify { context.publish(any()) }
+        verify(exactly = 1) { context.publish(any()) }
     }
 
     @Test
     fun `feilhaandtering gjoer ingenting hvis ingenting feiler`() {
         val packet = JsonMessage("{}", MessageProblems(""))
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
-        withFeilhaandtering(packet, context, ReguleringHendelseType.BEREGNA.lagEventnameForType(), Kontekst.REGULERING) {
+        withRetryOgFeilhaandtering(
+            packet = packet,
+            context = context,
+            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            kontekst = Kontekst.REGULERING,
+        ) {
         }
         verify(exactly = 0) { context.publish(any()) }
     }

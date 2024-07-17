@@ -91,7 +91,7 @@ class DoedshendelseDao(
                     WHERE status = any(?)
                     """.trimIndent(),
                 ).apply {
-                    setArray(1, createArrayOf("text", sakider.toTypedArray()))
+                    setArray(1, createArrayOf("bigint", sakider.toTypedArray()))
                 }.executeQuery()
                     .toList { asDoedshendelse() }
             }

@@ -32,8 +32,8 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
             context = context,
             feilendeSteg = this.name(),
             kontekst = kontekst(),
-        ) {
-            haandterPakke(packet, context)
+        ) { p, c ->
+            haandterPakke(p, c)
         }
     }
 

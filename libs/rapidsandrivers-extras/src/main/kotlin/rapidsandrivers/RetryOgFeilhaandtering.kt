@@ -18,10 +18,10 @@ internal fun withRetryOgFeilhaandtering(
     kontekst: Kontekst,
     context: MessageContext,
     feilendeSteg: String,
-    block: () -> Unit,
+    block: (packet: JsonMessage, context: MessageContext) -> Unit,
 ) {
     try {
-        block()
+        block(packet, context)
     } catch (e: Exception) {
         val antallRetries = kontekst.retries
         val antallKjoeringer = packet[ANTALL_RETRIES_KEY].asInt()
@@ -29,7 +29,7 @@ internal fun withRetryOgFeilhaandtering(
             feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. Prøver igjen.", e)
             Thread.sleep(Duration.ofSeconds((antallKjoeringer + 1).toLong()))
             packet[ANTALL_RETRIES_KEY] = antallKjoeringer + 1
-            context.publish(packet.toJson())
+            block(packet, context)
         } else {
             feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
             sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)

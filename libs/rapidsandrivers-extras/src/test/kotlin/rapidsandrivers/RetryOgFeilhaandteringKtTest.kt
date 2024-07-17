@@ -22,7 +22,7 @@ internal class RetryOgFeilhaandteringKtTest {
             context = context,
             feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
-        ) {
+        ) { _, _ ->
             throw RuntimeException()
         }
         verify(exactly = 1) { context.publish(any()) }
@@ -38,7 +38,7 @@ internal class RetryOgFeilhaandteringKtTest {
             context = context,
             feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
-        ) {
+        ) { _, _ ->
         }
         verify(exactly = 0) { context.publish(any()) }
     }
@@ -55,7 +55,7 @@ internal class RetryOgFeilhaandteringKtTest {
             context = context,
             feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.DOEDSHENDELSE,
-        ) {
+        ) { _, _ ->
             throw RuntimeException()
         }
         verify(exactly = 1) { context.publish(match { objectMapper.readTree(it)[ANTALL_RETRIES_KEY].asInt() == 1 }) }

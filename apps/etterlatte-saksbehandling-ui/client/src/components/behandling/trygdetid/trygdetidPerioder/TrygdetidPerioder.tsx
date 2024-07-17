@@ -31,8 +31,6 @@ export const TrygdetidPerioder = ({
 
   const [visLeggTilTrygdetidPeriode, setVisLeggTilTrygdetidPeriode] = useState<boolean>(false)
 
-  // const [visRedigerTrydgetid, setVisRedigerTrydgetid] = useState<VisRedigerTrygdetid>(initialVisRedigerTrygdetid)
-
   const trygdetidPerioder = trygdetid.trygdetidGrunnlag
     .filter((trygdetid) => trygdetid.type === trygdetidGrunnlagType)
     .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))

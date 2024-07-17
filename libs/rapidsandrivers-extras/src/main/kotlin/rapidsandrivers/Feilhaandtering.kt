@@ -12,28 +12,35 @@ import org.slf4j.LoggerFactory
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
 val sikkerLogg: Logger = sikkerlogger()
 
-internal fun <T> withFeilhaandtering(
+internal fun withRetryOgFeilhaandtering(
     packet: JsonMessage,
+    kontekst: Kontekst,
     context: MessageContext,
     feilendeSteg: String,
-    kontekst: Kontekst,
-    block: () -> T,
-): Result<T> =
+    block: () -> Unit,
+) {
     try {
-        Result.success(block())
+        block()
     } catch (e: Exception) {
-        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-        sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
-        try {
-            packet.setEventNameForHendelseType(EventNames.FEILA)
-            packet.feilendeSteg = feilendeSteg
-            packet[KONTEKST_KEY] = kontekst.name
-            packet.feilmelding = e.stackTraceToString()
+        val antallRetries = kontekst.retries
+        val antallKjoeringer = packet[ANTALL_RETRIES_KEY].asInt()
+        if (antallKjoeringer == 0 && antallKjoeringer < antallRetries) {
+            packet[ANTALL_RETRIES_KEY] = antallKjoeringer + 1
             context.publish(packet.toJson())
-            feilhaandteringLogger.info("Publiserte feila-melding")
-        } catch (e2: Exception) {
-            feilhaandteringLogger.error("Feil under feilhåndtering for ${packet.id}", e2)
+        } else {
+            feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+            try {
+                packet.setEventNameForHendelseType(EventNames.FEILA)
+                packet.feilendeSteg = feilendeSteg
+                packet[KONTEKST_KEY] = kontekst.name
+                packet.feilmelding = e.stackTraceToString()
+                context.publish(packet.toJson())
+                feilhaandteringLogger.info("Publiserte feila-melding")
+            } catch (e2: Exception) {
+                feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
+            }
+            feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
+            return
         }
-        feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
-        Result.failure(e)
     }
+}

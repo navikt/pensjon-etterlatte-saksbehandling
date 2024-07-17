@@ -22,13 +22,13 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate

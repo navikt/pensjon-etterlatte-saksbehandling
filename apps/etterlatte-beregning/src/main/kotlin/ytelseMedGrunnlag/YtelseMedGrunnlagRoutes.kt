@@ -7,10 +7,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.ytelseMedGrunnlag(
     ytelseMedGrunnlagService: YtelseMedGrunnlagService,

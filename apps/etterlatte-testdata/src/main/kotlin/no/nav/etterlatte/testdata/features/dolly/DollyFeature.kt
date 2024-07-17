@@ -13,7 +13,7 @@ import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest

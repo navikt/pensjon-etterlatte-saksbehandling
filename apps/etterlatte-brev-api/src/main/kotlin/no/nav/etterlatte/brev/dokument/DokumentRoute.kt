@@ -15,9 +15,9 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.dokumentRoute(
     safService: SafService,

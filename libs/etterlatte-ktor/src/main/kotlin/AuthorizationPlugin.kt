@@ -8,6 +8,7 @@ import io.ktor.server.auth.principal
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 /**

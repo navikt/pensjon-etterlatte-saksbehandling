@@ -11,9 +11,9 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 internal fun Route.egenAnsattRoute(
     egenAnsattService: EgenAnsattService,

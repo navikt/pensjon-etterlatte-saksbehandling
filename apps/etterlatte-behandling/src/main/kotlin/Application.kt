@@ -39,10 +39,10 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.sak.sakSystemRoutes

@@ -12,10 +12,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

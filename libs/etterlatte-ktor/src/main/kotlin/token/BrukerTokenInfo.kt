@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
 import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class BrukerTokenInfo {

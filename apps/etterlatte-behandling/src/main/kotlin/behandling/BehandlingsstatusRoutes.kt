@@ -12,10 +12,10 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.Saker
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse

@@ -1,9 +1,6 @@
-package no.nav.etterlatte.token
+package no.nav.etterlatte.libs.ktor.token
 
 import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

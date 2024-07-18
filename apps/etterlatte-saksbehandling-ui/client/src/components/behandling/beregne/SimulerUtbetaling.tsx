@@ -35,6 +35,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
         }
       })
     } else {
+      console.log('oppretter simulering')
       simuler()
     }
   }, [behandling.status, avkorting])

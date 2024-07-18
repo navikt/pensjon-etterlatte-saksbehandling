@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
@@ -42,7 +43,7 @@ class SimuleringOsKlient(
     private val url = config.getString("etterlatteproxy.url")
 
     suspend fun simuler(request: SimulerBeregningRequest): SimulerBeregningResponse {
-        logger.info("Kaller simuleringstjeneste i Oppdrag (via proxy)")
+        logger.info("Kaller simuleringstjeneste i Oppdrag (via proxy) request ${request.toJson()}")
 
         val response =
             client.post("$url/simuleringoppdrag/simulerberegning") {

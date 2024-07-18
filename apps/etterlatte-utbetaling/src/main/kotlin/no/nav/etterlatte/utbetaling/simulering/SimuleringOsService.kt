@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.simulering
 
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
@@ -24,6 +25,7 @@ import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdragslinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -35,6 +37,8 @@ class SimuleringOsService(
     private val simuleringDao: SimuleringDao,
     private val simuleringOsKlient: SimuleringOsKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun hent(behandlingId: UUID): SimulertBeregning? = simuleringDao.hent(behandlingId)?.tilSimulertBeregning()
 
     suspend fun simuler(
@@ -47,6 +51,7 @@ class SimuleringOsService(
         val innhold = vedtak.innhold
         if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {
             val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id)
+            logger.info("Behandlingid $behandlingId vedtak ${vedtak.toJson()}")
             val utbetalingsvedtak =
                 Utbetalingsvedtak.fra(
                     vedtak = vedtak,
@@ -61,12 +66,15 @@ class SimuleringOsService(
                             attesterendeEnhet = OppdragDefaults.OPPDRAGSENHET.enhet,
                         ),
                 )
+
             val utbetalingMapper =
                 UtbetalingMapper(
                     tidligereUtbetalinger = sakensUtbetalinger,
                     vedtak = utbetalingsvedtak,
                 )
+
             val opprettetUtbetaling = utbetalingMapper.opprettUtbetaling()
+            logger.info("Behandlingid $behandlingId opprettetUtbetaling ${opprettetUtbetaling.toJson()}")
             val erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty()
             val vedtakVirkFom = innhold.virkningstidspunkt
 
@@ -81,6 +89,8 @@ class SimuleringOsService(
             return simuleringOsKlient
                 .simuler(request)
                 .also {
+                    logger.info("Response simuleringproxy request: $it")
+                }.also {
                     simuleringDao.lagre(
                         behandlingId = behandlingId,
                         saksbehandler = brukerTokenInfo.ident(),

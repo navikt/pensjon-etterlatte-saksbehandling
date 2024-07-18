@@ -40,6 +40,8 @@ jobs:
 
       - name: Build and publish docker image
         uses: Wandalen/wretry.action@3.5.0
+        retry_condition: github.ref_name == 'main'
+        attempt_limit: 2
         with: |
           uses: nais/docker-build-push@v0
           id: docker-build-push

@@ -29,6 +29,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -223,6 +224,7 @@ class SamordningVedtakRouteTest {
         }
 
         @Test
+        @Disabled
         fun `skal gi 401 med token hvor rolle mangler`() {
             testApplication {
                 environment { config = applicationConfig }

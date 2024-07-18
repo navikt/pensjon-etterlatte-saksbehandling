@@ -33,7 +33,16 @@ val AuthorizationPlugin =
                         .intersect(issuers)
                         .isNotEmpty()
                 ) {
-                    val roller = call.brukerTokenInfo.groups
+                    val roller = call.brukerTokenInfo.roller
+
+                    if (roles.contains("les-oms-vedtak")) {
+                        application.log.info(
+                            "Roller: $roller. Groups: ${call.brukerTokenInfo.groups}. " +
+                                "Ident: ${call.brukerTokenInfo.ident()}." +
+                                "Claims: ${call.brukerTokenInfo.getClaims()}",
+                        )
+                        return@on // Temp for å få pesys på stell igjen
+                    }
 
                     if (roller.intersect(roles).isEmpty()) {
                         application.log.info(

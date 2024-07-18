@@ -36,6 +36,11 @@ val AuthorizationPlugin =
                     val roller = call.brukerTokenInfo.roller
 
                     if (roles.contains("les-oms-vedtak")) {
+                        application.log.info(
+                            "Roller: $roller. Groups: ${call.brukerTokenInfo.groups}. " +
+                                "Ident: ${call.brukerTokenInfo.ident()}." +
+                                "Claims: ${call.brukerTokenInfo.getClaims()}",
+                        )
                         return@on // Temp for å få pesys på stell igjen
                     }
 

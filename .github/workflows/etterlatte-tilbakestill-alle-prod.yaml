@@ -24,6 +24,7 @@ jobs:
           - utbetaling
           - vedtaksvurdering
           - vilkaarsvurdering
+          - samordning-vedtak
     uses: ./.github/workflows/.deploy-main-prod.yaml
     with:
       applikasjon: ${{ matrix.applikasjon }}

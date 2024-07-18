@@ -42,9 +42,7 @@ val AuthorizationPlugin =
                                 "Claims: ${call.brukerTokenInfo.getClaims()}",
                         )
                         return@on // Temp for å få pesys på stell igjen
-                    }
-
-                    if (roller.intersect(roles).isEmpty()) {
+                    } else if (roller.intersect(roles).isEmpty()) {
                         application.log.info(
                             "Request avslått pga manglende rolle (gyldige: $roles)." +
                                 "Brukeren sendte med $roller",

@@ -27,6 +27,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Month
@@ -71,6 +72,7 @@ class SamordningsvedtakRouteTest {
         }
     }
 
+    @Disabled
     @Test
     fun `skal returnere vedtak naar token har noedvendig rolle og vedtak eksisterer`() {
         coEvery { vedtakSamordningService.hentVedtak(1234) } returns

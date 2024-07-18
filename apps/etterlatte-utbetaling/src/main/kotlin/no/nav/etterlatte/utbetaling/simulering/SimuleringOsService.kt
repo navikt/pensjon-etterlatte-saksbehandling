@@ -89,7 +89,7 @@ class SimuleringOsService(
             return simuleringOsKlient
                 .simuler(request)
                 .also {
-                    logger.info("Response simuleringproxy request: $it")
+                    logger.info("Response simuleringproxy request: ${it.toJson()}")
                 }.also {
                     simuleringDao.lagre(
                         behandlingId = behandlingId,

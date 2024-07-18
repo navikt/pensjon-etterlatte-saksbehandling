@@ -5,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { Alert, BodyLong, Box, Button, ErrorSummary, HStack, List, Modal, Table, VStack } from '@navikt/ds-react'
+import { BodyLong, Box, Button, ErrorSummary, HStack, Modal, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -46,7 +46,7 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
-import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
+import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -196,21 +196,7 @@ const OverstyrBeregningGrunnlag = (props: {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="0 4" maxWidth="42.5em">
-        <VStack gap="5">
-          <Alert variant="warning">
-            <VStack gap="4">
-              Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
-              revurderes fra første virkningstidspunkt /konverteringstidspunkt.
-              <List as="ul" size="small" title="Saker som fortsatt trenger overstyrt beregning er:">
-                {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-                  <List.Item key={key}>{value}</List.Item>
-                ))}
-              </List>
-            </VStack>
-          </Alert>
-        </VStack>
-      </Box>
+      <BeregningErOverstyrtAlert />
 
       {mapApiResult(
         overstyrBeregningGrunnlag,

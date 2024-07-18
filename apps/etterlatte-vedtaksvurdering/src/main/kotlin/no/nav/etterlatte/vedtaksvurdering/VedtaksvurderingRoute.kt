@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -21,7 +20,6 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedta
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -250,10 +248,6 @@ fun Route.vedtaksvurderingRoute(
 
     route("/vedtak") {
         route("/samordnet") {
-            install(AuthorizationPlugin) {
-                accessPolicyRolesEllerAdGrupper = setOf("samordning-write")
-            }
-
             post("/{vedtakId}") {
                 val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
@@ -275,10 +269,6 @@ fun Route.vedtaksvurderingRoute(
 
 fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
-        install(AuthorizationPlugin) {
-            accessPolicyRolesEllerAdGrupper = setOf("samordning-read")
-        }
-
         get {
             val sakstype =
                 call.parameters["sakstype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }

@@ -120,17 +120,8 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-statistikk # skal fjernes etter at vedtaksdata i statistikk er oppdatert
         - application: etterlatte-samordning-vedtak
-          permissions:
-            roles:
-              - samordning-read
         - application: etterlatte-api    # tar over for samordning-vedtak
-          permissions:
-            roles:
-              - samordning-read
         - application: etterlatte-vedtaksvurdering-kafka
-          permissions:
-            roles:
-              - samordning-write
         - application: etterlatte-utbetaling
     outbound:
       rules:

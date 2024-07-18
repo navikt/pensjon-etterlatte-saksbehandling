@@ -35,16 +35,16 @@ val AuthorizationPlugin =
                         .intersect(issuers)
                         .isNotEmpty()
                 ) {
-                    val roller =
+                    val rollerEllerGrupper =
                         when (call.brukerTokenInfo) {
                             is Saksbehandler -> call.brukerTokenInfo.groups
                             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
                         }
 
-                    if (roller.intersect(rolesOrGroups).isEmpty()) {
+                    if (rollerEllerGrupper.intersect(rolesOrGroups).isEmpty()) {
                         application.log.info(
                             "Request avslått pga manglende rolle (gyldige: $rolesOrGroups)." +
-                                "Brukeren sendte med $roller",
+                                "Brukeren sendte med $rollerEllerGrupper",
                         )
                         throw ForespoerselException(
                             status = HttpStatusCode.Unauthorized.value,

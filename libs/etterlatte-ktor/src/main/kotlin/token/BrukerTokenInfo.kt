@@ -10,8 +10,6 @@ sealed class BrukerTokenInfo {
 
     abstract fun getClaims(): JwtTokenClaims?
 
-    abstract val roller: List<String>
-
     abstract val groups: List<String>
 
     abstract fun accessToken(): String
@@ -66,7 +64,7 @@ data class Systembruker(
 
     override fun getClaims() = jwtTokenClaims
 
-    override val roller: List<String>
+    val roller: List<String>
         get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
 
     override val groups: List<String>
@@ -101,9 +99,6 @@ data class Saksbehandler(
     override fun erSammePerson(ident: String?) = ident == this.ident
 
     override fun getClaims() = jwtTokenClaims
-
-    override val roller: List<String>
-        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
 
     override val groups: List<String>
         get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()

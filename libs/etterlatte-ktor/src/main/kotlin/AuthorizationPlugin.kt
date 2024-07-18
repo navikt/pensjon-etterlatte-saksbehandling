@@ -34,6 +34,11 @@ val AuthorizationPlugin =
                         .isNotEmpty()
                 ) {
                     val roller = call.brukerTokenInfo.roller
+
+                    if (roles.contains("les-oms-vedtak")) {
+                        return@on // Temp for å få pesys på stell igjen
+                    }
+
                     if (roller.intersect(roles).isEmpty()) {
                         application.log.info(
                             "Request avslått pga manglende rolle (gyldige: $roles)." +

@@ -148,7 +148,7 @@ inline val ApplicationCall.orgNummer: String
     get() {
         val claims =
             this
-                .hentTokenClaimsForIssuerName(Issuer.MASKINPORTEN)
+                .hentTokenClaimsForIssuerName(Issuer.MASKINPORTEN.issuerName)
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]

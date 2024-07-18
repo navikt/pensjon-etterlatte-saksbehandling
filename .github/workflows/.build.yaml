@@ -39,11 +39,10 @@ jobs:
         run: ./gradlew :apps:${{ github.workflow }}:build
 
       - name: Build and publish docker image
-        uses: Wandalen/wretry.action@3.5.0
-        retry_condition: github.ref_name == 'main'
+        uses: Wandalen/wretry.action@master
         with: |
-          uses: nais/docker-build-push@v0
-          id: docker-build-push
+          action: nais/docker-build-push@v0
+          retry_condition: github.ref_name == 'main'
           with:
             team: etterlatte
             identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

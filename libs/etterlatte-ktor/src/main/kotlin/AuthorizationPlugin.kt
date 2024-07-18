@@ -21,7 +21,7 @@ val AuthorizationPlugin =
         name = "AuthorizationPlugin",
         createConfiguration = ::PluginConfiguration,
     ) {
-        val roles = pluginConfig.roles
+        val rolesOrGroups = pluginConfig.accessPolicyRolesEllerAdGrupper
         pluginConfig.apply {
             on(AuthenticationChecked) { call ->
                 // If no principal, probably not passed authentication (expired token etc)
@@ -41,9 +41,9 @@ val AuthorizationPlugin =
                             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
                         }
 
-                    if (roller.intersect(roles).isEmpty()) {
+                    if (roller.intersect(rolesOrGroups).isEmpty()) {
                         application.log.info(
-                            "Request avslått pga manglende rolle (gyldige: $roles)." +
+                            "Request avslått pga manglende rolle (gyldige: $rolesOrGroups)." +
                                 "Brukeren sendte med $roller",
                         )
                         throw ForespoerselException(
@@ -63,6 +63,6 @@ val AuthorizationPlugin =
     }
 
 class PluginConfiguration {
-    var roles: Set<String> = emptySet()
+    var accessPolicyRolesEllerAdGrupper: Set<String> = emptySet()
     var issuers: Set<String> = emptySet()
 }

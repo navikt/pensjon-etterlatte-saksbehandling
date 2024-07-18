@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.simulering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.system.os.entiteter.beregningskjema.Beregning
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -47,6 +48,8 @@ enum class KlasseType(
 }
 
 private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+private val logger = LoggerFactory.getLogger("tilSimulertBeregning")
 
 fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
     val simulertPaaDato = LocalDate.parse(this.datoBeregnet, dateTimeFormatter)
@@ -105,5 +108,5 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         kommendeUtbetalinger = kommendeUtbetalinger,
         etterbetaling = etterbetalinger,
         tilbakekreving = tilbakekreving,
-    )
+    ).also { logger.info("SimulertBeregning $it") }
 }

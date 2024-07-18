@@ -95,7 +95,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
     private suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) {
         val roller =
             when (brukerTokenInfo) {
-                is Saksbehandler -> call.brukerTokenInfo.groups
+                is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
                 is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
             }
         if (roller.any { it == "650684ff-8107-4ae4-98fc-e18b5cf3188b" }) {

@@ -109,12 +109,14 @@ enum class Claims {
     idtyp,
 
    /*
+   Kun for Saksbehandlertoken!
    The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
     */
     NAVident,
 
     /*
+    Kun for Saksbehandlertoken!
     JSON array of group identifiers that the user is a member of.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#claims
      */
@@ -122,6 +124,7 @@ enum class Claims {
     groups,
 
     /*
+    Kun for systembruker!
     Roles will appear in the roles claim as an array of strings within the application's token.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#custom-roles
      */

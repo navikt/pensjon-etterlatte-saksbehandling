@@ -83,7 +83,7 @@ fun Route.samordningVedtakRoute(
 
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
-            roles = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            accessPolicyRolesEllerAdGrupper = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(SelvbetjeningAuthorizationPlugin) {

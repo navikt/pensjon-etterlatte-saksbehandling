@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
-import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
+import no.nav.etterlatte.vedtaksvurdering.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 
@@ -40,7 +40,7 @@ class Server(
                     behandlingKlient,
                 )
                 automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
-                samordningsvedtakRoute(vedtakSamordningService)
+                samordningSystembrukerVedtakRoute(vedtakSamordningService)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
             }

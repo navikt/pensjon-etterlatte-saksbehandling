@@ -58,7 +58,7 @@ class SamordningsvedtakRouteTest {
     fun `skal returnere 401 naar token mangler noedvendig rolle`() {
         testApplication {
             runServer(server) {
-                samordningsvedtakRoute(vedtakSamordningService)
+                samordningSystembrukerVedtakRoute(vedtakSamordningService)
             }
 
             val response =
@@ -72,13 +72,13 @@ class SamordningsvedtakRouteTest {
     }
 
     @Test
-    fun `skal returnere vedtak naar token har noedvendig rolle og vedtak eksisterer`() {
+    fun `skal returnere vedtak naar token har noedvendig gruppe og vedtak eksisterer`() {
         coEvery { vedtakSamordningService.hentVedtak(1234) } returns
             samordningVedtak()
 
         testApplication {
             runServer(server) {
-                samordningsvedtakRoute(vedtakSamordningService)
+                samordningSystembrukerVedtakRoute(vedtakSamordningService)
             }
 
             val response =

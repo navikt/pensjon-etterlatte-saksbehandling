@@ -16,7 +16,6 @@ on:
       - main
     paths:
       - apps/etterlatte-gyldig-soeknad/**
-      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
   pull_request:
@@ -25,7 +24,6 @@ on:
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - "!apps/etterlatte-gyldig-soeknad/.nais/*"
-      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 

@@ -32,7 +32,7 @@ fun Route.behandlingSakRoutes(
 ) {
     route("api/oms") {
         install(AuthorizationPlugin) {
-            roles = generateRoles(config)
+            accessPolicyRolesEllerAdGrupper = generateRoles(config)
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         post("/person/sak") {

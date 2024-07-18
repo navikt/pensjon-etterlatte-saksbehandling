@@ -18,7 +18,6 @@ on:
       - apps/etterlatte-beregning-kafka/**
       - libs/saksbehandling-common/**
       - apps/etterlatte-beregning-model/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -30,7 +29,6 @@ on:
       - "!apps/etterlatte-beregning-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - apps/etterlatte-beregning-model/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

@@ -18,7 +18,6 @@ on:
       - apps/etterlatte-beregning/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
@@ -34,7 +33,6 @@ on:
       - "!apps/etterlatte-beregning/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**

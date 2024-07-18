@@ -18,7 +18,6 @@ on:
       - apps/etterlatte-trygdetid/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml
@@ -30,7 +29,6 @@ on:
       - "!apps/etterlatte-trygdetid/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml

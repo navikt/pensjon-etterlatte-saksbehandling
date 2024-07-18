@@ -13,10 +13,10 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.libs.ktor.route.dato
+import no.nav.etterlatte.libs.ktor.token.Issuer
+import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -83,7 +83,7 @@ fun Route.samordningVedtakRoute(
 
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
-            roles = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            accessPolicyRolesEllerAdGrupper = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(SelvbetjeningAuthorizationPlugin) {

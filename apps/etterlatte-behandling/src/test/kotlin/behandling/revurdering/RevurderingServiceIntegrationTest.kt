@@ -27,7 +27,7 @@ import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.ktor.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -54,7 +54,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -150,7 +149,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.ANNEN,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
 
@@ -204,7 +203,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.SOESKENJUSTERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
 
@@ -286,7 +285,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         val revurderingService =
             revurderingService(
@@ -457,7 +456,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
 
@@ -531,7 +530,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.REGULERING,
                     begrunnelse = null,
                     paaGrunnAvHendelseId = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
         inTransaction {
@@ -548,7 +547,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
 
@@ -610,7 +609,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = "124124124",
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "Jenny", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
         assertTrue(
@@ -634,7 +633,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
         }
@@ -657,7 +656,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = revurderingsAarsakIkkeStoettetIMiljoeBarn,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
+                saksbehandler = simpleSaksbehandler(),
             )
         }
     }
@@ -680,7 +679,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null,
-                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
         }
@@ -696,7 +695,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
 
         val saksbehandlerIdent = "saksbehandler"
-        val saksbehandler = Saksbehandler("", saksbehandlerIdent, null)
+        val saksbehandler = simpleSaksbehandler()
         inTransaction {
             applicationContext.oppgaveService.tildelSaksbehandler(
                 oppgaveForFoerstegangsbehandling.id,
@@ -874,7 +873,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = Revurderingaarsak.REGULERING,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
+                saksbehandler = simpleSaksbehandler(),
             )
         }
 
@@ -922,7 +921,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     paaGrunnAvHendelseId = null,
                     paaGrunnAvOppgaveId = oppgaveHendelse.id.toString(),
                     begrunnelse = oppgaveHendelse.merknad,
-                    saksbehandler = Saksbehandler("", "Z123456", null),
+                    saksbehandler = simpleSaksbehandler(),
                 )
             }
 

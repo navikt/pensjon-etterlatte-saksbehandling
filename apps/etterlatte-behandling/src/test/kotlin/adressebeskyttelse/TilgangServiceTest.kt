@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -29,7 +30,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -41,7 +42,6 @@ import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -90,7 +90,7 @@ internal class TilgangServiceTest(
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", null),
+                simpleSaksbehandler(),
                 emptyMap(),
             )
         sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -114,11 +114,10 @@ internal class TilgangServiceTest(
     fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", azureAdStrengtFortroligClaim).build()
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -135,7 +134,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "annenIdent", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =
@@ -167,7 +166,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -184,7 +183,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "annenIdent", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =
@@ -220,11 +219,10 @@ internal class TilgangServiceTest(
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", azureAdStrengtFortroligClaim).build()
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -243,10 +241,9 @@ internal class TilgangServiceTest(
 
         Assertions.assertEquals(true, harTilgangTilBehandlingSomStrengtFortrolig)
 
-        val jwtclaimsFortrolig = JWTClaimsSet.Builder().claim("groups", azureAdFortroligClaim).build()
         val saksbehandlerMedFortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsFortrolig)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdFortroligClaim)),
                 mapOf(AzureGroup.FORTROLIG to azureAdFortroligClaim),
             )
         val harTilgangTilBehandlingSomfortrolig =
@@ -262,10 +259,9 @@ internal class TilgangServiceTest(
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", azureAdStrengtFortroligClaim).build()
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
 
@@ -293,10 +289,9 @@ internal class TilgangServiceTest(
 
         Assertions.assertEquals(false, hartilgangSomStrengtFortroligMotEgenAnsattSak)
 
-        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", azureAdEgenAnsattClaim).build()
         val saksbehandlerMedEgenansatt =
             SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdEgenAnsattClaim)),
                 mapOf(AzureGroup.EGEN_ANSATT to azureAdEgenAnsattClaim),
             )
         val harTilgangTilBehandlingMedEgenAnsattRolle =

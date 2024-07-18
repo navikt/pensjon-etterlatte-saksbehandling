@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,7 +22,7 @@ internal class OpprettBrevRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

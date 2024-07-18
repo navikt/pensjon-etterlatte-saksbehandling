@@ -13,8 +13,8 @@ import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

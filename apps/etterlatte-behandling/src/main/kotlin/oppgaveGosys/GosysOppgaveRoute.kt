@@ -12,10 +12,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.GosysOppgaveversjon
 
 internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {

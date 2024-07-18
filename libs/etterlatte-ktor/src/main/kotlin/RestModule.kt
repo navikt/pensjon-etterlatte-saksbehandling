@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.getClaimAsString
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport

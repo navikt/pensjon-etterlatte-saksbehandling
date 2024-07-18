@@ -20,6 +20,8 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.ktor.token.simpleAttestant
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -51,7 +53,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -83,8 +84,8 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private lateinit var klageDao: KlageDao
     private val brevApiKlientMock = mockk<BrevApiKlient>()
 
-    private val saksbehandler = Saksbehandler("token", saksbehandlerIdent, null)
-    private val attestant = Saksbehandler("tokenAttestant", attestantIdent, null)
+    private val saksbehandler = simpleSaksbehandler(ident = saksbehandlerIdent)
+    private val attestant = simpleAttestant(ident = attestantIdent)
     private val klagerFnr = GrunnlagTestData().gjenlevende.foedselsnummer.value
     private val enhet = "1337"
 

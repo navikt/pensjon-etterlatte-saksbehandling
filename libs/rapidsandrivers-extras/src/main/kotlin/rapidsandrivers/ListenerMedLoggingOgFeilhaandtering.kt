@@ -27,7 +27,12 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         packet: JsonMessage,
         context: MessageContext,
     ) = withLogContext(packet.correlationId) {
-        withFeilhaandtering(packet, context, feilendeSteg = this.name(), kontekst = kontekst()) {
+        withRetryOgFeilhaandtering(
+            packet = packet,
+            context = context,
+            feilendeSteg = this.name(),
+            kontekst = kontekst(),
+        ) {
             haandterPakke(packet, context)
         }
     }
@@ -46,10 +51,14 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
+        require(kontekst() in setOf(Kontekst.MIGRERING, Kontekst.REGULERING, Kontekst.TEST)) {
+            "Bruk heller ${ListenerMedLogging::class.simpleName}, denne her svelger feilmeldinger"
+        }
         River(rapidsConnection)
             .apply {
                 eventName(hendelsestype.lagEventnameForType())
                 correlationId()
+                validate { it.interestedIn(ANTALL_RETRIES_KEY) }
                 block()
             }.register(this)
     }

@@ -15,8 +15,8 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.AzureGroup

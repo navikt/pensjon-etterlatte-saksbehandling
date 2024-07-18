@@ -102,6 +102,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         revurderingsaarsak,
                         erForeldreloes,
                         avdoede,
+                        klage,
                     )
                 BARNEPENSJON_INNVILGELSE,
                 BARNEPENSJON_INNVILGELSE_FORELDRELOES,
@@ -256,6 +257,7 @@ class BrevDataMapperFerdigstillingVedtak(
         revurderingaarsak: Revurderingaarsak?,
         erForeldreloes: Boolean,
         avdoede: List<Avdoed>,
+        klage: Klage?,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -280,6 +282,13 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
+        val datoVedtakOmgjoering =
+            klage
+                ?.formkrav
+                ?.formkrav
+                ?.vedtaketKlagenGjelder
+                ?.datoAttestert
+                ?.toLocalDate()
         BarnepensjonRevurdering.fra(
             innholdMedVedlegg,
             utbetalingsinfo.await(),
@@ -292,6 +301,7 @@ class BrevDataMapperFerdigstillingVedtak(
             revurderingaarsak,
             erForeldreloes,
             avdoede,
+            datoVedtakOmgjoering,
         )
     }
 

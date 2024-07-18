@@ -19,7 +19,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
-import no.nav.etterlatte.ktor.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

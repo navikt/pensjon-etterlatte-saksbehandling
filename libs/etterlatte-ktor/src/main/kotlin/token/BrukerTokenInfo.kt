@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
 import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class BrukerTokenInfo {
@@ -10,10 +9,6 @@ sealed class BrukerTokenInfo {
     abstract fun erSammePerson(ident: String?): Boolean
 
     abstract fun getClaims(): JwtTokenClaims?
-
-    abstract val roller: List<String>
-
-    abstract val groups: List<String>
 
     abstract fun accessToken(): String
 
@@ -60,11 +55,8 @@ sealed class Systembruker(
 
     override fun getClaims() = jwtTokenClaims
 
-    override val roller: List<String>
+    val roller: List<String>
         get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
-
-    override val groups: List<String>
-        get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 
     override fun erSammePerson(ident: String?) = false
 
@@ -120,10 +112,7 @@ data class Saksbehandler(
 
     override fun getClaims() = jwtTokenClaims
 
-    override val roller: List<String>
-        get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
-
-    override val groups: List<String>
+    val groups: List<String>
         get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 }
 
@@ -137,12 +126,14 @@ enum class Claims {
     idtyp,
 
    /*
+   Kun for Saksbehandlertoken!
    The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
     */
     NAVident,
 
     /*
+    Kun for Saksbehandlertoken!
     JSON array of group identifiers that the user is a member of.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#claims
      */
@@ -150,6 +141,7 @@ enum class Claims {
     groups,
 
     /*
+    Kun for systembruker!
     Roles will appear in the roles claim as an array of strings within the application's token.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#custom-roles
      */

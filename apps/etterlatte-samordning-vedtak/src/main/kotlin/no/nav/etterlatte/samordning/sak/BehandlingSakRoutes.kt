@@ -6,13 +6,12 @@ import io.ktor.server.application.install
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.token.Issuer
 
 fun generateRoles(config: Config): Set<String> {
     val defaultRoles =
@@ -33,7 +32,7 @@ fun Route.behandlingSakRoutes(
 ) {
     route("api/oms") {
         install(AuthorizationPlugin) {
-            roles = generateRoles(config)
+            accessPolicyRolesEllerAdGrupper = generateRoles(config)
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         post("/person/sak") {

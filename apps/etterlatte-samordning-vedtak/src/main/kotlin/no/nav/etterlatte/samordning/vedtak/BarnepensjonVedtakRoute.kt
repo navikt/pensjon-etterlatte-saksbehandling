@@ -12,8 +12,8 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
-import no.nav.etterlatte.libs.ktor.Issuer
 import no.nav.etterlatte.libs.ktor.route.dato
+import no.nav.etterlatte.libs.ktor.token.Issuer
 
 fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -21,7 +21,7 @@ fun Route.barnepensjonVedtakRoute(
 ) {
     route("api/barnepensjon/har-loepende-bp") {
         install(AuthorizationPlugin) {
-            roles = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            accessPolicyRolesEllerAdGrupper = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 

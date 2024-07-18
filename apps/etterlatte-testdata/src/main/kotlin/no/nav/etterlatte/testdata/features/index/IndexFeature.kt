@@ -7,7 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.features
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 object IndexFeature : TestDataFeature {
     override val beskrivelse: String

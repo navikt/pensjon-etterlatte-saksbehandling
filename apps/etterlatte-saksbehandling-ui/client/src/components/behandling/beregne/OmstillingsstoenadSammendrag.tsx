@@ -29,8 +29,8 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Prorata Brøk</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Brutto stønad før avkorting</Table.HeaderCell>
             <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
+            <Table.HeaderCell>Brutto stønad før avkorting</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -49,6 +49,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
                 )}
               </Table.DataCell>
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
+              <Table.DataCell>{beregningsperiode.institusjonsopphold && 'institusjonsopphold'}</Table.DataCell>
               <Table.DataCell>
                 {NOK(beregningsperiode.utbetaltBeloep)}{' '}
                 <ToolTip title="Få mer informasjon om beregningsgrunnlaget">
@@ -58,7 +59,6 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
                   30 års trygdetid: 2,25 G * 30/40 /12 mnd.
                 </ToolTip>
               </Table.DataCell>
-              <Table.DataCell>{beregningsperiode.institusjonsopphold && 'institusjonsopphold'}</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>

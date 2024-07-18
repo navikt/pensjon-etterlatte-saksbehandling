@@ -1,12 +1,10 @@
-package no.nav.etterlatte.libs.ktor
+package no.nav.etterlatte.libs.ktor.token
 
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 enum class Issuer(

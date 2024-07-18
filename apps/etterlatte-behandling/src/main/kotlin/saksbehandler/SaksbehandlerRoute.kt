@@ -9,7 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
 inline val PipelineContext<*, ApplicationCall>.enheter: List<String>

@@ -10,13 +10,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.generellBehandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 

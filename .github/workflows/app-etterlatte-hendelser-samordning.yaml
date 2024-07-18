@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-hendelser-samordning/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -27,6 +28,7 @@ on:
       - "!apps/etterlatte-hendelser-samordning/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 permissions:

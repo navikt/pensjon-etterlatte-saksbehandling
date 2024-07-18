@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-migrering/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-oppgave-model/**
@@ -33,6 +34,7 @@ on:
       - "!apps/etterlatte-migrering/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-oppgave-model/**

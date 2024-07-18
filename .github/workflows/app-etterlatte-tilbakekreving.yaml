@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-tilbakekreving/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-mq/**
       - gradle/libs.versions.toml
@@ -27,6 +28,7 @@ on:
       - apps/etterlatte-tilbakekreving/**
       - "!apps/etterlatte-tilbakekreving/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-mq/**
       - gradle/libs.versions.toml

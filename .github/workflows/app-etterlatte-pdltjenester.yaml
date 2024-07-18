@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
   pull_request:
@@ -28,6 +29,7 @@ on:
       - "!apps/etterlatte-pdltjenester/.nais/*"
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
 

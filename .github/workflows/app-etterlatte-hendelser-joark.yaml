@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-hendelser-joark/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
   pull_request:
@@ -28,6 +29,7 @@ on:
       - "!apps/etterlatte-hendelser-joark/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
 

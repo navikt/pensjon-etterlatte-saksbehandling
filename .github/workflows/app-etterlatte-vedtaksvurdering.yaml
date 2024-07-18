@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-vedtaksvurdering/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
@@ -32,6 +33,7 @@ on:
       - apps/etterlatte-vedtaksvurdering/**
       - "!apps/etterlatte-vedtaksvurdering/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**

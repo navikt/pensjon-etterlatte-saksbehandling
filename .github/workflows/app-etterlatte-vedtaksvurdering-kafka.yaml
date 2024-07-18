@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
@@ -33,6 +34,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-funksjonsbrytere/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**

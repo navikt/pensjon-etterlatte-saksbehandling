@@ -37,7 +37,8 @@ val AuthorizationPlugin =
                 ) {
                     val rollerEllerGrupper =
                         when (call.brukerTokenInfo) {
-                            is Saksbehandler -> call.brukerTokenInfo.groups
+                            // saksbehandler token har ikke roles-claims se https://nav-it.slack.com/archives/C9P60F4F3/p1721289988497649?thread_ts=1721285263.277479&cid=C9P60F4F3
+                            is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
                             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
                         }
 

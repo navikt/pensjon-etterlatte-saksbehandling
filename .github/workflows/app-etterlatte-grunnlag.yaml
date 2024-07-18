@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-grunnlag/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-behandling-model/**
@@ -30,6 +31,7 @@ on:
       - apps/etterlatte-grunnlag/**
       - "!apps/etterlatte-grunnlag/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-behandling-model/**

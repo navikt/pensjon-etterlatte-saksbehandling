@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - apps/etterlatte-testdata/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -14,6 +15,7 @@ on:
     paths:
       - apps/etterlatte-testdata/**
       - "!apps/etterlatte-testdata/.nais/*"
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 permissions:

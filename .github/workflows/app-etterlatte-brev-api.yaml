@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-brev-api/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
@@ -35,6 +36,7 @@ on:
       - apps/etterlatte-brev-api/**
       - "!apps/etterlatte-brev-api/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**

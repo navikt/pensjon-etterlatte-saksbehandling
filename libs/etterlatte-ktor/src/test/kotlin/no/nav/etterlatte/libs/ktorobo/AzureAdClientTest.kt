@@ -199,7 +199,7 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                systembruker(claims = mapOf(Claims.idtyp.name to "app", Claims.azp_name.name to "cluster:appname:dev")),
+                systembruker(claims = mapOf(Claims.idtyp to "app", Claims.azp_name to "cluster:appname:dev")),
                 listOf(),
             )
         }

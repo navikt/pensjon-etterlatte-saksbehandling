@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
@@ -67,7 +68,7 @@ class GosysOppgaveServiceImplTest {
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
         val groupId = azureGroupToGroupIDMap[azureGroup]!!
         return SaksbehandlerMedRoller(
-            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf("groups" to groupId)),
+            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf(Claims.groups to groupId)),
             mapOf(azureGroup to groupId),
         )
     }

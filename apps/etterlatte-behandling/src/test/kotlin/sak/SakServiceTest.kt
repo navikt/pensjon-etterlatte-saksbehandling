@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -123,7 +124,7 @@ internal class SakServiceTest {
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
-        val saksbehandler = simpleSaksbehandler(claims = mapOf("groups" to tilgangsgrupper.map { it.name }))
+        val saksbehandler = simpleSaksbehandler(claims = mapOf(Claims.groups to tilgangsgrupper.map { it.name }))
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(
                 tokenValidationContext,

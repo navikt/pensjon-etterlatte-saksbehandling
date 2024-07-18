@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -116,7 +117,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "ident", claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -133,7 +134,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "annenIdent", claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =
@@ -165,7 +166,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "ident", claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(ident = "ident", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -182,7 +183,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerUtenStrengtFortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(ident = "annenIdent", claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(ident = "annenIdent", claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(),
             )
         val harTilgangStrengtFortroligBehandling =
@@ -221,7 +222,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
         sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -242,7 +243,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedFortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdFortroligClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdFortroligClaim)),
                 mapOf(AzureGroup.FORTROLIG to azureAdFortroligClaim),
             )
         val harTilgangTilBehandlingSomfortrolig =
@@ -260,7 +261,7 @@ internal class TilgangServiceTest(
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdStrengtFortroligClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
             )
 
@@ -290,7 +291,7 @@ internal class TilgangServiceTest(
 
         val saksbehandlerMedEgenansatt =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdEgenAnsattClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdEgenAnsattClaim)),
                 mapOf(AzureGroup.EGEN_ANSATT to azureAdEgenAnsattClaim),
             )
         val harTilgangTilBehandlingMedEgenAnsattRolle =

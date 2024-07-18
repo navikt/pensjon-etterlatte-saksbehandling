@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -66,7 +67,7 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdSaksbehandlerClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
@@ -94,7 +95,7 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf("groups" to azureAdSaksbehandlerClaim)),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller

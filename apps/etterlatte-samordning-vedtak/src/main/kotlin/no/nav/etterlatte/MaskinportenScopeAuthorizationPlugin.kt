@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.ktor
+package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.createRouteScopedPlugin

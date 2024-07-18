@@ -35,7 +35,10 @@ val AuthorizationPlugin =
                 ) {
                     val roller = call.brukerTokenInfo.roller
                     if (roller.intersect(roles).isEmpty()) {
-                        application.log.info("Request avslått pga manglende rolle (gyldige: $roles)")
+                        application.log.info(
+                            "Request avslått pga manglende rolle (gyldige: $roles)." +
+                                "Brukeren sendte med $roller",
+                        )
                         throw ForespoerselException(
                             status = HttpStatusCode.Unauthorized.value,
                             code = "GE-VALIDATE-ACCESS-ROLE",

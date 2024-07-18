@@ -45,7 +45,9 @@ val AuthorizationPlugin =
                         application.log.info(
                             "Roller: $roller. Groups: ${call.brukerTokenInfo.groups}. " +
                                 "Ident: ${call.brukerTokenInfo.ident()}." +
-                                "Claims: ${call.brukerTokenInfo.getClaims()}",
+                                "Claims: ${call.brukerTokenInfo.getClaims()?.allClaims?.entries}." +
+                                "Roller intersect roles is empty: ${roller.intersect(roles).isEmpty()}",
+                            "Roller intersect roles: ${roller.intersect(roles)}",
                         )
                         return@on // Temp for å få pesys på stell igjen
                     }

@@ -41,16 +41,6 @@ val AuthorizationPlugin =
                             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
                         }
 
-                    if (roles.contains("les-oms-vedtak")) {
-                        application.log.info(
-                            "Roller: $roller. Groups: ${call.brukerTokenInfo.groups}. " +
-                                "Ident: ${call.brukerTokenInfo.ident()}." +
-                                "Roller intersect roles is empty: ${roller.intersect(roles).isEmpty()}",
-                            "Roller intersect roles: ${roller.intersect(roles)}",
-                        )
-                        return@on // Temp for å få pesys på stell igjen
-                    }
-
                     if (roller.intersect(roles).isEmpty()) {
                         application.log.info(
                             "Request avslått pga manglende rolle (gyldige: $roles)." +

@@ -8,6 +8,8 @@ import io.ktor.server.auth.principal
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
@@ -33,7 +35,11 @@ val AuthorizationPlugin =
                         .intersect(issuers)
                         .isNotEmpty()
                 ) {
-                    val roller = call.brukerTokenInfo.roller
+                    val roller =
+                        when (call.brukerTokenInfo) {
+                            is Saksbehandler -> call.brukerTokenInfo.groups
+                            is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
+                        }
 
                     if (roles.contains("les-oms-vedtak")) {
                         application.log.info(

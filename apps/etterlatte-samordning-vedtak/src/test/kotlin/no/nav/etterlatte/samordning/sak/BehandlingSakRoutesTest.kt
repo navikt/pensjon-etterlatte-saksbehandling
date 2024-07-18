@@ -132,7 +132,7 @@ class BehandlingSakRoutesTest {
                     contentType(ContentType.Application.Json)
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(roles = listOf("les-oms-sak-for-person"))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak-for-person"))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.InternalServerError
@@ -161,7 +161,7 @@ class BehandlingSakRoutesTest {
                     contentType(ContentType.Application.Json)
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(roles = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.InternalServerError
@@ -200,7 +200,7 @@ class BehandlingSakRoutesTest {
                     setBody(requestFnr.toJson())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(roles = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.OK

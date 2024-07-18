@@ -29,6 +29,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -52,7 +53,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
@@ -452,7 +452,7 @@ class BehandlingFactoryTest {
     fun `skal ikke kunne opprette omgjøring førstegangsbehandling hvis det er innvilget førstegangsbehandling`() {
         val sakId = 1L
         val iverksattBehandlingId = UUID.randomUUID()
-        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
         val iverksattBehandling =
             foerstegangsbehandling(
                 status = BehandlingStatus.IVERKSATT,
@@ -479,7 +479,7 @@ class BehandlingFactoryTest {
     @Test
     fun `skal ikke omgjøre hvis vi ikke har en førstegangsbehandling i saken`() {
         val sak = sak()
-        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns emptyList()
@@ -497,7 +497,7 @@ class BehandlingFactoryTest {
     @Test
     fun `skal ikke omgjøre hvis vi har en åpen behandling i saken`() {
         val sak = sak()
-        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
         val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
         val revurdering =
             revurdering(
@@ -520,7 +520,7 @@ class BehandlingFactoryTest {
     @Test
     fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering hvis flagg er satt`() {
         val sak = sak()
-        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
         val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
         val revurdering =
             revurdering(
@@ -589,7 +589,7 @@ class BehandlingFactoryTest {
     @Test
     fun `skal lage ny førstegangsbehandling, oppgave og sende statisitkkmelding hvis omgjøring er lov`() {
         val sak = sak()
-        val saksbehandler = Saksbehandler("", "sakbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
         val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
         val revurdering =
             revurdering(
@@ -1022,7 +1022,7 @@ class BehandlingFactoryTest {
                         null,
                         null,
                     ),
-                    Saksbehandler("token", "Z123456", null),
+                    simpleSaksbehandler(),
                 )
             }
 

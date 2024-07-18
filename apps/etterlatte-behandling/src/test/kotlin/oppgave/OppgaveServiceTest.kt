@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -33,13 +32,12 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -76,9 +74,8 @@ internal class OppgaveServiceTest(
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
         val groupId = azureGroupToGroupIDMap[azureGroup]!!
-        val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
         return SaksbehandlerMedRoller(
-            Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
+            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf(Claims.groups to groupId)),
             mapOf(azureGroup to groupId),
         )
     }
@@ -311,7 +308,7 @@ internal class OppgaveServiceTest(
         val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         val annenBehandlingId = UUID.randomUUID().toString()
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         val oppgaveFerdigstilt =
             oppgaveService.opprettOppgave(
@@ -332,7 +329,7 @@ internal class OppgaveServiceTest(
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
             )
-        val saksbehandlerforstegangs = Saksbehandler("", "forstegangssaksbehandler", null)
+        val saksbehandlerforstegangs = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(annenBehandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandlerforstegangs)
         val oppgaveUnderBehandlingAnnenBehandling =
@@ -610,7 +607,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
 
         val sakIdOgReferanse =
@@ -640,7 +637,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
         oppgaveService.tilAttestering(
             referanse,
@@ -673,7 +670,7 @@ internal class OppgaveServiceTest(
         assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigstillOppgave(
                 nyOppgave.id,
-                Saksbehandler("", "Feilsaksbehandler", null),
+                simpleSaksbehandler(ident = "Feilsaksbehandler"),
                 null,
             )
         }
@@ -732,7 +729,7 @@ internal class OppgaveServiceTest(
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgaveEn.id, saksbehandler1.ident)
         oppgaveService.tildelSaksbehandler(oppgaveTo.id, saksbehandler1.ident)
 
@@ -931,7 +928,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandler1 = Saksbehandler("", "saksbehandler01", null)
+        val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandler1)
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
@@ -957,7 +954,7 @@ internal class OppgaveServiceTest(
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                Saksbehandler("", "feilSaksbehandler", null),
+                simpleSaksbehandler(ident = "feilSaksbehandler"),
             )
         }
     }
@@ -1080,7 +1077,7 @@ internal class OppgaveServiceTest(
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler = Saksbehandler("", "saksbehandler", null)
+        val saksbehandler = simpleSaksbehandler()
 
         oppgaveService.tildelSaksbehandler(foerstegangsbehandling.id, saksbehandler.ident)
 

@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.notat.StrukturertBrev
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
@@ -29,7 +30,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -90,7 +90,7 @@ class NotatServiceTest(
                     StrukturertBrev.KlageBlankett(
                         klage = klage,
                     ),
-                bruker = Saksbehandler("", "Z999999", null),
+                bruker = simpleSaksbehandler(),
             )
         }
 
@@ -132,7 +132,7 @@ class NotatServiceTest(
                         StrukturertBrev.KlageBlankett(
                             klage = klage,
                         ),
-                    bruker = Saksbehandler("", "Z999999", null),
+                    bruker = simpleSaksbehandler(),
                 )
             }
         } catch (_: Exception) {

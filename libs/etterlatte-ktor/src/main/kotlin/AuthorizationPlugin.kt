@@ -21,7 +21,7 @@ val AuthorizationPlugin =
         name = "AuthorizationPlugin",
         createConfiguration = ::PluginConfiguration,
     ) {
-        val roles = pluginConfig.roles
+        val rolesOrGroups = pluginConfig.accessPolicyRolesEllerAdGrupper
         pluginConfig.apply {
             on(AuthenticationChecked) { call ->
                 // If no principal, probably not passed authentication (expired token etc)
@@ -35,26 +35,17 @@ val AuthorizationPlugin =
                         .intersect(issuers)
                         .isNotEmpty()
                 ) {
-                    val roller =
+                    val rollerEllerGrupper =
                         when (call.brukerTokenInfo) {
-                            is Saksbehandler -> call.brukerTokenInfo.groups
+                            // saksbehandler token har ikke roles-claims se https://nav-it.slack.com/archives/C9P60F4F3/p1721289988497649?thread_ts=1721285263.277479&cid=C9P60F4F3
+                            is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
                             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
                         }
 
-                    if (roles.contains("les-oms-vedtak")) {
+                    if (rollerEllerGrupper.intersect(rolesOrGroups).isEmpty()) {
                         application.log.info(
-                            "Roller: $roller. Groups: ${call.brukerTokenInfo.groups}. " +
-                                "Ident: ${call.brukerTokenInfo.ident()}." +
-                                "Roller intersect roles is empty: ${roller.intersect(roles).isEmpty()}",
-                            "Roller intersect roles: ${roller.intersect(roles)}",
-                        )
-                        return@on // Temp for å få pesys på stell igjen
-                    }
-
-                    if (roller.intersect(roles).isEmpty()) {
-                        application.log.info(
-                            "Request avslått pga manglende rolle (gyldige: $roles)." +
-                                "Brukeren sendte med $roller",
+                            "Request avslått pga manglende rolle (gyldige: $rolesOrGroups)." +
+                                "Brukeren sendte med $rollerEllerGrupper",
                         )
                         throw ForespoerselException(
                             status = HttpStatusCode.Unauthorized.value,
@@ -73,6 +64,6 @@ val AuthorizationPlugin =
     }
 
 class PluginConfiguration {
-    var roles: Set<String> = emptySet()
+    var accessPolicyRolesEllerAdGrupper: Set<String> = emptySet()
     var issuers: Set<String> = emptySet()
 }

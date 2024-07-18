@@ -41,16 +41,6 @@ sealed class Systembruker(
 ) : BrukerTokenInfo() {
     override fun ident() = ident
 
-    // TOOD rett etterpå: splitt opp denne i ein implementasjon for vanlig og ein for hardkoda
-    fun identForBrev(): String {
-        val systemBrukereInternt = HardkodaSystembruker.Systembrukere.entries.map { it.appName }
-        if (ident in systemBrukereInternt) {
-            return Fagsaksystem.EY.navn
-        } else {
-            return ident
-        }
-    }
-
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
     override fun getClaims() = jwtTokenClaims

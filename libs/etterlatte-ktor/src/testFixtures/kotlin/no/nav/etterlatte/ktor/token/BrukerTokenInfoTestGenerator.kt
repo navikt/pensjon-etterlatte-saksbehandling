@@ -24,7 +24,7 @@ fun systembruker(claims: Map<Claims, Any?>): Systembruker =
     BrukerTokenInfo.of(
         accessToken = "token",
         saksbehandler = null,
-        claims = extracted(claims),
+        claims = extracted(claims + mapOf(Claims.idtyp to "app")),
         idtyp = "app",
     ) as Systembruker
 

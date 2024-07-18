@@ -191,7 +191,7 @@ internal class AzureAdClientTest {
         }
 
     @Test
-    fun `bruker client credentials viss JWT-claims sub og oid er like`() {
+    fun `bruker client credentials viss JWT-claims er systembruker`() {
         val client =
             spyk(AzureAdClient(config, FakeAzureAdHttpClient())).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
@@ -199,7 +199,7 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                systembruker(claims = mapOf(Claims.idtyp to "app", Claims.azp_name to "cluster:appname:dev")),
+                systembruker(claims = mapOf(Claims.azp_name to "cluster:appname:dev")),
                 listOf(),
             )
         }

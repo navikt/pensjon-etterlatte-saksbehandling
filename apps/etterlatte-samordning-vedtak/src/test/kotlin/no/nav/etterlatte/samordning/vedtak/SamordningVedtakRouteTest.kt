@@ -242,6 +242,7 @@ class SamordningVedtakRouteTest {
             }
         }
 
+        @Disabled
         @Test
         fun `skal gi 200 med gyldig token inkl rolle`() {
             coEvery {

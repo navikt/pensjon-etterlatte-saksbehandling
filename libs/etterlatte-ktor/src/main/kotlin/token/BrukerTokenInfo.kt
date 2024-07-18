@@ -145,7 +145,7 @@ enum class Claims {
     @Suppress("ktlint:standard:enum-entry-name-case")
     azp_name,
 
-    // systembruker applikasjonsnavn<
+    // systembruker applikasjonsnavn
     @Suppress("ktlint:standard:enum-entry-name-case")
     oid,
 

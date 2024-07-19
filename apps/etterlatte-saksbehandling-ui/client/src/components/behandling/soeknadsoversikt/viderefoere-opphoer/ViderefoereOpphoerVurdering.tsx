@@ -12,23 +12,18 @@ import {
 } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { lagreViderefoertOpphoer } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { VilkaarType } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { formaterDato } from '~utils/formatering/dato'
 import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-
-const VilkaarTypeTittel: Record<VilkaarType, string> = {
-  [VilkaarType.Ingen]: 'Ingen',
-  [VilkaarType.BP_FORMAAL_2024]: 'BP formål',
-  [VilkaarType.BP_DOEDSFALL_FORELDER_2024]: 'BP dødsfall forelder',
-} as const
+import { isSuccess } from '~shared/api/apiUtils'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -49,11 +44,17 @@ export const ViderefoereOpphoerVurdering = ({
   const [opphoerstidspunkt, setOpphoerstidspunkt] = useState<Date | null>(
     viderefoertOpphoer ? new Date(viderefoertOpphoer.dato) : null
   )
-  const [vilkaar, setVilkaar] = useState<VilkaarType | undefined>(viderefoertOpphoer?.vilkaar)
+  const [vilkaar, setVilkaar] = useState<string | undefined>(viderefoertOpphoer?.vilkaar)
   const [vilkaarError, setVilkaarError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
   const [kravdato] = useState<string | undefined>()
+
+  const [vilkaartyper, setVilkaartyper] = useApiCall(hentVilkaartyper)
+
+  useEffect(() => {
+    setVilkaartyper(behandlingId)
+  }, [])
 
   const valider = () => {
     if (!skalViderefoere) {
@@ -105,8 +106,6 @@ export const ViderefoereOpphoerVurdering = ({
     defaultSelected: opphoerstidspunkt ?? undefined,
   } as UseMonthPickerOptions)
 
-  const options = Object.keys(VilkaarType).map((k) => k)
-
   return (
     <VurderingsboksWrapper
       tittel="Skal opphøret umiddelbart videreføres?"
@@ -128,7 +127,7 @@ export const ViderefoereOpphoerVurdering = ({
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-                  {VilkaarTypeTittel[viderefoertOpphoer.vilkaar]}
+                  {isSuccess(vilkaartyper) ? vilkaartyper.data.typer.get(viderefoertOpphoer.vilkaar) : ''}
                 </Label>
               ) : (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
@@ -169,7 +168,7 @@ export const ViderefoereOpphoerVurdering = ({
                 setVilkaarError('')
                 if (jaNeiElement === JaNei.NEI) {
                   setOpphoerstidspunkt(null)
-                  setVilkaar(VilkaarType.Ingen)
+                  setVilkaar(undefined)
                 }
               }}
               value={skalViderefoere || ''}
@@ -185,17 +184,19 @@ export const ViderefoereOpphoerVurdering = ({
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
-        <UNSAFE_Combobox
-          label="Velg vilkåret som gjør at saken opphører"
-          options={options}
-          onToggleSelected={(option) => {
-            setVilkaar(VilkaarType[option as VilkaarType])
-            setVilkaarError('')
-          }}
-          selectedOptions={!!vilkaar ? [vilkaar!] : []}
-          isLoading={false}
-          error={vilkaarError ? vilkaarError : false}
-        />
+        {isSuccess(vilkaartyper) && (
+          <UNSAFE_Combobox
+            label="Velg vilkåret som gjør at saken opphører"
+            options={Array.from(vilkaartyper.data.typer.keys())}
+            onToggleSelected={(option) => {
+              setVilkaar(option)
+              setVilkaarError('')
+            }}
+            selectedOptions={!!vilkaar ? [vilkaar!] : []}
+            isLoading={false}
+            error={vilkaarError ? vilkaarError : false}
+          />
+        )}
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

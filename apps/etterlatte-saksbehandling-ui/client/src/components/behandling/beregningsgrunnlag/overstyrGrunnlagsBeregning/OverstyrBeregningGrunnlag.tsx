@@ -47,6 +47,7 @@ import { useInnloggetSaksbehandler } from '../../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
 import { SkruAvOverstyrtBeregningModal } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruAvOverstyrtBeregningModal'
+import { OverstyrtBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrtBeregningsgrunnlagTable'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -195,11 +196,14 @@ const OverstyrBeregningGrunnlag = (props: {
   return (
     <>
       <BeregningErOverstyrtAlert />
-      <VStack gap="4">
+      <VStack gap="12">
         <HStack gap="2">
           <CalculatorIcon fontSize="1.5rem" aria-hidden />
           <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
         </HStack>
+
+        <OverstyrtBeregningsgrunnlagTable />
+
         {mapApiResult(
           overstyrBeregningGrunnlag,
           <Spinner visible={true} label="Henter grunnlag" />,

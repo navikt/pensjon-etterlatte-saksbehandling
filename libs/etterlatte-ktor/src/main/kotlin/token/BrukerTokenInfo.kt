@@ -17,6 +17,7 @@ sealed class BrukerTokenInfo {
     companion object {
         private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
 
+        @PublishedApi
         internal fun of(
             accessToken: String,
             saksbehandler: String?,

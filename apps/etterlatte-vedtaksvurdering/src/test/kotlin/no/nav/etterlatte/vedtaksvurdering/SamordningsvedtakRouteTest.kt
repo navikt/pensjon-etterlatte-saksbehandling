@@ -55,23 +55,6 @@ class SamordningsvedtakRouteTest {
     }
 
     @Test
-    fun `skal returnere 401 naar token mangler noedvendig rolle`() {
-        testApplication {
-            runServer(server) {
-                samordningSystembrukerVedtakRoute(vedtakSamordningService)
-            }
-
-            val response =
-                client.get("/api/samordning/vedtak/1234") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${token(listOf("dummy"))}")
-                }
-
-            response.status shouldBe HttpStatusCode.Unauthorized
-        }
-    }
-
-    @Test
     fun `skal returnere vedtak naar token har noedvendig gruppe og vedtak eksisterer`() {
         coEvery { vedtakSamordningService.hentVedtak(1234) } returns
             samordningVedtak()

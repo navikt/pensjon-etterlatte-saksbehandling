@@ -84,7 +84,6 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
               }[behandling.sakType]}
           </>
         )}{' '}
-        :
         {isFailureHandler({
           apiResult: overstyrtBeregningResponse,
           errorMessage: 'Det oppsto en feil.',

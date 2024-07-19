@@ -201,8 +201,9 @@ const OverstyrBeregningGrunnlag = (props: {
           <CalculatorIcon fontSize="1.5rem" aria-hidden />
           <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
         </HStack>
-
-        <OverstyrtBeregningsgrunnlagTable />
+        <Box maxWidth="70rem">
+          <OverstyrtBeregningsgrunnlagTable />
+        </Box>
 
         {mapApiResult(
           overstyrBeregningGrunnlag,

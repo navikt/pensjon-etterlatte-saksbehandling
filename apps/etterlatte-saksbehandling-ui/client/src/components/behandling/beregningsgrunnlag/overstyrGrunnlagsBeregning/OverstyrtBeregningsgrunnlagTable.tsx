@@ -5,6 +5,7 @@ import { OverstyrBeregningsperiode, OverstyrtAarsak } from '~shared/types/Beregn
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { OverstyrBeregningsgrunnlagExpandableRowContent } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagExpandableRowContent'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { formaterDatoMedFallback } from '~utils/formatering/dato'
 
 export const OverstyrtBeregningsgrunnlagTable = () => {
   const overstyrtBeregningPerioder = useAppSelector(
@@ -39,8 +40,8 @@ export const OverstyrtBeregningsgrunnlagTable = () => {
                     />
                   }
                 >
-                  <Table.DataCell>{overtyrBeregningsgrunnlagPeriode.fom}</Table.DataCell>
-                  <Table.DataCell>{overtyrBeregningsgrunnlagPeriode.tom ?? '-'}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(overtyrBeregningsgrunnlagPeriode.fom, '-')}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(overtyrBeregningsgrunnlagPeriode.tom, '-')}</Table.DataCell>
                   <Table.DataCell>{overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep}</Table.DataCell>
                   <Table.DataCell>
                     {overtyrBeregningsgrunnlagPeriode.data.aarsak &&

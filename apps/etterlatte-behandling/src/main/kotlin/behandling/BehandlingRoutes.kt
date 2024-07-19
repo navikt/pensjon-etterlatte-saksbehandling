@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
@@ -247,6 +248,7 @@ internal fun Route.behandlingRoutes(
                 try {
                     val viderefoertOpphoer =
                         ViderefoertOpphoer(
+                            skalViderefoere = body.skalViderefoere,
                             behandlingId = behandlingId,
                             dato = body.dato,
                             begrunnelse = body.begrunnelse,
@@ -386,6 +388,7 @@ internal fun Route.behandlingRoutes(
 
 data class ViderefoertOpphoerRequest(
     @JsonProperty("dato") private val _dato: String,
+    val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
     val vilkaar: String,
@@ -394,6 +397,7 @@ data class ViderefoertOpphoerRequest(
 }
 
 data class ViderefoertOpphoer(
+    val skalViderefoere: JaNei,
     val behandlingId: UUID,
     val dato: YearMonth,
     val vilkaar: String,

@@ -129,6 +129,7 @@ export interface Virkningstidspunkt {
 }
 
 export interface ViderefoertOpphoer {
+  skalViderefoere: JaNei
   dato: string
   kilde: KildeSaksbehandler
   vilkaar: VilkaarType

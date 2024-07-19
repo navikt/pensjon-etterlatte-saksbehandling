@@ -1,6 +1,15 @@
 import { IBehandlingStatus, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { BodyShort, Heading, Label, MonthPicker, UNSAFE_Combobox, useMonthpicker } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Heading,
+  Label,
+  MonthPicker,
+  Radio,
+  RadioGroup,
+  UNSAFE_Combobox,
+  useMonthpicker,
+} from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import React, { useState } from 'react'
@@ -12,6 +21,8 @@ import { VilkaarType } from '~shared/api/vilkaarsvurdering'
 import { formaterDato } from '~utils/formatering/dato'
 import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
+import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 
 const VilkaarTypeTittel: Record<VilkaarType, string> = {
   [VilkaarType.BP_FORMAAL_2024]: 'BP formål',
@@ -33,6 +44,7 @@ export const ViderefoereOpphoerVurdering = ({
 }) => {
   const dispatch = useAppDispatch()
 
+  const [skalViderefoere, setSkalViderefoere] = useState<JaNei | undefined>(viderefoertOpphoer?.skalViderefoere)
   const [opphoerstidspunkt, setOpphoerstidspunkt] = useState<Date | null>(
     viderefoertOpphoer ? new Date(viderefoertOpphoer.dato) : null
   )
@@ -43,6 +55,9 @@ export const ViderefoereOpphoerVurdering = ({
   const [kravdato] = useState<string | undefined>()
 
   const valider = () => {
+    if (!skalViderefoere) {
+      return ''
+    }
     if (!vilkaar) {
       return 'Du må velge et vilkår som ikke lenger blir oppfylt'
     }
@@ -57,7 +72,7 @@ export const ViderefoereOpphoerVurdering = ({
 
     if (vilkaar !== undefined)
       return setViderefoertOpphoer(
-        { behandlingId, begrunnelse, vilkaar, kravdato, opphoerstidspunkt },
+        { skalViderefoere, behandlingId, begrunnelse, vilkaar, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
           dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -68,7 +83,9 @@ export const ViderefoereOpphoerVurdering = ({
 
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
+    setSkalViderefoere(viderefoertOpphoer?.skalViderefoere)
     setVilkaar(viderefoertOpphoer?.vilkaar)
+    setOpphoerstidspunkt(viderefoertOpphoer?.dato ? new Date(viderefoertOpphoer.dato) : null)
     setVilkaarError('')
     setBegrunnelse(viderefoertOpphoer?.begrunnelse || '')
     setVurdert(viderefoertOpphoer !== null)
@@ -91,9 +108,14 @@ export const ViderefoereOpphoerVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel="Hvilket vilkår?"
+      tittel="Skal opphøret umiddelbart videreføres?"
       subtittelKomponent={
         <>
+          {viderefoertOpphoer?.skalViderefoere && (
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+              {JaNeiRec[viderefoertOpphoer.skalViderefoere]}
+            </Label>
+          )}
           <div>
             <Heading size="xsmall">Opphørstidspunkt</Heading>
             <BodyShort spacing>
@@ -127,9 +149,29 @@ export const ViderefoereOpphoerVurdering = ({
       defaultRediger={viderefoertOpphoer === null}
     >
       <>
-        <Heading level="3" size="small">
-          Er dette et videreført opphør?
-        </Heading>
+        <div>
+          <Heading level="3" size="small">
+            Er dette et videreført opphør?
+          </Heading>
+          <RadioGroupWrapper>
+            <RadioGroup
+              legend=""
+              size="small"
+              className="radioGroup"
+              onChange={(event) => {
+                setSkalViderefoere(JaNei[event as JaNei])
+                setVilkaarError('')
+              }}
+              value={skalViderefoere || ''}
+              error={vilkaarError ? vilkaarError : false}
+            >
+              <div className="flex">
+                <Radio value={JaNei.JA}>Ja</Radio>
+                <Radio value={JaNei.NEI}>Nei</Radio>
+              </div>
+            </RadioGroup>
+          </RadioGroupWrapper>
+        </div>
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>

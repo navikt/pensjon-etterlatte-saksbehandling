@@ -67,6 +67,14 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vilkårtyper for $behandlingId")
+                val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId, brukerTokenInfo)
+                call.respond(VilkaartypeDTO(result))
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 try {
@@ -343,3 +351,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVer
         .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
         .metadata
         .versjon
+
+data class VilkaartypeDTO(
+    val typer: Map<String, String>,
+)

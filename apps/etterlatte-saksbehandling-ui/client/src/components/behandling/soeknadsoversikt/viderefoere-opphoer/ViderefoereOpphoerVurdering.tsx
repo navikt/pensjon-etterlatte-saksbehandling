@@ -17,13 +17,13 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
 import { lagreViderefoertOpphoer } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { hentVilkaartyper } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaartyper, Vilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { formaterDato } from '~utils/formatering/dato'
 import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { mapSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapSuccess } from '~shared/api/apiUtils'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -72,15 +72,17 @@ export const ViderefoereOpphoerVurdering = ({
   const lagre = (onSuccess?: () => void) => {
     setVilkaarError(valider())
 
-    if (vilkaar !== undefined)
+    if (skalViderefoere !== undefined && !!vilkaar && isSuccess(vilkaartyper)) {
+      const vilkaartype = finnVilkaartypeFraTittel(vilkaartyper.data, vilkaar)?.tittel || ''
       return setViderefoertOpphoer(
-        { skalViderefoere, behandlingId, begrunnelse, vilkaar, kravdato, opphoerstidspunkt },
+        { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
           dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
           onSuccess?.()
         }
       )
+    }
   }
 
   const reset = (onSuccess?: () => void) => {
@@ -92,6 +94,10 @@ export const ViderefoereOpphoerVurdering = ({
     setBegrunnelse(viderefoertOpphoer?.begrunnelse || '')
     setVurdert(viderefoertOpphoer !== null)
     onSuccess?.()
+  }
+
+  const finnVilkaartypeFraTittel = (typer: Vilkaartyper, tittel: string) => {
+    return typer.typer.find((p) => p.tittel === tittel)
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({
@@ -127,10 +133,7 @@ export const ViderefoereOpphoerVurdering = ({
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-                  {
-                    //isSuccess(vilkaartyper) ? vilkaartyper.data.typer(viderefoertOpphoer.vilkaar) :
-                    ''
-                  }
+                  {viderefoertOpphoer.vilkaar}
                 </Label>
               ) : (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
@@ -190,7 +193,7 @@ export const ViderefoereOpphoerVurdering = ({
         {mapSuccess(vilkaartyper, (typer) => (
           <UNSAFE_Combobox
             label="Velg vilkåret som gjør at saken opphører"
-            options={typer.typer.map((i) => i.name)}
+            options={typer.typer.map((i) => i.tittel)}
             onToggleSelected={(option) => {
               setVilkaar(option)
               setVilkaarError('')

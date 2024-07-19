@@ -353,5 +353,10 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVer
         .versjon
 
 data class VilkaartypeDTO(
-    val typer: Map<String, String>,
+    val typer: List<VilkaartypePair>,
+)
+
+data class VilkaartypePair(
+    val name: String,
+    val tittel: String,
 )

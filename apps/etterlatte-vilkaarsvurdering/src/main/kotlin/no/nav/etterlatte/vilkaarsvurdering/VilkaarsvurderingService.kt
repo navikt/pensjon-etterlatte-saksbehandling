@@ -401,7 +401,7 @@ class VilkaarsvurderingService(
     ) = finnRelevanteTyper(behandlingId, bruker)
         .map { it.hovedvilkaar }
         .map { it.type }
-        .associate { it.name to it.tittel }
+        .map { VilkaartypePair(name = it.name, tittel = it.tittel) }
 
     private suspend fun finnRelevanteTyper(
         behandlingId: UUID,

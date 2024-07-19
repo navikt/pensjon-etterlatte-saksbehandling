@@ -13,6 +13,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status.FERDIG
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.AfterEach
@@ -170,7 +171,26 @@ class DoedshendelseDaoTest(
 
     @Test
     fun `Skal oppdatere hendelse ferdig med brevid`() {
-        // TODO: må først ha egen versjon grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson som setter sak_id
-        // doedshendelseDao.oppdaterBrevDistribuertDoedshendelse()
+        val avdoedFnr = "12345678901"
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = avdoedFnr,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            )
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        val sakId = 5L
+        doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
+        val brevId = 12345L
+        val doedshendelseBrevDistribuert = DoedshendelseBrevDistribuert(sakId, brevId)
+        doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
+        val hendelseMedBrevliste = doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr)
+        hendelseMedBrevliste.size shouldBe 1
+        val hendelseMedBrev = hendelseMedBrevliste.first()
+        hendelseMedBrev.brevId shouldBe brevId
+        hendelseMedBrev.sakId shouldBe sakId
+        hendelseMedBrev.status shouldBe FERDIG
     }
 }

@@ -132,6 +132,17 @@ class BehandlingKlient(
             errorMessage = { "Kunne ikke hente klage med id=$klageId" },
             brukerTokenInfo = brukerTokenInfo,
         )
+
+    internal suspend fun hentKlagerForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Klage> =
+        get(
+            url = "$resourceUrl/api/klage/sak/$sakId",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Kunne ikke hente klager for sak=$sakId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
 }
 
 class BehandlingKlientException(

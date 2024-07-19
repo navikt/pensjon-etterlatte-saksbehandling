@@ -80,7 +80,7 @@ class BrevdataFacade(
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
 
-            val forenkletVedtak = vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent)
+            val forenkletVedtak = vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo)
 
             GenerellBrevData(
                 sak = sak,
@@ -94,11 +94,12 @@ class BrevdataFacade(
             )
         }
 
-    private fun vedtakOgRevurderingsaarsak(
+    private suspend fun vedtakOgRevurderingsaarsak(
         vedtak: VedtakDto?,
         sak: Sak,
         saksbehandlerIdent: String,
         attestantIdent: String?,
+        bruker: BrukerTokenInfo,
     ): Pair<ForenkletVedtak?, Revurderingaarsak?> =
         when (vedtak?.type) {
             VedtakType.INNVILGELSE,
@@ -118,6 +119,12 @@ class BrevdataFacade(
                             vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                             virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                             revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
+                            klage =
+                                if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+                                    behandlingService.hentKlageForBehandling(vedtakInnhold.behandling.id, sak.id, bruker)
+                                } else {
+                                    null
+                                },
                         ),
                         vedtakInnhold.behandling.revurderingsaarsak,
                     )

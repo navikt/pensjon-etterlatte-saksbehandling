@@ -9,6 +9,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -70,6 +71,7 @@ class ViderefoertOpphoerTest(
             behandlingId = opprettBehandling.id,
             viderefoertOpphoer =
                 ViderefoertOpphoer(
+                    skalViderefoere = JaNei.JA,
                     behandlingId = opprettBehandling.id,
                     dato = opphoerstidspunkt,
                     begrunnelse = "for testformål",

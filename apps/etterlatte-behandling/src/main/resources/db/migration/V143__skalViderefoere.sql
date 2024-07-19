@@ -1,0 +1,1 @@
+ALTER TABLE viderefoert_opphoer ADD COLUMN skalViderefoere TEXT;

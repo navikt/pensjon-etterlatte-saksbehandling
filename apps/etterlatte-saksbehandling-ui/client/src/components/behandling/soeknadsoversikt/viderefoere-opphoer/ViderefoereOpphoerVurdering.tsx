@@ -23,7 +23,7 @@ import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { isSuccess } from '~shared/api/apiUtils'
+import { mapSuccess } from '~shared/api/apiUtils'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -54,7 +54,7 @@ export const ViderefoereOpphoerVurdering = ({
 
   useEffect(() => {
     setVilkaartyper(behandlingId)
-  }, [])
+  }, [behandlingId])
 
   const valider = () => {
     if (!skalViderefoere) {
@@ -127,7 +127,10 @@ export const ViderefoereOpphoerVurdering = ({
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-                  {isSuccess(vilkaartyper) ? vilkaartyper.data.typer.get(viderefoertOpphoer.vilkaar) : ''}
+                  {
+                    //isSuccess(vilkaartyper) ? vilkaartyper.data.typer(viderefoertOpphoer.vilkaar) :
+                    ''
+                  }
                 </Label>
               ) : (
                 <Label as="p" size="small" style={{ marginBottom: '32px' }}>
@@ -184,10 +187,10 @@ export const ViderefoereOpphoerVurdering = ({
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
-        {isSuccess(vilkaartyper) && (
+        {mapSuccess(vilkaartyper, (typer) => (
           <UNSAFE_Combobox
             label="Velg vilkåret som gjør at saken opphører"
-            options={Array.from(vilkaartyper.data.typer.keys())}
+            options={typer.typer.map((i) => i.name)}
             onToggleSelected={(option) => {
               setVilkaar(option)
               setVilkaarError('')
@@ -196,7 +199,7 @@ export const ViderefoereOpphoerVurdering = ({
             isLoading={false}
             error={vilkaarError ? vilkaarError : false}
           />
-        )}
+        ))}
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

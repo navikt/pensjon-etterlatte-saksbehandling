@@ -142,5 +142,9 @@ export interface MigrertYrkesskadefordel {
   migrertYrkesskadefordel: boolean
 }
 export interface Vilkaartyper {
-  typer: Map<string, string>
+  typer: Vilkaartype[]
+}
+export interface Vilkaartype {
+  name: string
+  tittel: string
 }

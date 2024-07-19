@@ -12,6 +12,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
@@ -90,10 +92,16 @@ object EgendefinertMeldingFeature : TestDataFeature {
             }
         }
 
-    private suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) =
-        if (brukerTokenInfo.roller.any { it == "650684ff-8107-4ae4-98fc-e18b5cf3188b" }) {
+    private suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) {
+        val rollerEllerAdGrupper =
+            when (brukerTokenInfo) {
+                is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
+                is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
+            }
+        if (rollerEllerAdGrupper.any { it == "650684ff-8107-4ae4-98fc-e18b5cf3188b" }) {
             onSuccess()
         } else {
             call.respond(HttpStatusCode.Unauthorized, "Mangler etterlatte-rolle")
         }
+    }
 }

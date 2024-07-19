@@ -251,7 +251,7 @@ fun Route.vedtaksvurderingRoute(
     route("/vedtak") {
         route("/samordnet") {
             install(AuthorizationPlugin) {
-                roles = setOf("samordning-write")
+                accessPolicyRolesEllerAdGrupper = setOf("samordning-write")
             }
 
             post("/{vedtakId}") {
@@ -273,10 +273,10 @@ fun Route.vedtaksvurderingRoute(
     }
 }
 
-fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningService) {
+fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
         install(AuthorizationPlugin) {
-            roles = setOf("samordning-read")
+            accessPolicyRolesEllerAdGrupper = setOf("samordning-read")
         }
 
         get {

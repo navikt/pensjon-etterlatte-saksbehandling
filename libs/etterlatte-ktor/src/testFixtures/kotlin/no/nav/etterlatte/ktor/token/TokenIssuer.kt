@@ -11,7 +11,6 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
     navIdent: String = "Saksbehandler01",
     groups: List<String> = listOf(),
-    roles: List<String> = listOf(),
 ): String =
     this
         .issueToken(
@@ -22,7 +21,6 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
                     "navn" to navn,
                     Claims.NAVident.name to navIdent,
                     Claims.groups.name to groups,
-                    Claims.roles.name to roles,
                 ),
         ).serialize()
 

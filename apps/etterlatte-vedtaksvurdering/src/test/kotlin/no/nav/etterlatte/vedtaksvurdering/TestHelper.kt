@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.ktor.token.simpleAttestant
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -13,7 +15,6 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.math.BigDecimal
 import java.time.Month
@@ -28,8 +29,8 @@ const val SAKSBEHANDLER_2 = "saksbehandler2"
 const val ENHET_1 = "1234"
 const val ENHET_2 = "4321"
 
-val saksbehandler = Saksbehandler("token", SAKSBEHANDLER_1, null)
-val attestant = Saksbehandler("token", SAKSBEHANDLER_2, null)
+val saksbehandler = simpleSaksbehandler(ident = SAKSBEHANDLER_1)
+val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)
 
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),

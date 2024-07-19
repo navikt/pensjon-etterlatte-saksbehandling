@@ -37,7 +37,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -108,35 +108,32 @@ internal class SakServiceTest {
 
         val token = mockk<JwtToken>()
 
-        val claims = mockk<JwtTokenClaims>()
-
-        every { claims.getAsList(any()) } returns listOf("")
-
-        every { claims.getStringClaim(any()) } returns "Z123456"
-
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns nasjonalTilgang
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns nasjonalTilgang
-        every { claims.containsClaim("groups", AzureGroup.STRENGT_FORTROLIG.name) } returns strentFortrolig
-        every { claims.containsClaim("groups", AzureGroup.EGEN_ANSATT.name) } returns egenAnsatt
-
-        every { token.jwtTokenClaims } returns claims
+        val tilgangsgrupper = mutableSetOf<AzureGroup>()
+        if (nasjonalTilgang) {
+            tilgangsgrupper.add(AzureGroup.NASJONAL_MED_LOGG)
+            tilgangsgrupper.add(AzureGroup.NASJONAL_UTEN_LOGG)
+        }
+        if (strentFortrolig) {
+            tilgangsgrupper.add(AzureGroup.STRENGT_FORTROLIG)
+        }
+        if (egenAnsatt) {
+            tilgangsgrupper.add(AzureGroup.EGEN_ANSATT)
+        }
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
-        val saksbehandler = "Z123456"
-        val accessToken = "a"
-        val brukerTokenInfo = simpleSaksbehandler(saksbehandler)
+        val saksbehandler = simpleSaksbehandler(claims = mapOf(Claims.groups to tilgangsgrupper.map { it.name }))
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(
                 tokenValidationContext,
                 saksbehandlerService,
                 SaksbehandlerMedRoller(
-                    Saksbehandler(accessToken, saksbehandler, claims),
+                    saksbehandler,
                     groups,
                 ),
-                brukerTokenInfo,
+                saksbehandler,
             ),
         )
     }

@@ -140,6 +140,7 @@ export interface MigrertYrkesskadefordel {
 }
 
 export enum VilkaarType {
+  Ingen = 'Ingen',
   BP_FORMAAL_2024 = 'BP_FORMAAL_2024',
   BP_DOEDSFALL_FORELDER_2024 = 'BP_DOEDSFALL_FORELDER_2024',
 }

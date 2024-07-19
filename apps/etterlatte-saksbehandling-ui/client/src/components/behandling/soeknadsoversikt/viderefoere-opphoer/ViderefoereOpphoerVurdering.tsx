@@ -25,6 +25,7 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 
 const VilkaarTypeTittel: Record<VilkaarType, string> = {
+  [VilkaarType.Ingen]: 'Ingen',
   [VilkaarType.BP_FORMAAL_2024]: 'BP formål',
   [VilkaarType.BP_DOEDSFALL_FORELDER_2024]: 'BP dødsfall forelder',
 } as const
@@ -111,26 +112,30 @@ export const ViderefoereOpphoerVurdering = ({
       tittel="Skal opphøret umiddelbart videreføres?"
       subtittelKomponent={
         <>
-          {viderefoertOpphoer?.skalViderefoere && (
+          {viderefoertOpphoer?.skalViderefoere !== undefined && (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[viderefoertOpphoer.skalViderefoere]}
             </Label>
           )}
-          <div>
-            <Heading size="xsmall">Opphørstidspunkt</Heading>
-            <BodyShort spacing>
-              {viderefoertOpphoer?.dato ? formaterDato(viderefoertOpphoer.dato) : 'Ikke fastsatt'}
-            </BodyShort>
-          </div>
-          <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
-          {viderefoertOpphoer?.vilkaar ? (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {VilkaarTypeTittel[viderefoertOpphoer.vilkaar]}
-            </Label>
-          ) : (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              Ikke vurdert
-            </Label>
+          {viderefoertOpphoer?.skalViderefoere && (
+            <>
+              <div>
+                <Heading size="xsmall">Opphørstidspunkt</Heading>
+                <BodyShort spacing>
+                  {viderefoertOpphoer?.dato ? formaterDato(viderefoertOpphoer.dato) : 'Ikke fastsatt'}
+                </BodyShort>
+              </div>
+              <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
+              {viderefoertOpphoer?.vilkaar ? (
+                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+                  {VilkaarTypeTittel[viderefoertOpphoer.vilkaar]}
+                </Label>
+              ) : (
+                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+                  Ikke vurdert
+                </Label>
+              )}
+            </>
           )}
         </>
       }
@@ -159,8 +164,13 @@ export const ViderefoereOpphoerVurdering = ({
               size="small"
               className="radioGroup"
               onChange={(event) => {
-                setSkalViderefoere(JaNei[event as JaNei])
+                const jaNeiElement = JaNei[event as JaNei]
+                setSkalViderefoere(jaNeiElement)
                 setVilkaarError('')
+                if (jaNeiElement === JaNei.NEI) {
+                  setOpphoerstidspunkt(null)
+                  setVilkaar(VilkaarType.Ingen)
+                }
               }}
               value={skalViderefoere || ''}
               error={vilkaarError ? vilkaarError : false}

@@ -5,9 +5,9 @@ import {
   OverstyrBeregningsperiode,
   OverstyrtAarsak,
 } from '~shared/types/Beregning'
-import { BodyLong, Box, Button, ErrorSummary, HStack, Modal, Table, VStack } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { behandlingErRedigerbar } from '../felles/utils'
+import { behandlingErRedigerbar } from '../../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
 import {
   FEIL_I_PERIODE,
@@ -15,10 +15,10 @@ import {
   mapListeFraDto,
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
-} from './PeriodisertBeregningsgrunnlag'
-import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
-import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
+} from '../PeriodisertBeregningsgrunnlag'
+import OverstyrBeregningTableWrapper from '../OverstyrBeregningTableWrapper'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { CalculatorIcon, CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -31,22 +31,22 @@ import {
   hentOverstyrBeregningGrunnlag,
   lagreOverstyrBeregningGrunnlag,
   opprettEllerEndreBeregning,
-  deaktiverOverstyrtBeregning,
 } from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
+import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
+import { useBehandlingRoutes } from '../../BehandlingRoutes'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { useInnloggetSaksbehandler } from '../../useInnloggetSaksbehandler'
 import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
+import { SkruAvOverstyrtBeregningModal } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruAvOverstyrtBeregningModal'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -88,7 +88,6 @@ const OverstyrBeregningGrunnlag = (props: {
       overstyrBeregningForm: mapListeFraDto(perioder ?? []),
     },
   })
-  const [deaktiverOverstyrtBeregningResultat, deaktiverOverstyrtBereging] = useApiCall(deaktiverOverstyrtBeregning)
 
   const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
@@ -96,7 +95,6 @@ const OverstyrBeregningGrunnlag = (props: {
   const { next } = useBehandlingRoutes()
 
   const dispatch = useAppDispatch()
-  const modalRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
     fetchOverstyrBeregningGrunnlag(behandling.id, (result) => {
@@ -197,116 +195,89 @@ const OverstyrBeregningGrunnlag = (props: {
   return (
     <>
       <BeregningErOverstyrtAlert />
+      <VStack gap="4">
+        <HStack gap="2">
+          <CalculatorIcon fontSize="1.5rem" aria-hidden />
+          <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
+        </HStack>
+        {mapApiResult(
+          overstyrBeregningGrunnlag,
+          <Spinner visible={true} label="Henter grunnlag" />,
+          () => (
+            <ApiErrorAlert>En feil har oppstått ved henting av grunnlag</ApiErrorAlert>
+          ),
+          () => (
+            <>
+              {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
+              <Box maxWidth="70rem">
+                {fields.length ? (
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.HeaderCell />
+                        <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body id="formoverstyrberegning">
+                      {fields.map((item, index) => (
+                        <OverstyrBeregningTableWrapper
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          control={control}
+                          register={register}
+                          remove={remove}
+                          watch={watch}
+                          visFeil={visFeil}
+                          feil={feil}
+                          behandles={behandles}
+                          aarsaker={OverstyrtAarsak}
+                        />
+                      ))}
+                    </Table.Body>
+                  </Table>
+                ) : null}
 
-      {mapApiResult(
-        overstyrBeregningGrunnlag,
-        <Spinner visible={true} label="Henter grunnlag" />,
-        () => (
-          <ApiErrorAlert>En feil har oppstått ved henting av grunnlag</ApiErrorAlert>
-        ),
-        () => (
-          <>
-            {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-            <FormWrapper>
-              {fields.length ? (
-                <Table>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.HeaderCell />
-                      <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body id="formoverstyrberegning">
-                    {fields.map((item, index) => (
-                      <OverstyrBeregningTableWrapper
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        control={control}
-                        register={register}
-                        remove={remove}
-                        watch={watch}
-                        visFeil={visFeil}
-                        feil={feil}
-                        behandles={behandles}
-                        aarsaker={OverstyrtAarsak}
-                      />
-                    ))}
-                  </Table.Body>
-                </Table>
-              ) : null}
-
-              {behandles && (
-                <VStack gap="4" align="start">
-                  <Button
-                    type="button"
-                    icon={<PlusCircleIcon title="legg til" />}
-                    iconPosition="left"
-                    variant="tertiary"
-                    onClick={() => {
-                      leggTilBeregningsperiode()
-                    }}
-                  >
-                    Legg til beregningsperiode
-                  </Button>
-                  <HStack gap="4" align="center">
-                    <Button size="small" variant="tertiary" onClick={() => modalRef.current?.showModal()}>
-                      Skru av overstyrt beregning
-                    </Button>
-                    <Modal
-                      ref={modalRef}
-                      header={{ heading: 'Er du sikker på at du vil skru av overstyrt beregning?' }}
-                    >
-                      <Modal.Body>
-                        <BodyLong>
-                          Beregningsperioder vil bli permanent slettet. Virkningstidspunkt for revurdering MÅ settes
-                          tilbake til sakens første virkningstidspunkt.
-                        </BodyLong>
-                      </Modal.Body>
-                      <Modal.Footer>
-                        <Button
-                          type="button"
-                          variant="danger"
-                          loading={isPending(deaktiverOverstyrtBeregningResultat)}
-                          onClick={() => deaktiverOverstyrtBereging(behandling.id, () => setOverstyrt(undefined))}
-                        >
-                          Skru av overstyrt beregning
-                        </Button>
-                        <Button type="button" variant="secondary" onClick={() => modalRef.current?.close()}>
-                          {' '}
-                          Avbryt{' '}
-                        </Button>
-                      </Modal.Footer>
-                    </Modal>
-
+                {behandles && (
+                  <VStack gap="4" align="start">
                     <Button
-                      type="submit"
-                      variant="secondary"
-                      size="small"
-                      onClick={handleSubmit(ferdigstillForm)}
-                      loading={isPending(persistOverstyrBeregningGrunnlag)}
+                      type="button"
+                      icon={<PlusCircleIcon title="legg til" />}
+                      iconPosition="left"
+                      variant="tertiary"
+                      onClick={() => {
+                        leggTilBeregningsperiode()
+                      }}
                     >
-                      Lagre
+                      Legg til beregningsperiode
                     </Button>
-                  </HStack>
-                </VStack>
-              )}
-              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-            </FormWrapper>
+                    <HStack gap="4" align="center">
+                      <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
 
-            {isFailureHandler({
-              errorMessage: 'En feil har oppstått',
-              apiResult: deaktiverOverstyrtBeregningResultat,
-            })}
-          </>
-        )
-      )}
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="small"
+                        onClick={handleSubmit(ferdigstillForm)}
+                        loading={isPending(persistOverstyrBeregningGrunnlag)}
+                      >
+                        Lagre
+                      </Button>
+                    </HStack>
+                  </VStack>
+                )}
+                {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+              </Box>
+            </>
+          )
+        )}
+      </VStack>
 
       {isPending(persistOverstyrBeregningGrunnlag) && <Spinner visible={true} label="Lagre grunnlag" />}
       {isFailureHandler({
@@ -417,9 +388,3 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
 } as const
 
 export default OverstyrBeregningGrunnlag
-
-const FormWrapper = styled.div`
-  padding: 1em 4em;
-  max-width: 70em;
-  margin-bottom: 1rem;
-`

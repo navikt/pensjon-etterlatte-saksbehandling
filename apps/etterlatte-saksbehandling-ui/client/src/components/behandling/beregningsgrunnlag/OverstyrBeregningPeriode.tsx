@@ -4,7 +4,7 @@ import { Button, TextField, Textarea, Select } from '@navikt/ds-react'
 import { OverstyrBeregingsperiodeGrunnlagData, OverstyrtAarsakType } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
-import { FeilIPeriodeGrunnlagAlle, teksterFeilIPeriode } from './OverstyrBeregningGrunnlag'
+import { FeilIPeriodeGrunnlagAlle, teksterFeilIPeriode } from './overstyrGrunnlagsBeregning/OverstyrBeregningGrunnlag'
 
 export type OverstyrBeregningPerioder = {
   item: FieldArrayWithId<{ overstyrBeregningForm: OverstyrBeregingsperiodeGrunnlagData }, 'overstyrBeregningForm', 'id'>

@@ -9,14 +9,14 @@ import { hentOverstyrBeregning, hentOverstyrBeregningGrunnlag } from '~shared/ap
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { useEffect, useState } from 'react'
-import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
+import OverstyrBeregningGrunnlag from './overstyrGrunnlagsBeregning/OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
-import { OverstyrGrunnlagsBeregning } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrGrunnlagsBeregning'
+import { SkruPaaOverstyrtBeregning } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruPaaOverstyrtBeregning'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -70,7 +70,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
-              <OverstyrGrunnlagsBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
+              <SkruPaaOverstyrtBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
             )}
 
             {visOverstyrtBeregningGrunnlag && (

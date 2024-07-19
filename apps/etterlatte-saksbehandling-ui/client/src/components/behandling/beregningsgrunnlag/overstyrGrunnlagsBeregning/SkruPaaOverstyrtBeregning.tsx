@@ -8,7 +8,7 @@ import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-export const OverstyrGrunnlagsBeregning = ({
+export const SkruPaaOverstyrtBeregning = ({
   behandlingId,
   setOverstyrt,
 }: {

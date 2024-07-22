@@ -25,7 +25,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -196,13 +196,10 @@ export const ViderefoereOpphoerVurdering = ({
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
-        {mapApiResult(
-          vilkaartyperResult,
-          <Spinner label="Laster vilkårstyper" visible />,
-          () => (
-            <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>
-          ),
-          (typer) => (
+        {mapResult(vilkaartyperResult, {
+          pending: <Spinner label="Laster vilkårstyper" visible />,
+          error: () => <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>,
+          success: (typer) => (
             <UNSAFE_Combobox
               label="Velg vilkåret som gjør at saken opphører"
               options={typer.typer.map((i) => i.tittel)}
@@ -213,8 +210,8 @@ export const ViderefoereOpphoerVurdering = ({
               selectedOptions={!!vilkaar ? [vilkaar!] : []}
               error={vilkaarError ? vilkaarError : false}
             />
-          )
-        )}
+          ),
+        })}
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

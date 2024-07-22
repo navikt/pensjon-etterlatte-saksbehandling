@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.ktor.route.withParam
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import vilkaarsvurdering.MigrertYrkesskadefordel
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(
@@ -55,7 +56,7 @@ fun Route.vilkaarsvurdering(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId)
-                call.respond(mapOf("migrertYrkesskadefordel" to result))
+                call.respond(MigrertYrkesskadefordel(result))
             }
         }
 

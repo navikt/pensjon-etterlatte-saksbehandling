@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import vilkaarsvurdering.MigrertYrkesskadefordel
 import java.util.UUID
 
 interface VilkaarsvurderingService {
@@ -64,7 +65,8 @@ class VilkaarsvurderingServiceImpl(
         runBlocking {
             vilkaarsvurderingKlient
                 .get("$url/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel")
-                .body<Map<String, Any>>()["migrertYrkesskadefordel"] as Boolean
+                .body<MigrertYrkesskadefordel>()
+                .migrertYrkesskadefordel
         }
 
     override fun harRettUtenTidsbegrensning(behandlingId: String): Boolean =

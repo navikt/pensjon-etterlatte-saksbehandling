@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktOMSService(
@@ -22,22 +23,26 @@ internal class DoedshendelseKontrollpunktOMSService(
         sak: Sak?,
         eps: PersonDTO,
         avdoed: PersonDTO,
+        bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
-            kontrollerKryssendeYtelseBeroert(hendelse),
+            kontrollerKryssendeYtelseBeroert(hendelse, bruker),
             kontrollerEksisterendeBehandling(sak),
             kontrollerBeroertErDoed(eps),
             kontrollerBeroertFylt67Aar(eps, avdoed),
         )
 
-    private fun kontrollerKryssendeYtelseBeroert(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? {
+    private fun kontrollerKryssendeYtelseBeroert(
+        hendelse: DoedshendelseInternal,
+        bruker: BrukerTokenInfo,
+    ): DoedshendelseKontrollpunkt? {
         if (hendelse.sakTypeForEpsEllerBarn() == SakType.BARNEPENSJON) {
             return null
         }
         return runBlocking {
             val kryssendeYtelser =
                 pesysKlient
-                    .hentSaker(hendelse.beroertFnr)
+                    .hentSaker(hendelse.beroertFnr, bruker)
                     .filter {
                         it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
                     }.filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }

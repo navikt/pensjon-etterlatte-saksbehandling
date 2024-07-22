@@ -24,7 +24,9 @@ import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { isSuccess, mapSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -191,19 +193,25 @@ export const ViderefoereOpphoerVurdering = ({
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
-        {mapSuccess(vilkaartyperResult, (typer) => (
-          <UNSAFE_Combobox
-            label="Velg vilkåret som gjør at saken opphører"
-            options={typer.typer.map((i) => i.tittel)}
-            onToggleSelected={(option) => {
-              setVilkaar(option)
-              setVilkaarError('')
-            }}
-            selectedOptions={!!vilkaar ? [vilkaar!] : []}
-            isLoading={false}
-            error={vilkaarError ? vilkaarError : false}
-          />
-        ))}
+        {mapApiResult(
+          vilkaartyperResult,
+          <Spinner label="Laster vilkårstyper" visible />,
+          () => (
+            <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>
+          ),
+          (typer) => (
+            <UNSAFE_Combobox
+              label="Velg vilkåret som gjør at saken opphører"
+              options={typer.typer.map((i) => i.tittel)}
+              onToggleSelected={(option) => {
+                setVilkaar(option)
+                setVilkaarError('')
+              }}
+              selectedOptions={!!vilkaar ? [vilkaar!] : []}
+              error={vilkaarError ? vilkaarError : false}
+            />
+          )
+        )}
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

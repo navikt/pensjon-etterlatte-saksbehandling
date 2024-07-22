@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -77,7 +78,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any()) } returns Pair(response, 1)
+        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any(), Systembruker.brev) } returns Pair(response, 1)
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -86,7 +87,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         val vedtakCapture = slot<VedtakTilJournalfoering>()
         coVerify(exactly = 1) {
-            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture))
+            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture), Systembruker.brev)
         }
 
         val vedtakActual = vedtakCapture.captured

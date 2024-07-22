@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
@@ -328,6 +327,8 @@ internal class BeregningsGrunnlagServiceTest {
         coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
     }
 
+    private val bruker = simpleSaksbehandler()
+
     @Test
     fun `skal lage et kopi av grunnlaget`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
@@ -354,7 +355,7 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
@@ -395,7 +396,7 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
@@ -415,7 +416,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId, Systembruker.testdata)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId, bruker)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }
@@ -443,7 +444,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }

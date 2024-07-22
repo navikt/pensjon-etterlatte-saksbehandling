@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.readValue
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.testdata.BEGRUNNELSE
@@ -28,20 +28,26 @@ class BehandlingService(
     private val url: String,
     private val clientId: String,
 ) {
-    suspend fun hentSak(sakId: Long): Sak =
+    suspend fun hentSak(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+    ): Sak =
         retryOgPakkUt {
-            klient.get(Resource(clientId, "$url/saker/$sakId"), Systembruker.testdata).mapBoth(
+            klient.get(Resource(clientId, "$url/saker/$sakId"), bruker).mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },
             )
         }
 
-    suspend fun settKommerBarnetTilGode(behandling: UUID) {
+    suspend fun settKommerBarnetTilGode(
+        behandling: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
         retryOgPakkUt {
             klient
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"),
-                    Systembruker.testdata,
+                    bruker,
                     postBody =
                         JaNeiMedBegrunnelse(
                             JaNei.JA,
@@ -54,12 +60,15 @@ class BehandlingService(
         }
     }
 
-    suspend fun lagreGyldighetsproeving(behandling: UUID) {
+    suspend fun lagreGyldighetsproeving(
+        behandling: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
         retryOgPakkUt {
             klient
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"),
-                    Systembruker.testdata,
+                    bruker,
                     JaNeiMedBegrunnelse(JaNei.JA, BEGRUNNELSE),
                 ).mapBoth(
                     success = {},
@@ -68,12 +77,15 @@ class BehandlingService(
         }
     }
 
-    suspend fun lagreUtlandstilknytning(behandling: UUID) {
+    suspend fun lagreUtlandstilknytning(
+        behandling: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
         retryOgPakkUt {
             klient
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/utlandstilknytning"),
-                    Systembruker.testdata,
+                    bruker,
                     UtlandstilknytningRequest(
                         utlandstilknytningType = UtlandstilknytningType.NASJONAL,
                         begrunnelse = BEGRUNNELSE,
@@ -88,6 +100,7 @@ class BehandlingService(
     suspend fun lagreVirkningstidspunkt(
         behandling: UUID,
         doedsdato: LocalDate,
+        bruker: BrukerTokenInfo,
     ) {
         val virkningstidspunkt = doedsdato.plusMonths(1)
 
@@ -95,7 +108,7 @@ class BehandlingService(
             klient
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
-                    Systembruker.testdata,
+                    bruker,
                     VirkningstidspunktRequest(
                         _dato = YearMonth.of(virkningstidspunkt.year, virkningstidspunkt.month).toString(),
                         begrunnelse = BEGRUNNELSE,
@@ -111,11 +124,12 @@ class BehandlingService(
     suspend fun tildelSaksbehandler(
         navn: String,
         sakId: Long,
+        bruker: BrukerTokenInfo,
     ) {
         val oppgaver: List<OppgaveIntern> =
             retryOgPakkUt {
                 klient
-                    .get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
+                    .get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), bruker)
                     .mapBoth(
                         success = { readValue(it) },
                         failure = { throw it },
@@ -127,7 +141,7 @@ class BehandlingService(
                 klient
                     .post(
                         Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"),
-                        Systembruker.testdata,
+                        bruker,
                         SaksbehandlerEndringDto(navn),
                     ).mapBoth(
                         success = {},
@@ -140,12 +154,13 @@ class BehandlingService(
     suspend fun lagreBrevutfall(
         behandling: UUID,
         sakType: SakType,
+        bruker: BrukerTokenInfo,
     ) {
         retryOgPakkUt {
             klient
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
-                    Systembruker.testdata,
+                    bruker,
                     BrevutfallOgEtterbetalingDto(
                         behandlingId = behandling,
                         opphoer = false,

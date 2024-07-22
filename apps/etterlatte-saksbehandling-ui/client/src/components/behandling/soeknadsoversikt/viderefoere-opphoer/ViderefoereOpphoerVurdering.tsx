@@ -51,10 +51,10 @@ export const ViderefoereOpphoerVurdering = ({
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
   const [kravdato] = useState<string | undefined>()
 
-  const [vilkaartyper, setVilkaartyper] = useApiCall(hentVilkaartyper)
+  const [vilkaartyperResult, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
 
   useEffect(() => {
-    setVilkaartyper(behandlingId)
+    hentVilkaartyperRequest(behandlingId)
   }, [behandlingId])
 
   const valider = () => {
@@ -73,8 +73,8 @@ export const ViderefoereOpphoerVurdering = ({
   const lagre = (onSuccess?: () => void) => {
     setVilkaarError(valider())
 
-    if (skalViderefoere !== undefined && !!vilkaar && isSuccess(vilkaartyper)) {
-      const vilkaartype = finnVilkaartypeFraTittel(vilkaartyper.data, vilkaar)?.tittel || ''
+    if (skalViderefoere !== undefined && !!vilkaar && isSuccess(vilkaartyperResult)) {
+      const vilkaartype = finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.tittel || ''
       return setViderefoertOpphoer(
         { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
@@ -191,7 +191,7 @@ export const ViderefoereOpphoerVurdering = ({
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
-        {mapSuccess(vilkaartyper, (typer) => (
+        {mapSuccess(vilkaartyperResult, (typer) => (
           <UNSAFE_Combobox
             label="Velg vilkåret som gjør at saken opphører"
             options={typer.typer.map((i) => i.tittel)}

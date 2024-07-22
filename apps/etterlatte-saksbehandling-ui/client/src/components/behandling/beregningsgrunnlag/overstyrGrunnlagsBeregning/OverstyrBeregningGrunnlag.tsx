@@ -18,7 +18,7 @@ import {
 } from '../PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from '../OverstyrBeregningTableWrapper'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { CalculatorIcon, CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
+import { CalculatorIcon, CheckmarkCircleIcon, PlusCircleIcon, PlusIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -48,6 +48,7 @@ import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppga
 import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
 import { SkruAvOverstyrtBeregningModal } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruAvOverstyrtBeregningModal'
 import { OverstyrtBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrtBeregningsgrunnlagTable'
+import { OverstyrBeregningsgrunnlagPeriodeSkjema } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagPeriodeSkjema'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -194,16 +195,22 @@ const OverstyrBeregningGrunnlag = (props: {
   }
 
   return (
-    <>
+    <VStack gap="12">
       <BeregningErOverstyrtAlert />
-      <VStack gap="12">
+      <VStack gap="4">
         <HStack gap="2">
           <CalculatorIcon fontSize="1.5rem" aria-hidden />
           <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
         </HStack>
-        <Box maxWidth="70rem">
+        <VStack gap="4" maxWidth="70rem">
           <OverstyrtBeregningsgrunnlagTable />
-        </Box>
+          <OverstyrBeregningsgrunnlagPeriodeSkjema />
+          <div>
+            <Button size="small" variant="secondary" icon={<PlusIcon aria-hidden />}>
+              Ny periode
+            </Button>
+          </div>
+        </VStack>
 
         {mapApiResult(
           overstyrBeregningGrunnlag,
@@ -309,7 +316,7 @@ const OverstyrBeregningGrunnlag = (props: {
           <NesteOgTilbake />
         )}
       </Box>
-    </>
+    </VStack>
   )
 }
 

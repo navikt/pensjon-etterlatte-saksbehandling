@@ -10,7 +10,7 @@ interface Props<T extends FieldValues> {
   control: Control<T>
   fromDate?: Date
   toDate?: Date
-  validate: (maaned: Date) => string | undefined
+  validate?: (maaned: Date) => string | undefined
   required?: boolean
 }
 

@@ -2,6 +2,7 @@ import { IBehandlingStatus, ViderefoertOpphoer } from '~shared/types/IDetaljertB
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import {
   BodyShort,
+  Box,
   Heading,
   Label,
   MonthPicker,
@@ -116,9 +117,9 @@ export const ViderefoereOpphoerVurdering = ({
     <VurderingsboksWrapper
       tittel="Skal opphøret umiddelbart videreføres?"
       subtittelKomponent={
-        <>
+        <Box paddingBlock="0 8">
           {viderefoertOpphoer?.skalViderefoere !== undefined && (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+            <Label as="p" size="small">
               {JaNeiRec[viderefoertOpphoer.skalViderefoere]}
             </Label>
           )}
@@ -132,17 +133,17 @@ export const ViderefoereOpphoerVurdering = ({
               </div>
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
-                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+                <Label as="p" size="small">
                   {viderefoertOpphoer.vilkaar}
                 </Label>
               ) : (
-                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+                <Label as="p" size="small">
                   Ikke vurdert
                 </Label>
               )}
             </>
           )}
-        </>
+        </Box>
       }
       redigerbar={redigerbar}
       vurdering={

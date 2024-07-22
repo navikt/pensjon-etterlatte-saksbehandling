@@ -11,6 +11,7 @@ import {
   Stack,
   UNSAFE_Combobox,
   useMonthpicker,
+  VStack,
 } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
@@ -171,7 +172,7 @@ export const ViderefoereOpphoerVurdering = ({
       kommentar={viderefoertOpphoer?.begrunnelse}
       defaultRediger={viderefoertOpphoer === null}
     >
-      <>
+      <VStack gap="2">
         <div>
           <Heading level="3" size="small">
             Er dette et videreført opphør?
@@ -186,7 +187,7 @@ export const ViderefoereOpphoerVurdering = ({
             value={skalViderefoere || ''}
             error={vilkaarError ? vilkaarError : false}
           >
-            <Stack gap="0 6" marginBlock="0 2" direction={{ xs: 'column', sm: 'row' }} wrap={false}>
+            <Stack gap="0 6" direction={{ xs: 'column', sm: 'row' }} wrap={false}>
               <Radio value={JaNei.JA}>Ja</Radio>
               <Radio value={JaNei.NEI}>Nei</Radio>
             </Stack>
@@ -227,7 +228,7 @@ export const ViderefoereOpphoerVurdering = ({
           apiResult: setViderefoertOpphoerStatus,
           errorMessage: 'Kunne ikke lagre opphørsdato',
         })}
-      </>
+      </VStack>
     </VurderingsboksWrapper>
   )
 }

@@ -8,6 +8,7 @@ import {
   MonthPicker,
   Radio,
   RadioGroup,
+  Stack,
   UNSAFE_Combobox,
   useMonthpicker,
 } from '@navikt/ds-react'
@@ -23,7 +24,6 @@ import { formaterDato } from '~utils/formatering/dato'
 import { addMonths } from 'date-fns'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -176,23 +176,21 @@ export const ViderefoereOpphoerVurdering = ({
           <Heading level="3" size="small">
             Er dette et videreført opphør?
           </Heading>
-          <RadioGroupWrapper>
-            <RadioGroup
-              legend=""
-              size="small"
-              className="radioGroup"
-              onChange={(event) => {
-                haandterViderefoertOpphoer(event)
-              }}
-              value={skalViderefoere || ''}
-              error={vilkaarError ? vilkaarError : false}
-            >
-              <div className="flex">
-                <Radio value={JaNei.JA}>Ja</Radio>
-                <Radio value={JaNei.NEI}>Nei</Radio>
-              </div>
-            </RadioGroup>
-          </RadioGroupWrapper>
+          <RadioGroup
+            legend=""
+            size="small"
+            className="radioGroup"
+            onChange={(event) => {
+              haandterViderefoertOpphoer(event)
+            }}
+            value={skalViderefoere || ''}
+            error={vilkaarError ? vilkaarError : false}
+          >
+            <Stack gap="0 6" marginBlock="0 2" direction={{ xs: 'column', sm: 'row' }} wrap={false}>
+              <Radio value={JaNei.JA}>Ja</Radio>
+              <Radio value={JaNei.NEI}>Nei</Radio>
+            </Stack>
+          </RadioGroup>
         </div>
         <MonthPicker {...monthpickerProps}>
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />

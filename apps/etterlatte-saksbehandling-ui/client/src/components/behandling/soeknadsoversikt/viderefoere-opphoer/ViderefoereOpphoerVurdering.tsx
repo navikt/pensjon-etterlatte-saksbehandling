@@ -99,8 +99,8 @@ export const ViderefoereOpphoerVurdering = ({
     onSuccess?.()
   }
 
-  const finnVilkaartypeFraTittel = (typer: Vilkaartyper, tittel: string) => {
-    return typer.typer.find((p) => p.tittel === tittel)
+  const finnVilkaartypeFraTittel = (vilkaar: Vilkaartyper, tittel: string) => {
+    return vilkaar.typer.find((p) => p.tittel === tittel)
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({

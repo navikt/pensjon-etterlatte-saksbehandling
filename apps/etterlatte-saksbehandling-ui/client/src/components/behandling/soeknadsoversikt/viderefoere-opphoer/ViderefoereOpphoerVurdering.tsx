@@ -115,6 +115,16 @@ export const ViderefoereOpphoerVurdering = ({
     defaultSelected: opphoerstidspunkt ?? undefined,
   } as UseMonthPickerOptions)
 
+  function haandterViderefoertOpphoer(event: JaNei) {
+    const jaNeiElement = JaNei[event as JaNei]
+    setSkalViderefoere(jaNeiElement)
+    setVilkaarError('')
+    if (jaNeiElement === JaNei.NEI) {
+      setOpphoerstidspunkt(null)
+      setVilkaar(undefined)
+    }
+  }
+
   return (
     <VurderingsboksWrapper
       tittel="Skal opphøret umiddelbart videreføres?"
@@ -172,13 +182,7 @@ export const ViderefoereOpphoerVurdering = ({
               size="small"
               className="radioGroup"
               onChange={(event) => {
-                const jaNeiElement = JaNei[event as JaNei]
-                setSkalViderefoere(jaNeiElement)
-                setVilkaarError('')
-                if (jaNeiElement === JaNei.NEI) {
-                  setOpphoerstidspunkt(null)
-                  setVilkaar(undefined)
-                }
+                haandterViderefoertOpphoer(event)
               }}
               value={skalViderefoere || ''}
               error={vilkaarError ? vilkaarError : false}

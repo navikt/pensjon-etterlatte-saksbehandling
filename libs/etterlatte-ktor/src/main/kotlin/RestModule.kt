@@ -132,7 +132,9 @@ fun Application.restModule(
         metricsRoute(additionalMetrics)
     }
 
-    ObjectInputFilter.Config.setSerialFilter(Serialiseringsfilter())
+    if (ObjectInputFilter.Config.getSerialFilter() !is Serialiseringsfilter) {
+        ObjectInputFilter.Config.setSerialFilter(Serialiseringsfilter())
+    }
 }
 
 internal fun Throwable.erDeserialiseringsException(): Boolean {

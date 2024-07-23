@@ -59,6 +59,7 @@ const OverstyrBeregningGrunnlag = (props: {
       dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
     })
   }, [])
+
   return (
     <VStack gap="12">
       <BeregningErOverstyrtAlert />

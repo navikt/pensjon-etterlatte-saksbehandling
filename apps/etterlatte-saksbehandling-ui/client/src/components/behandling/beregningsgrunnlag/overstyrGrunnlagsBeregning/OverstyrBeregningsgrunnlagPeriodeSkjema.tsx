@@ -1,7 +1,7 @@
 import React from 'react'
 import { BodyShort, Box, Button, HGrid, HStack, Label, Select, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { OverstyrBeregningsperiode, OverstyrtAarsak, OverstyrtAarsakKey } from '~shared/types/Beregning'
+import { OverstyrBeregningsperiode, OverstyrtAarsak } from '~shared/types/Beregning'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -16,44 +16,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { addMonths } from 'date-fns'
-import { formaterTilISOString } from '~utils/formatering/dato'
-
-const stripWhitespace = (s: string | number): string => {
-  if (typeof s === 'string') return s.replace(/\s+/g, '')
-  else return s.toString().replace(/\s+/g, '')
-}
-
-const initialPeriode = (
-  behandling: IDetaljertBehandling,
-  sistePeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> | undefined
-): PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> => {
-  const nesteFomDato = (
-    fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
-    tom: Date | undefined
-  ): Date | string => {
-    return tom ? addMonths(tom, 1) : fom
-  }
-
-  return {
-    fom: formaterTilISOString(
-      nesteFomDato(
-        sistePeriode ? new Date(sistePeriode.fom) : new Date(behandling.virkningstidspunkt!.dato),
-        sistePeriode && sistePeriode.fom ? new Date(sistePeriode.fom) : undefined
-      )
-    ),
-    tom: undefined,
-    data: {
-      utbetaltBeloep: '',
-      trygdetid: '',
-      trygdetidForIdent: '',
-      prorataBroekNevner: '',
-      prorataBroekTeller: '',
-      beskrivelse: '',
-      aarsak: 'VELG_AARSAK',
-    },
-  }
-}
+import {
+  initialOverstyrBeregningsgrunnlagPeriode,
+  replacePeriodePaaIndex,
+  stripWhitespace,
+  validerAarsak,
+} from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -79,11 +47,6 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   const [lagreOverstyrBeregningGrunnlagResult, lagreOverstyrBeregningGrunnlagRequest] =
     useApiCall(lagreOverstyrBeregningGrunnlag)
 
-  const validerAarsak = (aarsak: OverstyrtAarsakKey | undefined): string | undefined => {
-    if (!aarsak || aarsak === 'VELG_AARSAK') return 'Må settes'
-    return undefined
-  }
-
   const {
     register,
     control,
@@ -92,28 +55,32 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   } = useForm<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>>({
     defaultValues: eksisterendePeriode
       ? eksisterendePeriode
-      : initialPeriode(behandling, overstyrBeregningGrunnlagPerioder?.[overstyrBeregningGrunnlagPerioder.length - 1]),
+      : initialOverstyrBeregningsgrunnlagPeriode(
+          behandling,
+          overstyrBeregningGrunnlagPerioder?.[overstyrBeregningGrunnlagPerioder.length - 1]
+        ),
   })
   const lagrePeriode = (
     overtyrBeregningsgrunnlagPeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>
   ) => {
+    const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
+      ...overtyrBeregningsgrunnlagPeriode,
+      data: {
+        ...overtyrBeregningsgrunnlagPeriode.data,
+        utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
+      },
+    }
+
     if (eksisterendePeriode && overstyrBeregningGrunnlagPerioder && indexTilEksisterendePeriode) {
-      const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
-        ...overtyrBeregningsgrunnlagPeriode,
-        data: {
-          ...overtyrBeregningsgrunnlagPeriode.data,
-          utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
-        },
-      }
-
-      const copy = [...overstyrBeregningGrunnlagPerioder]
-      copy.splice(indexTilEksisterendePeriode, 1, periodeMedBeloepUtenWhitespace)
-
       lagreOverstyrBeregningGrunnlagRequest(
         {
           behandlingId: behandling.id,
           grunnlag: {
-            perioder: copy,
+            perioder: replacePeriodePaaIndex(
+              periodeMedBeloepUtenWhitespace,
+              overstyrBeregningGrunnlagPerioder,
+              indexTilEksisterendePeriode
+            ),
           },
         },
         (result) => {
@@ -122,18 +89,6 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         }
       )
     } else {
-      const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
-        ...overtyrBeregningsgrunnlagPeriode,
-        fom: formaterTilISOString(overtyrBeregningsgrunnlagPeriode.fom),
-        tom: overtyrBeregningsgrunnlagPeriode.tom
-          ? formaterTilISOString(overtyrBeregningsgrunnlagPeriode.tom)
-          : undefined,
-        data: {
-          ...overtyrBeregningsgrunnlagPeriode.data,
-          utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
-        },
-      }
-
       lagreOverstyrBeregningGrunnlagRequest(
         {
           behandlingId: behandling.id,

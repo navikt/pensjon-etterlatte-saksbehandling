@@ -1,7 +1,6 @@
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '../../felles/utils'
-import { FEIL_I_PERIODE } from '../PeriodisertBeregningsgrunnlag'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
 import {
@@ -74,7 +73,7 @@ const OverstyrBeregningGrunnlag = (props: {
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
             success: () => (
               <>
-                <OverstyrtBeregningsgrunnlagTable />
+                <OverstyrtBeregningsgrunnlagTable behandlingId={behandling.id} />
                 {redigerbar && visOverstyrBeregningPeriodeSkjema ? (
                   <OverstyrBeregningsgrunnlagPeriodeSkjema
                     behandling={behandling}
@@ -96,11 +95,11 @@ const OverstyrBeregningGrunnlag = (props: {
             ),
           })}
         </VStack>
-
-        <HStack gap="4" align="center">
-          <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
-        </HStack>
       </VStack>
+
+      <div>
+        <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+      </div>
 
       {isFailureHandler({
         errorMessage: 'Kunne ikke opprette ny beregning',
@@ -121,28 +120,5 @@ const OverstyrBeregningGrunnlag = (props: {
     </VStack>
   )
 }
-
-type FeilIPeriodeOverstyrBeregning = (typeof FEIL_I_PERIODE)[number]
-export type FeilIPeriodeGrunnlagAlle =
-  | FeilIPeriodeOverstyrBeregning
-  | 'BELOEP_MANGLER'
-  | 'TRYGDETID_MANGLER'
-  | 'TRYGDETID_MANGLER_FNR'
-  | 'BESKRIVELSE_MANGLER'
-  | 'PRORATA_MANGLER'
-
-export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
-  INGEN_PERIODER: 'Minst en periode må finnes',
-  DEKKER_IKKE_SLUTT_AV_INTERVALL: 'Periodene må være komplette tilbake til virk',
-  DEKKER_IKKE_START_AV_INTERVALL: 'Periodene må vare ut ytelsen',
-  HULL_ETTER_PERIODE: 'Det er et hull i periodene etter denne perioden',
-  PERIODE_OVERLAPPER_MED_NESTE: 'Perioden overlapper med neste periode',
-  TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
-  BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
-  TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
-  TRYGDETID_MANGLER_FNR: 'Trygdetid tilhører FNR er påkrevd',
-  BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
-  PRORATA_MANGLER: 'Prorata brøk må ha begge felter fyllt ut hvis det er i bruk',
-} as const
 
 export default OverstyrBeregningGrunnlag

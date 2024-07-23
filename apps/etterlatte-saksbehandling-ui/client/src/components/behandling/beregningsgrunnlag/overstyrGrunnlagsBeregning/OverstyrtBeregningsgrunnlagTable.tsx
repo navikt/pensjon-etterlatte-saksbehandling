@@ -1,16 +1,42 @@
 import React from 'react'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Button, HStack, Table } from '@navikt/ds-react'
 import { OverstyrBeregningsperiode, OverstyrtAarsak } from '~shared/types/Beregning'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { OverstyrBeregningsgrunnlagExpandableRowContent } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagExpandableRowContent'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreOverstyrBeregningGrunnlag } from '~shared/api/beregning'
+import { oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { isPending } from '~shared/api/apiUtils'
 
-export const OverstyrtBeregningsgrunnlagTable = () => {
+export const OverstyrtBeregningsgrunnlagTable = ({ behandlingId }: { behandlingId: string }) => {
   const overstyrtBeregningPerioder = useAppSelector(
     (state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder
   )
+
+  const dispatch = useAppDispatch()
+
+  const [lagreOverstyrBeregningGrunnlagResult, lagreOverstyrBeregningGrunnlagRequest] =
+    useApiCall(lagreOverstyrBeregningGrunnlag)
+
+  const slettPeriode = (index: number) => {
+    if (overstyrtBeregningPerioder) {
+      const perioderKopi = [...overstyrtBeregningPerioder]
+      perioderKopi.splice(index, 1)
+
+      lagreOverstyrBeregningGrunnlagRequest(
+        {
+          behandlingId,
+          grunnlag: {
+            perioder: perioderKopi,
+          },
+        },
+        (result) => dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+      )
+    }
+  }
 
   return (
     <Table>
@@ -53,7 +79,13 @@ export const OverstyrtBeregningsgrunnlagTable = () => {
                       <Button size="small" variant="secondary" icon={<PencilIcon aria-hidden />}>
                         Rediger
                       </Button>
-                      <Button size="small" variant="secondary" icon={<TrashIcon aria-hidden />}>
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        icon={<TrashIcon aria-hidden />}
+                        onClick={() => slettPeriode(index)}
+                        loading={isPending(lagreOverstyrBeregningGrunnlagResult)}
+                      >
                         Slett
                       </Button>
                     </HStack>

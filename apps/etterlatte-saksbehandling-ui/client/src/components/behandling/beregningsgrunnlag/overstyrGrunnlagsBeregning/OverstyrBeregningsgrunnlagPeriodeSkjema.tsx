@@ -44,8 +44,8 @@ const initialPeriode = (
     ),
     tom: undefined,
     data: {
-      utbetaltBeloep: '0',
-      trygdetid: '0',
+      utbetaltBeloep: '',
+      trygdetid: '',
       trygdetidForIdent: '',
       prorataBroekNevner: '',
       prorataBroekTeller: '',

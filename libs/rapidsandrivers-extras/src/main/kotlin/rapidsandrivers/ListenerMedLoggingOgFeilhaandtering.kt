@@ -58,7 +58,6 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
             .apply {
                 eventName(hendelsestype.lagEventnameForType())
                 correlationId()
-                validate { it.interestedIn(ANTALL_RETRIES_KEY) }
                 block()
             }.register(this)
     }

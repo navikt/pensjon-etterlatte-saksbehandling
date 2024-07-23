@@ -154,6 +154,8 @@ enum class OppdragKlassifikasjonskode(
     MOTPOSTERING("TBMOTOBS", tekniskArt = true),
     BFRISKAT("BFRISKAT"),
     BSKTKRED("BSKTKRED"), // Kreditor disponerer - dette er mest sannsynlig verge
+    KREDKRED("KREDKRED"),
+    // Bøtetrekk, erstatningskrav, husleietrekk, eksternt kreditortrekk eller krav på offentlige avgifter
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -169,6 +171,7 @@ enum class OppdragKlassifikasjonskode(
                 "TBMOTOBS" -> MOTPOSTERING
                 "BFRISKAT" -> BFRISKAT
                 "BSKTKRED" -> BSKTKRED
+                "KREDKRED" -> KREDKRED
                 else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }

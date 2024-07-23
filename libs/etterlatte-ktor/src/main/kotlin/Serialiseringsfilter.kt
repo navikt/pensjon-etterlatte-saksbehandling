@@ -11,8 +11,14 @@ class Serialiseringsfilter : ObjectInputFilter {
     override fun checkInput(info: FilterInfo): Status {
         val serialClass = info.serialClass()
         return when {
-            serialClass == null -> Status.UNDECIDED
-            tillatt(serialClass) -> Status.ALLOWED
+            serialClass == null -> {
+                logger.warn("Serialclass er null, dette er rart. Info: $info")
+                Status.UNDECIDED
+            }
+            tillatt(serialClass) -> {
+                logger.info("Tillater klasse $serialClass for deserialisering")
+                Status.ALLOWED
+            }
             else -> {
                 logger.warn("Klasse ${serialClass.name} er ikke tillatt for deserialisering")
                 Status.REJECTED

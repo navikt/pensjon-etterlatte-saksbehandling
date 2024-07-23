@@ -14,7 +14,7 @@ interface PeriodeRedigeringModus {
   trygdetidGrunnlagId: string
 }
 
-const defaultPeriodeVisningModus: PeriodeRedigeringModus = {
+const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
   redigerPeriode: false,
   erAapen: false,
   trygdetidGrunnlagId: '',
@@ -42,7 +42,7 @@ export const TrygdetidPerioderTable = ({
   redigerbar,
 }: Props) => {
   const [periodeRedigeringModus, setPeriodeRedigeringModus] =
-    useState<PeriodeRedigeringModus>(defaultPeriodeVisningModus)
+    useState<PeriodeRedigeringModus>(defaultPeriodeRedigeringModus)
 
   return (
     <Table size="small">
@@ -89,9 +89,9 @@ export const TrygdetidPerioderTable = ({
                       trygdetidId={trygdetidId}
                       setTrygdetid={(trygdetid) => {
                         oppdaterTrygdetid(trygdetid)
-                        setPeriodeRedigeringModus(defaultPeriodeVisningModus)
+                        setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)
                       }}
-                      avbryt={() => setPeriodeRedigeringModus(defaultPeriodeVisningModus)}
+                      avbryt={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
                       trygdetidGrunnlagType={trygdetidGrunnlagType}
                       landListe={landListe}
                     />

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Button, HStack, Table } from '@navikt/ds-react'
 import { OverstyrBeregningsperiode, OverstyrtAarsak } from '~shared/types/Beregning'
@@ -10,8 +10,25 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreOverstyrBeregningGrunnlag } from '~shared/api/beregning'
 import { oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { isPending } from '~shared/api/apiUtils'
+import { OverstyrBeregningsgrunnlagPeriodeSkjema } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagPeriodeSkjema'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const OverstyrtBeregningsgrunnlagTable = ({ behandlingId }: { behandlingId: string }) => {
+interface PeriodeRedigeringModus {
+  redigerPeriode: boolean
+  erAapen: boolean
+  periodeIndex: number | undefined
+}
+
+const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
+  redigerPeriode: false,
+  erAapen: false,
+  periodeIndex: undefined,
+}
+
+export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+  const [periodeRedigeringModus, setPeriodeRedigeringModus] =
+    useState<PeriodeRedigeringModus>(defaultPeriodeRedigeringModus)
+
   const overstyrtBeregningPerioder = useAppSelector(
     (state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder
   )
@@ -28,7 +45,7 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandlingId }: { behandlingI
 
       lagreOverstyrBeregningGrunnlagRequest(
         {
-          behandlingId,
+          behandlingId: behandling.id,
           grunnlag: {
             perioder: perioderKopi,
           },
@@ -60,10 +77,28 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandlingId }: { behandlingI
               return (
                 <Table.ExpandableRow
                   key={index}
+                  open={periodeRedigeringModus.erAapen && index === periodeRedigeringModus.periodeIndex}
+                  onOpenChange={(open) => {
+                    setPeriodeRedigeringModus({
+                      redigerPeriode: open && periodeRedigeringModus.redigerPeriode,
+                      erAapen: open,
+                      periodeIndex: index,
+                    })
+                  }}
                   content={
-                    <OverstyrBeregningsgrunnlagExpandableRowContent
-                      overtyrBeregningsgrunnlagPeriode={overtyrBeregningsgrunnlagPeriode}
-                    />
+                    !periodeRedigeringModus.redigerPeriode ? (
+                      <OverstyrBeregningsgrunnlagExpandableRowContent
+                        overtyrBeregningsgrunnlagPeriode={overtyrBeregningsgrunnlagPeriode}
+                      />
+                    ) : (
+                      <OverstyrBeregningsgrunnlagPeriodeSkjema
+                        behandling={behandling}
+                        eksisterendePeriode={overtyrBeregningsgrunnlagPeriode}
+                        indexTilEksisterendePeriode={index}
+                        paaAvbryt={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
+                        paaLagre={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
+                      />
+                    )
                   }
                 >
                   <Table.DataCell>{formaterDatoMedFallback(overtyrBeregningsgrunnlagPeriode.fom, '-')}</Table.DataCell>
@@ -76,7 +111,21 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandlingId }: { behandlingI
                   </Table.DataCell>
                   <Table.DataCell>
                     <HStack gap="2" align="center" justify="end" wrap={false}>
-                      <Button size="small" variant="secondary" icon={<PencilIcon aria-hidden />}>
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        icon={<PencilIcon aria-hidden />}
+                        disabled={
+                          periodeRedigeringModus.redigerPeriode && index === periodeRedigeringModus.periodeIndex
+                        }
+                        onClick={() => {
+                          setPeriodeRedigeringModus({
+                            redigerPeriode: true,
+                            erAapen: true,
+                            periodeIndex: index,
+                          })
+                        }}
+                      >
                         Rediger
                       </Button>
                       <Button

@@ -73,11 +73,12 @@ const OverstyrBeregningGrunnlag = (props: {
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
             success: () => (
               <>
-                <OverstyrtBeregningsgrunnlagTable behandlingId={behandling.id} />
+                <OverstyrtBeregningsgrunnlagTable behandling={behandling} />
                 {redigerbar && visOverstyrBeregningPeriodeSkjema ? (
                   <OverstyrBeregningsgrunnlagPeriodeSkjema
                     behandling={behandling}
-                    setVisOverstyrBeregningPeriodeSkjema={setVisOverstyrBeregningPeriodeSkjema}
+                    paaAvbryt={() => setVisOverstyrBeregningPeriodeSkjema(false)}
+                    paaLagre={() => setVisOverstyrBeregningPeriodeSkjema(false)}
                   />
                 ) : (
                   <div>

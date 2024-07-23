@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import { BodyShort, Box, Button, HGrid, HStack, Label, Select, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { OverstyrBeregningsperiode, OverstyrtAarsak, OverstyrtAarsakKey } from '~shared/types/Beregning'
@@ -57,14 +57,18 @@ const initialPeriode = (
 
 interface Props {
   behandling: IDetaljertBehandling
-  setVisOverstyrBeregningPeriodeSkjema: Dispatch<SetStateAction<boolean>>
   eksisterendePeriode?: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>
+  indexTilEksisterendePeriode?: number
+  paaAvbryt: () => void
+  paaLagre: () => void
 }
 
 export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   behandling,
-  setVisOverstyrBeregningPeriodeSkjema,
   eksisterendePeriode,
+  indexTilEksisterendePeriode,
+  paaAvbryt,
+  paaLagre,
 }: Props) => {
   const overstyrBeregningGrunnlagPerioder = useAppSelector(
     (state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder
@@ -84,48 +88,67 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
     register,
     control,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>>({
     defaultValues: eksisterendePeriode
       ? eksisterendePeriode
       : initialPeriode(behandling, overstyrBeregningGrunnlagPerioder?.[overstyrBeregningGrunnlagPerioder.length - 1]),
   })
-
-  const avbryt = () => {
-    reset()
-    setVisOverstyrBeregningPeriodeSkjema(false)
-  }
-
   const lagrePeriode = (
     overtyrBeregningsgrunnlagPeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>
   ) => {
-    const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
-      ...overtyrBeregningsgrunnlagPeriode,
-      fom: formaterTilISOString(overtyrBeregningsgrunnlagPeriode.fom),
-      tom: overtyrBeregningsgrunnlagPeriode.tom
-        ? formaterTilISOString(overtyrBeregningsgrunnlagPeriode.tom)
-        : undefined,
-      data: {
-        ...overtyrBeregningsgrunnlagPeriode.data,
-        utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
-      },
-    }
-
-    lagreOverstyrBeregningGrunnlagRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag: {
-          perioder: !!overstyrBeregningGrunnlagPerioder?.length
-            ? [...overstyrBeregningGrunnlagPerioder, periodeMedBeloepUtenWhitespace]
-            : [periodeMedBeloepUtenWhitespace],
+    if (eksisterendePeriode && overstyrBeregningGrunnlagPerioder && indexTilEksisterendePeriode) {
+      const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
+        ...overtyrBeregningsgrunnlagPeriode,
+        data: {
+          ...overtyrBeregningsgrunnlagPeriode.data,
+          utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
         },
-      },
-      (result) => {
-        dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
-        setVisOverstyrBeregningPeriodeSkjema(false)
       }
-    )
+
+      const copy = [...overstyrBeregningGrunnlagPerioder]
+      copy.splice(indexTilEksisterendePeriode, 1, periodeMedBeloepUtenWhitespace)
+
+      lagreOverstyrBeregningGrunnlagRequest(
+        {
+          behandlingId: behandling.id,
+          grunnlag: {
+            perioder: copy,
+          },
+        },
+        (result) => {
+          dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+          paaLagre()
+        }
+      )
+    } else {
+      const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
+        ...overtyrBeregningsgrunnlagPeriode,
+        fom: formaterTilISOString(overtyrBeregningsgrunnlagPeriode.fom),
+        tom: overtyrBeregningsgrunnlagPeriode.tom
+          ? formaterTilISOString(overtyrBeregningsgrunnlagPeriode.tom)
+          : undefined,
+        data: {
+          ...overtyrBeregningsgrunnlagPeriode.data,
+          utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
+        },
+      }
+
+      lagreOverstyrBeregningGrunnlagRequest(
+        {
+          behandlingId: behandling.id,
+          grunnlag: {
+            perioder: !!overstyrBeregningGrunnlagPerioder?.length
+              ? [...overstyrBeregningGrunnlagPerioder, periodeMedBeloepUtenWhitespace]
+              : [periodeMedBeloepUtenWhitespace],
+          },
+        },
+        (result) => {
+          dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+          paaLagre()
+        }
+      )
+    }
   }
 
   return (
@@ -211,7 +234,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         })}
 
         <HStack gap="4">
-          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={avbryt}>
+          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
             Avbryt
           </Button>
           <Button

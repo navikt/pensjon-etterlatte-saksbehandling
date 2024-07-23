@@ -1,72 +1,31 @@
-import {
-  Beregning,
-  OverstyrBeregingsperiodeGrunnlagData,
-  OverstyrBeregning,
-  OverstyrBeregningsperiode,
-  OverstyrtAarsak,
-} from '~shared/types/Beregning'
-import { Box, Button, ErrorSummary, Heading, HStack, Table, VStack } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
+import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '../../felles/utils'
-import { useFieldArray, useForm } from 'react-hook-form'
-import {
-  FEIL_I_PERIODE,
-  feilIKomplettePerioderOverIntervall,
-  mapListeFraDto,
-  mapListeTilDto,
-  PeriodisertBeregningsgrunnlag,
-} from '../PeriodisertBeregningsgrunnlag'
-import OverstyrBeregningTableWrapper from '../OverstyrBeregningTableWrapper'
+import { FEIL_I_PERIODE } from '../PeriodisertBeregningsgrunnlag'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { CalculatorIcon, CheckmarkCircleIcon, PlusCircleIcon, PlusIcon } from '@navikt/aksel-icons'
+import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregning,
   oppdaterOverstyrBeregningsGrunnlag,
 } from '~store/reducers/BehandlingReducer'
-import { addMonths } from 'date-fns'
-import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
-import {
-  hentOverstyrBeregningGrunnlag,
-  lagreOverstyrBeregningGrunnlag,
-  opprettEllerEndreBeregning,
-} from '~shared/api/beregning'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { hentOverstyrBeregningGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
+import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../../BehandlingRoutes'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-
-import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../../useInnloggetSaksbehandler'
-import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
 import { SkruAvOverstyrtBeregningModal } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruAvOverstyrtBeregningModal'
 import { OverstyrtBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrtBeregningsgrunnlagTable'
 import { OverstyrBeregningsgrunnlagPeriodeSkjema } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagPeriodeSkjema'
-
-const stripWhitespace = (s: string | number): string => {
-  if (typeof s === 'string') return s.replace(/\s+/g, '')
-  else return s.toString().replace(/\s+/g, '')
-}
-
-function fjernWhitespaceFraUtbetaltBeloep(
-  data: OverstyrBeregingsperiodeGrunnlagData
-): OverstyrBeregingsperiodeGrunnlagData {
-  return data.map(({ fom, tom, data }) => ({
-    fom,
-    tom,
-    data: {
-      ...data,
-      utbetaltBeloep: stripWhitespace(data.utbetaltBeloep),
-    },
-  }))
-}
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const OverstyrBeregningGrunnlag = (props: {
   behandling: IBehandlingReducer
@@ -74,126 +33,33 @@ const OverstyrBeregningGrunnlag = (props: {
 }) => {
   const { behandling, setOverstyrt } = props
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = behandlingErRedigerbar(
+
+  const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+  const [visOverstyrBeregningPeriodeSkjema, setVisOverstyrBeregningPeriodeSkjema] = useState<boolean>(false)
 
-  const [visFeil, setVisFeil] = useState(false)
-  const [visOkLagret, setVisOkLagret] = useState(false)
-  const perioder = useAppSelector((state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder)
-  const { control, register, watch, handleSubmit, setValue } = useForm<{
-    overstyrBeregningForm: OverstyrBeregingsperiodeGrunnlagData
-  }>({
-    defaultValues: {
-      overstyrBeregningForm: mapListeFraDto(perioder ?? []),
-    },
-  })
+  const [overstyrBeregningGrunnlagResult, overstyrBeregningGrunnlagRequest] = useApiCall(hentOverstyrBeregningGrunnlag)
+  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
-  const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
-  const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
-  const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { next } = useBehandlingRoutes()
-
   const dispatch = useAppDispatch()
 
-  useEffect(() => {
-    fetchOverstyrBeregningGrunnlag(behandling.id, (result) => {
-      dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+  const onSubmit = () => {
+    opprettEllerEndreBeregningRequest(behandling.id, (beregning: Beregning) => {
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+      dispatch(oppdaterBeregning(beregning))
+      next()
+    })
+  }
 
-      setValue('overstyrBeregningForm', mapListeFraDto(result.perioder ?? []))
+  useEffect(() => {
+    overstyrBeregningGrunnlagRequest(behandling.id, (result) => {
+      dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
     })
   }, [])
-
-  const { fields, append, remove } = useFieldArray({
-    name: 'overstyrBeregningForm',
-    control,
-  })
-
-  const sisteTom = watch(`overstyrBeregningForm.${fields.length - 1}.tom`)
-  const sisteFom = watch(`overstyrBeregningForm.${fields.length - 1}.fom`)
-  const allePerioder = watch('overstyrBeregningForm')
-
-  const feil: [number, FeilIPeriodeGrunnlagAlle][] = [
-    ...feilIKomplettePerioderOverIntervall(allePerioder, new Date(behandling.virkningstidspunkt!.dato)),
-    ...allePerioder.flatMap((periode, indeks) =>
-      feilIOverstyrBeregningperiode(periode).map((feil) => [indeks, feil] as [number, FeilIPeriodeGrunnlagAlle])
-    ),
-  ]
-
-  const validerOverstyrBeregning = (grunnlag: OverstyrBeregingsperiodeGrunnlagData) => {
-    return grunnlag.every((value) => feilIOverstyrBeregningperiode(value).length === 0)
-  }
-
-  const validerOgLagre = (overstyrtBeregningForm: OverstyrBeregingsperiodeGrunnlagData) => {
-    const fiksetBeloep = fjernWhitespaceFraUtbetaltBeloep(overstyrtBeregningForm)
-    if (validerOverstyrBeregning(fiksetBeloep) && feil.length === 0) {
-      setVisFeil(false)
-      saveOverstyrBeregningGrunnlag(
-        {
-          behandlingId: behandling.id,
-          grunnlag: {
-            perioder: mapListeTilDto(fiksetBeloep),
-          },
-        },
-        (result) => {
-          dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
-        }
-      )
-      setVisOkLagret(true)
-      setTimeout(() => {
-        setVisOkLagret(false)
-      }, 1000)
-
-      return true
-    } else {
-      setVisFeil(true)
-      setVisOkLagret(false)
-      return false
-    }
-  }
-
-  const onSubmit = () => {
-    if (validerOgLagre(allePerioder)) {
-      postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-        dispatch(oppdaterBeregning(beregning))
-        next()
-      })
-    }
-  }
-
-  const ferdigstillForm = (data: { overstyrBeregningForm: OverstyrBeregingsperiodeGrunnlagData }) => {
-    validerOgLagre(data.overstyrBeregningForm)
-  }
-
-  const nesteFomDato = (
-    fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
-    tom: Date | undefined
-  ): Date => {
-    return tom ? addMonths(tom, 1) : fom
-  }
-
-  const leggTilBeregningsperiode = () => {
-    setVisFeil(false)
-    append([
-      {
-        fom: nesteFomDato(sisteFom, sisteTom),
-        tom: undefined,
-        data: {
-          utbetaltBeloep: '0',
-          trygdetid: '0',
-          trygdetidForIdent: '',
-          prorataBroekNevner: '',
-          prorataBroekTeller: '',
-          beskrivelse: '',
-          aarsak: 'VELG_AARSAK',
-        },
-      },
-    ])
-  }
-
   return (
     <VStack gap="12">
       <BeregningErOverstyrtAlert />
@@ -203,112 +69,48 @@ const OverstyrBeregningGrunnlag = (props: {
           <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
         </HStack>
         <VStack gap="4" maxWidth="70rem">
-          <OverstyrtBeregningsgrunnlagTable />
-          <OverstyrBeregningsgrunnlagPeriodeSkjema />
-          <div>
-            <Button size="small" variant="secondary" icon={<PlusIcon aria-hidden />}>
-              Ny periode
-            </Button>
-          </div>
+          {mapResult(overstyrBeregningGrunnlagResult, {
+            pending: <Spinner visible label="Henter overstyrt beregning grunnlag..." />,
+            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
+            success: () => (
+              <>
+                <OverstyrtBeregningsgrunnlagTable />
+                {redigerbar && visOverstyrBeregningPeriodeSkjema ? (
+                  <OverstyrBeregningsgrunnlagPeriodeSkjema
+                    behandling={behandling}
+                    setVisOverstyrBeregningPeriodeSkjema={setVisOverstyrBeregningPeriodeSkjema}
+                  />
+                ) : (
+                  <div>
+                    <Button
+                      size="small"
+                      variant="secondary"
+                      icon={<PlusIcon aria-hidden />}
+                      onClick={() => setVisOverstyrBeregningPeriodeSkjema(true)}
+                    >
+                      Ny periode
+                    </Button>
+                  </div>
+                )}
+              </>
+            ),
+          })}
         </VStack>
 
-        {mapApiResult(
-          overstyrBeregningGrunnlag,
-          <Spinner visible={true} label="Henter grunnlag" />,
-          () => (
-            <ApiErrorAlert>En feil har oppstått ved henting av grunnlag</ApiErrorAlert>
-          ),
-          () => (
-            <>
-              {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-              <Box maxWidth="70rem">
-                {fields.length ? (
-                  <Table>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.HeaderCell />
-                        <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body id="formoverstyrberegning">
-                      {fields.map((item, index) => (
-                        <OverstyrBeregningTableWrapper
-                          key={item.id}
-                          item={item}
-                          index={index}
-                          control={control}
-                          register={register}
-                          remove={remove}
-                          watch={watch}
-                          visFeil={visFeil}
-                          feil={feil}
-                          behandles={behandles}
-                          aarsaker={OverstyrtAarsak}
-                        />
-                      ))}
-                    </Table.Body>
-                  </Table>
-                ) : null}
-
-                {behandles && (
-                  <VStack gap="4" align="start">
-                    <Button
-                      type="button"
-                      icon={<PlusCircleIcon title="legg til" />}
-                      iconPosition="left"
-                      variant="tertiary"
-                      onClick={() => {
-                        leggTilBeregningsperiode()
-                      }}
-                    >
-                      Legg til beregningsperiode
-                    </Button>
-                    <HStack gap="4" align="center">
-                      <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
-
-                      <Button
-                        type="submit"
-                        variant="secondary"
-                        size="small"
-                        onClick={handleSubmit(ferdigstillForm)}
-                        loading={isPending(persistOverstyrBeregningGrunnlag)}
-                      >
-                        Lagre
-                      </Button>
-                    </HStack>
-                  </VStack>
-                )}
-                {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-              </Box>
-            </>
-          )
-        )}
+        <HStack gap="4" align="center">
+          <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+        </HStack>
       </VStack>
 
-      {isPending(persistOverstyrBeregningGrunnlag) && <Spinner visible={true} label="Lagre grunnlag" />}
-      {isFailureHandler({
-        errorMessage: 'En feil har oppstått ved lagring av grunnlag',
-        apiResult: persistOverstyrBeregningGrunnlag,
-      })}
       {isFailureHandler({
         errorMessage: 'Kunne ikke opprette ny beregning',
-        apiResult: endreBeregning,
+        apiResult: opprettEllerEndreBeregningResult,
       })}
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        {behandles ? (
+        {redigerbar ? (
           <BehandlingHandlingKnapper>
-            <Button
-              variant="primary"
-              onClick={onSubmit}
-              loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
-            >
+            <Button variant="primary" onClick={onSubmit} loading={isPending(opprettEllerEndreBeregningResult)}>
               Beregn
             </Button>
           </BehandlingHandlingKnapper>
@@ -319,62 +121,6 @@ const OverstyrBeregningGrunnlag = (props: {
     </VStack>
   )
 }
-
-function feilIOverstyrBeregningperiode(
-  grunnlag: PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>
-): FeilIPeriodeGrunnlagAlle[] {
-  const feil: FeilIPeriodeGrunnlagAlle[] = []
-
-  const beloep = parseInt(grunnlag.data.utbetaltBeloep)
-  if (isNaN(beloep) || beloep < 0) {
-    feil.push('BELOEP_MANGLER')
-  }
-
-  const trygdetid = parseInt(grunnlag.data.trygdetid)
-  if (isNaN(trygdetid) || trygdetid <= 0) {
-    feil.push('TRYGDETID_MANGLER')
-  }
-
-  if (validateFnrObligatorisk(grunnlag.data.trygdetidForIdent)) {
-    feil.push('TRYGDETID_MANGLER_FNR')
-  }
-
-  const prorataBroekNevner = parseInt(grunnlag.data.prorataBroekNevner ?? '')
-  const prorataBroekTeller = parseInt(grunnlag.data.prorataBroekTeller ?? '')
-
-  if (!isNaN(prorataBroekNevner) || !isNaN(prorataBroekTeller)) {
-    if (isNaN(prorataBroekNevner) || isNaN(prorataBroekTeller) || prorataBroekNevner <= 0 || prorataBroekTeller <= 0) {
-      feil.push('PRORATA_MANGLER')
-    }
-  }
-
-  if (grunnlag.tom !== undefined && grunnlag.tom < grunnlag.fom) {
-    feil.push('TOM_FOER_FOM')
-  }
-
-  if (!grunnlag.data.beskrivelse) {
-    feil.push('BESKRIVELSE_MANGLER')
-  }
-
-  return feil
-}
-
-const FeilIPerioder = (props: { feil: [number, FeilIPeriodeGrunnlagAlle][] }) => {
-  return (
-    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
-      {props.feil.map(([index, feil]) => (
-        <ErrorSummary.Item key={`${index}${feil}`} href={`#overstyrBeregningForm.${index}`}>
-          {teksterFeilIPeriode[feil]}
-        </ErrorSummary.Item>
-      ))}
-    </FeilIPerioderOppsummering>
-  )
-}
-
-const FeilIPerioderOppsummering = styled(ErrorSummary)`
-  margin: 2em auto;
-  width: 30em;
-`
 
 type FeilIPeriodeOverstyrBeregning = (typeof FEIL_I_PERIODE)[number]
 export type FeilIPeriodeGrunnlagAlle =

@@ -3,6 +3,7 @@ import { MonthPicker, MonthValidationT, useMonthpicker } from '@navikt/ds-react'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { isEqual } from 'date-fns'
+import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 
 interface Props<T extends FieldValues> {
   name: Path<T>
@@ -36,7 +37,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
 
   const { monthpickerProps, inputProps, setSelected, selectedMonth } = useMonthpicker({
     onMonthChange: (date: Date) => {
-      date && field.onChange(date)
+      date && field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
     defaultSelected: field.value ? new Date(field.value) : null,
     fromDate: fromDate ?? undefined,

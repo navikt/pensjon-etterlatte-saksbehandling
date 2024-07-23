@@ -412,6 +412,7 @@ private fun LoependeYtelse.toDto() =
         erLoepende = erLoepende,
         underSamordning = underSamordning,
         dato = dato,
+        sakId = sakId,
         behandlingId = behandlingId,
         sisteLoependeBehandlingId = sisteLoependeBehandlingId,
     )

@@ -26,7 +26,7 @@ interface VilkaarsvurderingService {
         behandlingKopiereFraId: UUID,
     ): HttpResponse
 
-    fun harMigrertYrkesskadefordel(behandlingId: String): Boolean
+    fun harMigrertYrkesskadefordel(sakId: Long): Boolean
 
     fun harRettUtenTidsbegrensning(behandlingId: String): Boolean
 }
@@ -61,10 +61,10 @@ class VilkaarsvurderingServiceImpl(
         }
     }
 
-    override fun harMigrertYrkesskadefordel(behandlingId: String): Boolean =
+    override fun harMigrertYrkesskadefordel(sakId: Long): Boolean =
         runBlocking {
             vilkaarsvurderingKlient
-                .get("$url/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel")
+                .get("$url/api/vilkaarsvurdering/$sakId/migrert-yrkesskadefordel")
                 .body<MigrertYrkesskadefordel>()
                 .migrertYrkesskadefordel
         }

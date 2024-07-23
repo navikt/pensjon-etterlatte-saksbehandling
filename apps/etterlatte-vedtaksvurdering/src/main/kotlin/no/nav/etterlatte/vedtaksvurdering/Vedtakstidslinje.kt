@@ -24,6 +24,7 @@ class Vedtakstidslinje(
             erLoepende = erLoepende,
             underSamordning = erUnderSamordning,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
+            sakId = if (erLoepende) senesteVedtakPaaDato!!.sakId else null,
             behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
             sisteLoependeBehandlingId =
                 if (erLoepende) {

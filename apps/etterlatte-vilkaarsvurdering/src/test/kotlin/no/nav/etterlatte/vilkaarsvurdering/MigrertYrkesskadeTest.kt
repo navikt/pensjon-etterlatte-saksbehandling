@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -75,14 +74,14 @@ class MigrertYrkesskadeTest(
             )
         repository.opprettVilkaarsvurdering(vilkaarsvurdering)
         runBlocking {
-            Assertions.assertFalse(service.erMigrertYrkesskadefordel(behandlingId, Systembruker.testdata))
+            Assertions.assertFalse(service.erMigrertYrkesskadefordel(sakId))
             dataSource.insert("migrert_yrkesskade", params = {
                 mapOf(
                     "behandling_id" to behandlingId,
                     "sak_id" to sakId,
                 )
             })
-            Assertions.assertTrue(service.erMigrertYrkesskadefordel(behandlingId, Systembruker.testdata))
+            Assertions.assertTrue(service.erMigrertYrkesskadefordel(sakId))
         }
     }
 }

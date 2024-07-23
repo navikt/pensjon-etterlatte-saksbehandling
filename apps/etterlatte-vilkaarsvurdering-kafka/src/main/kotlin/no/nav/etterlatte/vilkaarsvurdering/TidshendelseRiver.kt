@@ -86,9 +86,9 @@ class TidshendelseRiver(
     ): Boolean {
         val hendelseData = packet[HENDELSE_DATA_KEY]
 
-        hendelseData["loependeYtelse_januar2024_behandlingId"]?.let {
-            val behandlingId = it.asText()
-            val result = vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingId)
+        hendelseData["loependeYtelse_januar2024_sakId"]?.let {
+            val sakId = it.asLong()
+            val result = vilkaarsvurderingService.harMigrertYrkesskadefordel(sakId)
             logger.info("Løpende ytelse: sjekk av yrkesskadefordel før 2024-01-01: $result")
             packet["yrkesskadefordel_pre_20240101"] = result
         }

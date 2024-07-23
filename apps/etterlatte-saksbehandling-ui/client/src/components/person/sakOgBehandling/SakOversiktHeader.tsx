@@ -43,7 +43,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
           behandling.kilde === Vedtaksloesning.PESYS && behandling.virkningstidspunkt?.dato === ETTERLATTEREFORM_DATO
       )
     if (migrertBehandling) {
-      hentYrkesskadefordel(migrertBehandling.id)
+      hentYrkesskadefordel(migrertBehandling.sak)
     }
   }, [])
 

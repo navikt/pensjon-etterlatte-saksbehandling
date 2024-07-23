@@ -43,7 +43,7 @@ class TidshendelseRiverTest {
                 behandlingsmaaned,
                 behandlingIdPerReformtidspunkt,
             )
-        every { vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingIdPerReformtidspunkt) } returns true
+        every { vilkaarsvurderingService.harMigrertYrkesskadefordel(sakId) } returns true
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
@@ -56,7 +56,7 @@ class TidshendelseRiverTest {
             field(0, "yrkesskadefordel_pre_20240101").asBoolean() shouldBe true
         }
 
-        verify { vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingIdPerReformtidspunkt) }
+        verify { vilkaarsvurderingService.harMigrertYrkesskadefordel(sakId) }
     }
 
     @Test
@@ -64,7 +64,6 @@ class TidshendelseRiverTest {
         val hendelseId = UUID.randomUUID()
         val sakId = 321L
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
-        val behandlingIdPerReformtidspunkt = UUID.randomUUID().toString()
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
@@ -78,7 +77,7 @@ class TidshendelseRiverTest {
             assertThrows<IllegalArgumentException> { field(0, "yrkesskadefordel_pre_20240101") }
         }
 
-        verify(exactly = 0) { vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingIdPerReformtidspunkt) }
+        verify(exactly = 0) { vilkaarsvurderingService.harMigrertYrkesskadefordel(sakId) }
     }
 
     @Test
@@ -156,7 +155,7 @@ class TidshendelseRiverTest {
     ): JsonMessage {
         val hendelsedata = mutableMapOf<String, Any>()
         behandlingIdPerReformtidspunkt?.let {
-            hendelsedata["loependeYtelse_januar2024_behandlingId"] = it
+            hendelsedata["loependeYtelse_januar2024_sakId"] = sakId
         }
 
         return JsonMessage.newMessage(

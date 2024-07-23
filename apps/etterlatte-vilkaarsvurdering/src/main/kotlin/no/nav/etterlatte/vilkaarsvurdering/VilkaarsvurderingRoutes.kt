@@ -17,9 +17,11 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withParam
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
@@ -52,10 +54,10 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId, brukerTokenInfo)
+        get("/{$SAKID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter vilkårsvurdering for $sakId")
+                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(sakId)
                 call.respond(MigrertYrkesskadefordel(result))
             }
         }

@@ -120,8 +120,8 @@ class TidshendelseRiver(
         if (loependeYtelse.erLoepende && type == "AO_BP20") {
             val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, ikrafttredenEtterlattereformen)
             hendelseData["loependeYtelse_januar2024"] = loependeYtelsePerJanuar2024.erLoepende
-            loependeYtelsePerJanuar2024.behandlingId?.let {
-                hendelseData["loependeYtelse_januar2024_behandlingId"] = it.toString()
+            loependeYtelsePerJanuar2024.sakId?.let {
+                hendelseData["loependeYtelse_januar2024_sakId"] = it
             }
         }
 

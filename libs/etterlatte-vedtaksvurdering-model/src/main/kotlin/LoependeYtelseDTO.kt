@@ -8,6 +8,7 @@ data class LoependeYtelseDTO(
     val erLoepende: Boolean,
     val underSamordning: Boolean,
     val dato: LocalDate,
+    val sakId: Long? = null,
     val behandlingId: UUID? = null,
     val sisteLoependeBehandlingId: UUID? = null,
     // TODO kun relevant for regulering 2024 da feltet opphoerFraOgMed er innført i forkant av reguleringen 2024

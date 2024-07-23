@@ -50,6 +50,7 @@ class TidshendelseRiverTest {
                 erLoepende = true,
                 underSamordning = false,
                 dato = datoFomJanuar2024,
+                sakId = sakId,
                 behandlingId = behandlingId,
             )
 
@@ -73,7 +74,7 @@ class TidshendelseRiverTest {
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "123-123-123"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe true
-            field(0, HENDELSE_DATA_KEY)["loependeYtelse_januar2024_behandlingId"].asText() shouldBe behandlingId.toString()
+            field(0, HENDELSE_DATA_KEY)["loependeYtelse_januar2024_sakId"].asLong() shouldBe sakId
             field(0, DRYRUN).asBoolean() shouldBe false
         }
 

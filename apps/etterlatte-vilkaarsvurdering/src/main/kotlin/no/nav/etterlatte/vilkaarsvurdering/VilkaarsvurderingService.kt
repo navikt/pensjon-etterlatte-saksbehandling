@@ -39,13 +39,7 @@ class VilkaarsvurderingService(
 
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 
-    suspend fun erMigrertYrkesskadefordel(
-        behandlingId: UUID,
-        bruker: BrukerTokenInfo,
-    ): Boolean =
-        vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(
-            behandlingKlient.hentBehandling(behandlingId, bruker).sak,
-        )
+    fun erMigrertYrkesskadefordel(sakId: Long): Boolean = vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(sakId)
 
     fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean =
         vilkaarsvurderingRepository

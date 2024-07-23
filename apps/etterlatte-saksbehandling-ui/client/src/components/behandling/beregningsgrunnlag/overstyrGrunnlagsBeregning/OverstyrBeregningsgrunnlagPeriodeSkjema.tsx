@@ -71,7 +71,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
       },
     }
 
-    if (eksisterendePeriode && overstyrBeregningGrunnlagPerioder && indexTilEksisterendePeriode) {
+    if (eksisterendePeriode && overstyrBeregningGrunnlagPerioder && indexTilEksisterendePeriode !== undefined) {
       lagreOverstyrBeregningGrunnlagRequest(
         {
           behandlingId: behandling.id,

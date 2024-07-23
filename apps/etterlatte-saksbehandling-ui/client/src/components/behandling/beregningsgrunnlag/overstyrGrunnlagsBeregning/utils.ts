@@ -52,5 +52,8 @@ export const replacePeriodePaaIndex = (
 ): Array<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>> => {
   const kopi = [...perioder]
   kopi.splice(index, 1, periode)
+
+  console.log(kopi)
+
   return kopi
 }

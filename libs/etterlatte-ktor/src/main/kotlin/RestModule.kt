@@ -37,6 +37,7 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
+import java.io.ObjectInputFilter
 import java.util.UUID
 
 fun Application.restModule(
@@ -130,6 +131,8 @@ fun Application.restModule(
     if (withMetrics) {
         metricsRoute(additionalMetrics)
     }
+
+    ObjectInputFilter.Config.setSerialFilter(Serialiseringsfilter())
 }
 
 internal fun Throwable.erDeserialiseringsException(): Boolean {

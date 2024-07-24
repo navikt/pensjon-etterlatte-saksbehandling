@@ -34,12 +34,27 @@ fun List<Vilkaar>.kopier() = this.map { it.copy(id = UUID.randomUUID()) }
 
 data class Delvilkaar(
     val type: VilkaarType,
-    val tittel: String,
+    val tittel: String = type.tittel,
     val beskrivelse: String? = null,
     val spoersmaal: String? = null,
     val lovreferanse: Lovreferanse,
     val resultat: Utfall? = null,
-)
+) {
+    constructor(
+        type: VilkaarType,
+        beskrivelse: String? = null,
+        spoersmaal: String? = null,
+        lovreferanse: Lovreferanse,
+        resultat: Utfall? = null,
+    ) : this(
+        type = type,
+        tittel = type.tittel,
+        beskrivelse = beskrivelse,
+        spoersmaal = spoersmaal,
+        lovreferanse = lovreferanse,
+        resultat = resultat,
+    )
+}
 
 data class Lovreferanse(
     val paragraf: String,

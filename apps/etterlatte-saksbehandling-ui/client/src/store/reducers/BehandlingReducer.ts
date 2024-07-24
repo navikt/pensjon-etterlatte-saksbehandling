@@ -114,6 +114,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(oppdaterUtlandstilknytning, (state, action) => {
     state.behandling!!.utlandstilknytning = action.payload
   })
+  builder.addCase(oppdaterViderefoertOpphoer, (state, action) => {
+    state.behandling!!.viderefoertOpphoer = action.payload
+  })
   builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
     state.behandling!!.beregningsGrunnlagOMS = action.payload
   })

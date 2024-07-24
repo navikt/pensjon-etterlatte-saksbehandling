@@ -18,6 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initialOverstyrBeregningsgrunnlagPeriode,
+  konverterTilSisteDagIMaaneden,
   replacePeriodePaaIndex,
   stripWhitespace,
   validerAarsak,
@@ -65,6 +66,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   ) => {
     const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
       ...overtyrBeregningsgrunnlagPeriode,
+      tom: overtyrBeregningsgrunnlagPeriode.tom && konverterTilSisteDagIMaaneden(overtyrBeregningsgrunnlagPeriode.tom),
       data: {
         ...overtyrBeregningsgrunnlagPeriode.data,
         utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
@@ -143,23 +145,13 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             <Label>Prorata brøk (valgfritt)</Label>
             <HStack gap="3" align="center">
               <TextField
-                {...register('data.prorataBroekTeller', {
-                  valueAsNumber: true,
-                  required: { value: true, message: 'Må settes' },
-                  min: { value: 0, message: 'Kan ikke være negativ' },
-                  validate: validerStringNumber,
-                })}
+                {...register('data.prorataBroekTeller')}
                 label=""
                 error={errors.data?.prorataBroekTeller?.message}
               />
               <BodyShort>/</BodyShort>
               <TextField
-                {...register('data.prorataBroekNevner', {
-                  valueAsNumber: true,
-                  required: { value: true, message: 'Må settes' },
-                  min: { value: 0, message: 'Kan ikke være negativ' },
-                  validate: validerStringNumber,
-                })}
+                {...register('data.prorataBroekNevner')}
                 label=""
                 error={errors.data?.prorataBroekNevner?.message}
               />

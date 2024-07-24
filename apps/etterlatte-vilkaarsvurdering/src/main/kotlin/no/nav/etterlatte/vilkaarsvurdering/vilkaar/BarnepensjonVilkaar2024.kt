@@ -24,7 +24,6 @@ object BarnepensjonVilkaar2024 {
         Vilkaar(
             Delvilkaar(
                 type = VilkaarType.BP_FORMAAL_2024,
-                tittel = "Lever barnet?",
                 beskrivelse =
                     """
                     Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde. Dette betyr at barnet må være i live for å ha rett på barnepensjon.
@@ -43,7 +42,6 @@ object BarnepensjonVilkaar2024 {
         Vilkaar(
             Delvilkaar(
                 type = VilkaarType.BP_DOEDSFALL_FORELDER_2024,
-                tittel = "Dødsfall forelder",
                 beskrivelse =
                     """
                     For å ha rett på ytelsen må en eller begge foreldre være registrer død i folkeregisteret eller hos utenlandske myndigheter.
@@ -62,7 +60,6 @@ object BarnepensjonVilkaar2024 {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_ALDER_BARN_2024,
-                    tittel = "Barnets alder",
                     beskrivelse =
                         """
                         For å ha rett på ytelsen må barnet være under 20 år på virkningstidspunktet.
@@ -85,7 +82,6 @@ object BarnepensjonVilkaar2024 {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024,
-                    tittel = "Barnets medlemskap",
                     beskrivelse =
                         """
                         For å ha rett på ytelsen må barnet være medlem i trygden.
@@ -114,7 +110,6 @@ object BarnepensjonVilkaar2024 {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_VURDERING_AV_EKSPORT_2024,
-                    tittel = "Vurdering av eksport",
                     beskrivelse =
                         """
                         Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har minimum tre poengår eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
@@ -143,7 +138,6 @@ object BarnepensjonVilkaar2024 {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
-                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For å ha rett på ytelsen må avdøde:
@@ -180,7 +174,6 @@ object BarnepensjonVilkaar2024 {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024,
-                    tittel = "Avdødes forutgående medlemskap - EØS/avtaleland",
                     beskrivelse =
                         """
                         Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. 
@@ -206,7 +199,6 @@ object BarnepensjonVilkaar2024 {
         Vilkaar(
             Delvilkaar(
                 type = VilkaarType.BP_YRKESSKADE_AVDOED_2024,
-                tittel = "Yrkesskade",
                 beskrivelse =
                     """
                     Ved dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13, ytes det barnepensjon etter følgende særbestemmelser:
@@ -228,7 +220,6 @@ object BarnepensjonVilkaar2024 {
     private fun yrkesskadeFordelPaaGammeltRegelverk() =
         Delvilkaar(
             type = VilkaarType.BP_ALDER_BARN_UNNTAK_YS_GAMMELT_REGELVERK,
-            tittel = "Ja. Bruker er innvilget barnepensjon før 01.01.2024 med yrkesskade-fordel og skal ha til fylte 21 år",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-11",
@@ -238,7 +229,6 @@ object BarnepensjonVilkaar2024 {
     private fun minstEttBarnForedreloestBarnekullMedlemTrygden() =
         Delvilkaar(
             type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN_2024,
-            tittel = "Ja. Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-3",
@@ -250,7 +240,6 @@ object BarnepensjonVilkaar2024 {
     private fun barnetsMedlemskapYrkesskade() =
         Delvilkaar(
             type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE_2024,
-            tittel = "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-11",
@@ -262,10 +251,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedMindreEnn20AarsSamletBotidMinimumTrePoengaar() =
         Delvilkaar(
             type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_TRE_POENGAAR_2024,
-            tittel =
-                """
-                Ja. Den avdøde har mindre enn 20 års botid, men har minimum tre poengår. Trygdetid beregnes bare etter faktiske poengår
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-3",
@@ -277,7 +262,6 @@ object BarnepensjonVilkaar2024 {
     private fun enForelderMinst20AarsSamletBotid() =
         Delvilkaar(
             type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID_2024,
-            tittel = "Ja. En av foreldrene har minst 20 års samlet botid",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-3",
@@ -289,10 +273,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedMedlemITrygdenIkkeFylt26Aar() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR_2024,
-            tittel =
-                """
-                Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-2",
@@ -304,10 +284,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR_2024,
-            tittel =
-                """
-                Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-2",
@@ -319,10 +295,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON_2024,
-            tittel =
-                """
-                Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-2",
@@ -333,10 +305,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedHaddeTidsromMedAvtalefestetPensjon() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON_2024,
-            tittel =
-                """
-                Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom med pensjon fra folketrygden
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-2",
@@ -347,10 +315,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING_2024,
-            tittel =
-                """
-                Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær barnepensjon
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-2",
@@ -361,7 +325,6 @@ object BarnepensjonVilkaar2024 {
     private fun avdoedMedlemskapYrkesskade() =
         Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE_2024,
-            tittel = "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 18-11",

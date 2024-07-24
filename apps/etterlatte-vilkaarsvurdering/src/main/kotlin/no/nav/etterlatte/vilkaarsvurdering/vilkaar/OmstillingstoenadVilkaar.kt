@@ -27,7 +27,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_ETTERLATTE_LEVER,
-                    tittel = "Lever den etterlatte?",
                     beskrivelse =
                         """
                         Formålet med omstillingsstønad er blant annet å sikre inntekt til ektefelle/partner/samboer/tidligere familiepleier. Dette betyr at den etterlatte må være i live for å ha rett til stønaden.
@@ -46,7 +45,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_DOEDSFALL,
-                    tittel = "Dødsfall ektefelle/partner/samboer",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt må dødsfallet gjelde ektefelle/partner/samboer, og det må være registrert i folkeregisteret eller hos utenlandske trygdemyndigheter. 
@@ -65,7 +63,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_OVERLAPPENDE_YTELSER,
-                    tittel = "Bortfall rettigheter etter § 17-11 første ledd?",
                     beskrivelse =
                         """
                         Retten til omstillingsstønad faller bort når etterlatte fyller 67 år eller tar ut alderspensjon, får rett til 100 % uføretrygd, mottar AFP fra en offentlig pensjonsordning eller gifter seg igjen, gjelder også samboere etter § 1-5.
@@ -85,7 +82,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_SIVILSTAND,
-                    tittel = "Rett til omstillingsstønad igjen etter § 17-11 andre ledd?",
                     beskrivelse =
                         """
                         Hvis en etterlatt som er innvilget omstillingsstønad etter § 17-5 tredje ledd (hadde rettigheter utover 3-5 år på grunn av lav inntekt siste fem år før dødsfall) inngår skilsmisse innen to år, får vedkommende rett til omstillingsstønad igjen.
@@ -105,7 +101,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_YRKESSKADE,
-                    tittel = "Dødsfall som skyldes yrkesskade eller yrkessykdom",
                     beskrivelse =
                         """
                         Ved dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13, ytes det omstillingsstønad til gjenlevende ektefelle etter følgende særbestemmelser:
@@ -130,7 +125,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP,
-                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle har rett til ytelser etter dette kapitlet, må den avdøde:
@@ -166,7 +160,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES,
-                    tittel = "Avdødes forutgående medlemskap - EØS/avtaleland",
                     beskrivelse =
                         """
                         Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. Det er bare de avtalelandene der det er opparbeidet minst ett års trygdetid som skal tas med i sammenleggingen.
@@ -190,10 +183,6 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapOpptjening() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_OPPTJENING,
-            tittel =
-                """
-                Ja, avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening minst svarende til grunnbeløpet
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2",
@@ -204,10 +193,6 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapPensjon() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_PENSJON,
-            tittel =
-                """
-                Ja, avdøde hadde avtalefestet pensjon, eller pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær pensjon til gjenlevende ektefelle
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2",
@@ -218,10 +203,6 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapOver16() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_OVER_16,
-            tittel =
-                """
-                Ja, avdøde var medlem av trygden ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2",
@@ -233,7 +214,6 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapUnder26() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_UNDER_26,
-            tittel = "Ja, avdøde var medlem av trygden ved dødsfallet og ikke fylt 26 år",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2",
@@ -245,7 +225,6 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapYrkesskade() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_YRKESSKADE,
-            tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-12",
@@ -259,7 +238,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP,
-                    tittel = "Gjenlevendes medlemskap",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ha rett til ytelser etter dette kapitlet, må vedkommende være medlem i trygden.
@@ -284,10 +262,6 @@ object OmstillingstoenadVilkaar {
     private fun gjenlevendesMedlemskapPensjon() =
         Delvilkaar(
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_PENSJON,
-            tittel =
-                """
-                Ja, både avdøde og gjenlevende har mindre enn 20 års botid, og det gis stønad med en trygdetid lik avdødes antall poengår
-                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-3",
@@ -298,7 +272,6 @@ object OmstillingstoenadVilkaar {
     private fun gjenlevendesMedlemskapBotid() =
         Delvilkaar(
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_BOTID,
-            tittel = "Ja, den avdøde eller den gjenlevende har minst 20 års samlet botid",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-3",
@@ -309,7 +282,6 @@ object OmstillingstoenadVilkaar {
     private fun gjenlevendesMedlemskapYrkesskade() =
         Delvilkaar(
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_YRKESSKADE,
-            tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-12",
@@ -323,7 +295,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_OEVRIGE_VILKAAR,
-                    tittel = "Øvrige vilkår for ytelser",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle (§1-5 samboer likestilles) ha rett til ytelser etter dette kapitlet, må ett av disse vilkårene være oppfylt på tidspunktet for dødsfallet:
@@ -348,7 +319,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
-                    tittel = "Krav til aktivitet etter 6 måneder",
                     beskrivelse =
                         """
                         Seks måneder etter dødsfallet er det et vilkår for rett til omstillingsstønad at den gjenlevende:
@@ -379,7 +349,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
-                    tittel = "Rett til stønad uten tidsbegrensning?",
                     beskrivelse =
                         """
                         Er etterlatte født i 1963 eller tidligere, kan hen få stønad frem til fylte 67 år hvis hen de siste fem årene før dødsfallet ikke har hatt en gjennomsnittlig årlig arbeidsinntekt som overstiger 2G det enkelte år. Den årlige arbeidsinntekten må i tillegg ikke ha oversteget 3G hvert av de siste to årene før dødsfallet. Er dette oppfylt er man også unntatt fra aktivitetsplikten.
@@ -399,7 +368,6 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_VURDERING_AV_EKSPORT,
-                    tittel = "Vurdering av eksport",
                     beskrivelse =
                         """
                         Omstillingsstønaden kan eksporteres hvis avdøde eller gjenlvende har minst 20 års samlet botid i Norge, eller hvis avdøde eller gjenlevende har mindre enn 20 års botid, men da redusert etter en trygdetid lik avdødes antall poengår i Norge.
@@ -426,7 +394,6 @@ object OmstillingstoenadVilkaar {
     private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() =
         Delvilkaar(
             type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT,
-            tittel = "Ja, gjenlevende er født i 1963 eller tidligere og har hatt lav inntekt",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",
@@ -437,7 +404,6 @@ object OmstillingstoenadVilkaar {
     private fun aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar() =
         Delvilkaar(
             type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_BARN_UNDER_1_AAR,
-            tittel = "Ja, gjenlevende har barn som er under 1 år",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",

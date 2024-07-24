@@ -9,12 +9,18 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun initRogR(
     restModule: (Application.() -> Unit)? = null,
-    configFromEnvironment: Config = AivenConfig.default,
+    configFromEnvironment: ((Map<String, String>) -> Config) = { AivenConfig.default },
     settOppRivers: (RapidsConnection, rapidEnv: Map<String, String>) -> Unit,
 ) {
     val rapidEnv = getRapidEnv()
 
-    var builder = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(rapidEnv, configFromEnvironment))
+    var builder =
+        RapidApplication.Builder(
+            RapidApplication.RapidApplicationConfig.fromEnv(
+                rapidEnv,
+                configFromEnvironment(rapidEnv),
+            ),
+        )
     if (restModule != null) {
         builder = builder.withKtorModule(restModule)
     }

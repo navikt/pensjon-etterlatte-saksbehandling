@@ -1,10 +1,15 @@
 import React, { useState } from 'react'
-import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import { BeregningsGrunnlagOMSDto, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
   beregningsMetode: null,
@@ -13,24 +18,63 @@ const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
 
 interface Props {
   redigerbar: boolean
-  oppdaterMetodeBrukt: (metode: BeregningsMetodeBeregningsgrunnlag) => void
-  eksisterendeMetode?: BeregningsMetodeBeregningsgrunnlag | null
+  behandling: IBehandlingReducer
+  beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
 }
 
-export const TrygdetidMetodeBrukt = ({ redigerbar, eksisterendeMetode, oppdaterMetodeBrukt }: Props) => {
+export const TrygdetidMetodeBruktOMS = ({ redigerbar, behandling, beregningsgrunnlag }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
+  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
+
   const { register, getValues, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlag>({
-    defaultValues: eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode,
+    defaultValues:
+      beregningsgrunnlag && beregningsgrunnlag.beregningsMetode
+        ? beregningsgrunnlag.beregningsMetode
+        : defaultBeregningMetode,
   })
 
-  return (
-    <form
-      onSubmit={handleSubmit((data) => {
-        oppdaterMetodeBrukt(data)
+  const slettBeregningsMetode = () => {
+    lagreBeregningsGrunnlagOMSRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag: {
+          ...beregningsgrunnlag,
+          // Hvis man skal "slette" metode, så defaulter man til beregningsmetode NASJONAL
+          beregningsMetode: {
+            beregningsMetode: BeregningsMetode.NASJONAL,
+            begrunnelse: '',
+          },
+          // TODO: finne riktig måte å handle insititusjonsopphold
+          institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+        },
+      },
+      () => {
+        reset(defaultBeregningMetode)
         setRedigerTrygdetidMetodeBrukt(false)
-      })}
-    >
+      }
+    )
+  }
+
+  const lagreBeregningsMetode = (data: BeregningsMetodeBeregningsgrunnlag) => {
+    lagreBeregningsGrunnlagOMSRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag: {
+          ...beregningsgrunnlag,
+          beregningsMetode: data,
+          // TODO: finne riktig måte å handle insititusjonsopphold
+          institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+        },
+      },
+      () => {
+        setRedigerTrygdetidMetodeBrukt(false)
+      }
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit(lagreBeregningsMetode)}>
       <VStack gap="4">
         <HStack gap="2" align="center">
           <TagIcon aria-hidden fontSize="1.5rem" />
@@ -66,10 +110,8 @@ export const TrygdetidMetodeBrukt = ({ redigerbar, eksisterendeMetode, oppdaterM
                     variant="secondary"
                     size="small"
                     icon={<TrashIcon aria-hidden />}
-                    onClick={() => {
-                      reset(defaultBeregningMetode)
-                      oppdaterMetodeBrukt(defaultBeregningMetode)
-                    }}
+                    loading={isPending(lagreBeregningsGrunnlagOMSResult)}
+                    onClick={slettBeregningsMetode}
                   >
                     Slett
                   </Button>
@@ -97,6 +139,12 @@ export const TrygdetidMetodeBrukt = ({ redigerbar, eksisterendeMetode, oppdaterM
             <Box width="15rem">
               <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
             </Box>
+
+            {isFailureHandler({
+              apiResult: lagreBeregningsGrunnlagOMSResult,
+              errorMessage: 'Feil i lagring av metode',
+            })}
+
             <HStack gap="4">
               <Button
                 type="button"
@@ -110,7 +158,11 @@ export const TrygdetidMetodeBrukt = ({ redigerbar, eksisterendeMetode, oppdaterM
               >
                 Avbryt
               </Button>
-              <Button size="small" icon={<FloppydiskIcon aria-hidden />}>
+              <Button
+                size="small"
+                icon={<FloppydiskIcon aria-hidden />}
+                loading={isPending(lagreBeregningsGrunnlagOMSResult)}
+              >
                 Lagre
               </Button>
             </HStack>

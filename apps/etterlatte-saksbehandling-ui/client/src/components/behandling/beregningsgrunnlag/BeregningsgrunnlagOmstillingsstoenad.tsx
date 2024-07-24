@@ -29,12 +29,13 @@ import {
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { TrygdetidMetodeBrukt } from '~components/behandling/beregningsgrunnlag/felles/TrygdetidMetodeBrukt'
+import { TrygdetidMetodeBruktOMS } from '~components/behandling/beregningsgrunnlag/felles/TrygdetidMetodeBruktOMS'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -101,58 +102,46 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     <>
       <>
         {mapResult(beregningsgrunnlagOMSResult, {
-          success: () => (
-            <TrygdetidMetodeBrukt
-              redigerbar={redigerbar}
-              oppdaterMetodeBrukt={setBeregningsMetodeBeregningsgrunnlag}
-              eksisterendeMetode={beregningsMetodeBeregningsgrunnlag}
-            />
+          pending: <Spinner visible label="Henter beregningsgrunnlag..." />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
+          success: (beregningsgrunnlag) => (
+            <>
+              <TrygdetidMetodeBruktOMS
+                redigerbar={redigerbar}
+                behandling={behandling}
+                beregningsgrunnlag={beregningsgrunnlag}
+              />
+              <InstitusjonsoppholdBeregning
+                reduksjonsTyper={ReduksjonOMS}
+                behandling={behandling}
+                onSubmit={(institusjonsoppholdGrunnlag) =>
+                  setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)
+                }
+                institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
+                lovtekstMedLenke={
+                  <LovtekstMedLenke
+                    tittel="Institusjonsopphold"
+                    hjemler={[
+                      {
+                        tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',
+                        lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
+                      },
+                    ]}
+                    status={null}
+                  >
+                    <p>
+                      Omstillingsstønad kan reduseres som følge av opphold i en institusjon med fri kost og losji under
+                      statlig ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i
+                      somatiske sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for
+                      at stønaden skal bli redusert. Dersom vedkommende har faste og nødvendige utgifter til bolig, skal
+                      stønaden ikke reduseres eller reduseres mindre enn hovedregelen sier. Ytelsen skal ikke reduseres
+                      når etterlatte forsørger barn.
+                    </p>
+                  </LovtekstMedLenke>
+                }
+              />
+            </>
           ),
-        })}
-        {isSuccess(beregningsgrunnlagOMSResult) && (
-          <>
-            {/*<BeregningsgrunnlagMetode*/}
-            {/*  redigerbar={redigerbar}*/}
-            {/*  grunnlag={beregningsMetodeBeregningsgrunnlag}*/}
-            {/*  onUpdate={(grunnlag) => {*/}
-            {/*    setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })*/}
-            {/*  }}*/}
-            {/*/>*/}
-          </>
-        )}
-        {isSuccess(beregningsgrunnlagOMSResult) && (
-          <InstitusjonsoppholdBeregning
-            reduksjonsTyper={ReduksjonOMS}
-            behandling={behandling}
-            onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
-            institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
-            lovtekstMedLenke={
-              <LovtekstMedLenke
-                tittel="Institusjonsopphold"
-                hjemler={[
-                  {
-                    tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',
-                    lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
-                  },
-                ]}
-                status={null}
-              >
-                <p>
-                  Omstillingsstønad kan reduseres som følge av opphold i en institusjon med fri kost og losji under
-                  statlig ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske
-                  sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at stønaden
-                  skal bli redusert. Dersom vedkommende har faste og nødvendige utgifter til bolig, skal stønaden ikke
-                  reduseres eller reduseres mindre enn hovedregelen sier. Ytelsen skal ikke reduseres når etterlatte
-                  forsørger barn.
-                </p>
-              </LovtekstMedLenke>
-            }
-          />
-        )}
-        <Spinner visible={isPending(beregningsgrunnlagOMSResult)} label="Henter beregningsgrunnlag" />
-        {isFailureHandler({
-          apiResult: beregningsgrunnlagOMSResult,
-          errorMessage: 'Beregningsgrunnlag kan ikke hentes',
         })}
       </>
       {isFailureHandler({ apiResult: endreBeregning, errorMessage: 'Kunne ikke opprette ny beregning' })}

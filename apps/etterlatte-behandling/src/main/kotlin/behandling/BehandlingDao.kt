@@ -305,6 +305,7 @@ class BehandlingDao(
                             "(skalViderefoere, dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?)" +
                             "ON CONFLICT (behandling_id) DO UPDATE SET " +
+                            "skalViderefoere=excluded.skalViderefoere, " +
                             "dato=excluded.dato, " +
                             "kilde=excluded.kilde, " +
                             "begrunnelse=excluded.begrunnelse, " +

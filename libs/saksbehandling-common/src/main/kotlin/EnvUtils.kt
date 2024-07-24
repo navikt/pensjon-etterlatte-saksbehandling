@@ -31,5 +31,7 @@ data class Miljoevariabler(
 
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())
+
+        fun systemEnv(key: String) = System.getenv(key)
     }
 }

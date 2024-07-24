@@ -1,15 +1,7 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.testdata.AppBuilder
 import no.nav.etterlatte.testdata.AutomatiskBehandlingRiver
-import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.initRogR
 
-fun main() {
-    val rapidEnv = getRapidEnv()
-    RapidApplication
-        .create(rapidEnv)
-        .also { rapidsConnection ->
-            AutomatiskBehandlingRiver(rapidsConnection, AppBuilder().lagBehandler())
-        }.start()
-}
+fun main() = initRogR { rapidsConnection, _ -> AutomatiskBehandlingRiver(rapidsConnection, AppBuilder().lagBehandler()) }

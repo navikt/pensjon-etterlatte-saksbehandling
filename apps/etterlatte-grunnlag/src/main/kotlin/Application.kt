@@ -33,7 +33,7 @@ import rapidsandrivers.initRogR
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    ApplicationBuilder()
+    ApplicationBuilder().init()
 }
 
 class ApplicationBuilder {
@@ -64,7 +64,7 @@ class ApplicationBuilder {
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
-    init {
+    fun init() =
         initRogR(
             restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
@@ -80,5 +80,4 @@ class ApplicationBuilder {
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
         }
-    }
 }

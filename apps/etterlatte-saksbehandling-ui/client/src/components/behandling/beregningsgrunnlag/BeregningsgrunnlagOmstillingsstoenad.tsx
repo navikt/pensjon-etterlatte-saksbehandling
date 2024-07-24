@@ -28,13 +28,13 @@ import {
 } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import Spinner from '~shared/Spinner'
-import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
+import { TrygdetidMetodeBrukt } from '~components/behandling/beregningsgrunnlag/felles/TrygdetidMetodeBrukt'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -101,13 +101,21 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     <>
       <>
         {isSuccess(beregningsgrunnlag) && (
-          <BeregningsgrunnlagMetode
-            redigerbar={redigerbar}
-            grunnlag={beregningsMetodeBeregningsgrunnlag}
-            onUpdate={(grunnlag) => {
-              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
-            }}
-          />
+          <>
+            {/*// TODO: flytte setting og oppdatering av inn hit*/}
+            <TrygdetidMetodeBrukt
+              redigerbar={redigerbar}
+              oppdaterMetodeBrukt={setBeregningsMetodeBeregningsgrunnlag}
+              eksisterendeMetode={beregningsMetodeBeregningsgrunnlag}
+            />
+            {/*<BeregningsgrunnlagMetode*/}
+            {/*  redigerbar={redigerbar}*/}
+            {/*  grunnlag={beregningsMetodeBeregningsgrunnlag}*/}
+            {/*  onUpdate={(grunnlag) => {*/}
+            {/*    setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })*/}
+            {/*  }}*/}
+            {/*/>*/}
+          </>
         )}
         {isSuccess(beregningsgrunnlag) && (
           <InstitusjonsoppholdBeregning

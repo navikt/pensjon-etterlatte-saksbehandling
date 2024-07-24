@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
-import { BeregningsGrunnlagOMSDto, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  BeregningsGrunnlagOMSDto,
+  BeregningsMetode,
+  BeregningsMetodeBeregningsgrunnlag,
+  InstitusjonsoppholdGrunnlagData,
+} from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
@@ -10,6 +15,7 @@ import { lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
   beregningsMetode: null,
@@ -20,9 +26,15 @@ interface Props {
   redigerbar: boolean
   behandling: IBehandlingReducer
   beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
+  institusjonsoppholdsGrunnlagData: InstitusjonsoppholdGrunnlagData | null
 }
 
-export const TrygdetidMetodeBruktOMS = ({ redigerbar, behandling, beregningsgrunnlag }: Props) => {
+export const TrygdetidMetodeBruktOMS = ({
+  redigerbar,
+  behandling,
+  beregningsgrunnlag,
+  institusjonsoppholdsGrunnlagData,
+}: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
   const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
@@ -45,8 +57,10 @@ export const TrygdetidMetodeBruktOMS = ({ redigerbar, behandling, beregningsgrun
             beregningsMetode: BeregningsMetode.NASJONAL,
             begrunnelse: '',
           },
-          // TODO: finne riktig måte å handle insititusjonsopphold
-          institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+          institusjonsopphold:
+            beregningsgrunnlag && institusjonsoppholdsGrunnlagData
+              ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
+              : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
         },
       },
       () => {
@@ -63,8 +77,10 @@ export const TrygdetidMetodeBruktOMS = ({ redigerbar, behandling, beregningsgrun
         grunnlag: {
           ...beregningsgrunnlag,
           beregningsMetode: data,
-          // TODO: finne riktig måte å handle insititusjonsopphold
-          institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+          institusjonsopphold:
+            beregningsgrunnlag && institusjonsoppholdsGrunnlagData
+              ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
+              : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
         },
       },
       () => {

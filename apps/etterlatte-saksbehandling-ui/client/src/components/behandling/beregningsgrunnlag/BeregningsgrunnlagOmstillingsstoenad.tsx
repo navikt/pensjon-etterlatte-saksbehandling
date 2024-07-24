@@ -110,6 +110,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
                 redigerbar={redigerbar}
                 behandling={behandling}
                 beregningsgrunnlag={beregningsgrunnlag}
+                institusjonsoppholdsGrunnlagData={institusjonsoppholdsGrunnlagData}
               />
               <InstitusjonsoppholdBeregning
                 reduksjonsTyper={ReduksjonOMS}

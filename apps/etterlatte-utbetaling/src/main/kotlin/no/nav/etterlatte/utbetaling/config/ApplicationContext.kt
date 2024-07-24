@@ -3,7 +3,6 @@ package no.nav.etterlatte.utbetaling.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
@@ -13,12 +12,9 @@ import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
-import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.BehandlingKlient
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
@@ -28,7 +24,6 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
-import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
 import no.nav.etterlatte.utbetaling.common.februar
@@ -40,8 +35,6 @@ import no.nav.etterlatte.utbetaling.common.mars
 import no.nav.etterlatte.utbetaling.common.november
 import no.nav.etterlatte.utbetaling.common.oktober
 import no.nav.etterlatte.utbetaling.common.september
-import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
-import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -51,8 +44,6 @@ import no.nav.etterlatte.utbetaling.simulering.SimuleringDao
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
-import no.nav.etterlatte.utbetaling.utbetalingRoutes
-import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
 import java.time.LocalTime
@@ -72,7 +63,7 @@ class ApplicationContext(
             password = properties.serviceUserPassword,
         ),
     // Overridable clients
-    config: Config = ConfigFactory.load(),
+    val config: Config = ConfigFactory.load(),
     httpClient: HttpClient = httpClient(),
     val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
     val vedtaksvurderingKlient: VedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient),
@@ -139,7 +130,7 @@ class ApplicationContext(
         )
     }
 
-    private val simuleringOsService =
+    internal val simuleringOsService =
         SimuleringOsService(
             utbetalingDao,
             vedtaksvurderingKlient,
@@ -195,40 +186,6 @@ class ApplicationContext(
             clock = clock,
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
-
-    val rapidsConnection =
-        rapidConnection ?: RapidApplication
-            .Builder(
-                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-            ).withKtorModule {
-                restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    utbetalingRoutes(simuleringOsService, behandlingKlient)
-                }
-            }.build()
-
-    val oppgavetriggerRiver by lazy {
-        OppgavetriggerRiver(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-            grensesnittsavstemmingService = grensesnittsavstemmingService,
-        )
-    }
-
-    val kvitteringMottaker by lazy {
-        KvitteringMottaker(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = properties.mqKvitteringQueue,
-        )
-    }
-
-    val vedtakMottakRiver by lazy {
-        VedtakMottakRiver(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-        )
-    }
 }
 
 /**

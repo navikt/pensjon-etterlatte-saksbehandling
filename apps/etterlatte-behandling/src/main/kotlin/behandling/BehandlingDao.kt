@@ -304,7 +304,7 @@ class BehandlingDao(
                         "INSERT INTO viderefoert_opphoer " +
                             "(skalViderefoere, dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?)" +
-                            "ON CONFLICT (id) DO UPDATE SET " +
+                            "ON CONFLICT (behandling_id) DO UPDATE SET " +
                             "dato=excluded.dato, " +
                             "kilde=excluded.kilde, " +
                             "begrunnelse=excluded.begrunnelse, " +

@@ -34,7 +34,7 @@ class AppBuilder(
             auth = {
                 it.install(Auth) {
                     clientCredential {
-                        config = env.append("AZURE_APP_OUTBOUND_SCOPE", { requireNotNull(it.get(scope)) })
+                        config = env.append("AZURE_APP_OUTBOUND_SCOPE") { requireNotNull(it[scope]) }
                     }
                 }
             },

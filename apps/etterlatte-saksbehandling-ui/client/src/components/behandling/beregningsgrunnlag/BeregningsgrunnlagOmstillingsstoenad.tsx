@@ -29,7 +29,7 @@ import {
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
@@ -47,7 +47,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlagOMS)
+  const [beregningsgrunnlagOMSResult, beregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
   const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
@@ -56,7 +56,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     useState<BeregningsMetodeBeregningsgrunnlag | null>(null)
 
   useEffect(() => {
-    fetchBeregningsgrunnlag(behandling.id, (result) => {
+    beregningsgrunnlagOMSRequest(behandling.id, (result) => {
       if (result) {
         dispatch(
           oppdaterBeregingsGrunnlagOMS({
@@ -100,14 +100,17 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   return (
     <>
       <>
-        {isSuccess(beregningsgrunnlag) && (
-          <>
-            {/*// TODO: flytte setting og oppdatering av inn hit*/}
+        {mapResult(beregningsgrunnlagOMSResult, {
+          success: () => (
             <TrygdetidMetodeBrukt
               redigerbar={redigerbar}
               oppdaterMetodeBrukt={setBeregningsMetodeBeregningsgrunnlag}
               eksisterendeMetode={beregningsMetodeBeregningsgrunnlag}
             />
+          ),
+        })}
+        {isSuccess(beregningsgrunnlagOMSResult) && (
+          <>
             {/*<BeregningsgrunnlagMetode*/}
             {/*  redigerbar={redigerbar}*/}
             {/*  grunnlag={beregningsMetodeBeregningsgrunnlag}*/}
@@ -117,7 +120,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             {/*/>*/}
           </>
         )}
-        {isSuccess(beregningsgrunnlag) && (
+        {isSuccess(beregningsgrunnlagOMSResult) && (
           <InstitusjonsoppholdBeregning
             reduksjonsTyper={ReduksjonOMS}
             behandling={behandling}
@@ -146,8 +149,11 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             }
           />
         )}
-        <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />
-        {isFailureHandler({ apiResult: beregningsgrunnlag, errorMessage: 'Beregningsgrunnlag kan ikke hentes' })}
+        <Spinner visible={isPending(beregningsgrunnlagOMSResult)} label="Henter beregningsgrunnlag" />
+        {isFailureHandler({
+          apiResult: beregningsgrunnlagOMSResult,
+          errorMessage: 'Beregningsgrunnlag kan ikke hentes',
+        })}
       </>
       {isFailureHandler({ apiResult: endreBeregning, errorMessage: 'Kunne ikke opprette ny beregning' })}
       {isFailureHandler({ apiResult: lagreBeregningsgrunnlagOMS, errorMessage: 'lagreBeregningsgrunnlagOMS' })}

@@ -77,7 +77,7 @@ export const OverstyrtTrygdetid = ({
                 {getValues().overstyrtNorskPoengaar && (
                   <Button
                     type="button"
-                    variant="danger"
+                    variant="secondary"
                     size="small"
                     icon={<TrashIcon aria-hidden />}
                     onClick={() => {

@@ -95,7 +95,6 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
 }
 
 const BeregningsgrunnlagMetodeWrapper = styled.div`
-  padding: 1em 4em;
   max-width: 70em;
   margin-bottom: 1rem;
 `

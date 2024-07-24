@@ -28,7 +28,6 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
-import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
 import no.nav.etterlatte.utbetaling.common.februar
@@ -40,8 +39,6 @@ import no.nav.etterlatte.utbetaling.common.mars
 import no.nav.etterlatte.utbetaling.common.november
 import no.nav.etterlatte.utbetaling.common.oktober
 import no.nav.etterlatte.utbetaling.common.september
-import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
-import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -205,30 +202,6 @@ class ApplicationContext(
                     utbetalingRoutes(simuleringOsService, behandlingKlient)
                 }
             }.build()
-
-    val oppgavetriggerRiver by lazy {
-        OppgavetriggerRiver(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-            grensesnittsavstemmingService = grensesnittsavstemmingService,
-        )
-    }
-
-    val kvitteringMottaker by lazy {
-        KvitteringMottaker(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = properties.mqKvitteringQueue,
-        )
-    }
-
-    val vedtakMottakRiver by lazy {
-        VedtakMottakRiver(
-            rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService,
-        )
-    }
 }
 
 /**

@@ -4,7 +4,10 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
+import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
+import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 
@@ -37,9 +40,21 @@ fun jobs(applicationContext: ApplicationContext): MutableSet<TimerJob> {
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
     applicationContext.rapidsConnection
         .apply {
-            applicationContext.vedtakMottakRiver
-            applicationContext.kvitteringMottaker
-            applicationContext.oppgavetriggerRiver
+            VedtakMottakRiver(
+                rapidsConnection = this,
+                utbetalingService = applicationContext.utbetalingService,
+            )
+            KvitteringMottaker(
+                rapidsConnection = this,
+                utbetalingService = applicationContext.utbetalingService,
+                jmsConnectionFactory = applicationContext.jmsConnectionFactory,
+                queue = applicationContext.properties.mqKvitteringQueue,
+            )
+            OppgavetriggerRiver(
+                rapidsConnection = this,
+                utbetalingService = applicationContext.utbetalingService,
+                grensesnittsavstemmingService = applicationContext.grensesnittsavstemmingService,
+            )
 
             register(
                 object : RapidsConnection.StatusListener {

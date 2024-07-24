@@ -143,23 +143,13 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             <Label>Prorata brøk (valgfritt)</Label>
             <HStack gap="3" align="center">
               <TextField
-                {...register('data.prorataBroekTeller', {
-                  valueAsNumber: true,
-                  required: { value: true, message: 'Må settes' },
-                  min: { value: 0, message: 'Kan ikke være negativ' },
-                  validate: validerStringNumber,
-                })}
+                {...register('data.prorataBroekTeller')}
                 label=""
                 error={errors.data?.prorataBroekTeller?.message}
               />
               <BodyShort>/</BodyShort>
               <TextField
-                {...register('data.prorataBroekNevner', {
-                  valueAsNumber: true,
-                  required: { value: true, message: 'Må settes' },
-                  min: { value: 0, message: 'Kan ikke være negativ' },
-                  validate: validerStringNumber,
-                })}
+                {...register('data.prorataBroekNevner')}
                 label=""
                 error={errors.data?.prorataBroekNevner?.message}
               />

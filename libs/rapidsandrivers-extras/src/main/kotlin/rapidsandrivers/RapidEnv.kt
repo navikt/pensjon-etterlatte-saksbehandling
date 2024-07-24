@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.helse.rapids_rivers.AivenConfig
 import no.nav.helse.rapids_rivers.Config
 import org.apache.kafka.clients.CommonClientConfigs
@@ -8,12 +9,11 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import java.util.Properties
 
-fun getRapidEnv(): Map<String, String> =
-    System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }
+fun getRapidEnv(): Miljoevariabler =
+    Miljoevariabler(System.getenv())
+        .append("KAFKA_CONSUMER_GROUP_ID") { it["NAIS_APP_NAME"]!!.replace("-", "") }
 
-fun configFromEnvironment(env: Map<String, String>): Config {
+fun configFromEnvironment(env: Miljoevariabler): Config {
     val gcpConfigAvailable = env.containsKey("KAFKA_BROKERS") && env.containsKey("KAFKA_CREDSTORE_PASSWORD")
     return if (gcpConfigAvailable) {
         AivenConfig.default
@@ -23,7 +23,7 @@ fun configFromEnvironment(env: Map<String, String>): Config {
 }
 
 class LocalKafkaConfig(
-    private val env: Map<String, String>,
+    private val env: Miljoevariabler,
 ) : Config {
     override fun producerConfig(properties: Properties): Properties =
         properties.apply {

@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.ktor.client.ClientCallLogging
@@ -30,11 +31,13 @@ fun httpClientClientCredentials(
         it.install(Auth) {
             clientCredential {
                 config =
-                    mapOf(
-                        "AZURE_APP_CLIENT_ID" to azureAppClientId,
-                        "AZURE_APP_JWK" to azureAppJwk,
-                        "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
-                        "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope,
+                    Miljoevariabler(
+                        mapOf(
+                            "AZURE_APP_CLIENT_ID" to azureAppClientId,
+                            "AZURE_APP_JWK" to azureAppJwk,
+                            "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
+                            "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope,
+                        ),
                     )
             }
         }

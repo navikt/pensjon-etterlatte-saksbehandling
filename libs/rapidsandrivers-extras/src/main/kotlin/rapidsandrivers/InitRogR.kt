@@ -1,6 +1,7 @@
 package rapidsandrivers
 
 import io.ktor.server.application.Application
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.AivenConfig
@@ -11,8 +12,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 fun initRogR(
     applikasjonsnavn: String,
     restModule: (Application.() -> Unit)? = null,
-    configFromEnvironment: ((Map<String, String>) -> Config) = { AivenConfig.default },
-    settOppRivers: (RapidsConnection, rapidEnv: Map<String, String>) -> Unit,
+    configFromEnvironment: ((Miljoevariabler) -> Config) = { AivenConfig.default },
+    settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstartOgAvslutning("etterlatte-$applikasjonsnavn")
     val rapidEnv = getRapidEnv()
@@ -20,7 +21,7 @@ fun initRogR(
     var builder =
         RapidApplication.Builder(
             RapidApplication.RapidApplicationConfig.fromEnv(
-                rapidEnv,
+                rapidEnv.props,
                 configFromEnvironment(rapidEnv),
             ),
         )

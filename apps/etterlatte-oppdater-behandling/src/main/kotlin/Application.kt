@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
@@ -12,7 +11,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
+    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(rapidEnv)) }
 }
 
 private fun settOppRivers(

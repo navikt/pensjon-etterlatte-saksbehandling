@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
+
 data class ApplicationProperties(
     val dbName: String,
     val dbHost: String,
@@ -22,7 +24,7 @@ data class ApplicationProperties(
     val konsistensavstemmingOMSEnabled: Boolean,
 ) {
     companion object {
-        fun fromEnv(env: Map<String, String>) =
+        fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
                     dbName = value("DB_DATABASE"),
@@ -47,6 +49,6 @@ data class ApplicationProperties(
                 )
             }
 
-        private fun Map<String, String>.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
+        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
     }
 }

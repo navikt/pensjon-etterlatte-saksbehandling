@@ -20,7 +20,7 @@ class AppContext(
 ) {
     private val config: Config = ConfigFactory.load()
 
-    val dataSource = DataSourceBuilder.createDataSource(env.props)
+    val dataSource = DataSourceBuilder.createDataSource(env)
 
     private val grunnlagHttpClient: HttpClient by lazy {
         httpClientClientCredentials(

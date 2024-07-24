@@ -2,15 +2,15 @@ package no.nav.etterlatte.klage
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 val sikkerLogg = sikkerlogger()
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    private val env = System.getenv()
+    private val env = Miljoevariabler(System.getenv())
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 
     private val kabalHttpClient =

@@ -21,4 +21,11 @@ data class Miljoevariabler(
         key: String,
         default: String,
     ) = props.getOrDefault(key, default)
+
+    fun append(
+        key: String,
+        value: (Map<String, String>) -> String,
+    ) = this.apply { props.toMutableMap()[key] = value(props) }
+
+    fun containsKey(key: String) = props.containsKey(key)
 }

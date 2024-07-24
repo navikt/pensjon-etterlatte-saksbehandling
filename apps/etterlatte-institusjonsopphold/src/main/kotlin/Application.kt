@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
 import no.nav.etterlatte.kafka.KafkaConsumerInstitusjonsopphold
 import no.nav.etterlatte.kafka.startLytting
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
@@ -23,14 +24,14 @@ class Server {
         )
 
     fun run() {
-        val env = System.getenv().toMutableMap()
+        val env = Miljoevariabler(System.getenv().toMutableMap())
         startInstitusjonsoppholdLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }
 }
 
 fun startInstitusjonsoppholdLytter(
-    env: Map<String, String>,
+    env: Miljoevariabler,
     config: Config,
 ) {
     val logger = LoggerFactory.getLogger(Application::class.java)

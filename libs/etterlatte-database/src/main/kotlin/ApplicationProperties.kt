@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.database
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
+
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
@@ -7,7 +9,7 @@ class ApplicationProperties(
     val httpPort: Int,
 ) {
     companion object {
-        fun fromEnv(env: Map<String, String>) =
+        fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
                     jdbcUrl =
@@ -22,8 +24,8 @@ class ApplicationProperties(
                 )
             }
 
-        private fun Map<String, String>.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
+        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
 
-        private fun Map<String, String>.valueOrNull(property: String): String? = this[property]
+        private fun Miljoevariabler.valueOrNull(property: String): String? = this[property]
     }
 }

@@ -9,11 +9,11 @@ import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
 import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
-    env: Map<String, String> = System.getenv(),
+    env: Miljoevariabler = Miljoevariabler(System.getenv()),
 ) {
     private val config: Config = ConfigFactory.load()
 

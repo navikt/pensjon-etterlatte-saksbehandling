@@ -39,6 +39,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -78,7 +79,7 @@ val producer =
     if (localDevelopment) {
         LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
     } else {
-        GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
+        GcpKafkaConfig.fromEnv(Miljoevariabler((System.getenv()))).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
     }
 
 interface TestDataFeature {

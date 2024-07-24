@@ -7,6 +7,7 @@ import io.ktor.client.plugins.auth.AuthProvider
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.auth.HttpAuthHeader
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.security.token.support.client.core.ClientAuthenticationProperties
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.OAuth2CacheFactory
@@ -24,11 +25,11 @@ fun Auth.clientCredential(block: ClientCredentialAuthConfig.() -> Unit) {
 }
 
 class ClientCredentialAuthConfig {
-    lateinit var config: Map<String, String>
+    lateinit var config: Miljoevariabler
 }
 
 class ClientCredentialAuthProvider(
-    config: Map<String, String>,
+    config: Miljoevariabler,
 ) : AuthProvider {
     @Deprecated("Please use sendWithoutRequest function instead")
     override val sendWithoutRequest: Boolean = true
@@ -52,7 +53,7 @@ class ClientCredentialAuthProvider(
             tokenExchange = null,
         )
 
-    private fun Map<String, String>.getOrThrow(key: String) =
+    private fun Miljoevariabler.getOrThrow(key: String) =
         this[key]
             ?: throw IllegalArgumentException("Missing configuration property '$key'")
 

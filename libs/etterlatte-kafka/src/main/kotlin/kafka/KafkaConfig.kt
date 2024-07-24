@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -20,12 +21,12 @@ class GcpKafkaConfig(
     private val clientId: String,
 ) : KafkaConfig {
     companion object {
-        private fun generateInstanceId(env: Map<String, String>): String {
+        private fun generateInstanceId(env: Miljoevariabler): String {
             if (env.containsKey("NAIS_APP_NAME")) return InetAddress.getLocalHost().hostName
             return UUID.randomUUID().toString()
         }
 
-        fun fromEnv(env: Map<String, String>): KafkaConfig =
+        fun fromEnv(env: Miljoevariabler): KafkaConfig =
             GcpKafkaConfig(
                 bootstrapServers = env.getValue("KAFKA_BROKERS"),
                 truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),

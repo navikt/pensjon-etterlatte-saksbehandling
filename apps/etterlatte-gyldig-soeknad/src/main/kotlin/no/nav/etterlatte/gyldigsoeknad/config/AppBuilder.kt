@@ -34,10 +34,7 @@ class AppBuilder(
             auth = {
                 it.install(Auth) {
                     clientCredential {
-                        config =
-                            env.props
-                                .toMutableMap()
-                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                        config = env.append("AZURE_APP_OUTBOUND_SCOPE", { requireNotNull(it.get(scope)) })
                     }
                 }
             },

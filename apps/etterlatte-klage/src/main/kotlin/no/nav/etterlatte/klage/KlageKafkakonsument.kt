@@ -3,13 +3,14 @@ package no.nav.etterlatte.klage
 import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import no.nav.etterlatte.kafka.Kafkakonsument
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
 class KlageKafkakonsument(
-    env: Map<String, String>,
+    env: Miljoevariabler,
     topic: String,
     private val behandlingKlient: BehandlingKlient,
 ) : Kafkakonsument<String>(

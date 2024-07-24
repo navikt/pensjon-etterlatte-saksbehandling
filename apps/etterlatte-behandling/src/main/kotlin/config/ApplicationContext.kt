@@ -226,7 +226,7 @@ internal class ApplicationContext(
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
         } else {
             TestProdusent()
         },
@@ -265,7 +265,7 @@ internal class ApplicationContext(
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
-    val dataSource = DataSourceBuilder.createDataSource(env.props)
+    val dataSource = DataSourceBuilder.createDataSource(env)
 
     // Dao
     val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)

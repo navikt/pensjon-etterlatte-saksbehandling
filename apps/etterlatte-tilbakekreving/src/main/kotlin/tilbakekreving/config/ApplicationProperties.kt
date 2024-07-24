@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.jdbcUrl
 
 data class ApplicationProperties(
@@ -24,7 +25,7 @@ data class ApplicationProperties(
     val devMode: Boolean,
 ) {
     companion object {
-        fun fromEnv(env: Map<String, String>) =
+        fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
                     httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080,
@@ -54,8 +55,8 @@ data class ApplicationProperties(
                 )
             }
 
-        private fun Map<String, String>.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
+        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
 
-        private fun Map<String, String>.valueOrNull(property: String): String? = this[property]
+        private fun Miljoevariabler.valueOrNull(property: String): String? = this[property]
     }
 }

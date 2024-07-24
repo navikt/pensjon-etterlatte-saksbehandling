@@ -2,10 +2,10 @@ package no.nav.etterlatte.samordning
 
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 
 class ApplicationContext(
-    env: Map<String, String> = System.getenv(),
+    env: Miljoevariabler = Miljoevariabler(System.getenv()),
 ) {
     private val handler =
         SamordningHendelseHandler(

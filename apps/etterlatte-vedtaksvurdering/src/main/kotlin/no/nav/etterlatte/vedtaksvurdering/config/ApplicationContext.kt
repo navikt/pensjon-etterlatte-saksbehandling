@@ -10,10 +10,10 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -46,7 +46,7 @@ class ApplicationContext {
         sikkerLoggOppstartOgAvslutning("etterlatte-vedtaksvurdering")
     }
 
-    val env = System.getenv()
+    val env = Miljoevariabler(System.getenv())
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)

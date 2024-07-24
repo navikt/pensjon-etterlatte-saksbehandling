@@ -6,11 +6,11 @@ import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
-    private val env: Map<String, String> = System.getenv(),
+    private val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     private val pdlTjenesterKlient: PdlTjenesterKlient =
         PdlTjenesterKlient(
             httpClient =

@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.jobs.next
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
@@ -50,7 +51,7 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
-    val env: Map<String, String> = getRapidEnv(),
+    val env: Miljoevariabler = getRapidEnv(),
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env),
     rapidConnection: RapidsConnection? = null,
     val jmsConnectionFactory: EtterlatteJmsConnectionFactory =

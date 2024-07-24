@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -9,7 +10,7 @@ import java.time.Duration
 import java.util.Properties
 
 interface KafkaConsumerConfiguration {
-    fun generateKafkaConsumerProperties(env: Map<String, String>): Properties
+    fun generateKafkaConsumerProperties(env: Miljoevariabler): Properties
 }
 
 abstract class Kafkakonfigurasjon<T>(
@@ -20,7 +21,7 @@ abstract class Kafkakonfigurasjon<T>(
     private val isolationLevelConfig: String? = null,
     private val specificAvroReaderConfig: Boolean? = null,
 ) : KafkaConsumerConfiguration {
-    override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties =
+    override fun generateKafkaConsumerProperties(env: Miljoevariabler): Properties =
         Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)

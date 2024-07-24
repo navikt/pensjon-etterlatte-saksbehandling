@@ -62,7 +62,6 @@ import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -299,9 +298,7 @@ class ApplicationBuilder {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env
-                                .toMutableMap()
-                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                            env.append("AZURE_APP_OUTBOUND_SCOPE") { requireNotNull(it.get(scope)) }
                     }
                 }
                 it.install(HttpTimeout)

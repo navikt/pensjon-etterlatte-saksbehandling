@@ -1,7 +1,7 @@
 package no.nav.etterlatte.statistikk.config
 
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class ApplicationContext {
-    private val env = System.getenv()
+    private val env = Miljoevariabler(System.getenv())
     private val statistikkService: StatistikkService by lazy {
         StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient, aktivitetspliktService)
     }

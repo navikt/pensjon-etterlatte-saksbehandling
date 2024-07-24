@@ -24,7 +24,7 @@ class Server {
         )
 
     fun run() {
-        val env = Miljoevariabler(System.getenv().toMutableMap())
+        val env = Miljoevariabler.systemEnv()
         startInstitusjonsoppholdLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }

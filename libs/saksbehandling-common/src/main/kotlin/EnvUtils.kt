@@ -29,7 +29,7 @@ data class Miljoevariabler(
 
     fun containsKey(key: String) = props.containsKey(key)
 
-    fun value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
+    fun value(property: String): String = getValue(property)
 
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())

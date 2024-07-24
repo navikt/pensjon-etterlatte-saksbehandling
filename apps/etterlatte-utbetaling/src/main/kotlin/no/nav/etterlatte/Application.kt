@@ -20,7 +20,14 @@ val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().also {
-        rapidApplication(it)
+        initRogR(
+            restModule = {
+                restModule(sikkerLogg, config = HoconApplicationConfig(it.config)) {
+                    utbetalingRoutes(it.simuleringOsService, it.behandlingKlient)
+                }
+            },
+            configFromEnvironment = { configFromEnvironment(it) },
+        ) { rc, _ -> rc.settOppRiversOgListener(it) }
         sikkerLogg.info("Utbetaling logger på sikkerlogg")
     }
 }
@@ -41,16 +48,6 @@ fun jobs(applicationContext: ApplicationContext): MutableSet<TimerJob> {
     }
     return jobs
 }
-
-fun rapidApplication(applicationContext: ApplicationContext) =
-    initRogR(
-        restModule = {
-            restModule(sikkerLogg, config = HoconApplicationConfig(applicationContext.config)) {
-                utbetalingRoutes(applicationContext.simuleringOsService, applicationContext.behandlingKlient)
-            }
-        },
-        configFromEnvironment = { configFromEnvironment(it) },
-    ) { rc, _ -> rc.settOppRiversOgListener(applicationContext) }
 
 internal fun RapidsConnection.settOppRiversOgListener(applicationContext: ApplicationContext) {
     VedtakMottakRiver(

@@ -1,7 +1,7 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { OverstyrBeregningsperiode, OverstyrtAarsakKey } from '~shared/types/Beregning'
-import { addMonths } from 'date-fns'
+import { addMonths, lastDayOfMonth } from 'date-fns'
 import { formaterTilISOString } from '~utils/formatering/dato'
 
 export const stripWhitespace = (s: string | number): string => {
@@ -38,6 +38,10 @@ export const initialOverstyrBeregningsgrunnlagPeriode = (
       aarsak: 'VELG_AARSAK',
     },
   }
+}
+
+export const konverterTilSisteDagIMaaneden = (dato: string): string => {
+  return formaterTilISOString(lastDayOfMonth(dato))
 }
 
 export const validerAarsak = (aarsak: OverstyrtAarsakKey | undefined): string | undefined => {

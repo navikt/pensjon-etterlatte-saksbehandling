@@ -28,7 +28,7 @@ data class ApplicationProperties(
         fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
-                    httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080,
+                    httpPort = get("HTTP_PORT")?.toInt() ?: 8080,
                     mqHost = value("MQ_HOSTNAME"),
                     mqPort = value("MQ_PORT").toInt(),
                     mqQueueManager = value("MQ_MANAGER"),
@@ -51,7 +51,7 @@ data class ApplicationProperties(
                     behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
                     proxyUrl = value("ETTERLATTE_PROXY_URL"),
                     proxyScope = value("ETTERLATTE_PROXY_SCOPE"),
-                    devMode = valueOrNull("DEV_MODE").toBoolean(),
+                    devMode = get("DEV_MODE").toBoolean(),
                 )
             }
     }

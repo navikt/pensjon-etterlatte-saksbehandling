@@ -20,7 +20,7 @@ class ApplicationProperties(
                         ),
                     dbUsername = value("DB_USERNAME"),
                     dbPassword = value("DB_PASSWORD"),
-                    httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080,
+                    httpPort = get("HTTP_PORT")?.toInt() ?: 8080,
                 )
             }
     }

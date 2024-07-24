@@ -31,8 +31,6 @@ data class Miljoevariabler(
 
     fun value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
 
-    fun valueOrNull(property: String): String? = this[property]
-
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())
 

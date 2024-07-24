@@ -27,16 +27,14 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
+import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    val application = ApplicationBuilder()
-    application.start()
+    ApplicationBuilder()
 }
 
 class ApplicationBuilder {
@@ -67,10 +65,9 @@ class ApplicationBuilder {
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
-    private val rapidsConnection =
-        RapidApplication
-            .Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
-            .withKtorModule {
+    init {
+        initRogR(
+            restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
                         sakGrunnlagRoute(grunnlagService, behandlingKlient)
@@ -79,11 +76,11 @@ class ApplicationBuilder {
                         aldersovergangRoutes(aldersovergangService)
                     }
                 }
-            }.build()
-            .apply {
-                GrunnlagsversjoneringRiver(this, grunnlagService)
-                GrunnlagHendelserRiver(this, grunnlagService)
-            }
-
-    fun start() = setReady().also { rapidsConnection.start() }
+            },
+            setReady = { setReady() },
+        ) {
+            GrunnlagsversjoneringRiver(it, grunnlagService)
+            GrunnlagHendelserRiver(it, grunnlagService)
+        }
+    }
 }

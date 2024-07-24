@@ -12,7 +12,7 @@ import no.nav.etterlatte.vedtaksvurdering.samordning.SamordningMottattRiver
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR { rapidsConnection, rapidEnv ->
+    initRogR("vedtaksvurdering-kafka") { rapidsConnection, rapidEnv ->
         val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
         val vedtakKlient = appBuilder.lagVedtakKlient()
         LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)

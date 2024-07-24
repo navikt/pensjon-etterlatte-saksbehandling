@@ -10,7 +10,7 @@ import rapidsandrivers.initRogR
 import java.util.Timer
 
 fun main() =
-    initRogR(configFromEnvironment = { configFromEnvironment(it) }) { rapidsConnection, rapidEnv ->
+    initRogR("tidshendelser", configFromEnvironment = { configFromEnvironment(it) }) { rapidsConnection, rapidEnv ->
         val miljoevariabler = Miljoevariabler(rapidEnv)
         val appContext =
             AppContext(miljoevariabler) { key, message -> rapidsConnection.publish(key.toString(), message) }

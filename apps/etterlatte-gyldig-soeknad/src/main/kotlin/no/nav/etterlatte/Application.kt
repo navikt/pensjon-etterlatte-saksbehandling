@@ -10,7 +10,7 @@ import rapidsandrivers.initRogR
 val sikkerLogg = sikkerlogger()
 
 fun main() =
-    initRogR { rapidsConnection, rapidEnv ->
+    initRogR("gyldig-soeknad") { rapidsConnection, rapidEnv ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
 
         NySoeknadRiver(

@@ -5,6 +5,6 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsut
 import rapidsandrivers.initRogR
 
 fun main() =
-    initRogR { rapidsConnection, _ ->
+    initRogR("opplysninger-fra-soeknad") { rapidsConnection, _ ->
         StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
     }

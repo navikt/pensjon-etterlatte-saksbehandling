@@ -19,7 +19,6 @@ import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -37,10 +36,6 @@ fun main() {
 }
 
 class ApplicationBuilder {
-    init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-grunnlag")
-    }
-
     private val env = getRapidEnv()
     private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
     private val config: Config = ConfigFactory.load()
@@ -66,6 +61,7 @@ class ApplicationBuilder {
 
     fun init() =
         initRogR(
+            applikasjonsnavn = "grunnlag",
             restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {

@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
@@ -19,10 +18,6 @@ fun main() = ApplicationContext().let { Server(it).run() }
 internal class Server(
     private val context: ApplicationContext,
 ) {
-    init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-migrering")
-    }
-
     fun run() =
         with(context) {
             dataSource.migrate()
@@ -34,7 +29,7 @@ internal class Server(
                     migreringRoute(pesysRepository)
                 }
             }
-            initRogR(restModule) { rapidsConnection, _ ->
+            initRogR("migrering", restModule) { rapidsConnection, _ ->
                 LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository)
                 LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                 FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)

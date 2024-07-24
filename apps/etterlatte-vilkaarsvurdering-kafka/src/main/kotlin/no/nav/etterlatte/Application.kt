@@ -7,7 +7,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRiver
 import rapidsandrivers.initRogR
 
 fun main() =
-    initRogR { rapidsConnection, rapidEnv ->
+    initRogR("vilkaarsvurdering-kafka") { rapidsConnection, rapidEnv ->
         val vilkaarsvurderingService = AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient()
         VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
         TidshendelseRiver(rapidsConnection, vilkaarsvurderingService)

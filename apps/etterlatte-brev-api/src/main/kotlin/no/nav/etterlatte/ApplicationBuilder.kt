@@ -61,7 +61,6 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -90,10 +89,6 @@ val sikkerLogg: Logger = sikkerlogger()
 
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
-
-    init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-brev-api")
-    }
 
     private val env = getRapidEnv()
 
@@ -245,6 +240,7 @@ class ApplicationBuilder {
 
     private val rapidsConnection =
         initRogR(
+            applikasjonsnavn = "brev-api",
             restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)

@@ -12,7 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
+    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
 }
 
 private fun settOppRivers(

@@ -6,6 +6,6 @@ import no.nav.etterlatte.trygdetid.kafka.KopierTrygdetidRiver
 import rapidsandrivers.initRogR
 
 fun main() =
-    initRogR { rapidsConnection, rapidEnv ->
+    initRogR("trygdetid-kafka") { rapidsConnection, rapidEnv ->
         KopierTrygdetidRiver(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService())
     }

@@ -21,6 +21,7 @@ val sikkerLogg: Logger = sikkerlogger()
 fun main() {
     ApplicationContext().also {
         initRogR(
+            applikasjonsnavn = "utbetaling",
             restModule = {
                 restModule(sikkerLogg, config = HoconApplicationConfig(it.config)) {
                     utbetalingRoutes(it.simuleringOsService, it.behandlingKlient)
@@ -28,7 +29,6 @@ fun main() {
             },
             configFromEnvironment = { configFromEnvironment(it) },
         ) { rc, _ -> rc.settOppRiversOgListener(it) }
-        sikkerLogg.info("Utbetaling logger på sikkerlogg")
     }
 }
 

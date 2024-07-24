@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import rapidsandrivers.initRogR
 
 fun main() =
-    initRogR { rapidsConnection, rapidEnv ->
+    initRogR("beregning-kafka") { rapidsConnection, rapidEnv ->
         val beregningService = AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService()
         OmregningHendelserBeregningRiver(
             rapidsConnection,

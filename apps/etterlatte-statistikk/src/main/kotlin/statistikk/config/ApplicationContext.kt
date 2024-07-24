@@ -41,7 +41,7 @@ class ApplicationContext {
     }
 
     fun initRapidsConnection() =
-        initRogR { rapidsConnection, _ ->
+        initRogR("statistikk") { rapidsConnection, _ ->
             AvbruttOpprettetBehandlinghendelseRiver(rapidsConnection, statistikkService)
             BehandlingPaaVentHendelseRiver(rapidsConnection, statistikkService)
             TilbakekrevinghendelseRiver(rapidsConnection, statistikkService)

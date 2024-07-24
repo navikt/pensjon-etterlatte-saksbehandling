@@ -48,7 +48,5 @@ data class ApplicationProperties(
                     konsistensavstemmingOMSEnabled = value("KONSISTENSAVSTEMMING_OMS_ENABLED").toBoolean(),
                 )
             }
-
-        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
     }
 }

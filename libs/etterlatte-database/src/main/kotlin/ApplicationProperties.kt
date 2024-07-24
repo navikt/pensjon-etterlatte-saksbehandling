@@ -23,9 +23,5 @@ class ApplicationProperties(
                     httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080,
                 )
             }
-
-        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
-
-        private fun Miljoevariabler.valueOrNull(property: String): String? = this[property]
     }
 }

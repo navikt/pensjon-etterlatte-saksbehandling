@@ -54,9 +54,5 @@ data class ApplicationProperties(
                     devMode = valueOrNull("DEV_MODE").toBoolean(),
                 )
             }
-
-        private fun Miljoevariabler.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
-
-        private fun Miljoevariabler.valueOrNull(property: String): String? = this[property]
     }
 }

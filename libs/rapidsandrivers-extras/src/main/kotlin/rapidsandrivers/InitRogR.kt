@@ -6,17 +6,21 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun initRogR(
-    restModule: Application.() -> Unit,
+    restModule: (Application.() -> Unit)?,
     setReady: () -> Unit,
-    settOppRivers: (RapidsConnection) -> Unit,
+    settOppRivers: (RapidsConnection, Map<String, String>) -> Unit,
 ) {
     val rapidEnv = getRapidEnv()
 
-    val connection =
+    var builder =
         RapidApplication
             .Builder(RapidApplication.RapidApplicationConfig.fromEnv(rapidEnv))
-            .withKtorModule(restModule)
+    if (restModule != null) {
+        builder = builder.withKtorModule(restModule)
+    }
+    val connection =
+        builder
             .build()
-            .also { rapidsConnection -> settOppRivers(rapidsConnection) }
+            .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
     setReady().also { connection.start() }
 }

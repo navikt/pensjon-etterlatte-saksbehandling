@@ -35,7 +35,7 @@ internal class Server(
                     migreringRoute(pesysRepository)
                 }
             }
-            initRogR(restModule, { setReady() }) { rapidsConnection ->
+            initRogR(restModule, { setReady() }) { rapidsConnection, _ ->
                 LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository)
                 LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                 FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)

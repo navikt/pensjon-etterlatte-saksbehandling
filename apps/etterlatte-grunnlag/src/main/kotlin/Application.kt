@@ -78,9 +78,9 @@ class ApplicationBuilder {
                 }
             },
             setReady = { setReady() },
-        ) {
-            GrunnlagsversjoneringRiver(it, grunnlagService)
-            GrunnlagHendelserRiver(it, grunnlagService)
+        ) { rapidsConnection, _ ->
+            GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
+            GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
         }
     }
 }

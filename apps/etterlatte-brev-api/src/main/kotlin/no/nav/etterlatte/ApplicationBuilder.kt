@@ -71,7 +71,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -82,10 +81,10 @@ import no.nav.etterlatte.rivers.SamordningsnotatRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.Logger
+import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -244,11 +243,9 @@ class ApplicationBuilder {
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
-    private val rapidsConnection: RapidsConnection =
-        RapidApplication
-            .Builder(
-                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-            ).withKtorModule {
+    private val rapidsConnection =
+        initRogR(
+            restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
@@ -257,41 +254,40 @@ class ApplicationBuilder {
                     notatRoute(notatService, nyNotatService, tilgangssjekker)
                     oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
-            }.build()
-            .apply {
-                val brevgenerering =
-                    StartInformasjonsbrevgenereringRiver(
-                        brevgenereringRepository,
-                        this,
-                    )
-                register(
-                    object : RapidsConnection.StatusListener {
-                        override fun onStartup(rapidsConnection: RapidsConnection) {
-                            datasource.migrate()
-                            brevgenerering.init()
-                        }
-                    },
+            },
+            configFromEnvironment = { configFromEnvironment(it) },
+        ) { rapidsConnection, _ ->
+            val brevgenerering =
+                StartInformasjonsbrevgenereringRiver(
+                    brevgenereringRepository,
+                    rapidsConnection,
                 )
-                val ferdigstillJournalfoerOgDistribuerBrev =
-                    FerdigstillJournalfoerOgDistribuerBrev(
-                        pdfGenerator,
-                        journalfoerBrevService,
-                        brevdistribuerer,
-                    )
-                OpprettJournalfoerOgDistribuerRiver(
-                    this,
-                    grunnlagService,
-                    brevoppretter,
-                    ferdigstillJournalfoerOgDistribuerBrev,
+            rapidsConnection.register(
+                object : RapidsConnection.StatusListener {
+                    override fun onStartup(rapidsConnection: RapidsConnection) {
+                        datasource.migrate()
+                        brevgenerering.init()
+                    }
+                },
+            )
+            val ferdigstillJournalfoerOgDistribuerBrev =
+                FerdigstillJournalfoerOgDistribuerBrev(
+                    pdfGenerator,
+                    journalfoerBrevService,
+                    brevdistribuerer,
                 )
+            OpprettJournalfoerOgDistribuerRiver(
+                rapidsConnection,
+                grunnlagService,
+                brevoppretter,
+                ferdigstillJournalfoerOgDistribuerBrev,
+            )
 
-                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
-                VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, brevdistribuerer)
-                SamordningsnotatRiver(this, nyNotatService)
-            }
-
-    fun start() = setReady().also { rapidsConnection.start() }
+            JournalfoerVedtaksbrevRiver(rapidsConnection, journalfoerBrevService)
+            VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
+            DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
+            SamordningsnotatRiver(rapidsConnection, nyNotatService)
+        }
 
     private fun httpClient(
         scope: String? = null,

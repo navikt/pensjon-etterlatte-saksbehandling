@@ -12,9 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR(
-        restModule = null,
-    ) { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
+    initRogR { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
 }
 
 private fun settOppRivers(

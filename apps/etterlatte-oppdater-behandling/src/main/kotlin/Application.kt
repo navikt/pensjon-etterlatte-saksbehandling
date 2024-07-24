@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
@@ -15,7 +14,6 @@ import rapidsandrivers.initRogR
 fun main() {
     initRogR(
         restModule = null,
-        setReady = { setReady() },
     ) { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
 }
 

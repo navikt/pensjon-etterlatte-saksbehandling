@@ -18,6 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initialOverstyrBeregningsgrunnlagPeriode,
+  konverterTilSisteDagIMaaneden,
   replacePeriodePaaIndex,
   stripWhitespace,
   validerAarsak,
@@ -65,6 +66,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   ) => {
     const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
       ...overtyrBeregningsgrunnlagPeriode,
+      tom: overtyrBeregningsgrunnlagPeriode.tom && konverterTilSisteDagIMaaneden(overtyrBeregningsgrunnlagPeriode.tom),
       data: {
         ...overtyrBeregningsgrunnlagPeriode.data,
         utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),

@@ -21,6 +21,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import {
   Beregning,
+  BeregningsGrunnlagOMSDto,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
@@ -34,7 +35,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBeregning'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { TrygdetidMetodeBruktOMS } from '~components/behandling/beregningsgrunnlag/felles/TrygdetidMetodeBruktOMS'
+import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/felles/BeregningsMetodeBrukt'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
@@ -49,7 +50,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     innloggetSaksbehandler.skriveEnheter
   )
   const [beregningsgrunnlagOMSResult, beregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
-  const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
+  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
@@ -83,7 +84,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           },
     }
 
-    postBeregningsgrunnlag(
+    lagreBeregningsGrunnlagOMSRequest(
       {
         behandlingId: behandling.id,
         grunnlag: beregningsgrunnlagOMS,
@@ -98,6 +99,22 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     )
   }
 
+  const oppdaterBeregningsMetode = (
+    beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+    beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
+  ) => {
+    lagreBeregningsGrunnlagOMSRequest({
+      behandlingId: behandling.id,
+      grunnlag: {
+        ...beregningsgrunnlag,
+        beregningsMetode,
+        institusjonsopphold: institusjonsoppholdsGrunnlagData
+          ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
+          : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+      },
+    })
+  }
+
   return (
     <>
       <>
@@ -106,11 +123,14 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: (beregningsgrunnlag) => (
             <>
-              <TrygdetidMetodeBruktOMS
+              {/* TODO: Få denne til å være generell på tvers av BP og OMS */}
+              <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                behandling={behandling}
-                beregningsgrunnlag={beregningsgrunnlag}
-                institusjonsoppholdsGrunnlagData={institusjonsoppholdsGrunnlagData}
+                oppdaterBeregningsMetode={(beregningsMetode) =>
+                  oppdaterBeregningsMetode(beregningsMetode, beregningsgrunnlag)
+                }
+                eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
+                lagreBeregrningsGrunnlagResult={lagreBeregningsGrunnlagOMSResult}
               />
               <InstitusjonsoppholdBeregning
                 reduksjonsTyper={ReduksjonOMS}
@@ -146,7 +166,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         })}
       </>
       {isFailureHandler({ apiResult: endreBeregning, errorMessage: 'Kunne ikke opprette ny beregning' })}
-      {isFailureHandler({ apiResult: lagreBeregningsgrunnlagOMS, errorMessage: 'lagreBeregningsgrunnlagOMS' })}
+      {isFailureHandler({ apiResult: lagreBeregningsGrunnlagOMSResult, errorMessage: 'lagreBeregningsgrunnlagOMS' })}
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (
@@ -154,7 +174,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             <Button
               variant="primary"
               onClick={onSubmit}
-              loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
+              loading={isPending(lagreBeregningsGrunnlagOMSResult) || isPending(endreBeregning)}
             >
               {handlinger.NESTE.navn}
             </Button>

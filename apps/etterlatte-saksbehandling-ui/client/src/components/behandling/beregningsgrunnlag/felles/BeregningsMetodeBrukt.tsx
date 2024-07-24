@@ -1,21 +1,12 @@
 import React, { useState } from 'react'
-import {
-  BeregningsGrunnlagOMSDto,
-  BeregningsMetode,
-  BeregningsMetodeBeregningsgrunnlag,
-  InstitusjonsoppholdGrunnlagData,
-} from '~shared/types/Beregning'
+import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
   beregningsMetode: null,
@@ -24,69 +15,35 @@ const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
 
 interface Props {
   redigerbar: boolean
-  behandling: IBehandlingReducer
-  beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
-  institusjonsoppholdsGrunnlagData: InstitusjonsoppholdGrunnlagData | null
+  oppdaterBeregningsMetode: (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => void
+  eksisterendeMetode?: BeregningsMetodeBeregningsgrunnlag
+  lagreBeregrningsGrunnlagResult: Result<void>
 }
 
-export const TrygdetidMetodeBruktOMS = ({
+export const BeregningsMetodeBrukt = ({
   redigerbar,
-  behandling,
-  beregningsgrunnlag,
-  institusjonsoppholdsGrunnlagData,
+  oppdaterBeregningsMetode,
+  eksisterendeMetode,
+  lagreBeregrningsGrunnlagResult,
 }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
-
   const { register, getValues, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlag>({
-    defaultValues:
-      beregningsgrunnlag && beregningsgrunnlag.beregningsMetode
-        ? beregningsgrunnlag.beregningsMetode
-        : defaultBeregningMetode,
+    defaultValues: eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode,
   })
 
   const slettBeregningsMetode = () => {
-    lagreBeregningsGrunnlagOMSRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag: {
-          ...beregningsgrunnlag,
-          // Hvis man skal "slette" metode, så defaulter man til beregningsmetode NASJONAL
-          beregningsMetode: {
-            beregningsMetode: BeregningsMetode.NASJONAL,
-            begrunnelse: '',
-          },
-          institusjonsopphold:
-            beregningsgrunnlag && institusjonsoppholdsGrunnlagData
-              ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
-              : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
-        },
-      },
-      () => {
-        reset(defaultBeregningMetode)
-        setRedigerTrygdetidMetodeBrukt(false)
-      }
-    )
+    oppdaterBeregningsMetode({
+      beregningsMetode: BeregningsMetode.NASJONAL,
+      begrunnelse: '',
+    })
+    reset(defaultBeregningMetode)
+    setRedigerTrygdetidMetodeBrukt(false)
   }
 
   const lagreBeregningsMetode = (data: BeregningsMetodeBeregningsgrunnlag) => {
-    lagreBeregningsGrunnlagOMSRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag: {
-          ...beregningsgrunnlag,
-          beregningsMetode: data,
-          institusjonsopphold:
-            beregningsgrunnlag && institusjonsoppholdsGrunnlagData
-              ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
-              : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
-        },
-      },
-      () => {
-        setRedigerTrygdetidMetodeBrukt(false)
-      }
-    )
+    oppdaterBeregningsMetode(data)
+    setRedigerTrygdetidMetodeBrukt(false)
   }
 
   return (
@@ -126,7 +83,7 @@ export const TrygdetidMetodeBruktOMS = ({
                     variant="secondary"
                     size="small"
                     icon={<TrashIcon aria-hidden />}
-                    loading={isPending(lagreBeregningsGrunnlagOMSResult)}
+                    loading={isPending(lagreBeregrningsGrunnlagResult)}
                     onClick={slettBeregningsMetode}
                   >
                     Slett
@@ -157,7 +114,7 @@ export const TrygdetidMetodeBruktOMS = ({
             </Box>
 
             {isFailureHandler({
-              apiResult: lagreBeregningsGrunnlagOMSResult,
+              apiResult: lagreBeregrningsGrunnlagResult,
               errorMessage: 'Feil i lagring av metode',
             })}
 
@@ -177,7 +134,7 @@ export const TrygdetidMetodeBruktOMS = ({
               <Button
                 size="small"
                 icon={<FloppydiskIcon aria-hidden />}
-                loading={isPending(lagreBeregningsGrunnlagOMSResult)}
+                loading={isPending(lagreBeregrningsGrunnlagResult)}
               >
                 Lagre
               </Button>

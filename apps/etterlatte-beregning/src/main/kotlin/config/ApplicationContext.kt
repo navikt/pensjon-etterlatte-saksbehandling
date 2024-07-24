@@ -47,7 +47,7 @@ enum class BeregningFeatureToggle(
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    private val env = Miljoevariabler(System.getenv())
+    private val env = Miljoevariabler.systemEnv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(properties)
 

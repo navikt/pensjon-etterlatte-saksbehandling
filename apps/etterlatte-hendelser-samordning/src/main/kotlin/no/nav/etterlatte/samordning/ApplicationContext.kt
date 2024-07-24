@@ -5,7 +5,7 @@ import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 
 class ApplicationContext(
-    env: Miljoevariabler = Miljoevariabler(System.getenv()),
+    env: Miljoevariabler = Miljoevariabler.systemEnv(),
 ) {
     private val handler =
         SamordningHendelseHandler(

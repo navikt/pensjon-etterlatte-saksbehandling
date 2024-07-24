@@ -15,7 +15,7 @@ import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImpl
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler(System.getenv()))
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv())
     val dataSource = DataSourceBuilder.createDataSource(properties)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val delvilkaarRepository = DelvilkaarRepository()

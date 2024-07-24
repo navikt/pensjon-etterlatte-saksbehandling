@@ -18,7 +18,7 @@ import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler(System.getenv()))
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv())
     val dataSource =
         DataSourceBuilder.createDataSource(
             jdbcUrl = properties.jdbcUrl,

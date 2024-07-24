@@ -13,7 +13,7 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler(System.getenv())),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv()),
 ) {
     val dataSource =
         DataSourceBuilder.createDataSource(

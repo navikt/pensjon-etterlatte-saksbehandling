@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
-    private val env: Miljoevariabler = Miljoevariabler(System.getenv()),
+    private val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     private val pdlTjenesterKlient: PdlTjenesterKlient =
         PdlTjenesterKlient(
             httpClient =

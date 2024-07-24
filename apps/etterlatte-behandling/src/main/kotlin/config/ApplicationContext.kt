@@ -222,7 +222,7 @@ private fun finnBrukerIdent(): String {
 }
 
 internal class ApplicationContext(
-    val env: Miljoevariabler = Miljoevariabler(System.getenv()),
+    val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {

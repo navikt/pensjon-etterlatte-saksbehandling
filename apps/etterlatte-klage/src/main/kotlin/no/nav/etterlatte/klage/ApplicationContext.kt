@@ -10,7 +10,7 @@ val sikkerLogg = sikkerlogger()
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    private val env = Miljoevariabler(System.getenv())
+    private val env = Miljoevariabler.systemEnv()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 
     private val kabalHttpClient =

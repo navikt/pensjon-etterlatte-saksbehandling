@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 
 fun main() {
-    val context = ApplicationContext(Miljoevariabler(System.getenv()))
+    val context = ApplicationContext(Miljoevariabler.systemEnv())
     Server(context).run()
 }
 

@@ -28,4 +28,8 @@ data class Miljoevariabler(
     ) = this.apply { props.toMutableMap()[key] = value(this) }
 
     fun containsKey(key: String) = props.containsKey(key)
+
+    companion object {
+        fun systemEnv() = Miljoevariabler(System.getenv())
+    }
 }

@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
-    env: Miljoevariabler = Miljoevariabler(System.getenv()),
+    env: Miljoevariabler = Miljoevariabler.systemEnv(),
 ) {
     private val config: Config = ConfigFactory.load()
 

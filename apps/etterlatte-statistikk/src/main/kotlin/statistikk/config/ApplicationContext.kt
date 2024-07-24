@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class ApplicationContext {
-    private val env = Miljoevariabler(System.getenv())
+    private val env = Miljoevariabler.systemEnv()
     private val statistikkService: StatistikkService by lazy {
         StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient, aktivitetspliktService)
     }

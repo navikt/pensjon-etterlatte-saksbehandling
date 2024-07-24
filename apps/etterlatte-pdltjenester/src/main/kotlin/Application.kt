@@ -16,7 +16,7 @@ import org.slf4j.Logger
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    Server(ApplicationContext(Miljoevariabler(System.getenv()))).run()
+    Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
 }
 
 class Server(

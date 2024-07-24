@@ -46,7 +46,7 @@ class ApplicationContext {
         sikkerLoggOppstartOgAvslutning("etterlatte-vedtaksvurdering")
     }
 
-    val env = Miljoevariabler(System.getenv())
+    val env = Miljoevariabler.systemEnv()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)

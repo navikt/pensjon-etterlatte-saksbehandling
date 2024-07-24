@@ -1,25 +1,22 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
-import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
 import no.nav.etterlatte.regulering.ReguleringFeiletRiver
 import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
 import no.nav.etterlatte.regulering.VedtakAttestertRiver
 import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
-import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import rapidsandrivers.initRogR
 
 fun main() {
-    val rapidEnv = getRapidEnv()
-    val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
-    RapidApplication
-        .create(rapidEnv)
-        .also { rapidsConnection ->
-            settOppRivers(rapidsConnection, appBuilder)
-        }.start()
+    initRogR(
+        restModule = null,
+        setReady = { setReady() },
+    ) { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv))) }
 }
 
 private fun settOppRivers(

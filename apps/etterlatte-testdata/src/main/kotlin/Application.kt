@@ -62,7 +62,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private val env = System.getenv()
+private val env = Miljoevariabler.systemEnv()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper()
@@ -79,7 +79,8 @@ val producer =
     if (localDevelopment) {
         LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
     } else {
-        GcpKafkaConfig.fromEnv(Miljoevariabler((System.getenv()))).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
+        val systemEnv = Miljoevariabler.systemEnv()
+        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue("KAFKA_TARGET_TOPIC"))
     }
 
 interface TestDataFeature {

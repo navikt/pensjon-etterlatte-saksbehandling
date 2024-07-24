@@ -69,7 +69,7 @@ class ApplicationContext(
             password = properties.serviceUserPassword,
         ),
     // Overridable clients
-    config: Config = ConfigFactory.load(),
+    val config: Config = ConfigFactory.load(),
     httpClient: HttpClient = httpClient(),
     val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
     val vedtaksvurderingKlient: VedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient),
@@ -136,7 +136,7 @@ class ApplicationContext(
         )
     }
 
-    private val simuleringOsService =
+    internal val simuleringOsService =
         SimuleringOsService(
             utbetalingDao,
             vedtaksvurderingKlient,

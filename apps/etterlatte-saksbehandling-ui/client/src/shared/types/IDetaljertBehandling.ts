@@ -7,7 +7,6 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { Spraak } from '~shared/types/Brev'
-import { VilkaarType } from '~shared/api/vilkaarsvurdering'
 
 export interface IDetaljertBehandling {
   id: string
@@ -129,9 +128,10 @@ export interface Virkningstidspunkt {
 }
 
 export interface ViderefoertOpphoer {
+  skalViderefoere: JaNei
   dato: string
   kilde: KildeSaksbehandler
-  vilkaar: VilkaarType
+  vilkaar: string
   begrunnelse: string
 }
 

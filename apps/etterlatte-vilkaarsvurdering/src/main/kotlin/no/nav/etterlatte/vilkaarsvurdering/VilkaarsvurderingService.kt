@@ -394,6 +394,29 @@ class VilkaarsvurderingService(
 
             Pair(behandling.await(), grunnlag.await())
         }
+
+    suspend fun hentVilkaartyper(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) = finnRelevanteTyper(behandlingId, bruker)
+        .map { it.hovedvilkaar }
+        .map { it.type }
+        .map { VilkaartypePair(name = it.name, tittel = it.tittel) }
+
+    private suspend fun finnRelevanteTyper(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): List<Vilkaar> {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        if (behandling.sakType == SakType.OMSTILLINGSSTOENAD) {
+            return OmstillingstoenadVilkaar.inngangsvilkaar()
+        }
+        return if (behandling.virkningstidspunkt!!.erPaaNyttRegelverk()) {
+            BarnepensjonVilkaar2024.inngangsvilkaar()
+        } else {
+            BarnepensjonVilkaar1967.inngangsvilkaar()
+        }
+    }
 }
 
 class BehandlingstilstandException : IllegalStateException()

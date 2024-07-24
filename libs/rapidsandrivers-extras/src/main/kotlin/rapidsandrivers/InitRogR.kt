@@ -11,7 +11,7 @@ fun initRogR(
     restModule: (Application.() -> Unit)? = null,
     configFromEnvironment: ((Map<String, String>) -> Config) = { AivenConfig.default },
     settOppRivers: (RapidsConnection, rapidEnv: Map<String, String>) -> Unit,
-) {
+): RapidsConnection {
     val rapidEnv = getRapidEnv()
 
     var builder =
@@ -25,8 +25,10 @@ fun initRogR(
         builder = builder.withKtorModule(restModule)
     }
 
-    builder
-        .build()
-        .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
-        .start()
+    val connection =
+        builder
+            .build()
+            .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
+    connection.start()
+    return connection
 }

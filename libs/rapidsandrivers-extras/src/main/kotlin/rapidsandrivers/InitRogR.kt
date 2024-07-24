@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun initRogR(
     restModule: (Application.() -> Unit)? = null,
-    settOppRivers: (RapidsConnection, Map<String, String>) -> Unit,
+    settOppRivers: (RapidsConnection, rapidEnv: Map<String, String>) -> Unit,
 ) {
     val rapidEnv = getRapidEnv()
 

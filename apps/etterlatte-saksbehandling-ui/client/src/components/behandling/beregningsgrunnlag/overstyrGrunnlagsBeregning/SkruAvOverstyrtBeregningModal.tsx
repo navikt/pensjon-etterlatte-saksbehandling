@@ -15,10 +15,11 @@ interface Props {
 export const SkruAvOverstyrtBeregningModal = ({ behandlingId, setOverstyrt }: Props) => {
   const [open, setOpen] = useState<boolean>(false)
 
-  const [deaktiverOverstyrtBeregningResult, deaktiverOverstyrtBeregingRequest] = useApiCall(deaktiverOverstyrtBeregning)
+  const [deaktiverOverstyrtBeregningResult, deaktiverOverstyrtBeregningRequest] =
+    useApiCall(deaktiverOverstyrtBeregning)
 
   const skruAvOverstyrtBeregning = () => {
-    deaktiverOverstyrtBeregingRequest(behandlingId, () => {
+    deaktiverOverstyrtBeregningRequest(behandlingId, () => {
       setOpen(false)
       setOverstyrt(undefined)
     })

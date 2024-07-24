@@ -71,7 +71,7 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
         {!!overstyrtBeregningPerioder?.length ? (
           overstyrtBeregningPerioder.map(
             (
-              overtyrBeregningsgrunnlagPeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>,
+              overstyrBeregningsgrunnlagPeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>,
               index: number
             ) => {
               return (
@@ -88,12 +88,12 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
                   content={
                     !periodeRedigeringModus.redigerPeriode ? (
                       <OverstyrBeregningsgrunnlagExpandableRowContent
-                        overtyrBeregningsgrunnlagPeriode={overtyrBeregningsgrunnlagPeriode}
+                        overtyrBeregningsgrunnlagPeriode={overstyrBeregningsgrunnlagPeriode}
                       />
                     ) : (
                       <OverstyrBeregningsgrunnlagPeriodeSkjema
                         behandling={behandling}
-                        eksisterendePeriode={overtyrBeregningsgrunnlagPeriode}
+                        eksisterendePeriode={overstyrBeregningsgrunnlagPeriode}
                         indexTilEksisterendePeriode={index}
                         paaAvbryt={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
                         paaLagre={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
@@ -101,13 +101,13 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
                     )
                   }
                 >
-                  <Table.DataCell>{formaterDatoMedFallback(overtyrBeregningsgrunnlagPeriode.fom, '-')}</Table.DataCell>
-                  <Table.DataCell>{formaterDatoMedFallback(overtyrBeregningsgrunnlagPeriode.tom, '-')}</Table.DataCell>
-                  <Table.DataCell>{overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(overstyrBeregningsgrunnlagPeriode.fom, '-')}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(overstyrBeregningsgrunnlagPeriode.tom, '-')}</Table.DataCell>
+                  <Table.DataCell>{overstyrBeregningsgrunnlagPeriode.data.utbetaltBeloep}</Table.DataCell>
                   <Table.DataCell>
-                    {overtyrBeregningsgrunnlagPeriode.data.aarsak &&
-                      overtyrBeregningsgrunnlagPeriode.data.aarsak !== 'VELG_AARSAK' &&
-                      OverstyrtAarsak[overtyrBeregningsgrunnlagPeriode.data.aarsak]}
+                    {overstyrBeregningsgrunnlagPeriode.data.aarsak &&
+                      overstyrBeregningsgrunnlagPeriode.data.aarsak !== 'VELG_AARSAK' &&
+                      OverstyrtAarsak[overstyrBeregningsgrunnlagPeriode.data.aarsak]}
                   </Table.DataCell>
                   <Table.DataCell>
                     <HStack gap="2" align="center" justify="end" wrap={false}>

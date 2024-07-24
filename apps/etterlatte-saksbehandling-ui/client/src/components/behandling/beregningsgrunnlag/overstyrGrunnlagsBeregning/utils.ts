@@ -57,7 +57,5 @@ export const replacePeriodePaaIndex = (
   const kopi = [...perioder]
   kopi.splice(index, 1, periode)
 
-  console.log(kopi)
-
   return kopi
 }

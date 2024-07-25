@@ -37,6 +37,7 @@ import InstitusjonsoppholdBeregning from '~components/behandling/beregningsgrunn
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/felles/BeregningsMetodeBrukt'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -132,6 +133,11 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
                 eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
                 lagreBeregrningsGrunnlagResult={lagreBeregningsGrunnlagOMSResult}
               />
+
+              <InstitusjonsoppholdBeregningsgrunnlag
+                institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
+              />
+
               <InstitusjonsoppholdBeregning
                 reduksjonsTyper={ReduksjonOMS}
                 behandling={behandling}

@@ -119,7 +119,6 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
               {...register('data.utbetaltBeloep', {
                 valueAsNumber: true,
                 required: { value: true, message: 'Må settes' },
-                min: { value: 1, message: 'Må være større en 0' },
                 validate: validerStringNumber,
               })}
               label="Utbetalt beløp"

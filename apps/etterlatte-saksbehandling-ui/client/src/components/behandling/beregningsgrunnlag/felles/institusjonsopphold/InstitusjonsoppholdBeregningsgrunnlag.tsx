@@ -25,7 +25,7 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({ institusjonsopphold }: P
         <HvaSkalRegistreresReadMore />
       </VStack>
 
-      <Box maxWidth="70rem">
+      <Box maxWidth="60rem">
         <InstitusjonsoppholdBeregningsgrunnlagTable institusjonsopphold={mapListeFraDto(institusjonsopphold ?? [])} />
       </Box>
     </VStack>

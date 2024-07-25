@@ -38,6 +38,7 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/Lovtek
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/felles/BeregningsMetodeBrukt'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
+import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdHendelser'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -133,6 +134,10 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
                 eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
                 lagreBeregrningsGrunnlagResult={lagreBeregningsGrunnlagOMSResult}
               />
+
+              <Box maxWidth="70rem">
+                <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
+              </Box>
 
               <InstitusjonsoppholdBeregningsgrunnlag
                 institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}

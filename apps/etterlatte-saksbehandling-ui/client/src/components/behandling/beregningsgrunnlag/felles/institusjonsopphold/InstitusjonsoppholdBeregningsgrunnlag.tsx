@@ -1,7 +1,6 @@
 import React from 'react'
 import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { HospitalIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMore'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
 import { InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
@@ -23,7 +22,6 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({ institusjonsopphold }: P
         </Heading>
       </HStack>
       <VStack gap="2" maxWidth="42.5rem">
-        <InstitusjonsoppholdBeregningsgrunnlagReadMore />
         <HvaSkalRegistreresReadMore />
       </VStack>
 

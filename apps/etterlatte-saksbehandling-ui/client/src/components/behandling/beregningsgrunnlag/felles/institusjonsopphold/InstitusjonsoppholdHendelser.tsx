@@ -7,7 +7,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
-import { formaterDatoMedFallback } from '~utils/formatering/dato'
+import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import { InstitusjonsoppholdBeregningsgrunnlagReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMore'
 
 export const institusjonstype: { [key: string]: string } = {
@@ -63,8 +63,9 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
                             formaterDatoMedFallback(inst.oppholdBeriket.faktiskSluttdato, '-')}
                         </Table.DataCell>
                         <Table.DataCell>
-                          {inst.oppholdBeriket.forventetSluttdato &&
-                            formaterDatoMedFallback(inst.oppholdBeriket.forventetSluttdato, '')}
+                          {!!inst.oppholdBeriket.forventetSluttdato
+                            ? formaterDato(inst.oppholdBeriket.forventetSluttdato)
+                            : 'Ingen forventet sluttdato'}
                         </Table.DataCell>
                         <Table.DataCell>
                           {inst.oppholdBeriket.institusjonsType

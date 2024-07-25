@@ -18,6 +18,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold
           <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
           <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
           <Table.HeaderCell scope="col">Reduksjon</Table.HeaderCell>
+          <Table.HeaderCell scope="col">Egen reduksjon</Table.HeaderCell>
           <Table.HeaderCell scope="col" />
         </Table.Row>
       </Table.Header>
@@ -28,21 +29,16 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold
               <Table.ExpandableRow
                 key={index}
                 content={
-                  <HStack gap="8">
-                    <div>
-                      <Label>Egen reduksjon</Label>
-                      <BodyShort>{opphold.data.egenReduksjon ?? '-'}</BodyShort>
-                    </div>
-                    <Box maxWidth="7">
-                      <Label>Beskrivelse</Label>
-                      <BodyShort>{opphold.data.begrunnelse}</BodyShort>
-                    </Box>
-                  </HStack>
+                  <Box maxWidth="7">
+                    <Label>Beskrivelse</Label>
+                    <BodyShort>{opphold.data.begrunnelse}</BodyShort>
+                  </Box>
                 }
               >
                 <Table.DataCell>{formaterDatoMedFallback(opphold.fom, '-')}</Table.DataCell>
                 <Table.DataCell>{formaterDatoMedFallback(opphold.tom, '-')}</Table.DataCell>
                 <Table.DataCell>{ReduksjonOMS[opphold.data.reduksjon]}</Table.DataCell>
+                <Table.DataCell>{opphold.data.egenReduksjon ?? '-'}</Table.DataCell>
                 <Table.DataCell>
                   <HStack gap="2" wrap={false} justify="end">
                     <Button type="button" variant="secondary" size="small" icon={<PencilIcon aria-hidden />}>
@@ -58,7 +54,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold
           )
         ) : (
           <Table.Row>
-            <Table.DataCell colSpan={5}>Ingen perioder for institusjonsopphold</Table.DataCell>
+            <Table.DataCell colSpan={6}>Ingen perioder for institusjonsopphold</Table.DataCell>
           </Table.Row>
         )}
       </Table.Body>

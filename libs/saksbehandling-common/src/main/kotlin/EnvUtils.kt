@@ -13,13 +13,11 @@ data class Miljoevariabler private constructor(
 
     fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.name())
 
-    fun maybeEnvValue(key: String): String? = props[key]
-
     operator fun get(key: String) = props[key]
 
     operator fun get(key: EnvEnum) = get(key.name())
 
-    fun getValue(key: EnvEnum): String = getValue(key.name())
+    fun getValue(key: EnvEnum): String = props.getValue(key.name())
 
     fun getValue(key: String): String = props.getValue(key)
 
@@ -45,7 +43,7 @@ data class Miljoevariabler private constructor(
 
     fun containsKey(key: EnvEnum) = containsKey(key.name())
 
-    fun value(property: String): String = getValue(property)
+    fun value(property: String): String = props.getValue(property)
 
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())

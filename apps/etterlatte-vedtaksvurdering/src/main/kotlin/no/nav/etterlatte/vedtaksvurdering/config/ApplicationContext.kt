@@ -11,6 +11,7 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
@@ -32,6 +33,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
@@ -138,7 +140,7 @@ class ApplicationContext {
 
     private val vedtakshendelserProdusent: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_VEDTAKSHENDELSER_TOPIC"))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
         } else {
             object : KafkaProdusent<String, String> {
                 override fun publiser(
@@ -169,4 +171,11 @@ class ApplicationContext {
             periode = Duration.of(1, ChronoUnit.MINUTES),
         )
     }
+}
+
+enum class VedtakKey : EnvEnum {
+    KAFKA_VEDTAKSHENDELSER_TOPIC,
+    ;
+
+    override fun name() = name
 }

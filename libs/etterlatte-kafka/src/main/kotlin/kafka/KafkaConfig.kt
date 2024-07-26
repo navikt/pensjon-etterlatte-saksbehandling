@@ -1,5 +1,9 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_CREDSTORE_PASSWORD
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_KEYSTORE_PATH
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
@@ -30,11 +34,11 @@ class GcpKafkaConfig(
 
         fun fromEnv(env: Miljoevariabler): KafkaConfig =
             GcpKafkaConfig(
-                bootstrapServers = env.getValue("KAFKA_BROKERS"),
-                truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-                truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-                keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-                keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
+                bootstrapServers = env.getValue(KAFKA_BROKERS),
+                truststore = env.getValue(KAFKA_TRUSTSTORE_PATH),
+                truststorePassword = env.getValue(KAFKA_CREDSTORE_PASSWORD),
+                keystoreLocation = env.getValue(KAFKA_KEYSTORE_PATH),
+                keystorePassword = env.getValue(KAFKA_CREDSTORE_PASSWORD),
                 clientId = generateInstanceId(env),
             )
     }

@@ -4,6 +4,12 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
+import no.nav.etterlatte.EnvKey.ETTERLATTE_MIGRERING_URL
+import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
+import no.nav.etterlatte.EnvKey.NAVANSATT_URL
+import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.SKJERMING_URL
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
@@ -109,6 +115,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -246,11 +253,11 @@ internal class ApplicationContext(
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
-            env.getValue("NAVANSATT_URL"),
+            env.getValue(NAVANSATT_URL),
         ).also {
             it.asyncPing()
         },
-    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
+    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
@@ -260,7 +267,7 @@ internal class ApplicationContext(
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue("ETTERLATTE_TILBAKEKREVING_URL")),
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue(ETTERLATTE_TILBAKEKREVING_URL)),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
@@ -307,12 +314,12 @@ internal class ApplicationContext(
     val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue(SKJERMING_URL))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.get(ELECTOR_PATH), leaderElectionHttpClient)
 
-    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue("ETTERLATTE_KLAGE_API_URL"))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
+    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue(ETTERLATTE_KLAGE_API_URL))
+    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)

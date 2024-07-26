@@ -147,7 +147,8 @@ export const ViderefoereOpphoerVurdering = ({
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
                 <Label as="p" size="small">
-                  {viderefoertOpphoer.vilkaar}
+                  {isSuccess(vilkaartyperResult) &&
+                    vilkaartyperResult.data.typer.find((n) => n.name == viderefoertOpphoer.vilkaar)?.tittel}
                 </Label>
               ) : (
                 <Label as="p" size="small">

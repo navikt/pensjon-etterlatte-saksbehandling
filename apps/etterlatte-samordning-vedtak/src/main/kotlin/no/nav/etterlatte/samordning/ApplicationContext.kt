@@ -3,6 +3,7 @@ package no.nav.etterlatte.samordning
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
@@ -17,7 +18,7 @@ class ApplicationContext(
     env: Miljoevariabler,
 ) {
     val config: Config = ConfigFactory.load()
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
 
     private val vedtaksvurderingHttpClient by lazy {
         httpClientClientCredentials(

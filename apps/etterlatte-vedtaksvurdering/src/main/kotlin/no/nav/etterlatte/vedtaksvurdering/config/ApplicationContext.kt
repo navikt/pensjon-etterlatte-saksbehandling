@@ -17,6 +17,8 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
@@ -48,12 +50,12 @@ class ApplicationContext {
     }
 
     val env = Miljoevariabler.systemEnv()
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)
 
     val leaderElectionHttpClient: HttpClient = httpClient()
-    val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val samKlient =
         SamordningsKlientImpl(

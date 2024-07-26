@@ -80,6 +80,14 @@ class LocalKafkaConfig(
 
 enum class KafkaKey : EnvEnum {
     KAFKA_RAPID_TOPIC,
+    KAFKA_BROKERS,
+    KAFKA_TRUSTSTORE_PATH,
+    KAFKA_CREDSTORE_PASSWORD,
+    KAFKA_KEYSTORE_PATH,
+    KAFKA_SCHEMA_REGISTRY_USER,
+    KAFKA_SCHEMA_REGISTRY_PASSWORD,
+    KAFKA_SCHEMA_REGISTRY,
+    KAFKA_TARGET_TOPIC,
     ;
 
     override fun name() = name

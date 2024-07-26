@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PASSWORD
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
 import no.nav.etterlatte.libs.database.jdbcUrl
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 
 data class ApplicationProperties(
     val httpPort: Int,
@@ -34,7 +35,7 @@ data class ApplicationProperties(
         fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
-                    httpPort = get("HTTP_PORT")?.toInt() ?: 8080,
+                    httpPort = get(HTTP_PORT)?.toInt() ?: 8080,
                     mqHost = value("MQ_HOSTNAME"),
                     mqPort = value("MQ_PORT").toInt(),
                     mqQueueManager = value("MQ_MANAGER"),

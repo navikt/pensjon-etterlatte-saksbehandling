@@ -10,6 +10,7 @@ import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
@@ -56,7 +57,7 @@ class ApplicationContext(
             joarkHendelseHandler,
         )
 
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
 
     private fun httpClientCredentials(scope: String) =
         httpClientClientCredentials(

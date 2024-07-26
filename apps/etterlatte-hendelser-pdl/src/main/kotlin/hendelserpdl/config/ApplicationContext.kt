@@ -8,6 +8,7 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.AzureEnums
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
@@ -37,5 +38,5 @@ class ApplicationContext(
             personHendelseFordeler,
         ),
 ) {
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
 }

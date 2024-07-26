@@ -37,6 +37,8 @@ import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TARGET_TOPIC
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -77,10 +79,10 @@ val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
 val producer =
     if (localDevelopment) {
-        LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
+        LocalKafkaConfig(env[KAFKA_BROKERS]!!).standardProducer(env[KAFKA_TARGET_TOPIC]!!)
     } else {
         val systemEnv = Miljoevariabler.systemEnv()
-        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue("KAFKA_TARGET_TOPIC"))
+        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue(KAFKA_TARGET_TOPIC))
     }
 
 interface TestDataFeature {

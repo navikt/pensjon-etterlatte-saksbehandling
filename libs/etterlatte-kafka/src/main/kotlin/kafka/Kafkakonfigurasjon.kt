@@ -1,5 +1,12 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_CREDSTORE_PASSWORD
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_KEYSTORE_PATH
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY_PASSWORD
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY_USER
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
@@ -24,17 +31,17 @@ abstract class Kafkakonfigurasjon<T>(
 ) : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Miljoevariabler): Properties =
         Properties().apply {
-            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
+            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env[KAFKA_BROKERS])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
             put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")
             put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
             put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
-            put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env["KAFKA_TRUSTSTORE_PATH"])
-            put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
-            put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env["KAFKA_KEYSTORE_PATH"])
-            put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
+            put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env[KAFKA_TRUSTSTORE_PATH])
+            put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env[KAFKA_CREDSTORE_PASSWORD])
+            put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env[KAFKA_KEYSTORE_PATH])
+            put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env[KAFKA_CREDSTORE_PASSWORD])
 
-            put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
+            put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env[KAFKA_CREDSTORE_PASSWORD])
             // Nais doc: Password needed to use the keystore and truststore
 
             put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
@@ -51,12 +58,12 @@ abstract class Kafkakonfigurasjon<T>(
 
             put(
                 userInfoConfigKey,
-                "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}",
+                "${env[KAFKA_SCHEMA_REGISTRY_USER]}:${env[KAFKA_SCHEMA_REGISTRY_PASSWORD]}",
             )
-            put(schemaRegistryUrlConfigKey, env["KAFKA_SCHEMA_REGISTRY"])
+            put(schemaRegistryUrlConfigKey, env[KAFKA_SCHEMA_REGISTRY])
             put(
                 "schema.registry.basic.auth.user.info",
-                "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}",
+                "${env[KAFKA_SCHEMA_REGISTRY_USER]}:${env[KAFKA_SCHEMA_REGISTRY_PASSWORD]}",
             )
 
             isolationLevelConfig?.let { this.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, it) }

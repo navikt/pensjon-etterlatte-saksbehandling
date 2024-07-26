@@ -5,6 +5,9 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
@@ -117,27 +120,27 @@ class ApplicationContext {
 
     private val beregningHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
+            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
+            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue("BEREGNING_AZURE_SCOPE"),
         )
     }
 
     private val behandlingHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
+            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
+            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE"),
         )
     }
 
     private val vedtaksvurderingsHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
+            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
+            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue("VEDTAK_AZURE_SCOPE"),
         )
     }

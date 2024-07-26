@@ -8,6 +8,7 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AzureEnums
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
@@ -16,9 +17,9 @@ class ApplicationContext(
         PdlTjenesterKlient(
             httpClient =
                 httpClientClientCredentials(
-                    azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-                    azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-                    azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+                    azureAppClientId = env.requireEnvValue(AzureEnums.AZURE_APP_CLIENT_ID),
+                    azureAppJwk = env.requireEnvValue(AzureEnums.AZURE_APP_JWK),
+                    azureAppWellKnownUrl = env.requireEnvValue(AzureEnums.AZURE_APP_WELL_KNOWN_URL),
                     azureAppScope = env.requireEnvValue("PDL_AZURE_SCOPE"),
                     ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
                 ),

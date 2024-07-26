@@ -78,6 +78,9 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.config.JobbKeys.JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
+import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
+import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
@@ -97,6 +100,7 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
@@ -527,7 +531,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_METRIKKER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -550,7 +554,7 @@ internal class ApplicationContext(
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
-            openingHours = env.requireEnvValue("JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -560,7 +564,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_SAKSBEHANDLER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -578,4 +582,13 @@ internal class ApplicationContext(
     fun close() {
         (dataSource as HikariDataSource).close()
     }
+}
+
+enum class JobbKeys : EnvEnum {
+    JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS,
+    JOBB_METRIKKER_OPENING_HOURS,
+    JOBB_SAKSBEHANDLER_OPENING_HOURS,
+    ;
+
+    override fun name() = name
 }

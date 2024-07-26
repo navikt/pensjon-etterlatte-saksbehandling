@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
@@ -121,7 +122,7 @@ class ApplicationBuilder {
     private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val beregningService = BeregningService(beregningKlient)
-    private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
+    private val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)

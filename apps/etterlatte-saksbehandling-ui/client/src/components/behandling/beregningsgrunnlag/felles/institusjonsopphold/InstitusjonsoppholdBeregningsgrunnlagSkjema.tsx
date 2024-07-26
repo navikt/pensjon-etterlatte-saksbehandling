@@ -5,6 +5,7 @@ import { Box, Button, HelpText, HStack, Select, Textarea, TextField, VStack } fr
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { validerStringNumber } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 
 interface Props {
   institusjonsopphold?: PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>
@@ -39,6 +40,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({ institusjonsopphol
   }
 
   const lagrePeriode = (institusjonsoppholdPeriode: PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>) => {
+    // TODO: Håndtere for at egenReduksjon kan bli satt til NaN hvis reduksjon !== 'JA_EGEN_PROSENT_AV_G'
     console.log(institusjonsoppholdPeriode)
     paaLagre()
   }
@@ -46,7 +48,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({ institusjonsopphol
   return (
     <form onSubmit={handleSubmit(lagrePeriode)}>
       <VStack gap="4">
-        <HStack gap="4">
+        <HStack gap="4" align="start">
           <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required />
           <ControlledMaanedVelger name="tom" label="Til og med" control={control} />
           <Select
@@ -62,7 +64,11 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({ institusjonsopphol
           </Select>
           {watch().data.reduksjon === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
-              {...register('data.egenReduksjon')}
+              {...register('data.egenReduksjon', {
+                valueAsNumber: true,
+                required: { value: true, message: 'Må settes' },
+                validate: validerStringNumber,
+              })}
               label={
                 <HStack gap="2">
                   Reduksjonsbeløp
@@ -71,6 +77,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({ institusjonsopphol
                   </HelpText>
                 </HStack>
               }
+              error={errors.data?.egenReduksjon?.message}
             />
           )}
         </HStack>

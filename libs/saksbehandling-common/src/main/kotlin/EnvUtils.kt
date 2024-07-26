@@ -33,6 +33,14 @@ data class Miljoevariabler(
         value: (Miljoevariabler) -> String,
     ) = this.apply { props.toMutableMap()[key] = value(this) }
 
+    fun append(props: Map<EnvEnum, String>): Miljoevariabler {
+        val toMutableMap = this.props.toMutableMap()
+        toMutableMap.putAll(
+            props.entries.associate { it.key.name() to it.value },
+        )
+        return Miljoevariabler(toMutableMap)
+    }
+
     fun containsKey(key: String) = props.containsKey(key)
 
     fun value(property: String): String = getValue(property)

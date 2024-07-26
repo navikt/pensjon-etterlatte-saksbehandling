@@ -55,38 +55,34 @@ abstract class BehandlingIntegrationTest {
         applicationContext =
             ApplicationContext(
                 env =
-                    System
-                        .getenv()
-                        .toMutableMap()
-                        .apply {
-                            put(KafkaKey.KAFKA_RAPID_TOPIC.name(), "test")
-                            put(DatabaseConfig.DB_HOST.name(), props.host)
-                            put(DatabaseConfig.DB_USERNAME.name(), props.username)
-                            put(DatabaseConfig.DB_PASSWORD.name(), props.password)
-                            put(DatabaseConfig.DB_PORT.name(), props.firstMappedPort.toString())
-                            put(DatabaseConfig.DB_DATABASE.name(), props.databaseName)
-                            put(AzureKey.AZUREAD_ATTESTANT_GROUPID.name(), azureAdAttestantClaim)
-                            put(AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID.name(), azureAdAttestantGjennyClaim)
-                            put(
-                                AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID.name(),
-                                azureAdSaksbehandlerClaim,
-                            )
-                            put(AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID.name(), azureAdStrengtFortroligClaim)
-                            put(AzureKey.AZUREAD_EGEN_ANSATT_GROUPID.name(), azureAdEgenAnsattClaim)
-                            put(AzureKey.AZUREAD_FORTROLIG_GROUPID.name(), azureAdFortroligClaim)
-                            put(AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID.name(), azureAdNasjonUtenLoggClaim)
-                            put(AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID.name(), azureAdNasjonMedLoggClaim)
-                            put(EnvKey.NORG2_URL.name, "http://localhost")
-                            put(EnvKey.NAVANSATT_URL.name, "http://localhost")
-                            put(EnvKey.SKJERMING_URL.name, "http://localhost")
-                            put(TestEnvKey.OPPGAVE_URL.name(), "http://localhost")
-                            put(TestEnvKey.PEN_URL.name(), "http://localhost")
-                            put(TestEnvKey.PEN_CLIENT_ID.name(), "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
-                            put(EnvKey.ETTERLATTE_KLAGE_API_URL.name(), "http://localhost")
-                            put(EnvKey.ETTERLATTE_TILBAKEKREVING_URL.name(), "http://localhost")
-                            put(EnvKey.ETTERLATTE_MIGRERING_URL.name, "http://localhost")
-                            put(TestEnvKey.OPPGAVE_SCOPE.name, "scope")
-                        }.let { Miljoevariabler(it) },
+                    Miljoevariabler.systemEnv().append(
+                        mapOf(
+                            KafkaKey.KAFKA_RAPID_TOPIC to "test",
+                            DatabaseConfig.DB_HOST to props.host,
+                            DatabaseConfig.DB_USERNAME to props.username,
+                            DatabaseConfig.DB_PASSWORD to props.password,
+                            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
+                            DatabaseConfig.DB_DATABASE to props.databaseName,
+                            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
+                            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
+                            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
+                            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
+                            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
+                            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
+                            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
+                            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
+                            EnvKey.NORG2_URL to "http://localhost",
+                            EnvKey.NAVANSATT_URL to "http://localhost",
+                            EnvKey.SKJERMING_URL to "http://localhost",
+                            TestEnvKey.OPPGAVE_URL to "http://localhost",
+                            TestEnvKey.PEN_URL to "http://localhost",
+                            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
+                            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
+                            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
+                            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
+                            TestEnvKey.OPPGAVE_SCOPE to "scope",
+                        ),
+                    ),
                 config =
                     ConfigFactory.parseMap(
                         mapOf(

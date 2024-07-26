@@ -143,7 +143,7 @@ type ReduksjonKeyOMS =
   | 'NEI_HOEYE_UTGIFTER_BOLIG'
   | 'NEI_OMSORG_BARN'
 
-type ReduksjonKey = ReduksjonKeyBP | ReduksjonKeyOMS
+export type ReduksjonKey = ReduksjonKeyBP | ReduksjonKeyOMS
 
 export type ReduksjonType = Record<string, string>
 

@@ -35,9 +35,7 @@ data class Miljoevariabler private constructor(
         return Miljoevariabler(toMutableMap)
     }
 
-    fun containsKey(key: String) = props.containsKey(key)
-
-    fun containsKey(key: EnvEnum) = containsKey(key.key())
+    fun containsKey(key: EnvEnum) = props.containsKey(key.name())
 
     fun value(property: String): String = props.getValue(property)
 

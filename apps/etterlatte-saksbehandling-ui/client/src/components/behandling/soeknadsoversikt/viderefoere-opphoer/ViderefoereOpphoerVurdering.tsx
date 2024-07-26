@@ -61,7 +61,7 @@ export const ViderefoereOpphoerVurdering = ({
   }, [behandlingId])
 
   const valider = () => {
-    if (!skalViderefoere) {
+    if (!skalViderefoere || skalViderefoere == JaNei.NEI) {
       return ''
     }
     if (!vilkaar) {

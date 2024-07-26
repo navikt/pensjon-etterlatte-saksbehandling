@@ -1,6 +1,12 @@
 package no.nav.etterlatte.tilbakekreving.config
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_JDBC_URL
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PASSWORD
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
 import no.nav.etterlatte.libs.database.jdbcUrl
 
 data class ApplicationProperties(
@@ -37,13 +43,13 @@ data class ApplicationProperties(
                     serviceUserUsername = value("srvuser"),
                     serviceUserPassword = value("srvpwd"),
                     jdbcUrl =
-                        env["DB_JDBC_URL"] ?: jdbcUrl(
-                            value("DB_HOST"),
-                            value("DB_PORT").toInt(),
-                            value("DB_DATABASE"),
+                        env[DB_JDBC_URL] ?: jdbcUrl(
+                            getValue(DB_HOST),
+                            getValue(DB_PORT).toInt(),
+                            getValue(DB_DATABASE),
                         ),
-                    dbUsername = value("DB_USERNAME"),
-                    dbPassword = value("DB_PASSWORD"),
+                    dbUsername = getValue(DB_USERNAME),
+                    dbPassword = getValue(DB_PASSWORD),
                     azureAppClientId = value("AZURE_APP_CLIENT_ID"),
                     azureAppJwk = value("AZURE_APP_JWK"),
                     azureAppWellKnownUrl = value("AZURE_APP_WELL_KNOWN_URL"),

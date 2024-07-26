@@ -21,6 +21,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.database.DatabaseConfig
 import no.nav.etterlatte.tilgangsstyring.AzureKey
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -58,11 +59,11 @@ abstract class BehandlingIntegrationTest {
                         .toMutableMap()
                         .apply {
                             put(KafkaKey.KAFKA_RAPID_TOPIC.name(), "test")
-                            put("DB_HOST", props.host)
-                            put("DB_USERNAME", props.username)
-                            put("DB_PASSWORD", props.password)
-                            put("DB_PORT", props.firstMappedPort.toString())
-                            put("DB_DATABASE", props.databaseName)
+                            put(DatabaseConfig.DB_HOST.name(), props.host)
+                            put(DatabaseConfig.DB_USERNAME.name(), props.username)
+                            put(DatabaseConfig.DB_PASSWORD.name(), props.password)
+                            put(DatabaseConfig.DB_PORT.name(), props.firstMappedPort.toString())
+                            put(DatabaseConfig.DB_DATABASE.name(), props.databaseName)
                             put(AzureKey.AZUREAD_ATTESTANT_GROUPID.name(), azureAdAttestantClaim)
                             put(AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID.name(), azureAdAttestantGjennyClaim)
                             put(

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
@@ -724,6 +725,12 @@ internal class BehandlingServiceImpl(
         val behandling =
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
+
+        if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
+            viderefoertOpphoer.vilkaar == null
+        ) {
+            throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
+        }
 
         behandling
             .oppdaterVidereførtOpphoer(viderefoertOpphoer)

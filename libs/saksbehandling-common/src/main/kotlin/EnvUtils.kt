@@ -6,7 +6,7 @@ fun Map<String, String>.requireEnvValue(key: String) =
         else -> value
     }
 
-data class Miljoevariabler(
+data class Miljoevariabler private constructor(
     val props: Map<String, String>,
 ) {
     fun requireEnvValue(key: String): String = props.requireEnvValue(key)

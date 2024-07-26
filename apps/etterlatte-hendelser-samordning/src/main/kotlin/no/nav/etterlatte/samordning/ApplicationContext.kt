@@ -1,6 +1,7 @@
 package no.nav.etterlatte.samordning
 
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 
@@ -12,7 +13,7 @@ class ApplicationContext(
             kafkaProduser =
                 GcpKafkaConfig
                     .fromEnv(env)
-                    .rapidsAndRiversProducer(env.getValue("KAFKA_RAPID_TOPIC")),
+                    .rapidsAndRiversProducer(env.getValue(KAFKA_RAPID_TOPIC)),
         )
 
     val konsument =

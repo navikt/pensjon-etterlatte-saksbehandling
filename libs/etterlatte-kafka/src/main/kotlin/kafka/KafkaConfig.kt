@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -74,4 +75,11 @@ class LocalKafkaConfig(
         Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokersURL)
         }
+}
+
+enum class KafkaKey : EnvEnum {
+    KAFKA_RAPID_TOPIC,
+    ;
+
+    override fun name() = name
 }

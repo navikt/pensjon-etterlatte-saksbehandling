@@ -17,6 +17,8 @@ data class Miljoevariabler(
 
     operator fun get(key: String) = props[key]
 
+    fun getValue(key: EnvEnum): String = getValue(key.name())
+
     fun getValue(key: String): String = props.getValue(key)
 
     fun getOrDefault(

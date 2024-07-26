@@ -16,6 +16,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
@@ -56,7 +57,7 @@ abstract class BehandlingIntegrationTest {
                         .getenv()
                         .toMutableMap()
                         .apply {
-                            put("KAFKA_RAPID_TOPIC", "test")
+                            put(KafkaKey.KAFKA_RAPID_TOPIC.name(), "test")
                             put("DB_HOST", props.host)
                             put("DB_USERNAME", props.username)
                             put("DB_PASSWORD", props.password)

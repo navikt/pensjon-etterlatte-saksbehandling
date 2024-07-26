@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -319,7 +320,7 @@ class BehandlingDao(
                 statement.setString(4, viderefoertOpphoer.begrunnelse)
                 statement.setDate(5, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
                 statement.setObject(6, behandlingId)
-                statement.setString(7, viderefoertOpphoer.vilkaar)
+                statement.setString(7, viderefoertOpphoer.vilkaar?.name)
                 statement.updateSuccessful()
             }
         }
@@ -341,7 +342,7 @@ class BehandlingDao(
                         begrunnelse = getString("begrunnelse"),
                         kravdato = getDate("kravdato")?.let { it.toLocalDate() },
                         behandlingId = behandlingId,
-                        vilkaar = getString("vilkaar"),
+                        vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                     )
                 }
             }

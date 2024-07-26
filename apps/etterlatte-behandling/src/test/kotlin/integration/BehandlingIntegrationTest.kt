@@ -20,6 +20,7 @@ import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig
 import no.nav.etterlatte.tilgangsstyring.AzureKey
@@ -75,16 +76,16 @@ abstract class BehandlingIntegrationTest {
                             put(AzureKey.AZUREAD_FORTROLIG_GROUPID.name(), azureAdFortroligClaim)
                             put(AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID.name(), azureAdNasjonUtenLoggClaim)
                             put(AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID.name(), azureAdNasjonMedLoggClaim)
-                            put("NORG2_URL", "http://localhost")
-                            put("NAVANSATT_URL", "http://localhost")
-                            put("SKJERMING_URL", "http://localhost")
-                            put("OPPGAVE_URL", "http://localhost")
-                            put("PEN_URL", "http://localhost")
-                            put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
-                            put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
-                            put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
-                            put("ETTERLATTE_MIGRERING_URL", "http://localhost")
-                            put("OPPGAVE_SCOPE", "scope")
+                            put(EnvKey.NORG2_URL.name, "http://localhost")
+                            put(EnvKey.NAVANSATT_URL.name, "http://localhost")
+                            put(EnvKey.SKJERMING_URL.name, "http://localhost")
+                            put(TestEnvKey.OPPGAVE_URL.name(), "http://localhost")
+                            put(TestEnvKey.PEN_URL.name(), "http://localhost")
+                            put(TestEnvKey.PEN_CLIENT_ID.name(), "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
+                            put(EnvKey.ETTERLATTE_KLAGE_API_URL.name(), "http://localhost")
+                            put(EnvKey.ETTERLATTE_TILBAKEKREVING_URL.name(), "http://localhost")
+                            put(EnvKey.ETTERLATTE_MIGRERING_URL.name, "http://localhost")
+                            put(TestEnvKey.OPPGAVE_SCOPE.name, "scope")
                         }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
@@ -145,7 +146,11 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = saksbehandlerIdent, groups = listOf(azureAdAttestantClaim))
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = saksbehandlerIdent,
+            groups = listOf(azureAdAttestantClaim),
+        )
     }
 
     protected val tokenAttestant: String by lazy {
@@ -183,4 +188,14 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
+}
+
+enum class TestEnvKey : EnvEnum {
+    PEN_CLIENT_ID,
+    PEN_URL,
+    OPPGAVE_URL,
+    OPPGAVE_SCOPE,
+    ;
+
+    override fun name() = name
 }

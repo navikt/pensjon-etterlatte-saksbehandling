@@ -66,6 +66,7 @@ fun startEgenAnsattLytter(
 }
 
 enum class EgneAnsatteLytterKey : EnvEnum {
+    SKJERMING_GROUP_ID,
     SKJERMING_TOPIC,
     ;
 

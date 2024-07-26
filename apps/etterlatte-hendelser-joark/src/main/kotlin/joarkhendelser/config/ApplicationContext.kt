@@ -71,6 +71,7 @@ class ApplicationContext(
 }
 
 enum class JoarkKey : EnvEnum {
+    JOARK_HENDELSE_GROUP_ID,
     KAFKA_JOARK_HENDELSE_TOPIC,
     ;
 

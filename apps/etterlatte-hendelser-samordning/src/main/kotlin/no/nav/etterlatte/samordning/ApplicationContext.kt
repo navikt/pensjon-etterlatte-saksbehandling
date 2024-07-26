@@ -30,6 +30,7 @@ class ApplicationContext(
 }
 
 enum class SamordningKey : EnvEnum {
+    SAMORDNINGVEDTAK_HENDELSE_GROUP_ID,
     SAMORDNINGVEDTAK_HENDELSE_TOPIC,
     ;
 

@@ -47,6 +47,7 @@ class ApplicationContext {
 }
 
 enum class KlageKey : EnvEnum {
+    KLAGE_GROUP_ID,
     KLAGE_TOPIC,
     ;
 

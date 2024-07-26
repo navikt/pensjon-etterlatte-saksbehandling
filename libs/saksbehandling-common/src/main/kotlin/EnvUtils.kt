@@ -11,9 +11,7 @@ data class Miljoevariabler private constructor(
 ) {
     fun requireEnvValue(key: EnvEnum): String = props.requireEnvValue(key.name())
 
-    operator fun get(key: String) = props[key]
-
-    operator fun get(key: EnvEnum) = get(key.key())
+    operator fun get(key: EnvEnum) = props[key.name()]
 
     fun getValue(key: EnvEnum): String = props.getValue(key.key())
 

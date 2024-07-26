@@ -45,6 +45,7 @@ class ApplicationContext(
 }
 
 enum class PDLKey : EnvEnum {
+    LEESAH_KAFKA_GROUP_ID,
     LEESAH_TOPIC_PERSON,
     PDL_AZURE_SCOPE,
     ;

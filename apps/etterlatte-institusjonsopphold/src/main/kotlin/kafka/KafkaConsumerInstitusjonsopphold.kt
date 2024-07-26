@@ -41,6 +41,7 @@ data class KafkaOppholdHendelse(
 )
 
 enum class InstitusjonsoppholdKey : EnvEnum {
+    INSTITUSJONSOPPHOLD_GROUP_ID,
     INSTITUSJONSOPPHOLD_TOPIC,
     ;
 

@@ -20,6 +20,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.tilgangsstyring.AzureKey
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -61,14 +62,17 @@ abstract class BehandlingIntegrationTest {
                             put("DB_PASSWORD", props.password)
                             put("DB_PORT", props.firstMappedPort.toString())
                             put("DB_DATABASE", props.databaseName)
-                            put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
-                            put("AZUREAD_ATTESTANT_GJENNY_GROUPID", azureAdAttestantGjennyClaim)
-                            put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
-                            put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
-                            put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
-                            put("AZUREAD_FORTROLIG_GROUPID", azureAdFortroligClaim)
-                            put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", azureAdNasjonUtenLoggClaim)
-                            put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", azureAdNasjonMedLoggClaim)
+                            put(AzureKey.AZUREAD_ATTESTANT_GROUPID.name(), azureAdAttestantClaim)
+                            put(AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID.name(), azureAdAttestantGjennyClaim)
+                            put(
+                                AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID.name(),
+                                azureAdSaksbehandlerClaim,
+                            )
+                            put(AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID.name(), azureAdStrengtFortroligClaim)
+                            put(AzureKey.AZUREAD_EGEN_ANSATT_GROUPID.name(), azureAdEgenAnsattClaim)
+                            put(AzureKey.AZUREAD_FORTROLIG_GROUPID.name(), azureAdFortroligClaim)
+                            put(AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID.name(), azureAdNasjonUtenLoggClaim)
+                            put(AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID.name(), azureAdNasjonMedLoggClaim)
                             put("NORG2_URL", "http://localhost")
                             put("NAVANSATT_URL", "http://localhost")
                             put("SKJERMING_URL", "http://localhost")

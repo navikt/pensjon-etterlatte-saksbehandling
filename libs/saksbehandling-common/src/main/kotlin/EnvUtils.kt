@@ -11,6 +11,8 @@ data class Miljoevariabler(
 ) {
     fun requireEnvValue(key: String): String = props.requireEnvValue(key)
 
+    fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.name())
+
     fun maybeEnvValue(key: String): String? = props[key]
 
     operator fun get(key: String) = props[key]

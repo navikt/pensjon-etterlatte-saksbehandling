@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
 import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -28,7 +29,7 @@ class AppBuilder(
             azureAppClientId = props.requireEnvValue(AZURE_APP_CLIENT_ID),
             azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
-            azureAppScope = env.requireEnvValue("VEDTAK_AZURE_SCOPE"),
+            azureAppScope = env.requireEnvValue(VEDTAK_AZURE_SCOPE),
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }

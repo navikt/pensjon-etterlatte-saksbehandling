@@ -1,6 +1,9 @@
 package no.nav.etterlatte.gyldigsoeknad.config
 
 import io.ktor.client.plugins.auth.Auth
+import no.nav.etterlatte.EnvKey.BEHANDLING_URL
+import no.nav.etterlatte.EnvKey.DOKARKIV_URL
+import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
@@ -16,7 +19,7 @@ class AppBuilder(
     val behandlingKlient: BehandlingClient by lazy {
         BehandlingClient(
             httpClient("BEHANDLING_AZURE_SCOPE"),
-            env.requireEnvValue("BEHANDLING_URL"),
+            env.requireEnvValue(BEHANDLING_URL),
         )
     }
 
@@ -24,9 +27,9 @@ class AppBuilder(
         JournalfoerSoeknadService(
             DokarkivKlient(
                 httpClient("DOKARKIV_SCOPE"),
-                env.requireEnvValue("DOKARKIV_URL"),
+                env.requireEnvValue(DOKARKIV_URL),
             ),
-            PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL")),
+            PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL)),
         )
     }
 

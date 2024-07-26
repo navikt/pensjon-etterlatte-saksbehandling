@@ -7,14 +7,14 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.BrevKey.BREVBAKER_URL
 import no.nav.etterlatte.BrevKey.CLAMAV_ENDPOINT_URL
-import no.nav.etterlatte.BrevKey.DOKARKIV_URL
 import no.nav.etterlatte.BrevKey.DOKDIST_URL
-import no.nav.etterlatte.BrevKey.PDFGEN_URL
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
 import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
+import no.nav.etterlatte.EnvKey.DOKARKIV_URL
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
@@ -324,9 +324,7 @@ class ApplicationBuilder {
 enum class BrevKey : EnvEnum {
     BREVBAKER_URL,
     CLAMAV_ENDPOINT_URL,
-    DOKARKIV_URL,
     DOKDIST_URL,
-    PDFGEN_URL,
     REGOPPSLAG_URL,
     SAF_BASE_URL,
     SAF_SCOPE,

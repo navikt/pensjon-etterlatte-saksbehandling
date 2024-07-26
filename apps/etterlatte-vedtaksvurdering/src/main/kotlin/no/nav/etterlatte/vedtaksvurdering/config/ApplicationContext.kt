@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -120,7 +121,7 @@ class ApplicationContext {
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_METRIKKER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 

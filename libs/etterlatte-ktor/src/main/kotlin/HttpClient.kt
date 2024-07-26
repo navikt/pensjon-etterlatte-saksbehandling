@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,12 +32,12 @@ fun httpClientClientCredentials(
         it.install(Auth) {
             clientCredential {
                 config =
-                    Miljoevariabler(
+                    Miljoevariabler.httpClient(
                         mapOf(
-                            "AZURE_APP_CLIENT_ID" to azureAppClientId,
-                            "AZURE_APP_JWK" to azureAppJwk,
-                            "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
-                            "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope,
+                            AzureEnums.AZURE_APP_CLIENT_ID to azureAppClientId,
+                            AzureEnums.AZURE_APP_JWK to azureAppJwk,
+                            AzureEnums.AZURE_APP_WELL_KNOWN_URL to azureAppWellKnownUrl,
+                            AzureEnums.AZURE_APP_OUTBOUND_SCOPE to azureAppScope,
                         ),
                     )
             }
@@ -67,4 +68,14 @@ fun httpClient(
         }
         ekstraDefaultHeaders.invoke(this)
     }
+}
+
+enum class AzureEnums : EnvEnum {
+    AZURE_APP_CLIENT_ID,
+    AZURE_APP_JWK,
+    AZURE_APP_WELL_KNOWN_URL,
+    AZURE_APP_OUTBOUND_SCOPE,
+    ;
+
+    override fun name() = name
 }

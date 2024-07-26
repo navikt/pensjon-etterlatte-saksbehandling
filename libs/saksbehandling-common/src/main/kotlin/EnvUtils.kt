@@ -35,5 +35,14 @@ data class Miljoevariabler(
         fun systemEnv() = Miljoevariabler(System.getenv())
 
         fun systemEnv(key: String) = System.getenv(key)
+
+        fun httpClient(props: Map<EnvEnum, String>) =
+            props.entries
+                .associate { it.key.name() to it.value }
+                .let { Miljoevariabler(it) }
     }
+}
+
+interface EnvEnum {
+    fun name(): String
 }

@@ -109,7 +109,7 @@ export const lagreViderefoertOpphoer = async ({
   skalViderefoere: JaNei | undefined
   behandlingId: string
   begrunnelse: string
-  vilkaar: string
+  vilkaar: string | undefined
   kravdato: string | null | undefined
   opphoerstidspunkt: Date | null
 }): Promise<ApiResponse<ViderefoertOpphoer>> => {

@@ -76,8 +76,8 @@ export const ViderefoereOpphoerVurdering = ({
   const lagre = (onSuccess?: () => void) => {
     setVilkaarError(valider())
 
-    if (skalViderefoere !== undefined && !!vilkaar && isSuccess(vilkaartyperResult)) {
-      const vilkaartype = finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name || ''
+    if (skalViderefoere !== undefined && !vilkaarError && isSuccess(vilkaartyperResult)) {
+      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name || '' : undefined
       return setViderefoertOpphoer(
         { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {

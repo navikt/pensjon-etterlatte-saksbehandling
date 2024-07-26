@@ -391,7 +391,7 @@ data class ViderefoertOpphoerRequest(
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: String,
+    val vilkaar: String?,
 ) {
     val dato: YearMonth = _dato.tilYearMonth()
 }
@@ -400,7 +400,7 @@ data class ViderefoertOpphoer(
     val skalViderefoere: JaNei,
     val behandlingId: UUID,
     val dato: YearMonth,
-    val vilkaar: String,
+    val vilkaar: String?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,

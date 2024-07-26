@@ -1,6 +1,7 @@
 package no.nav.etterlatte.kafka
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -39,7 +40,7 @@ abstract class Kafkakonfigurasjon<T>(
             put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
             put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
-            put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
+            put(ConsumerConfig.CLIENT_ID_CONFIG, env[NAIS_APP_NAME])
             put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
             put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, Duration.ofMinutes(8L).toMillis().toInt())
             put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())

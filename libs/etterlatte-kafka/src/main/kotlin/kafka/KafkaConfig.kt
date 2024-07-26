@@ -2,6 +2,7 @@ package no.nav.etterlatte.kafka
 
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -23,7 +24,7 @@ class GcpKafkaConfig(
 ) : KafkaConfig {
     companion object {
         private fun generateInstanceId(env: Miljoevariabler): String {
-            if (env.containsKey("NAIS_APP_NAME")) return InetAddress.getLocalHost().hostName
+            if (env.containsKey(NAIS_APP_NAME)) return InetAddress.getLocalHost().hostName
             return UUID.randomUUID().toString()
         }
 

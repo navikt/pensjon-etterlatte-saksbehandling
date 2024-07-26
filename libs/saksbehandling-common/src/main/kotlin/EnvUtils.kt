@@ -29,9 +29,9 @@ data class Miljoevariabler private constructor(
     ) = props.getOrDefault(key, default)
 
     fun append(
-        key: String,
+        key: EnvEnum,
         value: (Miljoevariabler) -> String,
-    ) = this.apply { props.toMutableMap()[key] = value(this) }
+    ) = this.apply { props.toMutableMap()[key.name()] = value(this) }
 
     fun append(props: Map<EnvEnum, String>): Miljoevariabler {
         val toMutableMap = this.props.toMutableMap()
@@ -43,12 +43,14 @@ data class Miljoevariabler private constructor(
 
     fun containsKey(key: String) = props.containsKey(key)
 
+    fun containsKey(key: EnvEnum) = containsKey(key.name())
+
     fun value(property: String): String = getValue(property)
 
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())
 
-        fun systemEnv(key: String) = System.getenv(key)
+        fun systemEnv(key: EnvEnum) = System.getenv(key.name())
 
         fun httpClient(props: Map<EnvEnum, String>) =
             props.entries

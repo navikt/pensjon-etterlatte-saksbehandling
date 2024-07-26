@@ -1,11 +1,11 @@
 package no.nav.etterlatte.samordning
 
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.samordning.SamordningKey.SAMORDNINGVEDTAK_HENDELSE_TOPIC
 
 class ApplicationContext(

@@ -2,10 +2,10 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient

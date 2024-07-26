@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -20,7 +21,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger

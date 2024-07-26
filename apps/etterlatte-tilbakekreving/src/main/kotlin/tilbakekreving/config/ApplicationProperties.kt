@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
@@ -9,7 +10,7 @@ import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PASSWORD
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
 import no.nav.etterlatte.libs.database.jdbcUrl
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
+import no.nav.etterlatte.libs.ktor.AppConfig.DEV_MODE
 import no.nav.etterlatte.libs.ktor.AzureEnums
 import no.nav.etterlatte.mq.MqKey.MQ_CHANNEL
 import no.nav.etterlatte.mq.MqKey.MQ_HOSTNAME
@@ -71,7 +72,7 @@ data class ApplicationProperties(
                     behandlingScope = getValue(ETTERLATTE_BEHANDLING_SCOPE),
                     proxyUrl = getValue(ETTERLATTE_PROXY_URL),
                     proxyScope = getValue(ETTERLATTE_PROXY_SCOPE),
-                    devMode = get("DEV_MODE").toBoolean(),
+                    devMode = get(DEV_MODE).toBoolean(),
                 )
             }
     }

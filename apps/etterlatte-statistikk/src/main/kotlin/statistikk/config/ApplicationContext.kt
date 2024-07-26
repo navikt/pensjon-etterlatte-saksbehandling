@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
@@ -118,7 +119,7 @@ class ApplicationContext {
     }
 
     private val leaderElection: LeaderElection by lazy {
-        LeaderElection(env["ELECTOR_PATH"])
+        LeaderElection(env[ELECTOR_PATH])
     }
 
     private val beregningHttpClient: HttpClient by lazy {

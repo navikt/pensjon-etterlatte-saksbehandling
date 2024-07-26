@@ -8,16 +8,18 @@ import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
 import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
 
 class AppBuilder(
     props: Miljoevariabler,
 ) {
-    private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"]) { "Mangler vedtak url " }
+    private val vedtakUrl = requireNotNull(props[ETTERLATTE_VEDTAK_URL]) { "Mangler vedtak url " }
     private val env = Miljoevariabler.systemEnv()
 
     fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
@@ -45,3 +47,10 @@ private fun featureToggleProperties(config: Config) =
         host = config.getString("funksjonsbrytere.unleash.host"),
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
+
+enum class VedtakKafkaKey : EnvEnum {
+    ETTERLATTE_VEDTAK_URL,
+    ;
+
+    override fun name() = name
+}

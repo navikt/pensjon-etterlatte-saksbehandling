@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.database
 
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
@@ -26,7 +27,7 @@ class ApplicationProperties(
                         ),
                     dbUsername = getValue(DB_USERNAME),
                     dbPassword = getValue(DB_PASSWORD),
-                    httpPort = get("HTTP_PORT")?.toInt() ?: 8080,
+                    httpPort = get(HTTP_PORT)?.toInt() ?: 8080,
                 )
             }
     }

@@ -2,11 +2,11 @@ package no.nav.etterlatte.klage
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.klage.KlageKey.KLAGE_TOPIC
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 val sikkerLogg = sikkerlogger()

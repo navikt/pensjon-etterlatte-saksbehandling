@@ -1,6 +1,7 @@
 package no.nav.etterlatte.hendelserpdl.config
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.hendelserpdl.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.config.PDLKey.LEESAH_TOPIC_PERSON
@@ -11,7 +12,6 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.AzureEnums
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 

@@ -9,6 +9,13 @@ import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
+import no.nav.etterlatte.libs.ktor.AzureEnums
+import no.nav.etterlatte.mq.MqKey.MQ_CHANNEL
+import no.nav.etterlatte.mq.MqKey.MQ_HOSTNAME
+import no.nav.etterlatte.mq.MqKey.MQ_MANAGER
+import no.nav.etterlatte.mq.MqKey.MQ_PORT
+import no.nav.etterlatte.mq.MqKey.srvpwd
+import no.nav.etterlatte.mq.MqKey.srvuser
 
 data class ApplicationProperties(
     val httpPort: Int,
@@ -36,13 +43,13 @@ data class ApplicationProperties(
             env.run {
                 ApplicationProperties(
                     httpPort = get(HTTP_PORT)?.toInt() ?: 8080,
-                    mqHost = value("MQ_HOSTNAME"),
-                    mqPort = value("MQ_PORT").toInt(),
-                    mqQueueManager = value("MQ_MANAGER"),
-                    mqChannel = value("MQ_CHANNEL"),
+                    mqHost = getValue(MQ_HOSTNAME),
+                    mqPort = getValue(MQ_PORT).toInt(),
+                    mqQueueManager = getValue(MQ_MANAGER),
+                    mqChannel = getValue(MQ_CHANNEL),
                     mqKravgrunnlagQueue = value("KRAVGRUNNLAG_MQ_NAME"),
-                    serviceUserUsername = value("srvuser"),
-                    serviceUserPassword = value("srvpwd"),
+                    serviceUserUsername = getValue(srvuser),
+                    serviceUserPassword = getValue(srvpwd),
                     jdbcUrl =
                         env[DB_JDBC_URL] ?: jdbcUrl(
                             getValue(DB_HOST),
@@ -51,9 +58,9 @@ data class ApplicationProperties(
                         ),
                     dbUsername = getValue(DB_USERNAME),
                     dbPassword = getValue(DB_PASSWORD),
-                    azureAppClientId = value("AZURE_APP_CLIENT_ID"),
-                    azureAppJwk = value("AZURE_APP_JWK"),
-                    azureAppWellKnownUrl = value("AZURE_APP_WELL_KNOWN_URL"),
+                    azureAppClientId = getValue(AzureEnums.AZURE_APP_CLIENT_ID),
+                    azureAppJwk = getValue(AzureEnums.AZURE_APP_JWK),
+                    azureAppWellKnownUrl = getValue(AzureEnums.AZURE_APP_WELL_KNOWN_URL),
                     behandlingUrl = value("ETTERLATTE_BEHANDLING_URL"),
                     behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
                     proxyUrl = value("ETTERLATTE_PROXY_URL"),

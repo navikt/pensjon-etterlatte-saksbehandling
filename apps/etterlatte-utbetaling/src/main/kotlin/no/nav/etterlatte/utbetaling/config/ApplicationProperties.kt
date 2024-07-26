@@ -6,6 +6,9 @@ import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PASSWORD
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
+import no.nav.etterlatte.mq.MqKey.srvpwd
+import no.nav.etterlatte.mq.MqKey.srvuser
 
 data class ApplicationProperties(
     val dbName: String,
@@ -44,9 +47,9 @@ data class ApplicationProperties(
                     mqSendQueue = value("OPPDRAG_SEND_MQ_NAME"),
                     mqKvitteringQueue = value("OPPDRAG_KVITTERING_MQ_NAME"),
                     mqAvstemmingQueue = value("OPPDRAG_AVSTEMMING_MQ_NAME"),
-                    serviceUserUsername = value("srvuser"),
-                    serviceUserPassword = value("srvpwd"),
-                    leaderElectorPath = value("ELECTOR_PATH"),
+                    serviceUserUsername = getValue(srvuser),
+                    serviceUserPassword = getValue(srvpwd),
+                    leaderElectorPath = getValue(ELECTOR_PATH),
                     grensesnittavstemmingEnabled = value("GRENSESNITTAVSTEMMING_ENABLED").toBoolean(),
                     konsistensavstemmingEnabled = value("KONSISTENSAVSTEMMING_ENABLED").toBoolean(),
                     grensesnittavstemmingOMSEnabled = value("GRENSESNITTAVSTEMMING_OMS_ENABLED").toBoolean(),

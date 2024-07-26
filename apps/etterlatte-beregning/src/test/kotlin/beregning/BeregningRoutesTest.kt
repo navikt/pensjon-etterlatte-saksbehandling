@@ -269,6 +269,7 @@ internal class BeregningRoutesTest {
             every { sak } returns 1
             every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
+            every { opphoerFraOgMed } returns null
         }
 
     private val token: String by lazy { server.issueSaksbehandlerToken() }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
@@ -16,6 +17,11 @@ import no.nav.etterlatte.mq.MqKey.MQ_MANAGER
 import no.nav.etterlatte.mq.MqKey.MQ_PORT
 import no.nav.etterlatte.mq.MqKey.srvpwd
 import no.nav.etterlatte.mq.MqKey.srvuser
+import no.nav.etterlatte.tilbakekreving.config.TilbakekrevingKey.ETTERLATTE_BEHANDLING_SCOPE
+import no.nav.etterlatte.tilbakekreving.config.TilbakekrevingKey.ETTERLATTE_BEHANDLING_URL
+import no.nav.etterlatte.tilbakekreving.config.TilbakekrevingKey.ETTERLATTE_PROXY_SCOPE
+import no.nav.etterlatte.tilbakekreving.config.TilbakekrevingKey.ETTERLATTE_PROXY_URL
+import no.nav.etterlatte.tilbakekreving.config.TilbakekrevingKey.KRAVGRUNNLAG_MQ_NAME
 
 data class ApplicationProperties(
     val httpPort: Int,
@@ -47,7 +53,7 @@ data class ApplicationProperties(
                     mqPort = getValue(MQ_PORT).toInt(),
                     mqQueueManager = getValue(MQ_MANAGER),
                     mqChannel = getValue(MQ_CHANNEL),
-                    mqKravgrunnlagQueue = value("KRAVGRUNNLAG_MQ_NAME"),
+                    mqKravgrunnlagQueue = getValue(KRAVGRUNNLAG_MQ_NAME),
                     serviceUserUsername = getValue(srvuser),
                     serviceUserPassword = getValue(srvpwd),
                     jdbcUrl =
@@ -61,12 +67,23 @@ data class ApplicationProperties(
                     azureAppClientId = getValue(AzureEnums.AZURE_APP_CLIENT_ID),
                     azureAppJwk = getValue(AzureEnums.AZURE_APP_JWK),
                     azureAppWellKnownUrl = getValue(AzureEnums.AZURE_APP_WELL_KNOWN_URL),
-                    behandlingUrl = value("ETTERLATTE_BEHANDLING_URL"),
-                    behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
-                    proxyUrl = value("ETTERLATTE_PROXY_URL"),
-                    proxyScope = value("ETTERLATTE_PROXY_SCOPE"),
+                    behandlingUrl = getValue(ETTERLATTE_BEHANDLING_URL),
+                    behandlingScope = getValue(ETTERLATTE_BEHANDLING_SCOPE),
+                    proxyUrl = getValue(ETTERLATTE_PROXY_URL),
+                    proxyScope = getValue(ETTERLATTE_PROXY_SCOPE),
                     devMode = get("DEV_MODE").toBoolean(),
                 )
             }
     }
+}
+
+enum class TilbakekrevingKey : EnvEnum {
+    ETTERLATTE_BEHANDLING_URL,
+    ETTERLATTE_BEHANDLING_SCOPE,
+    ETTERLATTE_PROXY_URL,
+    ETTERLATTE_PROXY_SCOPE,
+    KRAVGRUNNLAG_MQ_NAME,
+    ;
+
+    override fun name() = name
 }

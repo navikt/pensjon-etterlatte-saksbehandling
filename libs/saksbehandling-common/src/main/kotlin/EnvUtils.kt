@@ -37,8 +37,6 @@ data class Miljoevariabler private constructor(
 
     fun containsKey(key: EnvEnum) = props.containsKey(key.name())
 
-    fun value(property: String): String = props.getValue(property)
-
     companion object {
         fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())
 

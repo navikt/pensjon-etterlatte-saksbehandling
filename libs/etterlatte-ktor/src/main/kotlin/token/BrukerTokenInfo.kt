@@ -19,7 +19,8 @@ sealed class BrukerTokenInfo {
     companion object {
         private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == APP
 
-        fun of(
+        @PublishedApi
+        internal fun of(
             accessToken: String,
             saksbehandler: String?,
             claims: JwtTokenClaims?,
@@ -55,12 +56,12 @@ sealed class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
-data class VanligSystembruker(
+data class VanligSystembruker internal constructor(
     override val ident: String,
     override val jwtTokenClaims: JwtTokenClaims? = null,
 ) : Systembruker(ident, jwtTokenClaims)
 
-data class HardkodaSystembruker(
+data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
     companion object {
@@ -83,7 +84,7 @@ data class HardkodaSystembruker(
     }
 }
 
-data class Saksbehandler(
+data class Saksbehandler internal constructor(
     val accessToken: String,
     val ident: String,
     val jwtTokenClaims: JwtTokenClaims?,

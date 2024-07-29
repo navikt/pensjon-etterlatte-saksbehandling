@@ -329,5 +329,6 @@ internal class BeregningServiceTest {
             every { sakType } returns type
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
+            every { opphoerFraOgMed } returns null
         }
 }

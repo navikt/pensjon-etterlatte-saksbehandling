@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.util.UUID
 
@@ -59,10 +59,13 @@ class OmregningService(
         ) { "Opprettelse av revurdering feilet for $sakId" }
     }
 
-    fun oppdaterKjoering(request: KjoeringRequest) {
+    fun oppdaterKjoering(
+        request: KjoeringRequest,
+        bruker: BrukerTokenInfo,
+    ) {
         if (request.status == KjoeringStatus.FEILA) {
             behandlingService.hentAapenRegulering(request.sakId)?.let {
-                behandlingService.avbrytBehandling(it, Systembruker.regulering)
+                behandlingService.avbrytBehandling(it, bruker)
             }
         }
         omregningDao.oppdaterKjoering(request)

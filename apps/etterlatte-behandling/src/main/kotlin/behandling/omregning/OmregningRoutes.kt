@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.time.LocalTime
 
@@ -57,7 +58,7 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
             val request = call.receive<KjoeringRequest>()
             logger.info("Motter hendelse om at regulering har status ${request.status.name} i sak ${request.sakId}")
             inTransaction {
-                omregningService.oppdaterKjoering(request)
+                omregningService.oppdaterKjoering(request, brukerTokenInfo)
             }
             call.respond(HttpStatusCode.OK)
         }

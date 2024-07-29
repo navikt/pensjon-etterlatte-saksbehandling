@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
@@ -120,7 +121,7 @@ class DoedshendelseJobServiceTest {
                     endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt(),
                 ),
             )
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedHarDNummer)
+        every { kontrollpunktService.identifiserKontrollerpunkter(any(), Systembruker.doedshendelse) } returns listOf(AvdoedHarDNummer)
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
@@ -148,7 +149,7 @@ class DoedshendelseJobServiceTest {
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedLeverIPDL)
+        every { kontrollpunktService.identifiserKontrollerpunkter(any(), Systembruker.doedshendelse) } returns listOf(AvdoedLeverIPDL)
         val doedshendelseInternalCapture = slot<DoedshendelseInternal>()
 
         service.setupKontekstAndRun(kontekst)
@@ -178,7 +179,7 @@ class DoedshendelseJobServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any(), Systembruker.doedshendelse) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
@@ -211,7 +212,7 @@ class DoedshendelseJobServiceTest {
                 every { id } returns oppgaveId
             }
         every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns false
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any(), Systembruker.doedshendelse) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
@@ -244,7 +245,7 @@ class DoedshendelseJobServiceTest {
                 every { id } returns oppgaveId
             }
         every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any(), Systembruker.doedshendelse) } returns
             emptyList()
         every { doedshendelserProducer.sendBrevRequestBP(any(), any(), any()) } just runs
         val doedshendelseCapture = slot<DoedshendelseInternal>()

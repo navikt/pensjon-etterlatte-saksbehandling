@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
@@ -628,7 +629,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -666,7 +667,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -690,7 +691,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
 
             with(resultat) {
                 opprettetRevurdering shouldBe false

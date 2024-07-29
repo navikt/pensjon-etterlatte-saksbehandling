@@ -46,7 +46,10 @@ class JournalfoerBrevService(
         return journalfoer(brev, sak).journalpostId
     }
 
-    suspend fun journalfoerVedtaksbrev(vedtak: VedtakTilJournalfoering): Pair<OpprettJournalpostResponse, BrevID>? {
+    suspend fun journalfoerVedtaksbrev(
+        vedtak: VedtakTilJournalfoering,
+        bruker: Systembruker,
+    ): Pair<OpprettJournalpostResponse, BrevID>? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -67,7 +70,7 @@ class JournalfoerBrevService(
             return null
         }
 
-        val sak = behandlingService.hentSak(brev.sakId, Systembruker.brev)
+        val sak = behandlingService.hentSak(brev.sakId, bruker)
 
         return journalfoer(brev, sak)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }

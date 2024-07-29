@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -42,18 +43,20 @@ class VilkaarsvurderingKlientImpl(
     ): VilkaarsvurderingDto? {
         logger.info("Henter vilkaarsvurdering med behandlingid=$behandlingId")
         try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                ).mapBoth(
-                    success = { json -> json.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
+            return retryOgPakkUt {
+                downstreamResourceClient
+                    .get(
+                        resource =
+                            Resource(
+                                clientId = clientId,
+                                url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                            ),
+                        brukerTokenInfo = brukerTokenInfo,
+                    ).mapBoth(
+                        success = { json -> json.response?.let { objectMapper.readValue(it.toString()) } },
+                        failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                    )
+            }
         } catch (e: Exception) {
             throw VilkaarsvurderingKlientException(
                 "Henting av vilkårsvurdering for behandling med behandlingId=$behandlingId fra vedtak feilet",

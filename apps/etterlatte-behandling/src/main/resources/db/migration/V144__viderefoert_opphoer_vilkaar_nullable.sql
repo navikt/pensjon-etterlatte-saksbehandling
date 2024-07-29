@@ -1,0 +1,1 @@
+ALTER TABLE viderefoert_opphoer ALTER COLUMN vilkaar DROP NOT NULL

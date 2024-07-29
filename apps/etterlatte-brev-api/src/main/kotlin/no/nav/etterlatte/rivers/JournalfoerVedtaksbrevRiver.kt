@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -55,7 +56,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
-            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak) } ?: return
+            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak, Systembruker.brev) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
                 response.second,

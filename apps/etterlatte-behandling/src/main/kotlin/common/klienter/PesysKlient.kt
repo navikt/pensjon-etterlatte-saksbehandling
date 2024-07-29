@@ -10,16 +10,20 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PesysKlient {
-    suspend fun hentSaker(fnr: String): List<SakSammendragResponse>
+    suspend fun hentSaker(
+        fnr: String,
+        bruker: BrukerTokenInfo,
+    ): List<SakSammendragResponse>
 
     suspend fun erTilstoetendeBehandlet(
         fnr: String,
         doedsdato: LocalDate,
+        bruker: BrukerTokenInfo,
     ): Boolean
 }
 
@@ -34,7 +38,10 @@ class PesysKlientImpl(
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")
 
-    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
+    override suspend fun hentSaker(
+        fnr: String,
+        bruker: BrukerTokenInfo,
+    ): List<SakSammendragResponse> {
         logger.info("Henter sak sammendrag for  ${fnr.maskerFnr()} fra PEN")
 
         return downstreamResourceClient
@@ -45,7 +52,7 @@ class PesysKlientImpl(
                         url = "$resourceUrl/sak/sammendragWonderful",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
-                brukerTokenInfo = Systembruker.doedshendelse,
+                brukerTokenInfo = bruker,
             ).mapBoth(
                 success = { resource -> objectMapper.readValue(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
@@ -55,6 +62,7 @@ class PesysKlientImpl(
     override suspend fun erTilstoetendeBehandlet(
         fnr: String,
         doedsdato: LocalDate,
+        bruker: BrukerTokenInfo,
     ): Boolean {
         logger.info("Sjekker om tilstøtende er behandlet i Pesys for ${fnr.maskerFnr()}")
 
@@ -66,7 +74,7 @@ class PesysKlientImpl(
                         url = "$resourceUrl/sak/tilstotendeBehandlet?dodsdato=$doedsdato",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
-                brukerTokenInfo = Systembruker.doedshendelse,
+                brukerTokenInfo = bruker,
             ).mapBoth(
                 success = { resource -> objectMapper.readValue(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },

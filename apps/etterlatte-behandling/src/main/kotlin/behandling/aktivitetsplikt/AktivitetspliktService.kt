@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -340,6 +339,7 @@ class AktivitetspliktService(
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
+        bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
             requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
@@ -351,7 +351,7 @@ class AktivitetspliktService(
                     grunnlagKlient
                         .hentPersongalleri(
                             forrigeBehandling.id,
-                            Systembruker.automatiskJobb,
+                            bruker,
                         )?.opplysning,
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"

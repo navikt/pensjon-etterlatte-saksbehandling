@@ -3,16 +3,27 @@ import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
-import { InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
+import { BeregningsGrunnlagOMSPostDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
 import { mapListeFraDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import { SakType } from '~shared/types/sak'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   redigerbar: boolean
+  behandling: IDetaljertBehandling
+  sakType: SakType
+  beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
 }
 
-export const InstitusjonsoppholdBeregningsgrunnlag = ({ redigerbar, institusjonsopphold }: Props) => {
+export const InstitusjonsoppholdBeregningsgrunnlag = ({
+  redigerbar,
+  behandling,
+  sakType,
+  beregningsgrunnlag,
+  institusjonsopphold,
+}: Props) => {
   const [visInstitusjonsoppholdBeregningPeriodeSkjema, setVisInstitusjonsoppholdBeregningPeriodeSkjema] =
     useState<boolean>(false)
 
@@ -34,6 +45,10 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({ redigerbar, institusjons
 
       {redigerbar && visInstitusjonsoppholdBeregningPeriodeSkjema ? (
         <InstitusjonsoppholdBeregningsgrunnlagSkjema
+          behandling={behandling}
+          sakType={sakType}
+          beregningsgrunnlag={beregningsgrunnlag}
+          institusjonsopphold={institusjonsopphold}
           paaAvbryt={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
           paaLagre={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
         />

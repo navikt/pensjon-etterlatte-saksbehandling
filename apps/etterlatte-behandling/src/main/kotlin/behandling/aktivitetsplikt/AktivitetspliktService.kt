@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -431,6 +432,11 @@ class AktivitetspliktService(
         } else {
             logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
         }
+    }
+
+    suspend fun sendMeldingOmAktivitetForSak(sakId: Long) {
+        val behandlingId = behandlingService.hentBehandlingerForSak(sakId).maxBy { it.sistEndret }.id
+        sendDtoTilStatistikk(sakId, Systembruker.automatiskJobb, behandlingId)
     }
 }
 

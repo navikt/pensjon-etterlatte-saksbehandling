@@ -68,6 +68,14 @@ data class HardkodaSystembruker(
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
     }
+
+    enum class Systembrukere(
+        val appName: String,
+    ) {
+        RIVER("river"),
+        DOEDSHENDELSE("doedshendelse"),
+        TESTDATA("testdata"),
+    }
 }
 
 data class Saksbehandler(
@@ -134,14 +142,6 @@ enum class Claims {
 
     @Suppress("ktlint:standard:enum-entry-name-case")
     sub,
-}
-
-enum class Systembrukere(
-    val appName: String,
-) {
-    RIVER("river"),
-    DOEDSHENDELSE("doedshendelse"),
-    TESTDATA("testdata"),
 }
 
 fun tokenMedClaims(claims: Map<Claims, Any?>) =

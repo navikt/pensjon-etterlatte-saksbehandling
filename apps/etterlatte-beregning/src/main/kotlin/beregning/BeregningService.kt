@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class BeregningService(
@@ -94,6 +96,10 @@ class BeregningService(
     ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
+        if (behandling.behandlingType === BehandlingType.REVURDERING) {
+            validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
+        }
+
         return hentOverstyrBeregning(behandling).takeIf { it != null }
             ?: beregningRepository.opprettOverstyrBeregning(
                 OverstyrBeregning(
@@ -111,6 +117,11 @@ class BeregningService(
     ) {
         if (behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false)) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+            if (behandling.behandlingType === BehandlingType.REVURDERING) {
+                validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
+            }
+
             beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
             beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
         } else {
@@ -125,7 +136,25 @@ class BeregningService(
 
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
         this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
+
+    private suspend fun validerFoersteVirke(
+        behandlingKlient: BehandlingKlient,
+        behandling: DetaljertBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val foersteVirkDto: FoersteVirkDto? = behandlingKlient.hentFoersteVirkningsdato(behandling.sak, brukerTokenInfo)
+
+        if (foersteVirkDto != null && YearMonth.from(foersteVirkDto.foersteIverksatteVirkISak) != behandling.virkningstidspunkt?.dato) {
+            throw KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato()
+        }
+    }
 }
+
+class KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_FOERSTE_VIRKNINGSTIDSPUNKT",
+        detail = "For å legge til eller fjerne overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
+    )
 
 class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :
     UgyldigForespoerselException(

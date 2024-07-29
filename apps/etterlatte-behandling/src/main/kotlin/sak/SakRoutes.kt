@@ -18,6 +18,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -36,7 +37,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 const val KJOERING = "kjoering"
 const val ANTALL = "antall"
@@ -292,11 +292,6 @@ internal fun Route.sakWebRoutes(
 
 data class EnhetRequest(
     val enhet: String,
-)
-
-data class FoersteVirkDto(
-    val foersteIverksatteVirkISak: LocalDate,
-    val sakId: Long,
 )
 
 data class SakerDto(

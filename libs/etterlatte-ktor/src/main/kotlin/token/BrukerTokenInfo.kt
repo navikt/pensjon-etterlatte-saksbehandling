@@ -60,12 +60,6 @@ sealed class Systembruker(
     override fun erSammePerson(ident: String?) = false
 
     override fun kanEndreOppgaverFor(ident: String?) = true
-
-    companion object {
-        val river = HardkodaSystembruker(Systembrukere.RIVER)
-        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
-        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
-    }
 }
 
 data class VanligSystembruker(
@@ -75,7 +69,13 @@ data class VanligSystembruker(
 
 data class HardkodaSystembruker(
     val omraade: Systembrukere,
-) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to "app")))
+) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to "app"))) {
+    companion object {
+        val river = HardkodaSystembruker(Systembrukere.RIVER)
+        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
+        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+    }
+}
 
 data class Saksbehandler(
     val accessToken: String,

@@ -5,7 +5,7 @@ import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.SamordningsnotatParametre
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -55,12 +55,12 @@ class SamordningsnotatRiver(
                                 kommentar = kommentar,
                                 saksbehandlerId = saksbehandlerId,
                             ),
-                        bruker = Systembruker.river,
+                        bruker = HardkodaSystembruker.river,
                     )
 
                 notatService.journalfoer(
                     id = notat.id,
-                    bruker = Systembruker.river,
+                    bruker = HardkodaSystembruker.river,
                 )
             }
         } catch (e: Exception) {

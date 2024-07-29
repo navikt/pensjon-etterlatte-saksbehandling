@@ -7,7 +7,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -37,7 +37,7 @@ class DoedsmeldingJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                doedshendelseService.setupKontekstAndRun(jobContext, Systembruker.doedshendelse)
+                doedshendelseService.setupKontekstAndRun(jobContext, HardkodaSystembruker.doedshendelse)
             }
         }
     }

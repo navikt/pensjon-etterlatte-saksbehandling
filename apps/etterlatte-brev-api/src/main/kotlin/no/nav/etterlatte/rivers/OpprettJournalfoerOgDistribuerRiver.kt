@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
@@ -61,7 +61,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.river, packet)
+            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
             rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
         }
     }
@@ -167,7 +167,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
-        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, Systembruker.river), null, null).avdoede
+        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

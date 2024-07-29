@@ -45,7 +45,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
@@ -174,7 +174,7 @@ fun getDollyAccessToken(): String =
     runBlocking {
         azureAdClient
             .hentTokenFraAD(
-                Systembruker.testdata,
+                HardkodaSystembruker.testdata,
                 listOf("api://${config.getString("dolly.client.id")}/.default"),
             ).get()!!
             .accessToken
@@ -184,7 +184,7 @@ fun getTestnavAccessToken(): String =
     runBlocking {
         azureAdClient
             .hentTokenFraAD(
-                Systembruker.testdata,
+                HardkodaSystembruker.testdata,
                 listOf("api://${config.getString("testnav.client.id")}/.default"),
             ).get()!!
             .accessToken

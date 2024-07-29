@@ -1,7 +1,7 @@
 package no.nav.etterlatte.testdata
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -38,7 +38,7 @@ class AutomatiskBehandlingRiver(
                 behandlingssteg,
                 packet,
                 context,
-                Systembruker.testdata,
+                HardkodaSystembruker.testdata,
             )
         }
     }

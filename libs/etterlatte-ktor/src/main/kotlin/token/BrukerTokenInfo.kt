@@ -24,7 +24,7 @@ sealed class BrukerTokenInfo {
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                Systembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
+                VanligSystembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -35,9 +35,9 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(
-    val ident: String,
-    val jwtTokenClaims: JwtTokenClaims? = null,
+sealed class Systembruker(
+    open val ident: String,
+    open val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
     private constructor(omraade: Systembrukere) : this(
         ident = omraade.appName,
@@ -70,11 +70,26 @@ data class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 
     companion object {
-        val river = Systembruker(Systembrukere.RIVER)
-        val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
-        val testdata = Systembruker(Systembrukere.TESTDATA)
+        val river = HardkodaSystembruker(Systembrukere.RIVER)
+        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
+        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
     }
 }
+
+data class VanligSystembruker(
+    override val ident: String,
+    override val jwtTokenClaims: JwtTokenClaims? = null,
+) : Systembruker(ident, jwtTokenClaims)
+
+data class HardkodaSystembruker(
+    val omraade: Systembrukere,
+) : Systembruker(
+        ident = omraade.appName,
+        jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
+            ),
+    )
 
 data class Saksbehandler(
     val accessToken: String,

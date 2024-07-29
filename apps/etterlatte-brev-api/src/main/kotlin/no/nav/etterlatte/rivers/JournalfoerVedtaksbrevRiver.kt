@@ -56,7 +56,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
-            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak, Systembruker.brev) } ?: return
+            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak, Systembruker.river) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
                 response.second,

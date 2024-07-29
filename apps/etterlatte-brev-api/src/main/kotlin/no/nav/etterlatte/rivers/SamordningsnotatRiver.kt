@@ -55,12 +55,12 @@ class SamordningsnotatRiver(
                                 kommentar = kommentar,
                                 saksbehandlerId = saksbehandlerId,
                             ),
-                        bruker = Systembruker.brev,
+                        bruker = Systembruker.river,
                     )
 
                 notatService.journalfoer(
                     id = notat.id,
-                    bruker = Systembruker.brev,
+                    bruker = Systembruker.river,
                 )
             }
         } catch (e: Exception) {

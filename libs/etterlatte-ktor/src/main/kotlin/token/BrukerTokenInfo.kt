@@ -70,7 +70,7 @@ data class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 
     companion object {
-        val brev = Systembruker(Systembrukere.BREV)
+        val river = Systembruker(Systembrukere.RIVER)
         val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = Systembruker(Systembrukere.TESTDATA)
         val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
@@ -146,7 +146,7 @@ enum class Claims {
 enum class Systembrukere(
     val appName: String,
 ) {
-    BREV("brev"),
+    RIVER("river"),
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
     AUTOMATISK_JOBB("automatisk_jobb"),

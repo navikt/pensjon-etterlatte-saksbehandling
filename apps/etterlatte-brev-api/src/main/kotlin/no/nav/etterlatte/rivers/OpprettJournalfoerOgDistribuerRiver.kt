@@ -61,7 +61,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev, packet)
+            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.river, packet)
             rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
         }
     }
@@ -167,7 +167,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
-        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, Systembruker.brev), null, null).avdoede
+        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, Systembruker.river), null, null).avdoede
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

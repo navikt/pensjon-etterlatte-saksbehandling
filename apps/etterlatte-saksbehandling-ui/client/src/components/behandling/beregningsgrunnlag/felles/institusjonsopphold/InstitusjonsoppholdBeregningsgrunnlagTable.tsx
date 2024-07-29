@@ -1,15 +1,35 @@
-import React from 'react'
-import { InstitusjonsoppholdGrunnlagData, InstitusjonsoppholdIBeregning, ReduksjonOMS } from '~shared/types/Beregning'
+import React, { useState } from 'react'
+import { InstitusjonsoppholdIBeregning, ReduksjonOMS } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, HStack, Label, Table } from '@navikt/ds-react'
-import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import { SakType } from '~shared/types/sak'
 
-interface Props {
-  institusjonsopphold: InstitusjonsoppholdGrunnlagData
+interface PeriodeRedigeringModus {
+  redigerPeriode: boolean
+  erAapen: boolean
+  periodeIndex: number | undefined
 }
 
-export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold }: Props) => {
+const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
+  redigerPeriode: false,
+  erAapen: false,
+  periodeIndex: undefined,
+}
+
+interface Props {
+  behandling: IDetaljertBehandling
+  sakType: SakType
+  institusjonsopphold: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[] | undefined
+}
+
+export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ behandling, sakType, institusjonsopphold }: Props) => {
+  const [periodeRedigeringModus, setPeriodeRedigeringModus] =
+    useState<PeriodeRedigeringModus>(defaultPeriodeRedigeringModus)
+
   return (
     <Table>
       <Table.Header>
@@ -25,14 +45,34 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold
       <Table.Body>
         {!!institusjonsopphold?.length ? (
           institusjonsopphold.map(
-            (opphold: PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>, index: number) => (
+            (opphold: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>, index: number) => (
               <Table.ExpandableRow
                 key={index}
+                open={periodeRedigeringModus.erAapen && index === periodeRedigeringModus.periodeIndex}
+                onOpenChange={(open) => {
+                  setPeriodeRedigeringModus({
+                    redigerPeriode: open && periodeRedigeringModus.redigerPeriode,
+                    erAapen: open,
+                    periodeIndex: index,
+                  })
+                }}
                 content={
-                  <Box maxWidth="7">
-                    <Label>Beskrivelse</Label>
-                    <BodyShort>{opphold.data.begrunnelse}</BodyShort>
-                  </Box>
+                  !periodeRedigeringModus.redigerPeriode ? (
+                    <Box maxWidth="7">
+                      <Label>Beskrivelse</Label>
+                      <BodyShort>{opphold.data.begrunnelse}</BodyShort>
+                    </Box>
+                  ) : (
+                    <InstitusjonsoppholdBeregningsgrunnlagSkjema
+                      behandling={behandling}
+                      sakType={sakType}
+                      eksisterendePeriode={opphold}
+                      institusjonsopphold={institusjonsopphold}
+                      indexTilEksisterendePeriode={index}
+                      paaAvbryt={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
+                      paaLagre={() => setPeriodeRedigeringModus(defaultPeriodeRedigeringModus)}
+                    />
+                  )
                 }
               >
                 <Table.DataCell>{formaterDatoMedFallback(opphold.fom, '-')}</Table.DataCell>
@@ -41,10 +81,28 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({ institusjonsopphold
                 <Table.DataCell>{opphold.data.egenReduksjon ?? '-'}</Table.DataCell>
                 <Table.DataCell>
                   <HStack gap="2" wrap={false} justify="end">
-                    <Button type="button" variant="secondary" size="small" icon={<PencilIcon aria-hidden />}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="small"
+                      icon={<PencilIcon aria-hidden />}
+                      onClick={() => {
+                        setPeriodeRedigeringModus({
+                          redigerPeriode: true,
+                          erAapen: true,
+                          periodeIndex: index,
+                        })
+                      }}
+                    >
                       Rediger
                     </Button>
-                    <Button type="button" variant="secondary" size="small" icon={<TrashIcon aria-hidden />}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="small"
+                      icon={<TrashIcon aria-hidden />}
+                      //TODO: LEGGE INN STØTTE FOR SLETTING
+                    >
                       Slett
                     </Button>
                   </HStack>

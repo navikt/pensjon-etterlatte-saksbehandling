@@ -23,6 +23,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initalInstitusjonsoppholdPeriode,
   konverterTilSisteDagIMaaneden,
+  replacePeriodePaaIndex,
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
 
 interface Props {
@@ -30,7 +31,7 @@ interface Props {
   sakType: SakType
   beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
   eksisterendePeriode?: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>
-  indexTilPeriode?: number
+  indexTilEksisterendePeriode?: number
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
   paaAvbryt: () => void
   paaLagre: () => void
@@ -40,7 +41,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
   behandling,
   sakType,
   beregningsgrunnlag,
-  indexTilPeriode,
+  indexTilEksisterendePeriode,
   eksisterendePeriode,
   institusjonsopphold,
   paaAvbryt,
@@ -77,21 +78,38 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
       tom: institusjonsoppholdPeriode.tom && konverterTilSisteDagIMaaneden(institusjonsoppholdPeriode.tom),
     }
 
-    const grunnlag = {
-      beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-      institusjonsopphold: !!institusjonsopphold?.length
-        ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
-        : [formatertInstitusjonsoppholdPeriode],
-    }
-
     if (sakType === SakType.OMSTILLINGSSTOENAD) {
-      if (eksisterendePeriode && institusjonsopphold && indexTilPeriode !== undefined) {
-        // TODO: lage logikk for å redigere og replace eksistenrende periode
-      } else {
+      if (eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined) {
+        const grunnlag = {
+          beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+          institusjonsopphold: replacePeriodePaaIndex(
+            formatertInstitusjonsoppholdPeriode,
+            institusjonsopphold,
+            indexTilEksisterendePeriode
+          ),
+        }
         lagreBeregningsGrunnlagOMSRequest(
           {
             behandlingId: behandling.id,
-            grunnlag: grunnlag,
+            grunnlag,
+          },
+          () => {
+            dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+            paaLagre()
+          }
+        )
+      } else {
+        const grunnlag = {
+          beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+          institusjonsopphold: !!institusjonsopphold?.length
+            ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
+            : [formatertInstitusjonsoppholdPeriode],
+        }
+
+        lagreBeregningsGrunnlagOMSRequest(
+          {
+            behandlingId: behandling.id,
+            grunnlag,
           },
           () => {
             dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))

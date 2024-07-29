@@ -71,11 +71,11 @@ export const validerAarsak = (aarsak: OverstyrtAarsakKey | undefined): string | 
   return undefined
 }
 
-export const replacePeriodePaaIndex = (
-  periode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>,
-  perioder: Array<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>>,
+export const replacePeriodePaaIndex = <G>(
+  periode: PeriodisertBeregningsgrunnlagDto<G>,
+  perioder: Array<PeriodisertBeregningsgrunnlagDto<G>>,
   index: number
-): Array<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>> => {
+): Array<PeriodisertBeregningsgrunnlagDto<G>> => {
   const kopi = [...perioder]
   kopi.splice(index, 1, periode)
 

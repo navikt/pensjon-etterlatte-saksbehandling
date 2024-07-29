@@ -4,7 +4,6 @@ import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
 import { BeregningsGrunnlagOMSPostDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
-import { mapListeFraDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -40,7 +39,11 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
       </VStack>
 
       <Box maxWidth="60rem">
-        <InstitusjonsoppholdBeregningsgrunnlagTable institusjonsopphold={mapListeFraDto(institusjonsopphold ?? [])} />
+        <InstitusjonsoppholdBeregningsgrunnlagTable
+          behandling={behandling}
+          sakType={sakType}
+          institusjonsopphold={institusjonsopphold}
+        />
       </Box>
 
       {redigerbar && visInstitusjonsoppholdBeregningPeriodeSkjema ? (

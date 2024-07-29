@@ -151,7 +151,7 @@ enum class Systembrukere(
     TESTDATA("testdata"),
 }
 
-fun tokenMedClaims(claims: Map<Claims, String>) =
+fun tokenMedClaims(claims: Map<Claims, Any?>) =
     claims.entries
         .fold(JWTClaimsSet.Builder()) { acc, next -> acc.claim(next.key.name, next.value) }
         .build()

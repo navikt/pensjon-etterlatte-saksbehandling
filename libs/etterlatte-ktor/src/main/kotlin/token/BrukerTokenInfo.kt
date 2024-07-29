@@ -75,13 +75,7 @@ data class VanligSystembruker(
 
 data class HardkodaSystembruker(
     val omraade: Systembrukere,
-) : Systembruker(
-        ident = omraade.appName,
-        jwtTokenClaims =
-            JwtTokenClaims(
-                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
-            ),
-    )
+) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to "app")))
 
 data class Saksbehandler(
     val accessToken: String,
@@ -156,3 +150,9 @@ enum class Systembrukere(
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
 }
+
+fun tokenMedClaims(claims: Map<Claims, String>) =
+    claims.entries
+        .fold(JWTClaimsSet.Builder()) { acc, next -> acc.claim(next.key.name, next.value) }
+        .build()
+        .let { JwtTokenClaims(it) }

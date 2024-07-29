@@ -8,14 +8,14 @@ internal class BrukerTokenInfoTest {
     private fun genererClaimSetSystembruker() =
         tokenMedClaims(
             mapOf(
-                Claims.idtyp to "app",
+                Claims.idtyp to APP,
                 Claims.azp_name to "cluster:appname:dev",
             ),
         )
 
     @Test
     fun `er maskin-til-maskin hvis idtype=app`() {
-        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", genererClaimSetSystembruker(), idtyp = "app") is Systembruker)
+        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", genererClaimSetSystembruker(), idtyp = APP) is Systembruker)
     }
 
     @Test

@@ -3,6 +3,8 @@ package no.nav.etterlatte.libs.ktor.token
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
+const val APP = "app"
+
 sealed class BrukerTokenInfo {
     abstract fun ident(): String
 
@@ -15,7 +17,7 @@ sealed class BrukerTokenInfo {
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
 
     companion object {
-        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
+        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == APP
 
         fun of(
             accessToken: String,
@@ -60,7 +62,7 @@ data class VanligSystembruker(
 
 data class HardkodaSystembruker(
     val omraade: Systembrukere,
-) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to "app"))) {
+) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
     companion object {
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)

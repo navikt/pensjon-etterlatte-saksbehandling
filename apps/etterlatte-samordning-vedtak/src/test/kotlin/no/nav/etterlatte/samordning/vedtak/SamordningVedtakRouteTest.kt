@@ -20,6 +20,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.token.APP
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.tokenMedClaims
@@ -277,7 +278,7 @@ class SamordningVedtakRouteTest {
             val claimSet =
                 tokenMedClaims(
                     mapOf(
-                        Claims.idtyp to "app",
+                        Claims.idtyp to APP,
                         Claims.azp_name to "cluster:appname:dev",
                         Claims.roles to listOf(role),
                     ),

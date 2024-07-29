@@ -1,5 +1,6 @@
 package no.nav.etterlatte.ktor.token
 
+import no.nav.etterlatte.libs.ktor.token.APP
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -36,6 +37,6 @@ fun MockOAuth2Server.issueSystembrukerToken(
                 mapOf(
                     Claims.azp_name.name to mittsystem,
                     "roles" to roles,
-                    Claims.idtyp.name to "app",
+                    Claims.idtyp.name to APP,
                 ),
         ).serialize()

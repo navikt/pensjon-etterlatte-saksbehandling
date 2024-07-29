@@ -39,14 +39,6 @@ sealed class Systembruker(
     open val ident: String,
     open val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(
-        ident = omraade.appName,
-        jwtTokenClaims =
-            JwtTokenClaims(
-                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
-            ),
-    )
-
     override fun ident() = ident
 
     fun identForBrev(): String {

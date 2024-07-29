@@ -73,7 +73,6 @@ data class Systembruker(
         val river = Systembruker(Systembrukere.RIVER)
         val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = Systembruker(Systembrukere.TESTDATA)
-        val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
     }
 }
 
@@ -149,5 +148,4 @@ enum class Systembrukere(
     RIVER("river"),
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
-    AUTOMATISK_JOBB("automatisk_jobb"),
 }

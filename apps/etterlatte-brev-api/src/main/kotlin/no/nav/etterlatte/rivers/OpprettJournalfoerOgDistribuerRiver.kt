@@ -103,7 +103,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 }
             } catch (e: Exception) {
                 val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
-                logger.error(feilMelding)
+                logger.error(feilMelding, e)
                 throw OpprettJournalfoerOgDistribuerRiverException(
                     feilMelding,
                     e,

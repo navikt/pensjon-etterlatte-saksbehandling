@@ -18,11 +18,11 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktOMSService
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.mockPerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -32,7 +32,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService = DoedshendelseKontrollpunktOMSService(pesysKlient, behandlingService)
 
-    private val bruker = Systembruker.doedshendelse
+    private val bruker = systembruker()
 
     @Test
     fun `Skal opprette kontrollpunkt naar identifisert gjenlevende er over 67 aar`() {

@@ -64,6 +64,11 @@ data class HardkodaSystembruker(
     val omraade: Systembrukere,
 ) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
     companion object {
+        /* Obs: Bruk bare disse fra kontekster hvor vi ikke har et BrukerTokenInfo-objekt allerede.
+        Send alltid med brukeren fra requesten der du kan. Disse er for rivers, automatiske jobber
+        og testdata-appene, hvor systemet på eget initiativ starter kjøring, og vi dermed ikke har en
+        eksisterende saksbehandler eller systembruker å hente tokenet fra
+         */
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)

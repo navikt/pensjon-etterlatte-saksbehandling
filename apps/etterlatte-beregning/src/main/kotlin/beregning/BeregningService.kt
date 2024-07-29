@@ -147,7 +147,7 @@ class BeregningService(
 class KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato :
     UgyldigForespoerselException(
         code = "UGYLDIG_FOERSTE_VIRKNINGSTIDSPUNKT",
-        detail = "For å overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
+        detail = "For å legge til eller fjerne overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
     )
 
 class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :

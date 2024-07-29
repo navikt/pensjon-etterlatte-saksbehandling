@@ -37,4 +37,5 @@ data class DetaljertBehandlingDto(
     val begrunnelse: String?,
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
+    val viderefoertOpphoer: ViderefoertOpphoer?,
 )

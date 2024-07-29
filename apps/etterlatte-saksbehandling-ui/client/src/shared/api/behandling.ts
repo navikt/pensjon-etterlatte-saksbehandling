@@ -5,6 +5,7 @@ import {
   IKommerBarnetTilgode,
   IUtlandstilknytning,
   NyBehandlingRequest,
+  ViderefoertOpphoer,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
@@ -16,6 +17,7 @@ import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Bre
 import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
+import { JaNei } from '~shared/types/ISvar'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -93,6 +95,30 @@ export const lagreUtlandstilknytning = async ({
   return apiClient.post(`/behandling/${behandlingId}/utlandstilknytning`, {
     utlandstilknytningType: svar,
     begrunnelse: begrunnelse,
+  })
+}
+
+export const lagreViderefoertOpphoer = async ({
+  skalViderefoere,
+  behandlingId,
+  begrunnelse,
+  vilkaar,
+  kravdato,
+  opphoerstidspunkt,
+}: {
+  skalViderefoere: JaNei | undefined
+  behandlingId: string
+  begrunnelse: string
+  vilkaar: string | undefined
+  kravdato: string | null | undefined
+  opphoerstidspunkt: Date | null
+}): Promise<ApiResponse<ViderefoertOpphoer>> => {
+  return apiClient.post(`/behandling/${behandlingId}/viderefoert-opphoer`, {
+    skalViderefoere: skalViderefoere,
+    vilkaar: vilkaar,
+    begrunnelse: begrunnelse,
+    kravdato: kravdato,
+    dato: opphoerstidspunkt,
   })
 }
 

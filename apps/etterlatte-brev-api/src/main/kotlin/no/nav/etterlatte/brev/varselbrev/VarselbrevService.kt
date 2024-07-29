@@ -39,7 +39,7 @@ internal class VarselbrevService(
                 sakId = sakId,
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
-                brevKode = { brevkode.redigering },
+                brevKodeMapping = { brevkode.redigering },
                 brevtype = Brevtype.VARSEL,
             ) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
@@ -79,11 +79,11 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKode = {
+        brevKodeMapping = {
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
-        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
+        brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 
     suspend fun genererPdf(
@@ -95,10 +95,10 @@ internal class VarselbrevService(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
-        brevKode = {
+        brevKodeMapping = {
             val brev = db.hentBrev(brevId)
             runBlocking { hentBrevkode(it.sakType, brev.behandlingId, bruker) }
         },
-        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
+        brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }

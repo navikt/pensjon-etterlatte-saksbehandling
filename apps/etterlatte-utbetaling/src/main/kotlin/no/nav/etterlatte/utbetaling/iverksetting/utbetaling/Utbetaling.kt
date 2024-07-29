@@ -139,6 +139,10 @@ enum class Kjoereplan(
     }
 }
 
+/*
+    Noen klassekoder:
+    https://confluence.adeo.no/pages/viewpage.action?pageId=329267485
+ */
 enum class OppdragKlassifikasjonskode(
     private val oppdragVerdi: String,
     val tekniskArt: Boolean = false,
@@ -149,6 +153,9 @@ enum class OppdragKlassifikasjonskode(
     FEILKONTO("KL_KODE_FEIL_PEN"),
     MOTPOSTERING("TBMOTOBS", tekniskArt = true),
     BFRISKAT("BFRISKAT"),
+    BSKTKRED("BSKTKRED"), // Kreditor disponerer - dette er mest sannsynlig verge
+    KREDKRED("KREDKRED"),
+    // Bøtetrekk, erstatningskrav, husleietrekk, eksternt kreditortrekk eller krav på offentlige avgifter
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -163,6 +170,8 @@ enum class OppdragKlassifikasjonskode(
                 "KL_KODE_FEIL_PEN" -> FEILKONTO
                 "TBMOTOBS" -> MOTPOSTERING
                 "BFRISKAT" -> BFRISKAT
+                "BSKTKRED" -> BSKTKRED
+                "KREDKRED" -> KREDKRED
                 else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }

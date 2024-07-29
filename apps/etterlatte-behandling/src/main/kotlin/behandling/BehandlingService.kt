@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
@@ -548,13 +549,14 @@ internal class BehandlingServiceImpl(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
+        val viderefoertOpphoer: ViderefoertOpphoer?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling, viderefoertOpphoer) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -565,7 +567,8 @@ internal class BehandlingServiceImpl(
                     kommerBarnetTilGodeDao
                         .hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling)
+                val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(behandlingId)
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, viderefoertOpphoer)
             }
 
         val sakId = behandling.sak.id
@@ -592,6 +595,7 @@ internal class BehandlingServiceImpl(
             begrunnelse = behandling.begrunnelse(),
             kilde = behandling.kilde,
             sendeBrev = behandling.sendeBrev,
+            viderefoertOpphoer = viderefoertOpphoer,
         )
     }
 
@@ -721,6 +725,12 @@ internal class BehandlingServiceImpl(
         val behandling =
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
+
+        if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
+            viderefoertOpphoer.vilkaar == null
+        ) {
+            throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
+        }
 
         behandling
             .oppdaterVidereførtOpphoer(viderefoertOpphoer)

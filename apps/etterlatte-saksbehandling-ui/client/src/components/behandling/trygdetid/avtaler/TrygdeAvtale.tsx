@@ -1,4 +1,4 @@
-import { HandshakeIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, HandshakeIcon, PencilIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   Alert,
   Box,
@@ -32,9 +32,9 @@ import { IconSize } from '~shared/types/Icon'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
 import { JaNei } from '~shared/types/ISvar'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -150,20 +150,22 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   return (
     <Box paddingBlock="8 0">
       <VStack gap="4">
-        <HStack gap="2">
+        <HStack gap="2" align="center">
           <HandshakeIcon fontSize={IconSize.DEFAULT} />
           <Heading size="small" level="3">
             Vurdering av trygdeavtale (Avdød)
           </Heading>
         </HStack>
 
+        <AvdoedesTrygdetidReadMore />
+
         {!redigering && avtalerListe && avtaleKriterierListe && (
           <>
             <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
             {redigerbar && (
               <div>
-                <Button size="small" onClick={rediger} type="button">
-                  Rediger
+                <Button size="small" variant="secondary" onClick={rediger} type="button" icon={<PencilIcon />}>
+                  Rediger avtale
                 </Button>
               </div>
             )}
@@ -175,7 +177,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
           redigerbar &&
           redigering && (
             <form>
-              <VStack gap="4">
+              <VStack gap="6">
                 <HStack gap="4">
                   <Select
                     label="Avtale"
@@ -210,33 +212,34 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   )}
                 </HStack>
 
-                <Select
-                  label="Kriterier for å omfattes av avtalen"
-                  autoComplete="off"
-                  value={trygdeavtale.avtaleKriteriaKode}
-                  onChange={(e) => {
-                    setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })
-                  }}
-                >
-                  <TrygdetidAvtaleOptionsView
-                    defaultBeskrivelse="Velg kriteria"
-                    trygdeavtaleOptions={hentAlleTrygdetidAvtalerKriterierRequest.data}
-                  />
-                </Select>
+                <Box width="50%">
+                  <Select
+                    label="Kriterier for å omfattes av avtalen"
+                    autoComplete="off"
+                    value={trygdeavtale.avtaleKriteriaKode}
+                    onChange={(e) => setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })}
+                  >
+                    <TrygdetidAvtaleOptionsView
+                      defaultBeskrivelse="Velg kriterie"
+                      trygdeavtaleOptions={hentAlleTrygdetidAvtalerKriterierRequest.data}
+                    />
+                  </Select>
+                </Box>
 
-                <RadioGroup
-                  legend="Er avdøde i personkretsen i denne avtalen?"
-                  className="radioGroup"
-                  onChange={(event) => {
-                    setTrygdeavtale({ ...trygdeavtale, personKrets: event as JaNei })
-                  }}
-                  value={trygdeavtale.personKrets || ''}
-                >
-                  <div className="flex">
-                    <Radio value={JaNei.JA}>Ja</Radio>
-                    <Radio value={JaNei.NEI}>Nei</Radio>
-                  </div>
-                </RadioGroup>
+                <VStack gap="2">
+                  <Heading size="xsmall">Er avdøde i personkretsen i denne avtalen?</Heading>
+                  <RadioGroup
+                    legend=""
+                    size="small"
+                    onChange={(event) => setTrygdeavtale({ ...trygdeavtale, personKrets: event as JaNei })}
+                    value={trygdeavtale.personKrets || ''}
+                  >
+                    <HStack gap="8">
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </HStack>
+                  </RadioGroup>
+                </VStack>
 
                 <HGrid gap="8 4" columns="60% 40%">
                   <VStack gap="2">
@@ -254,8 +257,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                         lenke="https://lovdata.no/pro/rundskriv/r45-00/KAPITTEL_3-3-2-1"
                       />
                       <RadioGroup
-                        legend="Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?"
-                        hideLegend={true}
+                        legend=""
                         size="small"
                         className="radioGroup"
                         onChange={(event) => {
@@ -337,9 +339,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
 
                   <VStack gap="2">
                     <HStack gap="2">
-                      <Heading size="xsmall">
-                        Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?
-                      </Heading>
+                      <Heading size="xsmall">Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?</Heading>
                       <HelpText>
                         Hvis forutgående medlemskap, og derav vilkår for å beregne framtidig trygdetid, er oppfylt etter
                         nasjonale regler i Sverige og/eller Island i tillegg til Norge, skal framtidig trygdetid
@@ -393,14 +393,26 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                 </HGrid>
 
                 <HStack gap="4">
-                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
-                    Lagre
-                  </Button>
                   {trygdeavtale && (
-                    <Button size="small" onClick={avbryt} type="button" variant="secondary">
+                    <Button
+                      size="small"
+                      onClick={avbryt}
+                      type="button"
+                      variant="secondary"
+                      icon={<XMarkIcon aria-hidden />}
+                    >
                       Avbryt
                     </Button>
                   )}
+                  <Button
+                    size="small"
+                    loading={isPending(lagreTrygdeavtaleRequest)}
+                    type="button"
+                    onClick={lagre}
+                    icon={<FloppydiskIcon />}
+                  >
+                    Lagre
+                  </Button>
                 </HStack>
               </VStack>
             </form>

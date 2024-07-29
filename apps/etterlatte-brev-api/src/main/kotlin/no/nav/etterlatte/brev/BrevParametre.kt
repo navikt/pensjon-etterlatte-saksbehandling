@@ -14,7 +14,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 sealed class BrevParametre {
     abstract val brevkode: EtterlatteBrevKode
 
-    abstract fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar
+    abstract fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND")
     data class Aktivitetsplikt(
@@ -24,7 +24,7 @@ sealed class BrevParametre {
         val nasjonalEllerUtland: NasjonalEllerUtland,
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
     }
 
@@ -34,7 +34,7 @@ sealed class BrevParametre {
         val avdoedNavn: String,
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonDoedsfall(
                 innhold = emptyList(),
                 avdoedNavn = avdoedNavn,
@@ -49,7 +49,7 @@ sealed class BrevParametre {
         val erOver18Aar: Boolean,
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonDoedsfall(
                 innhold = emptyList(),
                 avdoedNavn = avdoedNavn,
@@ -62,6 +62,6 @@ sealed class BrevParametre {
     class TomtBrev : BrevParametre() {
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.TOM_DELMAL
 
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar = ManueltBrevData()
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar = ManueltBrevData()
     }
 }

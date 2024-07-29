@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktor.token
 
 import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class BrukerTokenInfo {
@@ -10,8 +9,6 @@ sealed class BrukerTokenInfo {
     abstract fun erSammePerson(ident: String?): Boolean
 
     abstract fun getClaims(): JwtTokenClaims?
-
-    abstract val roller: List<String>
 
     abstract fun accessToken(): String
 
@@ -23,13 +20,11 @@ sealed class BrukerTokenInfo {
         fun of(
             accessToken: String,
             saksbehandler: String?,
-            oid: String?,
-            sub: String?,
             claims: JwtTokenClaims?,
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                Systembruker(oid!!, sub!!, ident = claims?.getClaimAsString(Claims.azp_name) ?: sub, claims)
+                Systembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -41,27 +36,33 @@ sealed class BrukerTokenInfo {
 }
 
 data class Systembruker(
-    val oid: String,
-    val sub: String,
-    val ident: String? = null,
+    val ident: String,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
     private constructor(omraade: Systembrukere) : this(
-        oid = omraade.oid,
-        sub = omraade.oid,
+        ident = omraade.appName,
         jwtTokenClaims =
             JwtTokenClaims(
                 JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
             ),
     )
 
-    override fun ident() = ident ?: Fagsaksystem.EY.navn
+    override fun ident() = ident
+
+    fun identForBrev(): String {
+        val systemBrukereInternt = Systembrukere.entries.map { it.appName }
+        if (ident in systemBrukereInternt) {
+            return Fagsaksystem.EY.navn
+        } else {
+            return ident
+        }
+    }
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
     override fun getClaims() = jwtTokenClaims
 
-    override val roller: List<String>
+    val roller: List<String>
         get() = getClaims()?.getAsList(Claims.roles.name) ?: emptyList()
 
     override fun erSammePerson(ident: String?) = false
@@ -94,7 +95,7 @@ data class Saksbehandler(
 
     override fun getClaims() = jwtTokenClaims
 
-    override val roller: List<String>
+    val groups: List<String>
         get() = getClaims()?.getAsList(Claims.groups.name) ?: emptyList()
 }
 
@@ -108,12 +109,14 @@ enum class Claims {
     idtyp,
 
    /*
+   Kun for Saksbehandlertoken!
    The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
     */
     NAVident,
 
     /*
+    Kun for Saksbehandlertoken!
     JSON array of group identifiers that the user is a member of.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#claims
      */
@@ -121,6 +124,7 @@ enum class Claims {
     groups,
 
     /*
+    Kun for systembruker!
     Roles will appear in the roles claim as an array of strings within the application's token.
     https://docs.nais.io/auth/entra-id/reference/?h=groups#custom-roles
      */
@@ -143,7 +147,7 @@ enum class Claims {
 }
 
 enum class Systembrukere(
-    val oid: String,
+    val appName: String,
 ) {
     BREV("brev"),
     MIGRERING("migrering"),

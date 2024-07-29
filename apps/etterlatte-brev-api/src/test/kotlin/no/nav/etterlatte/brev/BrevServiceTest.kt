@@ -23,9 +23,9 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -49,8 +49,10 @@ internal class BrevServiceTest {
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
+    private val innholdTilRedigerbartBrevHenter =
+        InnholdTilRedigerbartBrevHenter(brevDataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevDataFacade, behandlingService, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(adresseService, db, behandlingService, innholdTilRedigerbartBrevHenter)
 
     private val brevService =
         BrevService(
@@ -60,7 +62,7 @@ internal class BrevServiceTest {
             pdfGenerator,
         )
 
-    private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null, null)
+    private val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun before() {

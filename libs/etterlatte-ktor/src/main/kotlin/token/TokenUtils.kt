@@ -1,12 +1,10 @@
-package no.nav.etterlatte.libs.ktor
+package no.nav.etterlatte.libs.ktor.token
 
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 enum class Issuer(
@@ -34,19 +32,10 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
         val claims = this.hentTokenClaimsForIssuerName(Issuer.AZURE)
-        val oidSub =
-            claims
-                ?.let {
-                    val oid = it.getClaimAsString(Claims.oid)
-                    val sub = it.getClaimAsString(Claims.sub)
-                    Pair(oid, sub)
-                }
         val saksbehandler = claims?.getClaimAsString(Claims.NAVident)
         val idtyp = claims?.getClaimAsString(Claims.idtyp)
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
-            oid = oidSub?.first,
-            sub = oidSub?.second,
             saksbehandler = saksbehandler,
             idtyp = idtyp,
             claims = claims,

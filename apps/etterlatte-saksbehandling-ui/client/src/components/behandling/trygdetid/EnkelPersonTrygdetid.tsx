@@ -15,18 +15,19 @@ import React, { useEffect, useState } from 'react'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
-import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioder'
 import { VStack } from '@navikt/ds-react'
+import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
+import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 
 interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
   trygdetid: ITrygdetid
-  virkningstidspunktEtterNyRegelDato: Boolean
+  virkningstidspunktEtterNyRegelDato: boolean
   landListe: ILand[]
   fetchTrygdetider: (behandlingId: string) => void
 }
@@ -80,7 +81,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
 
   if (trygdetid?.id && trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (
-      <TrygdetidWrapper>
+      <VStack gap="12" maxWidth="69rem">
         <TrygdetidManueltOverstyrt
           behandlingId={behandling.id}
           trygdetidId={trygdetid.id}
@@ -89,15 +90,18 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           beregnetTrygdetid={trygdetid.beregnetTrygdetid}
         />
         <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
-      </TrygdetidWrapper>
+      </VStack>
     )
   }
 
   return (
     <>
       {trygdetid && (
-        <VStack gap="12">
-          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+        <VStack gap="12" maxWidth="69rem">
+          <VStack gap="4">
+            {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
+            <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+          </VStack>
 
           <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 
@@ -142,8 +146,3 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     </>
   )
 }
-
-const TrygdetidWrapper = styled.div`
-  padding: 0 4em;
-  max-width: 69em;
-`

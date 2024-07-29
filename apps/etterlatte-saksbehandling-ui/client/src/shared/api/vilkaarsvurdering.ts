@@ -48,6 +48,9 @@ export const hentMigrertYrkesskadeFordel = async (
 ): Promise<ApiResponse<MigrertYrkesskadefordel>> =>
   apiClient.get(`/vilkaarsvurdering/${behandlingId}/migrert-yrkesskadefordel`)
 
+export const hentVilkaartyper = async (behandlingId: string): Promise<ApiResponse<Vilkaartyper>> =>
+  apiClient.get(`/vilkaarsvurdering/${behandlingId}/typer`)
+
 export interface StatusOppdatert {
   statusOppdatert: boolean
 }
@@ -137,4 +140,11 @@ export interface VilkaarsvurderingVurdertResultat {
 
 export interface MigrertYrkesskadefordel {
   migrertYrkesskadefordel: boolean
+}
+export interface Vilkaartyper {
+  typer: Vilkaartype[]
+}
+export interface Vilkaartype {
+  name: string
+  tittel: string
 }

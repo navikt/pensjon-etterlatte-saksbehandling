@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -301,18 +303,50 @@ class BehandlingDao(
                 val statement =
                     prepareStatement(
                         "INSERT INTO viderefoert_opphoer " +
-                            "(dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar) VALUES (?, ?, ?, ?, ?, ?)",
+                            "(skalViderefoere, dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)" +
+                            "ON CONFLICT (behandling_id) DO UPDATE SET " +
+                            "skalViderefoere=excluded.skalViderefoere, " +
+                            "dato=excluded.dato, " +
+                            "kilde=excluded.kilde, " +
+                            "begrunnelse=excluded.begrunnelse, " +
+                            "kravdato=excluded.kravdato, " +
+                            "behandling_id=excluded.behandling_id, " +
+                            "vilkaar=excluded.vilkaar",
                     )
-                statement.setString(1, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
-                statement.setJsonb(2, viderefoertOpphoer.kilde)
-                statement.setString(3, viderefoertOpphoer.begrunnelse)
-                statement.setDate(4, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
-                statement.setObject(5, behandlingId)
-                statement.setString(6, viderefoertOpphoer.vilkaar)
+                statement.setString(1, viderefoertOpphoer.skalViderefoere.name)
+                statement.setString(2, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
+                statement.setJsonb(3, viderefoertOpphoer.kilde)
+                statement.setString(4, viderefoertOpphoer.begrunnelse)
+                statement.setDate(5, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
+                statement.setObject(6, behandlingId)
+                statement.setString(7, viderefoertOpphoer.vilkaar?.name)
                 statement.updateSuccessful()
             }
         }
     }
+
+    fun hentViderefoertOpphoer(behandlingId: UUID) =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar FROM viderefoert_opphoer WHERE behandling_id = ?",
+                    )
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().singleOrNull {
+                    ViderefoertOpphoer(
+                        skalViderefoere = JaNei.valueOf(getString("skalViderefoere")),
+                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        kilde = getString("kilde").let { objectMapper.readValue(it) },
+                        begrunnelse = getString("begrunnelse"),
+                        kravdato = getDate("kravdato")?.let { it.toLocalDate() },
+                        behandlingId = behandlingId,
+                        vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
+                    )
+                }
+            }
+        }
 
     fun lagreSendeBrev(
         behandlingId: UUID,

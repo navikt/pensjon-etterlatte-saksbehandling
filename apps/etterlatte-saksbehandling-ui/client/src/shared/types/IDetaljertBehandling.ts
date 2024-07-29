@@ -27,6 +27,7 @@ export interface IDetaljertBehandling {
   begrunnelse: string | null
   kilde: Vedtaksloesning
   sendeBrev: boolean
+  viderefoertOpphoer: ViderefoertOpphoer | null
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {
@@ -124,6 +125,14 @@ export interface Virkningstidspunkt {
   kilde: KildeSaksbehandler
   begrunnelse: string
   kravdato: string | null
+}
+
+export interface ViderefoertOpphoer {
+  skalViderefoere: JaNei
+  dato: string
+  kilde: KildeSaksbehandler
+  vilkaar: string
+  begrunnelse: string
 }
 
 export enum Vedtaksloesning {

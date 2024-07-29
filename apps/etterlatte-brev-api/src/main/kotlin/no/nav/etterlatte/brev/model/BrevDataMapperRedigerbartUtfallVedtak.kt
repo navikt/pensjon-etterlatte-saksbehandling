@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
 import no.nav.etterlatte.brev.MigreringBrevDataService
-import no.nav.etterlatte.brev.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -32,8 +32,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     private val beregningService: BeregningService,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
-    suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        with(redigerbarTekstRequest) {
+    suspend fun brevData(brevDataRedigerbarRequest: BrevDataRedigerbarRequest) =
+        with(brevDataRedigerbarRequest) {
             if (loependeIPesys) {
                 fraPesys(
                     brukerTokenInfo = brukerTokenInfo,

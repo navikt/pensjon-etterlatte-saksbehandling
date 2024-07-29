@@ -17,9 +17,9 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,7 +50,7 @@ internal class NyNotatServiceTest(
             behandlingServiceMock,
         )
 
-    private val saksbehandler = BrukerTokenInfo.of("token", "Z123456", null, null, null, null)
+    private val saksbehandler = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun before() {

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad
 
 import no.nav.etterlatte.beregning.grunnlag.Prosent
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.faktorKonstant
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -19,13 +19,13 @@ val institusjonsoppholdRegelOMS: Regel<OmstillingstoenadGrunnlag, Prosent> =
         finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
     ) { it?.prosentEtterReduksjon() ?: Prosent.hundre }
 
-val erBrukerIInstitusjonOMS: Regel<OmstillingstoenadGrunnlag, Boolean> =
+val brukerHarTellendeInstitusjonsopphold: Regel<OmstillingstoenadGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner om bruker har et institusjonsopphold",
         finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
     ) {
-        it != null
+        it != null && it.reduksjon != Reduksjon.NEI_KORT_OPPHOLD
     }
 
 val institusjonsoppholdSatsRegelOMS =
@@ -33,6 +33,6 @@ val institusjonsoppholdSatsRegelOMS =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner satsen for institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats"),
-    ) benytter grunnbeloep og institusjonsoppholdRegelOMS og faktorKonstant med { grunnbeloep, prosent, faktor ->
-        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned).multiply(faktor)
+    ) benytter grunnbeloep og institusjonsoppholdRegelOMS med { grunnbeloep, prosent ->
+        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
     }

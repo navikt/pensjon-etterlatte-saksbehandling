@@ -1,3 +1,4 @@
+
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
@@ -17,13 +18,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdOpenIdConfiguration
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.IAzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -188,14 +191,15 @@ internal class AzureAdClientTest {
         }
 
     @Test
-    fun `bruker client credentials viss JWT-claims sub og oid er like`() {
+    fun `bruker client credentials viss JWT-claims er systembruker`() {
         val client =
             spyk(AzureAdClient(config, FakeAzureAdHttpClient())).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
             }
+
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null, idtyp = "app"),
+                systembruker(claims = mapOf(Claims.azp_name to "cluster:appname:dev")),
                 listOf(),
             )
         }
@@ -204,7 +208,7 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker OBO viss JWT-claims sub og oid er ulike`() {
+    fun `bruker OBO viss JWT-claim idtype er tom eller ikke lik app`() {
         val client =
             spyk(AzureAdClient(config, FakeAzureAdHttpClient())).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
@@ -213,11 +217,11 @@ internal class AzureAdClientTest {
 
         runBlocking {
             client.hentTokenFraAD(
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null, idtyp = null),
+                simpleSaksbehandler(ident = "s1"),
                 listOf(),
             )
         }
-        coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "a") }
+        coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "token") }
         coVerify(exactly = 0) { client.getAccessTokenForResource(any()) }
     }
 }

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
+import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -67,10 +68,7 @@ class VarselbrevTest(
                     it.hentGenerellBrevData(sak.id, any(), any(), any())
                 } returns
                     mockk<GenerellBrevData>().also {
-                        every { it.vedtakstype() } returns ""
                         every { it.spraak } returns Spraak.NN
-                        every { it.loependeIPesys() } returns false
-                        every { it.erForeldreloes() } returns false
                         every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, "")
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
@@ -100,18 +98,28 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
                     )
                 } returns listOf()
             }
         val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+
+        val innholdTilRedigerbartBrevHenter =
+            InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbaker, adresseService, redigerbartVedleggHenter)
+
         val brevoppretter =
             Brevoppretter(
                 adresseService,
                 brevRepository,
-                brevdataFacade,
                 behandlingService,
-                brevbaker,
-                redigerbartVedleggHenter,
+                innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()
         service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())

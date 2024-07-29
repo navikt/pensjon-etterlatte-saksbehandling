@@ -5,12 +5,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -120,7 +120,7 @@ class BeregningServiceTest {
     private companion object {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null, null)
+        private val BRUKERTokenInfo = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private val BREV_BEREGNINGSPERIODE =
             no.nav.etterlatte.brev.behandling.Beregningsperiode(
                 YearMonth.now().atDay(1),

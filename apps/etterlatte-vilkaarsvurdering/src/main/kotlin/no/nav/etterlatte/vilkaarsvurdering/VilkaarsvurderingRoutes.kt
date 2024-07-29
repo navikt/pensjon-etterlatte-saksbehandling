@@ -16,11 +16,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withParam
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import java.util.UUID
@@ -64,6 +64,14 @@ fun Route.vilkaarsvurdering(
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
                 call.respond(mapOf("rettUtenTidsbegrensning" to result))
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vilkårtyper for $behandlingId")
+                val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId, brukerTokenInfo)
+                call.respond(VilkaartypeDTO(result))
             }
         }
 
@@ -343,3 +351,12 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVer
         .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
         .metadata
         .versjon
+
+data class VilkaartypeDTO(
+    val typer: List<VilkaartypePair>,
+)
+
+data class VilkaartypePair(
+    val name: String,
+    val tittel: String,
+)

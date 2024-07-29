@@ -1,6 +1,6 @@
 import { IBehandlingStatus, IBoddEllerArbeidetUtlandet } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { Checkbox, Heading, HelpText, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Box, Checkbox, Heading, HelpText, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useState } from 'react'
@@ -10,9 +10,7 @@ import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~s
 import { JaNei } from '~shared/types/ISvar'
 import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
 import styled from 'styled-components'
-
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { Begrunnelse } from '~components/behandling/trygdetid/styled'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   redigerbar,
@@ -182,17 +180,19 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
             </div>
           </VStack>
         )}
-        <Begrunnelse
-          label="Begrunnelse"
-          placeholder="Valgfritt"
-          minRows={3}
-          autoComplete="off"
-          value={begrunnelse}
-          onChange={(e) => {
-            const oppdatertBegrunnelse = e.target.value
-            setBegrunnelse(oppdatertBegrunnelse)
-          }}
-        />
+        <Box width="15rem">
+          <Textarea
+            label="Begrunnelse"
+            placeholder="Valgfritt"
+            minRows={3}
+            autoComplete="off"
+            value={begrunnelse}
+            onChange={(e) => {
+              const oppdatertBegrunnelse = e.target.value
+              setBegrunnelse(oppdatertBegrunnelse)
+            }}
+          />
+        </Box>
         {isFailureHandler({
           apiResult: setBoddEllerArbeidetUtlandetStatus,
           errorMessage: 'Kunne ikke lagre bodd eller arbeidet i utlandet',

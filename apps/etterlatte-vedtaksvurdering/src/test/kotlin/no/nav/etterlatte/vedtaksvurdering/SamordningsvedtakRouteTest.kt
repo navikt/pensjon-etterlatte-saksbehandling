@@ -11,8 +11,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -55,30 +55,13 @@ class SamordningsvedtakRouteTest {
     }
 
     @Test
-    fun `skal returnere 401 naar token mangler noedvendig rolle`() {
-        testApplication {
-            runServer(server) {
-                samordningsvedtakRoute(vedtakSamordningService)
-            }
-
-            val response =
-                client.get("/api/samordning/vedtak/1234") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${token(listOf("dummy"))}")
-                }
-
-            response.status shouldBe HttpStatusCode.Unauthorized
-        }
-    }
-
-    @Test
-    fun `skal returnere vedtak naar token har noedvendig rolle og vedtak eksisterer`() {
+    fun `skal returnere vedtak naar token har noedvendig gruppe og vedtak eksisterer`() {
         coEvery { vedtakSamordningService.hentVedtak(1234) } returns
             samordningVedtak()
 
         testApplication {
             runServer(server) {
-                samordningsvedtakRoute(vedtakSamordningService)
+                samordningSystembrukerVedtakRoute(vedtakSamordningService)
             }
 
             val response =

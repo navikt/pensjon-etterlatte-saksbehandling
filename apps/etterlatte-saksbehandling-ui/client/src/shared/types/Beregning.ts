@@ -167,7 +167,7 @@ export const ReduksjonOMS: ReduksjonType = {
 
 export type OverstyrtAarsakType = Record<string, string>
 
-type OverstyrtAarsakKey = 'VELG_AARSAK' | 'AVKORTET_UFOERETRYGD' | 'AVKORTET_FENGSEL' | 'ANNET'
+export type OverstyrtAarsakKey = 'VELG_AARSAK' | 'AVKORTET_UFOERETRYGD' | 'AVKORTET_FENGSEL' | 'ANNET'
 
 export const OverstyrtAarsak: OverstyrtAarsakType = {
   VELG_AARSAK: 'Velg årsak',

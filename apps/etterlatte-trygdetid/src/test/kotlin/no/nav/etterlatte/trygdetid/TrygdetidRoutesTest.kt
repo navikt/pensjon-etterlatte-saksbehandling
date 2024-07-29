@@ -12,8 +12,8 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient

@@ -36,3 +36,8 @@ export const validateFnrObligatorisk = (fnr: string | undefined): string | undef
   }
   return undefined
 }
+
+export const validerStringNumber = (stringNumber: string | undefined): string | undefined => {
+  if (Number.isNaN(stringNumber)) return 'Må være heltall'
+  return undefined
+}

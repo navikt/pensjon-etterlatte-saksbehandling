@@ -50,6 +50,7 @@ data class BarnepensjonRevurdering(
             revurderingaarsak: Revurderingaarsak?,
             erForeldreloes: Boolean,
             avdoede: List<Avdoed>,
+            datoVedtakOmgjoering: LocalDate?,
         ): BarnepensjonRevurdering {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
@@ -64,8 +65,7 @@ data class BarnepensjonRevurdering(
                     ),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                // TODO klage kobler seg på her
-                datoVedtakOmgjoering = null,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     barnepensjonBeregning(
                         innhold,
@@ -76,9 +76,7 @@ data class BarnepensjonRevurdering(
                         trygdetid,
                         erForeldreloes,
                     ),
-                etterbetaling =
-                    etterbetaling
-                        ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,

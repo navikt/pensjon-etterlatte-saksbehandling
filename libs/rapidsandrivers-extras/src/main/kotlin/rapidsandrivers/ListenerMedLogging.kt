@@ -59,4 +59,6 @@ abstract class ListenerMedLogging : River.PacketListener {
                 block()
             }.register(this)
     }
+
+    open fun kontekst(): Kontekst? = null
 }

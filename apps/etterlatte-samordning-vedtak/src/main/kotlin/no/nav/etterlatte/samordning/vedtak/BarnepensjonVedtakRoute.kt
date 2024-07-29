@@ -9,10 +9,11 @@ import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.route.dato
+import no.nav.etterlatte.libs.ktor.token.Issuer
 
 fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -20,8 +21,8 @@ fun Route.barnepensjonVedtakRoute(
 ) {
     route("api/barnepensjon/har-loepende-bp") {
         install(AuthorizationPlugin) {
-            roles = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
-            issuers = setOf("azure")
+            accessPolicyRolesEllerAdGrupper = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            issuers = setOf(Issuer.AZURE.issuerName)
         }
 
         get {

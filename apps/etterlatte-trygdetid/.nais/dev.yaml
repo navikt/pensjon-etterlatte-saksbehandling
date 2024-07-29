@@ -56,8 +56,6 @@ spec:
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
           - id: 753805ea-65a7-4855-bdc3-e6130348df9f # 0000-GA-PENSJON_NASJONAL_M_LOGG
           - id: ea7411eb-8b48-41a0-bc56-7b521fbf0c25 # 0000-GA-PENSJON_NASJONAL_U_LOGG
-        extra:
-          - NAVident
   resources:
     requests:
       cpu: 25m

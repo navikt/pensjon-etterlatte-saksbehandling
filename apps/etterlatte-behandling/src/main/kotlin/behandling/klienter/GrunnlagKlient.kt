@@ -35,6 +35,11 @@ interface GrunnlagKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
+
+    suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag
 }
 
 class GrunnlagKlientException(
@@ -52,7 +57,7 @@ class GrunnlagKlientObo(
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url").plus("/api")
+    private val resourceApiUrl = config.getString("grunnlag.resource.url").plus("/api")
 
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
@@ -67,7 +72,7 @@ class GrunnlagKlientObo(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/behandling/$behandlingId/$opplysningsType",
+                            url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/$opplysningsType",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -100,7 +105,7 @@ class GrunnlagKlientObo(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
+                            url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -127,7 +132,7 @@ class GrunnlagKlientObo(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId",
+                            url = "$resourceApiUrl/grunnlag/sak/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -137,6 +142,33 @@ class GrunnlagKlientObo(
         } catch (e: Exception) {
             throw GrunnlagKlientException(
                 "Henting av grunnlag for sak med id=$sakId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag {
+        try {
+            logger.info("Henter grunnlag for behandling med id=$behandlingId")
+
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceApiUrl/grunnlag/behandling/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response!!.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw GrunnlagKlientException(
+                "Henting av grunnlag for behandling med id=$behandlingId feilet",
                 e,
             )
         }

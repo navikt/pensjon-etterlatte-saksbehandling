@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
@@ -35,7 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -43,6 +44,7 @@ import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -247,6 +249,7 @@ internal fun Route.behandlingRoutes(
                 try {
                     val viderefoertOpphoer =
                         ViderefoertOpphoer(
+                            skalViderefoere = body.skalViderefoere,
                             behandlingId = behandlingId,
                             dato = body.dato,
                             begrunnelse = body.begrunnelse,
@@ -386,17 +389,19 @@ internal fun Route.behandlingRoutes(
 
 data class ViderefoertOpphoerRequest(
     @JsonProperty("dato") private val _dato: String,
+    val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: String,
+    val vilkaar: VilkaarType?,
 ) {
     val dato: YearMonth = _dato.tilYearMonth()
 }
 
 data class ViderefoertOpphoer(
+    val skalViderefoere: JaNei,
     val behandlingId: UUID,
     val dato: YearMonth,
-    val vilkaar: String,
+    val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,

@@ -7,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -19,8 +18,8 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -28,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -115,6 +115,9 @@ internal class BehandlingInfoRoutesTest {
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
@@ -140,7 +143,6 @@ internal class BehandlingInfoRoutesTest {
                 }
 
             val hentetBrevutfall: BrevutfallOgEtterbetalingDto = response.body()
-            println(response.bodyAsText())
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
@@ -171,6 +173,9 @@ internal class BehandlingInfoRoutesTest {
 
             etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
             etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
+            etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
+            etterbetaling.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
+            etterbetaling.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
         }
     }
 
@@ -205,7 +210,10 @@ internal class BehandlingInfoRoutesTest {
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 1),
             tom = YearMonth.of(2023, 2),
+            inneholderKrav = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+            frivilligSkattetrekk = true,
+            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
@@ -224,7 +232,10 @@ internal class BehandlingInfoRoutesTest {
                     behandlingId = behandlingId,
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
-                    null,
+                    inneholderKrav = true,
+                    frivilligSkattetrekk = true,
+                    etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
+                    kilde = null,
                 ),
         )
 

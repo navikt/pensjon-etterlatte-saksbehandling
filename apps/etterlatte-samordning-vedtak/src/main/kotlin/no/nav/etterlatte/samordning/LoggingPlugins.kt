@@ -15,20 +15,20 @@ import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
+import no.nav.etterlatte.PluginConfiguration
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.ktor.Issuer
-import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
 import no.nav.etterlatte.libs.ktor.STARTTIME
 import no.nav.etterlatte.libs.ktor.X_METHOD
 import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
 import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
 import no.nav.etterlatte.libs.ktor.X_USER
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.getClaimAsString
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.getClaimAsString
 import no.nav.etterlatte.samordning.vedtak.orgNummer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import org.slf4j.MDC
@@ -67,7 +67,9 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Selvbetjening" // Altså en borger/privatperson
                 } else if (principal?.context?.issuers?.contains(Issuer.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name) ?: bruker.sub
+                        is Systembruker ->
+                            bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name)
+                                ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.azp_name.name} for å være systembruker")
                         is Saksbehandler ->
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.NAVident.name} for å være saksbehandler")

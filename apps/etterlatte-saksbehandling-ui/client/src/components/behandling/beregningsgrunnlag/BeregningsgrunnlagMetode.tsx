@@ -1,8 +1,7 @@
-import { BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
-import { Begrunnelse } from '~components/behandling/trygdetid/styled'
 
 type BeregningsgrunnlagMetodeProps = {
   redigerbar: boolean
@@ -57,21 +56,23 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
             <Radio value={BeregningsMetode.BEST}>{beskrivelseFor(BeregningsMetode.BEST)}</Radio>
           </RadioGroup>
 
-          <Begrunnelse
-            label="Begrunnelse"
-            placeholder="Valgfritt"
-            minRows={3}
-            autoComplete="off"
-            disabled={grunnlag === undefined}
-            value={begrunnelse}
-            onChange={(e) => setBegrunnelse(e.target.value)}
-            onBlur={() =>
-              onUpdate({
-                beregningsMetode: grunnlag!!.beregningsMetode,
-                begrunnelse: begrunnelse,
-              })
-            }
-          />
+          <Box width="15rem">
+            <Textarea
+              label="Begrunnelse"
+              placeholder="Valgfritt"
+              minRows={3}
+              autoComplete="off"
+              disabled={grunnlag === undefined}
+              value={begrunnelse}
+              onChange={(e) => setBegrunnelse(e.target.value)}
+              onBlur={() =>
+                onUpdate({
+                  beregningsMetode: grunnlag!!.beregningsMetode,
+                  begrunnelse: begrunnelse,
+                })
+              }
+            />
+          </Box>
         </>
       )}
       {!redigerbar && grunnlag && (
@@ -94,7 +95,6 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
 }
 
 const BeregningsgrunnlagMetodeWrapper = styled.div`
-  padding: 1em 4em;
   max-width: 70em;
   margin-bottom: 1rem;
 `

@@ -302,7 +302,7 @@ internal class ApplicationContext(
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
 
-    val oppdaterAktivietetspliktRepo = OppdaterAktivitetspliktRepo(autoClosingDatabase)
+    val oppdaterAktivitetspliktRepo = OppdaterAktivitetspliktRepo(autoClosingDatabase)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
@@ -581,7 +581,7 @@ internal class ApplicationContext(
     val resendAktivitetspliktJob: SendTilStatistikkJob by lazy {
         SendTilStatistikkJob(
             aktivitetspliktService = aktivitetspliktService,
-            oppdaterAktivitetspliktRepo = oppdaterAktivietetspliktRepo,
+            oppdaterAktivitetspliktRepo = oppdaterAktivitetspliktRepo,
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             erLeader = { leaderElectionKlient.isLeader() },
             interval = Duration.of(5, ChronoUnit.MINUTES),

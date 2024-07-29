@@ -43,6 +43,7 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
           behandling={behandling}
           sakType={sakType}
           institusjonsopphold={institusjonsopphold}
+          beregningsgrunnlag={beregningsgrunnlag}
         />
       </Box>
 

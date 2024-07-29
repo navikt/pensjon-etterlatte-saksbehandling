@@ -47,11 +47,17 @@ class BeregningService(
                     beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
                 } else {
                     when (behandling.sakType) {
-                        SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                        SakType.BARNEPENSJON ->
+                            beregnBarnepensjonService.beregn(
+                                behandling,
+                                brukerTokenInfo,
+                                tilDato = behandling.opphoerFraOgMed?.atDay(1),
+                            )
                         SakType.OMSTILLINGSSTOENAD ->
                             beregnOmstillingsstoenadService.beregn(
                                 behandling,
                                 brukerTokenInfo,
+                                tilDato = behandling.opphoerFraOgMed?.atDay(1),
                             )
                     }
                 }

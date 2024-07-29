@@ -174,6 +174,7 @@ class BehandlingDao(
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
+            opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
         )
     }
 

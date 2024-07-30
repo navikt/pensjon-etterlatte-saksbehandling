@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -537,6 +538,35 @@ internal class BehandlingServiceImplTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt hvis virkningstidspunkt er foer opphoer`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = Tidspunkt.parse("2024-06-01T00:00:00Z"),
+                opphoerFraOgMed = YearMonth.of(2024, Month.DECEMBER),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi ugyldig virkningstidspunkt hvis virkningstidspunkt er etter opphoer`(sakType: SakType) {
+        shouldThrow<VirkningstidspunktKanIkkeVaereEtterOpphoer> {
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = Tidspunkt.parse("2024-12-01T00:00:00Z"),
+                opphoerFraOgMed = YearMonth.of(2024, Month.MAY),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
     fun `skal gi gyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er paa foerste virk`(sakType: SakType) {
         val gyldigVirkningstidspunkt =
             sjekkOmVirkningstidspunktErGyldig(
@@ -577,6 +607,35 @@ internal class BehandlingServiceImplTest {
         gyldigVirkningstidspunkt shouldBe false
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er foer opphoer`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2024-06-01T00:00:00Z"),
+                opphoerFraOgMed = YearMonth.of(2024, Month.DECEMBER),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi ugyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er etter opphoer`(sakType: SakType) {
+        shouldThrow<VirkningstidspunktKanIkkeVaereEtterOpphoer> {
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2024-12-01T00:00:00Z"),
+                opphoerFraOgMed = YearMonth.of(2024, Month.MAY),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+        }
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -588,6 +647,7 @@ internal class BehandlingServiceImplTest {
         kravdato: Tidspunkt? = null,
         foersteVirk: YearMonth? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+        opphoerFraOgMed: YearMonth? = null,
     ): Boolean {
         initFellesMocks(
             sakType = sakType,
@@ -604,6 +664,7 @@ internal class BehandlingServiceImplTest {
                     )
                 },
             kilde = kilde,
+            opphoerFraOgMed = opphoerFraOgMed,
         )
 
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
@@ -770,6 +831,7 @@ internal class BehandlingServiceImplTest {
         foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+        opphoerFraOgMed: YearMonth? = null,
     ) {
         nyKontekstMedBruker(mockSaksbehandler())
 
@@ -784,6 +846,7 @@ internal class BehandlingServiceImplTest {
                             soeknadMottattDato = soeknadMottatt,
                             utlandstilknytning = utlandstilknytning,
                             kilde = kilde,
+                            opphoerFraOgMed = opphoerFraOgMed,
                         ),
                         emptyList(),
                     )
@@ -795,6 +858,7 @@ internal class BehandlingServiceImplTest {
                             sakId = SAK_ID,
                             revurderingAarsak = Revurderingaarsak.ANNEN,
                             utlandstilknytning = utlandstilknytning,
+                            opphoerFraOgMed = opphoerFraOgMed,
                         ),
                         listOf(
                             foerstegangsbehandling(

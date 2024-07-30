@@ -70,6 +70,12 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
 ) : UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
 
+class VirkningstidspunktKanIkkeVaereEtterOpphoer :
+    UgyldigForespoerselException(
+        code = "VIRK_KAN_IKKE_VÆRE_ETTER_OPPHØR",
+        detail = "Virkningstidspunkt kan ikke være etter opphør",
+    )
+
 class BehandlingNotFoundException(
     behandlingId: UUID,
 ) : IkkeFunnetException(
@@ -361,7 +367,13 @@ internal class BehandlingServiceImpl(
 
         return when (behandling.type) {
             BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
-            BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                erGyldigVirkningstidspunktFoerstegangsbehandling(
+                    request,
+                    behandling,
+                    brukerTokenInfo,
+                )
+
             else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
         }
     }
@@ -398,6 +410,8 @@ internal class BehandlingServiceImpl(
         val virkningstidspunkt = request.dato
         val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
+
+        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
 
         if (doedsdato == null) {
             // Mangler dødsfall når avdød er ukjent
@@ -440,6 +454,8 @@ internal class BehandlingServiceImpl(
         behandling: Behandling,
     ): Boolean {
         val virkningstidspunkt = request.dato
+        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
+
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
         if (foersteVirkDato == null) {
             throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
@@ -732,6 +748,8 @@ internal class BehandlingServiceImpl(
             throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
         }
 
+        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)
+
         behandling
             .oppdaterVidereførtOpphoer(viderefoertOpphoer)
             .also {
@@ -771,4 +789,16 @@ internal class BehandlingServiceImpl(
         enheterSomSkalFiltreres: List<String>,
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
+
+    private fun sjekkAtVirkIkkeErEtterOpphoerFraOgMed(
+        virkningstidspunkt: YearMonth?,
+        opphoerFraOgMed: YearMonth?,
+    ) {
+        if (opphoerFraOgMed != null &&
+            virkningstidspunkt != null &&
+            virkningstidspunkt.isAfter(opphoerFraOgMed)
+        ) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
+    }
 }

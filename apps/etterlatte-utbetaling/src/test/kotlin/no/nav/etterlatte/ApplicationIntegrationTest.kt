@@ -74,7 +74,8 @@ class ApplicationIntegrationTest {
             vedtaksvurderingKlient = mockk(),
             simuleringOsKlient = mockk(),
         ).also {
-            rapidApplication(it).start()
+            rapidsConnection.settOppRiversOgListener(it)
+            rapidsConnection.start()
         }
     }
 

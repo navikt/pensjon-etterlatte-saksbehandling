@@ -180,15 +180,15 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         })}
 
         <HStack gap="4">
-          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
-            Avbryt
-          </Button>
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
             loading={isPending(lagreOverstyrBeregningGrunnlagResult)}
           >
             Lagre
+          </Button>
+          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
+            Avbryt
           </Button>
         </HStack>
       </VStack>

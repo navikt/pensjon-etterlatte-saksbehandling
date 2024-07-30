@@ -585,6 +585,8 @@ internal class ApplicationContext(
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             erLeader = { leaderElectionKlient.isLeader() },
             interval = Duration.of(5, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

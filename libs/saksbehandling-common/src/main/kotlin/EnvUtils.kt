@@ -27,7 +27,7 @@ data class Miljoevariabler private constructor(
     fun append(
         key: EnvEnum,
         value: (Miljoevariabler) -> String,
-    ) = this.apply { props.toMutableMap()[key.key()] = value(this) }
+    ) = Miljoevariabler(props + (key.key() to value(this)))
 
     fun append(props: Map<EnvEnum, String>): Miljoevariabler {
         val toMutableMap = this.props.toMutableMap()
@@ -44,7 +44,7 @@ data class Miljoevariabler private constructor(
     fun value(property: String): String = props.getValue(property)
 
     companion object {
-        fun systemEnv() = Miljoevariabler(System.getenv())
+        fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())
 
         fun systemEnv(key: EnvEnum) = System.getenv(key.key())
 

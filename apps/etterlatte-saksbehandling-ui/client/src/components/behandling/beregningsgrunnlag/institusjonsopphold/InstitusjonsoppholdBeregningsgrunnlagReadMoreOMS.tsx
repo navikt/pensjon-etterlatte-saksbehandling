@@ -2,7 +2,7 @@ import React from 'react'
 import { BodyLong, ReadMore, VStack } from '@navikt/ds-react'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
-export const InstitusjonsoppholdBeregningsgrunnlagReadMore = () => {
+export const InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS = () => {
   return (
     <ReadMore header="Mer om institusjonsopphold">
       <VStack gap="2">

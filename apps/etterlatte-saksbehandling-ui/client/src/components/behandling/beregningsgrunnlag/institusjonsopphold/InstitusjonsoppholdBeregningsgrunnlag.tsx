@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
-import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/HvaSkalRegistreresReadMore'
-import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
+import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
+import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
 import { BeregningsGrunnlagOMSPostDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
-import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 

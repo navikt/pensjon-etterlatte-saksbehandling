@@ -8,13 +8,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMore'
-
-export const institusjonstype: { [key: string]: string } = {
-  AS: 'Alders- og sykehjem',
-  FO: 'Fengsel',
-  HS: 'Helseinstitusjon',
-}
+import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
+import { institusjonstype } from '~shared/types/Institusjonsopphold'
 
 export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   const [institusjonsHendelserResult, institusjonsHendelserRequest] = useApiCall(
@@ -34,7 +29,7 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
         </Heading>
       </HStack>
       <VStack gap="2">
-        <InstitusjonsoppholdBeregningsgrunnlagReadMore />
+        <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />
         {mapResult(institusjonsHendelserResult, {
           pending: <Spinner visible label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,

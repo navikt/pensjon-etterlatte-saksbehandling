@@ -6,9 +6,8 @@ import { Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
-
 import { mapAllApiResult } from '~shared/api/apiUtils'
-import { institusjonstype } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdHendelser'
+import { institusjonstype } from '~shared/types/Institusjonsopphold'
 
 const Insthendelser = (props: { sakid: number }) => {
   const { sakid } = props

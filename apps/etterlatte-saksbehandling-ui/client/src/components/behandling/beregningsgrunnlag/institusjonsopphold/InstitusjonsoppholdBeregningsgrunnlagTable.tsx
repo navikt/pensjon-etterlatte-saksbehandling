@@ -10,7 +10,7 @@ import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregni
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'

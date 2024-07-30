@@ -71,8 +71,6 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
   const lagrePeriode = (
     institusjonsoppholdPeriode: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>
   ) => {
-    // TODO: Håndtere for at egenReduksjon kan bli satt til NaN hvis reduksjon !== 'JA_EGEN_PROSENT_AV_G'
-
     const formatertInstitusjonsoppholdPeriode = {
       ...institusjonsoppholdPeriode,
       tom: institusjonsoppholdPeriode.tom && konverterTilSisteDagIMaaneden(institusjonsoppholdPeriode.tom),

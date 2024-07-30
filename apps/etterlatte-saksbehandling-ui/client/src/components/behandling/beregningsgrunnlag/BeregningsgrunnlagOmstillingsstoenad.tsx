@@ -88,7 +88,6 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: (beregningsgrunnlag) => (
             <>
-              {/* TODO: Få denne til å være generell på tvers av BP og OMS */}
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
                 oppdaterBeregningsMetode={(beregningsMetode) =>

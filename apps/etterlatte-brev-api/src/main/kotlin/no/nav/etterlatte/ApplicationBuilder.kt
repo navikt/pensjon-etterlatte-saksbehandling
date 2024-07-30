@@ -70,6 +70,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -283,7 +284,7 @@ class ApplicationBuilder {
             VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
             DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
             SamordningsnotatRiver(rapidsConnection, nyNotatService)
-        }
+        }.also { setReady() }
 
     private fun httpClient(
         scope: String? = null,

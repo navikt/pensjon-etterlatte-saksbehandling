@@ -81,6 +81,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -331,5 +332,5 @@ enum class BrevKey : EnvEnum {
     SAF_SCOPE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

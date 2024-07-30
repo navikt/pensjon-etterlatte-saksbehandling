@@ -120,6 +120,13 @@ export const BeregningsMetodeBrukt = ({
 
             <HStack gap="4">
               <Button
+                size="small"
+                icon={<FloppydiskIcon aria-hidden />}
+                loading={isPending(lagreBeregrningsGrunnlagResult)}
+              >
+                Lagre
+              </Button>
+              <Button
                 type="button"
                 variant="secondary"
                 size="small"
@@ -130,13 +137,6 @@ export const BeregningsMetodeBrukt = ({
                 }}
               >
                 Avbryt
-              </Button>
-              <Button
-                size="small"
-                icon={<FloppydiskIcon aria-hidden />}
-                loading={isPending(lagreBeregrningsGrunnlagResult)}
-              >
-                Lagre
               </Button>
             </HStack>
           </>

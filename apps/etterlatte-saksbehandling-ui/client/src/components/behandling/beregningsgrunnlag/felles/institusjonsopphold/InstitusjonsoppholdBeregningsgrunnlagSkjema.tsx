@@ -160,15 +160,15 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           <Textarea {...register('data.begrunnelse')} label="Begrunnelse (valgfritt)" />
         </Box>
         <HStack gap="4">
-          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
-            Avbryt
-          </Button>
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
             loading={isPending(lagreBeregningsGrunnlagOMSResult)}
           >
             Lagre
+          </Button>
+          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
+            Avbryt
           </Button>
         </HStack>
       </VStack>

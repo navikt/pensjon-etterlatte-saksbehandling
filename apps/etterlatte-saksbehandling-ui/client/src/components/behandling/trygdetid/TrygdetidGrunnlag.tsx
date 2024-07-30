@@ -137,9 +137,6 @@ export const TrygdetidGrunnlag = ({
           </HGrid>
 
           <HStack gap="4">
-            <Button size="small" onClick={avbryt} variant="secondary" icon={<XMarkIcon aria-hidden />}>
-              Avbryt
-            </Button>
             <Button
               size="small"
               loading={isPending(trygdetidgrunnlagStatus)}
@@ -147,6 +144,9 @@ export const TrygdetidGrunnlag = ({
               icon={<FloppydiskIcon aria-hidden />}
             >
               Lagre
+            </Button>
+            <Button size="small" onClick={avbryt} variant="secondary" icon={<XMarkIcon aria-hidden />}>
+              Avbryt
             </Button>
           </HStack>
         </VStack>

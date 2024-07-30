@@ -75,5 +75,5 @@ enum class JoarkKey : EnvEnum {
     KAFKA_JOARK_HENDELSE_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

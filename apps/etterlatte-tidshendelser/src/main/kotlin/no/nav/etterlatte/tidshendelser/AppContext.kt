@@ -104,5 +104,5 @@ enum class TidshendelserKey : EnvEnum {
     JOBB_POLLER_OPENING_HOURS,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

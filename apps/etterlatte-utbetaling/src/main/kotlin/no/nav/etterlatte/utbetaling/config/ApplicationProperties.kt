@@ -85,5 +85,5 @@ enum class UtbetalingKey : EnvEnum {
     KONSISTENSAVSTEMMING_OMS_ENABLED,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

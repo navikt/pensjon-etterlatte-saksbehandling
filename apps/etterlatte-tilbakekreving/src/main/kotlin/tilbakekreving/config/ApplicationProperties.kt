@@ -86,5 +86,5 @@ enum class TilbakekrevingKey : EnvEnum {
     KRAVGRUNNLAG_MQ_NAME,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

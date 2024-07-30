@@ -34,5 +34,5 @@ enum class SamordningKey : EnvEnum {
     SAMORDNINGVEDTAK_HENDELSE_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

@@ -50,5 +50,5 @@ enum class PDLKey : EnvEnum {
     PDL_AZURE_SCOPE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

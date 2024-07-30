@@ -52,5 +52,5 @@ enum class VedtakKafkaKey : EnvEnum {
     ETTERLATTE_VEDTAK_URL,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

@@ -15,5 +15,5 @@ enum class MqKey : EnvEnum {
     srvpwd,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

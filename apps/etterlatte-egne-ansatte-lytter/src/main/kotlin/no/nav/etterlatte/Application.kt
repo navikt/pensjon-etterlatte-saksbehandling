@@ -70,5 +70,5 @@ enum class EgneAnsatteLytterKey : EnvEnum {
     SKJERMING_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

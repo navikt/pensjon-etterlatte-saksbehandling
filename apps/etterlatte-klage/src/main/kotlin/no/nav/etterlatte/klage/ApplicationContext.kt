@@ -51,5 +51,5 @@ enum class KlageKey : EnvEnum {
     KLAGE_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

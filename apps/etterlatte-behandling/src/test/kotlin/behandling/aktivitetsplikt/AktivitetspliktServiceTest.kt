@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -40,7 +41,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
@@ -629,7 +629,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -667,7 +667,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -691,7 +691,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, Systembruker.automatiskJobb)
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false

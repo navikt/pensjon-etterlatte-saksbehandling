@@ -77,5 +77,5 @@ enum class AzureEnums : EnvEnum {
     AZURE_APP_OUTBOUND_SCOPE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

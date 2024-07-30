@@ -11,5 +11,5 @@ enum class EnvKey : EnvEnum {
     ETTERLATTE_MIGRERING_URL,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

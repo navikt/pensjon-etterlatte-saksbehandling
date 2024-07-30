@@ -193,5 +193,5 @@ enum class TestEnvKey : EnvEnum {
     OPPGAVE_SCOPE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

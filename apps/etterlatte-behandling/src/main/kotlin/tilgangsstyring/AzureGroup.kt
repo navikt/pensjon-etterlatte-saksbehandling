@@ -26,5 +26,5 @@ enum class AzureKey : EnvEnum {
     AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

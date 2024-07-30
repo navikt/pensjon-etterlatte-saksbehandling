@@ -11,50 +11,50 @@ data class Miljoevariabler private constructor(
 ) {
     fun requireEnvValue(key: String): String = props.requireEnvValue(key)
 
-    fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.name())
+    fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.key())
 
     operator fun get(key: String) = props[key]
 
-    operator fun get(key: EnvEnum) = get(key.name())
+    operator fun get(key: EnvEnum) = get(key.key())
 
-    fun getValue(key: EnvEnum): String = props.getValue(key.name())
+    fun getValue(key: EnvEnum): String = props.getValue(key.key())
 
     fun getOrDefault(
         key: EnvEnum,
         value: String,
-    ) = props.getOrDefault(key.name(), value)
+    ) = props.getOrDefault(key.key(), value)
 
     fun append(
         key: EnvEnum,
         value: (Miljoevariabler) -> String,
-    ) = this.apply { props.toMutableMap()[key.name()] = value(this) }
+    ) = this.apply { props.toMutableMap()[key.key()] = value(this) }
 
     fun append(props: Map<EnvEnum, String>): Miljoevariabler {
         val toMutableMap = this.props.toMutableMap()
         toMutableMap.putAll(
-            props.entries.associate { it.key.name() to it.value },
+            props.entries.associate { it.key.key() to it.value },
         )
         return Miljoevariabler(toMutableMap)
     }
 
     fun containsKey(key: String) = props.containsKey(key)
 
-    fun containsKey(key: EnvEnum) = containsKey(key.name())
+    fun containsKey(key: EnvEnum) = containsKey(key.key())
 
     fun value(property: String): String = props.getValue(property)
 
     companion object {
         fun systemEnv() = Miljoevariabler(System.getenv())
 
-        fun systemEnv(key: EnvEnum) = System.getenv(key.name())
+        fun systemEnv(key: EnvEnum) = System.getenv(key.key())
 
         fun httpClient(props: Map<EnvEnum, String>) =
             props.entries
-                .associate { it.key.name() to it.value }
+                .associate { it.key.key() to it.value }
                 .let { Miljoevariabler(it) }
     }
 }
 
 interface EnvEnum {
-    fun name(): String
+    fun key(): String
 }

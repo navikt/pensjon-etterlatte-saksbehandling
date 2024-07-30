@@ -30,5 +30,5 @@ enum class NaisKey : EnvEnum {
     NAIS_APP_IMAGE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

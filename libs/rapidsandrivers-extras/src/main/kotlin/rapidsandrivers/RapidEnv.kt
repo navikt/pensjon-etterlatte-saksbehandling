@@ -70,5 +70,5 @@ enum class RapidKey : EnvEnum {
     KAFKA_BOOTSTRAP_SERVERS,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

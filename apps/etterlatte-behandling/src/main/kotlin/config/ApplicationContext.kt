@@ -614,5 +614,5 @@ enum class JobbKeys : EnvEnum {
     JOBB_SAKSBEHANDLER_OPENING_HOURS,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

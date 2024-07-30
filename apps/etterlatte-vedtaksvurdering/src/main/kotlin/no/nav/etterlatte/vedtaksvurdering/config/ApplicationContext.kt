@@ -177,5 +177,5 @@ enum class VedtakKey : EnvEnum {
     KAFKA_VEDTAKSHENDELSER_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

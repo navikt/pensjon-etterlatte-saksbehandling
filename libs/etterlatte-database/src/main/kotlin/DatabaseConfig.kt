@@ -11,5 +11,5 @@ enum class DatabaseConfig : EnvEnum {
     DB_DATABASE,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

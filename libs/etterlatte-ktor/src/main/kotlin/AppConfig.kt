@@ -7,5 +7,5 @@ enum class AppConfig : EnvEnum {
     ELECTOR_PATH,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

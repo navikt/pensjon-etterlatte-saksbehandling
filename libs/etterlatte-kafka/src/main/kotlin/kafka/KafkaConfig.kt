@@ -94,5 +94,5 @@ enum class KafkaKey : EnvEnum {
     KAFKA_TARGET_TOPIC,
     ;
 
-    override fun name() = name
+    override fun key() = name
 }

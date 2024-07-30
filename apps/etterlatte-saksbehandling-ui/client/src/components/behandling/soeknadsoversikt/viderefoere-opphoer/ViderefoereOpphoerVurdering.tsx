@@ -176,7 +176,7 @@ export const ViderefoereOpphoerVurdering = ({
       <VStack gap="2">
         <div>
           <Heading level="3" size="small">
-            Er dette et videreført opphør?
+            Er det nødvendig å fastsette til og med-dato?
           </Heading>
           <RadioGroup
             legend=""

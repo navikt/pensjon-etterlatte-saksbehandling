@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.aktivitetsplikt.OppdaterAktivitetspliktRepo
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
@@ -33,7 +32,6 @@ import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.OppgaveFristGaarUtJobb
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
-import no.nav.etterlatte.behandling.jobs.SendTilStatistikkJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -301,8 +299,6 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
-
-    val oppdaterAktivitetspliktRepo = OppdaterAktivitetspliktRepo(autoClosingDatabase)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
@@ -573,18 +569,6 @@ internal class ApplicationContext(
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.ofDays(1),
             oppgaveFristGaarUtJobService = oppgaveFristGaarUtJobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-        )
-    }
-
-    val resendAktivitetspliktJob: SendTilStatistikkJob by lazy {
-        SendTilStatistikkJob(
-            aktivitetspliktService = aktivitetspliktService,
-            oppdaterAktivitetspliktRepo = oppdaterAktivitetspliktRepo,
-            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            erLeader = { leaderElectionKlient.isLeader() },
-            interval = Duration.of(5, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

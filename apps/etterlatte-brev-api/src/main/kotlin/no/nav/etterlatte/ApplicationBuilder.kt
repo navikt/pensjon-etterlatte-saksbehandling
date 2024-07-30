@@ -253,6 +253,7 @@ class ApplicationBuilder {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             val brevgenerering =
                 StartInformasjonsbrevgenereringRiver(
@@ -284,7 +285,7 @@ class ApplicationBuilder {
             VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
             DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
             SamordningsnotatRiver(rapidsConnection, nyNotatService)
-        }.also { setReady() }
+        }
 
     private fun httpClient(
         scope: String? = null,

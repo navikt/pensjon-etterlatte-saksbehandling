@@ -75,8 +75,9 @@ class ApplicationBuilder {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
-        }.also { setReady() }
+        }
 }

@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.tidshendelser.AppContext
@@ -10,8 +9,7 @@ import rapidsandrivers.initRogR
 import java.util.Timer
 
 fun main() =
-    initRogR("tidshendelser", configFromEnvironment = { configFromEnvironment(it) }) { rapidsConnection, rapidEnv ->
-        val miljoevariabler = Miljoevariabler(rapidEnv)
+    initRogR("tidshendelser", configFromEnvironment = { configFromEnvironment(it) }) { rapidsConnection, miljoevariabler ->
         val appContext =
             AppContext(miljoevariabler) { key, message -> rapidsConnection.publish(key.toString(), message) }
 

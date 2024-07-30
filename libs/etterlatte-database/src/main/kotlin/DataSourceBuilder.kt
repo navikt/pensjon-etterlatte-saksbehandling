@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.isProd
@@ -22,7 +23,7 @@ import kotlin.system.exitProcess
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
 
-    fun createDataSource(env: Map<String, String>): DataSource = createDataSource(ApplicationProperties.fromEnv(env))
+    fun createDataSource(env: Miljoevariabler): DataSource = createDataSource(ApplicationProperties.fromEnv(env))
 
     fun createDataSource(properties: ApplicationProperties) =
         createDataSource(

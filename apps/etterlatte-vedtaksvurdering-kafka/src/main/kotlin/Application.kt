@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.samordning.TilSamordningRiver
 import no.nav.etterlatte.regulering.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoerselRiver
@@ -13,7 +12,7 @@ import rapidsandrivers.initRogR
 
 fun main() {
     initRogR("vedtaksvurdering-kafka") { rapidsConnection, rapidEnv ->
-        val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
+        val appBuilder = AppBuilder(rapidEnv)
         val vedtakKlient = appBuilder.lagVedtakKlient()
         LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
         OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, appBuilder.lagFeatureToggleService())

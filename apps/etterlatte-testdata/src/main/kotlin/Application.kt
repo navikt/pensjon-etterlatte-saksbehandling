@@ -37,8 +37,11 @@ import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TARGET_TOPIC
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -61,7 +64,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private val env = System.getenv()
+private val env = Miljoevariabler.systemEnv()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper()
@@ -76,9 +79,10 @@ val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
 val producer =
     if (localDevelopment) {
-        LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
+        LocalKafkaConfig(env[KAFKA_BROKERS]!!).standardProducer(env[KAFKA_TARGET_TOPIC]!!)
     } else {
-        GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
+        val systemEnv = Miljoevariabler.systemEnv()
+        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue(KAFKA_TARGET_TOPIC))
     }
 
 interface TestDataFeature {

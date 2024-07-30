@@ -1,5 +1,12 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PASSWORD
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_PORT
+import no.nav.etterlatte.libs.database.DatabaseConfig.DB_USERNAME
+
 data class ApplicationProperties(
     val dbName: String,
     val dbHost: String,
@@ -22,14 +29,14 @@ data class ApplicationProperties(
     val konsistensavstemmingOMSEnabled: Boolean,
 ) {
     companion object {
-        fun fromEnv(env: Map<String, String>) =
+        fun fromEnv(env: Miljoevariabler) =
             env.run {
                 ApplicationProperties(
-                    dbName = value("DB_DATABASE"),
-                    dbHost = value("DB_HOST"),
-                    dbPort = value("DB_PORT").toInt(),
-                    dbUsername = value("DB_USERNAME"),
-                    dbPassword = value("DB_PASSWORD"),
+                    dbName = getValue(DB_DATABASE),
+                    dbHost = getValue(DB_HOST),
+                    dbPort = getValue(DB_PORT).toInt(),
+                    dbUsername = getValue(DB_USERNAME),
+                    dbPassword = getValue(DB_PASSWORD),
                     mqHost = value("OPPDRAG_MQ_HOSTNAME"),
                     mqPort = value("OPPDRAG_MQ_PORT").toInt(),
                     mqQueueManager = value("OPPDRAG_MQ_MANAGER"),
@@ -46,7 +53,5 @@ data class ApplicationProperties(
                     konsistensavstemmingOMSEnabled = value("KONSISTENSAVSTEMMING_OMS_ENABLED").toBoolean(),
                 )
             }
-
-        private fun Map<String, String>.value(property: String): String = requireNotNull(this[property]) { "Property $property was null" }
     }
 }

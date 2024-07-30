@@ -8,14 +8,16 @@ import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class AppBuilder(
     props: Miljoevariabler,
 ) {
     private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"]) { "Mangler vedtak url " }
-    private val env = System.getenv()
+    private val env = Miljoevariabler.systemEnv()
 
     fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
 
@@ -23,9 +25,9 @@ class AppBuilder(
 
     private val vedtakHttpKlient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = props.requireEnvValue("AZURE_APP_CLIENT_ID"),
-            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppClientId = props.requireEnvValue(AZURE_APP_CLIENT_ID),
+            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
+            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue("VEDTAK_AZURE_SCOPE"),
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )

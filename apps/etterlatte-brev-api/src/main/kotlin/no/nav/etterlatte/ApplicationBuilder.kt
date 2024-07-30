@@ -263,6 +263,7 @@ class ApplicationBuilder {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             val brevgenerering =
                 StartInformasjonsbrevgenereringRiver(

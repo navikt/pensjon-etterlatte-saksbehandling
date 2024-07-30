@@ -340,6 +340,7 @@ class AktivitetspliktService(
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
+        bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
             requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
@@ -351,7 +352,7 @@ class AktivitetspliktService(
                     grunnlagKlient
                         .hentPersongalleri(
                             forrigeBehandling.id,
-                            Systembruker.automatiskJobb,
+                            bruker,
                         )?.opplysning,
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
@@ -431,6 +432,11 @@ class AktivitetspliktService(
         } else {
             logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
         }
+    }
+
+    suspend fun sendMeldingOmAktivitetForSak(sakId: Long) {
+        val behandlingId = behandlingService.hentBehandlingerForSak(sakId).maxBy { it.sistEndret }.id
+        sendDtoTilStatistikk(sakId, Systembruker.automatiskJobb, behandlingId)
     }
 }
 

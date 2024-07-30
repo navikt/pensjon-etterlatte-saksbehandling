@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.opprettBehandling
@@ -75,7 +76,7 @@ class ViderefoertOpphoerTest(
                     behandlingId = opprettBehandling.id,
                     dato = opphoerstidspunkt,
                     begrunnelse = "for testformål",
-                    vilkaar = "BP_FORMAAL_2024",
+                    vilkaar = VilkaarType.BP_FORMAAL_2024,
                     kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
                     kravdato = null,
                 ),

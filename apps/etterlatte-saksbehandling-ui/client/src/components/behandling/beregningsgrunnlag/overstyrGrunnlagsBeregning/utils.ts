@@ -1,28 +1,29 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { OverstyrBeregningsperiode, OverstyrtAarsakKey } from '~shared/types/Beregning'
-import { addMonths } from 'date-fns'
+import { InstitusjonsoppholdIBeregning, OverstyrBeregningsperiode, OverstyrtAarsakKey } from '~shared/types/Beregning'
+import { addMonths, lastDayOfMonth } from 'date-fns'
 import { formaterTilISOString } from '~utils/formatering/dato'
 
 export const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
   else return s.toString().replace(/\s+/g, '')
 }
+const nesteFomDato = (
+  behandling: IDetaljertBehandling,
+  fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
+  tom: Date | undefined
+): Date | string => {
+  return tom ? addMonths(tom, 1) : fom
+}
 
 export const initialOverstyrBeregningsgrunnlagPeriode = (
   behandling: IDetaljertBehandling,
   sistePeriode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> | undefined
 ): PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> => {
-  const nesteFomDato = (
-    fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
-    tom: Date | undefined
-  ): Date | string => {
-    return tom ? addMonths(tom, 1) : fom
-  }
-
   return {
     fom: formaterTilISOString(
       nesteFomDato(
+        behandling,
         sistePeriode ? new Date(sistePeriode.fom) : new Date(behandling.virkningstidspunkt!.dato),
         sistePeriode && sistePeriode.fom ? new Date(sistePeriode.fom) : undefined
       )
@@ -40,20 +41,43 @@ export const initialOverstyrBeregningsgrunnlagPeriode = (
   }
 }
 
+export const initalInstitusjonsoppholdPeriode = (
+  behandling: IDetaljertBehandling,
+  sistePeriode: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning> | undefined
+): PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning> => {
+  return {
+    fom: formaterTilISOString(
+      nesteFomDato(
+        behandling,
+        sistePeriode ? new Date(sistePeriode.fom) : new Date(behandling.virkningstidspunkt!.dato),
+        sistePeriode && sistePeriode.fom ? new Date(sistePeriode.fom) : undefined
+      )
+    ),
+    tom: undefined,
+    data: {
+      reduksjon: 'VELG_REDUKSJON',
+      egenReduksjon: undefined,
+      begrunnelse: '',
+    },
+  }
+}
+
+export const konverterTilSisteDagIMaaneden = (dato: string): string => {
+  return formaterTilISOString(lastDayOfMonth(dato))
+}
+
 export const validerAarsak = (aarsak: OverstyrtAarsakKey | undefined): string | undefined => {
   if (!aarsak || aarsak === 'VELG_AARSAK') return 'Må settes'
   return undefined
 }
 
-export const replacePeriodePaaIndex = (
-  periode: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>,
-  perioder: Array<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>>,
+export const replacePeriodePaaIndex = <G>(
+  periode: PeriodisertBeregningsgrunnlagDto<G>,
+  perioder: Array<PeriodisertBeregningsgrunnlagDto<G>>,
   index: number
-): Array<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>> => {
+): Array<PeriodisertBeregningsgrunnlagDto<G>> => {
   const kopi = [...perioder]
   kopi.splice(index, 1, periode)
-
-  console.log(kopi)
 
   return kopi
 }

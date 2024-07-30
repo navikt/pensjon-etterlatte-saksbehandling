@@ -25,6 +25,8 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import org.slf4j.Logger
 import rapidsandrivers.initRogR
@@ -72,6 +74,8 @@ class ApplicationBuilder {
                     }
                 }
             },
+            configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)

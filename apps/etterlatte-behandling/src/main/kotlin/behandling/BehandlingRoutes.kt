@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -391,7 +392,7 @@ data class ViderefoertOpphoerRequest(
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: String,
+    val vilkaar: VilkaarType?,
 ) {
     val dato: YearMonth = _dato.tilYearMonth()
 }
@@ -400,7 +401,7 @@ data class ViderefoertOpphoer(
     val skalViderefoere: JaNei,
     val behandlingId: UUID,
     val dato: YearMonth,
-    val vilkaar: String,
+    val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,

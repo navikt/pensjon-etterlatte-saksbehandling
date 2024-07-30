@@ -18,6 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initialOverstyrBeregningsgrunnlagPeriode,
+  konverterTilSisteDagIMaaneden,
   replacePeriodePaaIndex,
   stripWhitespace,
   validerAarsak,
@@ -65,6 +66,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
   ) => {
     const periodeMedBeloepUtenWhitespace: PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode> = {
       ...overtyrBeregningsgrunnlagPeriode,
+      tom: overtyrBeregningsgrunnlagPeriode.tom && konverterTilSisteDagIMaaneden(overtyrBeregningsgrunnlagPeriode.tom),
       data: {
         ...overtyrBeregningsgrunnlagPeriode.data,
         utbetaltBeloep: stripWhitespace(overtyrBeregningsgrunnlagPeriode.data.utbetaltBeloep),
@@ -117,7 +119,6 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
               {...register('data.utbetaltBeloep', {
                 valueAsNumber: true,
                 required: { value: true, message: 'Må settes' },
-                min: { value: 1, message: 'Må være større en 0' },
                 validate: validerStringNumber,
               })}
               label="Utbetalt beløp"
@@ -179,15 +180,15 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         })}
 
         <HStack gap="4">
-          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
-            Avbryt
-          </Button>
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
             loading={isPending(lagreOverstyrBeregningGrunnlagResult)}
           >
             Lagre
+          </Button>
+          <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>
+            Avbryt
           </Button>
         </HStack>
       </VStack>

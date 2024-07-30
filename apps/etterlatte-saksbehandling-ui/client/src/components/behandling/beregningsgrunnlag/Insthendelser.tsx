@@ -8,6 +8,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 
 import { mapAllApiResult } from '~shared/api/apiUtils'
+import { institusjonstype } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdHendelser'
 
 const Insthendelser = (props: { sakid: number }) => {
   const { sakid } = props
@@ -75,12 +76,6 @@ const Insthendelser = (props: { sakid: number }) => {
       )
     }
   )
-}
-
-export const institusjonstype: { [key: string]: string } = {
-  AS: 'Alders- og sykehjem',
-  FO: 'Fengsel',
-  HS: 'Helseinstitusjon',
 }
 
 export default Insthendelser

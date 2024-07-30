@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -76,10 +77,22 @@ class DoedshendelseKontrollpunktServiceTest {
 
     @BeforeEach
     fun oppsett() {
-        coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns emptyList()
-        coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns emptyList()
-        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalOMS.beroertFnr, any()) } returns false
-        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalBP.beroertFnr, any()) } returns false
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, Systembruker.doedshendelse) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, Systembruker.doedshendelse) } returns emptyList()
+        coEvery {
+            pesysKlient.erTilstoetendeBehandlet(
+                doedshendelseInternalOMS.beroertFnr,
+                any(),
+                Systembruker.doedshendelse,
+            )
+        } returns false
+        coEvery {
+            pesysKlient.erTilstoetendeBehandlet(
+                doedshendelseInternalBP.beroertFnr,
+                any(),
+                Systembruker.doedshendelse,
+            )
+        } returns false
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
@@ -165,7 +178,11 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalAvdoed,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak))
     }
@@ -199,7 +216,11 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalAvdoed,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
     }
@@ -232,7 +253,11 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalAvdoed,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
     }
@@ -289,7 +314,11 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns listOf(grunnlagsendringshendelse)
         every { oppgaveService.hentOppgaverForReferanse(grunnlagshendelseID.toString()) } returns listOf(oppgaveIntern)
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalAvdoed,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactlyInAnyOrder
             listOf(
@@ -324,7 +353,11 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns listOf(grunnlagsendringshendelse)
         every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns listOf(oppgaveIntern)
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalBP,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactly
             listOf(
@@ -359,21 +392,31 @@ class DoedshendelseKontrollpunktServiceTest {
                         null,
                     ),
             )
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollerpunkter(
+                doedshendelseInternalBP,
+                Systembruker.doedshendelse,
+            )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse)
     }
 
     @Test
     fun `Skal opprette kontrollpunkt hvis saken er behandlet i Pesys`() {
-        coEvery { pesysKlient.erTilstoetendeBehandlet(doedshendelseInternalBP.beroertFnr, any()) } returns true
+        coEvery {
+            pesysKlient.erTilstoetendeBehandlet(
+                doedshendelseInternalBP.beroertFnr,
+                any(),
+                Systembruker.doedshendelse,
+            )
+        } returns true
 
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP) shouldBe
+        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP, Systembruker.doedshendelse) shouldBe
             listOf(DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys)
     }
 
     @Test
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP) shouldBe emptyList()
+        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP, Systembruker.doedshendelse) shouldBe emptyList()
     }
 }

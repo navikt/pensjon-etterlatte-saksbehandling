@@ -61,7 +61,7 @@ export const ViderefoereOpphoerVurdering = ({
   }, [behandlingId])
 
   const valider = () => {
-    if (!skalViderefoere) {
+    if (!skalViderefoere || skalViderefoere == JaNei.NEI) {
       return ''
     }
     if (!vilkaar) {
@@ -76,8 +76,8 @@ export const ViderefoereOpphoerVurdering = ({
   const lagre = (onSuccess?: () => void) => {
     setVilkaarError(valider())
 
-    if (skalViderefoere !== undefined && !!vilkaar && isSuccess(vilkaartyperResult)) {
-      const vilkaartype = finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.tittel || ''
+    if (skalViderefoere !== undefined && !vilkaarError && isSuccess(vilkaartyperResult)) {
+      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name || '' : undefined
       return setViderefoertOpphoer(
         { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
@@ -147,7 +147,8 @@ export const ViderefoereOpphoerVurdering = ({
               <Heading size="xsmall">Vilkår som ikke lenger er oppfylt</Heading>
               {viderefoertOpphoer?.vilkaar ? (
                 <Label as="p" size="small">
-                  {viderefoertOpphoer.vilkaar}
+                  {isSuccess(vilkaartyperResult) &&
+                    vilkaartyperResult.data.typer.find((n) => n.name == viderefoertOpphoer.vilkaar)?.tittel}
                 </Label>
               ) : (
                 <Label as="p" size="small">
@@ -175,7 +176,7 @@ export const ViderefoereOpphoerVurdering = ({
       <VStack gap="2">
         <div>
           <Heading level="3" size="small">
-            Er dette et videreført opphør?
+            Er det nødvendig å fastsette til og med-dato?
           </Heading>
           <RadioGroup
             legend=""

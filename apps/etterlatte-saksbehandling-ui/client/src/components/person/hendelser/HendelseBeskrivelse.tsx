@@ -23,9 +23,9 @@ import {
 import { formaterKanskjeStringDatoMedFallback, formaterDato } from '~utils/formatering/dato'
 import styled from 'styled-components'
 import { BodyShort, Label, VStack } from '@navikt/ds-react'
-import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
+import { institusjonstype } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdHendelser'
 
 const VisAnsvarligeForeldreSamsvar = ({ samsvar }: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)

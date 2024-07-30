@@ -1,0 +1,1 @@
+drop table resend_aktivitetsplikt_statistikk;

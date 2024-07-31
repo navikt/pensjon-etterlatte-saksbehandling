@@ -2,15 +2,17 @@ package no.nav.etterlatte.joarkhendelser.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
+import no.nav.etterlatte.joarkhendelser.config.JoarkKey.KAFKA_JOARK_HENDELSE_TOPIC
 import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
@@ -52,7 +54,7 @@ class ApplicationContext(
 
     val joarkKonsument =
         JoarkhendelseKonsument(
-            env.requireEnvValue("KAFKA_JOARK_HENDELSE_TOPIC"),
+            env.requireEnvValue(KAFKA_JOARK_HENDELSE_TOPIC),
             KafkaEnvironment().generateKafkaConsumerProperties(env),
             joarkHendelseHandler,
         )
@@ -66,4 +68,12 @@ class ApplicationContext(
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
             azureAppScope = scope,
         )
+}
+
+enum class JoarkKey : EnvEnum {
+    JOARK_HENDELSE_GROUP_ID,
+    KAFKA_JOARK_HENDELSE_TOPIC,
+    ;
+
+    override fun key() = name
 }

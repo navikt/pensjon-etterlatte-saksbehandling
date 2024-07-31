@@ -7,6 +7,7 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY_PASSWORD
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_SCHEMA_REGISTRY_USER
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
@@ -22,7 +23,7 @@ interface KafkaConsumerConfiguration {
 }
 
 abstract class Kafkakonfigurasjon<T>(
-    private val groupId: String,
+    private val groupId: EnvEnum,
     private val deserializerClass: Class<T>,
     private val userInfoConfigKey: String,
     private val schemaRegistryUrlConfigKey: String,

@@ -2,12 +2,13 @@ package no.nav.etterlatte.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_GROUP_ID
 import org.apache.kafka.common.IsolationLevel
 import java.util.Locale
 
 class KafkaEnvironment :
     Kafkakonfigurasjon<KafkaEnvironment.JsonDeserializer>(
-        groupId = "INSTITUSJONSOPPHOLD_GROUP_ID",
+        groupId = INSTITUSJONSOPPHOLD_GROUP_ID,
         deserializerClass = JsonDeserializer::class.java,
         userInfoConfigKey = Avrokonstanter.USER_INFO_CONFIG,
         schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,

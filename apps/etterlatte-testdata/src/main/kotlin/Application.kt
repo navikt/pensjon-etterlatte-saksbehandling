@@ -36,11 +36,13 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.TestKey.DEV
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TARGET_TOPIC
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -72,7 +74,7 @@ val objectMapper: ObjectMapper =
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
-val localDevelopment = env["DEV"].toBoolean()
+val localDevelopment = env[DEV].toBoolean()
 val httpClient = httpClient(forventSuksess = true)
 val config: Config = ConfigFactory.load()
 val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
@@ -193,3 +195,10 @@ fun getTestnavAccessToken(): String =
             ).get()!!
             .accessToken
     }
+
+enum class TestKey : EnvEnum {
+    DEV,
+    ;
+
+    override fun key() = name
+}

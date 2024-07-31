@@ -9,13 +9,9 @@ fun Map<String, String>.requireEnvValue(key: String) =
 data class Miljoevariabler private constructor(
     val props: Map<String, String>,
 ) {
-    fun requireEnvValue(key: String): String = props.requireEnvValue(key)
+    fun requireEnvValue(key: EnvEnum): String = props.requireEnvValue(key.key())
 
-    fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.key())
-
-    operator fun get(key: String) = props[key]
-
-    operator fun get(key: EnvEnum) = get(key.key())
+    operator fun get(key: EnvEnum) = props[key.key()]
 
     fun getValue(key: EnvEnum): String = props.getValue(key.key())
 
@@ -37,11 +33,7 @@ data class Miljoevariabler private constructor(
         return Miljoevariabler(toMutableMap)
     }
 
-    fun containsKey(key: String) = props.containsKey(key)
-
-    fun containsKey(key: EnvEnum) = containsKey(key.key())
-
-    fun value(property: String): String = props.getValue(property)
+    fun containsKey(key: EnvEnum) = props.containsKey(key.key())
 
     companion object {
         fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())

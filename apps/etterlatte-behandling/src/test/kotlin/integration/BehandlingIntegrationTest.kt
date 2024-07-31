@@ -16,10 +16,14 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.kafka.KafkaKey
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.database.DatabaseConfig
+import no.nav.etterlatte.tilgangsstyring.AzureKey
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -51,35 +55,34 @@ abstract class BehandlingIntegrationTest {
         applicationContext =
             ApplicationContext(
                 env =
-                    System
-                        .getenv()
-                        .toMutableMap()
-                        .apply {
-                            put("KAFKA_RAPID_TOPIC", "test")
-                            put("DB_HOST", props.host)
-                            put("DB_USERNAME", props.username)
-                            put("DB_PASSWORD", props.password)
-                            put("DB_PORT", props.firstMappedPort.toString())
-                            put("DB_DATABASE", props.databaseName)
-                            put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
-                            put("AZUREAD_ATTESTANT_GJENNY_GROUPID", azureAdAttestantGjennyClaim)
-                            put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
-                            put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
-                            put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
-                            put("AZUREAD_FORTROLIG_GROUPID", azureAdFortroligClaim)
-                            put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", azureAdNasjonUtenLoggClaim)
-                            put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", azureAdNasjonMedLoggClaim)
-                            put("NORG2_URL", "http://localhost")
-                            put("NAVANSATT_URL", "http://localhost")
-                            put("SKJERMING_URL", "http://localhost")
-                            put("OPPGAVE_URL", "http://localhost")
-                            put("PEN_URL", "http://localhost")
-                            put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
-                            put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
-                            put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
-                            put("ETTERLATTE_MIGRERING_URL", "http://localhost")
-                            put("OPPGAVE_SCOPE", "scope")
-                        }.let { Miljoevariabler(it) },
+                    Miljoevariabler.systemEnv().append(
+                        mapOf(
+                            KafkaKey.KAFKA_RAPID_TOPIC to "test",
+                            DatabaseConfig.DB_HOST to props.host,
+                            DatabaseConfig.DB_USERNAME to props.username,
+                            DatabaseConfig.DB_PASSWORD to props.password,
+                            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
+                            DatabaseConfig.DB_DATABASE to props.databaseName,
+                            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
+                            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
+                            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
+                            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
+                            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
+                            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
+                            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
+                            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
+                            EnvKey.NORG2_URL to "http://localhost",
+                            EnvKey.NAVANSATT_URL to "http://localhost",
+                            EnvKey.SKJERMING_URL to "http://localhost",
+                            TestEnvKey.OPPGAVE_URL to "http://localhost",
+                            TestEnvKey.PEN_URL to "http://localhost",
+                            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
+                            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
+                            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
+                            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
+                            TestEnvKey.OPPGAVE_SCOPE to "scope",
+                        ),
+                    ),
                 config =
                     ConfigFactory.parseMap(
                         mapOf(
@@ -139,7 +142,11 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = saksbehandlerIdent, groups = listOf(azureAdAttestantClaim))
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = saksbehandlerIdent,
+            groups = listOf(azureAdAttestantClaim),
+        )
     }
 
     protected val tokenAttestant: String by lazy {
@@ -177,4 +184,14 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
+}
+
+enum class TestEnvKey : EnvEnum {
+    PEN_CLIENT_ID,
+    PEN_URL,
+    OPPGAVE_URL,
+    OPPGAVE_SCOPE,
+    ;
+
+    override fun key() = name
 }

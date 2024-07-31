@@ -1,27 +1,21 @@
-package no.nav.etterlatte.token
+package no.nav.etterlatte.libs.ktor.token
 
-import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Claims
-import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BrukerTokenInfoTest {
-    fun genererClaimSetSystembruker() =
-        JwtTokenClaims(
-            JWTClaimsSet
-                .Builder()
-                .claim(Claims.idtyp.name, "app")
-                .claim(Claims.azp_name.name, "cluster:appname:dev")
-                .build(),
+    private fun genererClaimSetSystembruker() =
+        tokenMedClaims(
+            mapOf(
+                Claims.idtyp to APP,
+                Claims.azp_name to "cluster:appname:dev",
+            ),
         )
 
     @Test
     fun `er maskin-til-maskin hvis idtype=app`() {
-        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", genererClaimSetSystembruker(), idtyp = "app") is Systembruker)
+        assertTrue(BrukerTokenInfo.of("a", "saksbehandler", genererClaimSetSystembruker(), idtyp = APP) is Systembruker)
     }
 
     @Test

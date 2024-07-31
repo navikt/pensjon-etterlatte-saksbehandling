@@ -4,13 +4,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
 class KafkaConsumerInstitusjonsopphold(
-    env: Map<String, String>,
+    env: Miljoevariabler,
     private val behandlingKlient: BehandlingKlient,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
 ) : Kafkakonsument<KafkaOppholdHendelse>(

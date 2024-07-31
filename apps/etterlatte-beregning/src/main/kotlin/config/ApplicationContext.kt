@@ -20,6 +20,7 @@ import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -46,7 +47,7 @@ enum class BeregningFeatureToggle(
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    private val env = System.getenv()
+    private val env = Miljoevariabler.systemEnv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(properties)
 

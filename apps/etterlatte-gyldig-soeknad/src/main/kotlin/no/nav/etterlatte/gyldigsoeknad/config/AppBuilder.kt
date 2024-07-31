@@ -6,6 +6,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 
@@ -34,10 +35,7 @@ class AppBuilder(
             auth = {
                 it.install(Auth) {
                     clientCredential {
-                        config =
-                            env.props
-                                .toMutableMap()
-                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                        config = env.append(AZURE_APP_OUTBOUND_SCOPE) { requireNotNull(it[scope]) }
                     }
                 }
             },

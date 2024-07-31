@@ -13,7 +13,7 @@ import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
 
 fun main() {
-    Server(ApplicationContext(Miljoevariabler(System.getenv()))).run()
+    Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
 }
 
 class Server(

@@ -1,8 +1,11 @@
 package no.nav.etterlatte.libs.common
 
-fun appName(): String? = System.getenv()["NAIS_APP_NAME"]
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_CLUSTER_NAME
 
-fun clusterNavn(): String? = System.getenv()["NAIS_CLUSTER_NAME"]
+fun appName(): String? = Miljoevariabler.systemEnv()[NAIS_APP_NAME]
+
+fun clusterNavn(): String? = Miljoevariabler.systemEnv()[NAIS_CLUSTER_NAME]
 
 enum class GcpEnv(
     val env: String,
@@ -20,3 +23,12 @@ fun appIsInGCP(): Boolean =
         null -> false
         else -> GcpEnv.entries.map { it.env }.contains(naisClusterName)
     }
+
+enum class NaisKey : EnvEnum {
+    NAIS_APP_NAME,
+    NAIS_CLUSTER_NAME,
+    NAIS_APP_IMAGE,
+    ;
+
+    override fun key() = name
+}

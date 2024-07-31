@@ -4,6 +4,12 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
+import no.nav.etterlatte.EnvKey.ETTERLATTE_MIGRERING_URL
+import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
+import no.nav.etterlatte.EnvKey.NAVANSATT_URL
+import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.SKJERMING_URL
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
@@ -78,6 +84,9 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.config.JobbKeys.JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
+import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
+import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
@@ -93,9 +102,11 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
@@ -104,6 +115,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
+import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -222,11 +235,11 @@ private fun finnBrukerIdent(): String {
 }
 
 internal class ApplicationContext(
-    val env: Miljoevariabler = Miljoevariabler(System.getenv()),
+    val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         },
@@ -240,11 +253,11 @@ internal class ApplicationContext(
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
-            env.getValue("NAVANSATT_URL"),
+            env.getValue(NAVANSATT_URL),
         ).also {
             it.asyncPing()
         },
-    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
+    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
@@ -254,18 +267,18 @@ internal class ApplicationContext(
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue("ETTERLATTE_TILBAKEKREVING_URL")),
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue(ETTERLATTE_TILBAKEKREVING_URL)),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
 ) {
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
-    val dataSource = DataSourceBuilder.createDataSource(env.props)
+    val dataSource = DataSourceBuilder.createDataSource(env)
 
     // Dao
     val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
@@ -301,12 +314,12 @@ internal class ApplicationContext(
     val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue(SKJERMING_URL))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.get(ELECTOR_PATH), leaderElectionHttpClient)
 
-    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue("ETTERLATTE_KLAGE_API_URL"))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
+    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue(ETTERLATTE_KLAGE_API_URL))
+    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
@@ -526,7 +539,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_METRIKKER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -549,7 +562,7 @@ internal class ApplicationContext(
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
-            openingHours = env.requireEnvValue("JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -559,7 +572,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_SAKSBEHANDLER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -577,4 +590,13 @@ internal class ApplicationContext(
     fun close() {
         (dataSource as HikariDataSource).close()
     }
+}
+
+enum class JobbKeys : EnvEnum {
+    JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS,
+    JOBB_METRIKKER_OPENING_HOURS,
+    JOBB_SAKSBEHANDLER_OPENING_HOURS,
+    ;
+
+    override fun key() = name
 }

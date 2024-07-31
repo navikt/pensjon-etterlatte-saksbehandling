@@ -5,12 +5,13 @@ import io.ktor.server.application.Application
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.config.ApplicationContext
 import no.nav.etterlatte.kafka.startLytting
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 
 fun main() {
-    val context = ApplicationContext(System.getenv())
+    val context = ApplicationContext(Miljoevariabler.systemEnv())
     Server(context).run()
 }
 

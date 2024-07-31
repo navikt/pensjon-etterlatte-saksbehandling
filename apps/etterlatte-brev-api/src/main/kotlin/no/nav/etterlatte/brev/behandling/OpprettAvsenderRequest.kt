@@ -2,8 +2,10 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.VanligSystembruker
 
 fun opprettAvsenderRequest(
     bruker: BrukerTokenInfo,
@@ -20,5 +22,6 @@ fun opprettAvsenderRequest(
 private fun hentBrevIdent(bruker: BrukerTokenInfo): String =
     when (bruker) {
         is Saksbehandler -> bruker.ident
-        is Systembruker -> bruker.identForBrev()
+        is VanligSystembruker -> bruker.ident
+        is HardkodaSystembruker -> Fagsaksystem.EY.navn
     }

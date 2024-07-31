@@ -49,7 +49,7 @@ export const OverstyrtTrygdetid = ({
       })}
     >
       <VStack gap="4">
-        <HStack gap="2">
+        <HStack gap="2" align="center">
           <TruckIcon aria-hidden height="1.5rem" width="1.5rem" />
           <Heading size="small" level="3">
             Poengår i Norge - registreres kun ved eksportvurdering

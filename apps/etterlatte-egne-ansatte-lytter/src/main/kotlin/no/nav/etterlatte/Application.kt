@@ -7,8 +7,8 @@ import no.nav.etterlatte.kafka.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import no.nav.etterlatte.kafka.KafkaEnvironment
 import no.nav.etterlatte.kafka.startLytting
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
@@ -27,14 +27,14 @@ class Server {
     }
 
     fun run() {
-        val env = System.getenv().toMutableMap()
+        val env = Miljoevariabler.systemEnv()
         startEgenAnsattLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }
 }
 
 fun startEgenAnsattLytter(
-    env: Map<String, String>,
+    env: Miljoevariabler,
     config: Config,
 ) {
     val logger = LoggerFactory.getLogger(Application::class.java)

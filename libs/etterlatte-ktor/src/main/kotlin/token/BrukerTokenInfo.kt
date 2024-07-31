@@ -3,6 +3,8 @@ package no.nav.etterlatte.libs.ktor.token
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
+const val APP = "app"
+
 sealed class BrukerTokenInfo {
     abstract fun ident(): String
 
@@ -15,16 +17,17 @@ sealed class BrukerTokenInfo {
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
 
     companion object {
-        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == "app"
+        private fun erSystembruker(idtyp: String?) = idtyp != null && idtyp == APP
 
-        fun of(
+        @PublishedApi
+        internal fun of(
             accessToken: String,
             saksbehandler: String?,
             claims: JwtTokenClaims?,
             idtyp: String?,
         ): BrukerTokenInfo =
             if (erSystembruker(idtyp = idtyp)) {
-                Systembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
+                VanligSystembruker(ident = claims?.getClaimAsString(Claims.azp_name)!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
@@ -35,28 +38,11 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(
-    val ident: String,
-    val jwtTokenClaims: JwtTokenClaims? = null,
+sealed class Systembruker(
+    open val ident: String,
+    open val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    private constructor(omraade: Systembrukere) : this(
-        ident = omraade.appName,
-        jwtTokenClaims =
-            JwtTokenClaims(
-                JWTClaimsSet.Builder().claim(Claims.idtyp.name, "app").build(),
-            ),
-    )
-
     override fun ident() = ident
-
-    fun identForBrev(): String {
-        val systemBrukereInternt = Systembrukere.entries.map { it.appName }
-        if (ident in systemBrukereInternt) {
-            return Fagsaksystem.EY.navn
-        } else {
-            return ident
-        }
-    }
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 
@@ -68,16 +54,37 @@ data class Systembruker(
     override fun erSammePerson(ident: String?) = false
 
     override fun kanEndreOppgaverFor(ident: String?) = true
+}
 
+data class VanligSystembruker internal constructor(
+    override val ident: String,
+    override val jwtTokenClaims: JwtTokenClaims? = null,
+) : Systembruker(ident, jwtTokenClaims)
+
+data class HardkodaSystembruker private constructor(
+    val omraade: Systembrukere,
+) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
     companion object {
-        val brev = Systembruker(Systembrukere.BREV)
-        val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
-        val testdata = Systembruker(Systembrukere.TESTDATA)
-        val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
+        /* Obs: Bruk bare disse fra kontekster hvor vi ikke har et BrukerTokenInfo-objekt allerede.
+        Send alltid med brukeren fra requesten der du kan. Disse er for rivers, automatiske jobber
+        og testdata-appene, hvor systemet på eget initiativ starter kjøring, og vi dermed ikke har en
+        eksisterende saksbehandler eller systembruker å hente tokenet fra
+         */
+        val river = HardkodaSystembruker(Systembrukere.RIVER)
+        val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
+        val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+    }
+
+    enum class Systembrukere(
+        val appName: String,
+    ) {
+        RIVER("river"),
+        DOEDSHENDELSE("doedshendelse"),
+        TESTDATA("testdata"),
     }
 }
 
-data class Saksbehandler(
+data class Saksbehandler internal constructor(
     val accessToken: String,
     val ident: String,
     val jwtTokenClaims: JwtTokenClaims?,
@@ -143,11 +150,8 @@ enum class Claims {
     sub,
 }
 
-enum class Systembrukere(
-    val appName: String,
-) {
-    BREV("brev"),
-    DOEDSHENDELSE("doedshendelse"),
-    TESTDATA("testdata"),
-    AUTOMATISK_JOBB("automatisk_jobb"),
-}
+fun tokenMedClaims(claims: Map<Claims, Any?>) =
+    claims.entries
+        .fold(JWTClaimsSet.Builder()) { acc, next -> acc.claim(next.key.name, next.value) }
+        .build()
+        .let { JwtTokenClaims(it) }

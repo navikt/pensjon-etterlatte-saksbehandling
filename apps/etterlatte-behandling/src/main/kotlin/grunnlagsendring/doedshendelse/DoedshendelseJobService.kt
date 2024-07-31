@@ -37,7 +37,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
@@ -60,12 +59,15 @@ class DoedshendelseJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun setupKontekstAndRun(context: Context) {
+    fun setupKontekstAndRun(
+        context: Context,
+        bruker: BrukerTokenInfo,
+    ) {
         Kontekst.set(context)
-        run()
+        run(bruker)
     }
 
-    private fun run() {
+    private fun run(bruker: BrukerTokenInfo) {
         if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
             val doedshendelserSomSkalHaanderes =
                 inTransaction {
@@ -79,7 +81,7 @@ class DoedshendelseJobService(
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    haandterDoedshendelse(doedshendelse, Systembruker.doedshendelse)
+                    haandterDoedshendelse(doedshendelse, bruker)
                 }
             }
         }

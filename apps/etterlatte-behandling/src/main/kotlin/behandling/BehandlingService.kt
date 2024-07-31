@@ -64,15 +64,15 @@ class BehandlingFinnesIkkeException(
 
 class KravdatoMaaFinnesHvisBosattutland(
     message: String,
-) : UgyldigForespoerselException(code = "BOSATTUTLAND_MÅ_HA_KRAVDATO", detail = message)
+) : UgyldigForespoerselException(code = "BOSATTUTLAND_MAA_HA_KRAVDATO", detail = message)
 
 class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
-) : UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
+) : UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
 
 class VirkningstidspunktKanIkkeVaereEtterOpphoer :
     UgyldigForespoerselException(
-        code = "VIRK_KAN_IKKE_VÆRE_ETTER_OPPHØR",
+        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHØR",
         detail = "Virkningstidspunkt kan ikke være etter opphør",
     )
 

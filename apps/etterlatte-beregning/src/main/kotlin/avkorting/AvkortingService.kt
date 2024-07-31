@@ -94,7 +94,7 @@ class AvkortingService(
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
-                behandling.opphoerFraOgMed?.minusMonths(1),
+                behandling.opphoerFraOgMed,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)

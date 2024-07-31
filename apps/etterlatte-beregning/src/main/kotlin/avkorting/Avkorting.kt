@@ -133,7 +133,7 @@ data class Avkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = virkningstidspunkt, tom = opphoerFom),
+                                periode = Periode(fom = virkningstidspunkt, tom = opphoerFom?.minusMonths(1)),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtland = nyttGrunnlag.inntektUtland,

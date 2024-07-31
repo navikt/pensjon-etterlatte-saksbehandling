@@ -403,17 +403,16 @@ internal class BehandlingServiceImpl(
         behandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
+        val virkningstidspunkt = request.dato
+        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
         if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             return true
         }
 
-        val virkningstidspunkt = request.dato
         val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
-
-        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
-        }
 
         if (doedsdato == null) {
             // Mangler dødsfall når avdød er ukjent

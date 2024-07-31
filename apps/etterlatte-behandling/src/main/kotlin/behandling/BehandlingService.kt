@@ -380,13 +380,13 @@ internal class BehandlingServiceImpl(
 
     /*
      * Gyldig virkningstidspunkt for førstegangsbehandling er basert på dødsdato opp mot når bruker har krav
-     * på å søke.
+     * på å søke, samt eventuell opphørsdato.
      * Kravdato er når søknad mottatt. Med unntak av utlandssak hvor egen kravdato kan være eksplisitt angitt.
      *
      * Virk er da gyldig hvis:
-     * 1. Saktype BP, den er etter dødsdato og den er samme dag eller etter 3 år før kravdato
-     * 2. Saktype OMS, den er etter dødsdato og den etter 3 år før kravdato
-     * 3. Den er etter dødsdato og
+     * 1. Saktype BP, den er etter dødsdato, ikke etter eventuelt opphør, og den er samme måned eller etter 3 år før kravdato
+     * 2. Saktype OMS, den er etter dødsdato, ikke etter eventuelt opphør, og den er etter 3 år før kravdato
+     *
      *
      * UNNTAK:
      * 1. I saker med ukjent avdød vil dødsdato mangle og det vil derfor ikke være mulig å validere.
@@ -411,7 +411,9 @@ internal class BehandlingServiceImpl(
         val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
-        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
+        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
 
         if (doedsdato == null) {
             // Mangler dødsfall når avdød er ukjent
@@ -447,14 +449,17 @@ internal class BehandlingServiceImpl(
     }
 
     /*
-     * Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
+     * Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken,
+     * og kan heller ikke være etter opphørsdato.
      */
     private fun erGyldigVirkningstidspunktRevurdering(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
     ): Boolean {
         val virkningstidspunkt = request.dato
-        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
+        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
 
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
         if (foersteVirkDato == null) {
@@ -748,7 +753,9 @@ internal class BehandlingServiceImpl(
             throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
         }
 
-        sjekkAtVirkIkkeErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)
+        if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
 
         behandling
             .oppdaterVidereførtOpphoer(viderefoertOpphoer)
@@ -790,15 +797,10 @@ internal class BehandlingServiceImpl(
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
 
-    private fun sjekkAtVirkIkkeErEtterOpphoerFraOgMed(
+    private fun virkningstidspunktErEtterOpphoerFraOgMed(
         virkningstidspunkt: YearMonth?,
         opphoerFraOgMed: YearMonth?,
-    ) {
-        if (opphoerFraOgMed != null &&
-            virkningstidspunkt != null &&
-            virkningstidspunkt.isAfter(opphoerFraOgMed)
-        ) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
-        }
-    }
+    ) = opphoerFraOgMed != null &&
+        virkningstidspunkt != null &&
+        virkningstidspunkt.isAfter(opphoerFraOgMed)
 }

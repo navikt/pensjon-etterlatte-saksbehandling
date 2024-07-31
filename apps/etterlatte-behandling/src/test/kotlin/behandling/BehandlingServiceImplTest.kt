@@ -636,6 +636,19 @@ internal class BehandlingServiceImplTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi ugyldig virkningstidspunkt for revurdering hvis foerste virk ikke finnes`(sakType: SakType) {
+        shouldThrow<KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling> {
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2024-12-01T00:00:00Z"),
+                foersteVirk = null,
+            )
+        }
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -860,22 +873,26 @@ internal class BehandlingServiceImplTest {
                             utlandstilknytning = utlandstilknytning,
                             opphoerFraOgMed = opphoerFraOgMed,
                         ),
-                        listOf(
-                            foerstegangsbehandling(
-                                id = BEHANDLINGS_ID,
-                                sakId = SAK_ID,
-                                sakType = sakType,
-                                status = BehandlingStatus.IVERKSATT,
-                                virkningstidspunkt =
-                                    Virkningstidspunkt.create(
-                                        dato = foersteVirk!!,
-                                        begrunnelse = "begrunnelse",
-                                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
-                                    ),
-                                soeknadMottattDato = soeknadMottatt,
-                                utlandstilknytning = utlandstilknytning,
-                            ),
-                        ),
+                        if (foersteVirk != null) {
+                            listOf(
+                                foerstegangsbehandling(
+                                    id = BEHANDLINGS_ID,
+                                    sakId = SAK_ID,
+                                    sakType = sakType,
+                                    status = BehandlingStatus.IVERKSATT,
+                                    virkningstidspunkt =
+                                        Virkningstidspunkt.create(
+                                            dato = foersteVirk,
+                                            begrunnelse = "begrunnelse",
+                                            saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                                        ),
+                                    soeknadMottattDato = soeknadMottatt,
+                                    utlandstilknytning = utlandstilknytning,
+                                ),
+                            )
+                        } else {
+                            emptyList()
+                        },
                     )
             }
 

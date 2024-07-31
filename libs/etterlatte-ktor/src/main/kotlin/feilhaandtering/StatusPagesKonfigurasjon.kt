@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
+import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import org.slf4j.Logger
 
@@ -124,7 +125,11 @@ class StatusPagesKonfigurasjon(
         call: ApplicationCall,
     ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.error("En feil har oppstått ved deserialisering. Requestobjektet var ${hentRequestobjekt(call)}", internfeil)
+            sikkerLogg.error(
+                "En feil har oppstått ved deserialisering. Requestobjektet var {}",
+                escape(hentRequestobjekt(call)),
+                internfeil,
+            )
             this.error(
                 "En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.",
             )
@@ -141,7 +146,7 @@ class StatusPagesKonfigurasjon(
         call: ApplicationCall,
     ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.info("En feil har oppstått ved deserialisering. Requestobjektet var ${hentRequestobjekt(call)}", internfeil)
+            sikkerLogg.info("En feil har oppstått ved deserialisering. Requestobjektet var {}", escape(hentRequestobjekt(call)), internfeil)
             this.info(
                 "En feil har oppstått ved deserialisering i et endepunkt. Se sikkerlogg for mer detaljer. " +
                     "Feilen fikk status ${internfeil.status} til frontend.",

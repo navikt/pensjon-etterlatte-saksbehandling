@@ -18,7 +18,7 @@ import {
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
-import { hentSakMedBehandlnger } from '~shared/api/sak'
+import { hentSak, hentSakMedBehandlnger } from '~shared/api/sak'
 import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
@@ -30,6 +30,8 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { settSak } from '~store/reducers/SakReducer'
+import { useAppDispatch } from '~store/Store'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -43,40 +45,47 @@ export enum PersonOversiktFane {
 
 export const Person = () => {
   useSidetittel('Personoversikt')
+  const dispatch = useAppDispatch()
 
+  const { sakId } = useParams()
   const [search, setSearch] = useSearchParams()
-
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
-  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
+  const [sakMedBehandlingResult, sakMedBehandlingFetch] = useApiCall(hentSakMedBehandlnger)
+  const [sakResult, sakFetch] = useApiCall(hentSak)
+
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
-
     setSearch({ fane: valgtFane })
     setFane(valgtFane)
   }
 
-  const { fnr } = useParams()
+  useEffect(() => {
+    sakFetch(Number(sakId))
+  }, [sakId])
 
   useEffect(() => {
-    if (fnrHarGyldigFormat(fnr)) {
-      personNavnFetch(fnr!!)
-      sakFetch(fnr!!)
+    if (isSuccess(sakResult)) {
+      dispatch(settSak(sakResult.data))
+
+      const ident = sakResult.data.ident
+      if (fnrHarGyldigFormat(ident)) {
+        personNavnFetch(ident)
+        sakMedBehandlingFetch(ident)
+      }
+    } else if (sakResult.status == 'error') {
+      throw new Error('Kunne ikke hente sak med sak ID ' + sakId)
     }
-  }, [fnr])
+  }, [sakResult])
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {
       return <ApiErrorAlert>Ugyldig forespørsel: {error.detail}</ApiErrorAlert>
     } else {
-      return <ApiErrorAlert>Feil oppsto ved henting av person med fødselsnummer {fnr}</ApiErrorAlert>
+      return <ApiErrorAlert>Feil oppsto ved henting av person</ApiErrorAlert>
     }
-  }
-
-  if (!fnrHarGyldigFormat(fnr)) {
-    return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
   const isOmstillingsstoenad = (sakStatus: Result<SakMedBehandlinger>) => {
@@ -112,33 +121,33 @@ export const Person = () => {
               {skalViseNotater && (
                 <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
               )}
-              {isOmstillingsstoenad(sakResult) && (
+              {isOmstillingsstoenad(sakMedBehandlingResult) && (
                 <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
               )}
             </Tabs.List>
 
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
-              <SakOversikt sakResult={sakResult} fnr={person.foedselsnummer} />
+              <SakOversikt sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Personopplysninger sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-              <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Hendelser sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-              <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Dokumentliste sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.BREV}>
-              <BrevOversikt sakResult={sakResult} />
+              <BrevOversikt sakResult={sakMedBehandlingResult} />
             </Tabs.Panel>
             {skalViseNotater && (
               <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-                <NotatOversikt sakResult={sakResult} />
+                <NotatOversikt sakResult={sakMedBehandlingResult} />
               </Tabs.Panel>
             )}
             <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-              <SamordningSak fnr={person.foedselsnummer} sakResult={sakResult} />
+              <SamordningSak fnr={person.foedselsnummer} sakResult={sakMedBehandlingResult} />
             </Tabs.Panel>
           </Tabs>
         )

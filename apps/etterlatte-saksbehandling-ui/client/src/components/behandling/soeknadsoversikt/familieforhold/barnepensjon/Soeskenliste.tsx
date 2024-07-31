@@ -7,6 +7,7 @@ import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
+import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -77,7 +78,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
-          <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+          <Link href={`/person/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
           </Link>
           <CopyButton copyText={barn.foedselsnummer} size="small" />

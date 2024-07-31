@@ -42,7 +42,7 @@ const handlingKnapp = (brev: IBrev) => {
     return (
       <Button
         as="a"
-        href={`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`}
+        href={`/person/${brev.sakId}/sak/${brev.sakId}/brev/${brev.id}`}
         variant="secondary"
         title="Rediger"
         icon={<DocPencilIcon />}
@@ -69,7 +69,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
   const opprettNyttBrevOgRedirect = () => {
     if (isSuccess(sakResult)) {
       opprettBrev(Number(sakResult.data.sak.id), (brev) => {
-        navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
+        navigate(`/person/${brev.sakId}/sak/${brev.sakId}/brev/${brev.id}`)
       })
     } else {
       throw Error('SakID mangler!')

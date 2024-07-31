@@ -9,9 +9,11 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
+import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
+  const sakId = hentSakId()
 
   useEffect(
     () =>
@@ -76,7 +78,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 variant="tertiary"
                 size="small"
                 as={Link}
-                href={`/person/${fnr}?fane=DOKUMENTER`}
+                href={`/person/${sakId}?fane=DOKUMENTER`}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

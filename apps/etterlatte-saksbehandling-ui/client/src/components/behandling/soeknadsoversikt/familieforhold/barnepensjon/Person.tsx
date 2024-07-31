@@ -11,6 +11,7 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { ILand } from '~shared/api/trygdetid'
 import { Result } from '~shared/api/apiUtils'
+import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -66,7 +67,7 @@ export const Person = ({
         <div>
           {person.fornavn} {person.etternavn}
           <FnrWrapper>
-            <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+            <Link href={`/person/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
             <CopyButton copyText={person.foedselsnummer} size="small" />

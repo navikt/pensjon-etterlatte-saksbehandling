@@ -8,25 +8,30 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { fnrErGyldig } from '~utils/fnr'
 import { hentSak } from '~shared/api/behandling'
 
-import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { hentSakMedBehandlnger } from '~shared/api/sak'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
   const [feilInput, setFeilInput] = useState(false)
   const [funnetSak, finnSak, resetSakSoek] = useApiCall(hentSak)
+  const [sakMedBehandlingResult, sakMedBehandlingFetch] = useApiCall(hentSakMedBehandlnger)
 
   const gyldigInputFnr = fnrErGyldig(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
 
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
-      navigate(`/person/${searchInput}`)
+      if (isSuccess(sakMedBehandlingResult)) {
+        navigate(`/person/${sakMedBehandlingResult.data.sak.id}`)
+      }
       return
     }
+
     if (gyldigInputSakId) {
       finnSak(searchInput, (sak) => {
-        navigate(`/person/${sak.ident}`)
+        navigate(`/person/${sak.id}`)
       })
       return
     }
@@ -39,6 +44,10 @@ export const Search = () => {
   }
 
   useEffect(() => {
+    if (gyldigInputFnr) {
+      sakMedBehandlingFetch(searchInput)
+    }
+
     resetSakSoek()
     setFeilInput(!!searchInput.length && !(gyldigInputFnr || gyldigInputSakId))
   }, [searchInput])
@@ -83,7 +92,7 @@ export const Search = () => {
           </span>
           <SearchResult>
             <BodyShort className="text">
-              {error.status === 404 ? `Fant ingen sak med id ${searchInput}` : 'En feil har skjedd'}
+              {error.status === 404 ? `Fant ingen sak med søk: ${searchInput}` : 'En feil har skjedd'}
             </BodyShort>
           </SearchResult>
         </Dropdown>

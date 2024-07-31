@@ -11,6 +11,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
+import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -31,6 +32,7 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
 
 export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
   const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+
   useEffect(() => {
     ident && hentPerson(ident)
   }, [ident])
@@ -39,6 +41,7 @@ export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefi
 }
 
 export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
+  const sakId = hentSakId()
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -56,7 +59,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
         <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
           <Label>
-            <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
+            <Link href={`/person/${sakId}`}>{genererNavn(person)}</Link>
           </Label>
 
           <DoedsdatoTag doedsdato={person.doedsdato} />

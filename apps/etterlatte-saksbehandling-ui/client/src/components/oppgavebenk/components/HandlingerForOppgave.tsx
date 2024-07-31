@@ -17,7 +17,7 @@ export const HandlingerForOppgave = ({
 }) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
-  const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
+  const { id, type, kilde, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
 
   if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
@@ -48,7 +48,12 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+        <Button
+          size="small"
+          icon={<EyeIcon />}
+          href={`/person/${oppgave.sakId}?fane=HENDELSER&referanse=${referanse}`}
+          as="a"
+        >
           Se hendelse
         </Button>
       )

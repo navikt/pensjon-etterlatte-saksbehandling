@@ -22,7 +22,7 @@ export const UnderkjennTilbakekreving = ({ tilbakekreving, kommentar, valgtBegru
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ tilbakekrevingId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
-      navigate(`/person/${tilbakekreving.sak.ident}`)
+      navigate(`/person/${tilbakekreving.sak.id}`)
     })
   }
 

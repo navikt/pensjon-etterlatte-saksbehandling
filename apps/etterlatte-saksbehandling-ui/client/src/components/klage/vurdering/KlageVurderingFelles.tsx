@@ -164,7 +164,7 @@ export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
       as="a"
       variant="primary"
       icon={<EnvelopeClosedIcon />}
-      href={`/person/${props.klage.sak.ident}?fane=BREV`}
+      href={`/person/${props.klage.sak.id}?fane=BREV`}
       target="_blank"
     >
       Opprett brev

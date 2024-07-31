@@ -13,6 +13,7 @@ import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
 import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
 import { oppgaveReducer } from '~store/reducers/OppgaveReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
+import { sakReducer } from '~store/reducers/SakReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -27,6 +28,7 @@ const reducer = {
   journalfoeringOppgaveReducer: journalfoeringOppgaveReducer,
   sjekklisteReducer: sjekklisteReducer,
   personopplysningerReducer: personopplysningerReducer,
+  sakReducer: sakReducer,
 }
 export const store = configureStore({
   reducer,

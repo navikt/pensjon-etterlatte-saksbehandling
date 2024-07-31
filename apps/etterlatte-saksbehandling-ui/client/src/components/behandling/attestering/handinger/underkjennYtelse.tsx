@@ -4,9 +4,9 @@ import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { underkjennVedtak } from '~shared/api/vedtaksvurdering'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
+import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
 
 type Props = {
   behandlingId: string
@@ -17,13 +17,12 @@ type Props = {
 export const UnderkjennYtelse = ({ behandlingId, kommentar, valgtBegrunnelse }: Props) => {
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
-
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
-  const soeker = usePersonopplysninger()?.soeker?.opplysning
+  const sakId = hentSakId()
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {
-      navigate(`/person/${soeker?.foedselsnummer}`)
+      navigate(`/person/${sakId}`)
     })
   }
 

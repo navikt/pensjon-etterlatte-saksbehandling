@@ -1,4 +1,5 @@
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
+import { useAppSelector } from '~store/Store'
 
 export const hentLoependeVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
@@ -32,3 +33,16 @@ const vedtakDatoStrengTilDate = (dato: string | undefined) => (dato ? new Date(d
 // å sjekke den for å erstatte med virkningstidspunkt
 export const ytelseOpphoersdato = (loependeVedtak: VedtakSammendrag) =>
   loependeVedtak.opphoerFraOgMed ? loependeVedtak.opphoerFraOgMed : loependeVedtak.virkningstidspunkt
+
+// TODO: flytte til en annen plass?
+export const hentSakId = () => {
+  const sakId = useAppSelector((state) => state.sakReducer.sak?.id)
+  const sakIdFraBehandling = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+  return sakId !== undefined
+    ? sakId
+    : sakIdFraBehandling !== undefined
+      ? sakIdFraBehandling
+      : (() => {
+          throw new Error('sakId is not defined')
+        })()
+}

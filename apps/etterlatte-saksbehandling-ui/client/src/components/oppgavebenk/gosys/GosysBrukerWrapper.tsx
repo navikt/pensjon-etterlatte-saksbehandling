@@ -7,7 +7,7 @@ export const GosysBrukerWrapper = ({ bruker }: { bruker?: GosysOppgaveBruker }) 
 
   switch (bruker.type) {
     case GosysBrukerType.PERSON:
-      return <SaksoversiktLenke fnr={bruker.ident} />
+      return <SaksoversiktLenke sakId={bruker.ident} />
     case GosysBrukerType.ARBEIDSGIVER:
       return `${bruker.ident} (arbeidsgiver)`
     case GosysBrukerType.SAMHANDLER:

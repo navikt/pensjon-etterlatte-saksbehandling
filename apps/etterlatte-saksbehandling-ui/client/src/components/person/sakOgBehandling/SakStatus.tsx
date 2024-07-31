@@ -12,7 +12,7 @@ import {
   ytelseErLoependeMedOpphoerFremITid,
   ytelseErOpphoert,
   ytelseOpphoersdato,
-} from '~components/person/sakOgBehandling/sakStatusUtils'
+} from '~components/person/sakOgBehandling/sakUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)

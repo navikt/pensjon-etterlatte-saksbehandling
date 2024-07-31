@@ -29,7 +29,9 @@ export const OppgaverTableRow = ({
   oppdaterStatus,
 }: Props): ReactNode => (
   <Table.Row>
-    <Table.DataCell>{oppgave.sakId}</Table.DataCell>
+    <Table.DataCell>
+      <SaksoversiktLenke sakId={String(oppgave.sakId)} />
+    </Table.DataCell>
     <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>
       {oppdaterFrist ? (
@@ -43,7 +45,7 @@ export const OppgaverTableRow = ({
         <FristWrapper dato={oppgave.frist} />
       )}
     </Table.DataCell>
-    <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
+    <Table.DataCell>{oppgave.fnr ? oppgave.fnr : 'Mangler'}</Table.DataCell>
     <Table.DataCell>
       <HStack align="center">
         <SakTypeTag sakType={oppgave.sakType} kort />

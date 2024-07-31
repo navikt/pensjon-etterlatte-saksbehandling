@@ -69,7 +69,7 @@ export const AktivitetspliktRevurderingModal = ({
                     variant="primary"
                     size="small"
                     as="a"
-                    href={`/person/${oppgave.fnr?.toString()}`}
+                    href={`/person/${oppgave.id?.toString()}`}
                     target="_blank"
                   >
                     Gå til sak

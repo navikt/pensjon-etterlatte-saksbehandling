@@ -100,14 +100,15 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
+        opphoerFom: YearMonth?,
     ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, true, bruker).beregnAvkortingForstegangs(
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, true, bruker, opphoerFom).beregnAvkortingForstegangs(
             beregning,
             sanksjoner,
         )
     } else {
         // TODO parameter innvilgelse vil ikke være tilstrekkelig når vi skal revurdere for å endre første virk..
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, false, bruker).beregnAvkortingRevurdering(
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, false, bruker, opphoerFom).beregnAvkortingRevurdering(
             beregning,
             sanksjoner,
         )
@@ -118,6 +119,7 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         innvilgelse: Boolean,
         bruker: BrukerTokenInfo,
+        opphoerFom: YearMonth? = null,
     ): Avkorting {
         // TODO kreve at det er inneværende år?
         val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(virkningstidspunkt, innvilgelse)
@@ -131,7 +133,7 @@ data class Avkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = virkningstidspunkt, tom = null),
+                                periode = Periode(fom = virkningstidspunkt, tom = opphoerFom),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtland = nyttGrunnlag.inntektUtland,

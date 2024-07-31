@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.metricsmicrometer)
+    implementation(libs.ktor2.doublereceive)
     implementation(libs.navfelles.tokenvalidationktor2)
     api(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)

@@ -53,13 +53,13 @@ class BeregningService(
                             beregnBarnepensjonService.beregn(
                                 behandling,
                                 brukerTokenInfo,
-                                tilDato = behandling.opphoerFraOgMed?.atDay(1),
+                                tilDato = behandling.opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth(),
                             )
                         SakType.OMSTILLINGSSTOENAD ->
                             beregnOmstillingsstoenadService.beregn(
                                 behandling,
                                 brukerTokenInfo,
-                                tilDato = behandling.opphoerFraOgMed?.atDay(1),
+                                tilDato = behandling.opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth(),
                             )
                     }
                 }

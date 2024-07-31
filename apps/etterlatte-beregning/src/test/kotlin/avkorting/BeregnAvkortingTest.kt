@@ -1931,6 +1931,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Avkorting foerstegangsbehandling med sanksjon`() =
@@ -1967,6 +1968,7 @@ class BeregnAvkortingTest {
                             type = SanksjonType.BORTFALL,
                         ),
                     ),
+                opphoerFom = null,
             )
 
     private fun `Avkorting revurdering med en sanksjon åpen periode`() =
@@ -2024,6 +2026,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Sanksjon tilbake i tid mellom inntektsgrunnlag`() =
@@ -2118,6 +2121,7 @@ class BeregnAvkortingTest {
                             tom = YearMonth.of(2024, Month.AUGUST),
                         ),
                     ),
+                opphoerFom = null,
             )
 
     private fun `Avkorting ny inntekt to`() =
@@ -2144,6 +2148,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Avkorting revurdert beregning`() =
@@ -2196,6 +2201,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                     sanksjoner = emptyList(),
+                    opphoerFom = null,
                 )
             }
 
@@ -2244,6 +2250,7 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 
     private fun `Revurdering med virk tilbake i tidligere år`() =
@@ -2286,5 +2293,6 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+                opphoerFom = null,
             )
 }

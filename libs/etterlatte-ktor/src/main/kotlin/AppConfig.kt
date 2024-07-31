@@ -3,7 +3,7 @@ package no.nav.etterlatte.libs.ktor
 import no.nav.etterlatte.libs.common.EnvEnum
 
 enum class AppConfig : EnvEnum {
-    HTTP_PORT,
+    DEV_MODE,
     ELECTOR_PATH,
     ;
 

@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
+import no.nav.etterlatte.EnvKey.PDLTJENESTER_URL
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -51,7 +52,7 @@ class ApplicationBuilder {
         )
     }
 
-    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
+    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env[PDLTJENESTER_URL]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)

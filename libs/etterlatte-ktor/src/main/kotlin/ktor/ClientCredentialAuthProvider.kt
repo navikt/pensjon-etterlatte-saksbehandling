@@ -8,6 +8,11 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.auth.HttpAuthHeader
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.AzureEnums
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.security.token.support.client.core.ClientAuthenticationProperties
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.OAuth2CacheFactory
@@ -38,22 +43,22 @@ class ClientCredentialAuthProvider(
         ClientProperties(
             // URI(conf["token_endpoint_url"]!!),
             tokenEndpointUrl = null,
-            wellKnownUrl = config["AZURE_APP_WELL_KNOWN_URL"]?.let { URI(it) },
+            wellKnownUrl = config[AZURE_APP_WELL_KNOWN_URL]?.let { URI(it) },
             grantType = GrantType.CLIENT_CREDENTIALS,
-            scope = config["AZURE_APP_OUTBOUND_SCOPE"]?.split(",") ?: emptyList(),
+            scope = config[AZURE_APP_OUTBOUND_SCOPE]?.split(",") ?: emptyList(),
             authentication =
                 ClientAuthenticationProperties
                     .builder(
-                        clientId = config.getOrThrow("AZURE_APP_CLIENT_ID"),
+                        clientId = config.getOrThrow(AZURE_APP_CLIENT_ID),
                         clientAuthMethod = ClientAuthenticationMethod.PRIVATE_KEY_JWT,
-                    ).clientJwk(config.getOrThrow("AZURE_APP_JWK"))
+                    ).clientJwk(config.getOrThrow(AZURE_APP_JWK))
                     .build(),
             // conf["resource_url"]?.let { URI(it) },
             resourceUrl = null,
             tokenExchange = null,
         )
 
-    private fun Miljoevariabler.getOrThrow(key: String) =
+    private fun Miljoevariabler.getOrThrow(key: AzureEnums) =
         this[key]
             ?: throw IllegalArgumentException("Missing configuration property '$key'")
 

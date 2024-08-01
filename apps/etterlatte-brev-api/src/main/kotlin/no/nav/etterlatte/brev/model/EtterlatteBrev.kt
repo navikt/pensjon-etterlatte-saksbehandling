@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
@@ -42,8 +43,23 @@ data class BarnepensjonBeregningsperiode(
     val datoTOM: LocalDate?,
     val grunnbeloep: Kroner,
     val antallBarn: Int,
+    val avdoedeForeldre: List<String?>?,
+    val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
-)
+) {
+    companion object {
+        fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
+            BarnepensjonBeregningsperiode(
+                datoFOM = beregningsperiode.datoFOM,
+                datoTOM = beregningsperiode.datoTOM,
+                grunnbeloep = beregningsperiode.grunnbeloep,
+                utbetaltBeloep = beregningsperiode.utbetaltBeloep,
+                antallBarn = beregningsperiode.antallBarn,
+                avdoedeForeldre = beregningsperiode.avdoedeForeldre,
+                trygdetidForIdent = beregningsperiode.trygdetidForIdent,
+            )
+    }
+}
 
 data class OmstillingsstoenadBeregning(
     override val innhold: List<Slate.Element>,
@@ -77,6 +93,7 @@ data class TrygdetidMedBeregningsmetode(
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
+    val ident: String,
 )
 
 data class Trygdetidsperiode(
@@ -163,6 +180,7 @@ fun TrygdetidDto.fromDto(
             ?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
     beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
     beregningsMetodeAnvendt = beregningsMetodeAnvendt,
+    ident = this.ident,
 )
 
 enum class FeilutbetalingType {

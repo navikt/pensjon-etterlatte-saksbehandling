@@ -12,16 +12,8 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
-    utbetalingsinfo.beregningsperioder.map {
-        BarnepensjonBeregningsperiode(
-            datoFOM = it.datoFOM,
-            datoTOM = it.datoTOM,
-            grunnbeloep = it.grunnbeloep,
-            utbetaltBeloep = it.utbetaltBeloep,
-            antallBarn = it.antallBarn,
-        )
-    }
+internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo): List<BarnepensjonBeregningsperiode> =
+    utbetalingsinfo.beregningsperioder.map { BarnepensjonBeregningsperiode.fra(it) }
 
 internal fun barnepensjonBeregning(
     innhold: InnholdMedVedlegg,
@@ -48,7 +40,9 @@ internal fun barnepensjonBeregning(
         trygdetid = trygdetid.map { it.fromDto(anvendtMetode, metodeFraGrunnlag, avdoede) },
         erForeldreloes = erForeldreloes,
         bruktTrygdetid =
-            trygdetid.find { it.ident == sisteBeregningsperiode.trygdetidForIdent }?.fromDto(anvendtMetode, metodeFraGrunnlag, avdoede)
+            trygdetid
+                .find { it.ident == sisteBeregningsperiode.trygdetidForIdent }
+                ?.fromDto(anvendtMetode, metodeFraGrunnlag, avdoede)
                 ?: throw ManglerAvdoedBruktTilTrygdetid(),
     )
 }

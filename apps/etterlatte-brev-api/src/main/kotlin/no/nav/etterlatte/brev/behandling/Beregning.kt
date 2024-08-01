@@ -46,6 +46,7 @@ data class Beregningsperiode(
     val institusjon: Boolean,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
+    val avdoedeForeldre: List<String?>? = null,
 )
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {

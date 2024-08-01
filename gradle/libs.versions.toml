@@ -27,7 +27,6 @@ jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-data
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
 jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-version" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-version" }
 jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.1" }

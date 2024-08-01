@@ -57,7 +57,6 @@ ktor2-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor2-ver
 ktor2-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor2-version" }
 ktor2-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor2-version" }
 ktor2-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor2-version" }
-ktor2-serverhtmlbuilder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor2-version" }
 ktor2-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor2-version" }
 ktor2-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor2-version" }
 ktor2-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor2-version" }

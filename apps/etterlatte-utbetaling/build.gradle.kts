@@ -25,7 +25,6 @@ dependencies {
     implementation(libs.ktor2.jackson)
 
     implementation(libs.mq.jakarta.client)
-    implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsimulering)
     implementation(libs.navfelles.tjenestespesifikasjoner.avstemming)

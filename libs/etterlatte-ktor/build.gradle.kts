@@ -45,7 +45,6 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     testImplementation(libs.navfelles.mockoauth2server)
-    testImplementation(libs.kotlinx.coroutinestest)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.jupiter.api)

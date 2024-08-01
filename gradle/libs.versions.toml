@@ -27,8 +27,6 @@ jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-data
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
 jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-version" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-version" }
-jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
@@ -42,7 +40,6 @@ kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", versi
 
 
 kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
-kotlinx-coroutinestest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-version" }
 
 ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
 ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
@@ -55,10 +52,8 @@ ktor2-servercore = { module = "io.ktor:ktor-server-core", version.ref = "ktor2-v
 ktor2-doublereceive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor2-version" }
 ktor2-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor2-version" }
 ktor2-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor2-version" }
-ktor2-authjwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor2-version" }
 ktor2-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor2-version" }
 ktor2-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor2-version" }
-ktor2-serverhtmlbuilder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor2-version" }
 ktor2-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor2-version" }
 ktor2-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor2-version" }
 ktor2-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor2-version" }
@@ -95,7 +90,6 @@ navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", ve
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
-test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
 test-mockk = { module = "io.mockk:mockk", version = "1.13.11" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }

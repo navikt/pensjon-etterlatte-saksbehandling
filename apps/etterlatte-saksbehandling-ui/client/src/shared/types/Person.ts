@@ -9,9 +9,10 @@ export interface Familieforhold {
   gjenlevende: Personopplysning[]
 }
 
-export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning, soekerFnr: string) => {
-  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
-  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
+export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning[], soekerFnr?: string) => {
+  const alleAvdoedesBarn = avdoede.flatMap((avdoed) => avdoed.opplysning.avdoedesBarn ?? [])
+  const levendeSoesken = alleAvdoedesBarn.filter((barn) => barn.foedselsnummer !== soekerFnr && !barn.doedsdato)
+  return levendeSoesken
 }
 
 export const hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag = (avdoede: Personopplysning[], soekerFnr: string) => {

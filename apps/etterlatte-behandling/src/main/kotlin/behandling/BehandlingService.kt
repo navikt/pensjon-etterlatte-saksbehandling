@@ -151,6 +151,8 @@ interface BehandlingService {
         viderefoertOpphoer: ViderefoertOpphoer,
     )
 
+    fun fjernViderefoertOpphoer(behandlingId: UUID)
+
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -762,6 +764,10 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)
             }
+    }
+
+    override fun fjernViderefoertOpphoer(behandlingId: UUID) {
+        behandlingDao.fjernViderefoertOpphoer(behandlingId)
     }
 
     override fun hentAapenRegulering(sakId: Long): UUID? =

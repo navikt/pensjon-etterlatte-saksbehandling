@@ -327,12 +327,31 @@ class BehandlingDao(
         }
     }
 
+    fun fjernViderefoertOpphoer(behandlingId: UUID) {
+        lagreOpphoerFom(behandlingId, null)
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        "UPDATE viderefoert_opphoer " +
+                            "SET aktiv = FALSE " +
+                            "WHERE behandling_id = ?",
+                    )
+                statement.setObject(1, behandlingId)
+                statement.updateSuccessful()
+            }
+        }
+    }
+
     fun hentViderefoertOpphoer(behandlingId: UUID) =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
-                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar FROM viderefoert_opphoer WHERE behandling_id = ?",
+                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar, aktiv " +
+                            "FROM viderefoert_opphoer " +
+                            "WHERE behandling_id = ? " +
+                            "AND aktiv = TRUE",
                     )
                 statement.setObject(1, behandlingId)
                 statement.executeQuery().singleOrNull {
@@ -344,6 +363,7 @@ class BehandlingDao(
                         kravdato = getDate("kravdato")?.let { it.toLocalDate() },
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
+                        aktiv = getBoolean("aktiv"),
                     )
                 }
             }
@@ -393,7 +413,7 @@ class BehandlingDao(
 
     fun lagreOpphoerFom(
         behandlingId: UUID,
-        opphoerFraOgMed: YearMonth,
+        opphoerFraOgMed: YearMonth?,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement = prepareStatement("UPDATE behandling SET opphoer_fom = ? where id = ?")

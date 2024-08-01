@@ -256,6 +256,7 @@ internal fun Route.behandlingRoutes(
                             vilkaar = body.vilkaar,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
+                            aktiv = true,
                         )
 
                     inTransaction {
@@ -271,6 +272,17 @@ internal fun Route.behandlingRoutes(
                     logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
+            }
+        }
+
+        post("/fjern-viderefoert-opphoer") {
+            kunSkrivetilgang {
+                logger.debug("Prøver å fjerne videreført opphør")
+
+                inTransaction {
+                    behandlingService.fjernViderefoertOpphoer(behandlingId)
+                }
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -405,4 +417,5 @@ data class ViderefoertOpphoer(
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,
+    val aktiv: Boolean = true,
 )

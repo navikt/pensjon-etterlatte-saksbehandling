@@ -35,7 +35,6 @@ dependencies {
     implementation(libs.navfelles.tokenvalidationktor2)
 
     implementation(libs.mq.jakarta.client)
-    implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)
 
     implementation(libs.database.kotliquery)

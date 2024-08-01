@@ -8,7 +8,7 @@ data class RegelPeriode(
     val tilDato: LocalDate? = null,
 ) {
     init {
-        check(tilDato == null || tilDato >= fraDato) { "Tildato må være større eller lik fradato" }
+        check(tilDato == null || tilDato >= fraDato) { "Tildato ($tilDato) må være større eller lik fradato ($fraDato)" }
     }
 }
 

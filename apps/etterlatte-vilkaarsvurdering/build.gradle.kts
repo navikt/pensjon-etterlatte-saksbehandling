@@ -14,7 +14,6 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
-    implementation(project(":libs:etterlatte-jobs"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

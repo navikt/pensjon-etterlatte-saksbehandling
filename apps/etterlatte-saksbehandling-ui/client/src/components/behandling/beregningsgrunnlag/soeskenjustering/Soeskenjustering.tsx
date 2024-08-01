@@ -108,10 +108,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   ]
 
   function oppdaterSoeskenTilJustering() {
-    setSkjulManglendeSoesken(true)
     if (manglendeSoesken.length === 0) {
       return
     }
+    setSkjulManglendeSoesken(true)
     const allePerioder = mapListeFraDto(behandling.beregningsGrunnlag!!.soeskenMedIBeregning)
     const oppdatertePerioder = allePerioder.map((periode) => {
       const manglendeSoeskenForPeriode = soesken.filter((soesken) =>

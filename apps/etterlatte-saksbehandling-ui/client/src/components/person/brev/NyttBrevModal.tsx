@@ -36,7 +36,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)
-      navigate(`/person/${brev.sakId}/sak/${brev.sakId}/brev/${brev.id}`)
+      navigate(`/person/${brev.sakId}/brev/${brev.id}`)
     })
   }
 

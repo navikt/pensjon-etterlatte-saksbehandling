@@ -113,7 +113,7 @@ const KravpakkeUtlandBehandling = (props: {
 
   const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
-      window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
+      window.open(`/person/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
     })
   }
 

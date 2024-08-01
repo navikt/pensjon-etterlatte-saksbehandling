@@ -31,13 +31,14 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
 )
 
 export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
-  const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+  if (ident !== undefined) {
+    const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+    useEffect(() => {
+      ident && hentPerson(ident)
+    }, [ident])
 
-  useEffect(() => {
-    ident && hentPerson(ident)
-  }, [ident])
-
-  return <StatusBar result={personStatus} />
+    return <StatusBar result={personStatus} />
+  }
 }
 
 export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {

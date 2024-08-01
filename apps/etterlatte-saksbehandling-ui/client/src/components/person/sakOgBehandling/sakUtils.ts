@@ -36,13 +36,20 @@ export const ytelseOpphoersdato = (loependeVedtak: VedtakSammendrag) =>
 
 // TODO: flytte til en annen plass?
 export const hentSakId = () => {
-  const sakId = useAppSelector((state) => state.sakReducer.sak?.id)
+  const sakIdFraSak = useAppSelector((state) => state.sakReducer.sak?.id)
   const sakIdFraBehandling = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+  const sakIdFraKlage = useAppSelector((state) => state.klageReducer.klage?.sak?.id)
+  const sakIdFraJournalfoering = useAppSelector(
+    (state) => state.journalfoeringOppgaveReducer.sakMedBehandlinger?.sak.id
+  )
+  const sakIdFraTilbakekreving = useAppSelector((state) => state.tilbakekrevingReducer.tilbakekrevingBehandling?.sak.id)
+
+  const muligeSakIder = [sakIdFraSak, sakIdFraBehandling, sakIdFraKlage, sakIdFraJournalfoering, sakIdFraTilbakekreving]
+  const sakId = muligeSakIder.find((id) => id !== undefined)
+
   return sakId !== undefined
     ? sakId
-    : sakIdFraBehandling !== undefined
-      ? sakIdFraBehandling
-      : (() => {
-          throw new Error('sakId is not defined')
-        })()
+    : (() => {
+        throw new Error('sakId is not available from context')
+      })()
 }

@@ -53,7 +53,7 @@ function App() {
                   <Route path="/" element={<Oppgavebenk />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:sakId" element={<Person />} />
-                  <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
+                  <Route path="/person/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
                   <Route path="/klage/:klageId/*" element={<Klagebehandling />} />

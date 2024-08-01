@@ -59,7 +59,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
     )
 
     lastOppBrev({ sakId: sak.id, formData }, (brev) => {
-      navigate(`/person/${brev.sakId}/sak/${brev.sakId}/brev/${brev.id}`)
+      navigate(`/person/${brev.sakId}/brev/${brev.id}`)
     })
   }
 

@@ -15,33 +15,49 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
-import { mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { hentSak } from '~shared/api/sak'
+import { useAppDispatch } from '~store/Store'
+import { settSak } from '~store/reducers/SakReducer'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
 
-  const { brevId, sakId, fnr } = useParams()
-  const [kanRedigeres, setKanRedigeres] = useState(false)
+  const dispatch = useAppDispatch()
 
+  const [fnr, setFnr] = useState<string>()
+  const { sakId, brevId } = useParams()
+  const [sakResult, sakFetch] = useApiCall(hentSak)
+  const [kanRedigeres, setKanRedigeres] = useState(false)
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
   useEffect(() => {
-    apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
-      if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
-        setKanRedigeres(true)
-      } else {
-        setKanRedigeres(false)
-      }
-    })
-  }, [brevId, sakId])
+    sakFetch(Number(sakId))
+  }, [sakId])
+
+  useEffect(() => {
+    if (isSuccess(sakResult) && sakResult.data) {
+      dispatch(settSak(sakResult.data))
+      setFnr(sakResult.data.ident)
+      apiHentBrev({ brevId: Number(brevId), sakId: sakResult.data.id }, (brev) => {
+        if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
+          setKanRedigeres(true)
+        } else {
+          setKanRedigeres(false)
+        }
+      })
+    } else if (sakResult.status == 'error') {
+      throw new Error('Kunne ikke hente sak med sak ID ' + sakId)
+    }
+  }, [brevId, sakResult, fnr])
 
   return (
     <>
-      <StatusBarPersonHenter ident={fnr} />
+      {fnr && <StatusBarPersonHenter ident={fnr || ''} />}
       <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${sakId}?fane=BREV`} />
 
       {mapApiResult(

@@ -72,7 +72,7 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(
 
 class VirkningstidspunktKanIkkeVaereEtterOpphoer :
     UgyldigForespoerselException(
-        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHØR",
+        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
         detail = "Virkningstidspunkt kan ikke være etter opphør",
     )
 

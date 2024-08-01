@@ -72,7 +72,7 @@ class VilkaarsvurderingKlient(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel",
                     ),
                 brukerTokenInfo = bruker,
             ).mapBoth(

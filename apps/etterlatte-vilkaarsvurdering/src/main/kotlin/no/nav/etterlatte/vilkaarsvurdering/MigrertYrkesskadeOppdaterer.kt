@@ -5,7 +5,7 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
@@ -29,7 +29,7 @@ class MigrertYrkesskadeJob(
         ) {
             if (erLeader()) {
                 runBlocking {
-                    oppdaterer.settSakPaaAlleMigrerteYrkesskadefordeler(Systembruker.automatiskJobb)
+                    oppdaterer.settSakPaaAlleMigrerteYrkesskadefordeler(HardkodaSystembruker.yrkesskadejobb)
                 }
             }
         }

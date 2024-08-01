@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadeJob
 import no.nav.etterlatte.no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadeOppdaterer
@@ -30,8 +31,8 @@ class ApplicationContext {
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
-    private val env: Miljoevariabler = Miljoevariabler(System.getenv())
-    private val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), httpClient())
+    private val env: Miljoevariabler = Miljoevariabler.systemEnv()
+    private val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], httpClient())
     private val migrertYrkesskadeOppdaterer = MigrertYrkesskadeOppdaterer(behandlingKlient, vilkaarsvurderingRepository)
     val migrertYrkesskadeJob = MigrertYrkesskadeJob(migrertYrkesskadeOppdaterer) { leaderElectionKlient.isLeader() }
 }

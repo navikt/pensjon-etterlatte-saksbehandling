@@ -5,7 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.log
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
-import io.ktor.server.request.receiveText
+import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -173,10 +173,11 @@ class StatusPagesKonfigurasjon(
     private suspend fun hentRequestobjekt(call: ApplicationCall): String {
         val requestobjekt =
             try {
-                call.receiveText()
+                call.receive<String>()
             } catch (e: Exception) {
                 "Kunne ikke hente requestobjektet"
             }
+        sikkerLogg.debug("Henta requestobjekt på totalt ${requestobjekt.length} tegn")
         return requestobjekt
     }
 }

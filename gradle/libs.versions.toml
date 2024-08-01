@@ -31,7 +31,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.7.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
-el-api = { module = "jakarta.el:jakarta.el-api", version = "5.0.0"}
+el-api = { module = "jakarta.el:jakarta.el-api", version = "6.0.1"}
 el-impl = { module = "org.glassfish.expressly:expressly", version = "5.0.0" }
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }

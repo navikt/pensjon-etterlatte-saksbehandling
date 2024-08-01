@@ -73,6 +73,7 @@ data class HardkodaSystembruker private constructor(
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+        val yrkesskadejobb = HardkodaSystembruker(Systembrukere.YRKESSKADEJOBB)
     }
 
     enum class Systembrukere(
@@ -81,6 +82,7 @@ data class HardkodaSystembruker private constructor(
         RIVER("river"),
         DOEDSHENDELSE("doedshendelse"),
         TESTDATA("testdata"),
+        YRKESSKADEJOBB("yrkesskadejobb"),
     }
 }
 

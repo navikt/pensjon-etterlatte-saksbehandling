@@ -49,7 +49,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         error: MessageProblems.MessageException,
         context: MessageContext,
     ) {
-        sikkerlogg.error("Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}", error)
+        sikkerlogg.debug("Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}", error)
         super.onSevere(error, context)
     }
 

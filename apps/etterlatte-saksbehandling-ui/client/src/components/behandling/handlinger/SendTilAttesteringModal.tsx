@@ -33,7 +33,7 @@ export const SendTilAttesteringModal = ({
     fattVedtak(behandlingId, () => {
       setIsOpen(false)
       if (soeker?.foedselsnummer) {
-        navigate(`/person/${oppgave?.sakId}`)
+        navigate(`/sak/${oppgave?.sakId}`)
       } else {
         navigate('/')
       }

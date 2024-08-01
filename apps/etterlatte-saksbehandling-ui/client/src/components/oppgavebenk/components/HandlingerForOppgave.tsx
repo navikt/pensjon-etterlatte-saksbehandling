@@ -51,7 +51,7 @@ export const HandlingerForOppgave = ({
         <Button
           size="small"
           icon={<EyeIcon />}
-          href={`/person/${oppgave.sakId}?fane=HENDELSER&referanse=${referanse}`}
+          href={`/sak/${oppgave.sakId}?fane=HENDELSER&referanse=${referanse}`}
           as="a"
         >
           Se hendelse

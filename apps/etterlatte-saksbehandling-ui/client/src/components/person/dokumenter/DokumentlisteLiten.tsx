@@ -78,7 +78,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 variant="tertiary"
                 size="small"
                 as={Link}
-                href={`/person/${sakId}?fane=DOKUMENTER`}
+                href={`/sak/${sakId}?fane=DOKUMENTER`}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

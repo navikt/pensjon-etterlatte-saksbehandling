@@ -67,7 +67,7 @@ export const Person = ({
         <div>
           {person.fornavn} {person.etternavn}
           <FnrWrapper>
-            <Link href={`/person/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
+            <Link href={`/sak/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
             <CopyButton copyText={person.foedselsnummer} size="small" />

@@ -143,7 +143,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info
         label="Bruker"
         tekst={
-          <Link href={`/person/${oppgave.sakId}`} target="_blank">
+          <Link href={`/sak/${oppgave.sakId}`} target="_blank">
             {oppgave.fnr}
           </Link>
         }

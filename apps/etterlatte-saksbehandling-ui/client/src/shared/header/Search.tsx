@@ -24,14 +24,14 @@ export const Search = () => {
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
       if (isSuccess(sakMedBehandlingResult)) {
-        navigate(`/person/${sakMedBehandlingResult.data.sak.id}`)
+        navigate(`/sak/${sakMedBehandlingResult.data.sak.id}`)
       }
       return
     }
 
     if (gyldigInputSakId) {
       finnSak(searchInput, (sak) => {
-        navigate(`/person/${sak.id}`)
+        navigate(`/sak/${sak.id}`)
       })
       return
     }

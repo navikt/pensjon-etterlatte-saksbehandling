@@ -65,13 +65,7 @@ export const AktivitetspliktRevurderingModal = ({
 
               {!erFerdigstilt && (
                 <div>
-                  <Button
-                    variant="primary"
-                    size="small"
-                    as="a"
-                    href={`/person/${oppgave.id?.toString()}`}
-                    target="_blank"
-                  >
+                  <Button variant="primary" size="small" as="a" href={`/sak/${oppgave.id?.toString()}`} target="_blank">
                     Gå til sak
                   </Button>
                 </div>

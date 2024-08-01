@@ -52,8 +52,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                  <Route path="/person/:sakId" element={<Person />} />
-                  <Route path="/person/:sakId/brev/:brevId" element={<NyttBrev />} />
+                  <Route path="/sak/:sakId" element={<Person />} />
+                  <Route path="/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
                   <Route path="/klage/:klageId/*" element={<Klagebehandling />} />

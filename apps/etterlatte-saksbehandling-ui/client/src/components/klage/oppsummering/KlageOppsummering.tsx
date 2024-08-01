@@ -36,7 +36,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
 
   const fattVedtakKlage = useCallback(() => {
     fattVedtak(klage!!.id, () => {
-      navigate(`/person/${klage!!.sak.id}`)
+      navigate(`/sak/${klage!!.sak.id}`)
     })
   }, [klage?.id])
 

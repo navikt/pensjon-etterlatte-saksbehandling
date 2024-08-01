@@ -53,7 +53,7 @@ export default function FerdigstillOppgave() {
         <Alert variant="warning">
           Journalposten har ikke blitt lastet inn som forventet. Er du helt sikker på at du vil ferdigstille oppgaven?
           <br /> Du kan kontrollere dokumentent i{' '}
-          <Link href={`/person/${oppgave.sakId}?fane=${PersonOversiktFane.DOKUMENTER}`} target="_blank">
+          <Link href={`/sak/${oppgave.sakId}?fane=${PersonOversiktFane.DOKUMENTER}`} target="_blank">
             dokumentoversikten <ExternalLinkIcon />
           </Link>
         </Alert>

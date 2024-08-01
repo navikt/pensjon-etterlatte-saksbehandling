@@ -78,7 +78,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
-          <Link href={`/person/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
+          <Link href={`/sak/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
           </Link>
           <CopyButton copyText={barn.foedselsnummer} size="small" />

@@ -18,7 +18,7 @@ export const AttesterKlage = ({ klage, kommentar }: { klage: Klage; kommentar: s
   const attester = () => {
     apiAttesterVedtak(
       { klageId: klage.id, kommentar: kommentar },
-      () => navigate(`/person/${klage.sak.id}`),
+      () => navigate(`/sak/${klage.sak.id}`),
       () => {
         setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
         setModalisOpen(false)

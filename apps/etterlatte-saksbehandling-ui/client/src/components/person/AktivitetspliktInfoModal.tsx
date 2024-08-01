@@ -336,7 +336,7 @@ export const AktivitetspliktInfoModal = ({
                   variant="primary"
                   size="small"
                   as="a"
-                  href={`/person/${oppgave.id?.toString()}?fane=BREV`}
+                  href={`/sak/${oppgave.id?.toString()}?fane=BREV`}
                   target="_blank"
                 >
                   Opprett manuelt brev

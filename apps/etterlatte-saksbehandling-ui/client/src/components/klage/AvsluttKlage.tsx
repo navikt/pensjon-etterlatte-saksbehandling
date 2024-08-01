@@ -35,7 +35,7 @@ export default function AvsluttKlage() {
   const avslutt = (request: AvsluttKlageRequest) => {
     avsluttKlagen(request, () => {
       setIsOpen(false)
-      navigate(`/person/${klage?.sak?.id}`)
+      navigate(`/sak/${klage?.sak?.id}`)
     })
   }
 

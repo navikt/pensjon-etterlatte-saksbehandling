@@ -58,7 +58,7 @@ export default function NyttBrev() {
   return (
     <>
       {fnr && <StatusBarPersonHenter ident={fnr || ''} />}
-      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${sakId}?fane=BREV`} />
+      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/sak/${sakId}?fane=BREV`} />
 
       {mapApiResult(
         brevStatus,

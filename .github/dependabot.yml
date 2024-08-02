@@ -28,8 +28,6 @@ updates:
           - "org.flyway*"
           - "com.github.seratch:kotliquery"
           - "com.github.ben-manes.caffeine:caffeine"
-          - "jakarta.xml.bind:jakarta.xml.bind-api"
-          - "org.glassfish.jaxb:jaxb-runtime"
           - "no.nav.klage:klage-kodeverk"
           - "com.michael-bull.kotlin-result:kotlin-result"
           - "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas"

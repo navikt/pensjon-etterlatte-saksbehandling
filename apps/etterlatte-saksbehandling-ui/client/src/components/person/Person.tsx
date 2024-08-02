@@ -98,10 +98,6 @@ export const Person = () => {
 
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
-      {mapFailure(sakResult, (error) => {
-        return <Box padding="8">{handleError(error)}</Box>
-      })}
-
       {mapAllApiResult(
         personNavnResult,
         <Spinner visible label="Laster personinfo ..." />,
@@ -155,6 +151,10 @@ export const Person = () => {
           </Tabs>
         )
       )}
+
+      {mapFailure(sakResult, (error) => {
+        return <Box padding="8">{handleError(error)}</Box>
+      })}
     </>
   )
 }

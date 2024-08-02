@@ -45,19 +45,6 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
-  useEffect(() => {
-    beregningsgrunnlagOMSRequest(behandling.id, (result) => {
-      if (result) {
-        dispatch(
-          oppdaterBeregingsGrunnlagOMS({
-            ...result,
-            institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
-          })
-        )
-      }
-    })
-  }, [])
-
   const onSubmit = () => {
     opprettEllerEndreBeregningRequest(behandling.id, (beregning: Beregning) => {
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
@@ -80,6 +67,19 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     })
   }
 
+  useEffect(() => {
+    beregningsgrunnlagOMSRequest(behandling.id, (result) => {
+      if (result) {
+        dispatch(
+          oppdaterBeregingsGrunnlagOMS({
+            ...result,
+            institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
+          })
+        )
+      }
+    })
+  }, [])
+
   return (
     <>
       <>
@@ -98,7 +98,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
               />
 
               <Box maxWidth="70rem">
-                <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
+                <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
               </Box>
 
               <InstitusjonsoppholdBeregningsgrunnlag

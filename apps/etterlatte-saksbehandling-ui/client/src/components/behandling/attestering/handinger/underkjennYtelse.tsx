@@ -6,7 +6,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { underkjennVedtak } from '~shared/api/vedtaksvurdering'
 
 import { isPending } from '~shared/api/apiUtils'
-import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
+import { useAppSelector } from '~store/Store'
 
 type Props = {
   behandlingId: string
@@ -18,7 +18,7 @@ export const UnderkjennYtelse = ({ behandlingId, kommentar, valgtBegrunnelse }: 
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
-  const sakId = hentSakId()
+  const sakId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {

@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.klage
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
-import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
@@ -158,7 +158,7 @@ class KlageBrevService(
             } else {
                 logger.info(
                     "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingsID}",
+                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingId}",
                 )
             }
             tidspunktJournalfoert to journalpostIdJournalfoering
@@ -168,7 +168,7 @@ class KlageBrevService(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto =
+    ): Brev =
         runBlocking {
             brevApiKlient.hentBrev(sakId, brevId, brukerTokenInfo)
         }

@@ -15,6 +15,13 @@ enum class Status {
     JOURNALFOERT,
     DISTRIBUERT,
     SLETTET,
+    ;
+
+    fun ikkeFerdigstilt(): Boolean = this in listOf(OPPRETTET, OPPDATERT)
+
+    fun ikkeJournalfoert(): Boolean = this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
+
+    fun ikkeDistribuert(): Boolean = this != DISTRIBUERT
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -70,6 +77,8 @@ data class Brev(
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
     val brevtype: Brevtype,
+    val journalpostId: String? = null,
+    val bestillingId: String? = null,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 }

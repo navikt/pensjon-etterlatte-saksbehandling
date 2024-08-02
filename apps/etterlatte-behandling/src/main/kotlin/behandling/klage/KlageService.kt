@@ -7,8 +7,9 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
-import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
@@ -19,12 +20,14 @@ import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageMottaker
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.KlageVedtak
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -521,7 +524,7 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = ferdigstillResultat.oversendelsesbrev.mottaker,
+                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottaker),
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,
@@ -640,6 +643,13 @@ class KlageServiceImpl(
         }
 }
 
+fun brevMottakerTilKlageMottaker(brevMottaker: Mottaker): KlageMottaker =
+    KlageMottaker(
+        navn = brevMottaker.navn,
+        foedselsnummer = brevMottaker.foedselsnummer?.value?.let { Mottakerident(it) },
+        orgnummer = brevMottaker.orgnummer,
+    )
+
 class OmgjoeringMaaGjeldeEtVedtakException(
     klage: Klage,
 ) : UgyldigForespoerselException(
@@ -652,7 +662,7 @@ class KlageIkkeFunnetException(
 ) : IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")
 
 data class FerdigstillResultat(
-    val oversendelsesbrev: OpprettetBrevDto,
+    val oversendelsesbrev: Brev,
     val notatTilKa: OpprettJournalpostDto,
     val journalfoertOversendelsesbrevTidspunkt: Tidspunkt,
     val journalpostIdOversendelsesbrev: String,

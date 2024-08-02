@@ -3,7 +3,11 @@ import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
-import { BeregningsGrunnlagOMSPostDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
+import {
+  BeregningsGrunnlagDto,
+  BeregningsGrunnlagOMSPostDto,
+  InstitusjonsoppholdGrunnlagDTO,
+} from '~shared/types/Beregning'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -12,7 +16,7 @@ interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
+  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
 }
 

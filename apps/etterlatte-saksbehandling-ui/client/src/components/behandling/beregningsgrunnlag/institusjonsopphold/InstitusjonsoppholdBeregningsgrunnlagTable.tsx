@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import {
+  BeregningsGrunnlagDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsMetode,
   InstitusjonsoppholdIBeregning,
@@ -33,7 +34,7 @@ const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
 interface Props {
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
+  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   institusjonsopphold: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[] | undefined
 }
 

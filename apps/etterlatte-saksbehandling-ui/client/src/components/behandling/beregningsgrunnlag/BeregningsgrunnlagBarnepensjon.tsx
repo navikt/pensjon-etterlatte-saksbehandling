@@ -266,26 +266,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         {/*    setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}*/}
         {/*  />*/}
         {/*)}*/}
-        {/*{isSuccess(beregningsgrunnlag) && (*/}
-        {/*  <InstitusjonsoppholdBeregning*/}
-        {/*    behandling={behandling}*/}
-        {/*    onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}*/}
-        {/*    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}*/}
-        {/*    lovtekstMedLenke={*/}
-        {/*      <LovtekstMedLenke tittel="Institusjonsopphold" hjemler={BP_INSTITUSJONSOPPHOLD_HJEMLER} status={null}>*/}
-        {/*        <p>*/}
-        {/*          Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig*/}
-        {/*          ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske*/}
-        {/*          sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at*/}
-        {/*          barnepensjonen skal bli redusert. Dersom barnet har faste og nødvendige utgifter til bolig, kan*/}
-        {/*          arbeids- og velferdsetaten bestemme at barnepensjonen ikke skal reduseres eller reduseres mindre enn*/}
-        {/*          hovedregelen sier.*/}
-        {/*        </p>*/}
-        {/*      </LovtekstMedLenke>*/}
-        {/*    }*/}
-        {/*    reduksjonsTyper={ReduksjonBP}*/}
-        {/*  />*/}
-        {/*)}*/}
         {/*<Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />*/}
         {/*{isFailureHandler({*/}
         {/*  apiResult: beregningsgrunnlag,*/}

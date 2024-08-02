@@ -2,10 +2,11 @@ import React from 'react'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import {
   BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSDto,
+  BeregningsGrunnlagOMSPostDto,
   BeregningsMetode,
   InstitusjonsoppholdGrunnlagDTO,
   InstitusjonsoppholdIBeregning,
+  ReduksjonBP,
   ReduksjonKey,
   ReduksjonOMS,
 } from '~shared/types/Beregning'
@@ -30,7 +31,7 @@ import {
 interface Props {
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSDto
+  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   eksisterendePeriode?: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>
   indexTilEksisterendePeriode?: number
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
@@ -171,7 +172,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             label="Reduksjon"
             error={errors.data?.reduksjon?.message}
           >
-            {Object.entries(ReduksjonOMS).map(([key, value]) => (
+            {Object.entries(sakType === SakType.OMSTILLINGSSTOENAD ? ReduksjonOMS : ReduksjonBP).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
               </option>

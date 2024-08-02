@@ -19,7 +19,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSak, hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult, mapFailure, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
@@ -75,8 +75,6 @@ export const Person = () => {
         personNavnFetch(ident)
         sakMedBehandlingFetch(ident)
       }
-    } else if (sakResult.status == 'error') {
-      throw new Error('Kunne ikke hente sak med sak ID ' + sakId)
     }
   }, [sakResult])
 
@@ -84,7 +82,7 @@ export const Person = () => {
     if (error.status === 400) {
       return <ApiErrorAlert>Ugyldig forespørsel: {error.detail}</ApiErrorAlert>
     } else {
-      return <ApiErrorAlert>Feil oppsto ved henting av person</ApiErrorAlert>
+      return <ApiErrorAlert>Feil oppsto ved henting av sak</ApiErrorAlert>
     }
   }
 
@@ -99,6 +97,11 @@ export const Person = () => {
       ))}
 
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+
+      {mapFailure(sakResult, (error) => {
+        return <Box padding="8">{handleError(error)}</Box>
+      })}
+
       {mapAllApiResult(
         personNavnResult,
         <Spinner visible label="Laster personinfo ..." />,

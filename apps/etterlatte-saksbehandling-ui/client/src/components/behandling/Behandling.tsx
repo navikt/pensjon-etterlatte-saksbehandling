@@ -68,7 +68,9 @@ export const Behandling = () => {
         return (
           <>
             <StickyToppMeny>
-              {soeker && <PdlPersonStatusBar person={personTilPersonNavnFoedselsAar(soeker)} />}
+              {soeker && (
+                <PdlPersonStatusBar person={personTilPersonNavnFoedselsAar(soeker)} saksId={behandlingFraRedux.sakId} />
+              )}
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
             <GridContainer>

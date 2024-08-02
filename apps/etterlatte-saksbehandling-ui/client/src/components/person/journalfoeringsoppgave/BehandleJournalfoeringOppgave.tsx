@@ -83,7 +83,7 @@ export default function BehandleJournalfoeringOppgave() {
   return (
     <>
       <StickyToppMeny>
-        <StatusBarPersonHenter ident={oppgave?.fnr} />
+        <StatusBarPersonHenter ident={oppgave?.fnr} saksId={Number(oppgave?.sakId)} />
         <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
       </StickyToppMeny>
       <GridContainer>

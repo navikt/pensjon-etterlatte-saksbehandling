@@ -46,7 +46,9 @@ const GenerellBehandling = () => {
                 apiResult: hentSakStatus,
                 errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
               })}
-              {isSuccess(hentSakStatus) && <StatusBarPersonHenter ident={hentSakStatus.data.ident} />}
+              {isSuccess(hentSakStatus) && (
+                <StatusBarPersonHenter ident={hentSakStatus.data.ident} saksId={hentSakStatus.data.id} />
+              )}
               <KravpakkeUtlandBehandling
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
               />

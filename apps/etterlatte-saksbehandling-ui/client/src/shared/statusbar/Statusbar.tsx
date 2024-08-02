@@ -11,9 +11,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { useAppSelector } from '~store/Store'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
+export const PdlPersonStatusBar = ({ person, saksId }: { person: IPdlPersonNavnFoedsel; saksId: number }) => (
   <StatusBar
     result={{
       status: 'success',
@@ -27,22 +26,22 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
         doedsdato: person.doedsdato,
       },
     }}
+    saksId={saksId}
   />
 )
 
-export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
+export const StatusBarPersonHenter = ({ ident, saksId }: { ident: string | null | undefined; saksId: number }) => {
   if (ident !== undefined) {
     const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
     useEffect(() => {
       ident && hentPerson(ident)
     }, [ident])
 
-    return <StatusBar result={personStatus} />
+    return <StatusBar result={personStatus} saksId={saksId} />
   }
 }
 
-export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
-  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+export const StatusBar = ({ result, saksId }: { result: Result<IPdlPersonNavnFoedsel>; saksId: number }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {

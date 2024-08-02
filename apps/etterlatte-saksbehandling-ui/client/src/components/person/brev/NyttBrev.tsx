@@ -28,7 +28,6 @@ export default function NyttBrev() {
   useSidetittel('Nytt brev')
 
   const dispatch = useAppDispatch()
-
   const { sakId, brevId } = useParams()
   const [sakResult, sakFetch] = useApiCall(hentSak)
   const [kanRedigeres, setKanRedigeres] = useState(false)
@@ -54,7 +53,7 @@ export default function NyttBrev() {
   return (
     <>
       {mapSuccess(sakResult, (result) => {
-        ;<StatusBarPersonHenter ident={result.ident} />
+        ;<StatusBarPersonHenter ident={result.ident} saksId={Number(sakId)} />
       })}
 
       <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/sak/${sakId}?fane=BREV`} />

@@ -93,7 +93,7 @@ export const Person = () => {
   return (
     <>
       {mapSuccess(personNavnResult, (person) => (
-        <PdlPersonStatusBar person={person} />
+        <PdlPersonStatusBar person={person} saksId={Number(sakId)} />
       ))}
 
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />

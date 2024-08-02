@@ -30,7 +30,7 @@ export const OppgaverTableRow = ({
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>
-      <SaksoversiktLenke sakId={String(oppgave.sakId)} />
+      <SaksoversiktLenke sakId={oppgave.sakId} />
     </Table.DataCell>
     <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>

@@ -19,7 +19,7 @@ object OmstillingstoenadVilkaar {
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
             rettTilStoenadUtenTidsbegrensning(),
-            aktivitetEtter6Maaneder(),
+            aktivitetsplikt(),
         )
 
     private fun etterlatteLever() =
@@ -314,33 +314,23 @@ object OmstillingstoenadVilkaar {
                 ),
         )
 
-    private fun aktivitetEtter6Maaneder() =
+    private fun aktivitetsplikt() =
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
-                    type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
+                    type = VilkaarType.OMS_AKTIVITETSPLIKT,
                     beskrivelse =
                         """
-                        Seks måneder etter dødsfallet er det et vilkår for rett til omstillingsstønad at den gjenlevende:
+                        Hvis aktivitetsplikten ikke er oppfylt i en sammenhengende periode på minst tre måneder skal omstillingsstønaden som hovedregel opphøres.
 
-                        a) er i minst 50 % arbeid,
-                        b) er reell arbeidssøker,
-                        c) gjennomfører nødvendig og hensiktsmessig opplæring eller utdanning, minst 50 %, eller
-                        d) etablerer egen virksomhet
-
-                        Det finnes unntak som gir fritak for aktivitetskravet, som må vurderes om ikke hovedvilkåret er oppfylt.
+                        Unntak kan gjøres hvis gjenlevende ser ut til å kunne oppfylle aktivitetskravet i nær fremtid, eller hvis gjenlevende i nær fremtid kan forventes å komme i en situasjon der vilkårene for unntak fra aktivitetsplikten er oppfylt.
                         """.trimIndent(),
-                    spoersmaal = "Er vilkåret om krav til aktivitet oppfylt?",
+                    spoersmaal = "Er bruker innenfor 3 måneders-grensen?",
                     lovreferanse =
                         Lovreferanse(
-                            paragraf = "§ 17-7",
-                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
+                            paragraf = "§ 17-8",
+                            lenke = "https://lovdata.no/pro/lov/1997-02-28-19/§17-8",
                         ),
-                ),
-            unntaksvilkaar =
-                listOf(
-                    aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
-                    aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
                 ),
         )
 
@@ -388,26 +378,6 @@ object OmstillingstoenadVilkaar {
                             ledd = 2,
                             lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-3",
                         ),
-                ),
-        )
-
-    private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() =
-        Delvilkaar(
-            type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT,
-            lovreferanse =
-                Lovreferanse(
-                    paragraf = "§ 17-7",
-                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
-                ),
-        )
-
-    private fun aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar() =
-        Delvilkaar(
-            type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_BARN_UNDER_1_AAR,
-            lovreferanse =
-                Lovreferanse(
-                    paragraf = "§ 17-7",
-                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                 ),
         )
 }

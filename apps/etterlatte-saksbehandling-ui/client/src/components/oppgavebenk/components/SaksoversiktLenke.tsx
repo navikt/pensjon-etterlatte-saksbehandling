@@ -1,6 +1,6 @@
 import { Link } from '@navikt/ds-react'
 
-const SaksoversiktLenke = ({ sakId }: { sakId: number }) => {
+const SaksoversiktLenke = ({ sakId }: { sakId: string }) => {
   return <Link href={`/sak/${sakId}`}>{sakId}</Link>
 }
 

@@ -3,6 +3,7 @@ package no.nav.etterlatte.testdata.automatisk
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.behandling.VirkningstidspunktRequest
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -88,6 +89,26 @@ class BehandlingService(
                     bruker,
                     UtlandstilknytningRequest(
                         utlandstilknytningType = UtlandstilknytningType.NASJONAL,
+                        begrunnelse = BEGRUNNELSE,
+                    ),
+                ).mapBoth(
+                    success = {},
+                    failure = { throw it },
+                )
+        }
+    }
+
+    suspend fun lagreBoddEllerArbeidetUtlandet(
+        behandling: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
+        retryOgPakkUt {
+            klient
+                .post(
+                    Resource(clientId, "$url/api/behandling/$behandling/boddellerarbeidetutlandet"),
+                    bruker,
+                    BoddEllerArbeidetUtlandetRequest(
+                        boddEllerArbeidetUtlandet = false,
                         begrunnelse = BEGRUNNELSE,
                     ),
                 ).mapBoth(

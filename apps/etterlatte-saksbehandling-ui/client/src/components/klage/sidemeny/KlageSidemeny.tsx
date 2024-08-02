@@ -105,7 +105,7 @@ export function KlageSidemeny() {
         apiResult: oppgaveResult,
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
-      <DokumentlisteLiten fnr={klage.sak.ident} />
+      <DokumentlisteLiten fnr={klage.sak.ident} saksId={klage.sak.id} />
       <AvsluttKlage />
     </Sidebar>
   )

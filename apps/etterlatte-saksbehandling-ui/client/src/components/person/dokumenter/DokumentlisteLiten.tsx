@@ -9,11 +9,9 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
-import { useAppSelector } from '~store/Store'
 
-export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
+export const DokumentlisteLiten = ({ fnr, saksId }: { fnr: string; saksId: number }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
-  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
 
   useEffect(
     () =>

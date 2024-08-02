@@ -160,7 +160,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         </Tabs.List>
 
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-          {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
+          {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} saksId={behandling.sakId} />}
         </Tabs.Panel>
         <Tabs.Panel value={BehandlingFane.HISTORIKK}>
           <OppgaveEndring oppgaveResult={oppgaveResult} />

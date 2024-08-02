@@ -18,11 +18,11 @@ export const UnderkjennYtelse = ({ behandlingId, kommentar, valgtBegrunnelse }: 
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
-  const sakId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {
-      navigate(`/sak/${sakId}`)
+      navigate(`/sak/${saksId}`)
     })
   }
 

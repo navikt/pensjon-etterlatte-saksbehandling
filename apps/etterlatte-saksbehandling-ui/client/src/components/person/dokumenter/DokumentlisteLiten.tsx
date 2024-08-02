@@ -13,7 +13,7 @@ import { useAppSelector } from '~store/Store'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
-  const sakId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
 
   useEffect(
     () =>
@@ -78,7 +78,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 variant="tertiary"
                 size="small"
                 as={Link}
-                href={`/sak/${sakId}?fane=DOKUMENTER`}
+                href={`/sak/${saksId}?fane=DOKUMENTER`}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

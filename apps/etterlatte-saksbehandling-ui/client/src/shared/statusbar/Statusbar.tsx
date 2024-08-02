@@ -11,7 +11,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
+import { useAppSelector } from '~store/Store'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -42,7 +42,7 @@ export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefi
 }
 
 export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
-  const sakId = hentSakId()
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -60,7 +60,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
         <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
           <Label>
-            <Link href={`/sak/${sakId}`}>{genererNavn(person)}</Link>
+            <Link href={`/sak/${saksId}`}>{genererNavn(person)}</Link>
           </Label>
 
           <DoedsdatoTag doedsdato={person.doedsdato} />

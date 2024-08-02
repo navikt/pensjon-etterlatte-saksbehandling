@@ -11,7 +11,7 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { ILand } from '~shared/api/trygdetid'
 import { Result } from '~shared/api/apiUtils'
-import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
+import { useAppSelector } from '~store/Store'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -55,6 +55,8 @@ export const Person = ({
     }
   }
 
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+
   return (
     <PersonBorder>
       <IconWrapper>
@@ -67,7 +69,7 @@ export const Person = ({
         <div>
           {person.fornavn} {person.etternavn}
           <FnrWrapper>
-            <Link href={`/sak/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
+            <Link href={`/sak/${saksId}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
             <CopyButton copyText={person.foedselsnummer} size="small" />

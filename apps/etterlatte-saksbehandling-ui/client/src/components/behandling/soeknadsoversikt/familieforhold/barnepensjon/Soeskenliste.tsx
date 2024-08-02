@@ -7,7 +7,7 @@ import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
-import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
+import { useAppSelector } from '~store/Store'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -71,6 +71,8 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
   const erGjenlevendesBarn =
     familieforhold.gjenlevende.flatMap((it) => it.opplysning.familieRelasjon?.barn).includes(barnetsFnr) ?? false
 
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+
   return (
     <Table.Row>
       <Table.DataCell>
@@ -78,7 +80,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
-          <Link href={`/sak/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
+          <Link href={`/sak/${saksId}`} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
           </Link>
           <CopyButton copyText={barn.foedselsnummer} size="small" />

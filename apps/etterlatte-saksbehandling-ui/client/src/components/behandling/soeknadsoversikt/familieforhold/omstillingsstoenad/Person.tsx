@@ -11,7 +11,7 @@ import { Result } from '~shared/api/apiUtils'
 import { ILand } from '~shared/api/trygdetid'
 import { formaterFnr } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
-import { hentSakId } from '~components/person/sakOgBehandling/sakUtils'
+import { useAppSelector } from '~store/Store'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -36,6 +36,8 @@ type Props = {
 }
 
 export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props) => {
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
+
   return (
     <PersonBorder>
       <IconWrapper>
@@ -48,7 +50,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
         <BodyShort>
           {person.fornavn} {person.etternavn}
           <HStack>
-            <Link href={`/sak/${hentSakId()}`} target="_blank" rel="noreferrer noopener">
+            <Link href={`/sak/${saksId}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
             <CopyButton copyText={person.foedselsnummer} size="small" />

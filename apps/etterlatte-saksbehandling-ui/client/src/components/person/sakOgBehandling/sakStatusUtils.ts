@@ -1,5 +1,4 @@
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
-import { useAppSelector } from '~store/Store'
 
 export const hentLoependeVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
@@ -33,23 +32,3 @@ const vedtakDatoStrengTilDate = (dato: string | undefined) => (dato ? new Date(d
 // å sjekke den for å erstatte med virkningstidspunkt
 export const ytelseOpphoersdato = (loependeVedtak: VedtakSammendrag) =>
   loependeVedtak.opphoerFraOgMed ? loependeVedtak.opphoerFraOgMed : loependeVedtak.virkningstidspunkt
-
-// TODO: flytte til en annen plass?
-export const hentSakId = () => {
-  const sakIdFraSak = useAppSelector((state) => state.sakReducer.sak?.id)
-  const sakIdFraBehandling = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
-  const sakIdFraKlage = useAppSelector((state) => state.klageReducer.klage?.sak?.id)
-  const sakIdFraJournalfoering = useAppSelector(
-    (state) => state.journalfoeringOppgaveReducer.sakMedBehandlinger?.sak.id
-  )
-  const sakIdFraTilbakekreving = useAppSelector((state) => state.tilbakekrevingReducer.tilbakekrevingBehandling?.sak.id)
-
-  const muligeSakIder = [sakIdFraSak, sakIdFraBehandling, sakIdFraKlage, sakIdFraJournalfoering, sakIdFraTilbakekreving]
-  const sakId = muligeSakIder.find((id) => id !== undefined)
-
-  return sakId !== undefined
-    ? sakId
-    : (() => {
-        throw new Error('sakId is not available from context')
-      })()
-}

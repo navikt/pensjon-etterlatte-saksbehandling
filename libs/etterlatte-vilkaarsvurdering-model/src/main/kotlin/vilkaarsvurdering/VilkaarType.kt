@@ -159,6 +159,9 @@ enum class VilkaarType(
     OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_YRKESSKADE(403, "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
     OMS_VURDERING_AV_EKSPORT(450, "Vurdering av eksport"),
     OMS_RETT_UTEN_TIDSBEGRENSNING(500, "Rett til stønad uten tidsbegrensning?"),
+    OMS_AKTIVITETSPLIKT(600, "Langvarig manglende aktivitet"),
+
+    // Vilkårene OMS_AKTIVITET_ETTER_6_MND og tilhørende unntak eksisterer på gamle vurderinger og kan ikke slettes.
     OMS_AKTIVITET_ETTER_6_MND(600, "Krav til aktivitet etter 6 måneder"),
     OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT(
         601,

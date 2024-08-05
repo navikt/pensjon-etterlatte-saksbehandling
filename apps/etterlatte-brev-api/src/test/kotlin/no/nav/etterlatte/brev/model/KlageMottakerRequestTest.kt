@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-internal class MottakerRequestTest {
+internal class KlageMottakerRequestTest {
     @Nested
     inner class MappingFraRegoppslag {
         @Test

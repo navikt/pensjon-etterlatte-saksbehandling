@@ -15,7 +15,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.database.toList
@@ -178,7 +178,7 @@ class ViderefoertOpphoerTest(
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
 
-        shouldThrow<InternfeilException> {
+        shouldThrow<UgyldigForespoerselException> {
             service.oppdaterViderefoertOpphoer(
                 behandlingId = opprettBehandling.id,
                 viderefoertOpphoer =

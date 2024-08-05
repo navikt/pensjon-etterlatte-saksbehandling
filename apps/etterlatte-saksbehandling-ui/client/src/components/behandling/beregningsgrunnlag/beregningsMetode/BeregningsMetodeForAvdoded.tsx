@@ -107,7 +107,7 @@ export const BeregningsMetodeForAvdoded = ({
             size="small"
             icon={<XMarkIcon aria-hidden />}
             onClick={() => {
-              reset(setDefaultBeregningsMetodeForAvdoed(ident))
+              reset()
               paaAvbryt()
             }}
           >

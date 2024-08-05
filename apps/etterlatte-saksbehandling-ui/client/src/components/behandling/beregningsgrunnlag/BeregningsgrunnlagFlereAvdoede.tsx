@@ -22,6 +22,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/beregningsMetode/SammendragAvBeregningsMetodeForAvdoed'
+import { isPending } from '~shared/api/apiUtils'
 
 interface Props {
   redigerbar: boolean
@@ -62,7 +63,33 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
     return undefined
   }
 
-  const oppdaterBeregningdsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
+  const slettBeregningsMetodeForAvdoed = (avdoed: string) => {
+    const oppdatertGrunnlag: BeregningsGrunnlagPostDto = {
+      ...beregningsgrunnlag,
+      soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
+      beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
+        beregningsMetode: BeregningsMetode.NASJONAL,
+        begrunnelse: '',
+      },
+      begegningsmetodeFlereAvdoede: !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
+        ? beregningsgrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
+        : [],
+    }
+
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag: oppdatertGrunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregingsGrunnlag(oppdatertGrunnlag))
+        setRedigerTrygdetidMetodeBrukt(false)
+      }
+    )
+  }
+
+  const oppdaterBeregninggsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
     const oppdatertGrunnlag: BeregningsGrunnlagPostDto = {
       ...beregningsgrunnlag,
       soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
@@ -136,10 +163,8 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
                             variant="secondary"
                             size="small"
                             icon={<TrashIcon aria-hidden />}
-                            onClick={() => {
-                              // TODO: bruke eksisterende ident, oppdater hvis eksisterende til å være "tom"
-                              //    Se på logikken for "oppdaterBeregningsMetodeForAvdoed"
-                            }}
+                            onClick={() => slettBeregningsMetodeForAvdoed(trygdetid.ident)}
+                            loading={isPending(lagreBeregningsgrunnlagResult)}
                           >
                             Slett
                           </Button>
@@ -153,7 +178,7 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
                     ident={trygdetid.ident}
                     navn={mapNavn(trygdetid.ident)}
                     eksisterendeMetode={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
-                    oppdaterBeregningsMetodeForAvdoed={oppdaterBeregningdsMetodeForAvdoed}
+                    oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
                     paaAvbryt={() => setRedigerTrygdetidMetodeBrukt(false)}
                     paaSlett={() => setRedigerTrygdetidMetodeBrukt(false)}
                     lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}

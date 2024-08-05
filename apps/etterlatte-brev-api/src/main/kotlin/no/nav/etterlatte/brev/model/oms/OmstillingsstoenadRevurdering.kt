@@ -64,6 +64,7 @@ data class OmstillingsstoenadRevurdering(
                         trygdetid = it.trygdetid,
                         beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
+                        sanksjon = it.sanksjon != null,
                     )
                 }
 

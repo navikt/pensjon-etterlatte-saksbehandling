@@ -136,6 +136,7 @@ class BeregningService(
                         beregningsGrunnlag?.beregningsMetode?.beregningsMetode
                             ?: requireNotNull(it.beregningsMetode),
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
+                    sanksjon = it.sanksjon,
                 )
             }
 

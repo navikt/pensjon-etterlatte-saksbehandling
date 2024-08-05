@@ -44,7 +44,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -71,7 +70,6 @@ class BehandlingFactory(
         request: NyBehandlingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        sikkerLogg.info("Oppretter sak og behandling for: $request")
         logger.info("Oppretter sak og behandling for persongalleri: ${request.persongalleri}, saktype ${request.sakType}")
         val soeker = request.persongalleri.soeker
 

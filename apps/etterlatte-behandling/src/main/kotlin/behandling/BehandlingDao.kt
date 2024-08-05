@@ -366,7 +366,7 @@ class BehandlingDao(
                         dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
-                        kravdato = getDate("kravdato")?.let { it.toLocalDate() },
+                        kravdato = getDate("kravdato")?.toLocalDate(),
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                         aktiv = getBoolean("aktiv"),

@@ -108,6 +108,12 @@ class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling :
         "Kan ikke opprette revurdering når man mangler føstegangsbehandling med virkningstidspunkt",
     )
 
+class VilkaarMaaFinnesHvisViderefoertOpphoer :
+    UgyldigForespoerselException(
+        "VIDEREFOERT_OPPHOER_MAA_HA_VILKAAR",
+        "Vilkår må angis hvis opphør skal videreføres",
+    )
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
@@ -751,8 +757,7 @@ internal class BehandlingServiceImpl(
         if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
             viderefoertOpphoer.vilkaar == null
         ) {
-            // TODO bør kanskje være 400-feil her?
-            throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
+            throw VilkaarMaaFinnesHvisViderefoertOpphoer()
         }
 
         if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
@@ -767,9 +772,7 @@ internal class BehandlingServiceImpl(
             }
     }
 
-    override fun fjernViderefoertOpphoer(behandlingId: UUID) {
-        behandlingDao.fjernViderefoertOpphoer(behandlingId)
-    }
+    override fun fjernViderefoertOpphoer(behandlingId: UUID) = behandlingDao.fjernViderefoertOpphoer(behandlingId)
 
     override fun hentAapenRegulering(sakId: Long): UUID? =
         behandlingDao

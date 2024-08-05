@@ -8,10 +8,12 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
@@ -29,6 +31,8 @@ class ParallelleSannheterKlient(
     val apiUrl: String,
     val featureToggleService: FeatureToggleService,
 ) {
+    private val sikkerlogg = sikkerlogger()
+
     suspend fun avklarNavn(pdlNavn: List<PdlNavn>): PdlNavn =
         if (featureToggleService.isEnabled(NavnFeatureToggles.AksepterManglendeNavn, false)) {
             avklarNullable(pdlNavn, Avklaring.NAVN) ?: fallbackperson()
@@ -128,8 +132,21 @@ class ParallelleSannheterKlient(
                             }
                     }.let {
                         when (it) {
-                            is RetryResult.Success -> it.content.body<JsonNode>()
-                            is RetryResult.Failure -> throw it.samlaExceptions()
+                            is RetryResult.Success -> {
+                                if (it.content.status != HttpStatusCode.NotImplemented) {
+                                    it.content.body<JsonNode>()
+                                } else {
+                                    sikkerlogg.info("Fikk feilmelding. Skulle avklare blant ${list.toJson()}")
+                                    throw ParallelleSannheterException(
+                                        "Kunne ikke avklare ${avklaring.feltnavn}, " +
+                                            "detaljer i sikkerlogg",
+                                    )
+                                }
+                            }
+                            is RetryResult.Failure -> {
+                                sikkerlogg.info("Fikk feilmelding. Skulle avklare blant ${list.toJson()}")
+                                throw it.samlaExceptions()
+                            }
                         }
                     }
 

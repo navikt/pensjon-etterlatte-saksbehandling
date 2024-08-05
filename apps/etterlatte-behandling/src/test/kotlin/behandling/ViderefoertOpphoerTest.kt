@@ -1,5 +1,8 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -7,23 +10,28 @@ import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Month
 import java.time.YearMonth
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,24 +39,29 @@ import javax.sql.DataSource
 class ViderefoertOpphoerTest(
     private val dataSource: DataSource,
 ) {
-    @Test
-    fun `lagrer viderefoert opphoer`() {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleStrengtFortrolig() } returns false
-                every { harRolleEgenAnsatt() } returns true
-            }
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    val saksbehandlerMedRoller =
+        mockk<SaksbehandlerMedRoller> {
+            every { harRolleStrengtFortrolig() } returns false
+            every { harRolleEgenAnsatt() } returns true
+        }
+    lateinit var connection: ConnectionAutoclosingTest
+    lateinit var service: BehandlingService
+    lateinit var behandlingDao: BehandlingDao
+
+    @BeforeEach
+    fun setUp() {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
-        val connection = ConnectionAutoclosingTest(dataSource)
+
         val kommerBarnetTilGodeDao =
             mockk<KommerBarnetTilGodeDao>().also { every { it.hentKommerBarnetTilGode(any()) } returns null }
-        val dao = BehandlingDao(kommerBarnetTilGodeDao, mockk(), connection)
-        val service =
+        connection = ConnectionAutoclosingTest(dataSource)
+        behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, mockk<RevurderingDao>(), connection)
+        service =
             BehandlingServiceImpl(
-                behandlingDao = dao,
+                behandlingDao = behandlingDao,
                 behandlingHendelser = mockk(),
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = mockk(),
@@ -59,6 +72,10 @@ class ViderefoertOpphoerTest(
                 grunnlagService = mockk(),
                 beregningKlient = mockk(),
             )
+    }
+
+    @Test
+    fun `lagrer viderefoert opphoer`() {
         val sak =
             SakDao(connection).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
@@ -66,7 +83,7 @@ class ViderefoertOpphoerTest(
                 Enheter.defaultEnhet.enhetNr,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
-        dao.opprettBehandling(behandling = opprettBehandling)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
         val opphoerstidspunkt = YearMonth.of(2024, Month.JUNE)
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
@@ -81,8 +98,139 @@ class ViderefoertOpphoerTest(
                     kravdato = null,
                 ),
         )
-        val viderefoertOpphoer = dao.hentViderefoertOpphoer(opprettBehandling.id)!!
+        val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.id)!!
         assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
         assertEquals(opphoerstidspunkt, viderefoertOpphoer.dato)
     }
+
+    @Test
+    fun `lagrer aktiv og inaktive opphoer paa samme behandling`() {
+        val sak =
+            SakDao(connection).opprettSak(
+                SOEKER_FOEDSELSNUMMER.value,
+                SakType.BARNEPENSJON,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
+
+        service.oppdaterViderefoertOpphoer(
+            behandlingId = opprettBehandling.id,
+            viderefoertOpphoer =
+                viderefoertOpphoer(opprettBehandling.id, YearMonth.of(2024, Month.JANUARY), JaNei.JA),
+        )
+
+        service.fjernViderefoertOpphoer(opprettBehandling.id)
+
+        service.oppdaterViderefoertOpphoer(
+            behandlingId = opprettBehandling.id,
+            viderefoertOpphoer =
+                ViderefoertOpphoer(
+                    skalViderefoere = JaNei.JA,
+                    behandlingId = opprettBehandling.id,
+                    dato = YearMonth.of(2024, Month.FEBRUARY),
+                    begrunnelse = "for testformål",
+                    vilkaar = VilkaarType.BP_FORMAAL_2024,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
+                    kravdato = null,
+                ),
+        )
+
+        service.fjernViderefoertOpphoer(opprettBehandling.id)
+
+        service.oppdaterViderefoertOpphoer(
+            behandlingId = opprettBehandling.id,
+            viderefoertOpphoer =
+                ViderefoertOpphoer(
+                    skalViderefoere = JaNei.JA,
+                    behandlingId = opprettBehandling.id,
+                    dato = YearMonth.of(2024, Month.MARCH),
+                    begrunnelse = "for testformål",
+                    vilkaar = VilkaarType.BP_FORMAAL_2024,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
+                    kravdato = null,
+                ),
+        )
+
+        val alleViderefoertOpphoer = hentAlleViderefoertOpphoer(opprettBehandling.id)
+
+        alleViderefoertOpphoer
+            .filter { it.aktiv }
+            .map { it.dato } shouldContainExactly listOf(YearMonth.of(2024, Month.MARCH))
+
+        alleViderefoertOpphoer
+            .filter { !it.aktiv }
+            .map { it.dato } shouldContainExactly
+            listOf(
+                YearMonth.of(2024, Month.JANUARY),
+                YearMonth.of(2024, Month.FEBRUARY),
+            )
+    }
+
+    @Test
+    fun `feiler ved oppretting hvis det skal viderefoeres og vilkaar mangler`() {
+        val sak =
+            SakDao(connection).opprettSak(
+                SOEKER_FOEDSELSNUMMER.value,
+                SakType.BARNEPENSJON,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
+
+        shouldThrow<InternfeilException> {
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        opprettBehandling.id,
+                        YearMonth.of(2024, Month.JANUARY),
+                        skalViderefoere = JaNei.JA,
+                        vilkaar = null,
+                    ),
+            )
+        }
+    }
+
+    private fun viderefoertOpphoer(
+        behandlingId: UUID,
+        opphoersdato: YearMonth,
+        skalViderefoere: JaNei,
+        vilkaar: VilkaarType? = VilkaarType.BP_FORMAAL_2024,
+    ) = ViderefoertOpphoer(
+        skalViderefoere = skalViderefoere,
+        behandlingId = behandlingId,
+        dato = opphoersdato,
+        begrunnelse = "for testformål",
+        vilkaar = vilkaar,
+        kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
+        kravdato = null,
+    )
+
+    private fun hentAlleViderefoertOpphoer(behandlingId: UUID): List<ViderefoertOpphoer> =
+        connection.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar, aktiv " +
+                            "FROM viderefoert_opphoer " +
+                            "WHERE behandling_id = ? ",
+                    )
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().toList {
+                    ViderefoertOpphoer(
+                        skalViderefoere =
+                            no.nav.etterlatte.libs.common.behandling.JaNei
+                                .valueOf(getString("skalViderefoere")),
+                        dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
+                        kilde = getString("kilde").let { objectMapper.readValue(it) },
+                        begrunnelse = getString("begrunnelse"),
+                        kravdato = getDate("kravdato")?.let { it.toLocalDate() },
+                        behandlingId = behandlingId,
+                        vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
+                        aktiv = getBoolean("aktiv"),
+                    )
+                }
+            }
+        }
 }

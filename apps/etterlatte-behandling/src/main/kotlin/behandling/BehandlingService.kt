@@ -751,6 +751,7 @@ internal class BehandlingServiceImpl(
         if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
             viderefoertOpphoer.vilkaar == null
         ) {
+            // TODO bør kanskje være 400-feil her?
             throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
         }
 

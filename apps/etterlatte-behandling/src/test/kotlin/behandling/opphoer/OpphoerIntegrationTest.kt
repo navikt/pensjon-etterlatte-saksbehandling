@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.opphoer
 
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -120,7 +121,7 @@ class OpphoerIntegrationTest : BehandlingIntegrationTest() {
             Assertions.assertEquals(opphoersdato, behandlingDto.viderefoertOpphoer?.dato)
 
             client
-                .post("/api/behandling/$behandlingId/fjern-viderefoert-opphoer") {
+                .delete("/api/behandling/$behandlingId/viderefoert-opphoer") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)

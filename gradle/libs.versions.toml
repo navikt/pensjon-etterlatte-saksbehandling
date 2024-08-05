@@ -12,7 +12,7 @@ ktor2-version = "2.3.12"
 navfelles-token-version = "5.0.1"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.20.1"
-tjenestespesifikasjoner-version = "1.9c76d3b"
+tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }

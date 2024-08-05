@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
-import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
@@ -46,29 +45,6 @@ class VilkaarsvurderingRepository(
                             }.asSingle,
                     )
                 }
-        }
-
-    fun settSakPaaMigrertYrkesskadefordel(
-        behandlingId: UUID,
-        sakId: Long,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        oppdater(
-            query = Queries.SETT_SAK_MIGRERT_YRKESSKADE,
-            params =
-                mapOf(
-                    "behandling_id" to behandlingId,
-                    "sak_id" to sakId,
-                ),
-            loggtekst = "Lagrer sak for behandling $behandlingId",
-        )
-    }
-
-    fun hentAlleMigrertYrkesskadefordel(tx: TransactionalSession? = null) =
-        tx.session {
-            hentListe(queryString = Queries.HENT_ALLE_MIGRERT_YRKESSKADE) {
-                it.uuid("behandling_id")
-            }
         }
 
     fun hentMigrertYrkesskadefordel(
@@ -418,14 +394,6 @@ class VilkaarsvurderingRepository(
 
         const val HENT_MIGRERT_YRKESSKADE = """
             SELECT sak_id FROM migrert_yrkesskade WHERE sak_id = :sak_id
-        """
-
-        const val HENT_ALLE_MIGRERT_YRKESSKADE = """
-            SELECT behandling_id FROM migrert_yrkesskade
-        """
-
-        const val SETT_SAK_MIGRERT_YRKESSKADE = """
-            UPDATE migrert_yrkesskade SET sak_id=:sak_id WHERE behandling_id=:behandling_id 
         """
 
         const val HENT_VILKAAR = """

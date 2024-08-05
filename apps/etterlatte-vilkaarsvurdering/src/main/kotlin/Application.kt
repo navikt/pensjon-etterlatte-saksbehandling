@@ -24,7 +24,6 @@ class Server(
             initEmbeddedServer(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
-                cronJobs = listOf(migrertYrkesskadeJob),
             ) {
                 vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
                 aldersovergang(behandlingKlient, aldersovergangService)

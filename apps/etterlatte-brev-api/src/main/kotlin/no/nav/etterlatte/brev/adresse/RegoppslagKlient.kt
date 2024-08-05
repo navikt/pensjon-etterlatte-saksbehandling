@@ -14,7 +14,6 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
-import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -50,7 +49,6 @@ class RegoppslagKlient(
                         setBody(RegoppslagRequest(ident))
                     }.body<RegoppslagResponseDTO>()
                     .also {
-                        sikkerLogg.info("Respons fra regoppslag: $it")
                         cache.put(ident, it)
                     }
             }

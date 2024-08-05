@@ -1,6 +1,5 @@
 package no.nav.etterlatte.pdl.mapper
 
-import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
@@ -346,8 +346,8 @@ object PersonMapper {
                         it.metadata.opplysningsId,
                     )
                 }
-        } catch (e: ResponseException) {
-            if (e.response.status == HttpStatusCode.NotImplemented) {
+        } catch (e: ParallelleSannheterException) {
+            if (e.ppsStatus == HttpStatusCode.NotImplemented) {
                 OpplysningDTO(
                     Sivilstatus.UAVKLART_PPS,
                     UUID.randomUUID().toString(),

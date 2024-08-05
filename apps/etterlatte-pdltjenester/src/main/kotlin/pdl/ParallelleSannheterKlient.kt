@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 
 class ParallelleSannheterException(
     override val message: String,
+    val ppsStatus: HttpStatusCode? = null,
 ) : RuntimeException(message)
 
 class ParallelleSannheterKlient(
@@ -140,6 +141,7 @@ class ParallelleSannheterKlient(
                                     throw ParallelleSannheterException(
                                         "Kunne ikke avklare ${avklaring.feltnavn}, " +
                                             "detaljer i sikkerlogg",
+                                        ppsStatus = HttpStatusCode.NotImplemented,
                                     )
                                 }
                             }

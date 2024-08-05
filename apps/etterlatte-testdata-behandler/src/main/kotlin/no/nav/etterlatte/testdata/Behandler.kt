@@ -55,6 +55,7 @@ class Behandler(
         behandlingService.settKommerBarnetTilGode(behandling, bruker)
         behandlingService.lagreGyldighetsproeving(behandling, bruker)
         behandlingService.lagreUtlandstilknytning(behandling, bruker)
+        behandlingService.lagreBoddEllerArbeidetUtlandet(behandling, bruker)
         behandlingService.lagreVirkningstidspunkt(behandling, doedsdato?.verdi!!, bruker)
         behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId, bruker)
 

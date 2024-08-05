@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import org.slf4j.LoggerFactory
-import vilkaarsvurdering.MigrertYrkesskadefordel
 import java.util.UUID
 
 class VilkaarsvurderingKlientException(
@@ -72,7 +72,7 @@ class VilkaarsvurderingKlient(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel",
                     ),
                 brukerTokenInfo = bruker,
             ).mapBoth(

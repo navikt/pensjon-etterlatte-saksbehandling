@@ -3,7 +3,6 @@ package no.nav.etterlatte.statistikk.config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.BEREGNING_AZURE_SCOPE
-import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -17,14 +16,11 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
-import no.nav.etterlatte.statistikk.clients.VedtaksvurderingsKlient
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
-import no.nav.etterlatte.statistikk.database.OppdaterVedtakRepo
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
-import no.nav.etterlatte.statistikk.jobs.VedtakOppdateringJob
 import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
@@ -75,24 +71,6 @@ class ApplicationContext {
         BeregningKlientImpl(beregningHttpClient, "http://etterlatte-beregning")
     }
 
-    private val vedtaksvurderingsKlient: VedtaksvurderingsKlient by lazy {
-        VedtaksvurderingsKlient(vedtaksvurderingsHttpClient, "http://etterlatte-vedtaksvurdering")
-    }
-
-    private val oppdaterVedtakRepo: OppdaterVedtakRepo by lazy {
-        OppdaterVedtakRepo(datasource)
-    }
-
-    val oppdaterVedtakJob: VedtakOppdateringJob by lazy {
-        VedtakOppdateringJob(
-            oppdaterVedtakRepo = oppdaterVedtakRepo,
-            vedtakKlient = vedtaksvurderingsKlient,
-            leaderElection = leaderElection,
-            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(2, ChronoUnit.MINUTES),
-        )
-    }
-
     private val soeknadStatistikkRepository: SoeknadStatistikkRepository by lazy {
         SoeknadStatistikkRepository.using(datasource)
     }
@@ -137,15 +115,6 @@ class ApplicationContext {
             azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue(BEHANDLING_AZURE_SCOPE),
-        )
-    }
-
-    private val vedtaksvurderingsHttpClient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
-            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
-            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
-            azureAppScope = env.requireEnvValue(VEDTAK_AZURE_SCOPE),
         )
     }
 }

@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.ktor.route.withParam
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
-import vilkaarsvurdering.MigrertYrkesskadefordel
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(

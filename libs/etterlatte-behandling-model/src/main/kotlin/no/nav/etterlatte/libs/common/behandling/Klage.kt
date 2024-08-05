@@ -693,7 +693,7 @@ data class KlageOversendelseDto(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Mottaker(
+data class KlageMottaker(
     val navn: String,
     val foedselsnummer: Mottakerident?,
     val orgnummer: String? = null,
@@ -704,7 +704,7 @@ data class Mottakerident(
 )
 
 data class EkstradataInnstilling(
-    val mottakerInnstilling: Mottaker,
+    val mottakerInnstilling: KlageMottaker,
     val vergeEllerFullmektig: VergeEllerFullmektig?,
     val journalpostInnstillingsbrev: String,
     val journalpostKlage: String?,

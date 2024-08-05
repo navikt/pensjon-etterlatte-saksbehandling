@@ -1,5 +1,6 @@
 package no.nav.etterlatte.pdl.mapper
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -12,11 +13,13 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
+import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import no.nav.etterlatte.pdl.SoekPersonTreff
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
@@ -26,6 +29,7 @@ import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
 import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +50,7 @@ object PersonMapper {
                     ppsKlient,
                     hentPerson.statsborgerskap,
                 )
-            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it, fnr) }
+            val sivilstand = hentPerson.sivilstand?.let { pdlSivilstand -> avklarSivilstatus(ppsKlient, fnr, pdlSivilstand) }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
@@ -84,7 +88,7 @@ object PersonMapper {
                 kontaktadresse = hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) },
                 statsborgerskap = statsborgerskap?.land,
                 pdlStatsborgerskap = pdlStatsborgerskap,
-                sivilstatus = ppsSivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
+                sivilstatus = sivilstand?.verdi ?: Sivilstatus.UOPPGITT,
                 sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) },
                 utland = UtlandMapper.mapUtland(hentPerson),
                 familieRelasjon =
@@ -239,7 +243,10 @@ object PersonMapper {
                     ppsKlient,
                     hentPerson.statsborgerskap,
                 )
-            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it, request.foedselsnummer) }
+            val sivilstand =
+                hentPerson.sivilstand?.let { pdlSivilstand ->
+                    avklarSivilstatus(ppsKlient, request.foedselsnummer, pdlSivilstand)
+                }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
@@ -290,13 +297,7 @@ object PersonMapper {
                         ?.map { OpplysningDTO(it, null) },
                 statsborgerskap = statsborgerskap?.let { OpplysningDTO(it.land, it.metadata.opplysningsId) },
                 pdlStatsborgerskap = statsborgerskapPdl?.let { OpplysningDTO(it, null) },
-                sivilstatus =
-                    ppsSivilstand?.let {
-                        OpplysningDTO(
-                            Sivilstatus.valueOf(it.type.name),
-                            it.metadata.opplysningsId,
-                        )
-                    },
+                sivilstatus = sivilstand,
                 sivilstand =
                     hentPerson.sivilstand
                         ?.let { SivilstandMapper.mapSivilstand(it) }
@@ -330,6 +331,31 @@ object PersonMapper {
             return null to statsborgerskap.map { it.tilStatsborgerskap() }
         }
     }
+
+    private suspend fun avklarSivilstatus(
+        ppsKlient: ParallelleSannheterKlient,
+        folkeregisteridentifikator: Folkeregisteridentifikator,
+        pdlSivilstand: List<PdlSivilstand>,
+    ): OpplysningDTO<Sivilstatus>? =
+        try {
+            ppsKlient
+                .avklarSivilstand(pdlSivilstand, folkeregisteridentifikator)
+                ?.let {
+                    OpplysningDTO(
+                        Sivilstatus.valueOf(it.type.name),
+                        it.metadata.opplysningsId,
+                    )
+                }
+        } catch (e: ParallelleSannheterException) {
+            if (e.ppsStatus == HttpStatusCode.NotImplemented) {
+                OpplysningDTO(
+                    Sivilstatus.UAVKLART_PPS,
+                    UUID.randomUUID().toString(),
+                )
+            } else {
+                throw e
+            }
+        }
 }
 
 fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap =

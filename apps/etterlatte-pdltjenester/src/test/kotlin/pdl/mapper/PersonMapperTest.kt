@@ -1,20 +1,27 @@
 package no.nav.etterlatte.pdl.mapper
 
+import io.ktor.http.HttpStatusCode
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlFoedsel
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlMetadata
 import no.nav.etterlatte.pdl.PdlNavn
+import no.nav.etterlatte.pdl.PdlSivilstand
+import no.nav.etterlatte.pdl.PdlSivilstandstype
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.Month
 
 class PersonMapperTest {
     @Test
@@ -64,6 +71,67 @@ class PersonMapperTest {
         Assertions.assertEquals(statNorge.gyldigTilOgMed, mappetStatsborgerskapNorge.gyldigTilOgMed)
         Assertions.assertEquals(statSverige.gyldigFraOgMed, mappetStatsborgerskapSverige.gyldigFraOgMed)
         Assertions.assertEquals(statSverige.gyldigTilOgMed, mappetStatsborgerskapSverige.gyldigTilOgMed)
+    }
+
+    @Test
+    fun `ved 501 for sivilstand fra pps mappes sivilstatus til uavklart`() {
+        val pdlSivilstand =
+            listOf(
+                PdlSivilstand(
+                    type = PdlSivilstandstype.ENKE_ELLER_ENKEMANN,
+                    gyldigFraOgMed = LocalDate.of(2023, Month.NOVEMBER, 7),
+                    relatertVedSivilstand = null,
+                    bekreftelsesdato = null,
+                    metadata =
+                        PdlMetadata(
+                            endringer = listOf(),
+                            historisk = false,
+                            master = "",
+                            opplysningsId = "",
+                        ),
+                ),
+                PdlSivilstand(
+                    type = PdlSivilstandstype.UGIFT,
+                    gyldigFraOgMed = null,
+                    relatertVedSivilstand = null,
+                    bekreftelsesdato = null,
+                    metadata =
+                        PdlMetadata(
+                            endringer = listOf(),
+                            historisk = false,
+                            master = "",
+                            opplysningsId = "",
+                        ),
+                ),
+            )
+        val pdlHentPerson = pdlHentPerson(sivilstand = pdlSivilstand)
+
+        val pdlKlient = mockk<PdlKlient>()
+        val ppsKlient =
+            mockk<ParallelleSannheterKlient> {
+                coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+                coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
+                coEvery { avklarFoedsel(pdlHentPerson.foedsel) } returns pdlHentPerson.foedsel.first()
+                coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
+                coEvery {
+                    avklarSivilstand(
+                        pdlSivilstand,
+                        GJENLEVENDE_FOEDSELSNUMMER,
+                    )
+                } throws ParallelleSannheterException("Kunne ikke avklare sivlstand", HttpStatusCode.NotImplemented)
+            }
+
+        val person =
+            PersonMapper.mapPerson(
+                ppsKlient = ppsKlient,
+                pdlKlient = pdlKlient,
+                fnr = GJENLEVENDE_FOEDSELSNUMMER,
+                personRolle = PersonRolle.GJENLEVENDE,
+                hentPerson = pdlHentPerson,
+                saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
+            )
+
+        Assertions.assertEquals(Sivilstatus.UAVKLART_PPS, person.sivilstatus)
     }
 
     @Test
@@ -147,12 +215,13 @@ fun pdlHentPerson(
             ),
         ),
     statsborgerskap: List<PdlStatsborgerskap>? = null,
+    sivilstand: List<PdlSivilstand>? = null,
 ): PdlHentPerson =
     PdlHentPerson(
         adressebeskyttelse = listOf(),
         navn = navn,
         foedsel = foedsel,
-        sivilstand = null,
+        sivilstand = sivilstand,
         doedsfall = listOf(),
         bostedsadresse = null,
         deltBostedsadresse = null,

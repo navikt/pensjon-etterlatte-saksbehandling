@@ -7,8 +7,8 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.deserialize
@@ -23,13 +23,13 @@ interface BrevApiKlient {
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto
+    ): Brev
 
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto
+    ): Brev
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -65,7 +65,7 @@ interface BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto
+    ): Brev
 
     suspend fun slettVedtaksbrev(
         klageId: UUID,
@@ -85,12 +85,12 @@ interface BrevApiKlient {
     suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto?
+    ): Brev?
 
     suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto?
+    ): Brev?
 }
 
 class BrevApiKlientObo(
@@ -106,7 +106,7 @@ class BrevApiKlientObo(
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto =
+    ): Brev =
         post(
             url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse",
             onSuccess = { resource ->
@@ -120,7 +120,7 @@ class BrevApiKlientObo(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto =
+    ): Brev =
         post(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
@@ -178,7 +178,7 @@ class BrevApiKlientObo(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto =
+    ): Brev =
         get(
             url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
@@ -188,7 +188,7 @@ class BrevApiKlientObo(
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto? =
+    ): Brev? =
         get(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
@@ -198,7 +198,7 @@ class BrevApiKlientObo(
     override suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto? =
+    ): Brev? =
         get(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/oversendelse",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
@@ -271,22 +271,6 @@ class BrevApiKlientObo(
             )
 }
 
-enum class BrevStatus {
-    OPPRETTET,
-    OPPDATERT,
-    FERDIGSTILT,
-    JOURNALFOERT,
-    DISTRIBUERT,
-    SLETTET,
-    ;
-
-    fun ikkeFerdigstilt(): Boolean = this in listOf(OPPRETTET, OPPDATERT)
-
-    fun ikkeJournalfoert(): Boolean = this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
-
-    fun ikkeDistribuert(): Boolean = this != DISTRIBUERT
-}
-
 data class KlageNotatRequest(
     val klage: Klage,
 ) {
@@ -296,13 +280,4 @@ data class KlageNotatRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettJournalpostDto(
     val journalpostId: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettetBrevDto(
-    val id: Long,
-    val mottaker: Mottaker,
-    val status: BrevStatus,
-    val journalpostId: String?,
-    val bestillingsID: String?,
 )

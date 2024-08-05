@@ -417,6 +417,8 @@ class BrevRepository(
                         ),
                 ),
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
+            journalpostId = row.stringOrNull("journalpost_id"),
+            bestillingId = row.stringOrNull("bestilling_id"),
         )
     }
 

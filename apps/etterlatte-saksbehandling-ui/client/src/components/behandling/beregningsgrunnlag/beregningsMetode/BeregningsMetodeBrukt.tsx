@@ -52,7 +52,7 @@ export const BeregningsMetodeBrukt = ({
         <HStack gap="2" align="center">
           <TagIcon aria-hidden fontSize="1.5rem" />
           <Heading size="small" level="3">
-            Trygdetid brukt i beregningen
+            Trygdetid metode brukt i beregningen
           </Heading>
         </HStack>
         {!redigerTrydgetidMetodeBrukt && (

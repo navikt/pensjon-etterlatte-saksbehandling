@@ -40,10 +40,11 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { hentTrygdetider } from '~shared/api/trygdetid'
-import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/BeregningsMetodeBrukt'
+import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { SakType } from '~shared/types/sak'
+import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagFlereAvdoede'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -192,6 +193,14 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
+                  {trygdetider.length > 1 && (
+                    <BeregningsgrunnlagFlereAvdoede
+                      redigerbar={redigerbar}
+                      behandling={behandling}
+                      trygdetider={trygdetider}
+                      beregningsgrunnlag={beregningsgrunnlag}
+                    />
+                  )}
                   {trygdetider.length <= 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}

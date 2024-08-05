@@ -1,10 +1,7 @@
 import React from 'react'
 import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import {
-  PeriodisertBeregningsgrunnlag,
-  PeriodisertBeregningsgrunnlagDto,
-} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -33,7 +30,6 @@ interface Props {
   navn: string
   eksisterendeMetode?: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   paaAvbryt: () => void
-  paaSlett: () => void
   oppdaterBeregningsMetodeForAvdoed: (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => void
   lagreBeregningsgrunnlagResult: Result<void>
 }

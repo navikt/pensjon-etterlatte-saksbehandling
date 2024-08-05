@@ -11,28 +11,17 @@ import {
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlag,
   oppdaterBeregning,
-  resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import {
-  mapListeFraDto,
-  mapListeTilDto,
-  PeriodisertBeregningsgrunnlag,
-} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
-import { Soeskengrunnlag } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
+import Soeskenjustering, {
+  Soeskengrunnlag,
+} from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import {
-  Beregning,
-  BeregningsGrunnlagDto,
-  BeregningsMetode,
-  BeregningsMetodeBeregningsgrunnlag,
-  BeregningsmetodeFlereAvdoedeData,
-  BeregningsmetodeForAvdoed,
-  InstitusjonsoppholdGrunnlagData,
-} from '~shared/types/Beregning'
+import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
+import { Beregning, BeregningsGrunnlagDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -63,12 +52,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [beregningsgrunnlagResult, beregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
   const [trygdetiderResult, trygdetiderRequest] = useApiCall(hentTrygdetider)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
-  const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
-    useState<InstitusjonsoppholdGrunnlagData | null>(null)
-  const [beregningsmetodeForAvdoede, setBeregningmetodeForAvdoede] = useState<BeregningsmetodeFlereAvdoedeData | null>(
-    null
-  )
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
 
@@ -86,39 +69,15 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const skalViseSoeskenjustering = soesken.length > 0 && !behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
   const onSubmit = () => {
-    if (skalViseSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
+    // Todo: dis dont work
+    if (skalViseSoeskenjustering && !behandling.beregningsGrunnlag?.soeskenMedIBeregning) {
       setSoeskenJusteringMangler(true)
-    }
-    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalViseSoeskenjustering) {
-      dispatch(resetBeregning())
-      const beregningsgrunnlag = {
-        soeskenMedIBeregning: soeskenGrunnlagsData
-          ? mapListeTilDto(soeskenGrunnlagsData)
-          : behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
-        institusjonsopphold: institusjonsoppholdsGrunnlagData
-          ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
-          : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
-        beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
-          beregningsMetode: BeregningsMetode.NASJONAL,
-        },
-        begegningsmetodeFlereAvdoede: beregningsmetodeForAvdoede
-          ? mapListeTilDto(beregningsmetodeForAvdoede)
-          : behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede ?? [],
-      }
-
-      lagreBeregningsgrunnlagRequest(
-        {
-          behandlingId: behandling.id,
-          grunnlag: beregningsgrunnlag,
-        },
-        () =>
-          postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
-            dispatch(oppdaterBeregingsGrunnlag(beregningsgrunnlag))
-            dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-            dispatch(oppdaterBeregning(beregning))
-            next()
-          })
-      )
+    } else {
+      postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+        dispatch(oppdaterBeregning(beregning))
+        next()
+      })
     }
   }
 
@@ -134,6 +93,24 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
         begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
         soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      },
+    })
+  }
+
+  const oppdaterSoeskenJustering = (
+    soeskenGrunnlag: Soeskengrunnlag,
+    beregningsgrunnlag: BeregningsGrunnlagDto | null
+  ) => {
+    lagreBeregningsgrunnlagRequest({
+      behandlingId: behandling.id,
+      grunnlag: {
+        ...beregningsgrunnlag,
+        soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
+        institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+        begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
+        beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
+          beregningsMetode: null,
+        },
       },
     })
   }
@@ -191,27 +168,18 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
                     beregningsgrunnlag={behandling.beregningsGrunnlag}
                     institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
                   />
+
+                  {skalViseSoeskenjustering && (
+                    <Soeskenjustering
+                      behandling={behandling}
+                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag, beregningsgrunnlag)}
+                      setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                    />
+                  )}
                 </>
               ),
             }),
         })}
-        {/*{isSuccess(beregningsgrunnlag) && isSuccess(trygdetider) && (*/}
-        {/*      </Box>*/}
-        {/*    )}*/}
-        {/*  </>*/}
-        {/*)}*/}
-        {/*{isSuccess(beregningsgrunnlag) && skalViseSoeskenjustering && (*/}
-        {/*  <Soeskenjustering*/}
-        {/*    behandling={behandling}*/}
-        {/*    onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}*/}
-        {/*    setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}*/}
-        {/*  />*/}
-        {/*)}*/}
-        {/*<Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />*/}
-        {/*{isFailureHandler({*/}
-        {/*  apiResult: beregningsgrunnlag,*/}
-        {/*  errorMessage: 'Beregningsgrunnlag kan ikke hentes',*/}
-        {/*})}*/}
       </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailureHandler({

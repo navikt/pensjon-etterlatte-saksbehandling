@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BodyShort, Box, Button, Heading, HStack, Tabs, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack, Tabs, VStack } from '@navikt/ds-react'
 import { PencilIcon, PersonIcon, PlusIcon, TagIcon, TrashIcon } from '@navikt/aksel-icons'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { formaterNavn } from '~shared/types/Person'
@@ -10,17 +10,10 @@ import {
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import {
-  BeregningsGrunnlagDto,
-  BeregningsGrunnlagPostDto,
-  BeregningsMetode,
-  BeregningsmetodeForAvdoed,
-} from '~shared/types/Beregning'
+import { BeregningsGrunnlagDto, BeregningsGrunnlagPostDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { useAppDispatch } from '~store/Store'
-import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/beregningsMetode/SammendragAvBeregningsMetodeForAvdoed'
 import { isPending } from '~shared/api/apiUtils'
 
@@ -33,8 +26,6 @@ interface Props {
 
 export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdetider, beregningsgrunnlag }: Props) => {
   const personopplysninger = usePersonopplysninger()
-
-  const dispatch = useAppDispatch()
 
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
@@ -69,8 +60,7 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
       soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
       institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
       beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-        begrunnelse: '',
+        beregningsMetode: null,
       },
       begegningsmetodeFlereAvdoede: !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
         ? beregningsgrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
@@ -83,20 +73,19 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
         grunnlag: oppdatertGrunnlag,
       },
       () => {
-        dispatch(oppdaterBeregingsGrunnlag(oppdatertGrunnlag))
         setRedigerTrygdetidMetodeBrukt(false)
       }
     )
   }
 
+  // TODO: dette må flyttes til rot for å få react til å re-rendre
   const oppdaterBeregninggsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
     const oppdatertGrunnlag: BeregningsGrunnlagPostDto = {
       ...beregningsgrunnlag,
       soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
       institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
       beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-        begrunnelse: '',
+        beregningsMetode: null,
       },
       begegningsmetodeFlereAvdoede: !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
         ? beregningsgrunnlag.begegningsmetodeFlereAvdoede
@@ -106,7 +95,6 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
     }
 
     lagreBeregningsgrunnlagRequest({ behandlingId: behandling.id, grunnlag: oppdatertGrunnlag }, () => {
-      dispatch(oppdaterBeregingsGrunnlag(oppdatertGrunnlag))
       setRedigerTrygdetidMetodeBrukt(false)
     })
   }
@@ -180,7 +168,6 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
                     eksisterendeMetode={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
                     oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
                     paaAvbryt={() => setRedigerTrygdetidMetodeBrukt(false)}
-                    paaSlett={() => setRedigerTrygdetidMetodeBrukt(false)}
                     lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
                   />
                 )}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { Box, Button, ErrorSummary, Heading, HStack } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, HStack, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
@@ -117,18 +117,16 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
 
   return (
-    <>
-      <Box paddingInline="16" paddingBlock="16 4">
-        <Heading level="2" size="medium">
-          Søskenjustering
-        </Heading>
-      </Box>
+    <VStack gap="4">
+      <Heading level="3" size="small">
+        Søskenjustering
+      </Heading>
       <FamilieforholdWrapper>
         {personopplysninger.soeker && (
           <Barn person={personopplysninger.soeker?.opplysning} doedsdato={avdoede?.opplysning.doedsdato} />
         )}
       </FamilieforholdWrapper>
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle">
         {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>
@@ -153,29 +151,25 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             ))}
           </UstiletListe>
           {behandles && (
-            <Box paddingBlock="4" paddingInline="16">
-              <HStack gap="4" align="center">
-                <Button
-                  size="small"
-                  variant="secondary"
-                  type="button"
-                  onClick={() =>
-                    append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))
-                  }
-                >
-                  Legg til periode
-                </Button>
+            <HStack gap="4" align="center">
+              <Button
+                size="small"
+                variant="secondary"
+                type="button"
+                onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
+              >
+                Legg til periode
+              </Button>
 
-                <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
-                  Lagre søskenjustering
-                </Button>
-                {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-              </HStack>
-            </Box>
+              <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
+                Lagre søskenjustering
+              </Button>
+              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+            </HStack>
           )}
         </form>
       </Box>
-    </>
+    </VStack>
   )
 }
 

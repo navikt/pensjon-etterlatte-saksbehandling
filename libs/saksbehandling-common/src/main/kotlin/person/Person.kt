@@ -89,6 +89,10 @@ enum class Sivilstatus {
     SEPARERT_PARTNER,
     SKILT_PARTNER,
     GJENLEVENDE_PARTNER,
+
+    // Uavklart brukes når PPS ikke kan avklare mellom flere forskjellige sivilstatuser,
+    // og er ikke en del av datamodellen til PDL
+    UAVKLART_PPS,
 }
 
 data class Sivilstand(

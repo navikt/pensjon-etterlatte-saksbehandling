@@ -125,10 +125,10 @@ class ParallelleSannheterKlient(
                             .post("$apiUrl/api/${avklaring.feltnavn}") {
                                 accept(Json)
                                 setBody(TextContent(nodeWithFieldName.toJson(), Json))
-                            }.body<JsonNode>()
+                            }
                     }.let {
                         when (it) {
-                            is RetryResult.Success -> it.content
+                            is RetryResult.Success -> it.content.body<JsonNode>()
                             is RetryResult.Failure -> throw it.samlaExceptions()
                         }
                     }

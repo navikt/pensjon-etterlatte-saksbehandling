@@ -18,7 +18,15 @@ import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { isValid } from 'date-fns'
+import { isValid, parse } from 'date-fns'
+
+const isValidDateOfDeath = (date?: Date) => {
+  if (date) {
+    const parsedDate = parse(String(date), 'yyyy-MM-dd', new Date())
+    return isValid(parsedDate)
+  }
+  return false
+}
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -79,7 +87,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        {visTidslinje && isValid(avdoedesDoedsdato!!) && (
+        {visTidslinje && isValidDateOfDeath(avdoedesDoedsdato!!) && (
           <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
         )}
         {visTidslinje && (

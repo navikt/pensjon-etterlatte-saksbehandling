@@ -39,7 +39,6 @@ dependencies {
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenclientcore)
-    implementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientmock)

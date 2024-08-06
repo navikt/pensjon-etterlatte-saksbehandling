@@ -32,8 +32,6 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
     implementation(libs.jackson.modulekotlin)
 
-    testImplementation(libs.navfelles.tokenvalidationktor2)
-
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.ktor2.servertests)

@@ -33,10 +33,7 @@ dependencies {
 
     implementation(libs.bundles.jackson)
 
-    implementation(libs.navfelles.tokenvalidationktor2)
     implementation(libs.database.kotliquery)
-
-    testImplementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)

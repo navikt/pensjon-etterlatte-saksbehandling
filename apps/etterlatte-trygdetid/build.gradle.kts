@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
 
-    testImplementation(libs.navfelles.tokenvalidationktor2)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)

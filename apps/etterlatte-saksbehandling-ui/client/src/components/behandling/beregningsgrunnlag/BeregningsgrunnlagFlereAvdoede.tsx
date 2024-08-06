@@ -9,27 +9,32 @@ import {
   mapListeFraDto,
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
+  PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { BeregningsGrunnlagDto, BeregningsGrunnlagPostDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { BeregningsGrunnlagDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/beregningsMetode/SammendragAvBeregningsMetodeForAvdoed'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, Result } from '~shared/api/apiUtils'
 
 interface Props {
   redigerbar: boolean
-  behandling: IDetaljertBehandling
   trygdetider: ITrygdetid[]
   beregningsgrunnlag: BeregningsGrunnlagDto | null
+  oppdaterBeregningsMetodeForFlereAvdoede: (
+    begegningsMetodeForFlereAvdoede: PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
+  ) => void
+  lagreBeregningsgrunnlagResult: Result<void>
 }
 
-export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdetider, beregningsgrunnlag }: Props) => {
+export const BeregningsgrunnlagFlereAvdoede = ({
+  redigerbar,
+  trygdetider,
+  beregningsgrunnlag,
+  oppdaterBeregningsMetodeForFlereAvdoede,
+  lagreBeregningsgrunnlagResult,
+}: Props) => {
   const personopplysninger = usePersonopplysninger()
 
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
-
-  const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
   const mapNavn = (fnr: string): string => {
     const opplysning = personopplysninger?.avdoede?.find(
@@ -55,48 +60,24 @@ export const BeregningsgrunnlagFlereAvdoede = ({ behandling, redigerbar, trygdet
   }
 
   const slettBeregningsMetodeForAvdoed = (avdoed: string) => {
-    const oppdatertGrunnlag: BeregningsGrunnlagPostDto = {
-      ...beregningsgrunnlag,
-      soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
-      beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: null,
-      },
-      begegningsmetodeFlereAvdoede: !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
+    oppdaterBeregningsMetodeForFlereAvdoede(
+      !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
         ? beregningsgrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
-        : [],
-    }
-
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag: oppdatertGrunnlag,
-      },
-      () => {
-        setRedigerTrygdetidMetodeBrukt(false)
-      }
+        : []
     )
+    setRedigerTrygdetidMetodeBrukt(false)
   }
 
-  // TODO: dette må flyttes til rot for å få react til å re-rendre
   const oppdaterBeregninggsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
-    const oppdatertGrunnlag: BeregningsGrunnlagPostDto = {
-      ...beregningsgrunnlag,
-      soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
-      beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: null,
-      },
-      begegningsmetodeFlereAvdoede: !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
+    oppdaterBeregningsMetodeForFlereAvdoede(
+      !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
         ? beregningsgrunnlag.begegningsmetodeFlereAvdoede
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
             .concat(mapListeTilDto([nyMetode]))
-        : mapListeTilDto([nyMetode]),
-    }
+        : mapListeTilDto([nyMetode])
+    )
 
-    lagreBeregningsgrunnlagRequest({ behandlingId: behandling.id, grunnlag: oppdatertGrunnlag }, () => {
-      setRedigerTrygdetidMetodeBrukt(false)
-    })
+    setRedigerTrygdetidMetodeBrukt(false)
   }
 
   return (

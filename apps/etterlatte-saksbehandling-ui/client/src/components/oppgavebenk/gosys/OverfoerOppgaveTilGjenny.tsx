@@ -11,6 +11,7 @@ import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GOSYS_TEMA_FILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -117,6 +118,7 @@ export const OverfoerOppgaveTilGjenny = ({
             <Button onClick={() => navigate(`/oppgave/${oppgave.id}`)}>Gå til oppgaven</Button>
           </HStack>
         ),
+        error: (error) => <ApiErrorAlert>{error.detail || 'Ukjent feil oppsto ved flytting av oppgave'}</ApiErrorAlert>,
       })}
     </>
   )

@@ -128,16 +128,6 @@ class OpprettDoedshendelseService(
                 ),
             )
         }
-        doedshendelseDao.opprettDoedshendelse(
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = avdoedFnr,
-                avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                beroertFnr = avdoedFnr,
-                relasjon = Relasjon.AVDOED,
-                endringstype = endringstype,
-                migrertMellomAttenOgTjue = true,
-            ),
-        )
     }
 
     private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> =

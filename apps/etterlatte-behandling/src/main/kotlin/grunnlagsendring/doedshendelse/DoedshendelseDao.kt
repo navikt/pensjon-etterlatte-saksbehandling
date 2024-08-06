@@ -82,7 +82,10 @@ class DoedshendelseDao(
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> =
+    fun hentDoedshendelserMedStatus(
+        status: List<Status>,
+        migrertMellomAttenOgTjue: Boolean = false,
+    ): List<DoedshendelseInternal> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -90,9 +93,11 @@ class DoedshendelseDao(
                     SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter, migrert_mellom_atten_og_tjue
                     FROM doedshendelse
                     WHERE status = any(?)
+                    AND migrert_mellom_atten_og_tjue = ?
                     """.trimIndent(),
                 ).apply {
                     setArray(1, createArrayOf("text", status.toTypedArray()))
+                    setBoolean(2, migrertMellomAttenOgTjue)
                 }.executeQuery()
                     .toList { asDoedshendelse() }
             }

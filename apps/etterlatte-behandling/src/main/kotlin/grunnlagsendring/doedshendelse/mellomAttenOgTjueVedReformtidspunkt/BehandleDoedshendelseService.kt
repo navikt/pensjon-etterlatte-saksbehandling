@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
@@ -54,10 +55,13 @@ class BehandleDoedshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
+    fun haandterDoedshendelse(
+        doedshendelse: DoedshendelseInternal,
+        bruker: BrukerTokenInfo,
+    ) {
         val kontrollpunkter =
             try {
-                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse, bruker)
             } catch (e: Exception) {
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
                 logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
@@ -142,15 +146,17 @@ class BehandleDoedshendelseService(
                 innsender = Vedtaksloesning.GJENNY.name,
             )
 
-        grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri)
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
 
         val spraak = hentSpraak(doedshendelse)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        grunnlagService.leggTilNyeOpplysningerBareSak(
-            sakId = opprettetSak.id,
-            opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
-        )
+        runBlocking {
+            grunnlagService.leggTilNyeOpplysningerBareSak(
+                sakId = opprettetSak.id,
+                opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
+            )
+        }
         return opprettetSak
     }
 
@@ -198,7 +204,6 @@ class BehandleDoedshendelseService(
             ) {
                 val borIUtlandet = sjekkUtlandForBeroertIHendelse(doedshendelse)
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-
                 deodshendelserProducer.sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(sak, borIUtlandet, erOver18aar = true)
                 return true
             } else {

@@ -100,6 +100,9 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseJob
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseJob
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
@@ -509,6 +512,37 @@ internal class ApplicationContext(
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+
+    val behandleDoedshendelseService =
+        BehandleDoedshendelseService(
+            doedshendelseDao = doedshendelseDao,
+            doedshendelseKontrollpunktService =
+                BehandleDoedshendelseKontrollpunktService(
+                    pdlTjenesterKlient = pdlTjenesterKlient,
+                    sakService = sakService,
+                    pesysKlient = pesysKlient,
+                    behandlingService = behandlingService,
+                ),
+            featureToggleService = featureToggleService,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
+            deodshendelserProducer = deodshendelserProducer,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            grunnlagService = grunnlagsService,
+            krrKlient = krrKlient,
+        )
+
+    val behandleDoedshendelseJob =
+        BehandleDoedshendelseJob(
+            doedshendelseDao,
+            behandleDoedshendelseService = behandleDoedshendelseService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            featureToggleService = featureToggleService,
             sakTilgangDao = sakTilgangDao,
         )
 

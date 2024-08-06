@@ -167,13 +167,8 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: Long,
         borIutland: Boolean,
     ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
-        generellBrevData =
-            brevdataFacade.hentGenerellBrevData(
-                sakId = sakId,
-                behandlingId = null,
-                brukerTokenInfo = Systembruker.brev,
-            ),
         borIutland,
+        hentAvdoede(sakId),
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(

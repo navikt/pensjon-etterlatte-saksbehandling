@@ -12,6 +12,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 
@@ -25,7 +26,10 @@ class BehandleDoedshendelseKontrollpunktService(
     private val kontrollpunktAvdoedService = DoedshendelseKontrollpunktAvdoedService()
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
 
-    fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
+    fun identifiserKontrollerpunkter(
+        hendelse: DoedshendelseInternal,
+        bruker: BrukerTokenInfo,
+    ): List<DoedshendelseKontrollpunkt> {
         val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
 
         return if (avdoed.doedsdato == null) {
@@ -33,7 +37,7 @@ class BehandleDoedshendelseKontrollpunktService(
         } else {
             val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
             val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-            val fellesKontrollpunkter = fellesKontrollpunkter(avdoed, barn)
+            val fellesKontrollpunkter = fellesKontrollpunkter(avdoed, barn, bruker)
 
             barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
         }
@@ -54,9 +58,10 @@ class BehandleDoedshendelseKontrollpunktService(
     private fun fellesKontrollpunkter(
         avdoed: PersonDTO,
         gjenlevende: PersonDTO,
+        bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> {
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
-        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende)
+        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende, bruker)
 
         return listOfNotNull(adresseKontrollpunkt, haandtertAvPesys)
     }
@@ -70,10 +75,11 @@ class BehandleDoedshendelseKontrollpunktService(
     private fun behandletAvPesys(
         avdoed: PersonDTO,
         gjenlevende: PersonDTO,
+        bruker: BrukerTokenInfo,
     ): DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys? =
         runBlocking {
             try {
-                if (pesysKlient.erTilstoetendeBehandlet(gjenlevende.foedselsnummer.verdi.value, avdoed.doedsdato!!.verdi)) {
+                if (pesysKlient.erTilstoetendeBehandlet(gjenlevende.foedselsnummer.verdi.value, avdoed.doedsdato!!.verdi, bruker)) {
                     DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys
                 } else {
                     null

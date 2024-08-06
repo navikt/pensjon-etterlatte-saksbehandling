@@ -89,7 +89,7 @@ class OpprettDoedshendelseServiceTest {
 
         service.opprettDoedshendelse(avdoed.foedselsnummer.verdi.value)
 
-        verify(exactly = 4) {
+        verify(exactly = 3) {
             dao.opprettDoedshendelse(any())
         }
     }
@@ -114,7 +114,7 @@ class OpprettDoedshendelseServiceTest {
 
         service.opprettDoedshendelse(avdoed.foedselsnummer.verdi.value)
 
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             dao.opprettDoedshendelse(any())
         }
 
@@ -144,18 +144,11 @@ class OpprettDoedshendelseServiceTest {
                     relasjon = Relasjon.BARN,
                     Endringstype.OPPRETTET,
                 ),
-                DoedshendelseInternal.nyHendelse(
-                    avdoed.foedselsnummer.verdi.value,
-                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = avdoed.foedselsnummer.verdi.value,
-                    relasjon = Relasjon.AVDOED,
-                    Endringstype.OPPRETTET,
-                ),
             )
 
         service.opprettDoedshendelse(avdoed.foedselsnummer.verdi.value)
 
-        verify(exactly = 3) {
+        verify(exactly = 2) {
             dao.opprettDoedshendelse(any())
         }
     }

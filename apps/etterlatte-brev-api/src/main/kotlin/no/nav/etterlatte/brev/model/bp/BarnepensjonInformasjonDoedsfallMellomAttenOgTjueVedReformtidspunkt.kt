@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevdataMedInnhold
 import no.nav.etterlatte.brev.model.Slate
@@ -13,15 +13,12 @@ data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
     BrevdataMedInnhold {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
             borIutland: Boolean,
+            avdoede: List<Avdoed>,
         ): BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt =
             BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
                 innhold = emptyList(),
-                avdoedNavn =
-                    generellBrevData.personerISak.avdoede
-                        .first()
-                        .navn,
+                avdoedNavn = avdoede.first().navn,
                 borIutland = borIutland,
             )
     }

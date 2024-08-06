@@ -6,12 +6,15 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.MellomAttenOgTjueVedReformtidspunktFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -27,13 +30,13 @@ class BehandleDoedshendelseJob(
     private val interval: Duration,
     dataSource: DataSource,
     val sakTilgangDao: SakTilgangDao,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $interval")
 
         return fixedRateCancellableTimer(
@@ -44,24 +47,28 @@ class BehandleDoedshendelseJob(
         ) {
             if (erLeader()) {
                 Kontekst.set(jobContext)
-                run()
+                run(HardkodaSystembruker.doedshendelse)
             }
         }
     }
 
-    private fun run() {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            val doedshendelserSomSkalHaanderes = hentAlleNyeDoedsmeldinger()
+    private fun run(bruker: BrukerTokenInfo) {
+        if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
+            val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
             logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
 
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
+                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse, bruker)
                 }
             }
         }
     }
 
-    private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY, Status.OPPDATERT))
+    private fun hentAlleNyeDoedsmeldinger() =
+        doedshendelseDao.hentDoedshendelserMedStatus(
+            listOf(Status.NY, Status.OPPDATERT),
+            migrertMellomAttenOgTjue = true,
+        )
 }

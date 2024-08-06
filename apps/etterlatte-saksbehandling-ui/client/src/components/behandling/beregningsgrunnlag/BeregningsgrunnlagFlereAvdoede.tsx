@@ -9,32 +9,32 @@ import {
   mapListeFraDto,
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
-  PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { BeregningsGrunnlagDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
+import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/beregningsMetode/SammendragAvBeregningsMetodeForAvdoed'
-import { isPending, Result } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
+import { useAppDispatch } from '~store/Store'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
   redigerbar: boolean
   trygdetider: ITrygdetid[]
-  beregningsgrunnlag: BeregningsGrunnlagDto | null
-  oppdaterBeregningsMetodeForFlereAvdoede: (
-    begegningsMetodeForFlereAvdoede: PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
-  ) => void
-  lagreBeregningsgrunnlagResult: Result<void>
 }
 
-export const BeregningsgrunnlagFlereAvdoede = ({
-  redigerbar,
-  trygdetider,
-  beregningsgrunnlag,
-  oppdaterBeregningsMetodeForFlereAvdoede,
-  lagreBeregningsgrunnlagResult,
-}: Props) => {
+export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Props) => {
+  const dispatch = useAppDispatch()
   const personopplysninger = usePersonopplysninger()
+  const behandling = useBehandling()
+
+  const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
+
+  if (!behandling) return <ApiErrorAlert>Ingen behandling</ApiErrorAlert>
 
   const mapNavn = (fnr: string): string => {
     const opplysning = personopplysninger?.avdoede?.find(
@@ -51,8 +51,8 @@ export const BeregningsgrunnlagFlereAvdoede = ({
   const finnPeriodisertBeregningsmetodeForAvdoed = (
     ident: String
   ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined => {
-    if (beregningsgrunnlag && !!beregningsgrunnlag.begegningsmetodeFlereAvdoede?.length) {
-      return mapListeFraDto(beregningsgrunnlag.begegningsmetodeFlereAvdoede)?.find(
+    if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede?.length) {
+      return mapListeFraDto(behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede)?.find(
         (grunnlag) => grunnlag?.data.avdoed === ident
       )
     }
@@ -60,24 +60,55 @@ export const BeregningsgrunnlagFlereAvdoede = ({
   }
 
   const slettBeregningsMetodeForAvdoed = (avdoed: string) => {
-    oppdaterBeregningsMetodeForFlereAvdoede(
-      !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
-        ? beregningsgrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
-        : []
+    const grunnlag = {
+      ...behandling?.beregningsGrunnlag,
+      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
+        beregningsMetode: BeregningsMetode.NASJONAL,
+      },
+      begegningsmetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.begegningsmetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
+        : [],
+    }
+
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        setRedigerTrygdetidMetodeBrukt(false)
+      }
     )
-    setRedigerTrygdetidMetodeBrukt(false)
   }
 
   const oppdaterBeregninggsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
-    oppdaterBeregningsMetodeForFlereAvdoede(
-      !!beregningsgrunnlag?.begegningsmetodeFlereAvdoede?.length
-        ? beregningsgrunnlag.begegningsmetodeFlereAvdoede
+    const grunnlag = {
+      ...behandling?.beregningsGrunnlag,
+      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
+        beregningsMetode: BeregningsMetode.NASJONAL,
+      },
+      begegningsmetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.begegningsmetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
             .concat(mapListeTilDto([nyMetode]))
-        : mapListeTilDto([nyMetode])
-    )
+        : mapListeTilDto([nyMetode]),
+    }
 
-    setRedigerTrygdetidMetodeBrukt(false)
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        setRedigerTrygdetidMetodeBrukt(false)
+      }
+    )
   }
 
   return (

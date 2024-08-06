@@ -7,7 +7,6 @@ import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlag,
   oppdaterBeregning,
@@ -15,23 +14,14 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import {
-  mapListeTilDto,
-  PeriodisertBeregningsgrunnlagDto,
-} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import {
-  Beregning,
-  BeregningsGrunnlagDto,
-  BeregningsMetode,
-  BeregningsMetodeBeregningsgrunnlag,
-  BeregningsmetodeForAvdoed,
-} from '~shared/types/Beregning'
+import { Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -44,18 +34,13 @@ import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsg
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { SakType } from '~shared/types/sak'
 import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagFlereAvdoede'
+import { useBehandling } from '~components/behandling/useBehandling'
 
-const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
+const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
   const personopplysninger = usePersonopplysninger()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const behandling = useBehandling()
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
   const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
@@ -63,6 +48,13 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
+
+  if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   if (behandling.kommerBarnetTilgode == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
@@ -91,12 +83,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     }
   }
 
-  const oppdaterBeregningsMetode = (
-    beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagDto | null
-  ) => {
+  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => {
     const grunnlag = {
-      ...beregningsgrunnlag,
+      ...behandling.beregningsGrunnlag,
       beregningsMetode,
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
       begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
@@ -111,34 +100,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     )
   }
 
-  const oppdaterBeregningsMetodeForFlereAvdoede = (
-    begegningsmetodeFlereAvdoede: PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[],
-    beregningsgrunnlag: BeregningsGrunnlagDto | null
-  ) => {
+  const oppdaterSoeskenJustering = (soeskenGrunnlag: Soeskengrunnlag) => {
     const grunnlag = {
-      ...beregningsgrunnlag,
-      soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
-      beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
-      begegningsmetodeFlereAvdoede,
-    }
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag,
-      },
-      () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
-    )
-  }
-
-  const oppdaterSoeskenJustering = (
-    soeskenGrunnlag: Soeskengrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagDto | null
-  ) => {
-    const grunnlag = {
-      ...beregningsgrunnlag,
+      ...behandling.beregningsGrunnlag,
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
       begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
@@ -162,22 +126,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         dispatch(
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
-        hentTrygdetiderRequest(behandling.id)
       }
+      hentTrygdetiderRequest(behandling.id)
     })
   }, [])
-
-  // Må gjøre dette for å få react til å re-rendre siden, er ikke helt best practice, siden det re-rendrer HELE siden
-  useEffect(() => {
-    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
-      if (result) {
-        dispatch(
-          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
-        )
-        hentTrygdetiderRequest(behandling.id)
-      }
-    })
-  }, [lagreBeregningsgrunnlagResult])
 
   return (
     <>
@@ -185,30 +137,20 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner visible label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
-          success: (beregningsgrunnlag) =>
+          success: () =>
             mapResult(hentTrygdetiderResult, {
               pending: <Spinner visible label="Henter trygdetider..." />,
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
                   {trygdetider.length > 1 && (
-                    <BeregningsgrunnlagFlereAvdoede
-                      redigerbar={redigerbar}
-                      trygdetider={trygdetider}
-                      beregningsgrunnlag={beregningsgrunnlag}
-                      oppdaterBeregningsMetodeForFlereAvdoede={(begegningsMetodeForFlereAvdoede) =>
-                        oppdaterBeregningsMetodeForFlereAvdoede(begegningsMetodeForFlereAvdoede, beregningsgrunnlag)
-                      }
-                      lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
-                    />
+                    <BeregningsgrunnlagFlereAvdoede redigerbar={redigerbar} trygdetider={trygdetider} />
                   )}
                   {trygdetider.length <= 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}
-                      oppdaterBeregningsMetode={(beregningsMetode) =>
-                        oppdaterBeregningsMetode(beregningsMetode, beregningsgrunnlag)
-                      }
-                      eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
+                      oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
+                      eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
                       lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
                     />
                   )}
@@ -224,11 +166,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
                     beregningsgrunnlag={behandling.beregningsGrunnlag}
                     institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
                   />
-
                   {skalViseSoeskenjustering && (
                     <Soeskenjustering
                       behandling={behandling}
-                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag, beregningsgrunnlag)}
+                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
                       setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
                     />
                   )}

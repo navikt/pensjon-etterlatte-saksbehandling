@@ -15,6 +15,7 @@ import java.time.LocalDate
 enum class KabalSakType {
     KLAGE,
     ANKE,
+    ANKE_I_TRYGDERETTEN,
 }
 
 enum class KabalKlagerType {

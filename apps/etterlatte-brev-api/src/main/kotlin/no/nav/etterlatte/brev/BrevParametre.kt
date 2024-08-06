@@ -6,7 +6,8 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.oms.AktivitetspliktBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 
@@ -17,7 +18,7 @@ sealed class BrevParametre {
     abstract fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND")
-    data class Aktivitetsplikt(
+    data class AktivitetspliktInformasjon4Mnd(
         val aktivitetsgrad: Aktivitetsgrad,
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
@@ -25,7 +26,17 @@ sealed class BrevParametre {
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
-            AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+            AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+    }
+
+    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND")
+    data class AktivitetspliktInformasjon6Mnd(
+        val redusertEtterInntekt: Boolean,
+        val nasjonalEllerUtland: NasjonalEllerUtland,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
+            AktivitetspliktInformasjon6MndBrevdata(redusertEtterInntekt, nasjonalEllerUtland)
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")

@@ -28,7 +28,6 @@ dependencies {
 
     implementation(libs.etterlatte.common)
 
-    implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.test.kotest.assertionscore)

@@ -30,8 +30,6 @@ dependencies {
 
     implementation(libs.bundles.jackson)
 
-    implementation(libs.navfelles.tokenclientcore)
-
     implementation(libs.database.kotliquery)
 
     testImplementation(libs.navfelles.mockoauth2server)

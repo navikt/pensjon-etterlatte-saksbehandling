@@ -30,8 +30,6 @@ dependencies {
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.bundles.jackson)
 
-    implementation(libs.navfelles.tokenclientcore)
-
     implementation(libs.mq.jakarta.client)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)
 

@@ -20,8 +20,6 @@ dependencies {
 
     implementation(libs.bundles.jackson)
 
-    implementation(libs.navfelles.tokenclientcore)
-
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)

@@ -29,7 +29,6 @@ class Server(
         initEmbeddedServer(
             httpPort = context.properties.httpPort,
             applicationConfig = ConfigFactory.load(),
-            withMetrics = false,
         ) {
             tilbakekrevingRoutes(context.tilbakekrevingService)
 

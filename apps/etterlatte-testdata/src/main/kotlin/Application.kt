@@ -36,16 +36,21 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.TestKey.DEV
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TARGET_TOPIC
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
-import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
@@ -61,7 +66,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private val env = System.getenv()
+private val env = Miljoevariabler.systemEnv()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper()
@@ -69,16 +74,17 @@ val objectMapper: ObjectMapper =
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
-val localDevelopment = env["DEV"].toBoolean()
+val localDevelopment = env[DEV].toBoolean()
 val httpClient = httpClient(forventSuksess = true)
 val config: Config = ConfigFactory.load()
 val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
 val producer =
     if (localDevelopment) {
-        LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
+        LocalKafkaConfig(env[KAFKA_BROKERS]!!).standardProducer(env[KAFKA_TARGET_TOPIC]!!)
     } else {
-        GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
+        val systemEnv = Miljoevariabler.systemEnv()
+        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue(KAFKA_TARGET_TOPIC))
     }
 
 interface TestDataFeature {
@@ -174,7 +180,7 @@ fun getDollyAccessToken(): String =
     runBlocking {
         azureAdClient
             .hentTokenFraAD(
-                Systembruker.testdata,
+                HardkodaSystembruker.testdata,
                 listOf("api://${config.getString("dolly.client.id")}/.default"),
             ).get()!!
             .accessToken
@@ -184,8 +190,15 @@ fun getTestnavAccessToken(): String =
     runBlocking {
         azureAdClient
             .hentTokenFraAD(
-                Systembruker.testdata,
+                HardkodaSystembruker.testdata,
                 listOf("api://${config.getString("testnav.client.id")}/.default"),
             ).get()!!
             .accessToken
     }
+
+enum class TestKey : EnvEnum {
+    DEV,
+    ;
+
+    override fun key() = name
+}

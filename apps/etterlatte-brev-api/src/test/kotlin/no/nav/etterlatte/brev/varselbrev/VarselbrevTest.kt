@@ -23,10 +23,10 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -136,7 +136,7 @@ class VarselbrevTest(
                 service.opprettVarselbrev(
                     sak.id,
                     behandling,
-                    Systembruker.brev,
+                    systembruker(),
                 )
             }
 

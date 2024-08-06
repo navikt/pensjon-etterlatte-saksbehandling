@@ -49,7 +49,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const personopplysninger = usePersonopplysninger()
-  const avdoede = personopplysninger?.avdoede.find((po) => po)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
@@ -70,10 +69,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
 
   const soesken =
-    (avdoede &&
+    (personopplysninger &&
       hentLevendeSoeskenFraAvdoedeForSoeker(
-        avdoede,
-        personopplysninger?.soeker?.opplysning.foedselsnummer as string
+        personopplysninger.avdoede,
+        personopplysninger.soeker?.opplysning.foedselsnummer as string
       )) ??
     []
   const skalViseSoeskenjustering = soesken.length > 0 && !behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)

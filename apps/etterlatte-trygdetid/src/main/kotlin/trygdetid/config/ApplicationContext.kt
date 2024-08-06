@@ -2,6 +2,7 @@ package no.nav.etterlatte.trygdetid.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -17,7 +18,7 @@ import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv())
     val dataSource =
         DataSourceBuilder.createDataSource(
             jdbcUrl = properties.jdbcUrl,

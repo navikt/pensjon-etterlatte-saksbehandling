@@ -30,13 +30,13 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
@@ -133,7 +133,7 @@ class JournalfoerBrevServiceTest {
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
         assertThrows<NoSuchElementException> {
-            runBlocking { service.journalfoerVedtaksbrev(vedtak, Systembruker.brev) }
+            runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
         }
 
         verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
@@ -162,7 +162,7 @@ class JournalfoerBrevServiceTest {
         val vedtak = opprettVedtak()
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
-        runBlocking { service.journalfoerVedtaksbrev(vedtak, Systembruker.brev) }
+        runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
         coVerify(exactly = 0) { dokarkivService.journalfoer(any()) }
@@ -216,7 +216,7 @@ class JournalfoerBrevServiceTest {
         coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
-        runBlocking { service.journalfoerVedtaksbrev(vedtak, Systembruker.brev) }
+        runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
 
         verify(exactly = 1) {
             db.hentBrevInnhold(forventetBrev.id)
@@ -227,7 +227,7 @@ class JournalfoerBrevServiceTest {
         val requestSlot = slot<JournalpostRequest>()
         coVerify(exactly = 1) {
             vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
-            behandlingService.hentSak(forventetBrev.sakId, Systembruker.brev)
+            behandlingService.hentSak(forventetBrev.sakId, any())
             dokarkivService.journalfoer(capture(requestSlot))
         }
 

@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.routing.route
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -15,7 +16,7 @@ import org.slf4j.Logger
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    Server(ApplicationContext(System.getenv())).run()
+    Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
 }
 
 class Server(

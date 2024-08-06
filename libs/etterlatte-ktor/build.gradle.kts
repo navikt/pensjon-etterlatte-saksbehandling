@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.metricsmicrometer)
+    implementation(libs.ktor2.doublereceive)
     implementation(libs.navfelles.tokenvalidationktor2)
     api(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
@@ -44,7 +45,6 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     testImplementation(libs.navfelles.mockoauth2server)
-    testImplementation(libs.kotlinx.coroutinestest)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.jupiter.api)

@@ -29,13 +29,11 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.bundles.jackson)
-    implementation(libs.jackson.xml)
 
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
 
     implementation(libs.mq.jakarta.client)
-    implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)
 
     implementation(libs.database.kotliquery)

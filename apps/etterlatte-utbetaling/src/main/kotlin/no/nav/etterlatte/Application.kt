@@ -1,19 +1,34 @@
 package no.nav.etterlatte
 
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
+import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
+import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
+import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
+import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
+import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().also {
-        rapidApplication(it).start()
-        sikkerLogg.info("Utbetaling logger på sikkerlogg")
+        initRogR(
+            applikasjonsnavn = "utbetaling",
+            restModule = {
+                restModule(sikkerLogg, config = HoconApplicationConfig(it.config)) {
+                    utbetalingRoutes(it.simuleringOsService, it.behandlingKlient)
+                }
+            },
+            configFromEnvironment = { configFromEnvironment(it) },
+        ) { rc, _ -> rc.settOppRiversOgListener(it) }
     }
 }
 
@@ -34,30 +49,40 @@ fun jobs(applicationContext: ApplicationContext): MutableSet<TimerJob> {
     return jobs
 }
 
-fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
-    applicationContext.rapidsConnection
-        .apply {
-            applicationContext.vedtakMottakRiver
-            applicationContext.kvitteringMottaker
-            applicationContext.oppgavetriggerRiver
+internal fun RapidsConnection.settOppRiversOgListener(applicationContext: ApplicationContext) {
+    VedtakMottakRiver(
+        rapidsConnection = this,
+        utbetalingService = applicationContext.utbetalingService,
+    )
+    KvitteringMottaker(
+        rapidsConnection = this,
+        utbetalingService = applicationContext.utbetalingService,
+        jmsConnectionFactory = applicationContext.jmsConnectionFactory,
+        queue = applicationContext.properties.mqKvitteringQueue,
+    )
+    OppgavetriggerRiver(
+        rapidsConnection = this,
+        utbetalingService = applicationContext.utbetalingService,
+        grensesnittsavstemmingService = applicationContext.grensesnittsavstemmingService,
+    )
 
-            register(
-                object : RapidsConnection.StatusListener {
-                    override fun onStartup(rapidsConnection: RapidsConnection) {
-                        applicationContext.dataSource.migrate().also {
-                            val cronjobs = jobs(applicationContext)
-                            val timerJobs = cronjobs.map { job -> job.schedule() }
-                            addShutdownHook(timerJobs)
-                        }
-                    }
+    register(
+        object : RapidsConnection.StatusListener {
+            override fun onStartup(rapidsConnection: RapidsConnection) {
+                applicationContext.dataSource.migrate().also {
+                    val cronjobs = jobs(applicationContext)
+                    val timerJobs = cronjobs.map { job -> job.schedule() }
+                    addShutdownHook(timerJobs)
+                }
+            }
 
-                    override fun onReady(rapidsConnection: RapidsConnection) {
-                        setReady()
-                    }
+            override fun onReady(rapidsConnection: RapidsConnection) {
+                setReady()
+            }
 
-                    override fun onShutdown(rapidsConnection: RapidsConnection) {
-                        applicationContext.jmsConnectionFactory.stop()
-                    }
-                },
-            )
-        }
+            override fun onShutdown(rapidsConnection: RapidsConnection) {
+                applicationContext.jmsConnectionFactory.stop()
+            }
+        },
+    )
+}

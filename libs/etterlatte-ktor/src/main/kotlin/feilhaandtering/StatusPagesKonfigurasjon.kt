@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.log
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
+import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
+import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import org.slf4j.Logger
 
@@ -29,12 +31,12 @@ class StatusPagesKonfigurasjon(
         exception<Throwable> { call, cause ->
             when (cause) {
                 is ForespoerselException -> {
-                    call.application.log.loggForespoerselException(cause)
+                    call.application.log.loggForespoerselException(cause, call)
                     call.respond(cause)
                 }
 
                 is InternfeilException -> {
-                    call.application.log.loggInternfeilException(cause)
+                    call.application.log.loggInternfeilException(cause, call)
                     call.respond(cause)
                 }
 
@@ -45,13 +47,13 @@ class StatusPagesKonfigurasjon(
                             detail = cause.message ?: "Fant ikke ressursen",
                             cause = cause,
                         )
-                    call.application.log.loggForespoerselException(wrapped)
+                    call.application.log.loggForespoerselException(wrapped, call)
                     call.respond(wrapped)
                 }
 
                 else -> {
                     val mappetFeil = InternfeilException("En feil har skjedd.", cause)
-                    call.application.log.loggInternfeilException(mappetFeil)
+                    call.application.log.loggInternfeilException(mappetFeil, call)
                     call.respond(mappetFeil)
                 }
             }
@@ -118,9 +120,16 @@ class StatusPagesKonfigurasjon(
         }
     }
 
-    private fun Logger.loggInternfeilException(internfeil: InternfeilException) {
+    private suspend fun Logger.loggInternfeilException(
+        internfeil: InternfeilException,
+        call: ApplicationCall,
+    ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.error("En feil har oppstått ved deserialisering", internfeil)
+            sikkerLogg.error(
+                "En feil har oppstått ved deserialisering. Requestobjektet var {}",
+                escape(hentRequestobjekt(call)),
+                internfeil,
+            )
             this.error(
                 "En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.",
             )
@@ -132,9 +141,12 @@ class StatusPagesKonfigurasjon(
         }
     }
 
-    private fun Logger.loggForespoerselException(internfeil: ForespoerselException) {
+    private suspend fun Logger.loggForespoerselException(
+        internfeil: ForespoerselException,
+        call: ApplicationCall,
+    ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.info("En feil har oppstått ved deserialisering", internfeil)
+            sikkerLogg.info("En feil har oppstått ved deserialisering. Requestobjektet var {}", escape(hentRequestobjekt(call)), internfeil)
             this.info(
                 "En feil har oppstått ved deserialisering i et endepunkt. Se sikkerlogg for mer detaljer. " +
                     "Feilen fikk status ${internfeil.status} til frontend.",
@@ -156,5 +168,16 @@ class StatusPagesKonfigurasjon(
             HttpStatusCode.InternalServerError,
             feil.somJsonRespons(),
         )
+    }
+
+    private suspend fun hentRequestobjekt(call: ApplicationCall): String {
+        val requestobjekt =
+            try {
+                call.receive<String>()
+            } catch (e: Exception) {
+                "Kunne ikke hente requestobjektet"
+            }
+        sikkerLogg.debug("Henta requestobjekt på totalt ${requestobjekt.length} tegn")
+        return requestobjekt
     }
 }

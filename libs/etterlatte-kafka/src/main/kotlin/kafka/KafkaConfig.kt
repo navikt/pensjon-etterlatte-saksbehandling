@@ -1,5 +1,12 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_CREDSTORE_PASSWORD
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_KEYSTORE_PATH
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
+import no.nav.etterlatte.libs.common.EnvEnum
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -20,18 +27,18 @@ class GcpKafkaConfig(
     private val clientId: String,
 ) : KafkaConfig {
     companion object {
-        private fun generateInstanceId(env: Map<String, String>): String {
-            if (env.containsKey("NAIS_APP_NAME")) return InetAddress.getLocalHost().hostName
+        private fun generateInstanceId(env: Miljoevariabler): String {
+            if (env.containsKey(NAIS_APP_NAME)) return InetAddress.getLocalHost().hostName
             return UUID.randomUUID().toString()
         }
 
-        fun fromEnv(env: Map<String, String>): KafkaConfig =
+        fun fromEnv(env: Miljoevariabler): KafkaConfig =
             GcpKafkaConfig(
-                bootstrapServers = env.getValue("KAFKA_BROKERS"),
-                truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-                truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-                keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-                keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
+                bootstrapServers = env.getValue(KAFKA_BROKERS),
+                truststore = env.getValue(KAFKA_TRUSTSTORE_PATH),
+                truststorePassword = env.getValue(KAFKA_CREDSTORE_PASSWORD),
+                keystoreLocation = env.getValue(KAFKA_KEYSTORE_PATH),
+                keystorePassword = env.getValue(KAFKA_CREDSTORE_PASSWORD),
                 clientId = generateInstanceId(env),
             )
     }
@@ -73,4 +80,19 @@ class LocalKafkaConfig(
         Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokersURL)
         }
+}
+
+enum class KafkaKey : EnvEnum {
+    KAFKA_RAPID_TOPIC,
+    KAFKA_BROKERS,
+    KAFKA_TRUSTSTORE_PATH,
+    KAFKA_CREDSTORE_PASSWORD,
+    KAFKA_KEYSTORE_PATH,
+    KAFKA_SCHEMA_REGISTRY_USER,
+    KAFKA_SCHEMA_REGISTRY_PASSWORD,
+    KAFKA_SCHEMA_REGISTRY,
+    KAFKA_TARGET_TOPIC,
+    ;
+
+    override fun key() = name
 }

@@ -34,7 +34,6 @@ dependencies {
     implementation(libs.ktor2.clientlogging)
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.auth)
-    implementation(libs.ktor2.authjwt)
     implementation(libs.cache.caffeine)
 
     implementation(libs.bundles.jackson)

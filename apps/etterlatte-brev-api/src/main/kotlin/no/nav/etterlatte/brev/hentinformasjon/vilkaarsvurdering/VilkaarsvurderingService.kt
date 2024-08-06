@@ -10,4 +10,9 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) = klient.hentVilkaarsvurdering(behandlingId, bruker)
+
+    suspend fun erMigrertYrkesskade(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) = klient.erMigrertYrkesskade(behandlingId, bruker)
 }

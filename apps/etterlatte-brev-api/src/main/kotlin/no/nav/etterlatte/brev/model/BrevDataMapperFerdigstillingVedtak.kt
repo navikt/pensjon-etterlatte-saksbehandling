@@ -282,6 +282,8 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
+        val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
+
         val datoVedtakOmgjoering =
             klage
                 ?.formkrav
@@ -302,6 +304,7 @@ class BrevDataMapperFerdigstillingVedtak(
             erForeldreloes,
             avdoede,
             datoVedtakOmgjoering,
+            erMigrertYrkesskade.await(),
         )
     }
 
@@ -330,6 +333,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(
@@ -343,6 +347,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 loependeIPesys,
                 avdoede,
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
+                erMigrertYrkesskade = erMigrertYrkesskade.await(),
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -355,6 +360,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 utlandstilknytningType,
                 requireNotNull(brevutfall.await()),
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
+                erMigrertYrkesskade = erMigrertYrkesskade.await(),
             )
         }
     }

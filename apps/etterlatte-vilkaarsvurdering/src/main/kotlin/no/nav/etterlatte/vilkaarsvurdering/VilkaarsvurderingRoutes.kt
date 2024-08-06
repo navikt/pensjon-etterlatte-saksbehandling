@@ -54,8 +54,8 @@ fun Route.vilkaarsvurdering(
         get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
-                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId)
-                call.respond(mapOf("migrertYrkesskadefordel" to result))
+                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId, brukerTokenInfo)
+                call.respond(MigrertYrkesskadefordel(result))
             }
         }
 

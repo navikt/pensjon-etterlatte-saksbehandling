@@ -45,6 +45,14 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         super.onError(problems, context)
     }
 
+    override fun onSevere(
+        error: MessageProblems.MessageException,
+        context: MessageContext,
+    ) {
+        sikkerlogg.debug("Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}", error)
+        super.onSevere(error, context)
+    }
+
     protected fun initialiserRiver(
         rapidsConnection: RapidsConnection,
         hendelsestype: EventnameHendelseType,

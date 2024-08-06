@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -32,6 +33,7 @@ data class AvkortetBeregningsperiode(
     val utbetaltBeloep: Kroner,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
+    val sanksjon: SanksjonertYtelse?,
 )
 
 data class Beregningsperiode(

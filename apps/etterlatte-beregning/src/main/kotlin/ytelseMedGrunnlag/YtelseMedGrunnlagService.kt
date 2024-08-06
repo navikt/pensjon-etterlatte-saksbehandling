@@ -32,7 +32,6 @@ class YtelseMedGrunnlagService(
                     beregning.beregningsperioder
                         .filter { it.datoFOM <= avkortetYtelse.fom }
                         .maxBy { it.datoFOM }
-
                 val grunnlag =
                     avkorting.avkortingGrunnlag
                         .filter { it.fom <= avkortetYtelse.fom }
@@ -53,6 +52,7 @@ class YtelseMedGrunnlagService(
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,
+                    sanksjon = avkortetYtelse.sanksjon,
                 )
             }
 

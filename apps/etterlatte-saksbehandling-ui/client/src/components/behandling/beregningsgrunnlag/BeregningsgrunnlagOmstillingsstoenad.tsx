@@ -17,7 +17,7 @@ import {
   oppdaterBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
@@ -35,6 +35,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -46,6 +47,12 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
   const onSubmit = () => {
+    if (!behandling.beregningsGrunnlagOMS?.beregningsMetode) {
+      setVisManglendeBeregningsgrunnlag(true)
+      return
+    }
+    setVisManglendeBeregningsgrunnlag(false)
+
     opprettEllerEndreBeregningRequest(behandling.id, (beregning: Beregning) => {
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
       dispatch(oppdaterBeregning(beregning))
@@ -57,14 +64,21 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
     beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
   ) => {
-    lagreBeregningsGrunnlagOMSRequest({
-      behandlingId: behandling.id,
-      grunnlag: {
-        ...beregningsgrunnlag,
-        beregningsMetode,
-        institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+    const grunnlag = {
+      ...beregningsgrunnlag,
+      beregningsMetode,
+      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+    }
+    lagreBeregningsGrunnlagOMSRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag,
       },
-    })
+      () => {
+        dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+        setVisManglendeBeregningsgrunnlag(false)
+      }
+    )
   }
 
   useEffect(() => {
@@ -116,6 +130,9 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         apiResult: opprettEllerEndreBeregningResult,
         errorMessage: 'Kunne ikke opprette eller oppdatere beregning',
       })}
+      {visManglendeBeregningsgrunnlag && (
+        <ApiErrorAlert>Beregningsmetode for trygdetid må velges før ytelsen kan beregnes.</ApiErrorAlert>
+      )}
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (

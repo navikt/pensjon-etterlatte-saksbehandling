@@ -5,6 +5,20 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.BrevKey.BREVBAKER_SCOPE
+import no.nav.etterlatte.BrevKey.BREVBAKER_URL
+import no.nav.etterlatte.BrevKey.CLAMAV_ENDPOINT_URL
+import no.nav.etterlatte.BrevKey.DOKDIST_SCOPE
+import no.nav.etterlatte.BrevKey.DOKDIST_URL
+import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
+import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
+import no.nav.etterlatte.BrevKey.SAF_BASE_URL
+import no.nav.etterlatte.BrevKey.SAF_SCOPE
+import no.nav.etterlatte.EnvKey.DOKARKIV_SCOPE
+import no.nav.etterlatte.EnvKey.DOKARKIV_URL
+import no.nav.etterlatte.EnvKey.NAVANSATT_URL
+import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
@@ -61,11 +75,11 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
@@ -82,19 +96,15 @@ import no.nav.etterlatte.rivers.SamordningsnotatRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.Logger
+import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
-
-    init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-brev-api")
-    }
 
     private val env = getRapidEnv()
 
@@ -110,13 +120,13 @@ class ApplicationBuilder {
 
     private val brevbaker =
         BrevbakerKlient(
-            httpClient("BREVBAKER_SCOPE"),
-            env.requireEnvValue("BREVBAKER_URL"),
+            httpClient(BREVBAKER_SCOPE),
+            env.requireEnvValue(BREVBAKER_URL),
         )
 
     private val regoppslagKlient =
-        RegoppslagKlient(httpClient("REGOPPSLAG_SCOPE"), env.requireEnvValue("REGOPPSLAG_URL"))
-    private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
+        RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
+    private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue(NAVANSATT_URL))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
@@ -128,7 +138,7 @@ class ApplicationBuilder {
     private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val beregningService = BeregningService(beregningKlient)
-    private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
+    private val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
@@ -149,12 +159,12 @@ class ApplicationBuilder {
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val dokarkivKlient =
-        DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
+        DokarkivKlient(httpClient(DOKARKIV_SCOPE, false), env.requireEnvValue(DOKARKIV_URL))
 
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
     private val distribusjonKlient =
-        DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
+        DistribusjonKlient(httpClient(DOKDIST_SCOPE, false), env.requireEnvValue(DOKDIST_URL))
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
@@ -219,13 +229,13 @@ class ApplicationBuilder {
             pdfGenerator,
         )
 
-    private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue("CLAMAV_ENDPOINT_URL"))
+    private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
     private val virusScanService = VirusScanService(clamAvClient)
     private val pdfService = PDFService(db, virusScanService)
 
     private val safService =
         SafService(
-            SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
+            SafKlient(httpClient(), env.requireEnvValue(SAF_BASE_URL), env.requireEnvValue(SAF_SCOPE)),
         )
 
     private val oversendelseBrevService =
@@ -238,17 +248,16 @@ class ApplicationBuilder {
         )
 
     private val notatRepository = NotatRepository(datasource)
-    private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL"))
+    private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
-    private val rapidsConnection: RapidsConnection =
-        RapidApplication
-            .Builder(
-                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-            ).withKtorModule {
+    private val rapidsConnection =
+        initRogR(
+            applikasjonsnavn = "brev-api",
+            restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
@@ -257,44 +266,44 @@ class ApplicationBuilder {
                     notatRoute(notatService, nyNotatService, tilgangssjekker)
                     oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
-            }.build()
-            .apply {
-                val brevgenerering =
-                    StartInformasjonsbrevgenereringRiver(
-                        brevgenereringRepository,
-                        this,
-                    )
-                register(
-                    object : RapidsConnection.StatusListener {
-                        override fun onStartup(rapidsConnection: RapidsConnection) {
-                            datasource.migrate()
-                            brevgenerering.init()
-                        }
-                    },
+            },
+            configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
+        ) { rapidsConnection, _ ->
+            val brevgenerering =
+                StartInformasjonsbrevgenereringRiver(
+                    brevgenereringRepository,
+                    rapidsConnection,
                 )
-                val ferdigstillJournalfoerOgDistribuerBrev =
-                    FerdigstillJournalfoerOgDistribuerBrev(
-                        pdfGenerator,
-                        journalfoerBrevService,
-                        brevdistribuerer,
-                    )
-                OpprettJournalfoerOgDistribuerRiver(
-                    this,
-                    grunnlagService,
-                    brevoppretter,
-                    ferdigstillJournalfoerOgDistribuerBrev,
+            rapidsConnection.register(
+                object : RapidsConnection.StatusListener {
+                    override fun onStartup(rapidsConnection: RapidsConnection) {
+                        datasource.migrate()
+                        brevgenerering.init()
+                    }
+                },
+            )
+            val ferdigstillJournalfoerOgDistribuerBrev =
+                FerdigstillJournalfoerOgDistribuerBrev(
+                    pdfGenerator,
+                    journalfoerBrevService,
+                    brevdistribuerer,
                 )
+            OpprettJournalfoerOgDistribuerRiver(
+                rapidsConnection,
+                grunnlagService,
+                brevoppretter,
+                ferdigstillJournalfoerOgDistribuerBrev,
+            )
 
-                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
-                VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, brevdistribuerer)
-                SamordningsnotatRiver(this, nyNotatService)
-            }
-
-    fun start() = setReady().also { rapidsConnection.start() }
+            JournalfoerVedtaksbrevRiver(rapidsConnection, journalfoerBrevService)
+            VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
+            DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
+            SamordningsnotatRiver(rapidsConnection, nyNotatService)
+        }
 
     private fun httpClient(
-        scope: String? = null,
+        scope: EnvEnum? = null,
         forventStatusSuccess: Boolean = true,
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
@@ -307,13 +316,26 @@ class ApplicationBuilder {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env
-                                .toMutableMap()
-                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                            env.append(AZURE_APP_OUTBOUND_SCOPE) { requireNotNull(it.get(scope)) }
                     }
                 }
                 it.install(HttpTimeout)
             }
         },
     )
+}
+
+enum class BrevKey : EnvEnum {
+    BREVBAKER_SCOPE,
+    BREVBAKER_URL,
+    CLAMAV_ENDPOINT_URL,
+    DOKDIST_SCOPE,
+    DOKDIST_URL,
+    REGOPPSLAG_SCOPE,
+    REGOPPSLAG_URL,
+    SAF_BASE_URL,
+    SAF_SCOPE,
+    ;
+
+    override fun key() = name
 }

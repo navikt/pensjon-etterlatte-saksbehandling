@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -47,7 +46,7 @@ internal class OpprettJournalfoerOgDistribuer {
         val brev = lagBrev(behandlingId)
         val journalfoerBrevService =
             mockk<JournalfoerBrevService>().also {
-                coEvery { it.journalfoerVedtaksbrev(any(), Systembruker.brev) } returns
+                coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
                     Pair(
                         OpprettJournalpostResponse(
                             journalpostId = "123",

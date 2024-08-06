@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tilbakekreving.config
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.JmsConnectionFactory
@@ -12,7 +13,7 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(Miljoevariabler.systemEnv()),
 ) {
     val dataSource =
         DataSourceBuilder.createDataSource(

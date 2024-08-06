@@ -30,6 +30,7 @@ data class BarnepensjonInnvilgelse(
     val kunNyttRegelverk: Boolean,
     val erGjenoppretting: Boolean,
     val harUtbetaling: Boolean,
+    val erMigrertYrkesskade: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -44,6 +45,7 @@ data class BarnepensjonInnvilgelse(
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
             erGjenoppretting: Boolean,
+            erMigrertYrkesskade: Boolean,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             return BarnepensjonInnvilgelse(
@@ -59,6 +61,7 @@ data class BarnepensjonInnvilgelse(
                     },
                 erGjenoppretting = erGjenoppretting,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
+import no.nav.etterlatte.EnvKey.PDLTJENESTER_URL
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -19,7 +20,6 @@ import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -29,21 +29,16 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
+import rapidsandrivers.initRogR
 
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    val application = ApplicationBuilder()
-    application.start()
+    ApplicationBuilder().init()
 }
 
 class ApplicationBuilder {
-    init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-grunnlag")
-    }
-
     private val env = getRapidEnv()
     private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
     private val config: Config = ConfigFactory.load()
@@ -57,7 +52,7 @@ class ApplicationBuilder {
         )
     }
 
-    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
+    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env[PDLTJENESTER_URL]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
@@ -67,10 +62,10 @@ class ApplicationBuilder {
     private val aldersovergangDao = AldersovergangDao(ds)
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
-    private val rapidsConnection =
-        RapidApplication
-            .Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
-            .withKtorModule {
+    fun init() =
+        initRogR(
+            applikasjonsnavn = "grunnlag",
+            restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
                         sakGrunnlagRoute(grunnlagService, behandlingKlient)
@@ -79,11 +74,11 @@ class ApplicationBuilder {
                         aldersovergangRoutes(aldersovergangService)
                     }
                 }
-            }.build()
-            .apply {
-                GrunnlagsversjoneringRiver(this, grunnlagService)
-                GrunnlagHendelserRiver(this, grunnlagService)
-            }
-
-    fun start() = setReady().also { rapidsConnection.start() }
+            },
+            configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
+        ) { rapidsConnection, _ ->
+            GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
+            GrunnlagHendelserRiver(rapidsConnection, grunnlagService)
+        }
 }

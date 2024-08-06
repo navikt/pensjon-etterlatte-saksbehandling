@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.ktor2.statuspages)
 
     implementation(libs.bundles.jackson)
-    implementation(libs.jackson.core)
     implementation(libs.jackson.databind)
 
     implementation(libs.etterlatte.common)

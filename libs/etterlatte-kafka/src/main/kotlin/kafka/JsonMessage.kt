@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.NaisKey
+import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.net.InetAddress
@@ -41,8 +44,8 @@ open class JsonMessage(
         private const val READ_COUNT_KEY = "system_read_count"
         private const val PARTICIPATING_SERVICES_KEY = "system_participating_services"
 
-        private val serviceName: String? = System.getenv("NAIS_APP_NAME")
-        private val serviceImage: String? = System.getenv("NAIS_APP_IMAGE")
+        private val serviceName: String? = Miljoevariabler.systemEnv(NAIS_APP_NAME)
+        private val serviceImage: String? = Miljoevariabler.systemEnv(NaisKey.NAIS_APP_IMAGE)
         private val serviceHostname = serviceName?.let { InetAddress.getLocalHost().hostName }
 
         fun newMessage(

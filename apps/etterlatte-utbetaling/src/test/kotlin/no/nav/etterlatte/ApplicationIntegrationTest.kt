@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -66,7 +67,7 @@ class ApplicationIntegrationTest {
             )
 
         ApplicationContext(
-            env = System.getenv(),
+            env = Miljoevariabler.systemEnv(),
             properties = applicationProperties,
             rapidConnection = rapidsConnection,
             jmsConnectionFactory = connectionFactory,
@@ -74,7 +75,8 @@ class ApplicationIntegrationTest {
             vedtaksvurderingKlient = mockk(),
             simuleringOsKlient = mockk(),
         ).also {
-            rapidApplication(it).start()
+            rapidsConnection.settOppRiversOgListener(it)
+            rapidsConnection.start()
         }
     }
 

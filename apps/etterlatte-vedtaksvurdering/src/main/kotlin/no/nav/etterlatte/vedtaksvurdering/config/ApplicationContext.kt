@@ -3,19 +3,24 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.HTTP_PORT
+import no.nav.etterlatte.EnvKey.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.EnvEnum
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
@@ -29,6 +34,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
@@ -46,13 +52,13 @@ class ApplicationContext {
         sikkerLoggOppstartOgAvslutning("etterlatte-vedtaksvurdering")
     }
 
-    val env = System.getenv()
-    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+    val env = Miljoevariabler.systemEnv()
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)
 
     val leaderElectionHttpClient: HttpClient = httpClient()
-    val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val samKlient =
         SamordningsKlientImpl(
@@ -115,13 +121,13 @@ class ApplicationContext {
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue("JOBB_METRIKKER_OPENING_HOURS").let { OpeningHours.of(it) },
+            openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
     private val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         }
@@ -135,7 +141,7 @@ class ApplicationContext {
 
     private val vedtakshendelserProdusent: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_VEDTAKSHENDELSER_TOPIC"))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
         } else {
             object : KafkaProdusent<String, String> {
                 override fun publiser(
@@ -166,4 +172,11 @@ class ApplicationContext {
             periode = Duration.of(1, ChronoUnit.MINUTES),
         )
     }
+}
+
+enum class VedtakKey : EnvEnum {
+    KAFKA_VEDTAKSHENDELSER_TOPIC,
+    ;
+
+    override fun key() = name
 }

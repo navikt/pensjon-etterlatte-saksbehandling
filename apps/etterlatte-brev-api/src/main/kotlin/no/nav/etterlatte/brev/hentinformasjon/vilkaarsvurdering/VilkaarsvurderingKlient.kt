@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -61,4 +62,23 @@ class VilkaarsvurderingKlient(
             }
         }
     }
+
+    internal suspend fun erMigrertYrkesskade(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Boolean =
+        downstreamResourceClient
+            .get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel",
+                    ),
+                brukerTokenInfo = bruker,
+            ).mapBoth(
+                success = { resource ->
+                    resource.response.let { objectMapper.readValue<MigrertYrkesskadefordel>(it.toString()) }.migrertYrkesskadefordel
+                },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
 }

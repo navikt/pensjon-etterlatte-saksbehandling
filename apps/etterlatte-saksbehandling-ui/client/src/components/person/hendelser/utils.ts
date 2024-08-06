@@ -152,10 +152,12 @@ export const omgjoeringAvslagKanOpprettes = (
   enheter: Array<string>
 ): Boolean => {
   return (
+    behandlinger.length > 0 &&
     behandlinger.every(
       (behandling) =>
         behandling.behandlingType != IBehandlingsType.FØRSTEGANGSBEHANDLING ||
         [IBehandlingStatus.AVSLAG, IBehandlingStatus.AVBRUTT].includes(behandling.status)
-    ) && enhetErSkrivbar(enhet, enheter)
+    ) &&
+    enhetErSkrivbar(enhet, enheter)
   )
 }

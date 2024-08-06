@@ -118,6 +118,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                             doedsdato = LocalDate.now(),
                         ),
                     ),
+                erMigrertYrkesskade = false,
             )
 
         Assertions.assertEquals(

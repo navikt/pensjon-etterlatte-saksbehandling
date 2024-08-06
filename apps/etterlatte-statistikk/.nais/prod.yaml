@@ -72,8 +72,6 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEREGNING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
-    - name: VEDTAK_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -81,6 +79,5 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
-        - application: etterlatte-vedtaksvurdering # skal fjernes etter vi har hentet vedtak
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -8,6 +8,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -257,6 +258,7 @@ internal fun Route.behandlingRoutes(
                             vilkaar = body.vilkaar,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
+                            aktiv = true,
                         )
 
                     inTransaction {
@@ -272,6 +274,17 @@ internal fun Route.behandlingRoutes(
                     logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
+            }
+        }
+
+        delete("/viderefoert-opphoer") {
+            kunSkrivetilgang {
+                logger.debug("Prøver å fjerne videreført opphør")
+
+                inTransaction {
+                    behandlingService.fjernViderefoertOpphoer(behandlingId)
+                }
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -406,4 +419,5 @@ data class ViderefoertOpphoer(
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,
+    val aktiv: Boolean = true,
 )

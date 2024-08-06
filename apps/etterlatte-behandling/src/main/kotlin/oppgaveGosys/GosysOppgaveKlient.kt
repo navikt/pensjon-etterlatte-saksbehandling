@@ -12,6 +12,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.network.sockets.SocketTimeoutException
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -306,8 +307,7 @@ data class EndreStatusRequest(
 )
 
 class GosysTimeout :
-    ForespoerselException(
-        status = HttpStatusCode.RequestTimeout.value,
+    TimeoutForespoerselException(
         code = "GOSYS_TIMEOUT",
         detail = "Henting av oppgave(er) fra Gosys tok for lang tid. Prøv igjen senere.",
     )

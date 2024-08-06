@@ -36,6 +36,13 @@ open class IkkeFunnetException(
  */
 class GenerellIkkeFunnetException : IkkeFunnetException(code = "NOT_FOUND", detail = "Kunne ikke finne ønsket ressurs")
 
+open class TimeoutForespoerselException(
+    override val code: String,
+    override val detail: String,
+    override val meta: Map<String, Any>? = null,
+    override val cause: Throwable? = null,
+) : ForespoerselException(status = 408, code = code, detail = detail, meta = meta, cause = cause)
+
 open class IkkeTillattException(
     override val code: String,
     override val detail: String,

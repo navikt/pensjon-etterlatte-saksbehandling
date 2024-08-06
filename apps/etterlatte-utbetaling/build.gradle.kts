@@ -19,11 +19,6 @@ dependencies {
     implementation(project(":libs:etterlatte-mq"))
     implementation(project(":libs:etterlatte-migrering-model"))
 
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.jackson)
-
     implementation(libs.mq.jakarta.client)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsimulering)

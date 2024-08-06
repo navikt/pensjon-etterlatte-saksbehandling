@@ -18,19 +18,7 @@ dependencies {
 
     implementation(libs.database.kotliquery)
 
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)
-    implementation(libs.ktor2.jackson)
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.ktor2.statuspages)
-    implementation(libs.ktor2.servercontentnegotiation)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.clientauth)
-
-    implementation(libs.jackson.datatypejsr310)
-    implementation(libs.jackson.modulekotlin)
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)

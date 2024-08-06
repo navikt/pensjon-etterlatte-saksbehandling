@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { fnrErGyldig } from '~utils/fnr'
 import { hentSak } from '~shared/api/behandling'
 
-import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isFailure, isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
 export const Search = () => {
@@ -45,6 +45,7 @@ export const Search = () => {
 
   useEffect(() => {
     if (gyldigInputFnr) {
+      console.log('gyldig')
       sakMedBehandlingFetch(searchInput)
     }
 
@@ -71,6 +72,17 @@ export const Search = () => {
             <Loader />
             <span>Søker...</span>
           </SpinnerContent>
+        </Dropdown>
+      )}
+
+      {isFailure(sakMedBehandlingResult) && (
+        <Dropdown $error={true}>
+          <span className="icon">
+            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
+          </span>
+          <SearchResult>
+            <BodyShort className="text">Fant ingen person</BodyShort>
+          </SearchResult>
         </Dropdown>
       )}
 

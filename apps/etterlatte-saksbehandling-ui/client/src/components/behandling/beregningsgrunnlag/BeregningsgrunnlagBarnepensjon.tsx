@@ -58,9 +58,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   )
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
-  const [beregningsgrunnlagResult, beregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
-  const [trygdetiderResult, trygdetiderRequest] = useApiCall(hentTrygdetider)
-  const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
+  const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
+  const [hentTrygdetiderResult, hentTrygdetiderRequest] = useApiCall(hentTrygdetider)
+  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
 
@@ -82,7 +82,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     if (skalViseSoeskenjustering && !behandling.beregningsGrunnlag?.soeskenMedIBeregning) {
       setSoeskenJusteringMangler(true)
     } else {
-      postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
+      opprettEllerEndreBeregningRequest(behandling.id, (beregning: Beregning) => {
         dispatch(resetBeregning())
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
         dispatch(oppdaterBeregning(beregning))
@@ -157,24 +157,24 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
 
   useEffect(() => {
-    beregningsgrunnlagRequest(behandling.id, (result) => {
+    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
         dispatch(
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
-        trygdetiderRequest(behandling.id)
+        hentTrygdetiderRequest(behandling.id)
       }
     })
   }, [])
 
   // Må gjøre dette for å få react til å re-rendre siden, er ikke helt best practice, siden det re-rendrer HELE siden
   useEffect(() => {
-    beregningsgrunnlagRequest(behandling.id, (result) => {
+    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
         dispatch(
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
-        trygdetiderRequest(behandling.id)
+        hentTrygdetiderRequest(behandling.id)
       }
     })
   }, [lagreBeregningsgrunnlagResult])
@@ -182,11 +182,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       <>
-        {mapResult(beregningsgrunnlagResult, {
+        {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner visible label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: (beregningsgrunnlag) =>
-            mapResult(trygdetiderResult, {
+            mapResult(hentTrygdetiderResult, {
               pending: <Spinner visible label="Henter trygdetider..." />,
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
@@ -237,14 +237,20 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }),
         })}
       </>
+
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
+
       {isFailureHandler({
-        apiResult: endreBeregning,
+        apiResult: opprettEllerEndreBeregningResult,
         errorMessage: 'Kunne ikke opprette ny beregning',
       })}
       {isFailureHandler({
-        apiResult: trygdetiderResult,
+        apiResult: hentTrygdetiderResult,
         errorMessage: 'Kunne ikke hente trygdetid(er)',
+      })}
+      {isFailureHandler({
+        apiResult: lagreBeregningsgrunnlagResult,
+        errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
@@ -253,7 +259,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             <Button
               variant="primary"
               onClick={onSubmit}
-              loading={isPending(lagreBeregningsgrunnlagResult) || isPending(endreBeregning)}
+              loading={isPending(lagreBeregningsgrunnlagResult) || isPending(opprettEllerEndreBeregningResult)}
             >
               {handlinger.NESTE.navn}
             </Button>

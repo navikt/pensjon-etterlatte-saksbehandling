@@ -59,7 +59,7 @@ export const StatusBar = ({ result, saksId }: { result: Result<IPdlPersonNavnFoe
         <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
           <Label>
-            <Link href={`/sak/${saksId}`}>{genererNavn(person)}</Link>
+            <Link href={saksId ? `/sak/${saksId}` : '/person'}>{genererNavn(person)}</Link>
           </Label>
 
           <DoedsdatoTag doedsdato={person.doedsdato} />

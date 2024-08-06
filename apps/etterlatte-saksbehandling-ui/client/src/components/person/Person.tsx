@@ -32,6 +32,7 @@ import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { settSak } from '~store/reducers/SakReducer'
 import { useAppDispatch } from '~store/Store'
+import { PersonOversiktLenkeStorage } from '~components/oppgavebenk/components/PersonoversiktLenke'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -56,6 +57,8 @@ export const Person = () => {
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
+  const fnr = localStorage.getItem(PersonOversiktLenkeStorage.FnrPerson)
+
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
     setSearch({ fane: valgtFane })
@@ -77,6 +80,13 @@ export const Person = () => {
       }
     }
   }, [sakResult])
+
+  useEffect(() => {
+    if (sakId == null && fnr && fnrHarGyldigFormat(fnr)) {
+      personNavnFetch(fnr)
+      sakMedBehandlingFetch(fnr)
+    }
+  }, [fnr, sakId])
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {
@@ -152,9 +162,12 @@ export const Person = () => {
         )
       )}
 
-      {mapFailure(sakResult, (error) => {
-        return <Box padding="8">{handleError(error)}</Box>
-      })}
+      {sakId &&
+        mapFailure(sakResult, (error) => {
+          return <Box padding="8">{handleError(error)}</Box>
+        })}
+
+      {!sakId && !fnr && <ApiErrorAlert>Feil oppsto ved henting av person</ApiErrorAlert>}
     </>
   )
 }

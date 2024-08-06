@@ -4,14 +4,14 @@ import { PencilIcon, PersonIcon, PlusIcon, TagIcon, TrashIcon } from '@navikt/ak
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { formaterNavn } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeForAvdoded'
+import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeForAvdoded'
 import {
   mapListeFraDto,
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
-import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/beregningsMetode/SammendragAvBeregningsMetodeForAvdoed'
+import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/SammendragAvBeregningsMetodeForAvdoed'
 import { isPending } from '~shared/api/apiUtils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'

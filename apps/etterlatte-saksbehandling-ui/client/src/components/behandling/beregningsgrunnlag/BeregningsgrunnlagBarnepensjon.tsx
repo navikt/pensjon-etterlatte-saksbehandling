@@ -33,7 +33,7 @@ import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { SakType } from '~shared/types/sak'
-import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagFlereAvdoede'
+import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
 
 const BeregningsgrunnlagBarnepensjon = () => {

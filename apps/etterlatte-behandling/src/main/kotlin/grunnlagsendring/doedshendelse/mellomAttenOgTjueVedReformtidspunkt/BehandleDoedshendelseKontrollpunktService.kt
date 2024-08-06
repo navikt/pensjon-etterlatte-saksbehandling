@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -37,7 +36,7 @@ class BehandleDoedshendelseKontrollpunktService(
         } else {
             val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
             val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-            val fellesKontrollpunkter = fellesKontrollpunkter(avdoed, barn, bruker)
+            val fellesKontrollpunkter = fellesKontrollpunkter(barn)
 
             barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
         }
@@ -55,38 +54,15 @@ class BehandleDoedshendelseKontrollpunktService(
         return Triple(sak, avdoed, gjenlevende)
     }
 
-    private fun fellesKontrollpunkter(
-        avdoed: PersonDTO,
-        gjenlevende: PersonDTO,
-        bruker: BrukerTokenInfo,
-    ): List<DoedshendelseKontrollpunkt> {
+    private fun fellesKontrollpunkter(gjenlevende: PersonDTO): List<DoedshendelseKontrollpunkt> {
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
-        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende, bruker)
 
-        return listOfNotNull(adresseKontrollpunkt, haandtertAvPesys)
+        return listOfNotNull(adresseKontrollpunkt)
     }
 
     private fun kontrollerAktivAdresse(gjenlevende: PersonDTO): DoedshendelseKontrollpunkt? =
         when (harAktivAdresse(gjenlevende)) {
             true -> null
             false -> DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse
-        }
-
-    private fun behandletAvPesys(
-        avdoed: PersonDTO,
-        gjenlevende: PersonDTO,
-        bruker: BrukerTokenInfo,
-    ): DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys? =
-        runBlocking {
-            try {
-                if (pesysKlient.erTilstoetendeBehandlet(gjenlevende.foedselsnummer.verdi.value, avdoed.doedsdato!!.verdi, bruker)) {
-                    DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                logger.error("Feil ved kall til Pesys for å sjekke om tilstøtt har blitt behandlet", e)
-                null // TODO: Fjern try-catch når vi har testet at grensesnittet fungerer som det skal mot Pesys
-            }
         }
 }

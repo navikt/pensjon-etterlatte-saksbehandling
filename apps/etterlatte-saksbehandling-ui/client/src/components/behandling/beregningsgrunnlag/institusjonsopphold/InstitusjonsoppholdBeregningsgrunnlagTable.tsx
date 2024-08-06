@@ -4,6 +4,7 @@ import {
   BeregningsGrunnlagOMSPostDto,
   BeregningsMetode,
   InstitusjonsoppholdIBeregning,
+  ReduksjonBP,
   ReduksjonOMS,
 } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, HStack, Label, Table } from '@navikt/ds-react'
@@ -127,7 +128,11 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
               >
                 <Table.DataCell>{formaterDatoMedFallback(opphold.fom, '-')}</Table.DataCell>
                 <Table.DataCell>{formaterDatoMedFallback(opphold.tom, '-')}</Table.DataCell>
-                <Table.DataCell>{ReduksjonOMS[opphold.data.reduksjon]}</Table.DataCell>
+                <Table.DataCell>
+                  {sakType === SakType.OMSTILLINGSSTOENAD
+                    ? ReduksjonOMS[opphold.data.reduksjon]
+                    : ReduksjonBP[opphold.data.reduksjon]}
+                </Table.DataCell>
                 <Table.DataCell>{opphold.data.egenReduksjon ?? '-'}</Table.DataCell>
                 <Table.DataCell>
                   <HStack gap="2" wrap={false} justify="end">

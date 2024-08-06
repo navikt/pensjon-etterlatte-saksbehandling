@@ -28,6 +28,7 @@ import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import {
   Beregning,
   BeregningsGrunnlagDto,
+  BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   BeregningsmetodeForAvdoed,
 } from '~shared/types/Beregning'
@@ -120,7 +121,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning ?? [],
       institusjonsopphold: beregningsgrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? [],
       beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? {
-        beregningsMetode: null,
+        beregningsMetode: BeregningsMetode.NASJONAL,
       },
       begegningsmetodeFlereAvdoede,
     }
@@ -143,7 +144,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
       begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
       beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: null,
+        beregningsMetode: BeregningsMetode.NASJONAL,
       },
     }
 

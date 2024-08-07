@@ -859,11 +859,9 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         behandlingsHendelser,
         applicationContext.behandlingDao,
         applicationContext.hendelseDao,
-        applicationContext.grunnlagsendringshendelseDao,
         applicationContext.kommerBarnetTilGodeService,
         applicationContext.revurderingDao,
         applicationContext.klageService,
-        applicationContext.behandlingService,
         aktivitetspliktDao,
         aktivitetspliktKopierService,
     )

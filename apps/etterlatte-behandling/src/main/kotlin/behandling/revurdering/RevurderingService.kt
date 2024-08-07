@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.revurdering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
@@ -14,7 +13,6 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -87,11 +85,9 @@ class RevurderingService(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
-    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val revurderingDao: RevurderingDao,
     private val klageService: KlageService,
-    private val behandlingService: BehandlingService,
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
 ) {
@@ -149,8 +145,6 @@ class RevurderingService(
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }
 
-    // Denne burde nok ha vore private eller noko, men for å ikkje få ei altfor stor omskriving
-    // gjer eg han til internal for no
     internal fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,

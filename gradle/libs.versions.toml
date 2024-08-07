@@ -29,7 +29,7 @@ jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-k
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-version" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.8.0" }
-kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
+kafka-avro = { module = "org.apache.avro:avro", version = "1.12.0" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }

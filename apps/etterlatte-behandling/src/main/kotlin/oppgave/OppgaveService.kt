@@ -539,7 +539,7 @@ class OppgaveService(
     }
 
     fun opprettOppgave(
-        referanse: String? = null,
+        referanse: String,
         sakId: Long,
         kilde: OppgaveKilde?,
         type: OppgaveType,

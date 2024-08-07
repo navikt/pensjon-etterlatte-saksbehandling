@@ -1,5 +1,4 @@
 plugins {
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.common")
     id("etterlatte.postgres")
 }
@@ -18,6 +17,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-mq"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.mq.jakarta.client)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)

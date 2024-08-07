@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -8,6 +7,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

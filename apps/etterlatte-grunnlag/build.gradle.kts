@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.postgres")
 }
 
@@ -13,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)

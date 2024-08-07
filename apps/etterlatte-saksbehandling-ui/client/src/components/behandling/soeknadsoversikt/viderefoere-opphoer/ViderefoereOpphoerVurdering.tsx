@@ -17,8 +17,12 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterBehandlingsstatus, oppdaterViderefoertOpphoer } from '~store/reducers/BehandlingReducer'
-import { lagreViderefoertOpphoer } from '~shared/api/behandling'
+import {
+  oppdaterBehandlingsstatus,
+  oppdaterViderefoertOpphoer,
+  resetViderefoertOpphoer,
+} from '~store/reducers/BehandlingReducer'
+import { lagreViderefoertOpphoer, slettViderefoertOpphoer } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { hentVilkaartyper, Vilkaartyper } from '~shared/api/vilkaarsvurdering'
 import { formaterDato } from '~utils/formatering/dato'
@@ -53,6 +57,7 @@ export const ViderefoereOpphoerVurdering = ({
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
   const [kravdato] = useState<string | undefined>()
+  const [, slettViderefoertOpphoerCall] = useApiCall(slettViderefoertOpphoer)
 
   const [vilkaartyperResult, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
 
@@ -126,6 +131,13 @@ export const ViderefoereOpphoerVurdering = ({
     }
   }
 
+  const slettOpphoer = (onSuccess?: () => void) =>
+    slettViderefoertOpphoerCall({ behandlingId: behandlingId }, () => {
+      onSuccess?.()
+      dispatch(resetViderefoertOpphoer())
+      setVurdert(false)
+    })
+
   return (
     <VurderingsboksWrapper
       tittel="Skal opphøret umiddelbart videreføres?"
@@ -172,6 +184,7 @@ export const ViderefoereOpphoerVurdering = ({
       avbrytklikk={reset}
       kommentar={viderefoertOpphoer?.begrunnelse}
       defaultRediger={viderefoertOpphoer === null}
+      slett={(callback) => slettOpphoer(callback)}
     >
       <VStack gap="2">
         <div>

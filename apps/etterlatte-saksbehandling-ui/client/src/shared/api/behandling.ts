@@ -122,6 +122,9 @@ export const lagreViderefoertOpphoer = async ({
   })
 }
 
+export const slettViderefoertOpphoer = async (args: { behandlingId: string }): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/behandling/${args.behandlingId}/viderefoert-opphoer`)
+
 export const lagreBoddEllerArbeidetUtlandet = async (args: {
   behandlingId: string
   begrunnelse: string

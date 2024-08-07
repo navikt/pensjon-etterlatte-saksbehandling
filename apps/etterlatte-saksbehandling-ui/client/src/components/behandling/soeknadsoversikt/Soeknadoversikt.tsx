@@ -122,7 +122,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
-        {useFeatureEnabledMedDefault('viderefoer-opphoer', false) && (
+        {useFeatureEnabledMedDefault('viderefoer-opphoer', false) && behandling.virkningstidspunkt && (
           <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
         )}
       </Box>

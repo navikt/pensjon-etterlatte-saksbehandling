@@ -26,7 +26,7 @@ dependencies {
     implementation(libs.ktor2.metricsmicrometer)
     implementation(libs.ktor2.doublereceive)
     implementation(libs.navfelles.tokenvalidationktor2)
-    api(libs.ktor2.clientauth)
+    implementation(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
     api(libs.navfelles.tokenclientcore)
     api("com.michael-bull.kotlin-result:kotlin-result:2.0.0")

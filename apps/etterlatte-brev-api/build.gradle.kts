@@ -25,6 +25,7 @@ dependencies {
 
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.jackson)
+    implementation(libs.ktor2.clientauth)
     implementation(libs.cache.caffeine)
 
     testImplementation(libs.test.kotest.assertionscore)

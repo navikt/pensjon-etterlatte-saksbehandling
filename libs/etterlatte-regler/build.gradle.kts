@@ -7,10 +7,6 @@ plugins {
 
 version = "1.1"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(libs.jackson.datatypejsr310)
     api(libs.jackson.modulekotlin)

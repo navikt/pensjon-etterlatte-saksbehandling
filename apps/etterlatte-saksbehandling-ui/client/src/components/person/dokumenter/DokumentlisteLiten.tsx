@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Detail, Heading, HStack, Link } from '@navikt/ds-react'
+import { Alert, BodyShort, Detail, Heading, HStack, Link } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Journalstatus } from '~shared/types/Journalpost'
@@ -9,7 +9,8 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
-import { NavLink } from 'react-router-dom'
+import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -73,7 +74,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <HStack justify="end">
-              <Button
+              {/*<Button
                 variant="tertiary"
                 size="small"
                 as={NavLink}
@@ -83,7 +84,8 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 icon={<ExternalLinkIcon />}
               >
                 Gå til dokumentoversikten
-              </Button>
+              </Button>*/}
+              <PersonButtonLink fnr={fnr} fane={PersonOversiktFane.DOKUMENTER} />
             </HStack>
           </>
         )

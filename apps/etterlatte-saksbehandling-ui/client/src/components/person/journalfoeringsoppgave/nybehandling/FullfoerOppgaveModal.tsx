@@ -63,7 +63,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
-                <Button variant="primary" onClick={() => navigate(`/person`, { state: { fnr: oppgave.fnr } })}>
+                <Button variant="primary" onClick={() => navigate('/person', { state: { fnr: oppgave.fnr } })}>
                   Gå til sakoversikten
                 </Button>
               </HStack>

@@ -66,7 +66,7 @@ export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: Navigat
   hentSak(sakId)
     .then((sak) => {
       if (sak.ok) {
-        navigate(`/person`, { state: { fnr: sak.data.ident } })
+        navigate('/person', { state: { fnr: sak.data.ident } })
       } else {
         navigate('/')
       }

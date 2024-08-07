@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import Spinner from '~shared/Spinner'
@@ -30,6 +30,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { usePersonLocationState } from '~components/person/PersonLink'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -45,7 +46,7 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
-  const location = useLocation()
+  const { fnr } = usePersonLocationState(search.get('key') || 'undefined')
 
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
@@ -55,11 +56,9 @@ export const Person = () => {
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
 
-    setSearch({ fane: valgtFane }, { state: location.state })
+    setSearch({ fane: valgtFane }, { state: { fnr } })
     setFane(valgtFane)
   }
-
-  const { fnr } = location.state
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {

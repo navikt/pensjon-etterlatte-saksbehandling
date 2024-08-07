@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -20,6 +21,8 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -137,6 +140,11 @@ class AktivitetspliktService(
         } else {
             logger.info("Det er ikke unntak for aktivitetsplikt i perioden, revurdering skal opprettes for sak ${unntak.sakId}")
         }
+    }
+
+    private fun harVarigUnntak(sakId: Long): Boolean {
+        val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+        return unntak?.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
     }
 
     fun hentAktiviteter(behandlingId: UUID) = aktivitetspliktDao.hentAktiviteter(behandlingId)
@@ -363,14 +371,23 @@ class AktivitetspliktService(
             OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
         } else {
             if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
-                opprettOppgave(request, forrigeBehandling)
+                opprettOppgaveForRevurdering(request, forrigeBehandling)
             } else {
                 opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
             }
         }
     }
 
-    private fun opprettOppgave(
+    fun opprettOppgaveHvisVarigUnntak(
+        request: OpprettOppgaveForAktivitetspliktVarigUnntakDto,
+    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
+        if (harVarigUnntak(request.sakId)) {
+            OpprettOppgaveForAktivitetspliktVarigUnntakResponse()
+        } else {
+            opprettOppgaveForVarigUnntak(request)
+        }
+
+    private fun opprettOppgaveForRevurdering(
         request: OpprettRevurderingForAktivitetspliktDto,
         forrigeBehandling: Behandling,
     ): OpprettRevurderingForAktivitetspliktResponse {
@@ -388,6 +405,26 @@ class AktivitetspliktService(
                     opprettetOppgave = true,
                     oppgaveId = oppgave.id,
                     forrigeBehandlingId = forrigeBehandling.id,
+                )
+            }
+    }
+
+    private fun opprettOppgaveForVarigUnntak(
+        request: OpprettOppgaveForAktivitetspliktVarigUnntakDto,
+    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse {
+        logger.info("Oppretter oppgave for infobrev for varig unntak av aktivitetsplikt for sak ${request.sakId}")
+        return oppgaveService
+            .opprettOppgave(
+                sakId = request.sakId,
+                referanse = request.referanse ?: "",
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
+                merknad = request.jobbType.beskrivelse,
+                frist = request.frist,
+            ).let { oppgave ->
+                OpprettOppgaveForAktivitetspliktVarigUnntakResponse(
+                    opprettetOppgave = true,
+                    oppgaveId = oppgave.id,
                 )
             }
     }

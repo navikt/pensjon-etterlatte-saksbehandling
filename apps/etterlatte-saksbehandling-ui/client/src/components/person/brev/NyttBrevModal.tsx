@@ -206,7 +206,8 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   <ControlledRadioGruppe
                     name="borINorgeEllerIkkeAvtaleland"
                     control={control}
-                    legend="Bor brukeren i Norge eller i ikke-avtaleland, samt EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter?"
+                    legend="Bor brukeren i Norge eller i ikke-avtaleland?"
+                    description="Dette gjelder også EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter."
                     errorVedTomInput="Du må velge om bruker er bosatt i Norge eller i ikke-avtaleland"
                     radios={
                       <>

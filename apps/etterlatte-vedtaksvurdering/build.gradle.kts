@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.database.kotliquery)
+    implementation(libs.cache.caffeine)
 
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)

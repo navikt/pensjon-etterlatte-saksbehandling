@@ -100,4 +100,3 @@ openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.2.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]
-navfelles-token = ["navfelles-tokenclientcore", "navfelles-tokenvalidationktor2"]

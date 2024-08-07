@@ -13,4 +13,5 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(libs.cache.caffeine)
 }

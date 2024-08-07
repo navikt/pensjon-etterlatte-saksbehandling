@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
 
     implementation(libs.database.kotliquery)
+    implementation(libs.cache.caffeine)
 
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.kotlinx.coroutinescore)

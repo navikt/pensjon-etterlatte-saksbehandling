@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.navfelles.tjenestespesifikasjoner.avstemming)
 
     implementation(libs.database.kotliquery)
+    implementation(libs.cache.caffeine)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

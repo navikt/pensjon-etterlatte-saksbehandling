@@ -22,7 +22,8 @@ dependencies {
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
-    implementation(libs.bundles.navfelles.token)
+    implementation(libs.cache.caffeine)
+    implementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.clientmock)

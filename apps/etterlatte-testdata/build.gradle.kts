@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.ktor2.mustache)
 
+    implementation(libs.cache.caffeine)
     implementation(libs.etterlatte.common)
 
     implementation(libs.navfelles.tokenvalidationktor2)

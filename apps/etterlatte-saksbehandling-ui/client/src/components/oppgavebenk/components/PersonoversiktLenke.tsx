@@ -9,7 +9,7 @@ export enum PersonOversiktLenkeStorage {
 const PersonOversiktLenke = ({ fnr }: { fnr: string | null }) => {
   const setFnrPersonStorage = useCallback(() => {
     if (fnr && fnrHarGyldigFormat(fnr)) {
-      localStorage.setItem(PersonOversiktLenkeStorage.FnrPerson, fnr)
+      sessionStorage.setItem(PersonOversiktLenkeStorage.FnrPerson, fnr)
     }
   }, [fnr])
 
@@ -21,3 +21,8 @@ const PersonOversiktLenke = ({ fnr }: { fnr: string | null }) => {
 }
 
 export default PersonOversiktLenke
+
+// TODO: flytte til en utils?
+export const GetFnrFromSessionStorage = () => {
+  return sessionStorage.getItem(PersonOversiktLenkeStorage.FnrPerson)
+}

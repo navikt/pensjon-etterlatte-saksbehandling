@@ -32,7 +32,7 @@ import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { settSak } from '~store/reducers/SakReducer'
 import { useAppDispatch } from '~store/Store'
-import { PersonOversiktLenkeStorage } from '~components/oppgavebenk/components/PersonoversiktLenke'
+import { GetFnrFromSessionStorage } from '~components/oppgavebenk/components/PersonoversiktLenke'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -57,7 +57,7 @@ export const Person = () => {
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
-  const fnr = localStorage.getItem(PersonOversiktLenkeStorage.FnrPerson)
+  const fnr = GetFnrFromSessionStorage()
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane

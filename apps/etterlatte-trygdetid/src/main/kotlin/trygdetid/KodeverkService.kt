@@ -44,7 +44,7 @@ class KodeverkService(
                                 ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse,
                     )
                 }
-            }.distinct()
+            }
     }
 }
 

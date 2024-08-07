@@ -9,10 +9,6 @@ plugins {
     application
 }
 
-repositories {
-    maven("https://packages.confluent.io/maven/")
-}
-
 dependencies {
     implementation(kotlin("stdlib"))
 

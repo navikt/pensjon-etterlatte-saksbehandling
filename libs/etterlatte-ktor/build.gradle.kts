@@ -5,10 +5,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-repositories {
-    maven("https://packages.confluent.io/maven/")
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.openapi)

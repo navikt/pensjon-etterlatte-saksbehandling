@@ -22,6 +22,7 @@ class OmstillingsstoenadService(
                 JobbType.OMS_DOED_5AAR -> 60
                 JobbType.OMS_DOED_4MND -> 4
                 JobbType.OMS_DOED_6MND -> 6
+                JobbType.OMS_DOED_6MND_INFORMASJON -> 6
                 else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
             }
 

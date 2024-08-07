@@ -7,12 +7,14 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_4MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
+import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND_INFORMASJON
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMASJON
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_REVURDERING
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -35,6 +37,7 @@ class TidshendelseService(
         OMS_DOED_5AAR("Opphør OMS etter 5 år"),
         OMS_DOED_4MND("Infobrev om aktivitetsplikt OMS etter 4 mnd"),
         OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
+        OMS_DOED_6MND_INFORMASJON("Infobrev om aktivitetsplikt OMS etter 6 mnd"),
     }
 
     fun haandterHendelse(hendelse: TidshendelsePacket): TidshendelseResult {
@@ -62,6 +65,7 @@ class TidshendelseService(
             return when (hendelse.jobbtype) {
                 OMS_DOED_4MND -> opprettOppgave(hendelse).let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
                 OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+                OMS_DOED_6MND_INFORMASJON -> opprettOppgave(hendelse).let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
         }
@@ -152,6 +156,7 @@ class TidshendelseService(
             OMS_DOED_5AAR -> true
             OMS_DOED_4MND -> false
             OMS_DOED_6MND -> false
+            OMS_DOED_6MND_INFORMASJON -> false
         }
 
     private fun oppgaveTypeFor(type: TidshendelserJobbType): OppgaveType =
@@ -163,6 +168,7 @@ class TidshendelseService(
             OMS_DOED_5AAR -> REVURDERING
             OMS_DOED_4MND -> AKTIVITETSPLIKT
             OMS_DOED_6MND -> AKTIVITETSPLIKT_REVURDERING
+            OMS_DOED_6MND_INFORMASJON -> AKTIVITETSPLIKT_INFORMASJON
         }
 }
 

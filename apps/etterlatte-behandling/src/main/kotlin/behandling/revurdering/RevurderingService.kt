@@ -180,7 +180,14 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
-            opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
+            opphoerFraOgMed =
+                if (aarsak !=
+                    Revurderingaarsak.REVURDERE_ETTER_OPPHOER
+                ) {
+                    forrigeIverksatteBehandling.opphoerFraOgMed
+                } else {
+                    null
+                },
         )
     }
 

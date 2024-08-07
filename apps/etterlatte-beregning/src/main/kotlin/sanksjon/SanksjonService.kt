@@ -1,8 +1,12 @@
 package no.nav.etterlatte.sanksjon
 
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -65,15 +69,11 @@ class SanksjonService(
 
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
-        if (YearMonth
-                .of(
-                    sanksjon.fom.year,
-                    sanksjon.fom.month,
-                ).isBefore(behandling.virkningstidspunkt?.dato)
-        ) {
-            throw FomErFoerVirkningstidpunktException()
-        }
+
         if (sanksjon.tom != null && sanksjon.tom.isBefore(sanksjon.fom)) throw TomErFoerFomException()
+        if (!sanksjonErLikeFoerVirk(behandling, sanksjon, brukerTokenInfo)) {
+            throw SanksjonEndresFoerVirkException()
+        }
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
@@ -85,6 +85,59 @@ class SanksjonService(
         // TODO: vi vil kanskje ikke tvinge noen avkortings-reberegning her hvis det er kun beskrivelse som endrer seg
         settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
+    }
+
+    suspend fun sanksjonErLikeFoerVirk(
+        behandling: DetaljertBehandling,
+        sanksjon: LagreSanksjon,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (YearMonth
+                    .of(
+                        sanksjon.fom.year,
+                        sanksjon.fom.month,
+                    ) < behandling.virkningstidspunkt!!.dato
+            ) {
+                throw FomErFoerVirkningstidpunktException()
+            }
+            return true
+        }
+        val forrigeIverksatteBehandling =
+            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+        val sanksjonerIForrigeBehandling =
+            sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id) ?: emptyList()
+        val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id) ?: emptyList()
+
+        val forrigeBehandlingSanksjoner =
+            sanksjonerIForrigeBehandling.map {
+                GrunnlagMedPeriode(
+                    data = it.type,
+                    fom = it.fom.atDay(1),
+                    tom = it.tom?.atEndOfMonth(),
+                )
+            }
+        val naavaerendeBehandlingSanksjoner =
+            sanksjonerIBehandling.map {
+                GrunnlagMedPeriode(
+                    data = it.type,
+                    fom = it.fom.atDay(1),
+                    tom = it.tom?.atEndOfMonth(),
+                )
+            } +
+                listOf(
+                    GrunnlagMedPeriode(
+                        data = sanksjon.type,
+                        fom = sanksjon.fom,
+                        tom = sanksjon.tom,
+                    ),
+                )
+
+        return erGrunnlagLiktFoerEnDato(
+            forrigeBehandlingSanksjoner,
+            naavaerendeBehandlingSanksjoner,
+            behandling.virkningstidspunkt!!.dato.atDay(1),
+        )
     }
 
     suspend fun slettSanksjon(
@@ -140,4 +193,12 @@ class BehandlingKanIkkeEndres :
     IkkeTillattException(
         code = "BEHANDLINGEN_KAN_IKKE_ENDRES",
         detail = "Behandlingen kan ikke endres",
+    )
+
+class SanksjonEndresFoerVirkException :
+    UgyldigForespoerselException(
+        code = "SANKSJON_ENDRES_FOER_VIRK",
+        detail =
+            "Sanksjoner kan ikke endres før virkningstidspunkt. Hvis sanksjonen skal endres tidligere " +
+                "må virkningstidspunktet flyttes tidligere.",
     )

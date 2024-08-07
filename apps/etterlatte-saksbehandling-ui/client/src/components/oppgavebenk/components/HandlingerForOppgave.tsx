@@ -124,6 +124,14 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
+    case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/person/${oppgave.fnr}?fane=BREV`} as="a">
+            Gå til brev
+          </Button>
+        )
+      )
     default:
       return null
   }

@@ -41,9 +41,7 @@ dependencies {
     implementation(libs.metrics.prometheus.simpleclienthotspot)
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)

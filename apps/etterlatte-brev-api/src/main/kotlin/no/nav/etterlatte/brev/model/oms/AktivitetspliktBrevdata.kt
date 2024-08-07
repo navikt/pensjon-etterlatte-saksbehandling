@@ -2,9 +2,14 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 
-data class AktivitetspliktBrevdata(
+data class AktivitetspliktInformasjon4MndBrevdata(
     val aktivitetsgrad: Aktivitetsgrad,
     val utbetaling: Boolean,
+    val redusertEtterInntekt: Boolean,
+    val nasjonalEllerUtland: NasjonalEllerUtland,
+) : BrevDataRedigerbar
+
+data class AktivitetspliktInformasjon6MndBrevdata(
     val redusertEtterInntekt: Boolean,
     val nasjonalEllerUtland: NasjonalEllerUtland,
 ) : BrevDataRedigerbar

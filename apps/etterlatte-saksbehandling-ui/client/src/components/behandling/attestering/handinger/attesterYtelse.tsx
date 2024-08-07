@@ -6,23 +6,22 @@ import { useNavigate } from 'react-router'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { attesterVedtak } from '~shared/api/vedtaksvurdering'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-
 import { isPending } from '~shared/api/apiUtils'
+import { useAppSelector } from '~store/Store'
 
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
-  const soeker = usePersonopplysninger()?.soeker?.opplysning
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandling.sendeBrev
   const [error, setError] = useState<string>()
   const [ferdigstillVedtaksbrevStatus, apiFerdigstillVedtaksbrev] = useApiCall(ferdigstillVedtaksbrev)
   const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)
+  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
 
   const settVedtakTilAttestert = () => {
     apiAttesterVedtak(
       { behandlingId: behandling.id, kommentar },
-      () => navigate(`/person/${soeker?.foedselsnummer}`),
+      () => navigate(`/sak/${saksId}`),
       (error) => {
         if (error.code === 'ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON') {
           setError('Vedtaket er allerede fattet av deg. Du kan ikke attestere dine egne vedtak.')

@@ -28,7 +28,7 @@ export const UnderkjennKlage = ({ klage, kommentar, valgtBegrunnelse }: Props) =
         valgtBegrunnelse: valgtBegrunnelse,
       },
       () => {
-        navigate(`/person/${klage.sak.ident}`)
+        navigate(`/sak/${klage.sak.id}`)
       }
     )
   }

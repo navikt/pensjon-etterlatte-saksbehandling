@@ -18,8 +18,8 @@ import {
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
-import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { hentSak, hentSakMedBehandlnger } from '~shared/api/sak'
+import { isSuccess, mapAllApiResult, mapFailure, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
@@ -30,6 +30,9 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { settSak } from '~store/reducers/SakReducer'
+import { useAppDispatch } from '~store/Store'
+import { GetFnrFromSessionStorage } from '~components/oppgavebenk/components/PersonoversiktLenke'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -43,40 +46,54 @@ export enum PersonOversiktFane {
 
 export const Person = () => {
   useSidetittel('Personoversikt')
+  const dispatch = useAppDispatch()
 
+  const { sakId } = useParams()
   const [search, setSearch] = useSearchParams()
-
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
-  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
+  const [sakMedBehandlingResult, sakMedBehandlingFetch] = useApiCall(hentSakMedBehandlnger)
+  const [sakResult, sakFetch] = useApiCall(hentSak)
+
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
+  const fnr = GetFnrFromSessionStorage()
+
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
-
     setSearch({ fane: valgtFane })
     setFane(valgtFane)
   }
 
-  const { fnr } = useParams()
+  useEffect(() => {
+    sakFetch(Number(sakId))
+  }, [sakId])
 
   useEffect(() => {
-    if (fnrHarGyldigFormat(fnr)) {
-      personNavnFetch(fnr!!)
-      sakFetch(fnr!!)
+    if (isSuccess(sakResult)) {
+      dispatch(settSak(sakResult.data))
+
+      const ident = sakResult.data.ident
+      if (fnrHarGyldigFormat(ident)) {
+        personNavnFetch(ident)
+        sakMedBehandlingFetch(ident)
+      }
     }
-  }, [fnr])
+  }, [sakResult])
+
+  useEffect(() => {
+    if (sakId == null && fnr && fnrHarGyldigFormat(fnr)) {
+      personNavnFetch(fnr)
+      sakMedBehandlingFetch(fnr)
+    }
+  }, [fnr, sakId])
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {
       return <ApiErrorAlert>Ugyldig forespørsel: {error.detail}</ApiErrorAlert>
     } else {
-      return <ApiErrorAlert>Feil oppsto ved henting av person med fødselsnummer {fnr}</ApiErrorAlert>
+      return <ApiErrorAlert>Feil oppsto ved henting av sak</ApiErrorAlert>
     }
-  }
-
-  if (!fnrHarGyldigFormat(fnr)) {
-    return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
   const isOmstillingsstoenad = (sakStatus: Result<SakMedBehandlinger>) => {
@@ -86,10 +103,11 @@ export const Person = () => {
   return (
     <>
       {mapSuccess(personNavnResult, (person) => (
-        <PdlPersonStatusBar person={person} />
+        <PdlPersonStatusBar person={person} saksId={Number(sakId)} />
       ))}
 
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+
       {mapAllApiResult(
         personNavnResult,
         <Spinner visible label="Laster personinfo ..." />,
@@ -112,37 +130,44 @@ export const Person = () => {
               {skalViseNotater && (
                 <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
               )}
-              {isOmstillingsstoenad(sakResult) && (
+              {isOmstillingsstoenad(sakMedBehandlingResult) && (
                 <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
               )}
             </Tabs.List>
 
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
-              <SakOversikt sakResult={sakResult} fnr={person.foedselsnummer} />
+              <SakOversikt sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Personopplysninger sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-              <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Hendelser sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-              <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />
+              <Dokumentliste sakResult={sakMedBehandlingResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.BREV}>
-              <BrevOversikt sakResult={sakResult} />
+              <BrevOversikt sakResult={sakMedBehandlingResult} />
             </Tabs.Panel>
             {skalViseNotater && (
               <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-                <NotatOversikt sakResult={sakResult} />
+                <NotatOversikt sakResult={sakMedBehandlingResult} />
               </Tabs.Panel>
             )}
             <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-              <SamordningSak fnr={person.foedselsnummer} sakResult={sakResult} />
+              <SamordningSak fnr={person.foedselsnummer} sakResult={sakMedBehandlingResult} />
             </Tabs.Panel>
           </Tabs>
         )
       )}
+
+      {sakId &&
+        mapFailure(sakResult, (error) => {
+          return <Box padding="8">{handleError(error)}</Box>
+        })}
+
+      {!sakId && !fnr && <ApiErrorAlert>Feil oppsto ved henting av person</ApiErrorAlert>}
     </>
   )
 }

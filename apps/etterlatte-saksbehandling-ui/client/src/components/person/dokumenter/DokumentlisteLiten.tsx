@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
 
-export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
+export const DokumentlisteLiten = ({ fnr, saksId }: { fnr: string; saksId: number }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
 
   useEffect(
@@ -76,7 +76,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
                 variant="tertiary"
                 size="small"
                 as={Link}
-                href={`/person/${fnr}?fane=DOKUMENTER`}
+                href={`/sak/${saksId}?fane=DOKUMENTER`}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

@@ -129,7 +129,7 @@ export const KnyttTilAnnenSak = ({
             Avslutt
           </Button>
 
-          <Button variant="secondary" onClick={() => navigate(`/person/${sak.ident}`)}>
+          <Button variant="secondary" onClick={() => navigate(`/sak/${sak.id}`)}>
             Gå til sak {sak.id}
           </Button>
           <Button

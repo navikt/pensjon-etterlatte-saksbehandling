@@ -2,7 +2,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -15,34 +15,48 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
-import { mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult, mapFailure, mapSuccess } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { hentSak } from '~shared/api/sak'
+import { useAppDispatch } from '~store/Store'
+import { settSak } from '~store/reducers/SakReducer'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
 
-  const { brevId, sakId, fnr } = useParams()
+  const dispatch = useAppDispatch()
+  const { sakId, brevId } = useParams()
+  const [sakResult, sakFetch] = useApiCall(hentSak)
   const [kanRedigeres, setKanRedigeres] = useState(false)
-
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
   useEffect(() => {
-    apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
-      if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
-        setKanRedigeres(true)
-      } else {
-        setKanRedigeres(false)
-      }
-    })
-  }, [brevId, sakId])
+    sakFetch(Number(sakId))
+  }, [sakId])
+
+  useEffect(() => {
+    if (isSuccess(sakResult) && sakResult.data) {
+      dispatch(settSak(sakResult.data))
+      apiHentBrev({ brevId: Number(brevId), sakId: sakResult.data.id }, (brev) => {
+        if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
+          setKanRedigeres(true)
+        } else {
+          setKanRedigeres(false)
+        }
+      })
+    }
+  }, [brevId, sakResult])
 
   return (
     <>
-      <StatusBarPersonHenter ident={fnr} />
-      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}?fane=BREV`} />
+      {mapSuccess(sakResult, (result) => {
+        ;<StatusBarPersonHenter ident={result.ident} saksId={Number(sakId)} />
+      })}
+
+      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/sak/${sakId}?fane=BREV`} />
 
       {mapApiResult(
         brevStatus,
@@ -84,6 +98,14 @@ export default function NyttBrev() {
           </GridContainer>
         )
       )}
+
+      {mapFailure(sakResult, () => {
+        return (
+          <Box padding="8">
+            <ApiErrorAlert>Feil oppsto ved henting av sak</ApiErrorAlert>
+          </Box>
+        )
+      })}
     </>
   )
 }

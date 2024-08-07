@@ -12,6 +12,7 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
+import PersonOversiktLenke from '~components/oppgavebenk/components/PersonoversiktLenke'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -29,7 +30,9 @@ export const OppgaverTableRow = ({
   oppdaterStatus,
 }: Props): ReactNode => (
   <Table.Row>
-    <Table.DataCell>{oppgave.sakId}</Table.DataCell>
+    <Table.DataCell>
+      <SaksoversiktLenke sakId={oppgave.sakId} />
+    </Table.DataCell>
     <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>
       {oppdaterFrist ? (
@@ -43,7 +46,9 @@ export const OppgaverTableRow = ({
         <FristWrapper dato={oppgave.frist} />
       )}
     </Table.DataCell>
-    <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
+    <Table.DataCell>
+      <PersonOversiktLenke fnr={oppgave.fnr} />
+    </Table.DataCell>
     <Table.DataCell>
       <HStack align="center">
         <SakTypeTag sakType={oppgave.sakType} kort />

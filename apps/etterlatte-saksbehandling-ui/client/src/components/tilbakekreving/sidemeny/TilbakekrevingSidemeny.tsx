@@ -122,7 +122,9 @@ export function TilbakekrevingSidemeny() {
         </>
       )}
 
-      {tilbakekreving?.sak.ident && <DokumentlisteLiten fnr={tilbakekreving.sak.ident} />}
+      {tilbakekreving?.sak.ident && (
+        <DokumentlisteLiten fnr={tilbakekreving.sak.ident} saksId={tilbakekreving.sak.id} />
+      )}
     </CollapsibleSidebar>
   )
 }

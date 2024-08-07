@@ -30,7 +30,7 @@ export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
           <Tag variant="alt3" size="small">
             Mo
           </Tag>
-          <Link href={`${configContext['modiapersonoversiktUrl']}/person/${fnr}`} target="_blank">
+          <Link href={`${configContext['modiapersonoversiktUrl']}/sak/${fnr}`} target="_blank">
             Oversikt i Modia <ExternalLinkIcon />
           </Link>
         </HStack>

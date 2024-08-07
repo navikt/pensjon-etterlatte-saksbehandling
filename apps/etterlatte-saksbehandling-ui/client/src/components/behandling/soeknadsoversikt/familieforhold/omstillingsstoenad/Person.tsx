@@ -1,6 +1,6 @@
 import { PersonIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
+import { BodyShort, CopyButton, Detail, Heading, HStack, Label } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
@@ -9,9 +9,8 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { Result } from '~shared/api/apiUtils'
 import { ILand } from '~shared/api/trygdetid'
-import { formaterFnr } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
-import { useAppSelector } from '~store/Store'
+import PersonOversiktLenke from '~components/oppgavebenk/components/PersonoversiktLenke'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -36,8 +35,6 @@ type Props = {
 }
 
 export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props) => {
-  const saksId = useAppSelector((state) => state.behandlingReducer.behandling?.sakId)
-
   return (
     <PersonBorder>
       <IconWrapper>
@@ -50,9 +47,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
         <BodyShort>
           {person.fornavn} {person.etternavn}
           <HStack>
-            <Link href={`/sak/${saksId}`} target="_blank" rel="noreferrer noopener">
-              ({formaterFnr(person.foedselsnummer)})
-            </Link>
+            <PersonOversiktLenke fnr={person.foedselsnummer} formater={true} />
             <CopyButton copyText={person.foedselsnummer} size="small" />
           </HStack>
         </BodyShort>

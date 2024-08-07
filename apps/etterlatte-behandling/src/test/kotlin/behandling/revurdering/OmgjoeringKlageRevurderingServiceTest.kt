@@ -49,7 +49,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
+class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -229,17 +229,23 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         behandlingsHendelser: BehandlingsHendelserKafkaProducerImpl = applicationContext.behandlingsHendelser,
         aktivitetspliktDao: AktivitetspliktDao = applicationContext.aktivitetspliktDao,
         aktivitetspliktKopierService: AktivitetspliktKopierService = applicationContext.aktivitetspliktKopierService,
-    ) = RevurderingService(
-        oppgaveService,
-        grunnlagService,
-        behandlingsHendelser,
-        applicationContext.behandlingDao,
-        applicationContext.hendelseDao,
-        applicationContext.kommerBarnetTilGodeService,
-        applicationContext.revurderingDao,
-        applicationContext.klageService,
-        aktivitetspliktDao,
-        aktivitetspliktKopierService,
+    ) = OmgjoeringKlageRevurderingService(
+        revurderingService =
+            RevurderingService(
+                oppgaveService,
+                grunnlagService,
+                behandlingsHendelser,
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao,
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao,
+                aktivitetspliktDao,
+                aktivitetspliktKopierService,
+            ),
+        oppgaveService = oppgaveService,
+        klageService = applicationContext.klageService,
+        behandlingDao = applicationContext.behandlingDao,
+        grunnlagService = grunnlagService,
     )
 
     private fun behandlingFactory() =

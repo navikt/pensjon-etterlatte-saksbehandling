@@ -109,7 +109,6 @@ class BehandlingFactoryTest {
                 hendelseDaoMock,
                 kommerBarnetTilGodeService,
                 revurderingDao,
-                klageService,
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
             ),

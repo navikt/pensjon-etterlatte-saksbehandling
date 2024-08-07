@@ -25,6 +25,7 @@ import java.util.UUID
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
     manuellRevurderingService: ManuellRevurderingService,
+    omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
 ) {
     val logger = routeLogger
 
@@ -78,7 +79,7 @@ internal fun Route.revurderingRoutes(
                     medBody<OpprettOmgjoeringKlageRequest> {
                         val revurdering =
                             inTransaction {
-                                revurderingService.opprettOmgjoeringKlage(
+                                omgjoeringKlageRevurderingService.opprettOmgjoeringKlage(
                                     sakId,
                                     it.oppgaveIdOmgjoering,
                                     saksbehandler,

@@ -177,6 +177,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     revurderingRoutes(
         revurderingService = applicationContext.revurderingService,
         manuellRevurderingService = applicationContext.manuellRevurderingService,
+        omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     migreringRoutes(migreringService = applicationContext.migreringService)

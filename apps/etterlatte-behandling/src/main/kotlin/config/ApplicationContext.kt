@@ -70,6 +70,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
+import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
@@ -387,7 +388,6 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            klageService = klageService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
@@ -399,6 +399,14 @@ internal class ApplicationContext(
             grunnlagService = grunnlagsService,
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+        )
+    val omgjoeringKlageRevurderingService =
+        OmgjoeringKlageRevurderingService(
+            revurderingService = revurderingService,
+            oppgaveService = oppgaveService,
+            klageService = klageService,
+            behandlingDao = behandlingDao,
+            grunnlagService = grunnlagsService,
         )
 
     val aktivitetspliktService =

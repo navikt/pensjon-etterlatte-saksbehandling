@@ -37,7 +37,7 @@ export default function AnnullerBehandling() {
   const avbryt = () => {
     avbrytBehandlingen(behandling!!.id, () => {
       if (soeker?.foedselsnummer) {
-        navigate(`/person/${soeker?.foedselsnummer}`)
+        navigate(`/person`, { state: { fnr: soeker?.foedselsnummer } })
       } else {
         window.location.reload() // Bare refresh behandling
       }

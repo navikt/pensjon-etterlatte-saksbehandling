@@ -7,6 +7,7 @@ import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
+import { NavLink } from 'react-router-dom'
 
 export const AktivitetspliktRevurderingModal = ({
   oppgave,
@@ -68,8 +69,9 @@ export const AktivitetspliktRevurderingModal = ({
                   <Button
                     variant="primary"
                     size="small"
-                    as="a"
-                    href={`/person/${oppgave.fnr?.toString()}`}
+                    as={NavLink}
+                    to="/person"
+                    state={{ fnr: oppgave.fnr?.toString() }}
                     target="_blank"
                   >
                     Gå til sak

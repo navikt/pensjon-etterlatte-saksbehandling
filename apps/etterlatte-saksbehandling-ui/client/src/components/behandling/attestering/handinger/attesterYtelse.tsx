@@ -22,7 +22,7 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
   const settVedtakTilAttestert = () => {
     apiAttesterVedtak(
       { behandlingId: behandling.id, kommentar },
-      () => navigate(`/person/${soeker?.foedselsnummer}`),
+      () => navigate(`/person`, { state: { fnr: soeker?.foedselsnummer } }),
       (error) => {
         if (error.code === 'ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON') {
           setError('Vedtaket er allerede fattet av deg. Du kan ikke attestere dine egne vedtak.')

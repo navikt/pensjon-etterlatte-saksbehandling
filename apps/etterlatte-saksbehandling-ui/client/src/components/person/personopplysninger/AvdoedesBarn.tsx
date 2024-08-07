@@ -8,6 +8,25 @@ import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactNode => {
+  if (!avdoede?.length) {
+    return (
+      <Table.Row>
+        <Table.DataCell colSpan={3}>
+          <Heading size="small">Ingen avdøde</Heading>
+        </Table.DataCell>
+      </Table.Row>
+    )
+  }
+
+  const barn = avdoede?.flatMap(({ barn }) => barn)?.filter((v) => !!v) || []
+  const fnr = barn?.map(({ foedselsnummer }) => foedselsnummer) || []
+  const unikeBarn = barn?.filter(({ foedselsnummer }, i) => !fnr.includes(foedselsnummer, i + 1))
+
+  console.log('unikeFnr', fnr)
+  console.log('unikeBarn', unikeBarn)
+
+  // const alleBarn = avdoede?.map((a) => a.barn)
+
   return (
     <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
       <Table>
@@ -19,37 +38,25 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactN
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!avdoede?.length ? (
-            avdoede.map((doed, i) =>
-              !!doed.barn?.length ? (
-                doed.barn.map((barn, index) => (
-                  <Table.Row key={index}>
-                    <Table.DataCell>
-                      {barn.fornavn} {barn.etternavn}
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <HStack gap="4">
-                        <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
-                        {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
-                      </HStack>
-                    </Table.DataCell>
-                    <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
-                  </Table.Row>
-                ))
-              ) : (
-                <Table.Row key={i}>
-                  <Table.DataCell colSpan={3}>
-                    <Heading size="small">
-                      Ingen barn for avdoed: {doed.fornavn} {doed.etternavn}
-                    </Heading>
-                  </Table.DataCell>
-                </Table.Row>
-              )
-            )
+          {!!unikeBarn?.length ? (
+            unikeBarn.map((barn, index) => (
+              <Table.Row key={index}>
+                <Table.DataCell>
+                  {barn.fornavn} {barn.etternavn}
+                </Table.DataCell>
+                <Table.DataCell>
+                  <HStack gap="4">
+                    <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
+                    {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
+                  </HStack>
+                </Table.DataCell>
+                <BostedsadresseDataCell bostedsadresse={barn.bostedsadresse} index={0} />
+              </Table.Row>
+            ))
           ) : (
             <Table.Row>
               <Table.DataCell colSpan={3}>
-                <Heading size="small">Ingen avdøde</Heading>
+                <Heading size="small">Ingen barn</Heading>
               </Table.DataCell>
             </Table.Row>
           )}

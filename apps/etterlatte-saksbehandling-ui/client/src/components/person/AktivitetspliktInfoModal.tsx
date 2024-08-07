@@ -39,6 +39,7 @@ import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
+import { NavLink } from 'react-router-dom'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsplikt: JaNei | null
@@ -335,8 +336,9 @@ export const AktivitetspliktInfoModal = ({
                 <Button
                   variant="primary"
                   size="small"
-                  as="a"
-                  href={`/person/${oppgave.fnr?.toString()}?fane=BREV`}
+                  as={NavLink}
+                  to="/person?fane=BREV"
+                  state={{ fnr: oppgave.fnr?.toString() }}
                   target="_blank"
                 >
                   Opprett manuelt brev

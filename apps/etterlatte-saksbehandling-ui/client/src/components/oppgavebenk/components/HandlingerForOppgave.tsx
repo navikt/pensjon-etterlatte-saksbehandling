@@ -7,6 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { NavLink } from 'react-router-dom'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -48,7 +49,13 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+        <Button
+          size="small"
+          icon={<EyeIcon />}
+          to={`/person?fane=HENDELSER&referanse=${referanse}`}
+          state={{ fnr }}
+          as={NavLink}
+        >
           Se hendelse
         </Button>
       )

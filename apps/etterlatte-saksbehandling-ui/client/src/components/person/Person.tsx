@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import Spinner from '~shared/Spinner'
@@ -45,6 +45,7 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
+  const location = useLocation()
 
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
@@ -54,11 +55,11 @@ export const Person = () => {
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
 
-    setSearch({ fane: valgtFane })
+    setSearch({ fane: valgtFane }, { state: location.state })
     setFane(valgtFane)
   }
 
-  const { fnr } = useParams()
+  const { fnr } = location.state
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
@@ -89,7 +90,8 @@ export const Person = () => {
         <PdlPersonStatusBar person={person} />
       ))}
 
-      <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+      <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
+
       {mapAllApiResult(
         personNavnResult,
         <Spinner visible label="Laster personinfo ..." />,

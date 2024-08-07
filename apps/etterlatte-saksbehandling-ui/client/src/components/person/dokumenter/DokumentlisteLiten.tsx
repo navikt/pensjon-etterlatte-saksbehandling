@@ -9,6 +9,7 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
+import { NavLink } from 'react-router-dom'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -75,8 +76,9 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
               <Button
                 variant="tertiary"
                 size="small"
-                as={Link}
-                href={`/person/${fnr}?fane=DOKUMENTER`}
+                as={NavLink}
+                to="/person?fane=DOKUMENTER"
+                state={{ fnr }}
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

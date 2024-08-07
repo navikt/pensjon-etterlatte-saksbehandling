@@ -21,12 +21,12 @@ export const Search = () => {
 
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
-      navigate(`/person/${searchInput}`)
+      navigate(`/person`, { state: { fnr: searchInput } })
       return
     }
     if (gyldigInputSakId) {
       finnSak(searchInput, (sak) => {
-        navigate(`/person/${sak.ident}`)
+        navigate(`/person`, { state: { fnr: sak.ident } })
       })
       return
     }

@@ -40,7 +40,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
-                <Button variant="primary" onClick={() => navigate(`/person/${oppgave.fnr}`)}>
+                <Button variant="primary" onClick={() => navigate(`/person`, { state: { fnr: oppgave.fnr } })}>
                   Gå til sakoversikten
                 </Button>
               </HStack>

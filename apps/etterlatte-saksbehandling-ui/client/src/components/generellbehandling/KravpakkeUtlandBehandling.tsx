@@ -66,7 +66,7 @@ export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: Navigat
   hentSak(sakId)
     .then((sak) => {
       if (sak.ok) {
-        navigate(`/person/${sak.data.ident}`)
+        navigate(`/person`, { state: { fnr: sak.data.ident } })
       } else {
         navigate('/')
       }
@@ -113,7 +113,7 @@ const KravpakkeUtlandBehandling = (props: {
 
   const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
-      window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
+      window.open(`/person/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
     })
   }
 

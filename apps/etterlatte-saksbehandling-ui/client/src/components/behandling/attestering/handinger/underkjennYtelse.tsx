@@ -23,7 +23,7 @@ export const UnderkjennYtelse = ({ behandlingId, kommentar, valgtBegrunnelse }: 
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {
-      navigate(`/person/${soeker?.foedselsnummer}`)
+      navigate(`/person`, { state: { fnr: soeker?.foedselsnummer } })
     })
   }
 

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Heading, HStack, Link, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
-import { useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -11,7 +11,7 @@ import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/Journalfoe
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
-import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
@@ -143,9 +143,9 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info
         label="Bruker"
         tekst={
-          <Link href={`/person/${oppgave.fnr}`} target="_blank">
+          <NavLink to="/person" state={{ fnr: oppgave.fnr }} target="_blank">
             {oppgave.fnr}
-          </Link>
+          </NavLink>
         }
       />
       <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />

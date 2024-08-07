@@ -25,9 +25,3 @@ dependencies {
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
 }
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
-}

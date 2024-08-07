@@ -8,9 +8,3 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
 }
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
-}

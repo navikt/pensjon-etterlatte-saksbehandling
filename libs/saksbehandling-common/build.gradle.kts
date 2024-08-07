@@ -23,9 +23,3 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
 }
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
-}

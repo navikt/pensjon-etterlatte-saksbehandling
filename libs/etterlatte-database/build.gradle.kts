@@ -23,10 +23,4 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.jupiter)
     testFixturesImplementation(libs.test.testcontainer.postgresql)
     testFixturesImplementation(libs.database.flywaydb)
-
-    tasks {
-        withType<Test> {
-            useJUnitPlatform()
-        }
-    }
 }

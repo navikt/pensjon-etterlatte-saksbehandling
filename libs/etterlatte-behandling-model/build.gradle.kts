@@ -10,9 +10,3 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.jupiter.params)
 }
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
-}

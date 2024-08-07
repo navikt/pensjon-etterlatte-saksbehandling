@@ -5,7 +5,6 @@ val libs = the<LibrariesForLibs>()
 
 plugins {
     kotlin("jvm")
-    id("etterlatte.libs")
     application
 }
 

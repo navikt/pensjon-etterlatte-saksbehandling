@@ -47,10 +47,4 @@ dependencies {
 
     testFixturesImplementation(libs.navfelles.mockoauth2server)
     testFixturesImplementation(libs.ktor2.servertests)
-
-    tasks {
-        withType<Test> {
-            useJUnitPlatform()
-        }
-    }
 }

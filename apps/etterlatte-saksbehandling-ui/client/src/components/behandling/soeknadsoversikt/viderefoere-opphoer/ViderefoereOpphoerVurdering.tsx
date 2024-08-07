@@ -31,7 +31,7 @@ import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthP
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -57,13 +57,18 @@ export const ViderefoereOpphoerVurdering = ({
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
   const [kravdato] = useState<string | undefined>()
-  const [, slettViderefoertOpphoerCall] = useApiCall(slettViderefoertOpphoer)
+  const [slettViderefoertOpphoerResult, slettViderefoertOpphoerCall, resetSlettToInitial] =
+    useApiCall(slettViderefoertOpphoer)
 
-  const [vilkaartyperResult, hentVilkaartyperRequest] = useApiCall(hentVilkaartyper)
+  const [vilkaartyperResult, hentVilkaartyperRequest, resetHentVilkaarToInitial] = useApiCall(hentVilkaartyper)
 
   useEffect(() => {
-    hentVilkaartyperRequest(behandlingId)
-  }, [behandlingId])
+    if (virkningstidspunkt != null) {
+      hentVilkaartyperRequest(behandlingId)
+    } else {
+      resetHentVilkaarToInitial()
+    }
+  }, [behandlingId, virkningstidspunkt])
 
   const valider = () => {
     if (!skalViderefoere || skalViderefoere == JaNei.NEI) {
@@ -96,6 +101,8 @@ export const ViderefoereOpphoerVurdering = ({
 
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
+    resetSlettToInitial()
+    resetHentVilkaarToInitial()
     setSkalViderefoere(viderefoertOpphoer?.skalViderefoere)
     setVilkaar(viderefoertOpphoer?.vilkaar)
     setOpphoerstidspunkt(viderefoertOpphoer?.dato ? new Date(viderefoertOpphoer.dato) : null)
@@ -211,6 +218,7 @@ export const ViderefoereOpphoerVurdering = ({
           <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
         </MonthPicker>
         {mapResult(vilkaartyperResult, {
+          initial: <ApiWarningAlert>Du må sette virkningstidspunkt først</ApiWarningAlert>,
           pending: <Spinner label="Laster vilkårstyper" visible />,
           error: () => <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>,
           success: (typer) => (
@@ -238,6 +246,10 @@ export const ViderefoereOpphoerVurdering = ({
         {isFailureHandler({
           apiResult: setViderefoertOpphoerStatus,
           errorMessage: 'Kunne ikke lagre opphørsdato',
+        })}
+        {isFailureHandler({
+          apiResult: slettViderefoertOpphoerResult,
+          errorMessage: 'Kunne ikke slette opphørsdato',
         })}
       </VStack>
     </VurderingsboksWrapper>

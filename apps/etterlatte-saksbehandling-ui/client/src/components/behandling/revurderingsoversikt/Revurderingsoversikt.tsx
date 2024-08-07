@@ -110,6 +110,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
   const personopplysninger = usePersonopplysninger()
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
+
+  const viderefoertOpphoerEnabled = useFeatureEnabledMedDefault('viderefoer-opphoer', false)
+
   return (
     <>
       <Box paddingInline="16" paddingBlock="4">
@@ -170,9 +173,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
 
-        {useFeatureEnabledMedDefault('viderefoer-opphoer', false) && behandling.virkningstidspunkt && (
-          <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
-        )}
+        {viderefoertOpphoerEnabled && <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />}
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />

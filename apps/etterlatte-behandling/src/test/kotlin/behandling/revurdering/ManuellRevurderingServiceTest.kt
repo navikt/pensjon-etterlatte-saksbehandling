@@ -2,15 +2,19 @@ package no.nav.etterlatte.behandling.revurdering
 
 import io.kotest.matchers.shouldBe
 import io.ktor.server.plugins.BadRequestException
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
@@ -26,7 +30,6 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -59,6 +62,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -188,7 +192,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService,
                 hendelser,
             )
-        val manuellRevurderingService = manuellRevurderingService(revurderingService, oppgaveService, grunnlagService)
+        val manuellRevurderingService =
+            manuellRevurderingService(
+                revurderingService,
+                oppgaveService,
+                grunnlagService,
+            )
         val revurdering =
             inTransaction {
                 manuellRevurderingService.opprettManuellRevurderingWrapper(
@@ -286,7 +295,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService,
                 hendelser,
             )
-        val manuellRevurderingService = manuellRevurderingService(revurderingService, oppgaveService, grunnlagService)
+        val manuellRevurderingService =
+            manuellRevurderingService(
+                revurderingService,
+                oppgaveService,
+                grunnlagService,
+            )
 
         val behandlingFactory =
             BehandlingFactory(
@@ -808,6 +822,81 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `nullstiller fra og med-dato for opphoer for revurdering etter opphoer`() {
+        val revurderingService =
+            mockk<RevurderingService>().also {
+                every { it.maksEnOppgaveUnderbehandlingForKildeBehandling(any()) } just runs
+                every {
+                    it.opprettRevurdering(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } returns
+                    mockk<RevurderingOgOppfoelging>().also {
+                        every { it.oppdater() } returns mockk()
+                    }
+            }
+        val service =
+            manuellRevurderingService(
+                revurderingService,
+                behandlingService =
+                    mockk<BehandlingService>().also {
+                        every { it.hentSisteIverksatte(any()) } returns
+                            mockk<Behandling>().also {
+                                every { it.sak } returns Sak(sakType = SakType.BARNEPENSJON, id = 1L, enhet = "", ident = "")
+                                every { it.opphoerFraOgMed } returns YearMonth.now()
+                                every { it.id } returns UUID.randomUUID()
+                                every { it.utlandstilknytning } returns null
+                                every { it.boddEllerArbeidetUtlandet } returns null
+                            }
+                    },
+                grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
+            )
+        service.opprettManuellRevurderingWrapper(
+            sakId = 1L,
+            aarsak = Revurderingaarsak.REVURDERE_ETTER_OPPHOER,
+            paaGrunnAvHendelseId = null,
+            paaGrunnAvOppgaveId = null,
+            begrunnelse = null,
+            fritekstAarsak = null,
+            saksbehandler = simpleSaksbehandler(),
+        )
+
+        verify {
+            revurderingService.opprettRevurdering(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                opphoerFraOgMed = null,
+            )
+        }
+    }
+
     private fun iverksett(behandling: Behandling) {
         applicationContext.behandlingDao.lagreStatus(
             behandling.id,
@@ -838,10 +927,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         revurderingService: RevurderingService,
         oppgaveService: OppgaveService = applicationContext.oppgaveService,
         grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
-        grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = applicationContext.grunnlagsendringshendelseDao,
+        behandlingService: BehandlingService = applicationContext.behandlingService,
     ) = ManuellRevurderingService(
         revurderingService = revurderingService,
-        behandlingService = applicationContext.behandlingService,
+        behandlingService = behandlingService,
         grunnlagService = grunnlagService,
         oppgaveService = oppgaveService,
         grunnlagsendringshendelseDao = applicationContext.grunnlagsendringshendelseDao,

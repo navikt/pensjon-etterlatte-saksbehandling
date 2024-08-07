@@ -21,11 +21,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 class ManuellRevurderingService(
-    val revurderingService: RevurderingService,
-    val behandlingService: BehandlingService,
-    val grunnlagService: GrunnlagService,
-    val oppgaveService: OppgaveService,
-    val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
+    private val revurderingService: RevurderingService,
+    private val behandlingService: BehandlingService,
+    private val grunnlagService: GrunnlagService,
+    private val oppgaveService: OppgaveService,
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

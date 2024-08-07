@@ -50,6 +50,18 @@ const BeregningsgrunnlagBarnepensjon = () => {
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
 
   if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
+
+  useEffect(() => {
+    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
+      if (result) {
+        dispatch(
+          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
+        )
+      }
+      hentTrygdetiderRequest(behandling.id)
+    })
+  }, [])
+
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
@@ -119,17 +131,6 @@ const BeregningsgrunnlagBarnepensjon = () => {
       () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
     )
   }
-
-  useEffect(() => {
-    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
-      if (result) {
-        dispatch(
-          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
-        )
-      }
-      hentTrygdetiderRequest(behandling.id)
-    })
-  }, [])
 
   return (
     <>

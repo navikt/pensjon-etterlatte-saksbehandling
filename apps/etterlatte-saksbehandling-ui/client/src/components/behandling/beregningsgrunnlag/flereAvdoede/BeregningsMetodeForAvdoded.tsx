@@ -107,7 +107,7 @@ export const BeregningsMetodeForAvdoded = ({
               paaAvbryt()
             }}
           >
-            Avrbyt
+            Avbryt
           </Button>
         </HStack>
       </VStack>

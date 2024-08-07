@@ -116,7 +116,7 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
       <HStack gap="2">
         <TagIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
-          Trygdetid metode brukt for flere avdøde
+          Trygdetid-metode brukt for flere avdøde
         </Heading>
       </HStack>
       <Box maxWidth="fit-content">

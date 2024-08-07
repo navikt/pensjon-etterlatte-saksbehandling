@@ -8,7 +8,6 @@ plugins {
 version = "1.1"
 
 repositories {
-    maven("https://jitpack.io")
     mavenCentral()
 }
 

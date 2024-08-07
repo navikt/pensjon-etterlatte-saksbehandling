@@ -3,9 +3,6 @@ plugins {
     id("etterlatte.libs")
 }
 
-repositories {
-    maven("https://jitpack.io")
-}
 dependencies {
     api(libs.bundles.jackson)
     api(libs.navfelles.rapidandriversktor2)

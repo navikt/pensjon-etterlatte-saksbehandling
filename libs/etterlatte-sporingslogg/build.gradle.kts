@@ -3,10 +3,6 @@ plugins {
     id("etterlatte.libs")
 }
 
-repositories {
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     runtimeOnly(group = "com.papertrailapp", name = "logback-syslog4j", version = "1.0.0")

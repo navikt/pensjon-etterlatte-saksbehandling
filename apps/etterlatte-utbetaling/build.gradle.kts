@@ -7,6 +7,10 @@ tasks.jar.configure {
     dependsOn(":libs:etterlatte-mq:jar")
 }
 
+repositories {
+    maven("https://jitpack.io")
+}
+
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-jobs"))

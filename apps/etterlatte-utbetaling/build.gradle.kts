@@ -29,7 +29,6 @@ dependencies {
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }

@@ -10,6 +10,6 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
 }

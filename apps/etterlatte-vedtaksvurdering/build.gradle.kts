@@ -23,7 +23,6 @@ dependencies {
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)
 
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server) {

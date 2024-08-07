@@ -16,6 +16,6 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
 
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
 }

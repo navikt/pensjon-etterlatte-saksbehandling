@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
 }

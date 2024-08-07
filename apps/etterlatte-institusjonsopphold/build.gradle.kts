@@ -10,5 +10,5 @@ dependencies {
     implementation(project(":libs:etterlatte-institusjonsopphold-model"))
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
 }

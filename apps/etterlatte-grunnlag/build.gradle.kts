@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.cache.caffeine)
 
     testImplementation(libs.navfelles.mockoauth2server)
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)

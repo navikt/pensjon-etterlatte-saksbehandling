@@ -22,7 +22,6 @@ dependencies {
     implementation(libs.navfelles.tokenclientcore)
 
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")

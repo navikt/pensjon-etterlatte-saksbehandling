@@ -7,7 +7,7 @@ export enum PersonOversiktLenkeStorage {
   FnrPerson = 'fnrPerson',
 }
 
-const PersonOversiktLenke = ({ fnr, formater = false }: { fnr: string | null; formater: boolean }) => {
+const PersonOversiktLenke = ({ fnr, formater = false }: { fnr: string | null; formater?: boolean }) => {
   const setFnrPersonStorage = useCallback(() => {
     if (fnr && fnrHarGyldigFormat(fnr)) {
       sessionStorage.setItem(PersonOversiktLenkeStorage.FnrPerson, fnr)

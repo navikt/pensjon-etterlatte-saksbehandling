@@ -15,8 +15,9 @@ val objectMapper: ObjectMapper =
     JsonMapper
         .builder()
         .addModule(JavaTimeModule())
-        .addModule(KotlinModule.Builder().build())
+        .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .addModule(KotlinModule.Builder().build())
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
         .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)

@@ -90,7 +90,7 @@ class StatistikkService(
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {
         val vedtak = stoenadRepository.hentStoenadRaderInnenforMaaned(maaned)
-        val omsSaker = vedtak.filter { it.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }.map { it.id }
+        val omsSaker = vedtak.filter { it.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }.map { it.sakId }
         val aktiviteterForOmsSaker = aktivitetspliktService.mapAktivitetForSaker(omsSaker, maaned)
         return MaanedStatistikk(maaned, vedtak, aktiviteterForOmsSaker)
     }

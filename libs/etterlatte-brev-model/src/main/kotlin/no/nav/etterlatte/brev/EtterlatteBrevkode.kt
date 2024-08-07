@@ -24,6 +24,7 @@ enum class EtterlatteBrevKode(
     BARNEPENSJON_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
 
     OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om omstillingsstønad"),
+    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_INNVILGELSE(Brevtype.VEDTAK, "Vedtak om innvilget omstillingsstønad"),
@@ -39,7 +40,14 @@ enum class EtterlatteBrevKode(
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
     OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT, "Varsel om aktivitetsplikt for omstillingsstønad"),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(Brevtype.MANUELT, "Informasjon om aktivitetsplikt for omstillingsstønad"),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
+        Brevtype.INFORMASJON,
+        "Informasjon om aktivitetsplikt for omstillingsstønad",
+    ),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
+        Brevtype.INFORMASJON,
+        "Informasjon om aktivitetsplikt for omstillingsstønad",
+    ),
     TILBAKEKREVING_INNHOLD(Brevtype.VEDTAK),
     TILBAKEKREVING_FERDIG(Brevtype.VEDTAK),
 

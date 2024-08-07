@@ -79,7 +79,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
             {!visOverstyrtBeregningGrunnlag &&
               {
-                [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,
+                [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon />,
                 [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
               }[behandling.sakType]}
           </>

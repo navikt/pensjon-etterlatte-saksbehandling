@@ -8,15 +8,12 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMore } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMore'
+import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
+import { institusjonstype } from '~shared/types/Institusjonsopphold'
+import { SakType } from '~shared/types/sak'
+import { InstitusjonsoppholdBeregningsgrunnlagReadMoreBP } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
 
-export const institusjonstype: { [key: string]: string } = {
-  AS: 'Alders- og sykehjem',
-  FO: 'Fengsel',
-  HS: 'Helseinstitusjon',
-}
-
-export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
+export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [institusjonsHendelserResult, institusjonsHendelserRequest] = useApiCall(
     hentGrunnlagsendringshendelserInstitusjonsoppholdForSak
   )
@@ -34,7 +31,8 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
         </Heading>
       </HStack>
       <VStack gap="2">
-        <InstitusjonsoppholdBeregningsgrunnlagReadMore />
+        {sakType === SakType.BARNEPENSJON && <InstitusjonsoppholdBeregningsgrunnlagReadMoreBP />}
+        {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         {mapResult(institusjonsHendelserResult, {
           pending: <Spinner visible label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,

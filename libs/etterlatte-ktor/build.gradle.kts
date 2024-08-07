@@ -10,9 +10,6 @@ repositories {
 }
 
 dependencies {
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.openapi)
 
@@ -28,10 +25,12 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.metricsmicrometer)
     implementation(libs.ktor2.doublereceive)
-    implementation(libs.navfelles.tokenvalidationktor2)
-    api(libs.ktor2.clientauth)
+    implementation(libs.navfelles.tokenvalidationktor2) {
+        exclude("io.ktor")
+    }
+    implementation(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
-    api(libs.navfelles.tokenclientcore)
+    implementation(libs.navfelles.tokenclientcore)
     api("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
 
     implementation(libs.logging.logstashlogbackencoder) {
@@ -44,9 +43,7 @@ dependencies {
     implementation(libs.metrics.prometheus.simpleclienthotspot)
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)

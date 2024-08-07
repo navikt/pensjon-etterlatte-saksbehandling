@@ -7,7 +7,6 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.8' }
 [versions]
 jackson-version = "2.17.2"
 jupiter-version = "5.10.3"
-kotlinx-version = "1.8.1"
 ktor2-version = "2.3.12"
 navfelles-token-version = "5.0.1"
 prometheus-version = "0.16.0"
@@ -35,9 +34,6 @@ kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.0" }
-
-
-kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
 
 ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
 ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
@@ -100,4 +96,3 @@ openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.2.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]
-navfelles-token = ["navfelles-tokenclientcore", "navfelles-tokenvalidationktor2"]

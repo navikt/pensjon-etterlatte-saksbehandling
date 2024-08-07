@@ -14,5 +14,5 @@ dependencies {
     testFixturesImplementation(libs.mq.jakarta.client)
     testFixturesImplementation(libs.messaginghub.pooled.jms)
     testFixturesImplementation(libs.test.mockk)
-    testFixturesImplementation(libs.kotlinx.coroutinescore)
+    testFixturesImplementation(libs.ktor2.servertests)
 }

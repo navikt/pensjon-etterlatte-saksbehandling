@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.servercio)
+    implementation(libs.navfelles.tokenclientcore)
 
     implementation(libs.database.kotliquery)
 

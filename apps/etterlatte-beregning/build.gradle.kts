@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.database.kotliquery)
 
     implementation(libs.ktor2.servercio)
+    implementation(libs.navfelles.tokenclientcore)
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)

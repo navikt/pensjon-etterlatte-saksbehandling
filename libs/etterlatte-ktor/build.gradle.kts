@@ -28,7 +28,7 @@ dependencies {
     implementation(libs.navfelles.tokenvalidationktor2)
     implementation(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
-    api(libs.navfelles.tokenclientcore)
+    implementation(libs.navfelles.tokenclientcore)
     api("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
 
     implementation(libs.logging.logstashlogbackencoder) {

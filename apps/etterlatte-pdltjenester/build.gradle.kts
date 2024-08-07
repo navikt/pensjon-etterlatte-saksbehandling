@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.servercio)
+    implementation(libs.navfelles.tokenclientcore)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

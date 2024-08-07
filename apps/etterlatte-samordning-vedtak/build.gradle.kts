@@ -17,6 +17,8 @@ dependencies {
 
     implementation(libs.navfelles.tokenvalidationktor2)
 
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))

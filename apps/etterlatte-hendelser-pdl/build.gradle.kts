@@ -17,6 +17,8 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.kafka.avroserializer)
 
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.test.testcontainer.kafka)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)

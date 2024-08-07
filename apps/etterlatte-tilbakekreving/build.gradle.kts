@@ -20,6 +20,8 @@ dependencies {
 
     implementation(libs.database.kotliquery)
 
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)

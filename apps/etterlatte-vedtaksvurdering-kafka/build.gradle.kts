@@ -13,6 +13,8 @@ dependencies {
     implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)

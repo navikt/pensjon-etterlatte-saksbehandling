@@ -24,6 +24,7 @@ enum class EtterlatteBrevKode(
     BARNEPENSJON_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
 
     OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om omstillingsstønad"),
+    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_INNVILGELSE(Brevtype.VEDTAK, "Vedtak om innvilget omstillingsstønad"),

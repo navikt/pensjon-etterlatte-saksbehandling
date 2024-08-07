@@ -10,6 +10,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe
@@ -109,6 +110,9 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
                       Informasjon om dødsfall
                     </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD}>
+                      Kvitteringsbrev på mottatt søknad
+                    </option>
                   </>
                 )}
                 {sakType === SakType.BARNEPENSJON && (
@@ -191,6 +195,29 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   )}
                 </>
               )}
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
+                <>
+                  <ControlledDatoVelger
+                    name="mottattDato"
+                    label="Når ble søknaden mottatt?"
+                    control={control}
+                    errorVedTomInput="Du må velge når søknaden ble mottatt"
+                  />
+                  <ControlledRadioGruppe
+                    name="borINorgeEllerIkkeAvtaleland"
+                    control={control}
+                    legend="Bor brukeren i Norge eller i ikke-avtaleland?"
+                    description="Dette gjelder også EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter."
+                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller i ikke-avtaleland"
+                    radios={
+                      <>
+                        <Radio value={JaNei.JA}>Ja</Radio>
+                        <Radio value={JaNei.NEI}>Nei</Radio>
+                      </>
+                    }
+                  />
+                </>
+              )}
             </VStack>
           </Modal.Body>
 
@@ -232,6 +259,11 @@ export type BrevParametre =
       avdoedNavn: string
     }
   | {
+      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD
+      mottattDato: Date
+      borINorgeEllerIkkeAvtaleland: boolean
+    }
+  | {
       type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
       bosattUtland: boolean
       avdoedNavn: string
@@ -249,6 +281,8 @@ type FilledFormData = {
   nasjonalEllerUtland?: NasjonalEllerUtland
   avdoedNavn?: string
   erOver18Aar?: JaNei | ''
+  mottattDato?: Date
+  borINorgeEllerIkkeAvtaleland?: JaNei
 }
 
 enum NasjonalEllerUtland {
@@ -261,6 +295,7 @@ enum FormType {
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND',
   OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
+  OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD = 'OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD',
   BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
 }
 
@@ -285,6 +320,12 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         type: formdata.type,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
+      }
+    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD:
+      return {
+        type: formdata.type,
+        mottattDato: formdata.mottattDato!!,
+        borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
       }
     case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
       return {

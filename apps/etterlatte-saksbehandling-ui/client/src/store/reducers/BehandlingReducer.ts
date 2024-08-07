@@ -56,6 +56,7 @@ export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse>('
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
+export const resetViderefoertOpphoer = createAction('behandling/viderefoert-opphoer/reset')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlag?: BeregningsGrunnlagPostDto
@@ -134,5 +135,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetAvkorting, (state) => {
     state.behandling!!.avkorting = undefined
+  })
+  builder.addCase(resetViderefoertOpphoer, (state) => {
+    state.behandling!!.viderefoertOpphoer = null
   })
 })

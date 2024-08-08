@@ -7,9 +7,6 @@ repositories {
     maven("https://jitpack.io")
 }
 dependencies {
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-
     api(libs.bundles.jackson)
     api(libs.navfelles.rapidandriversktor2)
 

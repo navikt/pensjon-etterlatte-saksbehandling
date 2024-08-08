@@ -24,7 +24,7 @@ export const AttesterTilbakekreving = ({
   const attester = () => {
     apiAttesterVedtak(
       { tilbakekrevingId: tilbakekreving.id, kommentar },
-      () => navigate(`/person/${tilbakekreving.sak.ident}`),
+      () => navigate('/person', { state: { fnr: tilbakekreving.sak.ident } }),
       (error) => {
         setError(`Ukjent feil oppsto ved attestering av vedtaket: ${error.detail}`)
         setModalisOpen(false)

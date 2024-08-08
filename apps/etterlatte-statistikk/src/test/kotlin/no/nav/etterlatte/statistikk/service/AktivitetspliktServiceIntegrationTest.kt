@@ -170,7 +170,7 @@ class AktivitetspliktServiceIntegrationTest(
                     listOf(
                         AktivitetDto(
                             typeAktivitet = AktivitetType.ARBEIDSSOEKER,
-                            fom = YearMonth.of(2024, Month.JULY).atDay(1),
+                            fom = YearMonth.of(2024, Month.MAY).atDay(1),
                             tom = null,
                         ),
                     ),

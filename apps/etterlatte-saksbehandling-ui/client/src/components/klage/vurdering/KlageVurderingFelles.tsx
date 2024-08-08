@@ -17,6 +17,8 @@ import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -160,14 +162,15 @@ const Maksbredde = styled.div`
 
 export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
   return (
-    <Button
-      as="a"
+    <PersonButtonLink
+      fnr={props.klage.sak.ident}
+      fane={PersonOversiktFane.BREV}
       variant="primary"
       icon={<EnvelopeClosedIcon />}
-      href={`/person/${props.klage.sak.ident}?fane=BREV`}
       target="_blank"
+      rel="noreferrer noopener"
     >
       Opprett brev
-    </Button>
+    </PersonButtonLink>
   )
 }

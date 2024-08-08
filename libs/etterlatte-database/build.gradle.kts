@@ -10,9 +10,6 @@ repositories {
 }
 
 dependencies {
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.database.postgresql)
     implementation(libs.database.flywaydb)

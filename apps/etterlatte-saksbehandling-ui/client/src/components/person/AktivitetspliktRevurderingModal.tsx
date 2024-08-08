@@ -7,6 +7,7 @@ import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 
 export const AktivitetspliktRevurderingModal = ({
   oppgave,
@@ -65,15 +66,16 @@ export const AktivitetspliktRevurderingModal = ({
 
               {!erFerdigstilt && (
                 <div>
-                  <Button
+                  <PersonButtonLink
                     variant="primary"
                     size="small"
-                    as="a"
-                    href={`/person/${oppgave.fnr?.toString()}`}
                     target="_blank"
+                    rel="noreferrer noopener"
+                    fnr={oppgave.fnr || '-'}
+                    disabled={!oppgave.fnr}
                   >
                     Gå til sak
-                  </Button>
+                  </PersonButtonLink>
                 </div>
               )}
               {erFerdigstilt && (

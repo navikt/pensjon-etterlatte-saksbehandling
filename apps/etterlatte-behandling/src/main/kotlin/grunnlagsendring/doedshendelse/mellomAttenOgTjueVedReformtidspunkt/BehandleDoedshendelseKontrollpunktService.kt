@@ -8,6 +8,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.harAktivAdresse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktAvdoedService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktBarnService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -46,7 +47,7 @@ class BehandleDoedshendelseKontrollpunktService(
         hendelse: DoedshendelseInternal,
         beroert: PersonRolle,
     ): Triple<Sak?, PersonDTO, PersonDTO> {
-        val sakType = hendelse.sakTypeForEpsEllerBarn()
+        val sakType = SakType.BARNEPENSJON
         val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
         val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
         val gjenlevende = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())

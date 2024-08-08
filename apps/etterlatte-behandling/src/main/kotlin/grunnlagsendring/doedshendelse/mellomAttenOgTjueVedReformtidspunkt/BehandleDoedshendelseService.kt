@@ -133,11 +133,8 @@ class BehandleDoedshendelseService(
                 type = SakType.BARNEPENSJON,
             )
 
-        val gjenlevende =
-            when (opprettetSak.sakType) {
-                SakType.BARNEPENSJON -> hentAnnenForelder(doedshendelse)
-                SakType.OMSTILLINGSSTOENAD -> null
-            }
+        val gjenlevende = hentAnnenForelder(doedshendelse)
+
         val galleri =
             Persongalleri(
                 soeker = doedshendelse.beroertFnr,

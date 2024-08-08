@@ -62,51 +62,22 @@ class OpprettDoedshendelseService(
             return
         }
 
-        val gyldigeDoedshendelserForAvdoed =
+        val eksisterendeBeroerte =
             inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
                 .filter { it.utfall !== Utfall.AVBRUTT }
+                .map { it.beroertFnr }
 
-        if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
-            sikkerLogg.info("Fant ${beroerteBarn.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
-            logger.info("Fant ${beroerteBarn.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value.maskerFnr()})")
-            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
-                inTransaction {
-                    lagreDoedshendelser(beroerteBarn, avdoed, Endringstype.OPPRETTET)
-                }
-            }
-        } else {
-            sikkerLogg.info("Fant ${beroerteBarn.size} nye berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
-            logger.info("Fant ${beroerteBarn.size} nye berørte personer for avdød (${avdoed.foedselsnummer.verdi.value.maskerFnr()})")
-            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
-                inTransaction {
-                    lagreDoedshendelserForNyeBeroerte(gyldigeDoedshendelserForAvdoed, beroerteBarn, avdoed, Endringstype.OPPRETTET)
-                }
-            }
-        }
-    }
-
-    private fun lagreDoedshendelserForNyeBeroerte(
-        doedshendelserForAvdoed: List<DoedshendelseInternal>,
-        beroerte: List<PersonFnrMedRelasjon>,
-        avdoed: PersonDTO,
-        endringstype: Endringstype,
-    ) {
-        val eksisterendeBeroerte = doedshendelserForAvdoed.map { it.beroertFnr }
         val nyeBeroerte =
-            beroerte
+            beroerteBarn
                 .map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
                 .filter { !eksisterendeBeroerte.contains(it.fnr) }
-        nyeBeroerte.forEach { person ->
-            doedshendelseDao.opprettDoedshendelse(
-                DoedshendelseInternal.nyHendelse(
-                    avdoedFnr = avdoed.foedselsnummer.verdi.value,
-                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = person.fnr,
-                    relasjon = person.relasjon,
-                    endringstype = endringstype,
-                    migrertMellomAttenOgTjue = true,
-                ),
-            )
+
+        sikkerLogg.info("Fant ${nyeBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
+        logger.info("Fant ${nyeBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value.maskerFnr()})")
+        inTransaction {
+            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
+                lagreDoedshendelser(nyeBeroerte, avdoed, Endringstype.OPPRETTET)
+            }
         }
     }
 
@@ -117,6 +88,8 @@ class OpprettDoedshendelseService(
     ) {
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
         beroerte.forEach { person ->
+            sikkerLogg.info("Oppretter dødshendelse for person (${person.fnr})")
+            logger.info("Oppretter dødshendelse for person (${person.fnr.maskerFnr()})")
             doedshendelseDao.opprettDoedshendelse(
                 DoedshendelseInternal.nyHendelse(
                     avdoedFnr = avdoedFnr,
@@ -134,19 +107,19 @@ class OpprettDoedshendelseService(
         with(avdoed.avdoedesBarn ?: emptyList()) {
             this
                 .filter { barn -> barn.doedsdato == null }
-                .filter { barn -> barn.mellom18og20PaaDato(REFORMTIDSPUNKT) }
+                .filter { barn -> barn.mellom18og20PaaReformtidspunkt() }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
 
-    private fun Person.mellom18og20PaaDato(dato: LocalDate): Boolean {
+    fun Person.mellom18og20PaaReformtidspunkt(): Boolean {
         // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
         // for å sikre at vi får med alle som er under 20 år.
         val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
 
-        val mellom18og20PaaDato = ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue in 18..19
+        val mellom18og20PaaDato = ChronoUnit.YEARS.between(benyttetFoedselsdato, REFORMTIDSPUNKT).absoluteValue in 18..19
         val fyller20IJanuar = (
-            ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue == 20L &&
-                benyttetFoedselsdato.month == dato.month
+            ChronoUnit.YEARS.between(benyttetFoedselsdato, REFORMTIDSPUNKT).absoluteValue == 20L &&
+                benyttetFoedselsdato.month == REFORMTIDSPUNKT.month
         )
 
         return mellom18og20PaaDato || fyller20IJanuar

@@ -84,8 +84,9 @@ export default function BehandleJournalfoeringOppgave() {
     <>
       <StickyToppMeny>
         <StatusBarPersonHenter ident={oppgave?.fnr} />
-        <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+        <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
       </StickyToppMeny>
+
       <GridContainer>
         <Column>
           <Box padding="8">

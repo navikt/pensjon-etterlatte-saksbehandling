@@ -1,7 +1,7 @@
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { CopyButton, Detail, Heading, Label, Link } from '@navikt/ds-react'
+import { CopyButton, Detail, Heading, HStack, Label } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterFnr } from '~utils/formatering/formatering'
@@ -11,6 +11,7 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { ILand } from '~shared/api/trygdetid'
 import { Result } from '~shared/api/apiUtils'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -65,12 +66,12 @@ export const Person = ({
         </Heading>
         <div>
           {person.fornavn} {person.etternavn}
-          <FnrWrapper>
-            <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+          <HStack gap="4" align="center">
+            <PersonLink fnr={person.foedselsnummer} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
-            </Link>
+            </PersonLink>
             <CopyButton copyText={person.foedselsnummer} size="small" />
-          </FnrWrapper>
+          </HStack>
         </div>
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
@@ -91,7 +92,3 @@ export const Person = ({
     </PersonBorder>
   )
 }
-
-const FnrWrapper = styled.div`
-  display: flex;
-`

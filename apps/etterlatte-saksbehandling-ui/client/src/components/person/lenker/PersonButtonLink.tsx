@@ -1,7 +1,6 @@
-import { type ButtonProps } from '@navikt/ds-react/src/button/Button'
 import { PersonOversiktFane } from '~components/person/Person'
 import { HTMLAttributeAnchorTarget } from 'react'
-import { Button } from '@navikt/ds-react'
+import { Button, ButtonProps } from '@navikt/ds-react'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { NavLink } from 'react-router-dom'
 

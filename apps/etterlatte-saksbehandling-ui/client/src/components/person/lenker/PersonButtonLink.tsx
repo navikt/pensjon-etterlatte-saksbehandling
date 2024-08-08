@@ -1,9 +1,9 @@
-import { ButtonProps } from '@navikt/ds-react/src/button/Button'
+import { type ButtonProps } from '@navikt/ds-react/src/button/Button'
 import { PersonOversiktFane } from '~components/person/Person'
 import { HTMLAttributeAnchorTarget } from 'react'
 import { Button } from '@navikt/ds-react'
-import { NavLink } from 'react-router-dom'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
+import { NavLink } from 'react-router-dom'
 
 interface PersonButtonLinkProps extends Omit<ButtonProps, 'onClick'> {
   fnr: string

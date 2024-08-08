@@ -43,7 +43,9 @@ export const OppgaverTableRow = ({
         <FristWrapper dato={oppgave.frist} />
       )}
     </Table.DataCell>
-    <Table.DataCell>{oppgave.fnr ? <PersonLink fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
+    <Table.DataCell>
+      {oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}
+    </Table.DataCell>
     <Table.DataCell>
       <HStack align="center">
         <SakTypeTag sakType={oppgave.sakType} kort />

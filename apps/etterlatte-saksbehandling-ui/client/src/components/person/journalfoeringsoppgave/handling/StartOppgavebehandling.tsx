@@ -141,7 +141,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
         }
       />
       <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || <i>Ikke tildelt</i>} />
-      <Info label="Bruker" tekst={oppgave.fnr ? <PersonLink fnr={oppgave.fnr} /> : '-'} />
+      <Info label="Bruker" tekst={oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : '-'} />
       <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </VStack>

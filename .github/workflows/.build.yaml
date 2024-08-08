@@ -52,6 +52,7 @@ jobs:
   license-check:
     name: License check
     runs-on: ubuntu-latest-8-cores
+    needs: build
     timeout-minutes: 10
     permissions:
       contents: read

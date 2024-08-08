@@ -11,6 +11,13 @@ const lagrePersonLocationState = (key: string, fnr: string) => {
   localStorage.setItem(key, JSON.stringify({ fnr }))
 }
 
+const hentPersonLocationState = (key?: string) => {
+  if (key) {
+    const jsonState = localStorage.getItem(key)
+    return jsonState ? JSON.parse(jsonState) : null
+  } else return {}
+}
+
 interface PersonLocationState {
   fnr: string
 }
@@ -19,15 +26,12 @@ interface PersonLocationState {
  * Hack for å støtte åpning av personsiden i ny fane.
  * FNR lagres med en nøkkel (UUID) i localStorage og hentes opp igjen når [Person.tsx] lastes.
  **/
-export const usePersonLocationState = (key: string): PersonLocationState => {
-  const jsonState = localStorage.getItem(key)
-  const initialState = jsonState ? JSON.parse(jsonState) : null
-
+export const usePersonLocationState = (key?: string): PersonLocationState => {
   const location = useLocation()
-  const [state, setState] = useState<PersonLocationState>(location.state || initialState)
+  const [state, setState] = useState<PersonLocationState>(location.state || hentPersonLocationState(key))
 
   useEffect(() => {
-    localStorage.removeItem(key)
+    if (key) localStorage.removeItem(key)
   }, [])
 
   useEffect(() => {

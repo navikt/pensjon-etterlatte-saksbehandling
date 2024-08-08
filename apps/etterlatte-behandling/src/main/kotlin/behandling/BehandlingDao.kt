@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -331,7 +332,10 @@ class BehandlingDao(
         }
     }
 
-    fun fjernViderefoertOpphoer(behandlingId: UUID) {
+    fun fjernViderefoertOpphoer(
+        behandlingId: UUID,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) {
         lagreOpphoerFom(behandlingId, null)
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -339,11 +343,13 @@ class BehandlingDao(
                     prepareStatement(
                         "UPDATE viderefoert_opphoer " +
                             "SET aktiv = false, " +
+                            "kilde = ?, " +
                             "sist_endret = CURRENT_TIMESTAMP " +
                             "WHERE behandling_id = ? " +
                             "AND aktiv = true",
                     )
-                statement.setObject(1, behandlingId)
+                statement.setJsonb(1, kilde)
+                statement.setObject(2, behandlingId)
                 statement.updateSuccessful()
             }
         }

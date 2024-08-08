@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -48,6 +49,8 @@ class ViderefoertOpphoerTest(
     lateinit var connection: ConnectionAutoclosingTest
     lateinit var service: BehandlingService
     lateinit var behandlingDao: BehandlingDao
+    private val saksbehandlerKilde: Grunnlagsopplysning.Saksbehandler =
+        Grunnlagsopplysning.Saksbehandler.create("A123")
 
     @BeforeEach
     fun setUp() {
@@ -88,19 +91,58 @@ class ViderefoertOpphoerTest(
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
             viderefoertOpphoer =
-                ViderefoertOpphoer(
+                viderefoertOpphoer(
                     skalViderefoere = JaNei.JA,
                     behandlingId = opprettBehandling.id,
-                    dato = opphoerstidspunkt,
-                    begrunnelse = "for testformål",
-                    vilkaar = VilkaarType.BP_FORMAAL_2024,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
-                    kravdato = null,
+                    opphoersdato = opphoerstidspunkt,
                 ),
         )
         val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.id)!!
         assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
         assertEquals(opphoerstidspunkt, viderefoertOpphoer.dato)
+    }
+
+    @Test
+    fun `inaktiverer opphør`() {
+        val sak =
+            SakDao(connection).opprettSak(
+                SOEKER_FOEDSELSNUMMER.value,
+                SakType.BARNEPENSJON,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
+        behandlingDao.opprettBehandling(behandling = opprettBehandling)
+
+        val viderefoertOpphoer =
+            viderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                opphoersdato = YearMonth.of(2024, Month.JANUARY),
+                skalViderefoere = JaNei.JA,
+                vilkaar = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_RETT_TILLEGGSPENSJON,
+            )
+        service.oppdaterViderefoertOpphoer(
+            behandlingId = opprettBehandling.id,
+            viderefoertOpphoer =
+            viderefoertOpphoer,
+        )
+
+        service.fjernViderefoertOpphoer(
+            opprettBehandling.id,
+            Grunnlagsopplysning.Saksbehandler.create("Slettersen"),
+        )
+
+        val alleViderefoertOpphoer = hentAlleViderefoertOpphoer(opprettBehandling.id)
+
+        alleViderefoertOpphoer
+            .filter { it.aktiv } shouldBe emptyList()
+
+        val inaktivert = alleViderefoertOpphoer.single { !it.aktiv }
+        (inaktivert.kilde as Grunnlagsopplysning.Saksbehandler).ident shouldBe "Slettersen"
+        inaktivert.dato shouldBe viderefoertOpphoer.dato
+        inaktivert.vilkaar shouldBe viderefoertOpphoer.vilkaar
+        inaktivert.kravdato shouldBe viderefoertOpphoer.kravdato
+        inaktivert.skalViderefoere shouldBe viderefoertOpphoer.skalViderefoere
+        inaktivert.begrunnelse shouldBe viderefoertOpphoer.begrunnelse
     }
 
     @Test
@@ -117,38 +159,34 @@ class ViderefoertOpphoerTest(
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
             viderefoertOpphoer =
-                viderefoertOpphoer(opprettBehandling.id, YearMonth.of(2024, Month.JANUARY), JaNei.JA),
-        )
-
-        service.fjernViderefoertOpphoer(opprettBehandling.id)
-
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-                ViderefoertOpphoer(
-                    skalViderefoere = JaNei.JA,
+                viderefoertOpphoer(
                     behandlingId = opprettBehandling.id,
-                    dato = YearMonth.of(2024, Month.FEBRUARY),
-                    begrunnelse = "for testformål",
-                    vilkaar = VilkaarType.BP_FORMAAL_2024,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
-                    kravdato = null,
+                    opphoersdato = YearMonth.of(2024, Month.JANUARY),
+                    skalViderefoere = JaNei.JA,
                 ),
         )
 
-        service.fjernViderefoertOpphoer(opprettBehandling.id)
+        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
 
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
             viderefoertOpphoer =
-                ViderefoertOpphoer(
+                viderefoertOpphoer(
+                    behandlingId = opprettBehandling.id,
+                    opphoersdato = YearMonth.of(2024, Month.FEBRUARY),
+                    skalViderefoere = JaNei.JA,
+                ),
+        )
+
+        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
+
+        service.oppdaterViderefoertOpphoer(
+            behandlingId = opprettBehandling.id,
+            viderefoertOpphoer =
+                viderefoertOpphoer(
                     skalViderefoere = JaNei.JA,
                     behandlingId = opprettBehandling.id,
-                    dato = YearMonth.of(2024, Month.MARCH),
-                    begrunnelse = "for testformål",
-                    vilkaar = VilkaarType.BP_FORMAAL_2024,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
-                    kravdato = null,
+                    opphoersdato = YearMonth.of(2024, Month.MARCH),
                 ),
         )
 
@@ -197,15 +235,16 @@ class ViderefoertOpphoerTest(
         opphoersdato: YearMonth,
         skalViderefoere: JaNei,
         vilkaar: VilkaarType? = VilkaarType.BP_FORMAAL_2024,
-    ) = ViderefoertOpphoer(
-        skalViderefoere = skalViderefoere,
-        behandlingId = behandlingId,
-        dato = opphoersdato,
-        begrunnelse = "for testformål",
-        vilkaar = vilkaar,
-        kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
-        kravdato = null,
-    )
+    ): ViderefoertOpphoer =
+        ViderefoertOpphoer(
+            skalViderefoere = skalViderefoere,
+            behandlingId = behandlingId,
+            dato = opphoersdato,
+            begrunnelse = "for testformål",
+            vilkaar = vilkaar,
+            kilde = saksbehandlerKilde,
+            kravdato = null,
+        )
 
     private fun hentAlleViderefoertOpphoer(behandlingId: UUID): List<ViderefoertOpphoer> =
         connection.hentConnection {

@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.avro)
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.kafka.avro) {
         exclude("org.apache.commons", "commons-compress")

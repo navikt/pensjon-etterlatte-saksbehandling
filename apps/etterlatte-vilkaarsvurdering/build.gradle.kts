@@ -3,10 +3,6 @@ plugins {
     id("etterlatte.postgres")
 }
 
-repositories {
-    maven("https://packages.confluent.io/maven/")
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))

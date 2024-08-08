@@ -6,10 +6,6 @@ plugins {
     kotlin("jvm") apply false
 }
 
-repositories {
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(libs.database.postgresql)
     implementation(libs.database.flywaydb)

@@ -7,11 +7,6 @@ plugins {
 
 version = "1.1"
 
-repositories {
-    maven("https://jitpack.io")
-    mavenCentral()
-}
-
 dependencies {
     api(libs.jackson.datatypejsr310)
     api(libs.jackson.modulekotlin)

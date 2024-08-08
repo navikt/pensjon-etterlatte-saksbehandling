@@ -5,6 +5,7 @@ plugins {
 
 repositories {
     maven("https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas")
+    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {

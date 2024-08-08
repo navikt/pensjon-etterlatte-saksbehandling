@@ -2,10 +2,6 @@ plugins {
     id("etterlatte.common")
 }
 
-repositories {
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))

@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknad
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysninger
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -52,6 +53,15 @@ sealed class BrevParametre {
                 mottattDato = mottattDato,
                 borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
             )
+    }
+
+    @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
+    data class OmstillingsstoenadInformasjonInnhentingAvOpplysninger(
+        val borIUtlandet: Boolean,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
+            OmstillingsstoenadInnhentingAvOpplysninger(borIUtlandet = borIUtlandet)
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")

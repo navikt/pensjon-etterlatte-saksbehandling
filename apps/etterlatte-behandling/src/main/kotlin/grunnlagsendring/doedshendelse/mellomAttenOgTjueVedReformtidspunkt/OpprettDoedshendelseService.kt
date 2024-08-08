@@ -9,6 +9,8 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.PersonFnrMedRelasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService.Companion.SENESTE_TIDSPUNKT
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService.Companion.TIDLIGSTE_TIDSPUNKT
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -107,25 +109,35 @@ class OpprettDoedshendelseService(
         with(avdoed.avdoedesBarn ?: emptyList()) {
             this
                 .filter { barn -> barn.doedsdato == null }
+                .filter { barn -> barn.merEnnEller18PaaVirkningstidspunkt(avdoed.doedsdato!!.verdi) }
                 .filter { barn -> barn.mellom18og20PaaReformtidspunkt() }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
 
-    fun Person.mellom18og20PaaReformtidspunkt(): Boolean {
-        // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
-        // for å sikre at vi får med alle som er under 20 år.
-        val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
-
-        val mellom18og20PaaDato = ChronoUnit.YEARS.between(benyttetFoedselsdato, REFORMTIDSPUNKT).absoluteValue in 18..19
-        val fyller20IJanuar = (
-            ChronoUnit.YEARS.between(benyttetFoedselsdato, REFORMTIDSPUNKT).absoluteValue == 20L &&
-                benyttetFoedselsdato.month == REFORMTIDSPUNKT.month
-        )
-
-        return mellom18og20PaaDato || fyller20IJanuar
-    }
-
     companion object {
         val REFORMTIDSPUNKT = LocalDate.of(2024, 1, 1)
+        val TIDLIGSTE_TIDSPUNKT = REFORMTIDSPUNKT.minusYears(20) // 2004.01.01
+        val SENESTE_TIDSPUNKT = REFORMTIDSPUNKT.minusYears(18).minusDays(1) // 2005.12.31
     }
+}
+
+fun Person.mellom18og20PaaReformtidspunkt(): Boolean {
+    // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
+    // for å sikre at vi får med alle som er under 20 år.
+    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+
+    // Sjekker at fødselsdato er fra tidligste tidspunkt til og med seneste tidspunkt
+    fun mellomAttenOgTjuePaaReformtidspunkt(foedselsdato: LocalDate): Boolean =
+        !(foedselsdato.isBefore(TIDLIGSTE_TIDSPUNKT) || foedselsdato.isAfter(SENESTE_TIDSPUNKT))
+
+    return mellomAttenOgTjuePaaReformtidspunkt(benyttetFoedselsdato)
+}
+
+fun Person.merEnnEller18PaaVirkningstidspunkt(doedsdato: LocalDate): Boolean {
+    // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
+    // for å sikre at vi får med alle som er under 20 år.
+    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+    val virkningstidspunkt = doedsdato.plusMonths(1).withDayOfMonth(1)
+
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, virkningstidspunkt).absoluteValue >= 18
 }

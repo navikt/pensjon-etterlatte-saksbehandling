@@ -118,13 +118,17 @@ class SanksjonService(
                 )
             }
         val naavaerendeBehandlingSanksjoner =
-            sanksjonerIBehandling.map {
-                GrunnlagMedPeriode(
-                    data = it.type,
-                    fom = it.fom.atDay(1),
-                    tom = it.tom?.atEndOfMonth(),
-                )
-            } +
+            sanksjonerIBehandling
+                .filter {
+                    // Filtrerer bort den sanksjonen vi endrer (hvis vi endrer noe)
+                    it.id != sanksjon.id
+                }.map {
+                    GrunnlagMedPeriode(
+                        data = it.type,
+                        fom = it.fom.atDay(1),
+                        tom = it.tom?.atEndOfMonth(),
+                    )
+                } +
                 listOf(
                     GrunnlagMedPeriode(
                         data = sanksjon.type,

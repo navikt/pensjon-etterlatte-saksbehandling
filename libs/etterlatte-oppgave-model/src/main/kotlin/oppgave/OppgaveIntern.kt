@@ -109,6 +109,7 @@ enum class OppgaveType {
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
     AKTIVITETSPLIKT,
     AKTIVITETSPLIKT_REVURDERING,
+    GENERELL_OPPGAVE,
     ;
 
     companion object {

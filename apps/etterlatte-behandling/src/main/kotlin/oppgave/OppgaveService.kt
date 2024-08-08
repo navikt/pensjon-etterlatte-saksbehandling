@@ -610,6 +610,7 @@ class OppgaveService(
                             true
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
+                        OppgaveType.GENERELL_OPPGAVE,
                         -> {
                             logger.info(
                                 "Tilbakestiller ikke oppgave av type ${it.type} " +

@@ -1,13 +1,13 @@
 import { GosysBrukerType, GosysOppgaveBruker } from '~shared/types/Gosys'
-import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
 import React from 'react'
+import { PersonLink } from '~components/person/PersonLink'
 
 export const GosysBrukerWrapper = ({ bruker }: { bruker?: GosysOppgaveBruker }) => {
   if (!bruker?.type || !bruker?.ident) return '-'
 
   switch (bruker.type) {
     case GosysBrukerType.PERSON:
-      return <SaksoversiktLenke fnr={bruker.ident} />
+      return <PersonLink fnr={bruker.ident} />
     case GosysBrukerType.ARBEIDSGIVER:
       return `${bruker.ident} (arbeidsgiver)`
     case GosysBrukerType.SAMHANDLER:

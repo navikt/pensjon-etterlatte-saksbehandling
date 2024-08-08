@@ -74,18 +74,17 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <HStack justify="end">
-              {/*<Button
+              <PersonButtonLink
+                fnr={fnr}
+                fane={PersonOversiktFane.DOKUMENTER}
                 variant="tertiary"
                 size="small"
-                as={NavLink}
-                to="/person?fane=DOKUMENTER"
-                state={{ fnr }}
                 target="_blank"
+                rel="noreferrer noopener"
                 icon={<ExternalLinkIcon />}
               >
                 Gå til dokumentoversikten
-              </Button>*/}
-              <PersonButtonLink fnr={fnr} fane={PersonOversiktFane.DOKUMENTER} />
+              </PersonButtonLink>
             </HStack>
           </>
         )

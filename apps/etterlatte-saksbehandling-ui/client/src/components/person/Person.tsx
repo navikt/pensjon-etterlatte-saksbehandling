@@ -46,7 +46,7 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
-  const { fnr } = usePersonLocationState(search.get('key') || 'undefined')
+  const { fnr } = usePersonLocationState(search.get('key'))
 
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)

@@ -7,7 +7,7 @@ import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
-import { NavLink } from 'react-router-dom'
+import { PersonLink } from '~components/person/PersonLink'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -78,9 +78,9 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
-          <NavLink to="/person" state={barn.foedselsnummer} target="_blank" rel="noreferrer noopener">
+          <PersonLink fnr={barn.foedselsnummer} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
-          </NavLink>
+          </PersonLink>
           <CopyButton copyText={barn.foedselsnummer} size="small" />
         </FnrWrapper>
       </Table.DataCell>

@@ -7,7 +7,7 @@ import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
-import { NavLink } from 'react-router-dom'
+import { PersonButtonLink } from '~components/person/PersonLink'
 
 export const AktivitetspliktRevurderingModal = ({
   oppgave,
@@ -66,16 +66,16 @@ export const AktivitetspliktRevurderingModal = ({
 
               {!erFerdigstilt && (
                 <div>
-                  <Button
+                  <PersonButtonLink
                     variant="primary"
                     size="small"
-                    as={NavLink}
-                    to="/person"
-                    state={{ fnr: oppgave.fnr?.toString() }}
                     target="_blank"
+                    rel="noreferrer noopener"
+                    fnr={oppgave.fnr || '-'}
+                    disabled={!oppgave.fnr}
                   >
                     Gå til sak
-                  </Button>
+                  </PersonButtonLink>
                 </div>
               )}
               {erFerdigstilt && (

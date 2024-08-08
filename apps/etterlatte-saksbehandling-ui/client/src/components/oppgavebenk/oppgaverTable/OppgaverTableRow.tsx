@@ -12,7 +12,6 @@ import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
 import { PersonLink } from '~components/person/PersonLink'
-import { PersonOversiktFane } from '~components/person/Person'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -44,9 +43,7 @@ export const OppgaverTableRow = ({
         <FristWrapper dato={oppgave.frist} />
       )}
     </Table.DataCell>
-    <Table.DataCell>
-      {oppgave.fnr ? <PersonLink fnr={oppgave.fnr} fane={PersonOversiktFane.SAKER} /> : 'Mangler'}
-    </Table.DataCell>
+    <Table.DataCell>{oppgave.fnr ? <PersonLink fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
     <Table.DataCell>
       <HStack align="center">
         <SakTypeTag sakType={oppgave.sakType} kort />

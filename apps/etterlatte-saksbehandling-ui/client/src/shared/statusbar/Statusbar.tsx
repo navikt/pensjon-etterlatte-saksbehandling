@@ -11,7 +11,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { NavLink } from 'react-router-dom'
+import { PersonLink } from '~components/person/PersonLink'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -57,9 +57,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
         <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
           <Label>
-            <NavLink to="/person" state={{ fnr: person.foedselsnummer }}>
-              {genererNavn(person)}
-            </NavLink>
+            <PersonLink fnr={person.foedselsnummer}>{genererNavn(person)}</PersonLink>
           </Label>
 
           <DoedsdatoTag doedsdato={person.doedsdato} />

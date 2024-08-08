@@ -1,14 +1,14 @@
 import { Alert, BodyLong, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { Navigate, NavLink, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FerdigstillOppgaveModal from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgaveModal'
 import { Journalstatus } from '~shared/types/Journalpost'
-import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import React from 'react'
+import { PersonLink } from '~components/person/PersonLink'
 
 export default function FerdigstillOppgave() {
   const { journalpost, oppgave } = useJournalfoeringOppgave()
@@ -53,9 +53,9 @@ export default function FerdigstillOppgave() {
         <Alert variant="warning">
           Journalposten har ikke blitt lastet inn som forventet. Er du helt sikker på at du vil ferdigstille oppgaven?
           <br /> Du kan kontrollere dokumentent i{' '}
-          <NavLink to={`/person?fane=${PersonOversiktFane.DOKUMENTER}`} state={{ fnr: oppgave.fnr }} target="_blank">
+          <PersonLink fnr={oppgave.fnr || '-'} target="_blank" rel="noreferrer noopener">
             dokumentoversikten <ExternalLinkIcon />
-          </NavLink>
+          </PersonLink>
         </Alert>
       )}
 

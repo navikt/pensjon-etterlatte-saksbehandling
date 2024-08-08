@@ -7,7 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
-import { NavLink } from 'react-router-dom'
+import { PersonButtonLink } from '~components/person/PersonLink'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -49,15 +49,15 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button
+        <PersonButtonLink
           size="small"
           icon={<EyeIcon />}
-          to={`/person?fane=HENDELSER&referanse=${referanse}`}
-          state={{ fnr }}
-          as={NavLink}
+          fnr={fnr || '-'}
+          queryParams={{ referanse: referanse || '-' }}
+          disabled={!fnr}
         >
           Se hendelse
-        </Button>
+        </PersonButtonLink>
       )
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (

@@ -11,7 +11,7 @@ import { Result } from '~shared/api/apiUtils'
 import { ILand } from '~shared/api/trygdetid'
 import { formaterFnr } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
-import { NavLink } from 'react-router-dom'
+import { PersonLink } from '~components/person/PersonLink'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -48,9 +48,9 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
         <BodyShort>
           {person.fornavn} {person.etternavn}
           <HStack>
-            <NavLink to="/person" state={{ fnr: person.foedselsnummer }} target="_blank" rel="noreferrer noopener">
+            <PersonLink fnr={person.foedselsnummer} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
-            </NavLink>
+            </PersonLink>
             <CopyButton copyText={person.foedselsnummer} size="small" />
           </HStack>
         </BodyShort>

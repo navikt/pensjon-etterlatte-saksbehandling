@@ -17,7 +17,8 @@ import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
-import { NavLink } from 'react-router-dom'
+import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -158,20 +159,18 @@ const Maksbredde = styled.div`
   max-width: 40rem;
   padding: 1rem 0;
 `
-/**
- * TODO: Denne blir det også krøll med ifm. history state
- **/
+
 export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
   return (
-    <Button
-      as={NavLink}
+    <PersonButtonLink
+      fnr={props.klage.sak.ident}
+      fane={PersonOversiktFane.BREV}
       variant="primary"
       icon={<EnvelopeClosedIcon />}
-      to="/person?fane=BREV"
-      state={props.klage.sak.ident}
       target="_blank"
+      rel="noreferrer noopener"
     >
       Opprett brev
-    </Button>
+    </PersonButtonLink>
   )
 }

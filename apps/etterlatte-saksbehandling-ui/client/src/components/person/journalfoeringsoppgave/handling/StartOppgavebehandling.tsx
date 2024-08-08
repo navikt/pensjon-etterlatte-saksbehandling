@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Button, Heading, HStack, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -16,6 +16,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
+import { PersonLink } from '~components/person/PersonLink'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -140,14 +141,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
         }
       />
       <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || <i>Ikke tildelt</i>} />
-      <Info
-        label="Bruker"
-        tekst={
-          <NavLink to="/person" state={{ fnr: oppgave.fnr }} target="_blank">
-            {oppgave.fnr}
-          </NavLink>
-        }
-      />
+      <Info label="Bruker" tekst={oppgave.fnr ? <PersonLink fnr={oppgave.fnr} /> : '-'} />
       <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </VStack>

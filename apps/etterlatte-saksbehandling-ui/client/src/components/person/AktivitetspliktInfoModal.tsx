@@ -39,7 +39,7 @@ import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
-import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 
 interface AktivitetspliktVurderingValues {

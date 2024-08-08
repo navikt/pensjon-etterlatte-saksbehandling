@@ -7,7 +7,7 @@ import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
-import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 
 export const AktivitetspliktRevurderingModal = ({
   oppgave,

@@ -1,6 +1,6 @@
 import { GosysBrukerType, GosysOppgaveBruker } from '~shared/types/Gosys'
 import React from 'react'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export const GosysBrukerWrapper = ({ bruker }: { bruker?: GosysOppgaveBruker }) => {
   if (!bruker?.type || !bruker?.ident) return '-'

@@ -9,7 +9,7 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
-import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {

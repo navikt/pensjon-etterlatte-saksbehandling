@@ -11,7 +11,7 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 interface Props {
   oppgave: OppgaveDTO

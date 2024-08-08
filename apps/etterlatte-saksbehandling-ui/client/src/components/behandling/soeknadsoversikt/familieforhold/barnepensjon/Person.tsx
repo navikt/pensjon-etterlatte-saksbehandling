@@ -11,7 +11,7 @@ import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familief
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { ILand } from '~shared/api/trygdetid'
 import { Result } from '~shared/api/apiUtils'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;

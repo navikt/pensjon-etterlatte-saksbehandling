@@ -16,7 +16,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()

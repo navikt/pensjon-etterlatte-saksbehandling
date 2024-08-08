@@ -30,7 +30,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { usePersonLocationState } from '~components/person/PersonLink'
+import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',

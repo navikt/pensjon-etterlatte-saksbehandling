@@ -8,7 +8,7 @@ import { Journalstatus } from '~shared/types/Journalpost'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import React from 'react'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 
 export default function FerdigstillOppgave() {

@@ -7,7 +7,7 @@ import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 const FnrWrapper = styled.div`
   display: flex;

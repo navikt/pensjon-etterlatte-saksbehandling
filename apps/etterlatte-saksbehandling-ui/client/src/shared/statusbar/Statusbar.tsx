@@ -11,7 +11,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
-import { PersonLink } from '~components/person/PersonLink'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar

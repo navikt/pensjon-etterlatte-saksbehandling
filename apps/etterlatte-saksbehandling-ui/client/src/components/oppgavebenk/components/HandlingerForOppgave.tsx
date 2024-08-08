@@ -7,7 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
-import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 
 export const HandlingerForOppgave = ({

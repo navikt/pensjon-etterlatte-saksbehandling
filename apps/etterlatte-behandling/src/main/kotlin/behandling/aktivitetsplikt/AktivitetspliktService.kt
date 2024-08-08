@@ -143,8 +143,15 @@ class AktivitetspliktService(
     }
 
     private fun harVarigUnntak(sakId: Long): Boolean {
-        val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        return unntak?.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+        val sisteVurdering =
+            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+
+        return when (sisteVurdering) {
+            is AktivitetspliktUnntak -> sisteVurdering.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+            else -> false
+        }
     }
 
     fun hentAktiviteter(behandlingId: UUID) = aktivitetspliktDao.hentAktiviteter(behandlingId)
@@ -382,9 +389,9 @@ class AktivitetspliktService(
         request: OpprettOppgaveForAktivitetspliktVarigUnntakDto,
     ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
         if (harVarigUnntak(request.sakId)) {
-            OpprettOppgaveForAktivitetspliktVarigUnntakResponse()
-        } else {
             opprettOppgaveForVarigUnntak(request)
+        } else {
+            OpprettOppgaveForAktivitetspliktVarigUnntakResponse()
         }
 
     private fun opprettOppgaveForRevurdering(

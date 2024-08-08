@@ -6,6 +6,9 @@ on:
       image:
         description: "Docker image url"
         value: ${{ jobs.build-and-publish.outputs.image }}
+      digest:
+        description: "Image digest"
+        value: ${{ jobs.build-and-publish.outputs.digest }}
 
 jobs:
   build-and-publish:
@@ -53,27 +56,3 @@ jobs:
           tag: ${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
-  salsa:
-    name: Generate SBOM, attest and sign image
-    needs: [ build-and-publish ]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - name: NAIS login
-        uses: nais/login@v0
-        id: login
-        with:
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          team: etterlatte
-      - name: Lag image-referanse med digest
-        run: |
-          IMAGE_WITH_TAG="${{ needs.build-and-publish.outputs.image }}"
-          IMAGE="${IMAGE_WITH_TAG%%:*}"
-          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
-      - name: Generate SBOM, attest and sign image
-        id: attest-sign
-        uses: nais/attest-sign@v1
-        with:
-          image_ref: ${{ env.IMAGE_WITH_DIGEST }}

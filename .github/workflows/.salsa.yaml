@@ -1,0 +1,38 @@
+name: .salsa.yaml
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'Lenke til docker image'
+        required: true
+        type: string
+      digest:
+        description: 'Image digest'
+        required: true
+        type: string
+
+jobs:
+  salsa:
+    name: Generate SBOM, attest and sign image
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: NAIS login
+        uses: nais/login@v0
+        id: login
+        with:
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          team: etterlatte
+      - name: Lag image-referanse med digest
+        run: |
+          IMAGE_WITH_TAG="${{ inputs.image }}"
+          IMAGE="${IMAGE_WITH_TAG%%:*}"
+          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ inputs.digest }}" >> $GITHUB_ENV
+      - name: Generate SBOM, attest and sign image
+        id: attest-sign
+        uses: nais/attest-sign@v1
+        with:
+          image_ref: ${{ env.IMAGE_WITH_DIGEST }}

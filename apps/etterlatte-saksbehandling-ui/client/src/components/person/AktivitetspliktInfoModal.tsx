@@ -40,6 +40,7 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
 import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsplikt: JaNei | null
@@ -336,6 +337,7 @@ export const AktivitetspliktInfoModal = ({
                 <PersonButtonLink
                   variant="primary"
                   fnr={oppgave.fnr || '-'}
+                  fane={PersonOversiktFane.BREV}
                   disabled={!oppgave.fnr}
                   size="small"
                   target="_blank"

@@ -9,6 +9,7 @@ import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import React from 'react'
 import { PersonLink } from '~components/person/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export default function FerdigstillOppgave() {
   const { journalpost, oppgave } = useJournalfoeringOppgave()
@@ -53,7 +54,12 @@ export default function FerdigstillOppgave() {
         <Alert variant="warning">
           Journalposten har ikke blitt lastet inn som forventet. Er du helt sikker på at du vil ferdigstille oppgaven?
           <br /> Du kan kontrollere dokumentent i{' '}
-          <PersonLink fnr={oppgave.fnr || '-'} target="_blank" rel="noreferrer noopener">
+          <PersonLink
+            fnr={oppgave.fnr || '-'}
+            fane={PersonOversiktFane.DOKUMENTER}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             dokumentoversikten <ExternalLinkIcon />
           </PersonLink>
         </Alert>

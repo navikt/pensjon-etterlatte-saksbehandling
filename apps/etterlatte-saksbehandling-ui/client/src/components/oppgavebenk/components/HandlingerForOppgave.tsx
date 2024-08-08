@@ -8,6 +8,7 @@ import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfo
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
 import { PersonButtonLink } from '~components/person/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -53,6 +54,7 @@ export const HandlingerForOppgave = ({
           size="small"
           icon={<EyeIcon />}
           fnr={fnr || '-'}
+          fane={PersonOversiktFane.HENDELSER}
           queryParams={{ referanse: referanse || '-' }}
           disabled={!fnr}
         >

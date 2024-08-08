@@ -55,22 +55,5 @@ jobs:
 
   build:
     if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/.build.yaml
-    secrets: inherit
-
-  salsa:
-    if: github.event_name != 'pull_request'
-    needs: build
-    uses: ./.github/workflows/.salsa.yaml
-    with:
-      image: ${{ needs.build.outputs.image }}
-      digest: ${{ needs.build.outputs.digest }}
-    secrets: inherit
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    uses: ./.github/workflows/.deploy.yaml
-    with:
-      image: ${{ needs.build.outputs.image }}
+    uses: ./.github/workflows/.build2.yaml
     secrets: inherit

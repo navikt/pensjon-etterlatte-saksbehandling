@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.Sanksjon
 import no.nav.etterlatte.sanksjon.SanksjonEndresFoerVirkException
@@ -335,9 +336,17 @@ internal class SanksjonServiceTest {
                     id = behandlingId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
 
             every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
+            every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+                sanksjon(
+                    id = sanksjonId,
+                    behandlingId = behandlingId,
+                    fom = behandling.virkningstidspunkt!!.dato,
+                    tom = null,
+                )
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
@@ -347,6 +356,70 @@ internal class SanksjonServiceTest {
 
             coVerify {
                 sanksjonRepository.slettSanksjon(sanksjonId)
+            }
+        }
+
+        @Test
+        fun `skal ikke kunne slette sanksjon med fom foer virkningstidspunkt`() {
+            val behandlingId = UUID.randomUUID()
+            val sanksjonId = UUID.randomUUID()
+            val virkningstidspunkt = YearMonth.of(2024, 2)
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt),
+                )
+
+            every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+                sanksjon(
+                    id = sanksjonId,
+                    behandlingId = behandlingId,
+                    fom = virkningstidspunkt.minusMonths(1),
+                    tom = null,
+                )
+            every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+
+            assertThrows<SanksjonEndresFoerVirkException> {
+                runBlocking {
+                    service.slettSanksjon(behandlingId, sanksjonId, bruker)
+                }
+            }
+        }
+
+        @Test
+        fun `skal ikke kunne slette en sanksjon som ikke hører til angitt behandlingId`() {
+            val behandlingId = UUID.randomUUID()
+            val sanksjonId = UUID.randomUUID()
+            val virkningstidspunkt = YearMonth.of(2024, 2)
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt),
+                )
+
+            every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+                sanksjon(
+                    id = sanksjonId,
+                    behandlingId = UUID.randomUUID(),
+                    fom = virkningstidspunkt,
+                    tom = null,
+                )
+            every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+
+            assertThrows<UgyldigForespoerselException> {
+                runBlocking {
+                    service.slettSanksjon(behandlingId, sanksjonId, bruker)
+                }
             }
         }
     }

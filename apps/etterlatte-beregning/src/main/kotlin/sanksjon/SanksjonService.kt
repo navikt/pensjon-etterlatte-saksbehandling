@@ -87,7 +87,7 @@ class SanksjonService(
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
-    suspend fun sanksjonErLikeFoerVirk(
+    private suspend fun sanksjonErLikeFoerVirk(
         behandling: DetaljertBehandling,
         sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,
@@ -150,8 +150,27 @@ class SanksjonService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
 
-        if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
+        val sanksjonSomSkalSlettes = sanksjonRepository.hentSanksjonMedId(sanksjonId) ?: return
+        if (sanksjonSomSkalSlettes.behandlingId != behandling.id) {
+            throw UgyldigForespoerselException(
+                "SANKSJON_TILHOERER_IKKE_BEHANDLING",
+                "Den angitte sanksjonsId'en hører ikke til den angitte behandlingId'en",
+            )
+        }
+
+        val virkningstidspunkt =
+            checkNotNull(behandling.virkningstidspunkt) {
+                "Behandling (id=$behandlingId) man prøver å slette sanksjon (id=$sanksjonId) i har ikke virkningstidspunkt"
+            }.dato
+        if (sanksjonSomSkalSlettes.fom < virkningstidspunkt) {
+            // Siden vi forbyr å legge til sanksjoner med fom < virk, er dette en kopiert sanksjon fra forrige
+            // behandling, og vi skal da ikke kunnne slette den.
+            throw SanksjonEndresFoerVirkException()
+        }
 
         settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")

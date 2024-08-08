@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import {
+  BeregningsGrunnlagDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsMetode,
   InstitusjonsoppholdIBeregning,
+  ReduksjonBP,
   ReduksjonOMS,
 } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, HStack, Label, Table } from '@navikt/ds-react'
@@ -10,7 +12,7 @@ import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregni
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/felles/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
@@ -33,7 +35,7 @@ const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
 interface Props {
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
+  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   institusjonsopphold: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[] | undefined
 }
 
@@ -126,7 +128,11 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
               >
                 <Table.DataCell>{formaterDatoMedFallback(opphold.fom, '-')}</Table.DataCell>
                 <Table.DataCell>{formaterDatoMedFallback(opphold.tom, '-')}</Table.DataCell>
-                <Table.DataCell>{ReduksjonOMS[opphold.data.reduksjon]}</Table.DataCell>
+                <Table.DataCell>
+                  {sakType === SakType.OMSTILLINGSSTOENAD
+                    ? ReduksjonOMS[opphold.data.reduksjon]
+                    : ReduksjonBP[opphold.data.reduksjon]}
+                </Table.DataCell>
                 <Table.DataCell>{opphold.data.egenReduksjon ?? '-'}</Table.DataCell>
                 <Table.DataCell>
                   <HStack gap="2" wrap={false} justify="end">

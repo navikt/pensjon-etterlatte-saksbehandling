@@ -11,9 +11,6 @@ repositories {
 }
 
 dependencies {
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-
     api(libs.bundles.jackson)
     implementation(project(":libs:saksbehandling-common"))
     compileOnly(libs.logging.slf4japi)

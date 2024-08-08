@@ -7,6 +7,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
+import io.ktor.network.sockets.SocketTimeoutException
+import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import org.slf4j.LoggerFactory
 
@@ -26,6 +28,13 @@ class KodeverkKlient(
                     accept(ContentType.Application.Json)
                     navConsumerId("etterlatte-trygdetid")
                 }.body()
+        } catch (e: SocketTimeoutException) {
+            logger.warn("Timeout mot kodeverk ved henting av landkoder")
+
+            throw TimeoutForespoerselException(
+                code = "KODEVERK_TIMEOUT",
+                detail = "Henting av landkoder fra kodeverk tok for lang tid... Prøv igjen om litt.",
+            )
         } catch (e: Exception) {
             logger.error("Henting av landkoder feilet", e)
             throw e

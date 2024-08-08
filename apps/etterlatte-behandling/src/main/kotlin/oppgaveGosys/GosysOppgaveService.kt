@@ -175,7 +175,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .let { it.tilGosysOppgave() }
+            .tilGosysOppgave()
             .also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
@@ -250,7 +250,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         gosysOppgaveKlient
             .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .let { it.tilGosysOppgave() }
+            .tilGosysOppgave()
 
     override suspend fun feilregistrer(
         oppgaveId: String,

@@ -165,7 +165,7 @@ data class AktivitetsgradPeriode(
         fun fra(dto: AktivitetspliktAktivitetsgradDto): AktivitetsgradPeriode =
             AktivitetsgradPeriode(
                 fom = dto.fom,
-                tom = dto.fom,
+                tom = dto.tom,
                 vurdering =
                     when (dto.vurdering) {
                         VurdertAktivitetsgrad.AKTIVITET_UNDER_50 -> VurdertAktivitet.UNDER_50_PROSENT

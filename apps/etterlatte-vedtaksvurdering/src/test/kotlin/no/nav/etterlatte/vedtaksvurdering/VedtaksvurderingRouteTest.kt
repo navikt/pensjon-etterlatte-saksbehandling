@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -27,8 +28,10 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -51,6 +54,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -344,14 +348,21 @@ internal class VedtaksvurderingRouteTest {
                         header(HttpHeaders.Authorization, "Bearer $token")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakSammendragDto>(it.bodyAsText())
+                        objectMapper.readValue<VedtakSammendragDto>(it.bodyAsText())
                     }
 
             vedtaksammendrag.id shouldBe attestertVedtak.id.toString()
             vedtaksammendrag.behandlingId shouldBe attestertVedtak.behandlingId
             vedtaksammendrag.datoAttestert shouldNotBe null
-            // TODO datoAttestert leses inn som UTC selv om den er +01:00 - ville forventet med norsk tidssone?
-            // vedtaksammendrag.datoAttestert shouldBe attestertVedtak.attestasjon?.tidspunkt?.toNorskTid()
+            /*
+            ISO_OFFSET_DATE_TIME brukes internt i jackson for https://github.com/FasterXML/jackson-modules-java8/tree/master/datetime
+            mens toNorskTid "bruker" ISO_ZONED_DATE_TIME
+             */
+            vedtaksammendrag.datoAttestert?.format(ISO_OFFSET_DATE_TIME) shouldBe
+                attestertVedtak.attestasjon
+                    ?.tidspunkt
+                    ?.toNorskTid()
+                    ?.format(ISO_OFFSET_DATE_TIME)
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any(), any())

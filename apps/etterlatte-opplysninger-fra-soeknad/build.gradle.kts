@@ -7,6 +7,6 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.etterlatte.common)
 
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

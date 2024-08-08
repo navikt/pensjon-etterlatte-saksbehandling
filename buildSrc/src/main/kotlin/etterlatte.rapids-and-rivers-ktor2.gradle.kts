@@ -11,6 +11,5 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.navfelles.rapidandriversktor2)
     implementation(project(":libs:rapidsandrivers-extras"))
 }

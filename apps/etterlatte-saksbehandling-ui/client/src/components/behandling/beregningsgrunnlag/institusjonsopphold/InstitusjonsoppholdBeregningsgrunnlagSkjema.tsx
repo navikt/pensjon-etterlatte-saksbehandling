@@ -1,10 +1,12 @@
 import React from 'react'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import {
+  BeregningsGrunnlagDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsMetode,
   InstitusjonsoppholdGrunnlagDTO,
   InstitusjonsoppholdIBeregning,
+  ReduksjonBP,
   ReduksjonKey,
   ReduksjonOMS,
 } from '~shared/types/Beregning'
@@ -14,9 +16,9 @@ import { useForm } from 'react-hook-form'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { validerStringNumber } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
+import { lagreBeregningsGrunnlag, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
 import { SakType } from '~shared/types/sak'
-import { oppdaterBeregingsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregingsGrunnlag, oppdaterBeregingsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -29,7 +31,7 @@ import {
 interface Props {
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagOMSPostDto | undefined
+  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   eksisterendePeriode?: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>
   indexTilEksisterendePeriode?: number
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
@@ -47,6 +49,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
   paaAvbryt,
   paaLagre,
 }: Props) => {
+  const [lagreBeregningsGrunnlagBPResult, lagreBeregningsGrunnlagBPRequest] = useApiCall(lagreBeregningsGrunnlag)
   const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
 
   const dispatch = useAppDispatch()
@@ -76,16 +79,16 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
       tom: institusjonsoppholdPeriode.tom && konverterTilSisteDagIMaaneden(institusjonsoppholdPeriode.tom),
     }
 
-    if (sakType === SakType.OMSTILLINGSSTOENAD) {
-      if (eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined) {
-        const grunnlag = {
-          beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-          institusjonsopphold: replacePeriodePaaIndex(
-            formatertInstitusjonsoppholdPeriode,
-            institusjonsopphold,
-            indexTilEksisterendePeriode
-          ),
-        }
+    if (eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined) {
+      const grunnlag = {
+        beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+        institusjonsopphold: replacePeriodePaaIndex(
+          formatertInstitusjonsoppholdPeriode,
+          institusjonsopphold,
+          indexTilEksisterendePeriode
+        ),
+      }
+      if (sakType === SakType.OMSTILLINGSSTOENAD) {
         lagreBeregningsGrunnlagOMSRequest(
           {
             behandlingId: behandling.id,
@@ -96,14 +99,32 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             paaLagre()
           }
         )
-      } else {
-        const grunnlag = {
-          beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-          institusjonsopphold: !!institusjonsopphold?.length
-            ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
-            : [formatertInstitusjonsoppholdPeriode],
-        }
-
+      } else if (sakType === SakType.BARNEPENSJON) {
+        const beregningsgrunnlagBP = beregningsgrunnlag as BeregningsGrunnlagDto
+        lagreBeregningsGrunnlagBPRequest(
+          {
+            behandlingId: behandling.id,
+            grunnlag: {
+              ...beregningsgrunnlagBP,
+              institusjonsopphold: grunnlag.institusjonsopphold,
+            },
+          },
+          () => {
+            dispatch(
+              oppdaterBeregingsGrunnlag({ ...beregningsgrunnlagBP, institusjonsopphold: grunnlag.institusjonsopphold })
+            )
+            paaLagre()
+          }
+        )
+      }
+    } else {
+      const grunnlag = {
+        beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+        institusjonsopphold: !!institusjonsopphold?.length
+          ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
+          : [formatertInstitusjonsoppholdPeriode],
+      }
+      if (sakType === SakType.OMSTILLINGSSTOENAD) {
         lagreBeregningsGrunnlagOMSRequest(
           {
             behandlingId: behandling.id,
@@ -111,6 +132,28 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           },
           () => {
             dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+            paaLagre()
+          }
+        )
+      } else if (sakType === SakType.BARNEPENSJON) {
+        const beregningsgrunnlagBP = beregningsgrunnlag as BeregningsGrunnlagDto
+        lagreBeregningsGrunnlagBPRequest(
+          {
+            behandlingId: behandling.id,
+            grunnlag: {
+              ...beregningsgrunnlagBP,
+              beregningsMetode: grunnlag.beregningsMetode,
+              institusjonsopphold: grunnlag.institusjonsopphold,
+            },
+          },
+          () => {
+            dispatch(
+              oppdaterBeregingsGrunnlag({
+                ...beregningsgrunnlagBP,
+                beregningsMetode: grunnlag.beregningsMetode,
+                institusjonsopphold: grunnlag.institusjonsopphold,
+              })
+            )
             paaLagre()
           }
         )
@@ -129,7 +172,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             label="Reduksjon"
             error={errors.data?.reduksjon?.message}
           >
-            {Object.entries(ReduksjonOMS).map(([key, value]) => (
+            {Object.entries(sakType === SakType.OMSTILLINGSSTOENAD ? ReduksjonOMS : ReduksjonBP).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
               </option>
@@ -161,7 +204,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}
-            loading={isPending(lagreBeregningsGrunnlagOMSResult)}
+            loading={isPending(lagreBeregningsGrunnlagOMSResult) || isPending(lagreBeregningsGrunnlagBPResult)}
           >
             Lagre
           </Button>

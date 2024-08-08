@@ -49,6 +49,8 @@ class ViderefoertOpphoerTest(
     lateinit var connection: ConnectionAutoclosingTest
     lateinit var service: BehandlingService
     lateinit var behandlingDao: BehandlingDao
+    private val saksbehandlerKilde: Grunnlagsopplysning.Saksbehandler =
+        Grunnlagsopplysning.Saksbehandler.create("A123")
 
     @BeforeEach
     fun setUp() {
@@ -153,7 +155,6 @@ class ViderefoertOpphoerTest(
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
-        val kilde = Grunnlagsopplysning.Saksbehandler.create("123")
 
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
@@ -165,7 +166,7 @@ class ViderefoertOpphoerTest(
                 ),
         )
 
-        service.fjernViderefoertOpphoer(opprettBehandling.id, kilde)
+        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
 
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
@@ -177,7 +178,7 @@ class ViderefoertOpphoerTest(
                 ),
         )
 
-        service.fjernViderefoertOpphoer(opprettBehandling.id, kilde)
+        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
 
         service.oppdaterViderefoertOpphoer(
             behandlingId = opprettBehandling.id,
@@ -234,15 +235,16 @@ class ViderefoertOpphoerTest(
         opphoersdato: YearMonth,
         skalViderefoere: JaNei,
         vilkaar: VilkaarType? = VilkaarType.BP_FORMAAL_2024,
-    ) = ViderefoertOpphoer(
-        skalViderefoere = skalViderefoere,
-        behandlingId = behandlingId,
-        dato = opphoersdato,
-        begrunnelse = "for testformål",
-        vilkaar = vilkaar,
-        kilde = Grunnlagsopplysning.Saksbehandler.create("A123"),
-        kravdato = null,
-    )
+    ): ViderefoertOpphoer =
+        ViderefoertOpphoer(
+            skalViderefoere = skalViderefoere,
+            behandlingId = behandlingId,
+            dato = opphoersdato,
+            begrunnelse = "for testformål",
+            vilkaar = vilkaar,
+            kilde = saksbehandlerKilde,
+            kravdato = null,
+        )
 
     private fun hentAlleViderefoertOpphoer(behandlingId: UUID): List<ViderefoertOpphoer> =
         connection.hentConnection {

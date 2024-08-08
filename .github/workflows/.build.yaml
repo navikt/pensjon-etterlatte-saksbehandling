@@ -17,6 +17,7 @@ jobs:
       id-token: write
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
+      digest: ${{ steps.docker-build-push.outputs.digest }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,12 +46,37 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          salsa: false
           dockerfile: docker/Dockerfile
           docker_context: apps/${{ github.workflow }}/
           image_suffix: ${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
+  salsa:
+    name: Generate SBOM, attest and sign image
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+    steps:
+      - name: NAIS login
+        uses: nais/login@v0
+        id: login
+        with:
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          team: etterlatte
+      - name: Lag image-referanse med digest
+        run: |
+          IMAGE_WITH_TAG="${{ needs.build.outputs.image }}"
+          IMAGE="${IMAGE_WITH_TAG%%:*}"
+          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
+      - name: Generate SBOM, attest and sign image
+        id: attest-sign
+        uses: nais/attest-sign@v1
+        with:
+          image_ref: ${{ env.IMAGE_WITH_DIGEST }}
   deploy-to-dev-gcp:
     name: dev-gcp
     runs-on: ubuntu-latest

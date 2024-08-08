@@ -49,15 +49,7 @@ jobs:
     uses: ./.github/workflows/.test.yaml
     secrets: inherit
 
-  build:
+  build-and-deploy:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
-    secrets: inherit
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    uses: ./.github/workflows/.deploy.yaml
-    with:
-      image: ${{ needs.build.outputs.image }}
     secrets: inherit

@@ -1,3 +1,4 @@
+
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -41,10 +42,15 @@ tasks {
                 }
         }
 
+        val configuration =
+            configurations.runtimeClasspath.get().map {
+                it.toPath().toFile()
+            }
+        val buildDirectory = layout.buildDirectory
         doLast {
-            configurations.runtimeClasspath.get().forEach {
+            configuration.forEach {
                 val file =
-                    layout.buildDirectory
+                    buildDirectory
                         .file("libs/${it.name}")
                         .get()
                         .asFile

@@ -123,7 +123,7 @@ enum class VilkaarType(
     OMS_ETTERLATTE_LEVER(90, "Lever den etterlatte?"),
     OMS_DOEDSFALL(100, "Dødsfall ektefelle/partner/samboer"),
     OMS_OEVRIGE_VILKAAR(105, "Øvrige vilkår for ytelser"),
-    OMS_OVERLAPPENDE_YTELSER(110, "Bortfall rettigheter etter § 17-11 første ledd?"),
+    OMS_OVERLAPPENDE_YTELSER(110, "Rett til omstillingsstønad utfra § 17-11 første ledd?"),
     OMS_SIVILSTAND(120, "Rett til omstillingsstønad igjen etter § 17-11 andre ledd?"),
     OMS_YRKESSKADE(200, "Dødsfall som skyldes yrkesskade eller yrkessykdom"),
     OMS_AVDOEDES_MEDLEMSKAP(300, "Avdødes forutgående medlemskap - Folketrygden"),

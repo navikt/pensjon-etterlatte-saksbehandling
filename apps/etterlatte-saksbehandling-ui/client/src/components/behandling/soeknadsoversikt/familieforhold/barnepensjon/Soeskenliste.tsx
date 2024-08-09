@@ -1,5 +1,5 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-react'
+import { CopyButton, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
@@ -7,6 +7,7 @@ import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato
 import { formaterFnr } from '~utils/formatering/formatering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -77,9 +78,9 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
       </Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
-          <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+          <PersonLink fnr={barn.foedselsnummer} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
-          </Link>
+          </PersonLink>
           <CopyButton copyText={barn.foedselsnummer} size="small" />
         </FnrWrapper>
       </Table.DataCell>

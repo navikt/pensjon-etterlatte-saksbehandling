@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
     id("java-library")
     id("java-test-fixtures")
@@ -22,10 +21,4 @@ dependencies {
     testImplementation(libs.test.jupiter.params)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
-}
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
 }

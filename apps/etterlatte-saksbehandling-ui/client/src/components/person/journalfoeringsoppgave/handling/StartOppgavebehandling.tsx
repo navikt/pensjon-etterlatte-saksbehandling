@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Heading, HStack, Link, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
@@ -11,11 +11,12 @@ import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/Journalfoe
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
-import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -140,14 +141,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
         }
       />
       <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || <i>Ikke tildelt</i>} />
-      <Info
-        label="Bruker"
-        tekst={
-          <Link href={`/person/${oppgave.fnr}`} target="_blank">
-            {oppgave.fnr}
-          </Link>
-        }
-      />
+      <Info label="Bruker" tekst={oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : '-'} />
       <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </VStack>

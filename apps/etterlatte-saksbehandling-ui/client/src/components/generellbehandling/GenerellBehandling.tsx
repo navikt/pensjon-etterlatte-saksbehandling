@@ -36,7 +36,7 @@ const GenerellBehandling = () => {
   return mapApiResult(
     fetchGenerellbehandlingStatus,
     <Spinner visible={true} label="Henter generell behandling" />,
-    () => <ApiErrorAlert>Kunne ikke hente generell behandling</ApiErrorAlert>,
+    (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente generell behandling'}</ApiErrorAlert>,
     (generellBehandling) => {
       switch (generellBehandling.type) {
         case 'KRAVPAKKE_UTLAND':

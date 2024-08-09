@@ -128,6 +128,6 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
-        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

@@ -90,6 +90,8 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
         context.oppgaveFristGaarUtJobb,
+        context.opprettDoedshendelseJob,
+        context.behandleDoedshendelseJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -174,7 +176,11 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         sakService = applicationContext.sakService,
     )
     vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
-    revurderingRoutes(revurderingService = applicationContext.revurderingService)
+    revurderingRoutes(
+        revurderingService = applicationContext.revurderingService,
+        manuellRevurderingService = applicationContext.manuellRevurderingService,
+        omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
+    )
     omregningRoutes(omregningService = applicationContext.omregningService)
     migreringRoutes(migreringService = applicationContext.migreringService)
     bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)

@@ -69,6 +69,8 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
+import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
@@ -98,6 +100,12 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseJob
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseJob
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -312,6 +320,7 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
+    val opprettDoedshendelseDao = OpprettDoedshendelseDao(autoClosingDatabase)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue(SKJERMING_URL))
@@ -384,15 +393,28 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            klageService = klageService,
-            behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
+    val manuellRevurderingService =
+        ManuellRevurderingService(
+            revurderingService = revurderingService,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagsService,
+            oppgaveService = oppgaveService,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+        )
+    val omgjoeringKlageRevurderingService =
+        OmgjoeringKlageRevurderingService(
+            revurderingService = revurderingService,
+            oppgaveService = oppgaveService,
+            klageService = klageService,
+            behandlingDao = behandlingDao,
+            grunnlagService = grunnlagsService,
+        )
 
     val aktivitetspliktService =
         AktivitetspliktService(
@@ -443,6 +465,7 @@ internal class ApplicationContext(
             pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val opprettDoedshendelseService = OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =
@@ -479,6 +502,48 @@ internal class ApplicationContext(
             pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
             krrKlient = krrKlient,
+        )
+
+    val opprettDoedshendelseJob =
+        OpprettDoedshendelseJob(
+            mellom18og20PaaReformtidspunktDao = opprettDoedshendelseDao,
+            opprettDoedshendelseService = opprettDoedshendelseService,
+            featureToggleService = featureToggleService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+
+    val behandleDoedshendelseService =
+        BehandleDoedshendelseService(
+            doedshendelseDao = doedshendelseDao,
+            doedshendelseKontrollpunktService =
+                BehandleDoedshendelseKontrollpunktService(
+                    pdlTjenesterKlient = pdlTjenesterKlient,
+                    sakService = sakService,
+                    behandlingService = behandlingService,
+                ),
+            featureToggleService = featureToggleService,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
+            deodshendelserProducer = deodshendelserProducer,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            grunnlagService = grunnlagsService,
+            krrKlient = krrKlient,
+        )
+
+    val behandleDoedshendelseJob =
+        BehandleDoedshendelseJob(
+            doedshendelseDao,
+            behandleDoedshendelseService = behandleDoedshendelseService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            featureToggleService = featureToggleService,
+            sakTilgangDao = sakTilgangDao,
         )
 
     val behandlingsStatusService =

@@ -1,10 +1,5 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
-}
-
-repositories {
-    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -16,10 +11,4 @@ dependencies {
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
-}
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
 }

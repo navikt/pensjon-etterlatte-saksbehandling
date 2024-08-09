@@ -67,6 +67,6 @@ spec:
         - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
     inbound:
       rules:
-      - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+      - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
         namespace: aura
         cluster: dev-gcp

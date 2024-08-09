@@ -1,6 +1,6 @@
 import { PersonIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
+import { BodyShort, CopyButton, Detail, Heading, HStack, Label } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
@@ -11,6 +11,7 @@ import { Result } from '~shared/api/apiUtils'
 import { ILand } from '~shared/api/trygdetid'
 import { formaterFnr } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -47,9 +48,9 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
         <BodyShort>
           {person.fornavn} {person.etternavn}
           <HStack>
-            <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+            <PersonLink fnr={person.foedselsnummer} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
-            </Link>
+            </PersonLink>
             <CopyButton copyText={person.foedselsnummer} size="small" />
           </HStack>
         </BodyShort>

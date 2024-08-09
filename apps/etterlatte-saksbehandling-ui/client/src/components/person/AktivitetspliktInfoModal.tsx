@@ -39,6 +39,8 @@ import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsplikt: JaNei | null
@@ -332,15 +334,17 @@ export const AktivitetspliktInfoModal = ({
                   Den etterlatte skal informeres om aktivitetskravet som vil tre i kraft 6 måneder etter dødsfallet. Det
                   skal opprettes et manuelt informasjonsbrev som skal bli sendt 3-4 måneder etter dødsfallet.
                 </BodyLong>
-                <Button
+                <PersonButtonLink
                   variant="primary"
+                  fnr={oppgave.fnr || '-'}
+                  fane={PersonOversiktFane.BREV}
+                  disabled={!oppgave.fnr}
                   size="small"
-                  as="a"
-                  href={`/person/${oppgave.fnr?.toString()}?fane=BREV`}
                   target="_blank"
+                  rel="noreferrer noopener"
                 >
                   Opprett manuelt brev
-                </Button>
+                </PersonButtonLink>
               </div>
             </HStack>
             {mapFailure(opprettetUnntak, (error) => (

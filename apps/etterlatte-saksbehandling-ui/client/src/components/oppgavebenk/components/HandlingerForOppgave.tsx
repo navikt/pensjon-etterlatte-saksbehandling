@@ -8,6 +8,8 @@ import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfo
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
 import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -49,9 +51,16 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+        <PersonButtonLink
+          size="small"
+          icon={<EyeIcon />}
+          fnr={fnr || '-'}
+          fane={PersonOversiktFane.HENDELSER}
+          queryParams={{ referanse: referanse || '-' }}
+          disabled={!fnr}
+        >
           Se hendelse
-        </Button>
+        </PersonButtonLink>
       )
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (

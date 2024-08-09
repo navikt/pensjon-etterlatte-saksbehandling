@@ -5,12 +5,7 @@ val libs = the<LibrariesForLibs>()
 
 plugins {
     kotlin("jvm")
-    id("etterlatte.libs")
     application
-}
-
-repositories {
-    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {

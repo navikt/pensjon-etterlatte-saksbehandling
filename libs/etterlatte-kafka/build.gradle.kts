@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
     id("java-library")
     id("java-test-fixtures")
@@ -7,7 +6,6 @@ plugins {
 
 repositories {
     maven("https://packages.confluent.io/maven/")
-    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -25,10 +23,4 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.kafka)
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
-}
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
 }

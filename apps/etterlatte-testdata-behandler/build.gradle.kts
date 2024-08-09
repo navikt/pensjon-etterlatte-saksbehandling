@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -13,5 +12,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.cache.caffeine)
 }

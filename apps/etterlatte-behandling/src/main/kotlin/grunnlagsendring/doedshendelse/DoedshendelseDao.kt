@@ -40,8 +40,8 @@ class DoedshendelseDao(
             with(it) {
                 prepareStatement(
                     """
-                    INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, endringstype)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, endringstype, migrert_mellom_atten_og_tjue)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
                     setString(1, doedshendelseInternal.id.toString())
@@ -53,6 +53,7 @@ class DoedshendelseDao(
                     setTidspunkt(7, doedshendelseInternal.endret)
                     setString(8, doedshendelseInternal.status.name)
                     setString(9, doedshendelseInternal.endringstype?.name)
+                    setBoolean(10, doedshendelseInternal.migrertMellomAttenOgTjue)
                 }.executeUpdate()
             }
         }
@@ -81,17 +82,22 @@ class DoedshendelseDao(
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> =
+    fun hentDoedshendelserMedStatus(
+        status: List<Status>,
+        migrertMellomAttenOgTjue: Boolean = false,
+    ): List<DoedshendelseInternal> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter, migrert_mellom_atten_og_tjue
                     FROM doedshendelse
                     WHERE status = any(?)
+                    AND migrert_mellom_atten_og_tjue = ?
                     """.trimIndent(),
                 ).apply {
                     setArray(1, createArrayOf("text", status.toTypedArray()))
+                    setBoolean(2, migrertMellomAttenOgTjue)
                 }.executeQuery()
                     .toList { asDoedshendelse() }
             }
@@ -131,7 +137,7 @@ class DoedshendelseDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter, migrert_mellom_atten_og_tjue
                     FROM doedshendelse
                     WHERE avdoed_fnr = ?
                     """.trimIndent(),
@@ -169,4 +175,5 @@ private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
         endringstype = getString("endringstype")?.let { Endringstype.valueOf(it) },
         kontrollpunkter =
             getString("kontrollpunkter")?.let { objectMapper.readValue(it) },
+        migrertMellomAttenOgTjue = getBoolean("migrert_mellom_atten_og_tjue"),
     )

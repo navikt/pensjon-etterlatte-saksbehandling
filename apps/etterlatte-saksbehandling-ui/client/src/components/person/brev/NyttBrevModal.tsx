@@ -67,7 +67,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)
-      navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
+      navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)
     })
   }
 
@@ -112,6 +112,9 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD}>
                       Kvitteringsbrev på mottatt søknad
+                    </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                      Innhenting av opplysninger
                     </option>
                   </>
                 )}
@@ -218,6 +221,9 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   />
                 </>
               )}
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+                <NasjonalEllerUtlandRadio control={control} />
+              )}
             </VStack>
           </Modal.Body>
 
@@ -264,6 +270,10 @@ export type BrevParametre =
       borINorgeEllerIkkeAvtaleland: boolean
     }
   | {
+      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      borIUtlandet: boolean
+    }
+  | {
       type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
       bosattUtland: boolean
       avdoedNavn: string
@@ -296,6 +306,7 @@ enum FormType {
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND',
   OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
   OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD = 'OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD',
+  OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
   BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
 }
 
@@ -326,6 +337,11 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         type: formdata.type,
         mottattDato: formdata.mottattDato!!,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
+      }
+    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+      return {
+        type: formdata.type,
+        borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
       }
     case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
       return {

@@ -13,8 +13,6 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -47,12 +45,12 @@ class BehandleDoedshendelseJob(
         ) {
             if (erLeader()) {
                 Kontekst.set(jobContext)
-                run(HardkodaSystembruker.doedshendelse)
+                run()
             }
         }
     }
 
-    private fun run(bruker: BrukerTokenInfo) {
+    private fun run() {
         if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
             val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
             logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
@@ -60,7 +58,7 @@ class BehandleDoedshendelseJob(
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse, bruker)
+                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
                 }
             }
         }

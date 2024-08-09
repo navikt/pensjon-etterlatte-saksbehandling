@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.ktor.route.logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -77,7 +78,8 @@ class OpprettDoedshendelseService(
         sikkerLogg.info("Fant ${nyeBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
         logger.info("Fant ${nyeBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value.maskerFnr()})")
         inTransaction {
-            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
+            val dryRun = !featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)
+            if (!dryRun) {
                 lagreDoedshendelser(nyeBeroerte, avdoed, Endringstype.OPPRETTET)
             }
         }
@@ -109,35 +111,62 @@ class OpprettDoedshendelseService(
         with(avdoed.avdoedesBarn ?: emptyList()) {
             this
                 .filter { barn -> barn.doedsdato == null }
-                .filter { barn -> barn.merEnnEller18PaaVirkningstidspunkt(avdoed.doedsdato!!.verdi) }
-                .filter { barn -> barn.mellom18og20PaaReformtidspunkt() }
+                .filter { barn -> merEnnEller18PaaVirkningstidspunkt(barn, avdoed.doedsdato!!.verdi) }
+                .filter { barn -> mellom18og20PaaReformtidspunkt(barn) }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
 
     companion object {
         val REFORMTIDSPUNKT = LocalDate.of(2024, 1, 1)
+
+        // Tidligste tidspunkt barn kan være født for å være kandidat for informasjonsbrev
         val TIDLIGSTE_TIDSPUNKT = REFORMTIDSPUNKT.minusYears(20) // 2004.01.01
+
+        // Seneste tidspunkt barn kan være født for å være kandidat for informasjonsbrev
         val SENESTE_TIDSPUNKT = REFORMTIDSPUNKT.minusYears(18).minusDays(1) // 2005.12.31
+
+        /**
+         * Det er kun barn som er mellom 18 og 20 år på reformtidspunktet som skal ha informasjonsbrev.
+         * Er barnet over 20 år har det ikke rett. Er barnet under 18 år, har det allerede fått informasjonsbrev basert på
+         * gammelt regelverk.
+         *
+         * Verdt å merke seg at en person har rett på ytelsen til og med måneden man fyller 20 år.
+         */
+        fun mellom18og20PaaReformtidspunkt(person: Person): Boolean {
+            // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
+            // for å sikre at vi får med alle som er under 20 år.
+            val benyttetFoedselsdato = person.foedselsdato ?: LocalDate.of(person.foedselsaar, 12, 31)
+
+            // Sjekker at fødselsdato er fra tidligste tidspunkt til og med seneste tidspunkt
+            fun mellomAttenOgTjuePaaReformtidspunkt(foedselsdato: LocalDate): Boolean =
+                !(foedselsdato.isBefore(TIDLIGSTE_TIDSPUNKT) || foedselsdato.isAfter(SENESTE_TIDSPUNKT))
+
+            return mellomAttenOgTjuePaaReformtidspunkt(benyttetFoedselsdato).let {
+                logger.info(
+                    "Person (${person.foedselsnummer.value.maskerFnr()}) er ${if (it) "" else "ikke"} mellom 18 og 20 på reformtidspunkt",
+                )
+                it
+            }
+        }
+
+        /**
+         * Det er kun personer som var 18 år eller mer på virkningstidspunkt som er aktuelle for informasjonsbrev.
+         */
+        fun merEnnEller18PaaVirkningstidspunkt(
+            person: Person,
+            doedsdato: LocalDate,
+        ): Boolean {
+            // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
+            // for å sikre at vi får med alle som er under 20 år.
+            val benyttetFoedselsdato = person.foedselsdato ?: LocalDate.of(person.foedselsaar, 12, 31)
+            val virkningstidspunkt = doedsdato.plusMonths(1).withDayOfMonth(1)
+
+            return (ChronoUnit.YEARS.between(benyttetFoedselsdato, virkningstidspunkt).absoluteValue >= 18).let {
+                logger.info(
+                    "Person (${person.foedselsnummer.value.maskerFnr()}) er ${if (it) "" else "ikke"} mellom 18 og 20 på virkningstidspunkt ($virkningstidspunkt)",
+                )
+                it
+            }
+        }
     }
-}
-
-fun Person.mellom18og20PaaReformtidspunkt(): Boolean {
-    // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
-    // for å sikre at vi får med alle som er under 20 år.
-    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
-
-    // Sjekker at fødselsdato er fra tidligste tidspunkt til og med seneste tidspunkt
-    fun mellomAttenOgTjuePaaReformtidspunkt(foedselsdato: LocalDate): Boolean =
-        !(foedselsdato.isBefore(TIDLIGSTE_TIDSPUNKT) || foedselsdato.isAfter(SENESTE_TIDSPUNKT))
-
-    return mellomAttenOgTjuePaaReformtidspunkt(benyttetFoedselsdato)
-}
-
-fun Person.merEnnEller18PaaVirkningstidspunkt(doedsdato: LocalDate): Boolean {
-    // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
-    // for å sikre at vi får med alle som er under 20 år.
-    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
-    val virkningstidspunkt = doedsdato.plusMonths(1).withDayOfMonth(1)
-
-    return ChronoUnit.YEARS.between(benyttetFoedselsdato, virkningstidspunkt).absoluteValue >= 18
 }

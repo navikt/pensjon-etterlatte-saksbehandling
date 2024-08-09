@@ -4,6 +4,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.MellomAttenOgTjueVedReformtidspunktFeatureToggle
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
@@ -21,6 +23,7 @@ import javax.sql.DataSource
 class OpprettDoedshendelseJob(
     private val mellom18og20PaaReformtidspunktDao: OpprettDoedshendelseDao,
     private val opprettDoedshendelseService: OpprettDoedshendelseService,
+    private val featureToggleService: FeatureToggleService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -37,7 +40,7 @@ class OpprettDoedshendelseJob(
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
-            initialDelay = 0,
+            initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
@@ -50,6 +53,7 @@ class OpprettDoedshendelseJob(
 
     private fun run() {
         withLogContext(correlationId = getCorrelationId(), kv = mapOf("migrering" to "true")) {
+            val dryRun = !featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)
             val listeOverAvdoede =
                 inTransaction {
                     mellom18og20PaaReformtidspunktDao.hentAvdoede(
@@ -58,17 +62,19 @@ class OpprettDoedshendelseJob(
                 }
             listeOverAvdoede.forEach { fnr ->
                 try {
-                    inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.STARTET) }
-                    logger.info("Starter håndtering av dødshendelse for person ${fnr.maskerFnr()}")
+                    if (!dryRun) inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.STARTET) }
+                    logger.info("Starter håndtering av dødshendelse for person ${fnr.maskerFnr()} (dryRun = $dryRun)")
                     opprettDoedshendelseService.opprettDoedshendelse(fnr)
-                    inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.OPPRETTET) }
+                    if (!dryRun) inTransaction { mellom18og20PaaReformtidspunktDao.oppdater(fnr, OpprettDoedshendelseStatus.OPPRETTET) }
                 } catch (e: Exception) {
-                    inTransaction {
-                        mellom18og20PaaReformtidspunktDao.oppdater(
-                            fnr,
-                            OpprettDoedshendelseStatus.FEILET,
-                            e.stackTraceToString(),
-                        )
+                    if (!dryRun) {
+                        inTransaction {
+                            mellom18og20PaaReformtidspunktDao.oppdater(
+                                fnr,
+                                OpprettDoedshendelseStatus.FEILET,
+                                e.stackTraceToString(),
+                            )
+                        }
                     }
                 }
             }

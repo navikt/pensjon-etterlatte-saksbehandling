@@ -508,6 +508,7 @@ internal class ApplicationContext(
         OpprettDoedshendelseJob(
             mellom18og20PaaReformtidspunktDao = opprettDoedshendelseDao,
             opprettDoedshendelseService = opprettDoedshendelseService,
+            featureToggleService = featureToggleService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
@@ -522,7 +523,6 @@ internal class ApplicationContext(
                 BehandleDoedshendelseKontrollpunktService(
                     pdlTjenesterKlient = pdlTjenesterKlient,
                     sakService = sakService,
-                    pesysKlient = pesysKlient,
                     behandlingService = behandlingService,
                 ),
             featureToggleService = featureToggleService,

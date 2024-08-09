@@ -35,7 +35,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
@@ -55,13 +54,10 @@ class BehandleDoedshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun haandterDoedshendelse(
-        doedshendelse: DoedshendelseInternal,
-        bruker: BrukerTokenInfo,
-    ) {
+    fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
         val kontrollpunkter =
             try {
-                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse, bruker)
+                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
             } catch (e: Exception) {
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
                 logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)

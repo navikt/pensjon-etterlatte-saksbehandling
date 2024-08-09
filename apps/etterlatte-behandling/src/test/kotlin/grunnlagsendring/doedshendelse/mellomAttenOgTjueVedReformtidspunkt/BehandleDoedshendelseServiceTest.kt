@@ -26,7 +26,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.MellomAttenOgTjueVedReformtidspunktFeatureToggle
-import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -112,14 +111,14 @@ class BehandleDoedshendelseServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
 
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), any()) } returns listOf(AvdoedHarDNummer)
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedHarDNummer)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
             mockk {
                 every { id } returns UUID.randomUUID()
             }
 
-        service.haandterDoedshendelse(doedshendelseInternal, systembruker())
+        service.haandterDoedshendelse(doedshendelseInternal)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
@@ -138,10 +137,10 @@ class BehandleDoedshendelseServiceTest {
                 )
 
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), any()) } returns listOf(AvdoedLeverIPDL)
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedLeverIPDL)
         val doedshendelseInternalCapture = slot<DoedshendelseInternal>()
 
-        service.haandterDoedshendelse(doedshendelseInternal, systembruker())
+        service.haandterDoedshendelse(doedshendelseInternal)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseInternalCapture)) }
         verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
@@ -168,11 +167,11 @@ class BehandleDoedshendelseServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
-        service.haandterDoedshendelse(doedshendelseInternal, systembruker())
+        service.haandterDoedshendelse(doedshendelseInternal)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
@@ -200,12 +199,12 @@ class BehandleDoedshendelseServiceTest {
                 every { id } returns oppgaveId
             }
         every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             emptyList()
         every { doedshendelserProducer.sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(any(), any(), any()) } just runs
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
-        service.haandterDoedshendelse(doedshendelseInternal, systembruker())
+        service.haandterDoedshendelse(doedshendelseInternal)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
         verify { doedshendelserProducer.sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(any(), any(), any()) }
@@ -233,11 +232,11 @@ class BehandleDoedshendelseServiceTest {
                 every { id } returns oppgaveId
             }
         every { toggle.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns false
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), any()) } returns
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
-        service.haandterDoedshendelse(doedshendelseInternal, systembruker())
+        service.haandterDoedshendelse(doedshendelseInternal)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
         verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }

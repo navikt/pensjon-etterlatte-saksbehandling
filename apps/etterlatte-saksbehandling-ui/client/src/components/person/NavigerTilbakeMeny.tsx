@@ -1,16 +1,15 @@
 import styled from 'styled-components'
 import { ChevronLeftIcon } from '@navikt/aksel-icons'
-import { Box, HStack, Label, Link } from '@navikt/ds-react'
+import { Box, HStack, Label } from '@navikt/ds-react'
+import { NavLink, NavLinkProps } from 'react-router-dom'
 
-export default function NavigerTilbakeMeny({ label, path }: { label: string; path: string }) {
+export default function NavigerTilbakeMeny({ ...props }: NavLinkProps) {
   return (
     <NavigerTilbakeBox role="navigation">
       <HStack gap="05" align="center">
         <ChevronLeftIcon aria-hidden />
         <Label>
-          <Link href={path || '/'} underline={false}>
-            {label}
-          </Link>
+          <NavLink {...props} />
         </Label>
       </HStack>
     </NavigerTilbakeBox>

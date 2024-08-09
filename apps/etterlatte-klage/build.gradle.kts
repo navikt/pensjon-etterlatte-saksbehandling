@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -9,6 +8,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.klage.kodeverk)
 

@@ -1,14 +1,15 @@
-import { Alert, BodyLong, Button, Heading, HStack, Link, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FerdigstillOppgaveModal from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgaveModal'
 import { Journalstatus } from '~shared/types/Journalpost'
-import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import React from 'react'
+import { PersonLink } from '~components/person/lenker/PersonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export default function FerdigstillOppgave() {
   const { journalpost, oppgave } = useJournalfoeringOppgave()
@@ -53,9 +54,14 @@ export default function FerdigstillOppgave() {
         <Alert variant="warning">
           Journalposten har ikke blitt lastet inn som forventet. Er du helt sikker på at du vil ferdigstille oppgaven?
           <br /> Du kan kontrollere dokumentent i{' '}
-          <Link href={`/person/${oppgave.fnr}?fane=${PersonOversiktFane.DOKUMENTER}`} target="_blank">
+          <PersonLink
+            fnr={oppgave.fnr || '-'}
+            fane={PersonOversiktFane.DOKUMENTER}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             dokumentoversikten <ExternalLinkIcon />
-          </Link>
+          </PersonLink>
         </Alert>
       )}
 

@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react'
 import { HStack, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
@@ -12,6 +11,7 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -43,7 +43,9 @@ export const OppgaverTableRow = ({
         <FristWrapper dato={oppgave.frist} />
       )}
     </Table.DataCell>
-    <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
+    <Table.DataCell>
+      {oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}
+    </Table.DataCell>
     <Table.DataCell>
       <HStack align="center">
         <SakTypeTag sakType={oppgave.sakType} kort />

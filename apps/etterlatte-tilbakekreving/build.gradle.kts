@@ -1,11 +1,14 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.postgres")
 }
 
 tasks.jar.configure {
     dependsOn(":libs:etterlatte-mq:jar")
+}
+
+repositories {
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -14,6 +17,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-mq"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.mq.jakarta.client)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)

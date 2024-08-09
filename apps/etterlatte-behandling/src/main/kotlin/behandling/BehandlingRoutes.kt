@@ -282,7 +282,10 @@ internal fun Route.behandlingRoutes(
                 logger.debug("Prøver å fjerne videreført opphør")
 
                 inTransaction {
-                    behandlingService.fjernViderefoertOpphoer(behandlingId)
+                    behandlingService.fjernViderefoertOpphoer(
+                        behandlingId,
+                        brukerTokenInfo.lagGrunnlagsopplysning(),
+                    )
                 }
                 call.respond(HttpStatusCode.OK)
             }

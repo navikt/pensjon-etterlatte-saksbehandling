@@ -1,7 +1,6 @@
 plugins {
     id("etterlatte.common")
     id("etterlatte.postgres")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -18,6 +17,7 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 

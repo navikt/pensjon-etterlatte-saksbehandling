@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
 }
 
@@ -9,10 +8,4 @@ dependencies {
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.jupiter.params)
-}
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
 }

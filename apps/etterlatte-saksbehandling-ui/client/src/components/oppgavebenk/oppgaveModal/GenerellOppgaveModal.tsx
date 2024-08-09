@@ -48,9 +48,7 @@ export const GenerellOppgaveModal = ({
 
         <Modal.Body>
           <VStack gap="4">
-            <Alert variant="info">
-              <b>Merknad:</b> {oppgave.merknad}
-            </Alert>
+            <Alert variant="info">{oppgave.merknad}</Alert>
 
             {kanRedigeres ? (
               <Textarea label="Kommentar" onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)} />

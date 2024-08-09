@@ -71,6 +71,25 @@ class DoedshendelseDaoTest(
     }
 
     @Test
+    fun `Skal ikke hente doedshendelser for migrerte personer mellom atten og tjue uten aa angi dette eksplisitt`() {
+        val avdoedFnr = "12345678902"
+        val doedshendelseInternal =
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = avdoedFnr,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                    migrertMellomAttenOgTjue = true,
+                )
+
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY)).size shouldBe 0
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY), migrertMellomAttenOgTjue = true).size shouldBe 1
+    }
+
+    @Test
     fun `Kan hente doedshendelser for avdoed basert paa fnr`() {
         val avdoedFnr = "12345678902"
         val doedshendelseInternal =

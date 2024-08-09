@@ -55,7 +55,9 @@ ktor2-statuspages = { module = "io.ktor:ktor-server-status-pages", version.ref =
 ktor2-metricsmicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor2-version" }
 ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2-version" }
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
+ktor2-serverresources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
+ktor2-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor2-version" }
 
 etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.07.23-11.12.ae810566ac12"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }

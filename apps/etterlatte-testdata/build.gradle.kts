@@ -18,10 +18,7 @@ dependencies {
     implementation(libs.navfelles.tokenvalidationktor2) {
         exclude("io.ktor", "ktor-server")
     }
-    implementation(libs.ktor2.servercore)
-    implementation(libs.ktor2.auth)
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.ktor2.statuspages) // For å kompensere for exclude-en over
+    implementation(libs.ktor2.server)
 
     testImplementation(libs.test.kotest.assertionscore)
 }

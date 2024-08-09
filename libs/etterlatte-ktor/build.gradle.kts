@@ -11,7 +11,7 @@ dependencies {
         exclude("io.ktor", "ktor-server-auth")
         exclude("io.ktor", "ktor-server-resources")
     }
-    implementation(libs.ktor2.servercore)
+    implementation(libs.ktor2.servercorejvm)
     implementation(libs.ktor2.webjars)
     implementation(libs.ktor2.auth)
     implementation(libs.ktor2.serverresources)
@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.navfelles.tokenvalidationktor2) {
         exclude("io.ktor", "ktor-server")
     }
+    implementation(libs.ktor2.server)
     implementation(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
     implementation(libs.navfelles.tokenclientcore)

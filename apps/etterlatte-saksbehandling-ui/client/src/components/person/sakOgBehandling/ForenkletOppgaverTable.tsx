@@ -62,10 +62,10 @@ export const ForenkletOppgaverTable = ({
   }, [oppgaveValg, oppgaver])
 
   useEffect(() => {
-    if (innloggetSaksbehandler.enheter.length) {
+    if (!!innloggetSaksbehandler.enheter.length) {
       saksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, setSaksbehandlereIEnheter)
     }
-  }, [innloggetSaksbehandler.enheter])
+  }, [])
 
   return !!filtrerteOppgaver?.length ? (
     <Table zebraStripes size="small">

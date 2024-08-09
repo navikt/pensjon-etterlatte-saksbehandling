@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
@@ -91,6 +92,21 @@ sealed class BrevParametre {
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
                 erOver18aar = erOver18Aar,
+            )
+    }
+
+    @JsonTypeName("BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD")
+    data class BarnepensjonMottattSoeknad(
+        val borINorgeEllerIkkeAvtaleland: Boolean,
+        val erOver18aar: Boolean,
+        val bosattUtland: Boolean,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
+            BarnepensjonInformasjonMottattSoeknad(
+                borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
+                erOver18aar = erOver18aar,
+                bosattUtland = bosattUtland,
             )
     }
 

@@ -41,7 +41,7 @@ class SjekklisteService(
             )
         }
 
-        val items =
+        val sjekklisteItems =
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> defaultSjekklisteItemsBP
                 SakType.OMSTILLINGSSTOENAD -> {
@@ -53,7 +53,7 @@ class SjekklisteService(
             }
 
         inTransaction {
-            dao.opprettSjekkliste(behandling.id, items)
+            dao.opprettSjekkliste(behandling.id, sjekklisteItems)
         }
 
         return requireNotNull(hentSjekkliste(behandling.id))

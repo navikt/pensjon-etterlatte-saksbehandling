@@ -7,6 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -124,6 +125,8 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
+    case Oppgavetype.GENERELL_OPPGAVE:
+      return oppgave.status !== Oppgavestatus.FERDIGSTILT && <GenerellOppgaveModal oppgave={oppgave} />
     default:
       return null
   }

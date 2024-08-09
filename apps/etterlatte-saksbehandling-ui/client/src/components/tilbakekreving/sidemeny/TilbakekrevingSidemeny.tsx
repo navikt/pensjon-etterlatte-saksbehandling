@@ -1,7 +1,5 @@
-import { CollapsibleSidebar, Scroller, SidebarContent, SidebarTools } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Detail, Heading, Label } from '@navikt/ds-react'
-import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
+import { Alert, Detail, Heading, Label } from '@navikt/ds-react'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch } from '~store/Store'
@@ -29,7 +27,6 @@ export function TilbakekrevingSidemeny() {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const oppgave = useSelectorOppgaveUnderBehandling()
 
-  const [collapsed, setCollapsed] = useState(false)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
@@ -59,49 +56,41 @@ export function TilbakekrevingSidemeny() {
   const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
 
   return (
-    <CollapsibleSidebar $collapsed={collapsed}>
-      <SidebarTools>
-        <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed((collapsed) => !collapsed)}>
-          {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
-        </Button>
-      </SidebarTools>
-      <SidebarContent $collapsed={collapsed}>
-        <Scroller>
-          <SidebarPanel $border>
-            <Heading size="small">Tilbakekreving</Heading>
-            <Heading size="xsmall" spacing>
-              {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
-            </Heading>
-            <div>
-              <SakTypeTag sakType={tilbakekreving.sak.sakType} />
-            </div>
-            <div className="info">
-              <Label size="small">Saksbehandler</Label>
-              {mapApiResult(
-                oppgaveResult,
-                <Spinner visible={true} label="Henter oppgave" />,
-                () => (
-                  <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-                ),
-                (oppgave) =>
-                  !!oppgave?.saksbehandler ? (
-                    <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
-                  ) : (
-                    <Alert size="small" variant="warning">
-                      Ingen saksbehandler har tatt denne oppgaven
-                    </Alert>
-                  )
-              )}
-            </div>
-            <div>
-              <Label size="small">Sakid:</Label>
-              <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
-            </div>
+    <Sidebar>
+      <SidebarPanel $border>
+        <Heading size="small">Tilbakekreving</Heading>
+        <Heading size="xsmall" spacing>
+          {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
+        </Heading>
+        <div>
+          <SakTypeTag sakType={tilbakekreving.sak.sakType} />
+        </div>
+        <div className="info">
+          <Label size="small">Saksbehandler</Label>
+          {mapApiResult(
+            oppgaveResult,
+            <Spinner visible={true} label="Henter oppgave" />,
+            () => (
+              <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+            ),
+            (oppgave) =>
+              !!oppgave?.saksbehandler ? (
+                <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+              ) : (
+                <Alert size="small" variant="warning">
+                  Ingen saksbehandler har tatt denne oppgaven
+                </Alert>
+              )
+          )}
+        </div>
+        <div>
+          <Label size="small">Sakid:</Label>
+          <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
+        </div>
 
-            <SettPaaVent oppgave={oppgave} />
-          </SidebarPanel>
-        </Scroller>
-      </SidebarContent>
+        <SettPaaVent oppgave={oppgave} />
+      </SidebarPanel>
+
       {kanAttestere && (
         <>
           {mapApiResult(
@@ -123,6 +112,6 @@ export function TilbakekrevingSidemeny() {
       )}
 
       {tilbakekreving?.sak.ident && <DokumentlisteLiten fnr={tilbakekreving.sak.ident} />}
-    </CollapsibleSidebar>
+    </Sidebar>
   )
 }

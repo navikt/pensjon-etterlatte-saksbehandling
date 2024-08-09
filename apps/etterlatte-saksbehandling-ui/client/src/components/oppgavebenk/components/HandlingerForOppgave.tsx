@@ -1,5 +1,5 @@
 import { Button } from '@navikt/ds-react'
-import { EyeIcon } from '@navikt/aksel-icons'
+import { EnvelopeClosedIcon, EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
@@ -136,9 +136,15 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/person/${oppgave.fnr}?fane=BREV`} as="a">
+          <PersonButtonLink
+            size="small"
+            icon={<EnvelopeClosedIcon />}
+            fnr={fnr || '-'}
+            fane={PersonOversiktFane.BREV}
+            disabled={!fnr}
+          >
             Gå til brev
-          </Button>
+          </PersonButtonLink>
         )
       )
     default:

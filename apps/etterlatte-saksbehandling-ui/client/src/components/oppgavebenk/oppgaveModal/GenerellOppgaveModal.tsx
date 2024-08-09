@@ -1,6 +1,6 @@
 import { Alert, Button, Heading, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
@@ -18,17 +18,27 @@ export const GenerellOppgaveModal = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [displayError, setError] = useState(false)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [tilbakemeldingFraSaksbehandler, setTilbakemeldingFraSaksbehandler] = useState('')
 
+  useEffect(() => {
+    setError(false)
+  }, [open])
+
   const avbryt = () => {
-    const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
-    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
-      setOpen(false)
-      oppgave.merknad = nyMerknad
-      oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-      navigate(`/person/${oppgave.fnr}`)
-    })
+    if (tilbakemeldingFraSaksbehandler.length) {
+      setError(false)
+      const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
+      avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
+        setOpen(false)
+        oppgave.merknad = nyMerknad
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        navigate(`/person/${oppgave.fnr}`)
+      })
+    } else {
+      setError(true)
+    }
   }
 
   const kanRedigeres = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
@@ -49,9 +59,12 @@ export const GenerellOppgaveModal = ({
         <Modal.Body>
           <VStack gap="4">
             <Alert variant="info">{oppgave.merknad}</Alert>
-
             {kanRedigeres ? (
-              <Textarea label="Kommentar" onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)} />
+              <Textarea
+                label="Kommentar"
+                onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)}
+                error={!displayError ? false : 'Du må legge til kommentar'}
+              />
             ) : (
               <p>Oppgaven kan kun behandles av saksbehandler.</p>
             )}

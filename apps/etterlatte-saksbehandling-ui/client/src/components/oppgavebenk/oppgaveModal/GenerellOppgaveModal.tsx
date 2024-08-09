@@ -17,7 +17,7 @@ export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
 
   const avbryt = () => {
     avsluttOppgave(
-      { id: oppgave.id, merknad: 'Merknad: ' + oppgave.merknad + '. Kommentar: ' + tilbakemeldingFraSaksbehandler },
+      { id: oppgave.id, merknad: oppgave.merknad + '. Kommentar: ' + tilbakemeldingFraSaksbehandler },
       () => {
         // TODO: validere på tilbakemelding != null?
         oppgave.status = Oppgavestatus.FERDIGSTILT

@@ -18,26 +18,26 @@ export const GenerellOppgaveModal = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [displayError, setError] = useState(false)
+  const [visError, setVisError] = useState(false)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [tilbakemeldingFraSaksbehandler, setTilbakemeldingFraSaksbehandler] = useState('')
 
   useEffect(() => {
-    setError(false)
+    setVisError(false)
   }, [open])
 
   const avbryt = () => {
     if (tilbakemeldingFraSaksbehandler.length) {
-      setError(false)
+      setVisError(false)
       const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
       avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
         setOpen(false)
-        oppgave.merknad = nyMerknad
+        oppgave.merknad = nyMerknad // oppdatere visning hvis ikke nytt kall til backend
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        navigate(`/person/${oppgave.fnr}`)
+        navigate(`/person/${oppgave.fnr}`) // hvis modal blir brukt fra saksoversikten
       })
     } else {
-      setError(true)
+      setVisError(true)
     }
   }
 
@@ -63,7 +63,7 @@ export const GenerellOppgaveModal = ({
               <Textarea
                 label="Kommentar"
                 onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)}
-                error={!displayError ? false : 'Du må legge til kommentar'}
+                error={!visError ? false : 'Du må legge til kommentar'}
               />
             ) : (
               <p>Oppgaven kan kun behandles av saksbehandler.</p>

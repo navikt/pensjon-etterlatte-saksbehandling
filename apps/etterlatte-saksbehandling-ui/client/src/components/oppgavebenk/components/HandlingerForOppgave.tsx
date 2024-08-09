@@ -126,7 +126,11 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.GENERELL_OPPGAVE:
-      return oppgave.status !== Oppgavestatus.FERDIGSTILT && <GenerellOppgaveModal oppgave={oppgave} />
+      return (
+        oppgave.status !== Oppgavestatus.FERDIGSTILT && (
+          <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     default:
       return null
   }

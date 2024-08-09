@@ -8,7 +8,13 @@ import { isPending } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const GenerellOppgaveModal = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -20,8 +26,8 @@ export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       { id: oppgave.id, merknad: oppgave.merknad + '. Kommentar: ' + tilbakemeldingFraSaksbehandler },
       () => {
         // TODO: validere på tilbakemelding != null?
-        oppgave.status = Oppgavestatus.FERDIGSTILT
         setOpen(false)
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
         navigate(`/person/${oppgave.fnr}`)
       }
     )

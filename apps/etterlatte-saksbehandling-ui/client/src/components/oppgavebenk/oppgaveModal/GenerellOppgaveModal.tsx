@@ -48,8 +48,10 @@ export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               <b>Merknad:</b> {oppgave.merknad}
             </Alert>
 
-            {kanRedigeres && (
+            {kanRedigeres ? (
               <Textarea label="Kommentar" onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)} />
+            ) : (
+              <p>Oppgaven kan kun behandles av saksbehandler.</p>
             )}
 
             <HStack gap="4" justify="end">

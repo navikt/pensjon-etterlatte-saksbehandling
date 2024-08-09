@@ -1,4 +1,4 @@
-name: .build.yaml
+name: .build-and-deploy.yaml
 
 on:
   workflow_call:

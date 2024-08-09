@@ -92,7 +92,7 @@ Foruten lokal Gradle-bruk skjer bygging via Github Actions. Vi har definert fler
 Hver app har sin app-etterlatte-[appnavn].yaml i .github/workflows. Denne fila må ha samme navn som appen har under apps/
 
 Denne spesifiserer noen parametre og kaller igjen videre. I en pull request blir test-bygget kjørt, ved merge til main blir bygg- og deploy-bygga kjørt
-Vi har én .test.yaml, én .build.yaml og én .deploy.yaml som alle apps bruker. build tagger imaget med sha samt hvilken git-grein det blir bygga fra (oftest main).
+Vi har én .test.yaml og én .build-and-deploy.yaml som alle apps bruker. build tagger imaget med sha samt hvilken git-grein det blir bygga fra (oftest main).
 
 Fra GitHub er det også mulig å kjøre et bygg for en enkelt app på valgfri git-grein. Denne bruker samme byggejobb som nevnt over.
 

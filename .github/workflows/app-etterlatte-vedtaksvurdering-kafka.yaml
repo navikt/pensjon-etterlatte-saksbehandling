@@ -53,5 +53,5 @@ jobs:
 
   build-and-deploy:
     if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/.build.yaml
+    uses: ./.github/workflows/.build-and-deploy.yaml
     secrets: inherit

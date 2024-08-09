@@ -3,7 +3,7 @@ import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
-import { ViderefoereOpphoerVurdering } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoerVurdering'
+import { VurderViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/VurderViderefoereOpphoer'
 
 const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
   viderefoertOpphoer === null ? 'warning' : 'success'
@@ -20,7 +20,7 @@ export const ViderefoereOpphoer = ({
   return (
     <LovtekstMedLenke tittel="Opphør fra og med" hjemler={[]} status={statusIkon(behandling.viderefoertOpphoer)}>
       <Informasjon>
-        <BodyShort>
+        <BodyShort spacing>
           Er opphørsdato tidligere enn dagens dato, eller skal saken opphøre i nær fremtid fordi vilkårene ikke lenger
           er oppfylt?
         </BodyShort>
@@ -32,13 +32,14 @@ export const ViderefoereOpphoer = ({
       </Informasjon>
       <Vurdering>
         {vurdert && (
-          <ViderefoereOpphoerVurdering
-            virkningstidspunkt={behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null}
-            viderefoertOpphoer={behandling.viderefoertOpphoer}
-            redigerbar={redigerbar}
-            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-            behandlingId={behandling.id}
-          />
+          <VurderViderefoereOpphoer redigerbar={redigerbar} behandling={behandling} setVurdert={setVurdert} />
+          // <ViderefoereOpphoerVurdering
+          //   virkningstidspunkt={behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null}
+          //   viderefoertOpphoer={behandling.viderefoertOpphoer}
+          //   redigerbar={redigerbar}
+          //   setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
+          //   behandlingId={behandling.id}
+          // />
         )}
         {!vurdert && redigerbar && (
           <Button variant="secondary" onClick={() => setVurdert(true)}>

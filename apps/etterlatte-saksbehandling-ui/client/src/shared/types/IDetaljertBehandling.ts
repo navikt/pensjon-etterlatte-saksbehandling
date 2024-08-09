@@ -129,10 +129,10 @@ export interface Virkningstidspunkt {
 
 export interface ViderefoertOpphoer {
   skalViderefoere: JaNei
-  dato: string
-  kilde: KildeSaksbehandler
-  vilkaar: string
-  begrunnelse: string
+  dato: string | undefined
+  kilde: KildeSaksbehandler | undefined
+  vilkaar: string | undefined
+  begrunnelse: string | undefined
 }
 
 export enum Vedtaksloesning {

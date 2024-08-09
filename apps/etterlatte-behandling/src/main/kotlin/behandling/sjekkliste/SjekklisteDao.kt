@@ -20,7 +20,7 @@ class SjekklisteDao(
             with(it) {
                 prepareStatement(
                     """
-                    INSERT INTO sjekkliste (ID, OPPRETTET_AV, ENDRET_AV)
+                    INSERT INTO sjekkliste (id, opprettet_av, endret_av)
                      VALUES(?, ?, ?)
                     """.trimIndent(),
                 ).apply {
@@ -36,13 +36,13 @@ class SjekklisteDao(
                 with(it) {
                     prepareStatement(
                         """
-                        INSERT INTO sjekkliste_item (SJEKKLISTE_ID, BESKRIVELSE, OPPRETTET_AV, ENDRET_AV) 
+                        INSERT INTO sjekkliste_item (sjekkliste_id, beskrivelse, opprettet_av, endret_av) 
                         VALUES(?, ?, ?, ?)
                         """.trimIndent(),
                     ).apply {
-                        sjekklisteItems.forEach {
+                        sjekklisteItems.forEach { sjekklisteItem ->
                             setObject(1, behandlingId)
-                            setString(2, it)
+                            setString(2, sjekklisteItem)
                             setString(3, brukernavn)
                             setString(4, brukernavn)
                             addBatch()
@@ -72,11 +72,11 @@ class SjekklisteDao(
                     WHERE id = ?
                     """.trimIndent(),
                 )
-            stmt.setObject(1, oppdatering.kommentar)
-            stmt.setObject(2, oppdatering.kontonrRegistrert)
-            stmt.setObject(3, oppdatering.onsketSkattetrekk)
-            stmt.setObject(4, oppdatering.bekreftet)
-            stmt.setObject(5, Kontekst.get().AppUser.name())
+            stmt.setString(1, oppdatering.kommentar)
+            stmt.setString(2, oppdatering.kontonrRegistrert)
+            stmt.setString(3, oppdatering.onsketSkattetrekk)
+            stmt.setBoolean(4, oppdatering.bekreftet)
+            stmt.setString(5, Kontekst.get().AppUser.name())
             stmt.setObject(6, sjekklisteId)
             stmt.executeUpdate().also {
                 if (it != 1) {
@@ -110,7 +110,7 @@ class SjekklisteDao(
                             id = getUUID("id"),
                             kommentar = getString("kommentar"),
                             kontonrRegistrert = getString("kontonr_reg"),
-                            onsketSkattetrekk = getInt("onsket_skattetrekk"),
+                            onsketSkattetrekk = getString("onsket_skattetrekk"),
                             bekreftet = getBoolean("bekreftet"),
                             sjekklisteItems = hentSjekklisteItems(id),
                             versjon = getLong("versjon"),
@@ -185,8 +185,8 @@ class SjekklisteDao(
                     WHERE id = ?
                     """.trimIndent(),
                 )
-            stmt.setObject(1, oppdatering.avkrysset)
-            stmt.setObject(2, Kontekst.get().AppUser.name())
+            stmt.setBoolean(1, oppdatering.avkrysset)
+            stmt.setString(2, Kontekst.get().AppUser.name())
             stmt.setObject(3, itemId)
             stmt.executeUpdate().also {
                 if (it != 1) {

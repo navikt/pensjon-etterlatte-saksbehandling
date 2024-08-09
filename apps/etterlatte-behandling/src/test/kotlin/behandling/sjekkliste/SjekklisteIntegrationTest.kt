@@ -117,7 +117,7 @@ class SjekklisteIntegrationTest(
             OppdatertSjekkliste(
                 kommentar = "noe rart her",
                 kontonrRegistrert = "5555.5555.5555",
-                onsketSkattetrekk = 1233,
+                onsketSkattetrekk = "30%",
                 bekreftet = true,
                 versjon = 3,
             ),
@@ -127,7 +127,7 @@ class SjekklisteIntegrationTest(
 
         assertAll(
             { sjekkliste.versjon shouldBe 2 },
-            { sjekkliste.onsketSkattetrekk shouldBe 1233 },
+            { sjekkliste.onsketSkattetrekk shouldBe "30%" },
             { sjekkliste.kommentar shouldBe "noe rart her" },
             { sjekkliste.bekreftet shouldBe true },
         )

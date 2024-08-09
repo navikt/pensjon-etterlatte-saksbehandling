@@ -127,7 +127,7 @@ class SjekklisteIntegrationTest(
 
         assertAll(
             { sjekkliste.versjon shouldBe 2 },
-            { sjekkliste.onsketSkattetrekk shouldBe 1233 },
+            { sjekkliste.onsketSkattetrekk shouldBe "30%" },
             { sjekkliste.kommentar shouldBe "noe rart her" },
             { sjekkliste.bekreftet shouldBe true },
         )

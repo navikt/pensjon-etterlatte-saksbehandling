@@ -39,14 +39,12 @@ export const ForenkletOppgaverTable = ({
       case OppgaveValg.FERDIGSTILTE:
         return sorterOppgaverEtterOpprettet([...oppgaver].filter((oppgave) => !erOppgaveRedigerbar(oppgave.status)))
       default:
-        return []
+        return oppgaver
     }
   }
 
   const [filtrerteOppgaver, setFiltrerteOppgaver] = useState<OppgaveDTO[]>(filtrerOppgaverPaaOppgaveValg(oppgaver))
-
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
-
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
 
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) =>

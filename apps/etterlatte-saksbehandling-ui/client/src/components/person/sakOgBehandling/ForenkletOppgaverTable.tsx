@@ -31,19 +31,20 @@ export const ForenkletOppgaverTable = ({
   oppgaveValg: OppgaveValg
 }): ReactNode => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const filtrerOppgaverPaaOppgaveValg = (): OppgaveDTO[] => {
+
+  const filtrerOppgaverPaaOppgaveValg = (oppgaver: OppgaveDTO[]): OppgaveDTO[] => {
     switch (oppgaveValg) {
       case OppgaveValg.AKTIVE:
         return sorterOppgaverEtterOpprettet([...oppgaver].filter((oppgave) => erOppgaveRedigerbar(oppgave.status)))
       case OppgaveValg.FERDIGSTILTE:
         return sorterOppgaverEtterOpprettet([...oppgaver].filter((oppgave) => !erOppgaveRedigerbar(oppgave.status)))
+      default:
+        return oppgaver
     }
   }
 
-  const [filtrerteOppgaver, setFiltrerteOppgaver] = useState<OppgaveDTO[]>(filtrerOppgaverPaaOppgaveValg())
-
+  const [filtrerteOppgaver, setFiltrerteOppgaver] = useState<OppgaveDTO[]>(filtrerOppgaverPaaOppgaveValg(oppgaver))
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
-
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
 
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) =>
@@ -51,12 +52,14 @@ export const ForenkletOppgaverTable = ({
       finnOgOppdaterOppgave(filtrerteOppgaver, oppgave.id, { status: Oppgavestatus.UNDER_BEHANDLING, saksbehandler })
     )
 
-  const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) =>
-    setFiltrerteOppgaver(finnOgOppdaterOppgave(filtrerteOppgaver, oppgaveId, { status }))
+  const oppdaterStatus = (oppgaveId: string, status: Oppgavestatus) => {
+    const oppdaterteOppgaver = finnOgOppdaterOppgave(filtrerteOppgaver, oppgaveId, { status })
+    setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg(oppdaterteOppgaver))
+  }
 
   useEffect(() => {
-    setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg())
-  }, [oppgaveValg])
+    setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg(oppgaver))
+  }, [oppgaveValg, oppgaver])
 
   useEffect(() => {
     if (!!innloggetSaksbehandler.enheter.length) {

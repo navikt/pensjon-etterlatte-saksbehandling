@@ -22,15 +22,13 @@ export const GenerellOppgaveModal = ({
   const [tilbakemeldingFraSaksbehandler, setTilbakemeldingFraSaksbehandler] = useState('')
 
   const avbryt = () => {
-    avsluttOppgave(
-      { id: oppgave.id, merknad: oppgave.merknad + '. Kommentar: ' + tilbakemeldingFraSaksbehandler },
-      () => {
-        // TODO: validere på tilbakemelding != null?
-        setOpen(false)
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        navigate(`/person/${oppgave.fnr}`)
-      }
-    )
+    const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
+    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
+      setOpen(false)
+      oppgave.merknad = nyMerknad
+      oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+      navigate(`/person/${oppgave.fnr}`)
+    })
   }
 
   const kanRedigeres = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident

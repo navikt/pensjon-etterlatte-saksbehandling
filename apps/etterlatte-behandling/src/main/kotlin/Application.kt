@@ -174,7 +174,11 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         sakService = applicationContext.sakService,
     )
     vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
-    revurderingRoutes(revurderingService = applicationContext.revurderingService)
+    revurderingRoutes(
+        revurderingService = applicationContext.revurderingService,
+        manuellRevurderingService = applicationContext.manuellRevurderingService,
+        omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
+    )
     omregningRoutes(omregningService = applicationContext.omregningService)
     migreringRoutes(migreringService = applicationContext.migreringService)
     bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)

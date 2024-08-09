@@ -69,6 +69,8 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
+import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
@@ -384,15 +386,28 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            klageService = klageService,
-            behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
+    val manuellRevurderingService =
+        ManuellRevurderingService(
+            revurderingService = revurderingService,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagsService,
+            oppgaveService = oppgaveService,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+        )
+    val omgjoeringKlageRevurderingService =
+        OmgjoeringKlageRevurderingService(
+            revurderingService = revurderingService,
+            oppgaveService = oppgaveService,
+            klageService = klageService,
+            behandlingDao = behandlingDao,
+            grunnlagService = grunnlagsService,
+        )
 
     val aktivitetspliktService =
         AktivitetspliktService(

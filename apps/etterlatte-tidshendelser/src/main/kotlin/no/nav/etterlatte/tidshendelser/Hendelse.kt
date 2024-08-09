@@ -59,6 +59,11 @@ enum class JobbType(
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
+    OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(
+        "Omstillingsstønad informasjon om aktivitetsplikt ved 6 mnd etter dødsdato - varig unntak",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
     REGULERING(
         "Starter regulering",
         JobbKategori.REGULERING,

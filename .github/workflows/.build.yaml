@@ -5,10 +5,10 @@ on:
     outputs:
       image:
         description: "Docker image url"
-        value: ${{ jobs.build.outputs.image }}
+        value: ${{ jobs.build-and-publish.outputs.image }}
 
 jobs:
-  build:
+  build-and-publish:
     name: Build & publish
     runs-on: ubuntu-latest-8-cores
     timeout-minutes: 10
@@ -52,7 +52,7 @@ jobs:
   license-check:
     name: License check
     runs-on: ubuntu-latest-8-cores
-    needs: build
+    needs: build-and-publish
     timeout-minutes: 10
     permissions:
       contents: read
@@ -74,7 +74,7 @@ jobs:
   salsa:
     name: Generate SBOM, attest and sign image
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-and-publish
     permissions:
       id-token: write
     steps:
@@ -87,9 +87,9 @@ jobs:
           team: etterlatte
       - name: Lag image-referanse med digest
         run: |
-          IMAGE_WITH_TAG="${{ needs.build.outputs.image }}"
+          IMAGE_WITH_TAG="${{ needs.build-and-publish.outputs.image }}"
           IMAGE="${IMAGE_WITH_TAG%%:*}"
-          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
+          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
         uses: nais/attest-sign@v1
@@ -98,7 +98,7 @@ jobs:
   deploy-to-dev-gcp:
     name: dev-gcp
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-and-publish
     permissions:
       contents: read
       id-token: write
@@ -109,12 +109,12 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build-and-publish.outputs.image }}
 
   deploy-to-prod-gcp:
     name: prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: [build, deploy-to-dev-gcp]
+    needs: [build-and-publish, deploy-to-dev-gcp]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -131,4 +131,4 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/prod.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build-and-publish.outputs.image }}

@@ -5,12 +5,20 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:saksbehandling-common"))
-    implementation(libs.openapi)
-
-    implementation(libs.ktor2.servercore)
-    implementation(libs.ktor2.servercio)
+    implementation(libs.openapi) {
+        exclude("io.ktor", "ktor-server-core-jvm")
+        exclude("io.ktor", "ktor-server-webjars")
+        exclude("io.ktor", "ktor-server-auth")
+        exclude("io.ktor", "ktor-server-resources")
+    }
+    implementation(libs.ktor2.servercorejvm)
+    implementation(libs.ktor2.webjars)
     implementation(libs.ktor2.auth)
+    implementation(libs.ktor2.serverresources)
+    // Fram hit: ktor-avhengnadar for å dekkje det vi ekskluderer frå openapi-importen
+
+    implementation(project(":libs:saksbehandling-common"))
+    implementation(libs.ktor2.servercio)
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.calllogging)
     implementation(libs.ktor2.callid)
@@ -21,8 +29,9 @@ dependencies {
     implementation(libs.ktor2.metricsmicrometer)
     implementation(libs.ktor2.doublereceive)
     implementation(libs.navfelles.tokenvalidationktor2) {
-        exclude("io.ktor")
+        exclude("io.ktor", "ktor-server")
     }
+    implementation(libs.ktor2.server)
     implementation(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
     implementation(libs.navfelles.tokenclientcore)

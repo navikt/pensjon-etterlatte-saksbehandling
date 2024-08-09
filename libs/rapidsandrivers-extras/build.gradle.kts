@@ -4,7 +4,13 @@ plugins {
 
 dependencies {
     api(libs.bundles.jackson)
-    api(libs.navfelles.rapidandriversktor2)
+    api(libs.navfelles.rapidandriversktor2) {
+        exclude("io.ktor", "ktor-server-cio")
+        exclude("io.ktor", "ktor-server-metrics-micrometer")
+    }
+    api(libs.ktor2.servercio)
+    api(libs.ktor2.metricsmicrometer)
+    // Desse to over er spesifisert som api i r&r sjølv, så vi må ha dei med her for å ikkje få feil i runtime
 
     implementation(project(":libs:saksbehandling-common"))
 

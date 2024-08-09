@@ -15,7 +15,10 @@ dependencies {
     implementation(libs.cache.caffeine)
     implementation(libs.etterlatte.common)
 
-    implementation(libs.navfelles.tokenvalidationktor2)
+    implementation(libs.navfelles.tokenvalidationktor2) {
+        exclude("io.ktor", "ktor-server")
+    }
+    implementation(libs.ktor2.server)
 
     testImplementation(libs.test.kotest.assertionscore)
 }

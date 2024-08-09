@@ -11,7 +11,10 @@ dependencies {
 
     implementation(libs.ktor2.servercio)
 
-    implementation(libs.navfelles.tokenvalidationktor2)
+    implementation(libs.navfelles.tokenvalidationktor2) {
+        exclude("io.ktor", "ktor-server")
+    }
+    implementation(libs.ktor2.server) // For å kompensere for exclude-en over
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.jackson)

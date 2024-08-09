@@ -149,10 +149,7 @@ class SanksjonRepository(
                     """
                     SELECT * FROM sanksjon WHERE id = ?
                     """.trimIndent(),
-                paramMap =
-                    mapOf(
-                        "id" to sanksjonId,
-                    ),
+                sanksjonId,
             ).let { query -> tx.run(query.map { it.toSanksjon() }.asSingle) }
         }
 }

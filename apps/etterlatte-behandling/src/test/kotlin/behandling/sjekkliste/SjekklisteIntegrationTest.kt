@@ -117,7 +117,7 @@ class SjekklisteIntegrationTest(
             OppdatertSjekkliste(
                 kommentar = "noe rart her",
                 kontonrRegistrert = "5555.5555.5555",
-                onsketSkattetrekk = 1233,
+                onsketSkattetrekk = "30%",
                 bekreftet = true,
                 versjon = 3,
             ),

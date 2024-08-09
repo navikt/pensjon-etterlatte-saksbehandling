@@ -302,7 +302,7 @@ class BehandlingServiceImpl(
     ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/api/sak/$sakId/aktivitetsplikt/unntak/varig") {
+                .post("$url/api/sak/$sakId/aktivitetsplikt/varigUnntak") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         OpprettOppgaveForAktivitetspliktVarigUnntakDto(

@@ -123,8 +123,8 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
         }
     }
 
-    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/unntak/varig") {
-        get {
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/varigUnntak") {
+        post {
             kunSystembruker {
                 logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
                 val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()

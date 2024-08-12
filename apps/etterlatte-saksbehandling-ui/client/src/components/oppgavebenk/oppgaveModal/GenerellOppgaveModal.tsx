@@ -1,16 +1,20 @@
 import { Alert, BodyShort, Button, Heading, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
-import { OppgaveDTO } from '~shared/types/oppgave'
+import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
 import { isPending } from '~shared/api/apiUtils'
-import { useNavigate } from 'react-router-dom'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const GenerellOppgaveModal = ({
+  oppgave,
+  oppdaterStatus,
+}: {
+  oppgave: OppgaveDTO
+  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
+}) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const navigate = useNavigate()
   const [open, setOpen] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
@@ -21,7 +25,8 @@ export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
       avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
         setError('')
-        navigate(0) // laster siden på nytt side (oppdatere visning)
+        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        setOpen(false)
       })
     } else {
       setError('Legge til kommentar')

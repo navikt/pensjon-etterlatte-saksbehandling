@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.behandling.sjekkliste
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -9,9 +9,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
-import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
-import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang

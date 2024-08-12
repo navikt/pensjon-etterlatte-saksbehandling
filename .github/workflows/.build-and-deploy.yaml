@@ -70,7 +70,7 @@ jobs:
       - name: Validate licenses
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew checkLicense
+        run: ./gradlew checkLicense --no-configuration-cache
   salsa:
     name: Generate SBOM, attest and sign image
     runs-on: ubuntu-latest
@@ -114,7 +114,7 @@ jobs:
   deploy-to-prod-gcp:
     name: prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: [build-and-publish, deploy-to-dev-gcp]
+    needs: [build-and-publish, license-check, deploy-to-dev-gcp]
     runs-on: ubuntu-latest
     permissions:
       contents: read

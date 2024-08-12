@@ -150,17 +150,14 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               <TextField
                 label="Ønsket skattetrekk"
                 name="OnsketSkattetrekk"
-                value={sjekkliste.onsketSkattetrekk || undefined}
+                value={sjekkliste.onsketSkattetrekk || ''}
                 onChange={(e) => {
-                  const isNumberOrEmpty = /^\d*$/.test(e.target.value)
-                  if (isNumberOrEmpty) {
-                    const oppdatert = {
-                      ...sjekkliste,
-                      onsketSkattetrekk: e.target.value === '' ? undefined : Number(e.target.value),
-                    }
-                    dispatch(updateSjekkliste(oppdatert))
-                    fireOpppdater(oppdatert)
+                  const oppdatert = {
+                    ...sjekkliste,
+                    onsketSkattetrekk: e.target.value,
                   }
+                  dispatch(updateSjekkliste(oppdatert))
+                  fireOpppdater(oppdatert)
                 }}
                 readOnly={!redigerbar}
               />

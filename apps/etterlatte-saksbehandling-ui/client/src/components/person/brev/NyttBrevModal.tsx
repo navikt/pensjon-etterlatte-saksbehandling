@@ -42,6 +42,37 @@ const RedusertEtterInntektRadio = ({ control }: { control: Control<FilledFormDat
   />
 )
 
+const BorINorgeEllerIkkeAvtaleland = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="borINorgeEllerIkkeAvtaleland"
+    control={control}
+    legend="Bor brukeren i Norge eller i ikke-avtaleland?"
+    description="Dette gjelder også EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter."
+    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller i ikke-avtaleland"
+    radios={
+      <>
+        <Radio value={JaNei.JA}>Ja</Radio>
+        <Radio value={JaNei.NEI}>Nei</Radio>
+      </>
+    }
+  />
+)
+
+const ErOver18Aar = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="erOver18Aar"
+    control={control}
+    legend="Er bruker over 18 år?"
+    errorVedTomInput="Du må velge om bruker er over 18 år"
+    radios={
+      <>
+        <Radio value={JaNei.JA}>Ja</Radio>
+        <Radio value={JaNei.NEI}>Nei</Radio>
+      </>
+    }
+  />
+)
+
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
@@ -119,7 +150,12 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   </>
                 )}
                 {sakType === SakType.BARNEPENSJON && (
-                  <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                  <>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD}>
+                      Kvitteringsbrev på mottatt søknad
+                    </option>
+                  </>
                 )}
               </Select>
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
@@ -183,19 +219,15 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     }}
                   />
                   {FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD === skjemaet.type && (
-                    <ControlledRadioGruppe
-                      name="erOver18Aar"
-                      control={control}
-                      legend="Er bruker over 18 år?"
-                      errorVedTomInput="Du må velge om bruker er over 18 år"
-                      radios={
-                        <>
-                          <Radio value={JaNei.JA}>Ja</Radio>
-                          <Radio value={JaNei.NEI}>Nei</Radio>
-                        </>
-                      }
-                    />
+                    <ErOver18Aar control={control} />
                   )}
+                </>
+              )}
+              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD && (
+                <>
+                  <ErOver18Aar control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
+                  <BorINorgeEllerIkkeAvtaleland control={control} />
                 </>
               )}
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
@@ -206,19 +238,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     control={control}
                     errorVedTomInput="Du må velge når søknaden ble mottatt"
                   />
-                  <ControlledRadioGruppe
-                    name="borINorgeEllerIkkeAvtaleland"
-                    control={control}
-                    legend="Bor brukeren i Norge eller i ikke-avtaleland?"
-                    description="Dette gjelder også EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter."
-                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller i ikke-avtaleland"
-                    radios={
-                      <>
-                        <Radio value={JaNei.JA}>Ja</Radio>
-                        <Radio value={JaNei.NEI}>Nei</Radio>
-                      </>
-                    }
-                  />
+                  <BorINorgeEllerIkkeAvtaleland control={control} />
                 </>
               )}
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
@@ -280,6 +300,12 @@ export type BrevParametre =
       erOver18Aar: boolean
     }
   | {
+      type: FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD
+      bosattUtland: boolean
+      erOver18aar: boolean
+      borINorgeEllerIkkeAvtaleland: boolean
+    }
+  | {
       type: FormType.TOMT_BREV
     }
 
@@ -308,6 +334,7 @@ enum FormType {
   OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD = 'OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD',
   OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
   BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
+  BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD = 'BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -349,6 +376,13 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
         erOver18Aar: formdata.erOver18Aar === JaNei.JA,
+      }
+    case FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD:
+      return {
+        type: formdata.type,
+        bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        erOver18aar: formdata.erOver18Aar === JaNei.JA,
+        borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
       }
     case FormType.TOMT_BREV:
       return {

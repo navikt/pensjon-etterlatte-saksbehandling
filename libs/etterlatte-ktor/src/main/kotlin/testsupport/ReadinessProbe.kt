@@ -8,4 +8,4 @@ fun setReady() {
     ready = true
 }
 
-fun isReady() = if (ready) HttpStatusCode.OK else HttpStatusCode.ExpectationFailed
+fun isReady() = if (ready) HttpStatusCode.OK else HttpStatusCode.ServiceUnavailable

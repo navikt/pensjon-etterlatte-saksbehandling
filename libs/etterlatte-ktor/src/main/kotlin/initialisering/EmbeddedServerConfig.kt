@@ -63,7 +63,6 @@ private fun settOppEmbeddedServer(
                     environment.monitor.subscribe(ServerReady) {
                         val scheduledJobs = cronjobs.map { it.schedule() }
                         addShutdownHook(scheduledJobs)
-                        setReady(true)
                     }
                     environment.monitor.subscribe(ApplicationStopPreparing) {
                         setReady(false)
@@ -71,4 +70,4 @@ private fun settOppEmbeddedServer(
                 }
                 connector { port = httpPort }
             },
-    )
+    ).also { setReady(true) }

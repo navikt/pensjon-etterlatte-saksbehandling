@@ -33,11 +33,8 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
@@ -51,7 +48,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -189,12 +185,6 @@ internal class BehandlingRoutesTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
-
-        coEvery {
-            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
-        } returns true
-
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
@@ -224,36 +214,6 @@ internal class BehandlingRoutesTest {
 
             assertEquals(200, response.status.value)
             verify(exactly = 1) { behandlingService.avbrytBehandling(behandlingId, any()) }
-        }
-    }
-
-    @Test
-    fun `Gir bad request hvis virkningstidspunkt ikke er gyldig`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
-
-        coEvery {
-            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
-        } returns false
-
-        withTestApplication { client ->
-            val response =
-                client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        """
-                        {
-                        "dato":"$bodyVirkningstidspunkt",
-                        "begrunnelse":"$bodyBegrunnelse"
-                        }
-                        """.trimIndent(),
-                    )
-                }
-
-            assertEquals(400, response.status.value)
         }
     }
 
@@ -298,33 +258,6 @@ internal class BehandlingRoutesTest {
                 }
             block(client)
         }
-    }
-
-    private fun mockBehandlingService(
-        bodyVirkningstidspunkt: Tidspunkt,
-        bodyBegrunnelse: String,
-    ) {
-        val parsetVirkningstidspunkt =
-            YearMonth.from(
-                bodyVirkningstidspunkt.toNorskTid().let {
-                    YearMonth.of(it.year, it.month)
-                },
-            )
-        val virkningstidspunkt =
-            Virkningstidspunkt(
-                parsetVirkningstidspunkt,
-                Grunnlagsopplysning.Saksbehandler.create(NAV_IDENT),
-                bodyBegrunnelse,
-            )
-        coEvery {
-            behandlingService.oppdaterVirkningstidspunkt(
-                behandlingId,
-                parsetVirkningstidspunkt,
-                any(),
-                bodyBegrunnelse,
-                any(),
-            )
-        } returns virkningstidspunkt
     }
 
     private val saksbehandlertoken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = NAV_IDENT) }

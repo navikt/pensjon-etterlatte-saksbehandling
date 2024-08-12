@@ -1,6 +1,7 @@
 import {
   BodyShort,
   Button,
+  ConfirmationPanel,
   ErrorMessage,
   Heading,
   HelpText,
@@ -16,7 +17,7 @@ import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
-import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
 import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
@@ -25,6 +26,7 @@ import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virknings
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { mapFailure } from '~shared/api/apiUtils'
 
 export interface Hjemmel {
   lenke: string
@@ -42,7 +44,7 @@ const Virkningstidspunkt = (props: {
   const { behandling, erBosattUtland } = props
   const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const dispatch = useAppDispatch()
-  const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
+  const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
   const [vurdert, setVurdert] = useState<boolean>(behandling.virkningstidspunkt !== null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
@@ -52,6 +54,7 @@ const Virkningstidspunkt = (props: {
   const [kravdato, setKravdato] = useState<Date | null>(
     behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null
   )
+  const [overstyr, setOverstyr] = useState(false)
 
   const [errorTekst, setErrorTekst] = useState<string>('')
   function getSoeknadMottattDato() {
@@ -97,8 +100,9 @@ const Virkningstidspunkt = (props: {
       {
         id: behandling.id,
         dato: virkningstidspunkt,
-        begrunnelse: begrunnelse,
-        kravdato: kravdato,
+        begrunnelse,
+        kravdato,
+        overstyr,
       },
       (res) => {
         dispatch(oppdaterVirkningstidspunkt(res))
@@ -108,7 +112,7 @@ const Virkningstidspunkt = (props: {
       (error) =>
         setErrorTekst(
           `Kunne ikke sette virkningstidspunkt. ${
-            error.detail ? error.detail : 'Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+            error.detail || 'Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
           }`
         )
     )
@@ -220,6 +224,21 @@ const Virkningstidspunkt = (props: {
                 />
 
                 {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
+
+                {mapFailure(
+                  fastsettVirkStatus,
+                  (error) =>
+                    behandling.behandlingType === IBehandlingsType.REVURDERING &&
+                    error.code === 'VIRK_FOER_FOERSTE_IVERKSATT_VIRK' && (
+                      <ConfirmationPanel
+                        label="Ja, jeg er sikker"
+                        checked={overstyr}
+                        onChange={(e) => setOverstyr(e.target.checked)}
+                      >
+                        Er du sikker på at du vil sette dette virkningstidspunktet?
+                      </ConfirmationPanel>
+                    )
+                )}
               </VStack>
             </VurderingsboksWrapper>
           )}

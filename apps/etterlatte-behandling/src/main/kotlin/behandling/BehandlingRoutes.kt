@@ -162,10 +162,9 @@ internal fun Route.behandlingRoutes(
 
         post("/virkningstidspunkt") {
             kunSkrivetilgang {
-                logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
-                logger.debug("Tok imot virkningstidspunktrequest")
-                logger.debug("Virkningstidspunktrequest hadde dato {}", body.dato)
+                val overstyr = call.request.queryParameters["overstyr"].toBoolean()
+                logger.debug("Virkningstidspunkt forsøkes satt til {} (overstyr={})", body.dato, overstyr)
 
                 val erGyldigVirkningstidspunkt =
                     inTransaction {
@@ -174,6 +173,7 @@ internal fun Route.behandlingRoutes(
                                 behandlingId,
                                 brukerTokenInfo,
                                 body,
+                                overstyr,
                             )
                         }
                     }

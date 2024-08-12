@@ -12,8 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 fun initRogR(
     applikasjonsnavn: String,
     restModule: (Application.() -> Unit)? = null,
-    configFromEnvironment: ((Miljoevariabler) -> Config) = { AivenConfig.default },
-    setReady: (value: Boolean) -> Unit = {},
+    configFromEnvironment: (Miljoevariabler) -> Config = { AivenConfig.default },
     settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstartOgAvslutning("etterlatte-$applikasjonsnavn")
@@ -34,18 +33,5 @@ fun initRogR(
         builder
             .build()
             .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
-            .also {
-                it.register(
-                    object : RapidsConnection.StatusListener {
-                        override fun onReady(rapidsConnection: RapidsConnection) {
-                            setReady(true)
-                        }
-
-                        override fun onShutdownSignal(rapidsConnection: RapidsConnection) {
-                            setReady(false)
-                        }
-                    },
-                )
-            }
     connection.start()
 }

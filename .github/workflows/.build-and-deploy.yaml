@@ -29,12 +29,12 @@ jobs:
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GradleEncryptionKey }}
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          cache-encryption-key: ${{ secrets.GradleEncryptionKey }}
         run: ./gradlew :apps:${{ github.workflow }}:build
 
       - name: Build and publish docker image

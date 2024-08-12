@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import no.nav.etterlatte.joarkhendelser.config.ApplicationContext
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
-import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 
 fun main() {
@@ -23,6 +22,6 @@ class Server(
 
     fun run() {
         startLytting(context.joarkKonsument, LoggerFactory.getLogger(Application::class.java))
-        setReady().also { engine.start(true) }
+        engine.start(true)
     }
 }

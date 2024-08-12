@@ -224,11 +224,6 @@ const SjekklisteItem = ({
         apiResult: itemUpdateResult,
         errorMessage: 'En feil oppsto ved oppdatering av sjekklista',
       })}
-      {item.beskrivelse.startsWith(utbetaltBidragsforskudd) && (
-        <Link href={configContext['bisysUrl']} target="_blank">
-          Bisys <ExternalLinkIcon />
-        </Link>
-      )}
       <Checkbox
         checked={avkrysset}
         readOnly={!redigerbar}
@@ -239,6 +234,14 @@ const SjekklisteItem = ({
         }}
       >
         {item.beskrivelse}
+        {item.beskrivelse.startsWith(utbetaltBidragsforskudd) && (
+          <>
+            <br />
+            <Link href={configContext['bisysUrl']} target="_blank">
+              Bisys <ExternalLinkIcon />
+            </Link>
+          </>
+        )}
       </Checkbox>
     </>
   )

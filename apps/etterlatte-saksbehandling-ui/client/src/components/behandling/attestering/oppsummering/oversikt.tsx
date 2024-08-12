@@ -140,14 +140,12 @@ export const Oversikt = ({
               attestant,
               <Spinner visible={true} label="Henter attestant" />,
               () => <ApiErrorAlert>Kunne ikke hente attestant</ApiErrorAlert>,
-              (attestantnavn) => {
-                return (
-                  <div>
-                    <Label size="small">Attestant</Label>
-                    <Detail>{attestantnavn}</Detail>
-                  </div>
-                )
-              }
+              (attestantnavn) => (
+                <div>
+                  <Label size="small">Attestant</Label>
+                  <Detail>{attestantnavn}</Detail>
+                </div>
+              )
             )}
           <div>
             <Label size="small">Kilde</Label>

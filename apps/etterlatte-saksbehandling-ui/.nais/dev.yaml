@@ -118,6 +118,8 @@ spec:
       value: https://kodeverk-api.nav.no
     - name: MODIAPERSONOVERSIKT_URL
       value: https://navikt.github.io/modiapersonoversikt/#
+    - name: BISYS_URL
+      value: https://bidrag.dev.intern.nav.no/
     - name: PSAK_URL
       value: https://pensjon-psak-q2.dev.adeo.no/psak
     - name: APP_VERSION

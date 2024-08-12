@@ -32,9 +32,10 @@ data class OppdaterSjekklisteItem(
     val versjon: Long,
 )
 
+@Suppress("ktlint:standard:max-line-length")
 internal val defaultSjekklisteItemsBP =
     listOf(
-        "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
+        "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag", // ops: endring av denne så må Sjekkliste.tsx oppdateres for match for visning av lenke til BISYS
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",

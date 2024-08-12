@@ -24,7 +24,7 @@ import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
@@ -213,16 +213,22 @@ const SjekklisteItem = ({
   redigerbar: boolean
   onUpdated: (item: ISjekklisteItem) => void
 }) => {
+  const configContext = useContext(ConfigContext)
   const [avkrysset, setAvkrysset] = useState<boolean>(item.avkrysset)
   const [itemUpdateResult, oppdaterItem] = useApiCall(oppdaterSjekklisteItem)
 
+  const utbetaltBidragsforskudd = 'Utbetalt bidragsforskudd'
   return (
     <>
       {isFailureHandler({
         apiResult: itemUpdateResult,
         errorMessage: 'En feil oppsto ved oppdatering av sjekklista',
       })}
-
+      {item.beskrivelse.startsWith(utbetaltBidragsforskudd) && (
+        <Link href={configContext['bisysUrl']} target="_blank">
+          Bisys <ExternalLinkIcon />
+        </Link>
+      )}
       <Checkbox
         checked={avkrysset}
         readOnly={!redigerbar}

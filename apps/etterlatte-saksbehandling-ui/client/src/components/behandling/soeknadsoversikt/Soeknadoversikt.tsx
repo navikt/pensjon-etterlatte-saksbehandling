@@ -29,7 +29,7 @@ import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkni
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {

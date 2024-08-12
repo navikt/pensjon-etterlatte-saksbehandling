@@ -3,7 +3,7 @@ import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
-import { VurderViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/VurderViderefoereOpphoer'
+import { ViderefoereOpphoerVurdering } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoerVurdering'
 
 const statusIkon = (viderefoertOpphoer: ViderefoertOpphoer | null) =>
   viderefoertOpphoer === null ? 'warning' : 'success'
@@ -32,14 +32,11 @@ export const ViderefoereOpphoer = ({
       </Informasjon>
       <Vurdering>
         {vurdert && (
-          <VurderViderefoereOpphoer redigerbar={redigerbar} behandling={behandling} setVurdert={setVurdert} />
-          // <ViderefoereOpphoerVurdering
-          //   virkningstidspunkt={behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null}
-          //   viderefoertOpphoer={behandling.viderefoertOpphoer}
-          //   redigerbar={redigerbar}
-          //   setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-          //   behandlingId={behandling.id}
-          // />
+          <ViderefoereOpphoerVurdering
+            redigerbar={redigerbar}
+            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
+            behandling={behandling}
+          />
         )}
         {!vurdert && redigerbar && (
           <Button variant="secondary" onClick={() => setVurdert(true)}>

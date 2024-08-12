@@ -1,5 +1,5 @@
 import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
-import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
@@ -99,6 +99,7 @@ export const VurderingsboksWrapper = (props: Props) => {
                 loading={lagrer}
                 variant="primary"
                 size="small"
+                icon={<FloppydiskIcon aria-hidden />}
                 onClick={async () => {
                   setLagrer(true)
                   new Promise((resolve) => resolve(props.lagreklikk!!(() => setRediger(false)))).finally(() =>
@@ -110,7 +111,12 @@ export const VurderingsboksWrapper = (props: Props) => {
               </Button>
             )}
             {props.avbrytklikk && (
-              <Button variant="secondary" size="small" onClick={() => props.avbrytklikk!!(() => setRediger(false))}>
+              <Button
+                variant="secondary"
+                size="small"
+                icon={<XMarkIcon aria-hidden />}
+                onClick={() => props.avbrytklikk!!(() => setRediger(false))}
+              >
                 Avbryt
               </Button>
             )}

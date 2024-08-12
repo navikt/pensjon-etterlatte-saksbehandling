@@ -23,10 +23,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
     implementation(libs.cache.caffeine)
-    implementation(libs.navfelles.tokenvalidationktor2) {
-        exclude("io.ktor", "ktor-server")
-    }
-    implementation(libs.ktor2.server) // For å kompensere for exclude-en over
+    implementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.clientmock)

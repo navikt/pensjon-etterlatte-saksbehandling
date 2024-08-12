@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -78,7 +79,7 @@ private class Server(
     fun run() =
         with(context) {
             dataSource.migrate()
-            engine.start(true)
+            engine.run()
         }
 }
 

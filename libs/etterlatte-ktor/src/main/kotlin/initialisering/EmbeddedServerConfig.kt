@@ -70,4 +70,9 @@ private fun settOppEmbeddedServer(
                 }
                 connector { port = httpPort }
             },
-    ).also { setReady(true) }
+    )
+
+fun CIOApplicationEngine.run() {
+    setReady(true)
+    start(true)
+}

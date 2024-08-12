@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.person.personRoute
 import no.nav.etterlatte.personweb.SporingService
@@ -38,5 +37,5 @@ class Server(
             }
         }
 
-    fun run() = setReady().also { engine.start(true) }
+    fun run() = engine.start(true)
 }

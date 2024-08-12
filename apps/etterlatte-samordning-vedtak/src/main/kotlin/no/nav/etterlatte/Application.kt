@@ -4,7 +4,6 @@ import io.ktor.server.application.install
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.samordning.ApplicationContext
 import no.nav.etterlatte.samordning.sak.behandlingSakRoutes
 import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
@@ -47,5 +46,5 @@ class Server(
             install(serverRequestLoggerPlugin)
         }
 
-    fun run() = setReady().also { engine.start(true) }
+    fun run() = engine.start(true)
 }

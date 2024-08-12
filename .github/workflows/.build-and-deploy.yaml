@@ -1,0 +1,134 @@
+name: .build-and-deploy.yaml
+
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: "Docker image url"
+        value: ${{ jobs.build-and-publish.outputs.image }}
+
+jobs:
+  build-and-publish:
+    name: Build & publish
+    runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+      digest: ${{ steps.docker-build-push.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Gradle test and build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :apps:${{ github.workflow }}:build
+
+      - name: Build and publish docker image
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: etterlatte
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          salsa: false
+          dockerfile: docker/Dockerfile
+          docker_context: apps/${{ github.workflow }}/
+          image_suffix: ${{ github.workflow }}
+          tag: ${{ env.GITHUB_REF_SLUG }}
+      - name: Print docker tag
+        run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
+  license-check:
+    name: License check
+    runs-on: ubuntu-latest-8-cores
+    needs: build-and-publish
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Validate licenses
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew checkLicense --no-configuration-cache
+  salsa:
+    name: Generate SBOM, attest and sign image
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    permissions:
+      id-token: write
+    steps:
+      - name: NAIS login
+        uses: nais/login@v0
+        id: login
+        with:
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          team: etterlatte
+      - name: Lag image-referanse med digest
+        run: |
+          IMAGE_WITH_TAG="${{ needs.build-and-publish.outputs.image }}"
+          IMAGE="${IMAGE_WITH_TAG%%:*}"
+          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
+      - name: Generate SBOM, attest and sign image
+        id: attest-sign
+        uses: nais/attest-sign@v1
+        with:
+          image_ref: ${{ env.IMAGE_WITH_DIGEST }}
+  deploy-to-dev-gcp:
+    name: dev-gcp
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
+          VAR: image=${{ needs.build-and-publish.outputs.image }}
+
+  deploy-to-prod-gcp:
+    name: prod-gcp
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: [build-and-publish, license-check, deploy-to-dev-gcp]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andstor/file-existence-action@v3
+        id: check_files
+        with:
+          files: "apps/${{ github.workflow }}/.nais/prod.yaml"
+      - uses: nais/deploy/actions/deploy@v2
+        if: steps.check_files.outputs.files_exists == 'true'
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/prod.yaml
+          VAR: image=${{ needs.build-and-publish.outputs.image }}

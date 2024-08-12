@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.postgres")
 }
 
@@ -10,6 +9,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-jobs"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.database.kotliquery)
 

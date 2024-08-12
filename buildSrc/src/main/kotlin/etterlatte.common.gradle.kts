@@ -1,3 +1,4 @@
+
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -5,12 +6,7 @@ val libs = the<LibrariesForLibs>()
 
 plugins {
     kotlin("jvm")
-    id("etterlatte.libs")
     application
-}
-
-repositories {
-    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {
@@ -46,10 +42,15 @@ tasks {
                 }
         }
 
+        val configuration =
+            configurations.runtimeClasspath.get().map {
+                it.toPath().toFile()
+            }
+        val buildDirectory = layout.buildDirectory
         doLast {
-            configurations.runtimeClasspath.get().forEach {
+            configuration.forEach {
                 val file =
-                    layout.buildDirectory
+                    buildDirectory
                         .file("libs/${it.name}")
                         .get()
                         .asFile

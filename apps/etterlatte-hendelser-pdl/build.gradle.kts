@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.avro)
     id("etterlatte.common")
 }
+repositories {
+    maven("https://packages.confluent.io/maven/")
+}
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))

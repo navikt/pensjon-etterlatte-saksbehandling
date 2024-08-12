@@ -101,28 +101,26 @@ export const Oversikt = ({
                 () => (
                   <ApiErrorAlert>Kunne ikke hente saksbehandlende saksbehandler</ApiErrorAlert>
                 ),
-                (saksbehandlernavn) => {
-                  return (
-                    <>
-                      <HStack gap="4" justify="space-between">
-                        <div>
-                          <Label size="small">Attestant</Label>
-                          {!!oppgave?.saksbehandler ? (
-                            <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
-                          ) : (
-                            <Alert size="small" variant="warning">
-                              Oppgaven er ikke tildelt
-                            </Alert>
-                          )}
-                        </div>
-                        <div>
-                          <Label size="small">Saksbehandler</Label>
-                          <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
-                        </div>
-                      </HStack>
-                    </>
-                  )
-                }
+                (saksbehandlernavn) => (
+                  <>
+                    <HStack gap="4" justify="space-between">
+                      <div>
+                        <Label size="small">Attestant</Label>
+                        {!!oppgave?.saksbehandler ? (
+                          <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+                        ) : (
+                          <Alert size="small" variant="warning">
+                            Oppgaven er ikke tildelt
+                          </Alert>
+                        )}
+                      </div>
+                      <div>
+                        <Label size="small">Saksbehandler</Label>
+                        <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
+                      </div>
+                    </HStack>
+                  </>
+                )
               )}
             </>
           ) : (

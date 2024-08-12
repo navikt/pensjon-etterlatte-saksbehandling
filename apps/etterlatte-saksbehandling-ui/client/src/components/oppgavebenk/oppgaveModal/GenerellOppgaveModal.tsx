@@ -1,43 +1,30 @@
-import { Alert, Button, Heading, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
-import React, { useEffect, useState } from 'react'
-import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import React, { useState } from 'react'
+import { OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
 import { isPending } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-export const GenerellOppgaveModal = ({
-  oppgave,
-  oppdaterStatus,
-}: {
-  oppgave: OppgaveDTO
-  oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
-}) => {
+export const GenerellOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const [visError, setVisError] = useState(false)
+  const [open, setOpen] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
-  const [tilbakemeldingFraSaksbehandler, setTilbakemeldingFraSaksbehandler] = useState('')
+  const [tilbakemeldingFraSaksbehandler, setTilbakemeldingFraSaksbehandler] = useState<string>('')
 
-  useEffect(() => {
-    setVisError(false)
-  }, [open])
-
-  const avbryt = () => {
-    if (tilbakemeldingFraSaksbehandler.length) {
-      setVisError(false)
+  const avslutt = () => {
+    if (!!tilbakemeldingFraSaksbehandler) {
       const nyMerknad = `${oppgave.merknad}. Kommentar: ${tilbakemeldingFraSaksbehandler}`
       avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
-        setOpen(false)
-        oppgave.merknad = nyMerknad // oppdatere visning hvis ikke nytt kall til backend
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        navigate(`/person/${oppgave.fnr}`) // hvis modal blir brukt fra saksoversikten
+        setError('')
+        navigate(0) // laster siden på nytt side (oppdatere visning)
       })
     } else {
-      setVisError(true)
+      setError('Legge til kommentar')
     }
   }
 
@@ -63,10 +50,10 @@ export const GenerellOppgaveModal = ({
               <Textarea
                 label="Kommentar"
                 onChange={(e) => setTilbakemeldingFraSaksbehandler(e.target.value)}
-                error={!visError ? false : 'Du må legge til kommentar'}
+                error={error}
               />
             ) : (
-              <p>Oppgaven kan kun behandles av saksbehandler.</p>
+              <BodyShort>Oppgaven kan kun behandles av saksbehandler.</BodyShort>
             )}
 
             <HStack gap="4" justify="end">
@@ -75,7 +62,7 @@ export const GenerellOppgaveModal = ({
               </Button>
 
               {kanRedigeres && (
-                <Button variant="danger" onClick={avbryt} loading={isPending(ferdigstillOppgaveStatus)}>
+                <Button variant="danger" onClick={avslutt} loading={isPending(ferdigstillOppgaveStatus)}>
                   Avslutt oppgave
                 </Button>
               )}

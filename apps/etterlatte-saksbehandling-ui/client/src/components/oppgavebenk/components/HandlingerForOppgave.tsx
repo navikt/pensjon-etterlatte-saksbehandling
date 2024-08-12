@@ -138,6 +138,8 @@ export const HandlingerForOppgave = ({
       return (
         oppgave.status !== Oppgavestatus.FERDIGSTILT && (
           <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (

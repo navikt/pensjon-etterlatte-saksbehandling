@@ -33,6 +33,8 @@ jobs:
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          cache-encryption-key: ${{ secrets.GradleEncryptionKey }}
         run: ./gradlew :apps:${{ github.workflow }}:build
 
       - name: Build and publish docker image

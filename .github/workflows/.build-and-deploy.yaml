@@ -32,7 +32,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-encryption-key: ${{ secrets.gradlekey }}
-          cache-read-only: false
           dependency-graph: generate-and-submit
       - name: Gradle test and build
         env:

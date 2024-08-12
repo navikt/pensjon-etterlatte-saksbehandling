@@ -29,7 +29,10 @@ jobs:
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.gradlekey }}
+          cache-read-only: false
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

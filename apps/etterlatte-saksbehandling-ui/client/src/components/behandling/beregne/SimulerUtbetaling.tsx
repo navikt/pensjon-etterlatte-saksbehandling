@@ -55,7 +55,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
         {behandlingStatusFerdigEllerVedtakFattet() &&
           mapResult(lagretSimuleringStatus, {
-            pending: <Spinner visible={true} label="Henter lagret simulering..." />,
+            pending: <Spinner label="Henter lagret simulering..." />,
             success: (lagretSimulering) =>
               lagretSimulering ? (
                 <SimuleringBeregning data={lagretSimulering} />
@@ -66,7 +66,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
           })}
 
         {mapResult(simuleringStatus, {
-          pending: <Spinner visible={true} label="Simulerer..." />,
+          pending: <Spinner label="Simulerer..." />,
           success: (simuleringrespons) =>
             simuleringrespons ? (
               <SimuleringBeregning data={simuleringrespons} />

@@ -41,7 +41,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
     <>
       {mapApiResult(
         fetchVilkaarsvurderingStatus,
-        <Spinner label="Laster stegmeny" visible />,
+        <Spinner label="Laster stegmeny" />,
         () => (
           <ApiErrorAlert>Kunne ikke laste stegmeny</ApiErrorAlert>
         ),

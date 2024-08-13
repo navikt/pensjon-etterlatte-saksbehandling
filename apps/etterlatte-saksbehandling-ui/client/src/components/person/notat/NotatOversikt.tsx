@@ -41,7 +41,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
   return (
     <Box padding="8">
       {mapResult(notatStatus, {
-        pending: <Spinner visible label="Henter notater for sak ..." />,
+        pending: <Spinner label="Henter notater for sak ..." />,
         error: () => <ApiErrorAlert>Feil ved henting av notater...</ApiErrorAlert>,
         success: () => (
           <Table>

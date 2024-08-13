@@ -130,7 +130,7 @@ export function KlageFormkravRedigering() {
   }
 
   if (isPendingOrInitial(vedtakISak)) {
-    return <Spinner visible label={`Laster fattede vedtak på saken med sakId=${klage?.sak.id}`} />
+    return <Spinner label={`Laster fattede vedtak på saken med sakId=${klage?.sak.id}`} />
   }
 
   if (isFailure(vedtakISak)) {

@@ -62,7 +62,8 @@ export function Klagebehandling() {
     <>
       <StatusBarPersonHenter ident={klage?.sak.ident} />
       <KlageStegmeny />
-      {isPending(fetchKlageStatus) && <Spinner visible label="Henter klagebehandling" />}
+
+      <Spinner visible={isPending(fetchKlageStatus)} label="Henter klagebehandling" />
 
       {klage !== null && viHarLastetRiktigKlage && (
         <GridContainer>

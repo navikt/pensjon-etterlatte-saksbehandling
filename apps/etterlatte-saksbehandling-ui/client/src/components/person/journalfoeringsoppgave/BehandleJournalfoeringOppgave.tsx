@@ -75,9 +75,9 @@ export default function BehandleJournalfoeringOppgave() {
   }, [oppgaveId])
 
   if (isPendingOrInitial(oppgaveStatus)) {
-    return <Spinner visible label="Henter oppgavedetaljer..." />
+    return <Spinner label="Henter oppgavedetaljer..." />
   } else if (isPending(sakStatus)) {
-    return <Spinner visible label="Henter sak..." />
+    return <Spinner label="Henter sak..." />
   }
 
   return (
@@ -91,7 +91,7 @@ export default function BehandleJournalfoeringOppgave() {
         <Column>
           <Box padding="8">
             {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
-              <Spinner visible label="Laster journalpost" />
+              <Spinner label="Laster journalpost" />
             ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
               <OppdaterJournalpost
                 initialJournalpost={journalpostStatus.data}

@@ -19,7 +19,7 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
   const navigate = useNavigate()
 
   if (!klage) {
-    return <Spinner visible label="Henter klage" />
+    return <Spinner label="Henter klage" />
   }
 
   if (kanRedigere && skalAvvises(klage)) {

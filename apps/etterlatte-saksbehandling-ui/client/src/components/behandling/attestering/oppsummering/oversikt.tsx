@@ -97,7 +97,7 @@ export const Oversikt = ({
             <>
               {mapApiResult(
                 res,
-                <Spinner visible={true} label="Henter saksbehandler" />,
+                <Spinner label="Henter saksbehandler" />,
                 () => (
                   <ApiErrorAlert>Kunne ikke hente saksbehandlende saksbehandler</ApiErrorAlert>
                 ),

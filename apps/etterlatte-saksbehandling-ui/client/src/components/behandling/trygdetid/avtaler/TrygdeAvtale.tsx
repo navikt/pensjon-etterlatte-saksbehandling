@@ -419,7 +419,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
           )}
         {(isPending(hentAlleTrygdetidAvtalerRequest) ||
           isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
-          isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label="Henter trgydeavtaler" />}
+          isPending(hentTrygdeavtaleRequest)) && <Spinner label="Henter trygdeavtaler" />}
 
         {isFailureHandler({
           apiResult: hentAlleTrygdetidAvtalerRequest,

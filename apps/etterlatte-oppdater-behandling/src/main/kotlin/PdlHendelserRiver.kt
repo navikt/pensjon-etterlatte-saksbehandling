@@ -12,6 +12,14 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.BOSTEDSADRESSE_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.DOEDSFALL_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -38,48 +46,53 @@ internal class PdlHendelserRiver(
     ) {
         logger.info("Mottatt hendelse fra pdl: ${packet["hendelse"]}")
         try {
-            when (packet["hendelse"].asText()) {
-                "DOEDSFALL_V1" -> {
+            val hendelse =
+                packet["hendelse"]
+                    .asText()
+                    .takeIf { LeesahOpplysningstype.entries.map { it.name }.contains(it) }
+                    ?.let { LeesahOpplysningstype.valueOf(it) }
+            when (hendelse) {
+                DOEDSFALL_V1 -> {
                     val doedshendelse: DoedshendelsePdl = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Doedshendelse mottatt for ${doedshendelse.fnr.maskerFnr()}")
                     behandlinger.sendDoedshendelse(doedshendelse)
                 }
 
-                "UTFLYTTING_FRA_NORGE" -> {
+                UTFLYTTING_FRA_NORGE -> {
                     val utflyttingsHendelse: UtflyttingsHendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Utflyttingshendelse mottatt for ${utflyttingsHendelse.fnr.maskerFnr()}")
                     behandlinger.sendUtflyttingshendelse(utflyttingsHendelse)
                 }
 
-                "FORELDERBARNRELASJON_V1" -> {
+                FORELDERBARNRELASJON_V1 -> {
                     val forelderBarnRelasjon: ForelderBarnRelasjonHendelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Forelder-barn-relasjon mottatt for ${forelderBarnRelasjon.fnr.maskerFnr()}")
                     behandlinger.sendForelderBarnRelasjonHendelse(forelderBarnRelasjon)
                 }
 
-                "ADRESSEBESKYTTELSE_V1" -> {
+                ADRESSEBESKYTTELSE_V1 -> {
                     val adressebeskyttelse: Adressebeskyttelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Adressebeskyttelse mottatt")
                     behandlinger.sendAdressebeskyttelseHendelse(adressebeskyttelse)
                 }
 
-                "BOSTEDSADRESSE_V1" -> {
+                BOSTEDSADRESSE_V1 -> {
                     val bostedsadresse: Bostedsadresse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Bostedsadresse mottatt for ${bostedsadresse.fnr.maskerFnr()}")
                     behandlinger.sendAdresseHendelse(bostedsadresse)
                 }
 
-                "VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1" -> {
+                VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> {
                     logger.info("Veregmaal eller fremtidsfullmakt mottatt")
                     val vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     behandlinger.sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
                 }
 
-                "SIVILSTAND_V1" -> {
+                SIVILSTAND_V1 -> {
                     logger.info("Sivilstand mottatt")
                     val sivilstandHendelse: SivilstandHendelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])

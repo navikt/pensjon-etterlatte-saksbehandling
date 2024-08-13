@@ -1,10 +1,15 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -31,12 +36,24 @@ internal class InntektsjusteringRiver(
         context: MessageContext,
     ) {
         try {
-            logger.info("Mottatt inntektsjustering TEST TEST ") // fnr?
-            // TODO finn sak med fnr
+            logger.info("Mottatt inntektsjustering (id=)")
+
+            val fnr = packet[InntektsjusteringInnsendt.fnrBruker].textValue()
+            val sak =
+                runBlocking {
+                    behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
+                }
 
             // TODO Journalfør inntektsjustering
 
-            // TODO lag oppgave i behandling
+            behandlingKlient.opprettOppgave(
+                sak.id,
+                NyOppgaveDto(
+                    OppgaveKilde.HENDELSE,
+                    OppgaveType.REVURDERING,
+                    merknad = "Mottatt inntektsjustering",
+                ),
+            )
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av inntektsjustering (id=$ TODO). Se sikkerlogg for detaljer.")

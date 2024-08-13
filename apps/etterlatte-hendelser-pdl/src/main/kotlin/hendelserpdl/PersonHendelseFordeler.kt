@@ -1,12 +1,5 @@
 package no.nav.etterlatte.hendelserpdl
 
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.BOSTEDSADRESSE_V1
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.DOEDSFALL_V1
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
-import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -25,21 +18,19 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.BOSTEDSADRESSE_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.DOEDSFALL_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
-
-enum class LeesahOpplysningstype {
-    ADRESSEBESKYTTELSE_V1,
-    FORELDERBARNRELASJON_V1,
-    UTFLYTTING_FRA_NORGE,
-    DOEDSFALL_V1,
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
-    SIVILSTAND_V1,
-    BOSTEDSADRESSE_V1,
-}
 
 class PersonHendelseFordeler(
     private val kafkaProduser: KafkaProdusent<String, JsonMessage>,

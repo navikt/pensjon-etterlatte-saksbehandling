@@ -788,6 +788,7 @@ class AktivitetspliktServiceTest {
 
         @Test
         fun `Skal opprette oppgave hvis det er varig unntak`() {
+            val behandlingsId = UUID.randomUUID()
             val oppgave =
                 mockk<OppgaveIntern> {
                     every { id } returns UUID.randomUUID()
@@ -810,6 +811,8 @@ class AktivitetspliktServiceTest {
                         every { unntak } returns AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                         every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
                         every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns behandlingsId
+                        every { oppgaveId } returns null
                     },
                 )
             val resultat = service.opprettOppgaveHvisVarigUnntak(request)

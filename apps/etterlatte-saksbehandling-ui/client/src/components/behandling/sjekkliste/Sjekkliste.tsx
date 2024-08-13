@@ -69,6 +69,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
     )
   }, [])
 
+  const erBarnepensjon = behandling.sakType == SakType.BARNEPENSJON
   return (
     <SidebarPanel $border id="sjekklistePanel">
       {sjekklisteValideringsfeil && (
@@ -88,7 +89,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
         <>
           <BodyLong>
             Gjennomgå alle punktene og marker de som krever handling.{' '}
-            <Link href={behandling.sakType == SakType.BARNEPENSJON ? rutinerBP : rutinerOMS} target="_blank">
+            <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
               Her finner du rutine til punktene.
             </Link>
           </BodyLong>
@@ -104,13 +105,21 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            {soeker?.foedselsnummer ? (
-              <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
-                Personoversikt i Gosys
-              </Link>
-            ) : (
-              <Alert variant="warning">Mangler fødselsnummer på søker</Alert>
-            )}
+            <VStack gap="4">
+              <Heading size="small">Lenker</Heading>
+              {soeker?.foedselsnummer ? (
+                <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
+                  Personoversikt i Gosys
+                </Link>
+              ) : (
+                <Alert variant="warning">Mangler fødselsnummer på søker</Alert>
+              )}
+              {erBarnepensjon && (
+                <Link href={configContext['bisysUrl']} target="_blank">
+                  Bisys <ExternalLinkIcon />
+                </Link>
+              )}
+            </VStack>
           </HMargin>
 
           <VStack gap="4">
@@ -213,11 +222,9 @@ const SjekklisteItem = ({
   redigerbar: boolean
   onUpdated: (item: ISjekklisteItem) => void
 }) => {
-  const configContext = useContext(ConfigContext)
   const [avkrysset, setAvkrysset] = useState<boolean>(item.avkrysset)
   const [itemUpdateResult, oppdaterItem] = useApiCall(oppdaterSjekklisteItem)
 
-  const utbetaltBidragsforskudd = 'Utbetalt bidragsforskudd'
   return (
     <>
       {isFailureHandler({
@@ -234,20 +241,12 @@ const SjekklisteItem = ({
         }}
       >
         {item.beskrivelse}
-        {item.beskrivelse.startsWith(utbetaltBidragsforskudd) && (
-          <>
-            <br />
-            <Link href={configContext['bisysUrl']} target="_blank">
-              Bisys <ExternalLinkIcon />
-            </Link>
-          </>
-        )}
       </Checkbox>
     </>
   )
 }
 
 const HMargin = styled.div`
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 2em;
+  margin-bottom: 2em;
 `

@@ -81,12 +81,17 @@ class GosysOppgaveServiceImpl(
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
     private val cache =
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
+
+    private val saksbehandlerCache =
+        Caffeine
+            .newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build<String, Map<String, String>> { _ -> saksbehandlerInfoDao.hentAlleSaksbehandlere().associate { it.ident to it.navn } }
 
     private fun hentEnheterForSaksbehandler(
         enhetsnr: String?,
@@ -145,7 +150,7 @@ class GosysOppgaveServiceImpl(
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
         return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave(saksbehandlerInfoDao) }
+            .map { it.tilGosysOppgave() }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -156,7 +161,7 @@ class GosysOppgaveServiceImpl(
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
         return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave(saksbehandlerInfoDao) }
+            .map { it.tilGosysOppgave() }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -177,7 +182,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .tilGosysOppgave(saksbehandlerInfoDao)
+            .tilGosysOppgave()
             .also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
@@ -252,7 +257,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         gosysOppgaveKlient
             .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .tilGosysOppgave(saksbehandlerInfoDao)
+            .tilGosysOppgave()
 
     override suspend fun feilregistrer(
         oppgaveId: String,
@@ -269,32 +274,30 @@ class GosysOppgaveServiceImpl(
         return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).id
     }
 
-    companion object {
-        private fun GosysApiOppgave.tilGosysOppgave(saksbehandlerInfoDao: SaksbehandlerInfoDao): GosysOppgave =
-            GosysOppgave(
-                id = this.id,
-                versjon = this.versjon,
-                status = this.status,
-                tema = this.tema,
-                oppgavetype = this.oppgavetype,
-                opprettet = this.opprettetTidspunkt,
-                frist =
-                    this.fristFerdigstillelse?.let { frist ->
-                        Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
-                    },
-                enhet = this.tildeltEnhetsnr,
-                saksbehandler =
-                    this.tilordnetRessurs?.let {
-                        OppgaveSaksbehandler(
-                            it,
-                            saksbehandlerInfoDao.hentSaksbehandlerNavn(it) ?: it,
-                        )
-                    },
-                beskrivelse = this.beskrivelse,
-                journalpostId = this.journalpostId,
-                bruker = this.bruker,
-            )
-    }
+    private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
+        GosysOppgave(
+            id = this.id,
+            versjon = this.versjon,
+            status = this.status,
+            tema = this.tema,
+            oppgavetype = this.oppgavetype,
+            opprettet = this.opprettetTidspunkt,
+            frist =
+                this.fristFerdigstillelse?.let { frist ->
+                    Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
+                },
+            enhet = this.tildeltEnhetsnr,
+            saksbehandler =
+                this.tilordnetRessurs?.let {
+                    OppgaveSaksbehandler(
+                        it,
+                        saksbehandlerCache.get("124")[it] ?: it,
+                    )
+                },
+            beskrivelse = this.beskrivelse,
+            journalpostId = this.journalpostId,
+            bruker = this.bruker,
+        )
 }
 
 class StoetterKunFlyttingAvJournalfoeringsoppgave :

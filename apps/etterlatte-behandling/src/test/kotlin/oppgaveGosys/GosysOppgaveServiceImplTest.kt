@@ -59,7 +59,7 @@ class GosysOppgaveServiceImplTest {
 
     private val saksbehandlerInfoDao =
         mockk<SaksbehandlerInfoDao> {
-            every { hentSaksbehandlerNavn(any()) } returns null
+            every { hentAlleSaksbehandlere() } returns emptyList()
         }
     private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
 
@@ -165,8 +165,8 @@ class GosysOppgaveServiceImplTest {
             }
 
         verify(exactly = 1) { saksbehandlerService.hentKomplettSaksbehandler(sbident) }
-        verify(exactly = 1) { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
         coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgaver(null, listOf("EYO", "EYB"), any(), null, brukerTokenInfo) }
+        verify(exactly = 1) { saksbehandlerInfoDao.hentAlleSaksbehandlere() }
 
         resultat shouldHaveSize 3
         resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 2
@@ -298,7 +298,7 @@ class GosysOppgaveServiceImplTest {
         runBlocking {
             service.flyttTilGjenny(gosysOppgave.id, sakId, brukerTokenInfo)
         }
-        verify(exactly = 1) { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
+
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
                 gosysOppgave.journalpostId!!,
@@ -323,6 +323,7 @@ class GosysOppgaveServiceImplTest {
                 brukerTokenInfo = brukerTokenInfo,
             )
         }
+        verify(exactly = 1) { saksbehandlerInfoDao.hentAlleSaksbehandlere() }
     }
 
     private fun mockGosysOppgave(

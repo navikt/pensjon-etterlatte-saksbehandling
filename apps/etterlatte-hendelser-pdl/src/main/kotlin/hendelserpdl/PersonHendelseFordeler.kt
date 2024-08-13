@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
@@ -22,6 +23,7 @@ import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.BOSTEDSADRESSE_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.DOEDSFALL_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FOLKEREGISTERIDENTIFIKATOR_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
@@ -102,6 +104,10 @@ class PersonHendelseFordeler(
                             ).also { logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})") }
                         BOSTEDSADRESSE_V1 ->
                             haandterBostedsadresse(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
+                        FOLKEREGISTERIDENTIFIKATOR_V1 ->
+                            haandterFolkeregisteridentifikator(hendelse, ident).also {
                                 logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
                             }
                     }
@@ -254,6 +260,26 @@ class PersonHendelseFordeler(
                     bekreftelsesdato = hendelse.sivilstand?.bekreftelsesdato,
                 ),
         )
+    }
+
+    private fun haandterFolkeregisteridentifikator(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
+    ) = when (hendelse.endringstype()) {
+        Endringstype.OPPRETTET -> {}
+        Endringstype.OPPHOERT -> {}
+        Endringstype.KORRIGERT,
+        Endringstype.ANNULLERT,
+        ->
+            publiserPaaRapid(
+                opplysningstype = FOLKEREGISTERIDENTIFIKATOR_V1,
+                hendelse =
+                    Folkeregisteridentifikatorhendelse(
+                        hendelseId = hendelse.hendelseId,
+                        endringstype = hendelse.endringstype(),
+                        fnr = personnummer.folkeregisterident.value,
+                    ),
+            )
     }
 
     private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.entries.map { it.toString() }

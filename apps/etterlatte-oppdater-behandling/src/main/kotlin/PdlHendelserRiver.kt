@@ -16,6 +16,7 @@ import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.BOSTEDSADRESSE_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.DOEDSFALL_V1
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FOLKEREGISTERIDENTIFIKATOR_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
@@ -97,6 +98,11 @@ internal class PdlHendelserRiver(
                     val sivilstandHendelse: SivilstandHendelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     behandlinger.sendSivilstandHendelse(sivilstandHendelse)
+                }
+
+                FOLKEREGISTERIDENTIFIKATOR_V1 -> {
+                    logger.info("Folkeregisteridentifikator mottatt")
+                    behandlinger.sendFolkeregisteridentifikatorhendelse(objectMapper.treeToValue(packet[HENDELSE_DATA_KEY]))
                 }
 
                 else -> {

@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -60,6 +61,8 @@ interface BehandlingService {
     fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
 
     fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
+
+    fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): HttpResponse
 
     fun hentAlleSaker(
         kjoering: String,
@@ -190,6 +193,14 @@ class BehandlingServiceImpl(
             }
         }
     }
+
+    override fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse) =
+        runBlocking {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/folkeregisteridentifikatorhendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(hendelse)
+            }
+        }
 
     override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
         runBlocking {

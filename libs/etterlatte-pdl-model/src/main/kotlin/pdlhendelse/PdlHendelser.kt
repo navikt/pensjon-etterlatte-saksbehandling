@@ -10,6 +10,12 @@ sealed interface PdlHendelse {
     val fnr: String
 }
 
+data class Folkeregisteridentifikatorhendelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
+    override val fnr: String,
+) : PdlHendelse
+
 data class VergeMaalEllerFremtidsfullmakt(
     override val hendelseId: String,
     override val endringstype: Endringstype,

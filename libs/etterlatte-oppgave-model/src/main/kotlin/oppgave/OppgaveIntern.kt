@@ -94,6 +94,7 @@ enum class OppgaveKilde {
     TILBAKEKREVING,
     GJENOPPRETTING,
     SAKSBEHANDLER,
+    BRUKERDIALOG,
 }
 
 enum class OppgaveType {

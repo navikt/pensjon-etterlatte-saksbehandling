@@ -49,8 +49,8 @@ internal class InntektsjusteringRiver(
             behandlingKlient.opprettOppgave(
                 sak.id,
                 NyOppgaveDto(
-                    OppgaveKilde.HENDELSE,
-                    OppgaveType.REVURDERING,
+                    OppgaveKilde.BRUKERDIALOG,
+                    OppgaveType.GENERELL_OPPGAVE,
                     merknad = "Mottatt inntektsjustering",
                 ),
             )

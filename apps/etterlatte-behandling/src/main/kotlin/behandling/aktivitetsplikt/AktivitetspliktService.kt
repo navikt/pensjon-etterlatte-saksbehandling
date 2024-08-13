@@ -514,8 +514,8 @@ fun hentVurderingForSakHelper(
     val idAktivitet = setOf(aktivitet.map { it.behandlingId to it.oppgaveId })
     val idUnntak = setOf(unntak.map { it.behandlingId to it.oppgaveId })
     if (aktivitet.isNotEmpty() && unntak.isNotEmpty() && idAktivitet != idUnntak) {
-        // vi har hentet både fra vurdering og unntak, men vi har hentet fra forskjellige oppgaver / behandlinger
-        // for å hente riktig i dette tilfellet må vi finne hvilken som er nyest, og bruke den id'en til å hente
+        // Vi har hentet både fra vurdering og unntak, men vi har hentet fra forskjellige oppgaver / behandlinger.
+        // For å hente riktig i dette tilfellet må vi finne hvilken som er nyest, og bruke den id'en til å hente
         // den andre
         val nyesteEndringAktivitet = aktivitet.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
         val nyesteEndringUnntak = unntak.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }

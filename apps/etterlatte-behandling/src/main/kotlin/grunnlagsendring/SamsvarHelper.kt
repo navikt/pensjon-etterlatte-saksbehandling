@@ -81,7 +81,7 @@ internal fun finnSamsvarForHendelse(
         }
 
         GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR -> {
-            SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar(true) // TODO("Må finne ut av denne")
+            SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar(false) // TODO("Må finne ut av denne")
         }
 
         GrunnlagsendringsType.BOSTED -> {

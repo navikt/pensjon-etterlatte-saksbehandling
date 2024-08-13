@@ -62,19 +62,17 @@ object BarnepensjonAnvendtTrygdetidPerioder {
                 )
             }.map {
                 when (it) {
-                    is RegelkjoeringResultat.Suksess -> {
-                        val aktueltResultat = it.periodiserteResultater.single()
-                        GrunnlagMedPeriode(
-                            data = aktueltResultat.resultat.verdi,
-                            fom = aktueltResultat.periode.fraDato,
-                            tom = aktueltResultat.periode.tilDato,
-                        )
-                    }
-
+                    is RegelkjoeringResultat.Suksess -> it.periodiserteResultater.single()
                     is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException(
                         "Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}",
                     )
                 }
+            }.map { aktueltResultat ->
+                GrunnlagMedPeriode(
+                    data = aktueltResultat.resultat.verdi,
+                    fom = aktueltResultat.periode.fraDato,
+                    tom = aktueltResultat.periode.tilDato,
+                )
             }.kombinerOverlappendePerioder()
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =

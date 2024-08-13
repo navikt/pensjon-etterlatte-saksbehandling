@@ -26,6 +26,6 @@ fun main() =
         InntektsjusteringRiver(
             rapidsConnection,
             behandlingKlient = ab.behandlingKlient,
-            journalfoerSoeknadService = ab.journalfoerSoeknadService,
+            journalfoerInntektsjusteringService = ab.journalfoerInntektsjusteringService,
         )
     }

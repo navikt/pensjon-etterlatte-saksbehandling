@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.JsonMappingException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
-import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingKlient: BehandlingClient,
-    private val journalfoerSoeknadService: JournalfoerSoeknadService,
+    private val journalfoerInntektsjusteringService: JournalfoerInntektsjusteringService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(InntektsjusteringRiver::class.java)
 
@@ -44,7 +43,12 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            // TODO Journalfør inntektsjustering
+            val inntektsjustering = packet[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue()
+
+            journalfoerInntektsjusteringService.opprettJournalpost(
+                sak,
+                inntektsjustering,
+            )
 
             behandlingKlient.opprettOppgave(
                 sak.id,

@@ -514,10 +514,43 @@ fun hentVurderingForSakHelper(
     val idAktivitet = setOf(aktivitet.map { it.behandlingId to it.oppgaveId })
     val idUnntak = setOf(unntak.map { it.behandlingId to it.oppgaveId })
     if (aktivitet.isNotEmpty() && unntak.isNotEmpty() && idAktivitet != idUnntak) {
-        TODO(
-            "Håndter dette tilfellet. Her må vi finne den nyeste av kildene mellom aktivitet og unntak, " +
-                "og hente unntak / aktivitet for den id'en.",
-        )
+        // vi har hentet både fra vurdering og unntak, men vi har hentet fra forskjellige oppgaver / behandlinger
+        // for å hente riktig i dette tilfellet må vi finne hvilken som er nyest, og bruke den id'en til å hente
+        // den andre
+        val nyesteEndringAktivitet = aktivitet.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
+        val nyesteEndringUnntak = unntak.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
+
+        if (nyesteEndringUnntak > nyesteEndringAktivitet) {
+            val foersteUnntak = unntak.first()
+            if (foersteUnntak.behandlingId != null) {
+                val aktivitetForBehandling =
+                    aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(foersteUnntak.behandlingId)
+                return AktivitetspliktVurdering(aktivitetForBehandling, unntak)
+            } else {
+                val oppgaveId =
+                    requireNotNull(foersteUnntak.oppgaveId) {
+                        "Har et unntak med id=${foersteUnntak.id} i sak=${foersteUnntak.sakId} som ikke " +
+                            "er koblet på hverken sak eller oppgave."
+                    }
+                val aktivitetForOppgave = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId)
+                return AktivitetspliktVurdering(aktivitetForOppgave, unntak)
+            }
+        } else {
+            val foersteVurdering = aktivitet.first()
+            if (foersteVurdering.behandlingId != null) {
+                val unntakForBehandling =
+                    aktivitetspliktUnntakDao.hentUnntakForBehandling(foersteVurdering.behandlingId)
+                return AktivitetspliktVurdering(aktivitet, unntakForBehandling)
+            } else {
+                val oppgaveId =
+                    requireNotNull(foersteVurdering.oppgaveId) {
+                        "Har en vurdering med id=${foersteVurdering.id} i sak=${foersteVurdering.sakId} som ikke " +
+                            "er koblet på hverken sak eller oppgave."
+                    }
+                val unntakForOppgave = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
+                return AktivitetspliktVurdering(aktivitet, unntakForOppgave)
+            }
+        }
     }
 
     return AktivitetspliktVurdering(aktivitet, unntak)

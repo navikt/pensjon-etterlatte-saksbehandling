@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -55,7 +57,12 @@ class GosysOppgaveServiceImplTest {
                 )
         }
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
+    private val saksbehandlerInfoDao =
+        mockk<SaksbehandlerInfoDao> {
+            every { hentSaksbehandlerNavn(any()) } returns null
+        }
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     val azureGroupToGroupIDMap =
@@ -85,6 +92,7 @@ class GosysOppgaveServiceImplTest {
 
     @AfterEach
     fun afterEach() {
+        confirmVerified(saksbehandlerInfoDao, oppgaveService, saksbehandlerService, gosysOppgaveKlient)
         clearAllMocks()
     }
 
@@ -155,6 +163,10 @@ class GosysOppgaveServiceImplTest {
             runBlocking {
                 service.hentOppgaver(null, null, null, null, brukerTokenInfo)
             }
+
+        verify(exactly = 1) { saksbehandlerService.hentKomplettSaksbehandler(sbident) }
+        verify(exactly = 1) { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
+        coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgaver(null, listOf("EYO", "EYB"), any(), null, brukerTokenInfo) }
 
         resultat shouldHaveSize 3
         resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 2
@@ -244,6 +256,8 @@ class GosysOppgaveServiceImplTest {
                 service.hentOppgaver(null, null, null, null, brukerTokenInfo)
             }
 
+        coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgaver(any(), any(), Enheter.STRENGT_FORTROLIG.enhetNr, null, brukerTokenInfo) }
+
         resultat shouldHaveSize 1
         resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 0
         resultat.filter { it.bruker?.ident == "29048012345" } shouldHaveSize 1
@@ -251,18 +265,22 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `kalle gosys-klient med riktige params`() {
+        val oppgaveId = "123"
+        val tildeles = "A012345"
+        val oppgaveVersjon = 2L
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-                oppgaveId = "123",
-                oppgaveVersjon = 2L,
-                tildeles = "A012345",
+                oppgaveId = oppgaveId,
+                oppgaveVersjon = oppgaveVersjon,
+                tildeles = tildeles,
                 brukerTokenInfo,
             )
         } returns mockGosysOppgave("EYO", "GEN")
 
         runBlocking {
-            service.tildelOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)
+            service.tildelOppgaveTilSaksbehandler(oppgaveId = oppgaveId, oppgaveVersjon = oppgaveVersjon, tildeles, brukerTokenInfo)
         }
+        coVerify { gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tildeles, brukerTokenInfo) }
     }
 
     @Test
@@ -280,7 +298,7 @@ class GosysOppgaveServiceImplTest {
         runBlocking {
             service.flyttTilGjenny(gosysOppgave.id, sakId, brukerTokenInfo)
         }
-
+        verify(exactly = 1) { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
                 gosysOppgave.journalpostId!!,
@@ -292,6 +310,7 @@ class GosysOppgaveServiceImplTest {
                 brukerTokenInfo.ident(),
             )
         }
+        coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgave(any(), brukerTokenInfo) }
         coVerify(exactly = 1) {
             gosysOppgaveKlient.feilregistrer(
                 id = gosysOppgave.id.toString(),

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -77,6 +78,7 @@ class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
+    private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -143,7 +145,7 @@ class GosysOppgaveServiceImpl(
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
         return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
+            .map { it.tilGosysOppgave(saksbehandlerInfoDao) }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -154,7 +156,7 @@ class GosysOppgaveServiceImpl(
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
         return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
+            .map { it.tilGosysOppgave(saksbehandlerInfoDao) }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -175,7 +177,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .tilGosysOppgave()
+            .tilGosysOppgave(saksbehandlerInfoDao)
             .also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
@@ -250,7 +252,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         gosysOppgaveKlient
             .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .tilGosysOppgave()
+            .tilGosysOppgave(saksbehandlerInfoDao)
 
     override suspend fun feilregistrer(
         oppgaveId: String,
@@ -268,7 +270,7 @@ class GosysOppgaveServiceImpl(
     }
 
     companion object {
-        private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
+        private fun GosysApiOppgave.tilGosysOppgave(saksbehandlerInfoDao: SaksbehandlerInfoDao): GosysOppgave =
             GosysOppgave(
                 id = this.id,
                 versjon = this.versjon,
@@ -281,7 +283,13 @@ class GosysOppgaveServiceImpl(
                         Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
                     },
                 enhet = this.tildeltEnhetsnr,
-                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it, it) },
+                saksbehandler =
+                    this.tilordnetRessurs?.let {
+                        OppgaveSaksbehandler(
+                            it,
+                            saksbehandlerInfoDao.hentSaksbehandlerNavn(it) ?: it,
+                        )
+                    },
                 beskrivelse = this.beskrivelse,
                 journalpostId = this.journalpostId,
                 bruker = this.bruker,

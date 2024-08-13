@@ -71,7 +71,6 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService =
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, any()) } returns true
-                    every { isEnabled(KlageFeatureToggle.KanFerdigstilleKlageToggle, any()) } returns true
                 },
         ).also {
             resetDatabase()

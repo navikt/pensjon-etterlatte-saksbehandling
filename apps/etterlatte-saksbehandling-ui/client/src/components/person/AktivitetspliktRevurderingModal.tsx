@@ -18,7 +18,7 @@ export const AktivitetspliktRevurderingModal = ({
 }) => {
   const [visModal, setVisModal] = useState(false)
   const [erFerdigstilt, setErFerdigstilt] = useState(false)
-  const [beskrivelse, setBeskrivelse] = useState<string>('')
+  const [begrunnelse, setBegrunnelse] = useState<string>('')
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
@@ -33,7 +33,7 @@ export const AktivitetspliktRevurderingModal = ({
 
   const ferdigstill = () => {
     if (!erFerdigstilt) {
-      apiFerdigstillOppgave({ id: oppgave.id, merknad: beskrivelse }, () => {
+      apiFerdigstillOppgave({ id: oppgave.id, merknad: begrunnelse }, () => {
         setVisModal(false)
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       })
@@ -63,14 +63,18 @@ export const AktivitetspliktRevurderingModal = ({
                 Sak {oppgave.sakId} har en åpen behandling som forhindret Gjenny fra å opprette en revurdering
                 automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.
               </BodyLong>
+              <BodyLong>
+                Hvis dette ikke er nødvendig, legg inn en begrunnelse og ferdigstill oppgaven. Ellers gå til saken og
+                vent med å ferdigstille oppgaven til ny revurdering er opprettet.
+              </BodyLong>
 
               {!erFerdigstilt && (
                 <div>
                   <Textarea
-                    label="Beskrivelse"
-                    value={beskrivelse}
-                    onChange={(e) => setBeskrivelse(e.target.value)}
-                    placeholder="Beskrivelse"
+                    label="Begrunnelse"
+                    value={begrunnelse}
+                    onChange={(e) => setBegrunnelse(e.target.value)}
+                    placeholder="Begrunnelse"
                   />
                   <br />
                   <PersonButtonLink

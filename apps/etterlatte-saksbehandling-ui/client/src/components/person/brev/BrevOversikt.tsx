@@ -14,6 +14,7 @@ import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
+import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -102,6 +103,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
               <Table.Row>
                 <Table.HeaderCell>ID</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>Distribuert</Table.HeaderCell>
                 <Table.HeaderCell>Type</Table.HeaderCell>
                 <Table.HeaderCell>Navn</Table.HeaderCell>
                 <Table.HeaderCell>Adresse</Table.HeaderCell>
@@ -119,6 +121,9 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                   <Table.DataCell>{b.id}</Table.DataCell>
                   <Table.DataCell>
                     <BrevStatusTag status={b.status} />
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    {b.status === BrevStatus.DISTRIBUERT ? formaterDatoMedKlokkeslett(b.statusEndret) : '-'}
                   </Table.DataCell>
                   <Table.DataCell>{formaterBrevtype(b.brevtype)}</Table.DataCell>
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>

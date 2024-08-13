@@ -147,15 +147,12 @@ class AktivitetspliktService(
     }
 
     private fun harVarigUnntak(sakId: Long): Boolean {
-        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val sisteVurdering =
-            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+        val varigUnntak =
+            hentVurderingForSak(sakId)
+                .unntak
+                .find { it.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }
 
-        return when (sisteVurdering) {
-            is AktivitetspliktUnntak -> sisteVurdering.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-            else -> false
-        }
+        return varigUnntak != null
     }
 
     fun hentAktiviteter(behandlingId: UUID) = aktivitetspliktDao.hentAktiviteter(behandlingId)

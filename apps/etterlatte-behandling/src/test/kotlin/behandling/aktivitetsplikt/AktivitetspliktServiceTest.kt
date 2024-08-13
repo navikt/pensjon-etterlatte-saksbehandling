@@ -200,7 +200,14 @@ class AktivitetspliktServiceTest {
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
-            every { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) } returns 1
+            every {
+                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                    aktivitetsgrad,
+                    sakId,
+                    any(),
+                    oppgaveId,
+                )
+            } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns emptyList()
             every { oppgaveService.hentOppgave(oppgaveId) } returns
                 OppgaveIntern(
@@ -228,7 +235,14 @@ class AktivitetspliktServiceTest {
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
-            every { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) } returns 1
+            every {
+                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                    aktivitetsgrad,
+                    sakId,
+                    any(),
+                    oppgaveId,
+                )
+            } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns listOf(mockk())
 
             assertThrows<IllegalArgumentException> {
@@ -411,7 +425,12 @@ class AktivitetspliktServiceTest {
                     ),
                 )
 
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                aktivitetsgrad,
+                sakId,
+                kilde,
+                behandlingId = behandlingId,
+            )
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
             verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
@@ -755,8 +774,8 @@ class AktivitetspliktServiceTest {
 
         @Test
         fun `Skal ikke opprette oppgave hvis det ikke er varig unntak`() {
-            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns null
-            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
 
             val resultat = service.opprettOppgaveHvisVarigUnntak(request)
 
@@ -784,14 +803,15 @@ class AktivitetspliktServiceTest {
                     frist = frist,
                 )
             } returns oppgave
-            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns
-                mockk {
-                    every { unntak } returns AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
-                    every { sakId } returns aktivitet.sakId
-                }
-
+                listOf(
+                    mockk {
+                        every { unntak } returns AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                        every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                        every { sakId } returns aktivitet.sakId
+                    },
+                )
             val resultat = service.opprettOppgaveHvisVarigUnntak(request)
 
             with(resultat) {

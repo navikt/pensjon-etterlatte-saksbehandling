@@ -29,7 +29,7 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
         success: (data) => (
           <SamordningTabell fnr={fnr} sakId={sakId!} samordningsdata={data} refresh={() => hent(sakId!)} />
         ),
-        pending: <Spinner visible={true} label="Henter samordningsdata" />,
+        pending: <Spinner label="Henter samordningsdata" />,
         error: () => <ApiErrorAlert>Kunne ikke hente samordningsdata</ApiErrorAlert>,
       })}
     </Box>

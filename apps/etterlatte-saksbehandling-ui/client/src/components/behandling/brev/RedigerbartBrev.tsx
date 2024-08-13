@@ -122,7 +122,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER}>
           {(isPendingOrInitial(hentManuellPayloadStatus) || isPending(tilbakestillManuellPayloadStatus)) && (
-            <Spinner visible label="Henter brevinnhold ..." />
+            <Spinner label="Henter brevinnhold ..." />
           )}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
@@ -148,7 +148,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
           {isPendingOrInitial(hentManuellPayloadStatus) ||
-            (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label="Henter brevinnhold ..." />)}
+            (isPending(tilbakestillManuellPayloadStatus) && <Spinner label="Henter brevinnhold ..." />)}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
               <Accordion indent={false}>

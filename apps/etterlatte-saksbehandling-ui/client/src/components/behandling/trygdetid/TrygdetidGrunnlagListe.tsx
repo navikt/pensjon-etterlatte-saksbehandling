@@ -223,7 +223,7 @@ const PeriodeRow = ({
           </Table.DataCell>
           <Table.DataCell>
             {isPending(slettTrygdetidStatus) ? (
-              <Spinner visible={true} variant="neutral" label="Sletter" margin="1em" />
+              <Spinner variant="neutral" label="Sletter" margin="1em" />
             ) : (
               <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
             )}

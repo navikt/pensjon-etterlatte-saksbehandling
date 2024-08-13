@@ -104,7 +104,7 @@ export function KlageListe(props: { sakId: number }) {
 
   return mapApiResult(
     klager,
-    <Spinner visible label="Henter klager i saken" />,
+    <Spinner label="Henter klager i saken" />,
     () => <ApiErrorAlert>Kunne ikke hente klager</ApiErrorAlert>,
     (klageliste) => {
       klageliste.sort((a, b) => (new Date(a.opprettet) < new Date(b.opprettet) ? 1 : -1))

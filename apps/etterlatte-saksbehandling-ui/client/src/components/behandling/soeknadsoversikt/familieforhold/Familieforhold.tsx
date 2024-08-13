@@ -50,7 +50,7 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
 export const visLandInfoFraKodeverkEllerDefault = (landListeResult: Result<ILand[]>, statsborgerskap?: string) => {
   return mapApiResult(
     landListeResult,
-    <Spinner label="Henter landliste" visible={true} />,
+    <Spinner label="Henter landliste" />,
     () => <>{statsborgerskap ?? 'Ukjent'}</>,
     (landListe) => <>{statsborgerskap ? finnLandSomTekst(statsborgerskap, landListe) : 'Ukjent'}</>
   )

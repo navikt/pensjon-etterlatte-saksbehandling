@@ -136,11 +136,11 @@ const BeregningsgrunnlagBarnepensjon = () => {
     <>
       <>
         {mapResult(hentBeregningsgrunnlagResult, {
-          pending: <Spinner visible label="Henter beregningsgrunnlag..." />,
+          pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: () =>
             mapResult(hentTrygdetiderResult, {
-              pending: <Spinner visible label="Henter trygdetider..." />,
+              pending: <Spinner label="Henter trygdetider..." />,
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>

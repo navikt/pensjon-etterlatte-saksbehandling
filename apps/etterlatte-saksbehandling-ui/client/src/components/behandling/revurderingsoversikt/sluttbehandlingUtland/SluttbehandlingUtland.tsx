@@ -111,7 +111,7 @@ export default function SluttbehandlingUtland({
         </Heading>
         {mapAllApiResult(
           kravpakkeStatus,
-          <Spinner visible={true} label="Henter kravpakke" />,
+          <Spinner label="Henter kravpakke" />,
           null,
           () => (
             <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
@@ -158,7 +158,9 @@ export default function SluttbehandlingUtland({
         Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+
+      <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
+
       {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
           redigerbar={redigerbar}
@@ -200,7 +202,7 @@ export default function SluttbehandlingUtland({
       {visHistorikk &&
         mapAllApiResult(
           hentRevurderingerForSakMedAarsakStatus,
-          <Spinner visible={true} label="Henter historikk" />,
+          <Spinner label="Henter historikk" />,
           null,
           () => <ApiErrorAlert>Klarte ikke å hente historikken</ApiErrorAlert>,
           (revurderingsinfoliste) => (

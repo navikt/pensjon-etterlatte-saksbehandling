@@ -128,7 +128,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         />
       ) : (
         mapResult(minOppgavelisteOppgaverResult, {
-          pending: <Spinner visible={true} label="Henter dine oppgaver" />,
+          pending: <Spinner label="Henter dine oppgaver" />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente dine oppgaver'}</ApiErrorAlert>,
         })
       )}

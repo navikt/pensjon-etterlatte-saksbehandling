@@ -40,7 +40,7 @@ const FoersteVirkGrunnlag = () => {
 
   return mapApiResult(
     foersteVirk,
-    <Spinner visible={true} label="Henter første virkningstidspunkt" />,
+    <Spinner label="Henter første virkningstidspunkt" />,
     () => <ApiErrorAlert>Kunne ikke hente første virkningstidspunkt</ApiErrorAlert>,
     (foersteVirk) => (
       <>
@@ -85,7 +85,7 @@ const AdopsjonGrunnlag = () => {
 
   return mapApiResult(
     foreldreansvar,
-    <Spinner visible={true} label="Henter historikk for foreldreansvar" />,
+    <Spinner label="Henter historikk for foreldreansvar" />,
     () => <ApiErrorAlert>Kunne ikke hente foreldreansvar</ApiErrorAlert>,
     (foreldreansvar) => (
       <div>

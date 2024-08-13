@@ -122,7 +122,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
         />
       ) : (
         mapResult(oppgavelistaOppgaverResult, {
-          pending: <Spinner visible={true} label="Henter oppgaver" />,
+          pending: <Spinner label="Henter oppgaver" />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
         })
       )}

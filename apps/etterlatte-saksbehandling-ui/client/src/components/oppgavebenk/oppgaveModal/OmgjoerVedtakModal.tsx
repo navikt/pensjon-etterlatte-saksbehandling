@@ -84,7 +84,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
         <Modal.Body>
           {mapApiResult(
             klageResult,
-            <Spinner label="Henter klage" visible />,
+            <Spinner label="Henter klage" />,
             (error) => (
               <ApiErrorAlert>{error.detail}</ApiErrorAlert>
             ),

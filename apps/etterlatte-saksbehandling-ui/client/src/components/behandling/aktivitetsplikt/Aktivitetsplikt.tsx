@@ -104,9 +104,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               Dette er en vurdering som ble gjort før juni 2024
             </Detail>
 
-            <Spinner visible={isPending(hentet)} label="Henter data" />
-
-            {!isPending(hentet) && (
+            {isPending(hentet) ? (
+              <Spinner label="Henter data" />
+            ) : (
               <>
                 <BodyLong>{aktivitetOppfolging.aktivitet}</BodyLong>
 

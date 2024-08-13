@@ -31,7 +31,7 @@ export const UtsendingsinfoModal = ({ journalpost }: { journalpost: Journalpost 
         <Modal.Body>
           {mapApiResult(
             status,
-            <Spinner visible label="Henter utsendingsinfo" />,
+            <Spinner label="Henter utsendingsinfo" />,
             (error) => (
               <ApiErrorAlert>{error.detail || 'Feil ved henting av utsendingsinfo'}</ApiErrorAlert>
             ),

@@ -92,7 +92,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
     <Box padding="8">
       {mapApiResult(
         brevListe,
-        <Spinner visible label="Henter brev for sak ..." />,
+        <Spinner label="Henter brev for sak ..." />,
         () => (
           <ApiErrorAlert>Feil ved henting av brev...</ApiErrorAlert>
         ),

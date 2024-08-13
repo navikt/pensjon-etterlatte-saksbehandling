@@ -7,7 +7,6 @@ export const AppSwitcher = () => {
   const configContext = useContext(ConfigContext)
 
   return (
-    <>
       <Dropdown>
         <InternalHeader.Button as={Dropdown.Toggle}>
           <MenuGridIcon style={{ fontSize: '1.5rem' }} title="Systemer og oppslagsverk" />
@@ -19,7 +18,7 @@ export const AppSwitcher = () => {
               Gosys <ExternalLinkIcon />
             </Dropdown.Menu.GroupedList.Item>
             <Dropdown.Menu.GroupedList.Item as="a" target="_blank" href={configContext['eessiPensjonUrl']}>
-              ESSI <ExternalLinkIcon />
+              EESSI <ExternalLinkIcon />
             </Dropdown.Menu.GroupedList.Item>
             <Dropdown.Menu.GroupedList.Item as="a" target="_blank" href={configContext['rinaUrl']}>
               RINA <ExternalLinkIcon />
@@ -30,9 +29,11 @@ export const AppSwitcher = () => {
             <Dropdown.Menu.GroupedList.Item as="a" target="_blank" href={configContext['modiapersonoversiktUrl']}>
               Modia <ExternalLinkIcon />
             </Dropdown.Menu.GroupedList.Item>
+            <Dropdown.Menu.GroupedList.Item as="a" target="_blank" href={configContext['bisysUrl']}>
+              Bisys <ExternalLinkIcon />
+            </Dropdown.Menu.GroupedList.Item>
           </Dropdown.Menu.GroupedList>
         </Dropdown.Menu>
       </Dropdown>
-    </>
   )
 }

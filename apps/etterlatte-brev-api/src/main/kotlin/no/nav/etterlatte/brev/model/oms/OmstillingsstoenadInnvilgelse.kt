@@ -53,9 +53,10 @@ data class OmstillingsstoenadInnvilgelse(
                         restanse = it.restanse,
                         utbetaltBeloep = it.utbetaltBeloep,
                         trygdetid = it.trygdetid,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
+                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         sanksjon = it.sanksjon != null,
+                        institusjon = it.institusjon != null,
                     )
                 }
 

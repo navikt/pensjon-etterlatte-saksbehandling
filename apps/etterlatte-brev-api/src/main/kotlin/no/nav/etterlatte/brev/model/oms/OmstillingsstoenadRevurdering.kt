@@ -65,6 +65,7 @@ data class OmstillingsstoenadRevurdering(
                         beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                         sanksjon = it.sanksjon != null,
+                        institusjon = it.institusjon != null,
                     )
                 }
 

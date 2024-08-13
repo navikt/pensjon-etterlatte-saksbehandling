@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
@@ -107,6 +108,19 @@ sealed class BrevParametre {
                 borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
                 erOver18aar = erOver18aar,
                 bosattUtland = bosattUtland,
+            )
+    }
+
+    @JsonTypeName("BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
+    data class BarnepensjonInformasjonInnhentingAvOpplysninger(
+        val erOver18aar: Boolean,
+        val borIUtlandet: Boolean,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
+            BarnepensjonInnhentingAvOpplysninger(
+                erOver18aar = erOver18aar,
+                borIUtlandet = borIUtlandet,
             )
     }
 

@@ -22,6 +22,13 @@ export interface GenerellEndringshendelse {
   endringer: EndringLinje[]
 }
 
+export interface GenerellOppgaveDto {
+  merknad: string
+  sakIds: string
+  type: Oppgavetype
+  kilde: OppgaveKilde
+}
+
 export interface EndringLinje {
   tittel: string
   beskrivelse?: string

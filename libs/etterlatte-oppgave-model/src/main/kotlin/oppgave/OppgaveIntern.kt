@@ -156,6 +156,13 @@ data class VedtakEndringDTO(
     val opphoerFraOgMed: YearMonth? = null,
 )
 
+data class NyOppgaveBulkDto(
+    val merknad: String,
+    val sakIds: String,
+    val type: OppgaveType,
+    val kilde: OppgaveKilde,
+)
+
 data class NyOppgaveDto(
     val oppgaveKilde: OppgaveKilde?,
     val oppgaveType: OppgaveType,

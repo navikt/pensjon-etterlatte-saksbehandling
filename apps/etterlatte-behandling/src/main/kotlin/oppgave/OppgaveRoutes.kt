@@ -16,6 +16,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -111,6 +112,37 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                         },
                     )
                 }
+            }
+        }
+
+        route("/bulk") {
+            post("/opprett") {
+                // TODO: hvilke tilgangsstyring?
+                // kunSaksbehandler
+                // kunSaksbehandlerMedSkrivetilgang
+
+                val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
+                val sakIds = oppgaveBulkDto.sakIds.split(",").map { it.trim() }
+
+                inTransaction {
+                    sakIds.forEach { id ->
+                        try {
+                            service.opprettOppgave(
+                                referanse = "",
+                                sakId = id.toLong(),
+                                kilde = oppgaveBulkDto.kilde,
+                                type = oppgaveBulkDto.type,
+                                merknad = oppgaveBulkDto.merknad,
+                            )
+                        } catch (e: Exception) {
+                            // TODO: hvordan håndtere?
+                            // ugyldigSakIds.add(id)
+                            throw Exception()
+                        }
+                    }
+                }
+
+                call.respond(HttpStatusCode.OK)
             }
         }
 

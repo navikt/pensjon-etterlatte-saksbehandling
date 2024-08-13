@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
-import { GenerellEndringshendelse, NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
+import { GenerellEndringshendelse, GenerellOppgaveDto, NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -40,6 +40,9 @@ export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkSta
 export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {
   return apiClient.get(`/oppgaver/sak/${sakId}/oppgaver`)
 }
+
+export const opprettGenerellOppgave = async (generellOppgave: GenerellOppgaveDto): Promise<ApiResponse<any>> =>
+  apiClient.post('/oppgaver/bulk/opprett', { ...generellOppgave })
 
 export const opprettOppgave = async (args: {
   sakId: number

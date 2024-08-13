@@ -121,7 +121,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 
       <MapApiResult
         result={hentBrevutfallOgEtterbetalingResult}
-        mapInitialOrPending={<Spinner visible={true} label="Henter brevutfall .." />}
+        mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
         mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
         mapSuccess={() =>
           visSkjema ? (

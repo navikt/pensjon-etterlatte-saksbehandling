@@ -1,5 +1,5 @@
 import { Button } from '@navikt/ds-react'
-import { EyeIcon } from '@navikt/aksel-icons'
+import { EnvelopeClosedIcon, EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
@@ -7,6 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 
@@ -131,6 +132,26 @@ export const HandlingerForOppgave = ({
       return (
         erInnloggetSaksbehandlerOppgave && (
           <AktivitetspliktRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
+    case Oppgavetype.GENERELL_OPPGAVE:
+      return (
+        oppgave.status !== Oppgavestatus.FERDIGSTILT && (
+          <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
+    case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <PersonButtonLink
+            size="small"
+            icon={<EnvelopeClosedIcon />}
+            fnr={fnr || '-'}
+            fane={PersonOversiktFane.BREV}
+            disabled={!fnr}
+          >
+            Gå til brev
+          </PersonButtonLink>
         )
       )
     default:

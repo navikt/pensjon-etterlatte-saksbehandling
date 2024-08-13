@@ -31,8 +31,9 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JobbType
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -738,6 +739,65 @@ class AktivitetspliktServiceTest {
             }
             verify { automatiskRevurderingService wasNot Called }
             verify { oppgaveService wasNot Called }
+        }
+    }
+
+    @Nested
+    inner class OpprettOppgaveHvisVarigUnntak {
+        private val sakId = 1L
+        private val frist = Tidspunkt.now()
+        private val request =
+            OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+                sakId = sakId,
+                frist = frist,
+                jobbType = JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK,
+            )
+
+        @Test
+        fun `Skal ikke opprette oppgave hvis det ikke er varig unntak`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
+
+            val resultat = service.opprettOppgaveHvisVarigUnntak(request)
+
+            with(resultat) {
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+            }
+            verify { oppgaveService wasNot Called }
+        }
+
+        @Test
+        fun `Skal opprette oppgave hvis det er varig unntak`() {
+            val oppgave =
+                mockk<OppgaveIntern> {
+                    every { id } returns UUID.randomUUID()
+                }
+
+            every {
+                oppgaveService.opprettOppgave(
+                    sakId = sakId,
+                    referanse = any(),
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
+                    merknad = JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK.beskrivelse,
+                    frist = frist,
+                )
+            } returns oppgave
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns
+                mockk {
+                    every { unntak } returns AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                    every { sakId } returns aktivitet.sakId
+                }
+
+            val resultat = service.opprettOppgaveHvisVarigUnntak(request)
+
+            with(resultat) {
+                opprettetOppgave shouldBe true
+                oppgaveId shouldBe oppgave.id
+            }
         }
     }
 

@@ -45,7 +45,7 @@ export function KlageBrev() {
   }, [brevId, sakId])
 
   if (!klage) {
-    return <Spinner visible label="Henter klage" />
+    return <Spinner label="Henter klage" />
   }
 
   const redigerbar = erKlageRedigerbar(klage)
@@ -81,7 +81,7 @@ export function KlageBrev() {
         {mapApiResult(
           hentetBrev,
           <SpinnerContainer>
-            <Spinner visible label="Henter brevet" />
+            <Spinner label="Henter brevet" />
           </SpinnerContainer>,
           () => (
             <ApiErrorAlert>Kunne ikke hente brevet. Prøv å laste siden på nytt</ApiErrorAlert>

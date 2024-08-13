@@ -26,7 +26,7 @@ export const VedtakKolonner = (props: { behandlingId: string }) => {
       {mapApiResult(
         vedtak,
         <Table.DataCell colSpan={2}>
-          <Spinner visible label="" margin="0" />
+          <Spinner label="" margin="0" />
         </Table.DataCell>,
         (apierror) => (
           <Table.DataCell colSpan={2}>

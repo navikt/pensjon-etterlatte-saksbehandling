@@ -155,6 +155,9 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     <option value={FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD}>
                       Kvitteringsbrev på mottatt søknad
                     </option>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                      Innhenting av opplysninger
+                    </option>
                   </>
                 )}
               </Select>
@@ -228,6 +231,12 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   <ErOver18Aar control={control} />
                   <NasjonalEllerUtlandRadio control={control} />
                   <BorINorgeEllerIkkeAvtaleland control={control} />
+                </>
+              )}
+              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+                <>
+                  <ErOver18Aar control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
                 </>
               )}
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
@@ -306,6 +315,11 @@ export type BrevParametre =
       borINorgeEllerIkkeAvtaleland: boolean
     }
   | {
+      type: FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      borIUtlandet: boolean
+      erOver18aar: boolean
+    }
+  | {
       type: FormType.TOMT_BREV
     }
 
@@ -335,6 +349,7 @@ enum FormType {
   OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
   BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
   BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD = 'BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD',
+  BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -383,6 +398,12 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
+      }
+    case FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+      return {
+        type: formdata.type,
+        borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        erOver18aar: formdata.erOver18Aar === JaNei.JA,
       }
     case FormType.TOMT_BREV:
       return {

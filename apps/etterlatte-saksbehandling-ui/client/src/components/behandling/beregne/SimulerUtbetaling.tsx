@@ -5,14 +5,15 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Heading, Table, Box, Label, ErrorMessage } from '@navikt/ds-react'
+import { BodyShort, Box, ErrorMessage, Heading, Label, Table } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
-import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
 import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
+import { compareDesc } from 'date-fns'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -54,7 +55,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
         {behandlingStatusFerdigEllerVedtakFattet() &&
           mapResult(lagretSimuleringStatus, {
-            pending: <Spinner visible={true} label="Henter lagret simulering..." />,
+            pending: <Spinner label="Henter lagret simulering..." />,
             success: (lagretSimulering) =>
               lagretSimulering ? (
                 <SimuleringBeregning data={lagretSimulering} />
@@ -65,7 +66,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
           })}
 
         {mapResult(simuleringStatus, {
-          pending: <Spinner visible={true} label="Simulerer..." />,
+          pending: <Spinner label="Simulerer..." />,
           success: (simuleringrespons) =>
             simuleringrespons ? (
               <SimuleringBeregning data={simuleringrespons} />
@@ -82,12 +83,12 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
   return (
     <>
-      <UtbetalingTable tittel="Kommende utbetaling(er)" data={data.kommendeUtbetalinger} />
+      <UtbetalingTable tittel="Kommende utbetaling(er)" perioder={data.kommendeUtbetalinger} />
 
-      {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" data={data.etterbetaling} />}
+      {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
 
       {data.tilbakekreving.length > 0 && (
-        <UtbetalingTable tittel="Potensiell tilbakekreving" data={data.tilbakekreving} />
+        <UtbetalingTable tittel="Potensiell tilbakekreving" perioder={data.tilbakekreving} />
       )}
 
       <>
@@ -106,10 +107,12 @@ const TableWrapper = styled.div`
   margin-bottom: 1em;
 `
 
-const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiode[] }) => {
+const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder: SimulertBeregningsperiode[] }) => {
+  const sortertePerioder = [...perioder].sort((a, b) => compareDesc(new Date(a.fom), new Date(b.fom)))
+
   return (
     <TableWrapper>
-      <Heading size="xsmall">{props.tittel}</Heading>
+      <Heading size="xsmall">{tittel}</Heading>
       <Table zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -121,7 +124,7 @@ const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiod
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {props.data.map((periode, idx) => (
+          {sortertePerioder.map((periode, idx) => (
             <Table.Row key={idx}>
               <Table.DataCell>
                 {formaterDato(periode.fom)} - {formaterKanskjeStringDato(periode.tom)}
@@ -139,7 +142,7 @@ const UtbetalingTable = (props: { tittel: string; data: SimulertBeregningsperiod
               <Label>Sum</Label>
             </Table.DataCell>
             <Table.DataCell align="right">
-              {NOK(props.data.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}
+              {NOK(perioder.map((row) => row.beloep).reduce((sum, current) => sum + current, 0))}
             </Table.DataCell>
           </Table.Row>
         </Table.Body>

@@ -57,7 +57,7 @@ export const ReleaseAlerts = () => {
       <DropdownMenu>
         {mapApiResult(
           status,
-          <Spinner visible label="Henter siste utgivelser" />,
+          <Spinner label="Henter siste utgivelser" />,
           () => (
             <ApiErrorAlert>Kunne ikke hente siste utgivelser</ApiErrorAlert>
           ),

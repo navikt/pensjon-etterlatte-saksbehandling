@@ -46,9 +46,9 @@ function App() {
           <Versioncheck />
           <BrowserRouter basename="/">
             <ScrollToTop />
-            <HeaderBanner />
-            <ErrorBoundary>
-              <ConfigContext.Provider value={hentConfigStatus.data}>
+            <ConfigContext.Provider value={hentConfigStatus.data}>
+              <HeaderBanner />
+              <ErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
                   <Route path="/person" element={<Person />} />
@@ -61,8 +61,8 @@ function App() {
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </ConfigContext.Provider>
-            </ErrorBoundary>
+              </ErrorBoundary>
+            </ConfigContext.Provider>
           </BrowserRouter>
         </div>
       )}

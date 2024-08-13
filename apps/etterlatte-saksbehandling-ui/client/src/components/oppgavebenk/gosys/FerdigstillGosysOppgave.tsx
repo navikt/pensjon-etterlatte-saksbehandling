@@ -29,7 +29,7 @@ export const FerdigstillGosysOppgave = ({
     error: (error) => (
       <Alert variant="error">{error.detail || 'Ukjent feil oppsto ved ferdigstilling av oppgave'}</Alert>
     ),
-    pending: <Spinner visible label="Ferdigstiller oppgaven..." />,
+    pending: <Spinner label="Ferdigstiller oppgaven..." />,
     initial: (
       <>
         <Alert variant="info">Er du sikker på at du vil ferdigstille oppgaven?</Alert>

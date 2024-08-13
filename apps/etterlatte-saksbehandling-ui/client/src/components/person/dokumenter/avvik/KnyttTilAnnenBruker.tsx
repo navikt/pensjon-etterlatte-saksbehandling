@@ -108,7 +108,7 @@ export const KnyttTilAnnentBruker = ({
         </Button>
       </HStack>
     ),
-    pending: <Spinner visible label="Henter sak..." />,
+    pending: <Spinner label="Henter sak..." />,
     success: (annenSak) => (
       <>
         {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}

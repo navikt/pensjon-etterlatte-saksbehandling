@@ -101,7 +101,7 @@ export const OppgaveFraJournalpostModal = ({
 
         <Modal.Body>
           {mapResult(gosysResult, {
-            pending: <Spinner label="Sjekker om det finnes Gosys-oppgaver tilknyttet journalposten" visible />,
+            pending: <Spinner label="Sjekker om det finnes Gosys-oppgaver tilknyttet journalposten" />,
             error: (error) => (
               <ApiErrorAlert>{error.detail || 'Feil oppsto ved henting av oppgaver fra Gosys'}</ApiErrorAlert>
             ),
@@ -152,7 +152,7 @@ export const OppgaveFraJournalpostModal = ({
           })}
 
           {mapResult(hentOppgaverStatus, {
-            pending: <Spinner visible label="Sjekker om det allerede finnes en oppgave" />,
+            pending: <Spinner label="Sjekker om det allerede finnes en oppgave" />,
             success: () =>
               kanOppretteOppgave ? (
                 isSuccess(sakStatus) ? (

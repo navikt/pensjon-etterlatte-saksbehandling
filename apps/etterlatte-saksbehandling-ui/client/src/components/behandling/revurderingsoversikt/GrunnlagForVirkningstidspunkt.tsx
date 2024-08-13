@@ -1,13 +1,13 @@
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterKanskjeStringDato, formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentFoersteVirk } from '~shared/api/behandling'
-import { Box, Label, VStack } from '@navikt/ds-react'
+import { Alert, Box, Label, VStack } from '@navikt/ds-react'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -15,7 +15,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { SakType } from '~shared/types/sak'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
-import { addYears } from 'date-fns'
+import { addYears, isBefore } from 'date-fns'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -40,10 +40,19 @@ const FoersteVirkGrunnlag = () => {
 
   return mapApiResult(
     foersteVirk,
-    <Spinner visible={true} label="Henter første virkningstidspunkt" />,
+    <Spinner label="Henter første virkningstidspunkt" />,
     () => <ApiErrorAlert>Kunne ikke hente første virkningstidspunkt</ApiErrorAlert>,
     (foersteVirk) => (
-      <Info tekst={formaterDato(foersteVirk.foersteIverksatteVirkISak)} label="Første virkningstidspunkt i sak" />
+      <>
+        <Info tekst={formaterDato(foersteVirk.foersteIverksatteVirkISak)} label="Første virkningstidspunkt i sak" />
+
+        {behandling?.virkningstidspunkt &&
+          isBefore(new Date(behandling.virkningstidspunkt.dato), new Date(foersteVirk.foersteIverksatteVirkISak)) && (
+            <Alert variant="warning">
+              <strong>OBS:</strong> Nytt virkningstidspunkt er <i>før</i> første virkningstidspunkt i sak!
+            </Alert>
+          )}
+      </>
     )
   )
 }
@@ -76,7 +85,7 @@ const AdopsjonGrunnlag = () => {
 
   return mapApiResult(
     foreldreansvar,
-    <Spinner visible={true} label="Henter historikk for foreldreansvar" />,
+    <Spinner label="Henter historikk for foreldreansvar" />,
     () => <ApiErrorAlert>Kunne ikke hente foreldreansvar</ApiErrorAlert>,
     (foreldreansvar) => (
       <div>

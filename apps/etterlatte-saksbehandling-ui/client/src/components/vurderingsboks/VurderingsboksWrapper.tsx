@@ -78,11 +78,7 @@ export const VurderingsboksWrapper = (props: Props) => {
                     })
                   }}
                 >
-                  {lagrer ? (
-                    <Spinner visible label="" margin="0" variant="interaction" />
-                  ) : (
-                    <TrashIcon aria-hidden="true" />
-                  )}
+                  {lagrer ? <Spinner label="" margin="0" variant="interaction" /> : <TrashIcon aria-hidden="true" />}
                   <span className="text"> Slett</span>
                 </RedigerWrapper>
               )}

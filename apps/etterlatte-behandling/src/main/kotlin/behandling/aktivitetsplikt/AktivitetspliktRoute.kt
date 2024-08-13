@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -139,6 +140,20 @@ internal fun Route.aktivitetspliktRoutes(
                             request,
                             brukerTokenInfo,
                         )
+                    }
+                call.respond(opprettet)
+            }
+        }
+    }
+
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/varigUnntak") {
+        post {
+            kunSystembruker {
+                logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
+                val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
+                val opprettet =
+                    inTransaction {
+                        aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
                     }
                 call.respond(opprettet)
             }

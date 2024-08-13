@@ -81,7 +81,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
         </Modal.Header>
         <Modal.Body>
           {mapResult(muligeRevurderingAarsakerResult, {
-            pending: <Spinner visible label="Henter revurderingsårsaker..." />,
+            pending: <Spinner label="Henter revurderingsårsaker..." />,
             success: (muligeRevurderingAarsaker) =>
               !!muligeRevurderingAarsaker?.length ? (
                 <VStack gap="4">

@@ -7,12 +7,14 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_4MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
+import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK
+import no.nav.etterlatte.libs.common.behandling.JobbType
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_REVURDERING
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -35,6 +37,7 @@ class TidshendelseService(
         OMS_DOED_5AAR("Opphør OMS etter 5 år"),
         OMS_DOED_4MND("Infobrev om aktivitetsplikt OMS etter 4 mnd"),
         OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
+        OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK("Infobrev om aktivitetsplikt OMS etter 6 mnd - varig unntak"),
     }
 
     fun haandterHendelse(hendelse: TidshendelsePacket): TidshendelseResult {
@@ -62,6 +65,7 @@ class TidshendelseService(
             return when (hendelse.jobbtype) {
                 OMS_DOED_4MND -> opprettOppgave(hendelse).let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
                 OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+                OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
         }
@@ -143,6 +147,27 @@ class TidshendelseService(
         }
     }
 
+    private fun opprettOppgaveForAktivitetspliktVarigUnntak(hendelse: TidshendelsePacket): TidshendelseResult {
+        val response =
+            behandlingService.opprettOppgaveAktivitetspliktVarigUnntak(
+                sakId = hendelse.sakId,
+                referanse = hendelse.behandlingId?.toString(),
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+                jobbType = JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK,
+            )
+
+        return when {
+            response.opprettetOppgave -> {
+                logger.info("Opprettet oppgave for aktivitetsplikt [sak=${hendelse.sakId}, oppgave=${response.oppgaveId}]")
+                TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
+            }
+            else -> {
+                logger.info("Det ble ikke opprettet oppgave for aktivitetsplikt varig unntak [sak=${hendelse.sakId}]")
+                TidshendelseResult.Skipped
+            }
+        }
+    }
+
     private fun skalLageOmregning(hendelse: TidshendelsePacket) =
         when (hendelse.jobbtype) {
             AO_BP20 -> true
@@ -152,6 +177,7 @@ class TidshendelseService(
             OMS_DOED_5AAR -> true
             OMS_DOED_4MND -> false
             OMS_DOED_6MND -> false
+            OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
         }
 
     private fun oppgaveTypeFor(type: TidshendelserJobbType): OppgaveType =
@@ -163,6 +189,7 @@ class TidshendelseService(
             OMS_DOED_5AAR -> REVURDERING
             OMS_DOED_4MND -> AKTIVITETSPLIKT
             OMS_DOED_6MND -> AKTIVITETSPLIKT_REVURDERING
+            OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
         }
 }
 

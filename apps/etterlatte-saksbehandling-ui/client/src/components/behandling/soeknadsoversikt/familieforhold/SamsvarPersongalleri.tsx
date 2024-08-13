@@ -201,7 +201,7 @@ export function SamsvarPersongalleri(props: { landListeResult: Result<ILand[]> }
 
   return mapApiResult(
     samsvarPersongalleri,
-    <Spinner label="Henter samsvar persongalleri" visible />,
+    <Spinner label="Henter samsvar persongalleri" />,
     (error) => <ApiErrorAlert>Kunne ikke hente samsvar persongalleri: {error.detail}</ApiErrorAlert>,
     (samsvarPersongalleri) => (
       <VisSamsvarPersongalleri

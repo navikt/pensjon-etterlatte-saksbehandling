@@ -34,7 +34,7 @@ export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number
         {sakType === SakType.BARNEPENSJON && <InstitusjonsoppholdBeregningsgrunnlagReadMoreBP />}
         {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         {mapResult(institusjonsHendelserResult, {
-          pending: <Spinner visible label="Henter hendelser for institusjonsopphold..." />,
+          pending: <Spinner label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,
           success: (hendelser) => (
             <Table size="small">

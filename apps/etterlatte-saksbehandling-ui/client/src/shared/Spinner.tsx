@@ -1,4 +1,4 @@
-import { BodyLong, Loader, LoaderProps } from '@navikt/ds-react'
+import { BodyLong, HStack, Loader, LoaderProps } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 interface Props extends Omit<LoaderProps, 'title'> {
@@ -12,17 +12,16 @@ const Spinner = ({ visible, label, margin = '3em', ...rest }: Props) => {
 
   return (
     <SpinnerWrap $margin={margin}>
-      <Loader {...rest} title={label} />
-      {label && <BodyLong spacing>{label}</BodyLong>}
+      <HStack gap="4" align="center" justify="center">
+        <Loader {...rest} title={label} />
+        {label && <BodyLong>{label}</BodyLong>}
+      </HStack>
     </SpinnerWrap>
   )
 }
 
 const SpinnerWrap = styled.div<{ $margin: string }>`
-  display: flex;
-  justify-content: center;
   margin: ${(props) => props.$margin};
-  text-align: center;
 `
 
 export default Spinner

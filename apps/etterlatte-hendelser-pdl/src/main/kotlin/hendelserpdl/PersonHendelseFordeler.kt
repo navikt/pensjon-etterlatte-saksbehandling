@@ -278,6 +278,7 @@ class PersonHendelseFordeler(
                         hendelseId = hendelse.hendelseId,
                         endringstype = hendelse.endringstype(),
                         fnr = personnummer.folkeregisterident.value,
+                        gammeltFnr = hendelse.personidenter.firstOrNull(),
                     ),
             )
     }

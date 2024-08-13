@@ -267,7 +267,7 @@ class PersonHendelseFordeler(
         personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) = when (hendelse.endringstype()) {
         Endringstype.OPPRETTET -> {}
-        Endringstype.OPPHOERT -> {}
+        Endringstype.OPPHOERT,
         Endringstype.KORRIGERT,
         Endringstype.ANNULLERT,
         ->

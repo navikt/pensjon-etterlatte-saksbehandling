@@ -55,7 +55,7 @@ class AktivitetspliktUnntakDaoTest(
 
         dao.opprettUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
 
-        dao.hentUnntakForOppgave(oppgave.id)!!.asClue {
+        dao.hentUnntakForOppgave(oppgave.id).single().asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id
@@ -70,6 +70,7 @@ class AktivitetspliktUnntakDaoTest(
 
     @Test
     fun `Skal hente seneste unntak`() {
+        // TODO denne testen kan kasseres / skrives om til at man skal hente flere
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(1000, ChronoUnit.SECONDS))
@@ -84,7 +85,7 @@ class AktivitetspliktUnntakDaoTest(
         dao.opprettUnntak(unntak, sak.id, kilde1, null, null)
         dao.opprettUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde2, null, null)
 
-        dao.hentNyesteUnntak(sak.id)!!.asClue {
+        dao.hentNyesteUnntak(sak.id).single().asClue {
             it.sakId shouldBe sak.id
             it.unntak shouldBe GRADERT_UFOERETRYGD
             it.fom shouldBe unntak.fom
@@ -115,7 +116,7 @@ class AktivitetspliktUnntakDaoTest(
 
         dao.opprettUnntak(unntak, sak.id, kilde, null, opprettBehandling.id)
 
-        dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+        dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe opprettBehandling.id
             it.oppgaveId shouldBe null
@@ -150,11 +151,11 @@ class AktivitetspliktUnntakDaoTest(
 
             dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
-            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
 
             val lagreUnntakMedId =
                 LagreAktivitetspliktUnntak(
-                    id = unntak!!.id,
+                    id = unntak.id,
                     unntak = AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM,
                     beskrivelse = "Beskrivelse er oppdatert",
                     fom = LocalDate.now(),
@@ -163,7 +164,7 @@ class AktivitetspliktUnntakDaoTest(
 
             dao.oppdaterUnntak(lagreUnntakMedId, kilde, opprettBehandling.id)
 
-            dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+            dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe opprettBehandling.id
                 it.unntak shouldBe lagreUnntakMedId.unntak
@@ -196,10 +197,10 @@ class AktivitetspliktUnntakDaoTest(
 
             dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
-            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
-            dao.slettUnntak(unntak!!.id, opprettBehandling.id)
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
+            dao.slettUnntak(unntak.id, opprettBehandling.id)
 
-            dao.hentUnntakForBehandling(opprettBehandling.id) shouldBe null
+            dao.hentUnntakForBehandling(opprettBehandling.id) shouldBe emptyList()
         }
 
         @Test
@@ -208,10 +209,10 @@ class AktivitetspliktUnntakDaoTest(
 
             dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
-            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id)
-            dao.slettUnntak(unntak!!.id, UUID.randomUUID())
+            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
+            dao.slettUnntak(unntak.id, UUID.randomUUID())
 
-            dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+            dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe unntak.id
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe opprettBehandling.id
@@ -255,12 +256,12 @@ class AktivitetspliktUnntakDaoTest(
 
             dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, forrigeBehandling.id)
 
-            val unntak = dao.hentUnntakForBehandling(forrigeBehandling.id)
-            dao.hentUnntakForBehandling(nyBehandling.id) shouldBe null
+            val unntak = dao.hentUnntakForBehandling(forrigeBehandling.id).single()
+            dao.hentUnntakForBehandling(nyBehandling.id) shouldBe emptyList()
 
-            dao.kopierUnntak(unntak!!.id, nyBehandling.id) shouldBe 1
+            dao.kopierUnntak(unntak.id, nyBehandling.id) shouldBe 1
 
-            dao.hentUnntakForBehandling(nyBehandling.id)!!.asClue {
+            dao.hentUnntakForBehandling(nyBehandling.id).single().asClue {
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe nyBehandling.id
                 it.unntak shouldBe unntak.unntak

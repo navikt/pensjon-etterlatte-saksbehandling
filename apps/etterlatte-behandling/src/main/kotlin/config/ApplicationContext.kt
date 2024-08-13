@@ -426,6 +426,7 @@ internal class ApplicationContext(
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
+            featureToggleService = featureToggleService,
         )
 
     val gyldighetsproevingService =

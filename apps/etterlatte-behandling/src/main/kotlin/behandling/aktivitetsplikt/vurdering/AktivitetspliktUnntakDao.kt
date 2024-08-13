@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -92,7 +93,7 @@ class AktivitetspliktUnntakDao(
         }
     }
 
-    fun hentUnntakForOppgave(oppgaveId: UUID): AktivitetspliktUnntak? =
+    fun hentUnntakForOppgave(oppgaveId: UUID): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -105,29 +106,40 @@ class AktivitetspliktUnntakDao(
                     )
                 stmt.setObject(1, oppgaveId)
 
-                stmt.executeQuery().singleOrNull { toUnntak() }
+                stmt.executeQuery().toList { toUnntak() }
             }
         }
 
-    fun hentNyesteUnntak(sakId: Long): AktivitetspliktUnntak? =
+    fun hentNyesteUnntak(sakId: Long): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse
-                        FROM aktivitetsplikt_unntak
+                        SELECT behandling_id, oppgave_id FROM aktivitetsplikt_unntak
                         WHERE sak_id = ?
-                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        ORDER BY endret::jsonb ->> 'tidspunkt' DESC
                         LIMIT 1
-                        """.trimMargin(),
+                        """.trimIndent(),
                     )
                 stmt.setLong(1, sakId)
-                stmt.executeQuery().singleOrNull { toUnntak() }
+                val (behandlingId, oppgaveId) =
+                    stmt.executeQuery().singleOrNull {
+                        getString("behandling_id") to getString("oppgave_id")
+                    } ?: return@hentConnection emptyList()
+
+                if (behandlingId != null) {
+                    hentUnntakForBehandling(UUID.fromString(behandlingId))
+                } else {
+                    requireNotNull(oppgaveId) {
+                        "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
+                    }
+                    hentUnntakForOppgave(UUID.fromString(oppgaveId))
+                }
             }
         }
 
-    fun hentUnntakForBehandling(behandlingId: UUID): AktivitetspliktUnntak? =
+    fun hentUnntakForBehandling(behandlingId: UUID): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -140,7 +152,7 @@ class AktivitetspliktUnntakDao(
                     )
                 stmt.setObject(1, behandlingId)
 
-                stmt.executeQuery().singleOrNull { toUnntak() }
+                stmt.executeQuery().toList { toUnntak() }
             }
         }
 

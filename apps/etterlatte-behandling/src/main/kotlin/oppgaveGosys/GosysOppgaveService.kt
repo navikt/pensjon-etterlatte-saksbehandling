@@ -291,7 +291,7 @@ class GosysOppgaveServiceImpl(
                 this.tilordnetRessurs?.let {
                     OppgaveSaksbehandler(
                         it,
-                        saksbehandlerCache.get("124")[it] ?: it,
+                        saksbehandlerCache.get("ANY_KEY")[it] ?: it,
                     )
                 },
             beskrivelse = this.beskrivelse,

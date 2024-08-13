@@ -7,11 +7,20 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDaoTest.Companion.kilde
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType.GRADERT_UFOERETRYGD
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
@@ -69,11 +78,11 @@ class AktivitetspliktUnntakDaoTest(
     }
 
     @Test
-    fun `Skal hente seneste unntak`() {
-        // TODO denne testen kan kasseres / skrives om til at man skal hente flere
+    fun `Skal hente alle seneste unntak for sak, selv om det ligger flere unntak i behandling`() {
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(1000, ChronoUnit.SECONDS))
+        val kilde3 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(2, ChronoUnit.DAYS))
         val unntak =
             LagreAktivitetspliktUnntak(
                 unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
@@ -82,17 +91,62 @@ class AktivitetspliktUnntakDaoTest(
                 tom = LocalDate.now().plusMonths(6),
             )
 
-        dao.opprettUnntak(unntak, sak.id, kilde1, null, null)
-        dao.opprettUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde2, null, null)
+        val behandling =
+            OpprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = null,
+                virkningstidspunkt = null,
+                utlandstilknytning = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsAarsak = null,
+                fritekstAarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                begrunnelse = null,
+                relatertBehandlingId = null,
+                sendeBrev = true,
+                opphoerFraOgMed = null,
+            )
+        behandlingDao.opprettBehandling(behandling)
 
-        dao.hentNyesteUnntak(sak.id).single().asClue {
+        val oppgave =
+            OppgaveIntern(
+                id = UUID.randomUUID(),
+                status = Status.NY,
+                enhet = sak.enhet,
+                sakId = sak.id,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.AKTIVITETSPLIKT,
+                saksbehandler = null,
+                forrigeSaksbehandlerIdent = null,
+                referanse = "",
+                merknad = null,
+                opprettet = Tidspunkt.now(),
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fnr = sak.ident,
+                frist = null,
+            )
+        oppgaveDao.opprettOppgave(oppgave)
+
+        dao.opprettUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde1, null, behandling.id)
+        dao.opprettUnntak(unntak, sak.id, kilde2, null, behandling.id)
+        dao.opprettUnntak(unntak.copy(unntak = MIDLERTIDIG_SYKDOM), sak.id, kilde3, oppgave.id, null)
+
+        val nyesteUnntak = dao.hentNyesteUnntak(sak.id)
+
+        nyesteUnntak.size shouldBe 1
+        nyesteUnntak[0].asClue {
             it.sakId shouldBe sak.id
-            it.unntak shouldBe GRADERT_UFOERETRYGD
+            it.unntak shouldBe MIDLERTIDIG_SYKDOM
             it.fom shouldBe unntak.fom
             it.tom shouldBe unntak.tom
-            it.opprettet shouldBe kilde2
-            it.endret shouldBe kilde2
+            it.opprettet shouldBe kilde3
+            it.endret shouldBe kilde3
             it.beskrivelse shouldBe unntak.beskrivelse
+            it.oppgaveId shouldBe oppgave.id
+            it.behandlingId shouldBe null
         }
     }
 

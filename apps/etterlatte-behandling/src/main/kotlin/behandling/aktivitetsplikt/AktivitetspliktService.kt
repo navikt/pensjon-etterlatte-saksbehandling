@@ -472,7 +472,7 @@ fun hentVurderingForSakHelper(
 
     val idAktivitet = setOf(aktivitet.map { it.behandlingId to it.oppgaveId })
     val idUnntak = setOf(unntak.map { it.behandlingId to it.oppgaveId })
-    if (idAktivitet != idUnntak) {
+    if (aktivitet.isNotEmpty() && unntak.isNotEmpty() && idAktivitet != idUnntak) {
         TODO(
             "Håndter dette tilfellet. Her må vi finne den nyeste av kildene mellom aktivitet og unntak, " +
                 "og hente unntak / aktivitet for den id'en.",

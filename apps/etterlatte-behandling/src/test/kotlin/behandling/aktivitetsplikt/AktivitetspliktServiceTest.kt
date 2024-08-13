@@ -521,6 +521,8 @@ class AktivitetspliktServiceTest {
                         every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
                         every { sakId } returns aktivitet.sakId
                         every { fom } returns LocalDate.of(2024, Month.APRIL, 20)
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
                     },
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
@@ -538,6 +540,8 @@ class AktivitetspliktServiceTest {
                         every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
                         every { fom } returns aktivitet.fom.minusMonths(1)
                         every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
                     },
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
@@ -551,6 +555,7 @@ class AktivitetspliktServiceTest {
         fun `Skal returnere true hvis aktivitetsplikt ikke er oppfylt, hvis det finnes unntak for perioden`() {
             val foerst = Grunnlagsopplysning.Saksbehandler.create("Z123455")
             val sist = Grunnlagsopplysning.Saksbehandler.create("Z123455")
+            val behId = UUID.randomUUID()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
                 listOf(
                     mockk {
@@ -558,6 +563,8 @@ class AktivitetspliktServiceTest {
                         every { tom } returns null
                         every { opprettet } returns foerst
                         every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns behId
+                        every { oppgaveId } returns null
                     },
                 )
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
@@ -567,6 +574,8 @@ class AktivitetspliktServiceTest {
                         every { fom } returns aktivitet.fom.minusMonths(1)
                         every { opprettet } returns sist
                         every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns behId
+                        every { oppgaveId } returns null
                     },
                 )
 
@@ -585,6 +594,8 @@ class AktivitetspliktServiceTest {
                         every { tom } returns LocalDate.now().minusYears(1)
                         every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
                         every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
                     },
                 )
 
@@ -708,6 +719,8 @@ class AktivitetspliktServiceTest {
                         every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
                         every { sakId } returns aktivitet.sakId
                         every { fom } returns LocalDate.of(2024, Month.APRIL, 1)
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
                     },
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()

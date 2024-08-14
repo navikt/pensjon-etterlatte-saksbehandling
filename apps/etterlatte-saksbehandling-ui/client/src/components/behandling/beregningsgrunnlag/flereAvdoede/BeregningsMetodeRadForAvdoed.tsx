@@ -52,11 +52,11 @@ export const BeregningsMetodeRadForAvdoed = ({
             paaAvbryt={() => {
               setRedigerModus(false)
             }}
-            oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
+            oppdaterBeregningsMetodeForAvdoed={oppdaterBeregningsMetodeForAvdoed}
             lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
           />
         ) : (
-          'Hadet'
+          ''
         )
       }
     >
@@ -75,16 +75,16 @@ export const BeregningsMetodeRadForAvdoed = ({
       {redigerbar &&
         (beregningsMetodeForAvdoed ? (
           <>
-            <Table.DataCell>{redigerKnapp(() => setRedigerModus(true))}</Table.DataCell>
-            <Table.DataCell>{slettKnapp(slettBeregningsMetodeForAvdoed, lagreBeregningsgrunnlagResult)}</Table.DataCell>
+            <Table.DataCell>{redigerKnapp()}</Table.DataCell>
+            <Table.DataCell>{slettKnapp()}</Table.DataCell>
           </>
         ) : (
-          <Table.DataCell>{leggTilKnapp(() => setRedigerModus(true))}</Table.DataCell>
+          <Table.DataCell>{leggTilKnapp()}</Table.DataCell>
         ))}
     </Table.ExpandableRow>
   )
 
-  function redigerKnapp(redigerFn) {
+  function redigerKnapp() {
     return (
       <Button
         type="button"
@@ -92,14 +92,14 @@ export const BeregningsMetodeRadForAvdoed = ({
         size="small"
         icon={<PencilIcon aria-hidden />}
         disabled={redigerModus}
-        onClick={redigerFn}
+        onClick={() => setRedigerModus(true)}
       >
         Rediger
       </Button>
     )
   }
 
-  function leggTilKnapp(redigerFn) {
+  function leggTilKnapp() {
     return (
       <Button
         type="button"
@@ -107,45 +107,36 @@ export const BeregningsMetodeRadForAvdoed = ({
         size="small"
         icon={<PencilIcon aria-hidden />}
         disabled={redigerModus}
-        onClick={redigerFn}
+        onClick={() => setRedigerModus(true)}
       >
         Legg til
       </Button>
     )
   }
 
-  function slettKnapp(slettFn, slettResult) {
+  function slettKnapp() {
     return (
       <Button
         size="small"
         variant="secondary"
         icon={<TrashIcon aria-hidden />}
-        loading={isPending(slettResult)}
-        onClick={slettFn}
+        loading={isPending(lagreBeregningsgrunnlagResult)}
+        onClick={slettBeregningsMetodeForAvdoed}
       >
         Slett
       </Button>
     )
   }
 
-  function oppdaterBeregninggsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
-    const grunnlag = patchGrunnlagOppdaterMetode(nyMetode)
-
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandlingId,
-        grunnlag,
-      },
-      () => {
-        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
-        setRedigerModus(false)
-      }
-    )
+  function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
+    lagre(patchGrunnlagOppdaterMetode(nyMetode))
   }
 
   function slettBeregningsMetodeForAvdoed() {
-    const grunnlag = patchGrunnlagSlettMetode(ident)
+    lagre(patchGrunnlagSlettMetode(ident))
+  }
 
+  function lagre(grunnlag: BeregningsGrunnlagPostDto) {
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandlingId,

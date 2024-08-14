@@ -50,7 +50,6 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
   }
 
   const patchGrunnlagSlettMetode = (avdoed: string) => {
-    console.log(`Sletter metode for ident ${avdoed}`)
     return {
       ...behandling?.beregningsGrunnlag,
       soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],

@@ -1,11 +1,13 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -14,6 +16,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -34,8 +38,10 @@ internal class InntektsjusteringRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val inntektsjustering = packet.inntektsjustering()
+
         try {
-            logger.info("Mottatt inntektsjustering (id=)")
+            logger.info("Mottatt inntektsjustering (id=${inntektsjustering.id})")
 
             val fnr = packet[InntektsjusteringInnsendt.fnrBruker].textValue()
             val sak =
@@ -43,10 +49,11 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            val inntektsjustering = packet[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue()
+            val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
 
             journalfoerInntektsjusteringService.opprettJournalpost(
                 sak,
+                inntektsaar,
                 inntektsjustering,
             )
 
@@ -67,4 +74,17 @@ internal class InntektsjusteringRiver(
             throw e
         }
     }
+
+    private fun JsonMessage.inntektsjustering(): Inntektsjustering =
+        objectMapper.readValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue())
 }
+
+// TODO i felles repo
+data class Inntektsjustering(
+    val id: UUID,
+    val arbeidsinntekt: Int,
+    val naeringsinntekt: Int,
+    val arbeidsinntektUtland: Int,
+    val naeringsinntektUtland: Int,
+    val tidspunkt: LocalDateTime,
+)

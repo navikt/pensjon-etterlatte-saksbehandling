@@ -89,7 +89,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
         <Modal.Body>
           {mapApiResult(
             pdfStatus,
-            <Spinner visible label="Laster inn PDF" />,
+            <Spinner label="Laster inn PDF" />,
             (error) => (
               <ApiErrorAlert>{error.detail || 'Feil oppsto ved visning av dokument'}</ApiErrorAlert>
             ),

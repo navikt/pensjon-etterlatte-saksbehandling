@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.hvisEnabled
 import no.nav.etterlatte.libs.ktor.route.klageId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
@@ -35,7 +34,6 @@ import java.time.OffsetDateTime
 enum class KlageFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
-    KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
     KanOppretteVedtakAvvisningToggle("pensjon-etterlatte.kan-opprette-vedtak-avvist-klage"),
     StoetterUtfallDelvisOmgjoering("pensjon-etterlatte.klage-delvis-omgjoering"),
     ;
@@ -123,14 +121,12 @@ internal fun Route.klageRoutes(
             }
 
             post("ferdigstill") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanFerdigstilleKlageToggle) {
-                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                        val ferdigstiltKlage =
-                            inTransaction {
-                                klageService.ferdigstillKlage(klageId, saksbehandler)
-                            }
-                        call.respond(ferdigstiltKlage)
-                    }
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    val ferdigstiltKlage =
+                        inTransaction {
+                            klageService.ferdigstillKlage(klageId, saksbehandler)
+                        }
+                    call.respond(ferdigstiltKlage)
                 }
             }
 

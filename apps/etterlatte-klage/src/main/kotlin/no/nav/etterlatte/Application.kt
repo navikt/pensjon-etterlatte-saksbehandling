@@ -6,7 +6,7 @@ import no.nav.etterlatte.klage.ApplicationContext
 import no.nav.etterlatte.klage.kabalOvesendelseRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import org.slf4j.LoggerFactory
 
 fun main() {
@@ -34,6 +34,6 @@ class Server(
 
     fun run() {
         startLytting(konsument = context.kabalKafkakonsument, logger = LoggerFactory.getLogger(Application::class.java))
-        setReady().also { engine.start(wait = true) }
+        engine.run()
     }
 }

@@ -12,10 +12,10 @@ spec:
     - "https://etterlatte-utbetaling.intern.dev.nav.no"
   liveness:
     initialDelay: 5
-    path: /health/isalive
+    path: /isalive
   readiness:
     initialDelay: 5
-    path: /health/isready
+    path: /isready
   prometheus:
     enabled: true
     path: /metrics

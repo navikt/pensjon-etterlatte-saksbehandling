@@ -49,6 +49,18 @@ class SaksbehandlerInfoDao(
             }
         }
 
+    fun hentAlleSaksbehandlere(): List<SaksbehandlerInfo> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement("select id, navn from saksbehandler_info").executeQuery().toList {
+                    SaksbehandlerInfo(
+                        getString("id"),
+                        getString("navn"),
+                    )
+                }
+            }
+        }
+
     fun hentSaksbehandlerEnheter(ident: String): List<SaksbehandlerEnhet>? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {

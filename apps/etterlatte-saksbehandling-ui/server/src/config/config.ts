@@ -138,4 +138,5 @@ export const ClientConfig = {
   rinaUrl: requireEnvValue('RINA_URL'),
   modiapersonoversiktUrl: requireEnvValue('MODIAPERSONOVERSIKT_URL'),
   psakUrl: requireEnvValue('PSAK_URL'),
+  bisysUrl: requireEnvValue('BISYS_URL'),
 }

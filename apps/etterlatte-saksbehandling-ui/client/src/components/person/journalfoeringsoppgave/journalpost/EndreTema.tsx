@@ -32,7 +32,7 @@ export const EndreTema = ({
 
   return mapApiResult(
     temaStatus,
-    <Spinner label="Henter tilgjengelige temakoder ..." visible />,
+    <Spinner label="Henter tilgjengelige temakoder ..." />,
     () => <ApiErrorAlert>Feil ved henting av temakoder</ApiErrorAlert>,
     (koder) => (
       <FormWrapper $column={true}>

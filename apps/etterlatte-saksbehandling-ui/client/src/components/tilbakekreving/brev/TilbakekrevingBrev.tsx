@@ -40,10 +40,10 @@ export function TilbakekrevingBrev({
   }, [behandling])
 
   if (isPending(hentBrevStatus)) {
-    return <Spinner visible label="Henter brev ..." />
+    return <Spinner label="Henter brev ..." />
   }
   if (isPending(opprettBrevStatus)) {
-    return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
+    return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
   }
 
   if (isFailure(hentBrevStatus)) {

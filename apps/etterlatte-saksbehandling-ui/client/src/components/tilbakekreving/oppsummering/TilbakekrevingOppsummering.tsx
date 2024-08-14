@@ -120,7 +120,7 @@ export function TilbakekrevingOppsummering({
         </div>
 
         {mapResult(validerTilbakekrevingStatus, {
-          pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" visible={true} />,
+          pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" />,
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
       </Box>

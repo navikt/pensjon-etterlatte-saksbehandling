@@ -219,7 +219,7 @@ export const ViderefoereOpphoerVurdering = ({
         </MonthPicker>
         {mapResult(vilkaartyperResult, {
           initial: <ApiWarningAlert>Du må sette virkningstidspunkt først</ApiWarningAlert>,
-          pending: <Spinner label="Laster vilkårstyper" visible />,
+          pending: <Spinner label="Laster vilkårstyper" />,
           error: () => <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>,
           success: (typer) => (
             <UNSAFE_Combobox

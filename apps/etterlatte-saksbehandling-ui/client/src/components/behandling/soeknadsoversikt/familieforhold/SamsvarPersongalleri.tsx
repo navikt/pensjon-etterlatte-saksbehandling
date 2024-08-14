@@ -13,7 +13,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { ILand } from '~shared/api/trygdetid'
 import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
@@ -87,8 +86,6 @@ function VisSamsvarPersongalleri(props: {
   landListeResult: Result<ILand[]>
 }) {
   const { samsvar, saktype } = props
-  const visMismatchPdl = useFeatureEnabledMedDefault('familieforhold-vis-mismatch-pdl', false)
-
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
 
@@ -101,7 +98,7 @@ function VisSamsvarPersongalleri(props: {
 
   return (
     <>
-      {harAvvikMotPdl && visMismatchPdl && (
+      {harAvvikMotPdl && (
         <BredAlert variant="warning">
           {saktype === SakType.BARNEPENSJON ? (
             <BodyShort spacing>
@@ -201,7 +198,7 @@ export function SamsvarPersongalleri(props: { landListeResult: Result<ILand[]> }
 
   return mapApiResult(
     samsvarPersongalleri,
-    <Spinner label="Henter samsvar persongalleri" visible />,
+    <Spinner label="Henter samsvar persongalleri" />,
     (error) => <ApiErrorAlert>Kunne ikke hente samsvar persongalleri: {error.detail}</ApiErrorAlert>,
     (samsvarPersongalleri) => (
       <VisSamsvarPersongalleri

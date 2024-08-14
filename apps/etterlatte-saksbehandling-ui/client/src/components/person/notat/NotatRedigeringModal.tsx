@@ -90,7 +90,7 @@ export const NotatRedigeringModal = ({ notat }: RedigerbartNotatProps) => {
                   <Heading size="xsmall">Rediger notat</Heading>
 
                   {mapResult(hentPayloadStatus, {
-                    pending: <Spinner label="Henter notat ..." visible />,
+                    pending: <Spinner label="Henter notat ..." />,
                     success: () => (
                       <SlateEditor value={content} onChange={(value) => setContent(value)} readonly={false} />
                     ),

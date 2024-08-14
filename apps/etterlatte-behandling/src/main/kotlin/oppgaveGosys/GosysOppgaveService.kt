@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -77,14 +78,26 @@ class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
+    private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
     private val cache =
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
+
+    private val saksbehandlerCache =
+        Caffeine
+            .newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build<String, Map<String, String>> { _ ->
+                inTransaction {
+                    saksbehandlerInfoDao.hentAlleSaksbehandlere().associate {
+                        it.ident to it.navn
+                    }
+                }
+            }
 
     private fun hentEnheterForSaksbehandler(
         enhetsnr: String?,
@@ -267,26 +280,30 @@ class GosysOppgaveServiceImpl(
         return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).id
     }
 
-    companion object {
-        private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
-            GosysOppgave(
-                id = this.id,
-                versjon = this.versjon,
-                status = this.status,
-                tema = this.tema,
-                oppgavetype = this.oppgavetype,
-                opprettet = this.opprettetTidspunkt,
-                frist =
-                    this.fristFerdigstillelse?.let { frist ->
-                        Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
-                    },
-                enhet = this.tildeltEnhetsnr,
-                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it, it) },
-                beskrivelse = this.beskrivelse,
-                journalpostId = this.journalpostId,
-                bruker = this.bruker,
-            )
-    }
+    private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
+        GosysOppgave(
+            id = this.id,
+            versjon = this.versjon,
+            status = this.status,
+            tema = this.tema,
+            oppgavetype = this.oppgavetype,
+            opprettet = this.opprettetTidspunkt,
+            frist =
+                this.fristFerdigstillelse?.let { frist ->
+                    Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
+                },
+            enhet = this.tildeltEnhetsnr,
+            saksbehandler =
+                this.tilordnetRessurs?.let {
+                    OppgaveSaksbehandler(
+                        it,
+                        saksbehandlerCache.get("ANY_KEY")[it] ?: it,
+                    )
+                },
+            beskrivelse = this.beskrivelse,
+            journalpostId = this.journalpostId,
+            bruker = this.bruker,
+        )
 }
 
 class StoetterKunFlyttingAvJournalfoeringsoppgave :

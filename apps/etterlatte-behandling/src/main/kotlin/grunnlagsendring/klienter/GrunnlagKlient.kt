@@ -179,7 +179,7 @@ class GrunnlagKlientImpl(
 
     override suspend fun ping(konsument: String?): PingResult =
         client.ping(
-            pingUrl = url.plus("/health/isready"),
+            pingUrl = url.plus("/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,

@@ -41,7 +41,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   return (
     <>
       {mapResult(sakResult, {
-        pending: <Spinner visible label="Henter sak og behandlinger" />,
+        pending: <Spinner label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
           <HStack gap="4" wrap={false}>
@@ -62,7 +62,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
                 </ToggleGroup>
                 {mapResult(oppgaverResult, {
-                  pending: <Spinner visible label="Henter oppgaver for sak..." />,
+                  pending: <Spinner label="Henter oppgaver for sak..." />,
                   error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                   success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
                 })}

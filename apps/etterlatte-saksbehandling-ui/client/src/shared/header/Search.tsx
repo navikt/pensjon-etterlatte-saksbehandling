@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
+import { BodyShort, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
@@ -9,6 +9,7 @@ import { fnrErGyldig } from '~utils/fnr'
 import { hentSak } from '~shared/api/behandling'
 
 import { isPending, mapFailure } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -58,10 +59,7 @@ export const Search = () => {
 
       {isPending(funnetSak) && (
         <Dropdown>
-          <SpinnerContent>
-            <Loader />
-            <span>Søker...</span>
-          </SpinnerContent>
+          <Spinner label="Søker..." />
         </Dropdown>
       )}
 
@@ -128,10 +126,4 @@ const SearchResult = styled.div`
   .sak {
     color: gray;
   }
-`
-
-const SpinnerContent = styled.div`
-  display: flex;
-  gap: 0.5em;
-  margin: 1em;
 `

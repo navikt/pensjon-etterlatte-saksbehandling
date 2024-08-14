@@ -26,7 +26,7 @@ export default function ForhaandsvisningNotat({ id }: { id: number }) {
   }, [id])
 
   return mapResult(pdfStatus, {
-    pending: <Spinner label="Klargjør forhåndsvisning av PDF ..." visible />,
+    pending: <Spinner label="Klargjør forhåndsvisning av PDF ..." />,
     error: (error) => <ApiErrorAlert>{error.detail || 'Ukjent feil oppsto'}</ApiErrorAlert>,
     success: () => !!fileURL && <PdfViewer src={fileURL} />,
   })

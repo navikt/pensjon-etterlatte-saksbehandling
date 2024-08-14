@@ -73,6 +73,15 @@ const ErOver18Aar = ({ control }: { control: Control<FilledFormData, any> }) => 
   />
 )
 
+const SoeknadMottattDato = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledDatoVelger
+    name="mottattDato"
+    label="Når ble søknaden mottatt?"
+    control={control}
+    errorVedTomInput="Du må velge når søknaden ble mottatt"
+  />
+)
+
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
@@ -228,6 +237,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
               )}
               {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD && (
                 <>
+                  <SoeknadMottattDato control={control} />
                   <ErOver18Aar control={control} />
                   <NasjonalEllerUtlandRadio control={control} />
                   <BorINorgeEllerIkkeAvtaleland control={control} />
@@ -241,12 +251,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
               )}
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
                 <>
-                  <ControlledDatoVelger
-                    name="mottattDato"
-                    label="Når ble søknaden mottatt?"
-                    control={control}
-                    errorVedTomInput="Du må velge når søknaden ble mottatt"
-                  />
+                  <SoeknadMottattDato control={control} />
                   <BorINorgeEllerIkkeAvtaleland control={control} />
                 </>
               )}
@@ -310,6 +315,7 @@ export type BrevParametre =
     }
   | {
       type: FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD
+      mottattDato: Date
       bosattUtland: boolean
       erOver18aar: boolean
       borINorgeEllerIkkeAvtaleland: boolean
@@ -395,6 +401,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
     case FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD:
       return {
         type: formdata.type,
+        mottattDato: formdata.mottattDato!!,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,

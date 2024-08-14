@@ -196,9 +196,8 @@ const KravpakkeUtlandBehandling = (props: {
                     apiResult: avdoedeStatus,
                     errorMessage: 'Klarte ikke å hente informasjon om avdøed',
                   })}
-                  {isPendingOrInitial(avdoedeStatus) && (
-                    <Spinner visible={true} label="Henter opplysninger om avdøde" />
-                  )}
+
+                  <Spinner visible={isPendingOrInitial(avdoedeStatus)} label="Henter opplysninger om avdøde" />
                 </div>
               ) : (
                 <Alert variant="warning">
@@ -208,7 +207,7 @@ const KravpakkeUtlandBehandling = (props: {
               )}
               {mapApiResult(
                 hentAlleLandRequest,
-                <Spinner visible={true} label="Laster landliste" />,
+                <Spinner label="Laster landliste" />,
                 () => (
                   <ApiErrorAlert>Vi klarte ikke å hente landlisten</ApiErrorAlert>
                 ),
@@ -467,7 +466,9 @@ const KravpakkeUtlandBehandling = (props: {
                 Behandlingen er oppdatert
               </Alert>
             )}
-            {isPendingOrInitial(gjeldendeSakStatus) && <Spinner visible={true} label="Henter opplysninger om sak" />}
+
+            <Spinner visible={isPendingOrInitial(gjeldendeSakStatus)} label="Henter opplysninger om sak" />
+
             {isFailureHandler({
               errorMessage: 'Vi klarte ikke å hente gjeldende sak',
               apiResult: gjeldendeSakStatus,

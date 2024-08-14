@@ -1,6 +1,6 @@
-import { BodyLong, Button, Heading, Modal, VStack } from '@navikt/ds-react'
+import { BodyLong, Button, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { ferdigstillOppgave, hentOppgave } from '~shared/api/oppgaver'
+import { ferdigstillOppgaveMedMerknad, hentOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
 import { isSuccess, mapFailure } from '~shared/api/apiUtils'
@@ -18,8 +18,9 @@ export const AktivitetspliktRevurderingModal = ({
 }) => {
   const [visModal, setVisModal] = useState(false)
   const [erFerdigstilt, setErFerdigstilt] = useState(false)
+  const [begrunnelse, setBegrunnelse] = useState<string>('')
 
-  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export const AktivitetspliktRevurderingModal = ({
 
   const ferdigstill = () => {
     if (!erFerdigstilt) {
-      apiFerdigstillOppgave(oppgave.id, () => {
+      apiFerdigstillOppgave({ id: oppgave.id, merknad: begrunnelse }, () => {
         setVisModal(false)
         oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
       })
@@ -54,18 +55,28 @@ export const AktivitetspliktRevurderingModal = ({
         <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Vurdering av aktivitetsplikt' }}>
           <Modal.Body>
             <VStack gap="4">
-              <Heading size="small">{oppgave.merknad}</Heading>
               <BodyLong>
                 Den etterlatte skal være i minst 50% aktivitet 6 måneder etter dødsfallet. Det ser ikke ut til å ha
                 blitt registrert noe aktivitet over 50% eller unntak på denne brukeren.
               </BodyLong>
               <BodyLong>
                 Sak {oppgave.sakId} har en åpen behandling som forhindret Gjenny fra å opprette en revurdering
-                automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.{' '}
+                automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.
+              </BodyLong>
+              <BodyLong>
+                Hvis dette ikke er nødvendig, legg inn en begrunnelse og ferdigstill oppgaven. Ellers gå til saken og
+                vent med å ferdigstille oppgaven til ny revurdering er opprettet.
               </BodyLong>
 
               {!erFerdigstilt && (
                 <div>
+                  <Textarea
+                    label="Begrunnelse"
+                    value={begrunnelse}
+                    onChange={(e) => setBegrunnelse(e.target.value)}
+                    placeholder="Begrunnelse"
+                  />
+                  <br />
                   <PersonButtonLink
                     variant="primary"
                     size="small"
@@ -79,9 +90,14 @@ export const AktivitetspliktRevurderingModal = ({
                 </div>
               )}
               {erFerdigstilt && (
-                <BodyLong>
-                  <i>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</i>
-                </BodyLong>
+                <>
+                  <BodyLong>
+                    <i>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</i>
+                  </BodyLong>
+                  <BodyLong>
+                    <b>Merknad:</b> {oppgave.merknad}
+                  </BodyLong>
+                </>
               )}
             </VStack>
             {mapFailure(ferdigstillOppgaveStatus, (error) => (

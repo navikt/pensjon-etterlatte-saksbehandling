@@ -46,8 +46,8 @@ export const resetAvkorting = createAction('behandling/avkorting/reset')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
 export const oppdaterViderefoertOpphoer = createAction<ViderefoertOpphoer>('behandling/viderefoert-opphoer')
-export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
-export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
+export const oppdaterBeregningsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
+export const oppdaterBeregningsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
   'behandling/beregningsgrunnlagOMS'
 )
 export const oppdaterOverstyrBeregningsGrunnlag =
@@ -109,7 +109,7 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(oppdaterBehandlingsstatus, (state, action) => {
     state.behandling!!.status = action.payload
   })
-  builder.addCase(oppdaterBeregingsGrunnlag, (state, action) => {
+  builder.addCase(oppdaterBeregningsGrunnlag, (state, action) => {
     state.behandling!!.beregningsGrunnlag = action.payload
   })
   builder.addCase(oppdaterUtlandstilknytning, (state, action) => {
@@ -118,7 +118,7 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(oppdaterViderefoertOpphoer, (state, action) => {
     state.behandling!!.viderefoertOpphoer = action.payload
   })
-  builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
+  builder.addCase(oppdaterBeregningsGrunnlagOMS, (state, action) => {
     state.behandling!!.beregningsGrunnlagOMS = action.payload
   })
   builder.addCase(oppdaterOverstyrBeregningsGrunnlag, (state, action) => {

@@ -8,7 +8,7 @@ import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgru
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
 interface Props {
@@ -137,7 +137,7 @@ export const BeregningsMetodeRadForAvdoed = ({
         grunnlag,
       },
       () => {
-        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
         setRedigerModus(false)
       }
     )
@@ -152,7 +152,7 @@ export const BeregningsMetodeRadForAvdoed = ({
         grunnlag,
       },
       () => {
-        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
         setRedigerModus(false)
       }
     )

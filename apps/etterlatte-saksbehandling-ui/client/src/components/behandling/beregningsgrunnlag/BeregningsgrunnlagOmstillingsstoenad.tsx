@@ -13,7 +13,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterBeregingsGrunnlagOMS,
+  oppdaterBeregningsGrunnlagOMS,
   oppdaterBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -75,7 +75,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         grunnlag,
       },
       () => {
-        dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+        dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
         setVisManglendeBeregningsgrunnlag(false)
       }
     )
@@ -85,7 +85,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     beregningsgrunnlagOMSRequest(behandling.id, (result) => {
       if (result) {
         dispatch(
-          oppdaterBeregingsGrunnlagOMS({
+          oppdaterBeregningsGrunnlagOMS({
             ...result,
             institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
           })

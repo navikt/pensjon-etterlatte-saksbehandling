@@ -31,6 +31,8 @@ fun initRogR(
 
     val connection =
         builder
+            .withIsAliveEndpoint("/health/isalive")
+            .withIsReadyEndpoint("/health/isready")
             .build()
             .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
     connection.start()

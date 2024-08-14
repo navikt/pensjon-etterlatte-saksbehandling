@@ -41,6 +41,7 @@ export default function GenerellOppgave() {
     <FormWrapper>
       <FormProvider {...methods}>
         <Heading size="large">Opprett generell oppgave</Heading>
+
         <TextField
           {...register('sakIds', {
             required: { value: true, message: 'Du må spesifisere minimum EN saksID' },
@@ -70,8 +71,8 @@ export default function GenerellOppgave() {
         generellOppgaveResult,
         <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
         null,
-        () => (
-          <ApiErrorAlert>Klarte ikke å opprette Generelle oppgaver, sjekk at alle saksId`ene er gyldige.</ApiErrorAlert>
+        (error) => (
+          <ApiErrorAlert>{error.detail}</ApiErrorAlert>
         ),
         () => (
           <Alert variant="success">Generelle oppgaver er opprettet!</Alert>

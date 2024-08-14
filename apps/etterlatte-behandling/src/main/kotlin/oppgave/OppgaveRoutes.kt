@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -122,24 +123,10 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 // kunSaksbehandlerMedSkrivetilgang
 
                 val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
-                val sakIds = oppgaveBulkDto.sakIds.split(",").map { it.trim() }
+                val sakIds: List<Long> = oppgaveBulkDto.sakIds.split(",").map { it.trim().toLong() }
 
                 inTransaction {
-                    sakIds.forEach { id ->
-                        try {
-                            service.opprettOppgave(
-                                referanse = "",
-                                sakId = id.toLong(),
-                                kilde = oppgaveBulkDto.kilde,
-                                type = oppgaveBulkDto.type,
-                                merknad = oppgaveBulkDto.merknad,
-                            )
-                        } catch (e: Exception) {
-                            // TODO: hvordan håndtere?
-                            // ugyldigSakIds.add(id)
-                            throw Exception()
-                        }
-                    }
+                    service.opprettOppgaveBulk("", sakIds, OppgaveKilde.BEHANDLING, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
                 }
 
                 call.respond(HttpStatusCode.OK)

@@ -27,6 +27,8 @@ import java.util.UUID
 interface OppgaveDao {
     fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
+    fun opprettOppgaveBulk(oppgaveListe: List<OppgaveIntern>)
+
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
@@ -135,6 +137,40 @@ class OppgaveDaoImpl(
                 statement.setString(13, oppgaveIntern.kilde?.name)
                 statement.executeUpdate()
                 logger.info("lagret oppgave for ${oppgaveIntern.id} for sakid ${oppgaveIntern.sakId}")
+            }
+        }
+    }
+
+    override fun opprettOppgaveBulk(oppgaveListe: List<OppgaveIntern>) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """.trimIndent(),
+                    )
+
+                oppgaveListe.forEach { oppgaveIntern ->
+                    statement.setObject(1, oppgaveIntern.id)
+                    statement.setString(2, oppgaveIntern.status.name)
+                    statement.setString(3, oppgaveIntern.enhet)
+                    statement.setLong(4, oppgaveIntern.sakId)
+                    statement.setString(5, oppgaveIntern.type.name)
+                    statement.setString(6, oppgaveIntern.saksbehandler?.ident)
+                    statement.setString(7, oppgaveIntern.referanse)
+                    statement.setString(8, oppgaveIntern.merknad)
+                    statement.setTidspunkt(9, oppgaveIntern.opprettet)
+                    statement.setString(10, oppgaveIntern.sakType.name)
+                    statement.setString(11, oppgaveIntern.fnr)
+                    statement.setTidspunkt(12, oppgaveIntern.frist)
+                    statement.setString(13, oppgaveIntern.kilde?.name)
+
+                    statement.addBatch()
+                }
+
+                statement.executeBatch()
             }
         }
     }

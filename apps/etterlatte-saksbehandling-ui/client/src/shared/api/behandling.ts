@@ -45,8 +45,9 @@ export const fastsettVirkningstidspunkt = async (args: {
   dato: Date
   begrunnelse: string
   kravdato: Date | null
+  overstyr: boolean
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
-  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
+  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt?overstyr=${args.overstyr}`, {
     dato: args.dato,
     begrunnelse: args.begrunnelse,
     kravdato: args.kravdato ? format(args.kravdato, DatoFormat.AAR_MAANED_DAG) : null,

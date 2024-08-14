@@ -34,7 +34,8 @@ const HentBosattutland = ({ behandling, redigerbar }: { behandling: IDetaljertBe
         <EessiPensjonLenke sakId={behandling.sakId} behandlingId={behandling.id} sakType={behandling.sakType} />
       </Heading>
 
-      {isPending(hentBosattUtlandStatus) && <Spinner visible={true} label="Henter bosatt utland info" />}
+      <Spinner visible={isPending(hentBosattUtlandStatus)} label="Henter bosatt utland info" />
+
       {isFailureWithCode(hentBosattUtlandStatus, 404) && (
         <BosattUtland behandlingId={behandling.id} bosattutland={null} redigerbar={redigerbar} />
       )}

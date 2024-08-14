@@ -76,7 +76,7 @@ export function TilbakekrevingListe(props: { sakId: number }) {
   return (
     <MapApiResult
       result={tilbakekrevinger}
-      mapInitialOrPending={<Spinner visible label="Henter tilbakekrevinger til saken" />}
+      mapInitialOrPending={<Spinner label="Henter tilbakekrevinger til saken" />}
       mapError={() => <ApiErrorAlert>Kunne ikke hente tilbakekrevinger</ApiErrorAlert>}
       mapSuccess={(tilbakekrevinger) => <TilbakekrevingTabell tilbakekrevinger={tilbakekrevinger} />}
     />

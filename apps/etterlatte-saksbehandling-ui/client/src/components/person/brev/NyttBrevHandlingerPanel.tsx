@@ -83,7 +83,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       >
         {mapAllApiResult(
           ferdigstillStatus,
-          <Spinner label="Forsøker å ferdigstille brevet ..." visible />,
+          <Spinner label="Forsøker å ferdigstille brevet ..." />,
           null,
           (error) => (
             <Alert variant="error">{error.detail}</Alert>
@@ -95,7 +95,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
 
         {mapAllApiResult(
           journalfoerStatus,
-          <Spinner label="Journalfører brevet i dokarkiv ..." visible />,
+          <Spinner label="Journalfører brevet i dokarkiv ..." />,
           null,
           (error) => (
             <Alert variant="error">{error.detail}</Alert>
@@ -107,7 +107,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
 
         {mapAllApiResult(
           distribuerStatus,
-          <Spinner label="Sender brev til distribusjon ..." visible />,
+          <Spinner label="Sender brev til distribusjon ..." />,
           null,
           (error) => (
             <Alert variant="error">{error.detail}</Alert>

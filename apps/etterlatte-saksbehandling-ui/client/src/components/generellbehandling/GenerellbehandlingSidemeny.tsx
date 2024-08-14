@@ -54,7 +54,7 @@ export const GenerellbehandlingSidemeny = (props: {
           apiResult: oppgaveResult,
           errorMessage: 'Vi fant ingen saksbehandler for den tilknyttede oppgaven. Husk å tildele oppgaven.',
         })}
-        {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
+        <Spinner visible={isPending(oppgaveResult)} label="Henter saksbehandler or oppgave" />
         {oppgave?.saksbehandler ? (
           <Alert variant={oppgaveErTildeltInnloggetBruker ? 'success' : 'info'} style={{ marginBottom: '2rem' }}>
             <BodyShort>{`Oppgaven for kravpakken er tildelt ${

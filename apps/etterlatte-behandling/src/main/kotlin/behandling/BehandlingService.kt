@@ -76,6 +76,14 @@ class VirkningstidspunktKanIkkeVaereEtterOpphoer :
         detail = "Virkningstidspunkt kan ikke være etter opphør",
     )
 
+class VirkFoerIverksattVirk(
+    virk: YearMonth,
+    foersteVirk: YearMonth,
+) : UgyldigForespoerselException(
+        code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK",
+        detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
+    )
+
 class BehandlingNotFoundException(
     behandlingId: UUID,
 ) : IkkeFunnetException(
@@ -186,6 +194,7 @@ interface BehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
+        overstyr: Boolean,
     ): Boolean
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
@@ -368,6 +377,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
+        overstyr: Boolean,
     ): Boolean {
         val behandling =
             requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
@@ -377,7 +387,7 @@ internal class BehandlingServiceImpl(
         }
 
         return when (behandling.type) {
-            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
+            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling, overstyr)
             BehandlingType.FØRSTEGANGSBEHANDLING ->
                 erGyldigVirkningstidspunktFoerstegangsbehandling(
                     request,
@@ -451,6 +461,7 @@ internal class BehandlingServiceImpl(
                 SakType.OMSTILLINGSSTOENAD ->
                     // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+
                 SakType.BARNEPENSJON ->
                     // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
@@ -465,6 +476,7 @@ internal class BehandlingServiceImpl(
     private fun erGyldigVirkningstidspunktRevurdering(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
+        overstyr: Boolean,
     ): Boolean {
         val virkningstidspunkt = request.dato
         if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
@@ -472,10 +484,17 @@ internal class BehandlingServiceImpl(
         }
 
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
-        if (foersteVirkDato == null) {
+        return if (foersteVirkDato == null) {
             throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
+        } else if (virkningstidspunkt.isBefore(foersteVirkDato)) {
+            // Vi tillater virkningstidspunkt før første virk dersom saksbehandler vil overstyre
+            if (overstyr) {
+                true
+            } else {
+                throw VirkFoerIverksattVirk(virkningstidspunkt, foersteVirkDato)
+            }
         } else {
-            return virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
+            virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
         }
     }
 

@@ -1,6 +1,6 @@
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype } from '~utils/formatering/formatering'
-import { formaterDatoMedKlokkeslett, formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { SidebarPanel } from '~shared/components/Sidebar'
@@ -24,15 +24,21 @@ export const Oversikt = ({
   behandlingsInfo: IBehandlingInfo
   behandlendeSaksbehandler?: string
 }) => {
-  const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
+  const attestering = behandlingsInfo.attestertLogg?.slice(-1)[0]
+  const kommentarFraAttestant = attestering?.kommentar
   const oppgave = useSelectorOppgaveUnderBehandling()
 
   const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
+  const [attestant, hentNavnForAttestant] = useApiCall(hentNavnforIdent)
+
   useEffect(() => {
     if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
       hentNavnForIdent(behandlendeSaksbehandler)
     }
-  }, [behandlendeSaksbehandler, behandlingsInfo.status])
+    if (attestering?.ident) {
+      hentNavnForAttestant(attestering.ident)
+    }
+  }, [behandlendeSaksbehandler, behandlingsInfo.status, attestering])
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -91,32 +97,30 @@ export const Oversikt = ({
             <>
               {mapApiResult(
                 res,
-                <Spinner visible={true} label="Henter saksbehandler" />,
+                <Spinner label="Henter saksbehandler" />,
                 () => (
                   <ApiErrorAlert>Kunne ikke hente saksbehandlende saksbehandler</ApiErrorAlert>
                 ),
-                (saksbehandlernavn) => {
-                  return (
-                    <>
-                      <HStack gap="4" justify="space-between">
-                        <div>
-                          <Label size="small">Attestant</Label>
-                          {!!oppgave?.saksbehandler ? (
-                            <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
-                          ) : (
-                            <Alert size="small" variant="warning">
-                              Oppgaven er ikke tildelt
-                            </Alert>
-                          )}
-                        </div>
-                        <div>
-                          <Label size="small">Saksbehandler</Label>
-                          <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
-                        </div>
-                      </HStack>
-                    </>
-                  )
-                }
+                (saksbehandlernavn) => (
+                  <>
+                    <HStack gap="4" justify="space-between">
+                      <div>
+                        <Label size="small">Attestant</Label>
+                        {!!oppgave?.saksbehandler ? (
+                          <Detail>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Detail>
+                        ) : (
+                          <Alert size="small" variant="warning">
+                            Oppgaven er ikke tildelt
+                          </Alert>
+                        )}
+                      </div>
+                      <div>
+                        <Label size="small">Saksbehandler</Label>
+                        <Detail>{saksbehandlernavn || behandlendeSaksbehandler}</Detail>
+                      </div>
+                    </HStack>
+                  </>
+                )
               )}
             </>
           ) : (
@@ -131,6 +135,18 @@ export const Oversikt = ({
               )}
             </div>
           )}
+          {attestering &&
+            mapApiResult(
+              attestant,
+              <Spinner visible={true} label="Henter attestant" />,
+              () => <ApiErrorAlert>Kunne ikke hente attestant</ApiErrorAlert>,
+              (attestantnavn) => (
+                <div>
+                  <Label size="small">Attestant</Label>
+                  <Detail>{attestantnavn}</Detail>
+                </div>
+              )
+            )}
           <div>
             <Label size="small">Kilde</Label>
             <Detail>{behandlingsInfo.kilde}</Detail>

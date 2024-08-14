@@ -153,7 +153,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     <TableBox>
       {mapApiResult(
         hentSanksjonStatus,
-        <Spinner visible label="Henter sanksjoner" />,
+        <Spinner label="Henter sanksjoner" />,
         () => (
           <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
         ),

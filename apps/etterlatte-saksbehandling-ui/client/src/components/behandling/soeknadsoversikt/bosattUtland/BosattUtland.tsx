@@ -101,7 +101,9 @@ export const BosattUtland = ({
         apiResult: hentAlleLandRequest,
         errorMessage: 'Vi klarte ikke å hente landlisten, den er påkrevd for å kunne fylle inn SED data',
       })}
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+
+      <Spinner visible={isPending(hentAlleLandRequest)} label="Henter land" />
+
       {alleLandKodeverk && (
         <>
           <MottatteSeder

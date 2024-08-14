@@ -64,6 +64,11 @@ sealed class SamsvarMellomKildeOgGrunnlag {
         override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
+    @JsonTypeName("FOLKEREGISTERIDENTIFIKATOR")
+    data class Folkeregisteridentifikatorsamsvar(
+        override val samsvar: Boolean,
+    ) : SamsvarMellomKildeOgGrunnlag()
+
     @JsonTypeName("GRUNNBELOEP")
     data class Grunnbeloep(
         override val samsvar: Boolean,

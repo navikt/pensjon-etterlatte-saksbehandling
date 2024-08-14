@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.time.LocalDateTime
@@ -57,6 +58,17 @@ class BehandlingClient(
             .post("$url/behandlinger/$behandlingId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)
                 setBody(gyldighet)
+            }.body<String>()
+    }
+
+    fun opprettOppgave(
+        sakId: Long,
+        oppgave: NyOppgaveDto,
+    ) = runBlocking {
+        sakOgBehandlingApp
+            .post("$url/oppgaver/sak/$sakId/opprett") {
+                contentType(ContentType.Application.Json)
+                setBody(oppgave)
             }.body<String>()
     }
 }

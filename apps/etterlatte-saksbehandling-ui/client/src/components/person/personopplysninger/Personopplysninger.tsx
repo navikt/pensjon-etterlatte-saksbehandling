@@ -54,7 +54,7 @@ export const Personopplysninger = ({
             {!!sak ? (
               <>
                 {mapResult(familieOpplysningerResult, {
-                  pending: <Spinner visible={true} label="Henter opplysninger" />,
+                  pending: <Spinner label="Henter opplysninger" />,
                   error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger'}</ApiErrorAlert>,
                   success: ({ soeker, avdoede, gjenlevende }) => (
                     <>

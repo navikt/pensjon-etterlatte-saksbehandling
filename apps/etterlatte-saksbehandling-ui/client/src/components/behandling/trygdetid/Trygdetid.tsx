@@ -196,10 +196,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           </>
         )}
 
-        {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
-          <Spinner visible={true} label="Henter trygdetid" />
-        )}
-        {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
+        <Spinner label="Henter trygdetid" visible={isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)} />
+        <Spinner label="Oppretter trygdetid" visible={isPending(opprettTrygdetidRequest)} />
 
         {isFailureHandler({
           apiResult: hentTrygdetidRequest,

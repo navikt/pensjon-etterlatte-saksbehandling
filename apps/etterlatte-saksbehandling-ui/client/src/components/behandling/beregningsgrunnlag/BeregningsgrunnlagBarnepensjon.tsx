@@ -100,7 +100,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       ...behandling.beregningsGrunnlag,
       beregningsMetode,
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
+      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
     }
     lagreBeregningsgrunnlagRequest(
@@ -117,7 +117,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       ...behandling.beregningsGrunnlag,
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
+      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },

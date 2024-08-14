@@ -201,7 +201,7 @@ class ReguleringTest {
                 ),
             ),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
-        begegningsmetodeFlereAvdoede =
+        beregningsMetodeFlereAvdoede =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 1, 1),

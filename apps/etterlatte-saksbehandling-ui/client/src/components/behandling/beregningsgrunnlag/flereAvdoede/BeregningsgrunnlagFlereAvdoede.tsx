@@ -41,8 +41,8 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
   const finnPeriodisertBeregningsmetodeForAvdoed = (
     ident: String
   ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined => {
-    if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede?.length) {
-      return mapListeFraDto(behandling.beregningsGrunnlag.begegningsmetodeFlereAvdoede)?.find(
+    if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length) {
+      return mapListeFraDto(behandling.beregningsGrunnlag.beregningsMetodeFlereAvdoede)?.find(
         (grunnlag) => grunnlag?.data.avdoed === ident
       )
     }
@@ -58,8 +58,8 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
       beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },
-      begegningsmetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.begegningsmetodeFlereAvdoede?.length
-        ? behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
+      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
         : [],
     }
   }
@@ -72,8 +72,8 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
       beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },
-      begegningsmetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.begegningsmetodeFlereAvdoede?.length
-        ? behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede
+      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
             .concat(mapListeTilDto([nyMetode]))
         : mapListeTilDto([nyMetode]),

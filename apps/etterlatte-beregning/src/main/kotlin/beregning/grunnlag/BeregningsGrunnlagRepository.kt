@@ -52,7 +52,7 @@ class BeregningsGrunnlagRepository(
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
                                 "beregnings_metode_flere_avdoede" to
-                                    beregningsGrunnlag.begegningsmetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
+                                    beregningsGrunnlag.beregningsMetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -251,7 +251,7 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
                 )
             },
         kilde = objectMapper.readValue(this.string("kilde")),
-        begegningsmetodeFlereAvdoede =
+        beregningsMetodeFlereAvdoede =
             this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
                 objectMapper.readValue(it)
             } ?: emptyList(),

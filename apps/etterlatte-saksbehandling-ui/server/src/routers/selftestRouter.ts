@@ -7,7 +7,10 @@ export const selftestRouter = express.Router()
 
 selftestRouter.get('/', express.json(), async (req, res) => {
   const results: Promise<IPingResult>[] = Object.entries(ApiConfig).map(async ([serviceName, urlscope]) => {
-    const statuscode = await fetch(`${urlscope.url}/health/isready`)
+    const sti =
+      serviceName in ['grunnlag', 'utbetaling', 'brev'] ? `${urlscope.url}/isready` : `${urlscope.url}/health/isready`
+
+    const statuscode = await fetch(sti)
       .then((res) => res.status)
       .catch((err) => {
         logger.warn(`${serviceName} is down.`, err)

@@ -10,6 +10,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
 interface Props {
   behandlingId: string
@@ -62,8 +63,8 @@ export const BeregningsMetodeRadForAvdoed = ({
     >
       <Table.DataCell>{navn}</Table.DataCell>
       <Table.DataCell>
-        {beregningsMetodeForAvdoed
-          ? beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode
+        {beregningsMetodeForAvdoed?.data.beregningsMetode.beregningsMetode
+          ? formaterEnumTilLesbarString(beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode)
           : 'Metode er ikke satt'}
       </Table.DataCell>
       <Table.DataCell>
@@ -72,61 +73,37 @@ export const BeregningsMetodeRadForAvdoed = ({
       <Table.DataCell>
         {beregningsMetodeForAvdoed?.tom ? format(startOfMonth(beregningsMetodeForAvdoed.tom), 'yyyy-MM-dd') : '-'}
       </Table.DataCell>
-      {redigerbar &&
-        (beregningsMetodeForAvdoed ? (
+      <Table.DataCell>
+        {redigerbar && (
           <>
-            <Table.DataCell>{redigerKnapp()}</Table.DataCell>
-            <Table.DataCell>{slettKnapp()}</Table.DataCell>
+            <Button
+              type="button"
+              variant="secondary"
+              size="small"
+              icon={<PencilIcon aria-hidden />}
+              disabled={redigerModus}
+              onClick={() => setRedigerModus(true)}
+            >
+              {beregningsMetodeForAvdoed ? 'Rediger' : 'Legg til'}
+            </Button>
           </>
-        ) : (
-          <Table.DataCell>{leggTilKnapp()}</Table.DataCell>
-        ))}
+        )}
+      </Table.DataCell>
+      <Table.DataCell>
+        {redigerbar && beregningsMetodeForAvdoed && (
+          <Button
+            size="small"
+            variant="secondary"
+            icon={<TrashIcon aria-hidden />}
+            loading={isPending(lagreBeregningsgrunnlagResult)}
+            onClick={slettBeregningsMetodeForAvdoed}
+          >
+            Slett
+          </Button>
+        )}
+      </Table.DataCell>
     </Table.ExpandableRow>
   )
-
-  function redigerKnapp() {
-    return (
-      <Button
-        type="button"
-        variant="secondary"
-        size="small"
-        icon={<PencilIcon aria-hidden />}
-        disabled={redigerModus}
-        onClick={() => setRedigerModus(true)}
-      >
-        Rediger
-      </Button>
-    )
-  }
-
-  function leggTilKnapp() {
-    return (
-      <Button
-        type="button"
-        variant="secondary"
-        size="small"
-        icon={<PencilIcon aria-hidden />}
-        disabled={redigerModus}
-        onClick={() => setRedigerModus(true)}
-      >
-        Legg til
-      </Button>
-    )
-  }
-
-  function slettKnapp() {
-    return (
-      <Button
-        size="small"
-        variant="secondary"
-        icon={<TrashIcon aria-hidden />}
-        loading={isPending(lagreBeregningsgrunnlagResult)}
-        onClick={slettBeregningsMetodeForAvdoed}
-      >
-        Slett
-      </Button>
-    )
-  }
 
   function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
     lagre(patchGrunnlagOppdaterMetode(nyMetode))

@@ -98,6 +98,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD")
     data class BarnepensjonMottattSoeknad(
+        val mottattDato: LocalDate,
         val borINorgeEllerIkkeAvtaleland: Boolean,
         val erOver18aar: Boolean,
         val bosattUtland: Boolean,
@@ -105,6 +106,7 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonMottattSoeknad(
+                mottattDato = mottattDato,
                 borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
                 erOver18aar = erOver18aar,
                 bosattUtland = bosattUtland,

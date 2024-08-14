@@ -128,8 +128,10 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
-          {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
-          {isPending(oppdaterYrkesskadeRequest) && <Spinner visible={true} label="Oppdater yrkesskade" />}
+
+          <Spinner label="Oppdatere poengår" visible={isPending(overstyrTrygdetidRequest)} />
+          <Spinner label="Oppdater yrkesskade" visible={isPending(oppdaterYrkesskadeRequest)} />
+
           {isFailureHandler({
             apiResult: overstyrTrygdetidRequest,
             errorMessage: 'En feil har oppstått ved lagring av norsk poengår',

@@ -52,7 +52,7 @@ export default function NyttBrev() {
 
       {mapApiResult(
         brevStatus,
-        <Spinner label="Henter brev ..." visible />,
+        <Spinner label="Henter brev ..." />,
         () => (
           <ApiErrorAlert>Feil oppsto ved henting av brev</ApiErrorAlert>
         ),

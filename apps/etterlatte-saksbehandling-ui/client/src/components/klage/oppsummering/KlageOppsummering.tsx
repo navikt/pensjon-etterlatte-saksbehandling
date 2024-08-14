@@ -41,7 +41,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   }, [klage?.id])
 
   if (!klage) {
-    return <Spinner visible label="Henter klage" />
+    return <Spinner label="Henter klage" />
   }
 
   const { utfall, sak } = klage

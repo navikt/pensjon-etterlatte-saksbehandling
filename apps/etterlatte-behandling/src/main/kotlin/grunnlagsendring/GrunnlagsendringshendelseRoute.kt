@@ -15,6 +15,7 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -90,6 +91,15 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
                 val sivilstandHendelse = call.receive<SivilstandHendelse>()
                 logger.info("Mottar en sivilstand-hendelse fra PDL for ${sivilstandHendelse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/folkeregisteridentifikatorhendelse") {
+            kunSystembruker {
+                val hendelse = call.receive<Folkeregisteridentifikatorhendelse>()
+                logger.info("Mottar en folkeregisteridentifikator-hendelse fra PDL for ${hendelse.fnr.maskerFnr()}")
+                grunnlagsendringshendelseService.opprettFolkeregisteridentifikatorhendelse(hendelse)
                 call.respond(HttpStatusCode.OK)
             }
         }

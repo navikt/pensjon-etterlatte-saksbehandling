@@ -50,5 +50,6 @@ class GrunnlagsendringsHendelseFilter(
             GrunnlagsendringsType.GRUNNBELOEP -> false
             GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> false
             GrunnlagsendringsType.BOSTED -> true
+            GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR -> true
         }
 }

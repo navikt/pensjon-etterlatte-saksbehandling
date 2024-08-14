@@ -22,4 +22,10 @@ fun main() =
             rapidsConnection,
             ab.behandlingKlient,
         )
+
+        InntektsjusteringRiver(
+            rapidsConnection,
+            behandlingKlient = ab.behandlingKlient,
+            journalfoerSoeknadService = ab.journalfoerSoeknadService,
+        )
     }

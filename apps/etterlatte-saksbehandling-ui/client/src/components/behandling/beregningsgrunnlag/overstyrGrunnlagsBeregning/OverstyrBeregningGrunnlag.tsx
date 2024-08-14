@@ -70,7 +70,7 @@ const OverstyrBeregningGrunnlag = (props: {
         </HStack>
         <VStack gap="4" maxWidth="70rem">
           {mapResult(overstyrBeregningGrunnlagResult, {
-            pending: <Spinner visible label="Henter overstyrt beregning grunnlag..." />,
+            pending: <Spinner label="Henter overstyrt beregning grunnlag..." />,
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
             success: () => (
               <>

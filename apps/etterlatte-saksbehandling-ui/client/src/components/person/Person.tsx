@@ -93,7 +93,7 @@ export const Person = () => {
 
       {mapAllApiResult(
         personNavnResult,
-        <Spinner visible label="Laster personinfo ..." />,
+        <Spinner label="Laster personinfo ..." />,
         null,
         (error) => (
           <Box padding="8">{handleError(error)}</Box>

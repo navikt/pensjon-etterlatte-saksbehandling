@@ -69,7 +69,7 @@ export function TilbakekrevingSidemeny() {
           <Label size="small">Saksbehandler</Label>
           {mapApiResult(
             oppgaveResult,
-            <Spinner visible={true} label="Henter oppgave" />,
+            <Spinner label="Henter oppgave" />,
             () => (
               <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
             ),
@@ -95,7 +95,7 @@ export function TilbakekrevingSidemeny() {
         <>
           {mapApiResult(
             fetchVedtakStatus,
-            <Spinner label="Henter vedtaksdetaljer" visible />,
+            <Spinner label="Henter vedtaksdetaljer" />,
             () => (
               <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
             ),

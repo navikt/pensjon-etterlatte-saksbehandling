@@ -118,7 +118,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <>
           {mapApiResult(
             beregning,
-            <Spinner visible label="Henter beregning" />,
+            <Spinner label="Henter beregning" />,
             () => (
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),

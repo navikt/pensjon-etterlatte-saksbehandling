@@ -86,7 +86,7 @@ export function KlageSidemeny() {
         <>
           {mapApiResult(
             fetchVedtakStatus,
-            <Spinner label="Henter vedtaksdetaljer" visible />,
+            <Spinner label="Henter vedtaksdetaljer" />,
             () => (
               <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
             ),

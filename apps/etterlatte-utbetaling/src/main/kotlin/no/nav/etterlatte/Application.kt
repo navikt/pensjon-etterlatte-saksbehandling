@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
@@ -74,10 +73,6 @@ internal fun RapidsConnection.settOppRiversOgListener(applicationContext: Applic
                     val timerJobs = cronjobs.map { job -> job.schedule() }
                     addShutdownHook(timerJobs)
                 }
-            }
-
-            override fun onReady(rapidsConnection: RapidsConnection) {
-                setReady()
             }
 
             override fun onShutdown(rapidsConnection: RapidsConnection) {

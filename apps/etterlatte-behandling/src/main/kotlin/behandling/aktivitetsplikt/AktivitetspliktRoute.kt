@@ -160,6 +160,14 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
+        get {
+            logger.info("Henter nyeste aktivitetsplikt vurdering for sakIe=$sakId")
+            val vurdering = inTransaction { aktivitetspliktService.hentVurdering(sakId = sakId) }
+            call.respond(vurdering ?: HttpStatusCode.NotFound)
+        }
+    }
+
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")

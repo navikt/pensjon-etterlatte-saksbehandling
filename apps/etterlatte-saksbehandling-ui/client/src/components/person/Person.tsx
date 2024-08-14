@@ -9,6 +9,7 @@ import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
   BellIcon,
+  BriefcaseClockIcon,
   BulletListIcon,
   CogRotationIcon,
   EnvelopeClosedIcon,
@@ -31,6 +32,7 @@ import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
+import { Aktivitet } from '~components/person/aktivitet/Aktivitet'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -40,6 +42,7 @@ export enum PersonOversiktFane {
   NOTATER = 'NOTATER',
   SAMORDNING = 'SAMORDNING',
   HENDELSER = 'HENDELSER',
+  AKTIVITET = 'AKTIVITET',
 }
 
 export const Person = () => {
@@ -108,6 +111,9 @@ export const Person = () => {
                 icon={<PersonIcon />}
               />
               <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
+              {isOmstillingsstoenad(sakResult) && (
+                <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
+              )}
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
               {skalViseNotater && (
@@ -140,6 +146,9 @@ export const Person = () => {
             )}
             <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
               <SamordningSak fnr={person.foedselsnummer} sakResult={sakResult} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
+              <Aktivitet sakResult={sakResult} />
             </Tabs.Panel>
           </Tabs>
         )

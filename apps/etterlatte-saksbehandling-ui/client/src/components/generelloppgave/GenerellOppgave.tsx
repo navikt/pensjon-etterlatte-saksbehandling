@@ -1,5 +1,5 @@
 import { Alert, Button, Heading, Textarea, TextField } from '@navikt/ds-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -21,6 +21,14 @@ export default function GenerellOppgave() {
       kilde: OppgaveKilde.BEHANDLING,
     },
   })
+
+  const { reset } = methods
+
+  useEffect(() => {
+    if (generellOppgaveResult.status === 'success') {
+      reset()
+    }
+  }, [generellOppgaveResult, reset])
 
   const opprett = (data: GenerellOppgaveDto) => {
     opprettNyGenerellOppgave({
@@ -81,6 +89,7 @@ export default function GenerellOppgave() {
     </FormWrapper>
   )
 }
+
 const FormWrapper = styled.div`
   margin: 2em;
   width: 25em;

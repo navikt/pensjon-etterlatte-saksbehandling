@@ -118,18 +118,18 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
         route("/bulk") {
             post("/opprett") {
-                // TODO: hvilke tilgangsstyring?
-                // kunSaksbehandler
-                // kunSaksbehandlerMedSkrivetilgang
+                kunSaksbehandler {
+                    val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
 
-                val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
-                val sakIds: List<Long> = oppgaveBulkDto.sakIds.split(",").map { it.trim().toLong() }
+                    // TODO: heller ta inn liste i endepunkt?
+                    val sakIds: List<Long> = oppgaveBulkDto.sakIds.split(",").map { it.trim().toLong() }
 
-                inTransaction {
-                    service.opprettOppgaveBulk("", sakIds, OppgaveKilde.BEHANDLING, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
+                    inTransaction {
+                        service.opprettOppgaveBulk("", sakIds, OppgaveKilde.BEHANDLING, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
+                    }
+
+                    call.respond(HttpStatusCode.OK)
                 }
-
-                call.respond(HttpStatusCode.OK)
             }
         }
 

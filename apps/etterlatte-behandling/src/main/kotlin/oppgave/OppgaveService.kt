@@ -541,7 +541,7 @@ class OppgaveService(
 
     fun opprettOppgaveBulk(
         referanse: String,
-        sakIds: List<Long>, // TODO: change to list?
+        sakIds: List<Long>,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,
@@ -552,6 +552,8 @@ class OppgaveService(
 
         if (!saker.map { it.id }.containsAll(sakIds)) {
             val finnesIkke = sakIds.filterNot { it in saker.map { sak -> sak.id } }
+
+            // TODO: finne bedre feilkode?
             throw IkkeFunnetException("GO-01-SAK-IKKE-FUNNET", "Vi klarte ikke finne følgende sakIder: $finnesIkke")
         }
 

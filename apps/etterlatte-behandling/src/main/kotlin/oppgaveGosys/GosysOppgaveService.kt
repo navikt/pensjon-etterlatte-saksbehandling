@@ -91,7 +91,13 @@ class GosysOppgaveServiceImpl(
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
-            .build<String, Map<String, String>> { _ -> saksbehandlerInfoDao.hentAlleSaksbehandlere().associate { it.ident to it.navn } }
+            .build<String, Map<String, String>> { _ ->
+                inTransaction {
+                    saksbehandlerInfoDao.hentAlleSaksbehandlere().associate {
+                        it.ident to it.navn
+                    }
+                }
+            }
 
     private fun hentEnheterForSaksbehandler(
         enhetsnr: String?,

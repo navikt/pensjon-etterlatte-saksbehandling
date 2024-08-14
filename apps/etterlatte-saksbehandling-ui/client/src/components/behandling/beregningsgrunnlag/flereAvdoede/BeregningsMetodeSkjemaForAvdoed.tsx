@@ -34,7 +34,7 @@ interface Props {
   lagreBeregningsgrunnlagResult: Result<void>
 }
 
-export const BeregningsMetodeForAvdoded = ({
+export const BeregningsMetodeSkjemaForAvdoed = ({
   ident,
   navn,
   eksisterendeMetode,

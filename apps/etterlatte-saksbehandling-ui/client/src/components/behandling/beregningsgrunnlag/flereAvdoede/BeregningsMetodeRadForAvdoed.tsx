@@ -1,53 +1,118 @@
 import React, { useState } from 'react'
-import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { BeregningsGrunnlagPostDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
+import {
+  mapListeFraDto,
+  mapListeTilDto,
+  PeriodisertBeregningsgrunnlag,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { BeregningsGrunnlagPostDto, BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { Button, Table } from '@navikt/ds-react'
 import { format, startOfMonth } from 'date-fns'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeForAvdoded'
+import { BeregningsMetodeSkjemaForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeSkjemaForAvdoed'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
+import { formaterNavn } from '~shared/types/Person'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { ITrygdetid } from '~shared/api/trygdetid'
 
 interface Props {
-  behandlingId: string
-  ident: string
-  navn: string
-  beregningsMetodeForAvdoed: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
+  behandling: IBehandlingReducer
+  trygdetid: ITrygdetid
   redigerbar: boolean
-  patchGrunnlagOppdaterMetode: (
-    nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>
-  ) => BeregningsGrunnlagPostDto
-  patchGrunnlagSlettMetode: (ident: string) => BeregningsGrunnlagPostDto
 }
 
-export const BeregningsMetodeRadForAvdoed = ({
-  behandlingId,
-  ident,
-  beregningsMetodeForAvdoed,
-  navn,
-  redigerbar,
-  patchGrunnlagOppdaterMetode,
-  patchGrunnlagSlettMetode,
-}: Props) => {
+export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar }: Props) => {
   const dispatch = useAppDispatch()
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
+  const personopplysninger = usePersonopplysninger()
 
+  const mapNavn = (fnr: string): string => {
+    if (!personopplysninger) return fnr
+
+    const opplysning = personopplysninger.avdoede.find(
+      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+    )?.opplysning
+
+    if (!opplysning) {
+      return fnr
+    }
+    return `${formaterNavn(opplysning)} (${fnr})`
+  }
+
+  const finnPeriodisertBeregningsmetodeForAvdoed = (
+    ident: String
+  ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined => {
+    if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length) {
+      return mapListeFraDto(behandling.beregningsGrunnlag.beregningsMetodeFlereAvdoede)?.find(
+        (grunnlag) => grunnlag?.data.avdoed === ident
+      )
+    }
+    return undefined
+  }
+
+  function lagre(grunnlag: BeregningsGrunnlagPostDto) {
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
+        setRedigerModus(false)
+      }
+    )
+  }
+
+  function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
+    lagre({
+      ...behandling?.beregningsGrunnlag,
+      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
+        beregningsMetode: BeregningsMetode.NASJONAL,
+      },
+      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
+            .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
+            .concat(mapListeTilDto([nyMetode]))
+        : mapListeTilDto([nyMetode]),
+    })
+  }
+
+  function slettBeregningsMetodeForAvdoed() {
+    lagre({
+      ...behandling?.beregningsGrunnlag,
+      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
+        beregningsMetode: BeregningsMetode.NASJONAL,
+      },
+      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
+        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede.filter(
+            (metode) => metode.data.avdoed !== trygdetid.ident
+          )
+        : [],
+    })
+  }
+
+  const navn = mapNavn(trygdetid.ident)
+  const beregningsMetodeForAvdoed = finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
   return (
     <Table.ExpandableRow
       open={redigerModus}
       onOpenChange={(open) => {
         setRedigerModus(open)
       }}
-      key={ident}
+      key={trygdetid.ident}
       content={
         redigerModus ? (
-          <BeregningsMetodeForAvdoded
-            ident={ident}
+          <BeregningsMetodeSkjemaForAvdoed
+            ident={trygdetid.ident}
             navn={navn}
             eksisterendeMetode={beregningsMetodeForAvdoed}
             paaAvbryt={() => {
@@ -104,25 +169,4 @@ export const BeregningsMetodeRadForAvdoed = ({
       </Table.DataCell>
     </Table.ExpandableRow>
   )
-
-  function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
-    lagre(patchGrunnlagOppdaterMetode(nyMetode))
-  }
-
-  function slettBeregningsMetodeForAvdoed() {
-    lagre(patchGrunnlagSlettMetode(ident))
-  }
-
-  function lagre(grunnlag: BeregningsGrunnlagPostDto) {
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandlingId,
-        grunnlag,
-      },
-      () => {
-        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
-        setRedigerModus(false)
-      }
-    )
-  }
 }

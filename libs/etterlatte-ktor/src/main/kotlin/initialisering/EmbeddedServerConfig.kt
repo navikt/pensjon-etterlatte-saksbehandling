@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.ktor.initialisering
 
 import com.typesafe.config.Config
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationStopPreparing
 import io.ktor.server.application.ServerReady
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.setReady
 
 fun initEmbeddedServer(
     httpPort: Int,
@@ -62,7 +64,15 @@ private fun settOppEmbeddedServer(
                         val scheduledJobs = cronjobs.map { it.schedule() }
                         addShutdownHook(scheduledJobs)
                     }
+                    environment.monitor.subscribe(ApplicationStopPreparing) {
+                        setReady(false)
+                    }
                 }
                 connector { port = httpPort }
             },
     )
+
+fun CIOApplicationEngine.run() {
+    setReady(true)
+    start(true)
+}

@@ -1,55 +1,58 @@
 import React, { useState } from 'react'
 import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
+import { BeregningsGrunnlagPostDto, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { Button, Table } from '@navikt/ds-react'
 import { format, startOfMonth } from 'date-fns'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeForAvdoded'
-import { isPending, Result } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
+import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
 
 interface Props {
-  beregningsMetodeForAvdoed: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
+  behandlingId: string
+  ident: string
   navn: string
+  beregningsMetodeForAvdoed: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   redigerbar: boolean
-  lagreBeregningsgrunnlagResult: Result<void>
-  oppdaterBeregningsMetodeForAvdoed: (
-    nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>,
-    onSuccess: () => void
-  ) => void
-  slettBeregningsMetodeForAvdoed: (ident: string, onSuccess: () => void) => void
+  patchGrunnlagOppdaterMetode: (
+    nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>
+  ) => BeregningsGrunnlagPostDto
+  patchGrunnlagSlettMetode: (ident: string) => BeregningsGrunnlagPostDto
 }
 
 export const BeregningsMetodeRadForAvdoed = ({
+  behandlingId,
+  ident,
   beregningsMetodeForAvdoed,
   navn,
   redigerbar,
-  oppdaterBeregningsMetodeForAvdoed,
-  lagreBeregningsgrunnlagResult,
-  slettBeregningsMetodeForAvdoed,
+  patchGrunnlagOppdaterMetode,
+  patchGrunnlagSlettMetode,
 }: Props) => {
+  const dispatch = useAppDispatch()
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
+  const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
-  const slettFn = (ident) =>
-    slettBeregningsMetodeForAvdoed(ident, () => {
-      setRedigerModus(false)
-    })
-
-  return beregningsMetodeForAvdoed ? (
+  return (
     <Table.ExpandableRow
       open={redigerModus}
+      onOpenChange={(open) => {
+        setRedigerModus(open)
+      }}
+      key={ident}
       content={
         redigerModus ? (
           <BeregningsMetodeForAvdoded
-            ident={beregningsMetodeForAvdoed.data.avdoed}
+            ident={ident}
             navn={navn}
+            eksisterendeMetode={beregningsMetodeForAvdoed}
             paaAvbryt={() => {
               setRedigerModus(false)
             }}
-            oppdaterBeregningsMetodeForAvdoed={(data) =>
-              oppdaterBeregningsMetodeForAvdoed(data, () => {
-                setRedigerModus(false)
-              })
-            }
+            oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
             lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
           />
         ) : (
@@ -58,29 +61,26 @@ export const BeregningsMetodeRadForAvdoed = ({
       }
     >
       <Table.DataCell>{navn}</Table.DataCell>
-      <Table.DataCell>{beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode}</Table.DataCell>
       <Table.DataCell>
-        {beregningsMetodeForAvdoed.fom ? format(startOfMonth(beregningsMetodeForAvdoed.fom), 'yyyy-MM-dd') : ''}
+        {beregningsMetodeForAvdoed
+          ? beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode
+          : 'Metode er ikke satt'}
       </Table.DataCell>
       <Table.DataCell>
-        {beregningsMetodeForAvdoed.tom ? format(startOfMonth(beregningsMetodeForAvdoed.tom), 'yyyy-MM-dd') : ''}
+        {beregningsMetodeForAvdoed?.fom ? format(startOfMonth(beregningsMetodeForAvdoed.fom), 'yyyy-MM-dd') : '-'}
       </Table.DataCell>
-      <Table.DataCell>{redigerbar ? redigerKnapp(() => setRedigerModus(true)) : ''}</Table.DataCell>
       <Table.DataCell>
-        {redigerbar
-          ? slettKnapp(() => slettFn(beregningsMetodeForAvdoed.data.avdoed), lagreBeregningsgrunnlagResult)
-          : ''}
+        {beregningsMetodeForAvdoed?.tom ? format(startOfMonth(beregningsMetodeForAvdoed.tom), 'yyyy-MM-dd') : '-'}
       </Table.DataCell>
-      <Table.DataCell>Slett</Table.DataCell>
-    </Table.ExpandableRow>
-  ) : (
-    <Table.ExpandableRow content="">
-      <Table.DataCell>{navn}</Table.DataCell>
-      <Table.DataCell>Metode er ikke satt</Table.DataCell>
-      <Table.DataCell>-</Table.DataCell>
-      <Table.DataCell>-</Table.DataCell>
-      <Table.DataCell />
-      <Table.DataCell />
+      {redigerbar &&
+        (beregningsMetodeForAvdoed ? (
+          <>
+            <Table.DataCell>{redigerKnapp(() => setRedigerModus(true))}</Table.DataCell>
+            <Table.DataCell>{slettKnapp(slettBeregningsMetodeForAvdoed, lagreBeregningsgrunnlagResult)}</Table.DataCell>
+          </>
+        ) : (
+          <Table.DataCell>{leggTilKnapp(() => setRedigerModus(true))}</Table.DataCell>
+        ))}
     </Table.ExpandableRow>
   )
 
@@ -99,6 +99,21 @@ export const BeregningsMetodeRadForAvdoed = ({
     )
   }
 
+  function leggTilKnapp(redigerFn) {
+    return (
+      <Button
+        type="button"
+        variant="secondary"
+        size="small"
+        icon={<PencilIcon aria-hidden />}
+        disabled={redigerModus}
+        onClick={redigerFn}
+      >
+        Legg til
+      </Button>
+    )
+  }
+
   function slettKnapp(slettFn, slettResult) {
     return (
       <Button
@@ -110,6 +125,36 @@ export const BeregningsMetodeRadForAvdoed = ({
       >
         Slett
       </Button>
+    )
+  }
+
+  function oppdaterBeregninggsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
+    const grunnlag = patchGrunnlagOppdaterMetode(nyMetode)
+
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandlingId,
+        grunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        setRedigerModus(false)
+      }
+    )
+  }
+
+  function slettBeregningsMetodeForAvdoed() {
+    const grunnlag = patchGrunnlagSlettMetode(ident)
+
+    lagreBeregningsgrunnlagRequest(
+      {
+        behandlingId: behandlingId,
+        grunnlag,
+      },
+      () => {
+        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+        setRedigerModus(false)
+      }
     )
   }
 }

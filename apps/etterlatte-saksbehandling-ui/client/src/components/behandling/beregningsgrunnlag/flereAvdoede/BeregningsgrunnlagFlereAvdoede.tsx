@@ -11,10 +11,6 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BeregningsMetodeRadForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeRadForAvdoed'
 
@@ -24,11 +20,8 @@ interface Props {
 }
 
 export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Props) => {
-  const dispatch = useAppDispatch()
   const personopplysninger = usePersonopplysninger()
   const behandling = useBehandling()
-
-  const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
   if (!behandling) return <ApiErrorAlert>Ingen behandling</ApiErrorAlert>
 
@@ -56,8 +49,9 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
     return undefined
   }
 
-  const slettBeregningsMetodeForAvdoed = (avdoed: string, onSuccess: () => void) => {
-    const grunnlag = {
+  const patchGrunnlagSlettMetode = (avdoed: string) => {
+    console.log(`Sletter metode for ident ${avdoed}`)
+    return {
       ...behandling?.beregningsGrunnlag,
       soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
       institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
@@ -68,24 +62,10 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
         ? behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede.filter((metode) => metode.data.avdoed !== avdoed)
         : [],
     }
-
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag,
-      },
-      () => {
-        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
-        onSuccess()
-      }
-    )
   }
 
-  const oppdaterBeregninggsMetodeForAvdoed = (
-    nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>,
-    onSuccess: () => void
-  ) => {
-    const grunnlag = {
+  const patchGrunnlagOppdaterMetode = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
+    return {
       ...behandling?.beregningsGrunnlag,
       soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
       institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
@@ -98,17 +78,6 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
             .concat(mapListeTilDto([nyMetode]))
         : mapListeTilDto([nyMetode]),
     }
-
-    lagreBeregningsgrunnlagRequest(
-      {
-        behandlingId: behandling.id,
-        grunnlag,
-      },
-      () => {
-        dispatch(oppdaterBeregingsGrunnlag(grunnlag))
-        onSuccess()
-      }
-    )
   }
 
   return (
@@ -133,12 +102,13 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
           {trygdetider.map((trygdetid: ITrygdetid) => (
             <>
               <BeregningsMetodeRadForAvdoed
-                beregningsMetodeForAvdoed={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
-                oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
-                slettBeregningsMetodeForAvdoed={slettBeregningsMetodeForAvdoed}
-                lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
+                ident={trygdetid.ident}
                 navn={mapNavn(trygdetid.ident)}
                 redigerbar={redigerbar}
+                beregningsMetodeForAvdoed={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
+                behandlingId={behandling.id}
+                patchGrunnlagOppdaterMetode={patchGrunnlagOppdaterMetode}
+                patchGrunnlagSlettMetode={patchGrunnlagSlettMetode}
               />
             </>
           ))}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Radio, ReadMore, Textarea, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
@@ -27,7 +27,6 @@ const setDefaultBeregningsMetodeForAvdoed = (
 
 interface Props {
   ident: string
-  navn: string
   eksisterendeMetode?: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   paaAvbryt: () => void
   oppdaterBeregningsMetodeForAvdoed: (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => void
@@ -36,7 +35,6 @@ interface Props {
 
 export const BeregningsMetodeSkjemaForAvdoed = ({
   ident,
-  navn,
   eksisterendeMetode,
   paaAvbryt,
   oppdaterBeregningsMetodeForAvdoed,
@@ -73,26 +71,55 @@ export const BeregningsMetodeSkjemaForAvdoed = ({
         <ControlledRadioGruppe
           name="data.beregningsMetode.beregningsMetode"
           control={control}
-          legend={`Hvilken metode ble brukt for ${navn}?`}
+          legend="Trygdetid i beregning"
           errorVedTomInput="Du må velge en metode"
           radios={
             <>
-              <Radio value={BeregningsMetode.NASJONAL}>Nasjonal beregning</Radio>
-              <Radio value={BeregningsMetode.PRORATA}>Prorata</Radio>
-              <Radio value={BeregningsMetode.BEST}>Høyest verdi av nasjonal/prorata</Radio>
+              <Radio value={BeregningsMetode.NASJONAL}>Nasjonal beregning (folketrygdberegning)</Radio>
+              <Radio value={BeregningsMetode.PRORATA}>
+                Prorata (EØS/avtaleland, der rettighet er oppfylt ved sammenlegging)
+              </Radio>
+              <Radio value={BeregningsMetode.BEST}>
+                Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter nasjonale
+                regler)
+              </Radio>
             </>
           }
         />
-
+        <Heading size="xsmall" level="4">
+          Gyldig for beregning
+        </Heading>
+        <BodyShort>
+          Disse datoene brukes til å regne ut satsen for barnepensjon ut ifra om det er en eller to forelder død.
+        </BodyShort>
         <HStack gap="4">
-          <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required validate={validerFom} />
-          <ControlledMaanedVelger name="tom" label="Til og med" control={control} />
+          <ControlledMaanedVelger
+            name="fom"
+            label="Fra og med"
+            description="Måned etter dødsfall"
+            control={control}
+            required
+            validate={validerFom}
+          />
+          <VStack>
+            <ControlledMaanedVelger
+              name="tom"
+              label="Til og med (valgfritt)"
+              description="Siste måneden med foreldrerett"
+              control={control}
+            />
+            <ReadMore header="Når skal du oppgi til og med dato">
+              <Box maxWidth="30rem">
+                Beregningen gjelder for perioden der den avdøde regnes som forelder for barnet. Hvis barnet har blitt
+                adoptert skal datoen “til og med” oppgis. Velg forelderen med dårligst trygdetid hvis det kun er én
+                adoptivforelder.
+              </Box>
+            </ReadMore>
+          </VStack>
         </HStack>
-
         <Box width="15rem">
           <Textarea {...register('data.beregningsMetode.begrunnelse')} label="Begrunnelse (valgfritt)" />
         </Box>
-
         <HStack gap="4">
           <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(lagreBeregningsgrunnlagResult)}>
             Lagre

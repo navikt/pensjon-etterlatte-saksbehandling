@@ -5,7 +5,7 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsGrunnlagPostDto, BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
-import { Button, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Table } from '@navikt/ds-react'
 import { format, startOfMonth } from 'date-fns'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { BeregningsMetodeSkjemaForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeSkjemaForAvdoed'
@@ -110,10 +110,9 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       }}
       key={trygdetid.ident}
       content={
-        redigerModus ? (
+        redigerbar ? (
           <BeregningsMetodeSkjemaForAvdoed
             ident={trygdetid.ident}
-            navn={navn}
             eksisterendeMetode={beregningsMetodeForAvdoed}
             paaAvbryt={() => {
               setRedigerModus(false)
@@ -122,7 +121,12 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
             lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
           />
         ) : (
-          ''
+          <>
+            <Heading size="small" level="4">
+              Begrunnelse
+            </Heading>
+            <BodyShort>{beregningsMetodeForAvdoed?.data.beregningsMetode.begrunnelse || '-'}</BodyShort>
+          </>
         )
       }
     >

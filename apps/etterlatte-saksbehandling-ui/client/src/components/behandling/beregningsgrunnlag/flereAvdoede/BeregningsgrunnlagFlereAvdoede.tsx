@@ -1,24 +1,22 @@
-import React, { useState } from 'react'
-import { Box, Button, Heading, HStack, Tabs, VStack } from '@navikt/ds-react'
-import { PencilIcon, PersonIcon, PlusIcon, TagIcon, TrashIcon } from '@navikt/aksel-icons'
+import React from 'react'
+import { Box, Heading, HStack, Table, VStack } from '@navikt/ds-react'
+import { TagIcon } from '@navikt/aksel-icons'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { formaterNavn } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { BeregningsMetodeForAvdoded } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeForAvdoded'
 import {
   mapListeFraDto,
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
-import { SammendragAvBeregningsMetodeForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/SammendragAvBeregningsMetodeForAvdoed'
-import { isPending } from '~shared/api/apiUtils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { BeregningsMetodeRadForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeRadForAvdoed'
 
 interface Props {
   redigerbar: boolean
@@ -32,12 +30,11 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
 
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
-  const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
-
   if (!behandling) return <ApiErrorAlert>Ingen behandling</ApiErrorAlert>
 
   const mapNavn = (fnr: string): string => {
-    const opplysning = personopplysninger?.avdoede?.find(
+    if (!personopplysninger) return fnr
+    const opplysning = personopplysninger.avdoede.find(
       (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
     )?.opplysning
 
@@ -52,14 +49,14 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
     ident: String
   ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined => {
     if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede?.length) {
-      return mapListeFraDto(behandling?.beregningsGrunnlag.begegningsmetodeFlereAvdoede)?.find(
+      return mapListeFraDto(behandling.beregningsGrunnlag.begegningsmetodeFlereAvdoede)?.find(
         (grunnlag) => grunnlag?.data.avdoed === ident
       )
     }
     return undefined
   }
 
-  const slettBeregningsMetodeForAvdoed = (avdoed: string) => {
+  const slettBeregningsMetodeForAvdoed = (avdoed: string, onSuccess: () => void) => {
     const grunnlag = {
       ...behandling?.beregningsGrunnlag,
       soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
@@ -79,12 +76,15 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
       },
       () => {
         dispatch(oppdaterBeregingsGrunnlag(grunnlag))
-        setRedigerTrygdetidMetodeBrukt(false)
+        onSuccess()
       }
     )
   }
 
-  const oppdaterBeregninggsMetodeForAvdoed = (nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
+  const oppdaterBeregninggsMetodeForAvdoed = (
+    nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>,
+    onSuccess: () => void
+  ) => {
     const grunnlag = {
       ...behandling?.beregningsGrunnlag,
       soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
@@ -106,7 +106,7 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
       },
       () => {
         dispatch(oppdaterBeregingsGrunnlag(grunnlag))
-        setRedigerTrygdetidMetodeBrukt(false)
+        onSuccess()
       }
     )
   }
@@ -120,73 +120,29 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
         </Heading>
       </HStack>
       <Box maxWidth="fit-content">
-        <Tabs defaultValue={trygdetider[0].ident} onChange={() => setRedigerTrygdetidMetodeBrukt(false)}>
-          <Tabs.List>
-            {trygdetider.map((trygdetid: ITrygdetid) => (
-              <Tabs.Tab
-                key={trygdetid.ident}
-                value={trygdetid.ident}
-                icon={<PersonIcon aria-hidden />}
-                label={mapNavn(trygdetid.ident)}
-              />
-            ))}
-          </Tabs.List>
+        <Table>
+          <Table.Row>
+            <Table.HeaderCell />
+            <Table.HeaderCell scope="col">Forelder</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Trygdetid brukt i beregningen</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
+            <Table.HeaderCell />
+            <Table.HeaderCell />
+          </Table.Row>
           {trygdetider.map((trygdetid: ITrygdetid) => (
-            <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
-              <Box paddingBlock="4 0">
-                {!redigerTrydgetidMetodeBrukt && (
-                  <VStack gap="4">
-                    <SammendragAvBeregningsMetodeForAvdoed
-                      beregningsMetodeForAvdoed={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
-                    />
-
-                    {redigerbar && (
-                      <HStack gap="4">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="small"
-                          icon={
-                            finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident) ? (
-                              <PencilIcon aria-hidden />
-                            ) : (
-                              <PlusIcon aria-hidden />
-                            )
-                          }
-                          onClick={() => setRedigerTrygdetidMetodeBrukt(true)}
-                        >
-                          {finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident) ? 'Rediger' : 'Legg til'}
-                        </Button>
-                        {finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident) && (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="small"
-                            icon={<TrashIcon aria-hidden />}
-                            onClick={() => slettBeregningsMetodeForAvdoed(trygdetid.ident)}
-                            loading={isPending(lagreBeregningsgrunnlagResult)}
-                          >
-                            Slett
-                          </Button>
-                        )}
-                      </HStack>
-                    )}
-                  </VStack>
-                )}
-                {redigerbar && redigerTrydgetidMetodeBrukt && (
-                  <BeregningsMetodeForAvdoded
-                    ident={trygdetid.ident}
-                    navn={mapNavn(trygdetid.ident)}
-                    eksisterendeMetode={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
-                    oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
-                    paaAvbryt={() => setRedigerTrygdetidMetodeBrukt(false)}
-                    lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
-                  />
-                )}
-              </Box>
-            </Tabs.Panel>
+            <>
+              <BeregningsMetodeRadForAvdoed
+                beregningsMetodeForAvdoed={finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
+                oppdaterBeregningsMetodeForAvdoed={oppdaterBeregninggsMetodeForAvdoed}
+                slettBeregningsMetodeForAvdoed={slettBeregningsMetodeForAvdoed}
+                lagreBeregningsgrunnlagResult={lagreBeregningsgrunnlagResult}
+                navn={mapNavn(trygdetid.ident)}
+                redigerbar={redigerbar}
+              />
+            </>
           ))}
-        </Tabs>
+        </Table>
       </Box>
     </VStack>
   )

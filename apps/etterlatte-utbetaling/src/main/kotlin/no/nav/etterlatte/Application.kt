@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
@@ -27,6 +28,7 @@ fun main() {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
+            setReady = { setReady() },
         ) { rc, _ -> rc.settOppRiversOgListener(it) }
     }
 }

@@ -13,6 +13,7 @@ fun initRogR(
     applikasjonsnavn: String,
     restModule: (Application.() -> Unit)? = null,
     configFromEnvironment: (Miljoevariabler) -> Config = { AivenConfig.default },
+    setReady: () -> Unit = {},
     settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstartOgAvslutning("etterlatte-$applikasjonsnavn")
@@ -33,5 +34,6 @@ fun initRogR(
         builder
             .build()
             .also { rapidsConnection -> settOppRivers(rapidsConnection, rapidEnv) }
+    setReady()
     connection.start()
 }

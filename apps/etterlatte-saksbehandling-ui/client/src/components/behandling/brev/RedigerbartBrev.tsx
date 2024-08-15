@@ -28,9 +28,15 @@ interface RedigerbartBrevProps {
   brev: IBrev
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
+  tilbakestillingsaction: () => void
 }
 
-export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehandlingEndret }: RedigerbartBrevProps) {
+export default function RedigerbartBrev({
+  brev,
+  kanRedigeres,
+  lukkAdvarselBehandlingEndret,
+  tilbakestillingsaction,
+}: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
   const [vedlegg, setVedlegg] = useState<any[]>([])
@@ -71,6 +77,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
           lagret: true,
           beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}`,
         })
+        tilbakestillingsaction && tilbakestillingsaction()
         if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
       }
     )

@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -130,7 +129,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                             .map { it.toLong() }
 
                     inTransaction {
-                        service.opprettOppgaveBulk("", sakIds, OppgaveKilde.BEHANDLING, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
+                        service.opprettOppgaveBulk("", sakIds, oppgaveBulkDto.kilde, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
                     }
 
                     call.respond(HttpStatusCode.OK)

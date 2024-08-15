@@ -1,0 +1,35 @@
+name: config-cache
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test-gradle-cache:
+    runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.gradlekey }}
+          dependency-graph: generate-and-submit
+      - name: Gradle test and build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :apps:etterlatte-migrering:build

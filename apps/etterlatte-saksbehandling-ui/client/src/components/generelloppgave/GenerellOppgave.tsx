@@ -13,7 +13,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export default function GenerellOppgave() {
   useSidetittel('Opprett generell oppgave')
-  const [generellOppgaveResult, opprettNyGenerellOppgave] = useApiCall(opprettGenerellOppgave)
+  const [opprettGenerellOppgaveResult, opprettGenerelOppgaveRequest] = useApiCall(opprettGenerellOppgave)
   const skalViseSide = useFeatureEnabledMedDefault('opprette-generell-oppgave', false)
 
   const methods = useForm<GenerellOppgaveDto>({
@@ -28,13 +28,13 @@ export default function GenerellOppgave() {
   const { reset } = methods
 
   useEffect(() => {
-    if (generellOppgaveResult.status === 'success') {
+    if (opprettGenerellOppgaveResult.status === 'success') {
       reset()
     }
-  }, [generellOppgaveResult, reset])
+  }, [opprettGenerellOppgaveResult, reset])
 
   const opprett = (data: GenerellOppgaveDto) => {
-    opprettNyGenerellOppgave({
+    opprettGenerelOppgaveRequest({
       sakIds: data.sakIds,
       merknad: data.merknad,
       type: data.type,
@@ -81,7 +81,7 @@ export default function GenerellOppgave() {
           </FormProvider>
 
           {mapAllApiResult(
-            generellOppgaveResult,
+            opprettGenerellOppgaveResult,
             <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
             null,
             (error) => (

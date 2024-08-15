@@ -51,23 +51,29 @@ internal class InntektsjusteringRiver(
 
             val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
 
-            journalfoerInntektsjusteringService.opprettJournalpost(
-                sak,
-                inntektsaar,
-                inntektsjustering,
-            )
+            val journalpostResponse =
+                journalfoerInntektsjusteringService.opprettJournalpost(
+                    sak,
+                    inntektsaar,
+                    inntektsjustering,
+                )
 
-            behandlingKlient.opprettOppgave(
-                sak.id,
-                NyOppgaveDto(
-                    OppgaveKilde.BRUKERDIALOG,
-                    OppgaveType.GENERELL_OPPGAVE,
-                    merknad = "Mottatt inntektsjustering",
-                ),
-            )
+            if (journalpostResponse == null) {
+                logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
+                return
+            } else {
+                behandlingKlient.opprettOppgave(
+                    sak.id,
+                    NyOppgaveDto(
+                        OppgaveKilde.BRUKERDIALOG,
+                        OppgaveType.GENERELL_OPPGAVE,
+                        merknad = "Mottatt inntektsjustering",
+                    ),
+                )
+            }
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
-            logger.error("Feil under deserialisering av inntektsjustering (id=$ TODO). Se sikkerlogg for detaljer.")
+            logger.error("Feil under deserialisering av inntektsjustering (id=${inntektsjustering.id}). Se sikkerlogg for detaljer.")
             throw e
         } catch (e: Exception) {
             logger.error("Uhåndtert feilsituasjon TODO : $", e)

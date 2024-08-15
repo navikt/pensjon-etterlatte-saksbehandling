@@ -8,11 +8,11 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREVKODE_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREVKODER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_SAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
-import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_BREVKODE_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_BREVKODER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
@@ -80,7 +80,7 @@ class BrevRepository(
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
 
-    fun hentBrevkode(id: BrevID) = ds.hent(HENT_BREVKODE_QUERY, id) { it.stringOrNull("brevkode")?.let { Brevkoder.valueOf(it) } }
+    fun hentBrevkoder(id: BrevID) = ds.hent(HENT_BREVKODER_QUERY, id) { it.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) } }
 
     fun hentBrevForBehandling(
         behandlingId: UUID,
@@ -137,14 +137,14 @@ class BrevRepository(
             .also { require(it == 1) }
     }
 
-    fun oppdaterBrevkode(
+    fun oppdaterBrevkoder(
         id: BrevID,
         brevkoder: Brevkoder,
     ) = ds.transaction { tx ->
         tx.oppdater(
-            OPPDATER_BREVKODE_QUERY,
-            mapOf("id" to id, "brevkode" to brevkoder.name),
-            "Oppdaterer brevkode for brev $id til $brevkoder",
+            OPPDATER_BREVKODER_QUERY,
+            mapOf("id" to id, "brevkoder" to brevkoder.name),
+            "Oppdaterer brevkoder for brev $id til $brevkoder",
         )
     }
 
@@ -283,7 +283,7 @@ class BrevRepository(
                             "soeker_fnr" to ulagretBrev.soekerFnr,
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
                             "brevtype" to ulagretBrev.brevtype.name,
-                            "brevkode" to ulagretBrev.brevkode.name,
+                            "brevkoder" to ulagretBrev.brevkoder.name,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -438,6 +438,7 @@ class BrevRepository(
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
             journalpostId = row.stringOrNull("journalpost_id"),
             bestillingId = row.stringOrNull("bestilling_id"),
+            brevkoder = row.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) },
         )
     }
 
@@ -465,7 +466,8 @@ class BrevRepository(
         const val HENT_BREV_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
+                b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -479,12 +481,13 @@ class BrevRepository(
             )
         """
 
-        const val HENT_BREVKODE_QUERY = "SELECT brevkode FROM brev WHERE id = ?"
+        const val HENT_BREVKODER_QUERY = "SELECT brevkoder FROM brev WHERE id = ?"
 
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
+                b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -503,7 +506,8 @@ class BrevRepository(
         const val HENT_BREV_FOR_SAK_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
+                b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -519,8 +523,8 @@ class BrevRepository(
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype, brevkode) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype, :brevkode) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype, brevkoder) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype, :brevkoder) 
             ON CONFLICT DO NOTHING;
         """
 
@@ -551,9 +555,9 @@ class BrevRepository(
             WHERE brev_id = :brev_id
         """
 
-        const val OPPDATER_BREVKODE_QUERY = """
+        const val OPPDATER_BREVKODER_QUERY = """
             UPDATE brev 
-            SET brevkode = :brevkode
+            SET brevkoder = :brevkoder
             WHERE id = :id
         """
 

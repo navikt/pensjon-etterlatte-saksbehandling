@@ -97,7 +97,7 @@ class Brevoppretter(
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
-        val opprinneligBrevkode = db.hentBrevkode(brevId)
+        val opprinneligBrevkoder = db.hentBrevkoder(brevId)
 
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
@@ -117,8 +117,8 @@ class Brevoppretter(
                 db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
             }
 
-            if (opprinneligBrevkode != brevkode) {
-                db.oppdaterBrevkode(brevId, brevkode)
+            if (opprinneligBrevkoder != brevkode) {
+                db.oppdaterBrevkoder(brevId, brevkode)
                 db.oppdaterTittel(brevId, innhold.tittel)
             }
 

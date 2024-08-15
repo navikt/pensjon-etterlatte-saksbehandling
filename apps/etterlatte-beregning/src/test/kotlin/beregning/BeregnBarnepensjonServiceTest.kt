@@ -17,8 +17,6 @@ import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.config.BeregningFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -71,19 +69,13 @@ internal class BeregnBarnepensjonServiceTest {
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
 
-    private fun beregnBarnepensjonService(foreldreloes: Boolean = false): BeregnBarnepensjonService {
-        val featureToggleService = DummyFeatureToggleService()
-
-        featureToggleService.settBryter(BeregningFeatureToggle.Foreldreloes, foreldreloes)
-
-        return BeregnBarnepensjonService(
+    private fun beregnBarnepensjonService() =
+        BeregnBarnepensjonService(
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService,
         )
-    }
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - nasjonal`() {
@@ -495,7 +487,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, fnr = AVDOED2_FOEDSELSNUMMER.value))
 
         runBlocking {
-            val beregning = beregnBarnepensjonService(true).beregn(behandling, bruker, periodensSisteDato)
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker, periodensSisteDato)
             beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
 
             with(beregning.beregningsperioder[0]) {
@@ -649,7 +641,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, fnr = AVDOED2_FOEDSELSNUMMER.value))
 
         runBlocking {
-            val beregning = beregnBarnepensjonService(foreldreloes = true).beregn(behandling, bruker, periodensSisteDato)
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker, periodensSisteDato)
             beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 1
 
             with(beregning.beregningsperioder[0]) {
@@ -678,7 +670,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, 20))
 
         runBlocking {
-            val beregning = beregnBarnepensjonService(true).beregn(behandling, bruker)
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null

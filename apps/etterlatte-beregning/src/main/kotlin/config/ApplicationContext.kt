@@ -11,7 +11,6 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -35,15 +34,6 @@ private fun featureToggleProperties(config: Config) =
         host = config.getString("funksjonsbrytere.unleash.host"),
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
-
-enum class BeregningFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    Foreldreloes("foreldreloes"),
-    ;
-
-    override fun key(): String = key
-}
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -85,7 +75,6 @@ class ApplicationContext {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService,
         )
     val beregnOmstillingsstoenadService =
         BeregnOmstillingsstoenadService(

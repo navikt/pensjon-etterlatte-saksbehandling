@@ -19,8 +19,6 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.beregning.regler.toSamlet
-import no.nav.etterlatte.config.BeregningFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -59,7 +57,6 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -76,8 +73,6 @@ class BeregnBarnepensjonService(
             beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
 
-        val foreldreloesFlag = featureToggleService.isEnabled(BeregningFeatureToggle.Foreldreloes, false)
-
         val trygdetidListe =
             try {
                 trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
@@ -88,10 +83,6 @@ class BeregnBarnepensjonService(
                 )
                 emptyList()
             }
-
-        if (trygdetidListe.size > 1 && !foreldreloesFlag) {
-            throw ForeldreloesTrygdetid(behandling.id)
-        }
 
         if (trygdetidListe.isEmpty()) {
             throw TrygdetidIkkeOpprettet()

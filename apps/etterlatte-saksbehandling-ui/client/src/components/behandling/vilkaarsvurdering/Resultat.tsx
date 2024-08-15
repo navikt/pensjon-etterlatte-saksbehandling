@@ -21,6 +21,7 @@ import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { formaterSakstype } from '~utils/formatering/formatering'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -227,7 +228,7 @@ export const Resultat = (props: Props) => {
             Du må se over vurderingene og sjekke at de fortsatt er riktige.
           </OppdatertGrunnlagAlert>
         )}
-        <VilkaarsvurderingKnapper behandlingId={behandlingId} />
+        {redigerbar ? <VilkaarsvurderingKnapper behandlingId={behandlingId} /> : <NesteOgTilbake />}
       </Box>
     </>
   )

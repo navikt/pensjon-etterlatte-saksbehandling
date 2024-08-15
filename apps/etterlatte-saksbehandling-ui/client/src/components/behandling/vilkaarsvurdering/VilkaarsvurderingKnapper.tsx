@@ -52,6 +52,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
       next()
     })
   }
+
   const genererNesteKnapp = () => {
     switch (vedtaksresultat) {
       case 'innvilget':

@@ -2,6 +2,9 @@ name: config-cache
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - *
 
 permissions:
   contents: write

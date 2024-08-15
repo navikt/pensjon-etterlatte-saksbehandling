@@ -68,6 +68,7 @@ class VedtaksbrevService(
             brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
             brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtakStatus, saksbehandler, brev, pdf ->
+            brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
             lagrePdfHvisVedtakFattet(
                 brev.id,
                 pdf,

@@ -1,7 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak, slettBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { BodyShort, Box, Button, HStack, Modal, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
@@ -53,7 +52,6 @@ const handlingKnapp = (brev: IBrev) => {
 }
 
 export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {
-  useNavigate()
   const [brevListe, hentBrev] = useApiCall(hentBrevForSak)
 
   useEffect(() => {

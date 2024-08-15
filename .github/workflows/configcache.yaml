@@ -29,6 +29,7 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.gradlekey }}
           dependency-graph: generate-and-submit
+          cache-read-only: false
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -53,6 +53,7 @@ class YtelseMedGrunnlagService(
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,
                     sanksjon = avkortetYtelse.sanksjon,
+                    institusjonsopphold = beregningIPeriode.institusjonsopphold,
                 )
             }
 

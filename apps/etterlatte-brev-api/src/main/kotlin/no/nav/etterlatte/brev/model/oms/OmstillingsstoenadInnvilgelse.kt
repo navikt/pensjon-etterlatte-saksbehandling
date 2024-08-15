@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -53,9 +54,10 @@ data class OmstillingsstoenadInnvilgelse(
                         restanse = it.restanse,
                         utbetaltBeloep = it.utbetaltBeloep,
                         trygdetid = it.trygdetid,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
+                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         sanksjon = it.sanksjon != null,
+                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
                     )
                 }
 

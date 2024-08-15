@@ -11,6 +11,16 @@ fun hentAntallKjerner(): Int {
     }
     return Runtime.getRuntime().availableProcessors() / 2
 }
+
+buildscript {
+    configurations.all {
+        resolutionStrategy {
+            force(libs.commons.compress)
+            force("com.squareup.okio:okio-jvm:3.4.0")
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.license) apply true
     alias(libs.plugins.versions) apply true

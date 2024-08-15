@@ -64,6 +64,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
   const behandling = useBehandling()
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     if (!redigerbar) {
@@ -115,7 +116,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       return
 
     hentBrevPaaNytt()
-  }, [behandlingId, sakId])
+  }, [behandlingId, sakId, tilbakestilt])
 
   const [, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
 
@@ -205,6 +206,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               brev={vedtaksbrev!!}
               kanRedigeres={redigerbar}
               lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
+              tilbakestillingsaction={() => {
+                setTilbakestilt(true)
+              }}
             />
           ))}
 

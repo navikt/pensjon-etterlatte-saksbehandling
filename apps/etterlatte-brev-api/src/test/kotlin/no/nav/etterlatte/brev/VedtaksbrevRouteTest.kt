@@ -245,6 +245,7 @@ internal class VedtaksbrevRouteTest {
                 Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
             ),
             brevtype = Brevtype.INFORMASJON,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient =

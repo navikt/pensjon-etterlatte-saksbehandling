@@ -108,6 +108,7 @@ class OversendelseBrevServiceImpl(
                         ),
                     innholdVedlegg = listOf(),
                     brevtype = Brevtype.OVERSENDELSE_KLAGE,
+                    brevkoder = Brevkoder.OVERSENDELSE_KLAGE,
                 ),
             )
         return brev

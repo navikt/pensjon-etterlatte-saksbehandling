@@ -155,6 +155,7 @@ class JournalfoerBrevServiceTest {
                 Tidspunkt.now(),
                 mottaker = mockk(),
                 brevtype = Brevtype.MANUELT,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
@@ -190,6 +191,7 @@ class JournalfoerBrevServiceTest {
                 opprettet = Tidspunkt.now(),
                 mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.INFORMASJON,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         coEvery { behandlingService.hentSak(forventetBrev.sakId, any()) } returns sak
@@ -272,6 +274,7 @@ class JournalfoerBrevServiceTest {
                 opprettet = Tidspunkt.now(),
                 mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.MANUELT,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         every { db.hentBrev(any()) } returns forventetBrev
@@ -344,6 +347,7 @@ class JournalfoerBrevServiceTest {
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
         brevtype = Brevtype.INFORMASJON,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker(fnr: String) =

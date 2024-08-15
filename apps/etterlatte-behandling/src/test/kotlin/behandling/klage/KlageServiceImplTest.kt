@@ -15,6 +15,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -577,6 +578,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
             brevtype = Brevtype.MANUELT,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun randomString() = Random.nextLong().toString()

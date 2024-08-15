@@ -120,6 +120,7 @@ internal class OversendelsesbrevRouteTest {
                 Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
             ),
             brevtype = Brevtype.OVERSENDELSE_KLAGE,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     companion object {

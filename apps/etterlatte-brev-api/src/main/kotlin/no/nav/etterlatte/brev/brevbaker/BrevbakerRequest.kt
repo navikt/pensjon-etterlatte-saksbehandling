@@ -84,7 +84,7 @@ data class BrevbakerRequest internal constructor(
             felles: Felles,
         ): BrevbakerRequest =
             BrevbakerRequest(
-                kode = strukturertBrev.brevkode,
+                kode = strukturertBrev.brevkode.ferdigstilling,
                 letterData = strukturertBrev.tilLetterdata(),
                 felles = felles,
                 language = LanguageCode.spraakToLanguageCode(strukturertBrev.spraak),

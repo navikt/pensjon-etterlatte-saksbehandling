@@ -1,5 +1,11 @@
 package no.nav.etterlatte.brev
 
+/*
+Denne enumen brukes primært for kommunikasjonen mot brevbakeren.
+
+Denne enumen henger tett sammen med Brevkoder-enumen.
+Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
+ */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
     val tittel: String? = null,
@@ -65,6 +71,8 @@ enum class EtterlatteBrevKode(
 
     KLAGE_OVERSENDELSE_BRUKER(Brevtype.OVERSENDELSE_KLAGE, "Klagen er oversendt til NAV Klageinstans Vest"),
     KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT, "Oversendelse til KA"),
+
+    OPPLASTET_PDF(Brevtype.OPPLASTET_PDF),
 }
 
 enum class Brevtype {

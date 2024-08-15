@@ -31,7 +31,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
@@ -59,7 +59,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevtype: Brevtype,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
@@ -83,6 +83,7 @@ class Brevoppretter(
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                     brevtype = brevtype,
+                    brevkoder = brevkode,
                 )
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }
@@ -92,10 +93,11 @@ class Brevoppretter(
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
+        val opprinneligBrevkoder = db.hentBrevkoder(brevId)
 
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
@@ -113,6 +115,11 @@ class Brevoppretter(
 
             if (innholdVedlegg != null) {
                 db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
+            }
+
+            if (opprinneligBrevkoder != brevkode) {
+                db.oppdaterBrevkoder(brevId, brevkode)
+                db.oppdaterTittel(brevId, innhold.tittel)
             }
 
             return BrevService.BrevPayload(

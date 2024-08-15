@@ -19,6 +19,15 @@ fun <A> DataSource.transaction(
         session.transaction { operation(it) }
     }
 
+fun <A> DataSource.hent(
+    query: String,
+    params: Any?,
+    mapping: (Row) -> A?,
+): A? =
+    using(sessionOf(this)) {
+        it.run(queryOf(query, params).map(mapping).asSingle)
+    }
+
 interface Transactions<T> {
     fun <R> inTransaction(block: T.(TransactionalSession) -> R): R
 

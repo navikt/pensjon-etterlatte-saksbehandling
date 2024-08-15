@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
@@ -56,6 +57,7 @@ fun opprettBrevFra(
     mottaker = opprettNyttBrev.mottaker,
     opprettet = opprettNyttBrev.opprettet,
     brevtype = opprettNyttBrev.brevtype,
+    brevkoder = opprettNyttBrev.brevkoder,
 )
 
 class Pdf(
@@ -91,6 +93,7 @@ data class OpprettNyttBrev(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
     val brevtype: Brevtype,
+    val brevkoder: Brevkoder,
 ) {
     val status: Status = Status.OPPRETTET
 }

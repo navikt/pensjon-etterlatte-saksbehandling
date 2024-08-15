@@ -39,7 +39,7 @@ internal class VarselbrevService(
                 sakId = sakId,
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
-                brevKodeMapping = { brevkode.redigering },
+                brevKodeMapping = { brevkode },
                 brevtype = Brevtype.VARSEL,
             ) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(

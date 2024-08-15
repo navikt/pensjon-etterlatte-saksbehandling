@@ -26,6 +26,7 @@ export function TilbakekrevingBrev({
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   useEffect(() => {
     hentBrevRequest(behandling.id, (brev, statusCode) => {
@@ -37,7 +38,7 @@ export function TilbakekrevingBrev({
         })
       }
     })
-  }, [behandling])
+  }, [behandling, tilbakestilt])
 
   if (isPending(hentBrevStatus)) {
     return <Spinner label="Henter brev ..." />
@@ -77,7 +78,13 @@ export function TilbakekrevingBrev({
           </Box>
         </Sidebar>
 
-        {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}
+        {vedtaksbrev && (
+          <RedigerbartBrev
+            brev={vedtaksbrev}
+            kanRedigeres={redigerbar}
+            tilbakestillingsaction={() => setTilbakestilt(true)}
+          />
+        )}
       </BrevContent>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="center">

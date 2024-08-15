@@ -145,7 +145,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                       Informasjon om aktivitetsplikt ved 4 måneder
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
-                      Informasjon om aktivitetsplikt ved 6 måneder
+                      Informasjon om aktivitetsplikt ved 6 måneder - varig unntak
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
                       Informasjon om dødsfall

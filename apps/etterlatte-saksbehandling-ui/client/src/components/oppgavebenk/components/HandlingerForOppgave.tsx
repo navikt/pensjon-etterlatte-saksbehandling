@@ -1,15 +1,16 @@
 import { Button } from '@navikt/ds-react'
-import { EnvelopeClosedIcon, EyeIcon } from '@navikt/aksel-icons'
+import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
+import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
-import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
 import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
+import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -143,15 +144,7 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <PersonButtonLink
-            size="small"
-            icon={<EnvelopeClosedIcon />}
-            fnr={fnr || '-'}
-            fane={PersonOversiktFane.BREV}
-            disabled={!fnr}
-          >
-            Gå til brev
-          </PersonButtonLink>
+          <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
     default:

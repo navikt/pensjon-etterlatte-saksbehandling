@@ -1,5 +1,11 @@
 package no.nav.etterlatte.brev
 
+/*
+Denne enumen brukes primært for kommunikasjonen mot brevbakeren.
+
+Denne enumen henger tett sammen med Brevkoder-enumen.
+Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
+ */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
     val tittel: String? = null,

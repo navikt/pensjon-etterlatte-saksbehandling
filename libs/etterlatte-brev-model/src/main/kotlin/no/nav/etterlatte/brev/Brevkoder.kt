@@ -1,5 +1,17 @@
 package no.nav.etterlatte.brev
 
+/*
+Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
+Saksbehandler kan redigere den redigerbare delen, og ved PDF-generering sender vi den delen over til brevbakeren,
+så den delen blir fletta inn i ferdigstillingsmalen.
+
+For å få metadata og oppsett rundt riktig, er vi avhengige av å vite hvilken mal den redigerbare delen er basert på,
+og hvilken mal ferdigstillingsdelen er basert på. Denne enumen er nettopp den koplinga.
+
+Det er også ei logisk kopling mellom redigerbart utfall og ferdigstillingsmal - det vil for eksempel ikke gi meining
+å bruke den redigerbare delen for tilbakekreving i ferdigstillingsmalen for vedtak avslag.
+Så her modellerer vi det eksplisitt.
+*/
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
     val ferdigstilling: EtterlatteBrevKode = redigering,

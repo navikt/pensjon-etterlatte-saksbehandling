@@ -119,7 +119,7 @@ class Brevoppretter(
 
             if (opprinneligBrevkode != brevkode) {
                 db.oppdaterBrevkode(brevId, brevkode)
-                // TODO oppdater tittel her
+                db.oppdaterTittel(brevId, innhold.tittel)
             }
 
             return BrevService.BrevPayload(

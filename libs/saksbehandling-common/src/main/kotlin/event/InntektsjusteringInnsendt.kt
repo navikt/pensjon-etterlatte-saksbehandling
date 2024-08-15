@@ -4,7 +4,6 @@ object InntektsjusteringInnsendt {
     val fnrBruker = "@fnr_bruker"
     val inntektsjusteringInnhold = "@inntektsjustering_innhold"
     val inntektsaar = "@inntektsaar"
-    val dokarkivReturKey = "@dokarkivRetur"
 }
 
 enum class InntektsjusteringInnsendtHendelseType(

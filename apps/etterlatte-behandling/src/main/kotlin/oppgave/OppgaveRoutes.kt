@@ -121,8 +121,13 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 kunSaksbehandler {
                     val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
 
-                    // TODO: heller ta inn liste i endepunkt?
-                    val sakIds: List<Long> = oppgaveBulkDto.sakIds.split(",").map { it.trim().toLong() }
+                    val sakIds: List<Long> =
+                        oppgaveBulkDto.sakIds
+                            .split(
+                                ",",
+                            ).map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                            .map { it.toLong() }
 
                     inTransaction {
                         service.opprettOppgaveBulk("", sakIds, OppgaveKilde.BEHANDLING, oppgaveBulkDto.type, oppgaveBulkDto.merknad)

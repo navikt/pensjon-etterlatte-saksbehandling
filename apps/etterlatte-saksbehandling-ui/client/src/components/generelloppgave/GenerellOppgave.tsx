@@ -9,10 +9,13 @@ import { opprettGenerellOppgave } from '~shared/api/oppgaver'
 import { GenerellOppgaveDto, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export default function GenerellOppgave() {
   useSidetittel('Opprett generell oppgave')
   const [generellOppgaveResult, opprettNyGenerellOppgave] = useApiCall(opprettGenerellOppgave)
+  const skalViseSide = useFeatureEnabledMedDefault('opprette-generell-oppgave', false)
+
   const methods = useForm<GenerellOppgaveDto>({
     defaultValues: {
       merknad: '',
@@ -46,47 +49,53 @@ export default function GenerellOppgave() {
   } = methods
 
   return (
-    <FormWrapper>
-      <FormProvider {...methods}>
-        <Heading size="large">Opprett generell oppgave</Heading>
+    <>
+      {skalViseSide && (
+        <FormWrapper>
+          <FormProvider {...methods}>
+            <Heading size="large">Opprett generell oppgave</Heading>
 
-        <TextField
-          {...register('sakIds', {
-            required: { value: true, message: 'Du må spesifisere minimum EN saksID' },
-          })}
-          label="Saker"
-          description="Legg til saksId i en kommaseparert liste"
-          placeholder="sakid1, sakid2, ...."
-          error={errors.sakIds?.message}
-        />
+            <TextField
+              {...register('sakIds', {
+                required: { value: true, message: 'Du må oppgi minst en saks-ID' },
+              })}
+              label="Saker"
+              description="Legg til saks-ID-er i en kommaseparert liste"
+              placeholder="sakid1, sakid2, ...."
+              error={errors.sakIds?.message}
+            />
 
-        <Textarea
-          {...register('merknad', {
-            required: { value: true, message: 'Du må spesifisere merknad' },
-          })}
-          label="Merknad"
-          placeholder="Legg til en kort beskrivelse av hva som skal utføres"
-          error={errors.merknad?.message}
-          maxLength={180}
-        />
+            <Textarea
+              {...register('merknad', {
+                required: { value: true, message: 'Du må spesifisere merknad' },
+              })}
+              label="Merknad"
+              placeholder="Legg til en kort beskrivelse av oppgaven"
+              error={errors.merknad?.message}
+              maxLength={180}
+            />
 
-        <Button type="submit" onClick={handleSubmit(opprett)} variant="primary">
-          Opprett
-        </Button>
-      </FormProvider>
+            <Button type="submit" onClick={handleSubmit(opprett)} variant="primary">
+              Opprett
+            </Button>
+          </FormProvider>
 
-      {mapAllApiResult(
-        generellOppgaveResult,
-        <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
-        null,
-        (error) => (
-          <ApiErrorAlert>{error.detail}</ApiErrorAlert>
-        ),
-        () => (
-          <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
-        )
+          {mapAllApiResult(
+            generellOppgaveResult,
+            <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
+            null,
+            (error) => (
+              <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+            ),
+            () => (
+              <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
+            )
+          )}
+        </FormWrapper>
       )}
-    </FormWrapper>
+
+      {!skalViseSide && <Alert variant="error">Denne funksjonen er ikke tilgjengelig for denne brukerrollen.</Alert>}
+    </>
   )
 }
 

@@ -25,12 +25,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v4
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-encryption-key: ntCTnkBEx22thmeoxTjzgQ==
+          cache-encryption-key: ${{ secrets.gradlekey }}
           dependency-graph: generate-and-submit
           cache-read-only: false
       - name: Gradle test and build

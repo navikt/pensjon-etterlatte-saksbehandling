@@ -7,6 +7,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
@@ -54,17 +55,25 @@ class AktivitetspliktKopierServiceTest {
                 )
 
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
-            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktUnntakDao.kopierUnntak(unntakId, behandlingId) } returns 1
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
-            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
-                mockk {
-                    every { id } returns unntakId
-                    every { tom } returns LocalDate.now().minusYears(1)
-                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
-                    every { sakId } returns aktivitet.sakId
-                }
+                listOf(
+                    AktivitetspliktUnntak(
+                        id = unntakId,
+                        sakId = sakId,
+                        behandlingId = behandlingId,
+                        oppgaveId = null,
+                        unntak = AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR,
+                        fom = null,
+                        tom = LocalDate.now().minusYears(1),
+                        opprettet = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                        endret = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                        beskrivelse = "",
+                    ),
+                )
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
             service.kopierVurdering(sakId, behandlingId)
@@ -80,16 +89,20 @@ class AktivitetspliktKopierServiceTest {
             val aktivitetsgradId = UUID.randomUUID()
 
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
-                mockk {
-                    every { id } returns aktivitetsgradId
-                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
-                    every { fom } returns aktivitet.fom.minusMonths(1)
-                    every { sakId } returns aktivitet.sakId
-                }
-            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+                listOf(
+                    mockk {
+                        every { id } returns aktivitetsgradId
+                        every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
+                        every { fom } returns aktivitet.fom.minusMonths(1)
+                        every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
+                    },
+                )
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(aktivitetsgradId, behandlingId) } returns 1
-            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
             service.kopierVurdering(sakId, behandlingId)

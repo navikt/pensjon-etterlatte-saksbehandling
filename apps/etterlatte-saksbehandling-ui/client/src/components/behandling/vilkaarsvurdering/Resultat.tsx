@@ -18,10 +18,10 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { formaterSakstype } from '~utils/formatering/formatering'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -222,21 +222,13 @@ export const Resultat = (props: Props) => {
       </Box>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        {redigerbar ? (
-          <>
-            {vilkaarsvurdering.isGrunnlagUtdatert && (
-              <OppdatertGrunnlagAlert variant="warning">
-                OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
-                Du må se over vurderingene og sjekke at de fortsatt er riktige.
-              </OppdatertGrunnlagAlert>
-            )}
-            {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
-              <VilkaarsvurderingKnapper behandlingId={behandlingId} />
-            )}
-          </>
-        ) : (
-          <NesteOgTilbake />
+        {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
+          <OppdatertGrunnlagAlert variant="warning">
+            OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
+            Du må se over vurderingene og sjekke at de fortsatt er riktige.
+          </OppdatertGrunnlagAlert>
         )}
+        {redigerbar ? <VilkaarsvurderingKnapper behandlingId={behandlingId} /> : <NesteOgTilbake />}
       </Box>
     </>
   )

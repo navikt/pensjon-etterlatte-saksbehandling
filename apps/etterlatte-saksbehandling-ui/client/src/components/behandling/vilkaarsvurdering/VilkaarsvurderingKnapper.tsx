@@ -53,6 +53,25 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
     })
   }
 
+  const genererNesteKnapp = () => {
+    switch (vedtaksresultat) {
+      case 'innvilget':
+      case 'endring':
+      case 'opphoer':
+        return (
+          <Button variant="primary" loading={isPending(oppdaterStatusResult)} onClick={sjekkGyldighetOgOppdaterStatus}>
+            {handlinger.NESTE.navn}
+          </Button>
+        )
+      case 'avslag':
+        return (
+          <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
+            {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
+          </Button>
+        )
+    }
+  }
+
   return (
     <>
       {isFailureHandler({
@@ -63,30 +82,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         apiResult: oppdaterStatusResult,
         errorMessage: 'Kunne ikke oppdatere status',
       })}
-      <BehandlingHandlingKnapper>
-        {(() => {
-          switch (vedtaksresultat) {
-            case 'innvilget':
-            case 'endring':
-            case 'opphoer':
-              return (
-                <Button
-                  variant="primary"
-                  loading={isPending(oppdaterStatusResult)}
-                  onClick={sjekkGyldighetOgOppdaterStatus}
-                >
-                  {handlinger.NESTE.navn}
-                </Button>
-              )
-            case 'avslag':
-              return (
-                <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-                  {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
-                </Button>
-              )
-          }
-        })()}
-      </BehandlingHandlingKnapper>
+      <BehandlingHandlingKnapper>{genererNesteKnapp()}</BehandlingHandlingKnapper>
     </>
   )
 }

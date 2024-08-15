@@ -13,7 +13,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.brev.EtterlatteBrevKode
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.model.Slate
@@ -32,7 +32,7 @@ import java.util.UUID
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class StrukturertBrev {
-    abstract val brevkode: EtterlatteBrevKode
+    abstract val brevkode: Brevkoder
     abstract val sak: Sak
     abstract val soekerFnr: String
     open val behandlingId: UUID? = null
@@ -44,7 +44,7 @@ sealed class StrukturertBrev {
     data class KlageBlankett(
         val klage: Klage,
     ) : StrukturertBrev() {
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT
+        override val brevkode: Brevkoder = Brevkoder.KLAGE_OVERSENDELSE_BLANKETT
         override val sak: Sak = klage.sak
         override val soekerFnr: String = klage.sak.ident
         override val behandlingId = klage.id

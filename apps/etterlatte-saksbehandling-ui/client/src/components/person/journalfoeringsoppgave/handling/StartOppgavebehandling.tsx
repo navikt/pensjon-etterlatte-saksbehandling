@@ -75,7 +75,11 @@ export default function StartOppgavebehandling() {
       )}
 
       {isSuccess(personResult) && !tilhoererBruker && (
-        <Alert variant="error">Journalposten tilhører ikke bruker som oppgaven er tilknyttet</Alert>
+        <Alert variant="warning">
+          Journalposten og oppgaven tilhører nå to ulike brukere. Hvis du skal opprette ny behandling eller klage på
+          bruker tilknyttet journalposten, må du opprette ny journalføringsoppgave. Dette kan du gjøre fra
+          dokumentoversikten til brukeren.
+        </Alert>
       )}
 
       <RadioGroup
@@ -93,7 +97,11 @@ export default function StartOppgavebehandling() {
         >
           Opprett behandling
         </Radio>
-        <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>
+        <Radio
+          value={OppgaveHandling.NY_KLAGE}
+          description="Opprett ny klagebehandling"
+          disabled={!journalpost || !tilhoererBruker}
+        >
           Opprett klagebehandling
         </Radio>
         <Radio

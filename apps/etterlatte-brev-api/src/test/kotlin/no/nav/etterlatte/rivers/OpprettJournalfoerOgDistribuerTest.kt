@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
@@ -105,6 +106,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),
                 ),
             brevtype = Brevtype.INFORMASJON,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =

@@ -32,7 +32,7 @@ val institusjonsoppholdSatsRegelOMS =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner satsen for institusjonsoppholdberegning",
-        regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats"),
+        regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-INSTITUSJONSOPPHOLD-SATS"),
     ) benytter grunnbeloep og institusjonsoppholdRegelOMS med { grunnbeloep, prosent ->
         Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
     }

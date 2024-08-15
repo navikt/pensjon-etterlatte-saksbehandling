@@ -13,7 +13,6 @@ import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
@@ -45,8 +44,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
-
-  const visFlereTrygdetider = useFeatureEnabledMedDefault('foreldreloes', false)
 
   const personopplysninger = usePersonopplysninger()
 
@@ -132,7 +129,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
         {landListe && (
           <>
-            {(trygdetider.length == 1 || !visFlereTrygdetider) && (
+            {trygdetider.length == 1 && (
               <EnkelPersonTrygdetid
                 redigerbar={redigerbar}
                 behandling={behandling}
@@ -142,7 +139,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                 fetchTrygdetider={fetchTrygdetider}
               />
             )}
-            {trygdetider.length > 1 && visFlereTrygdetider && (
+            {trygdetider.length > 1 && (
               <>
                 <Box maxWidth="fit-content">
                   <Alert variant="info">Det finnes flere avdøde, husk å oppdatere for alle</Alert>

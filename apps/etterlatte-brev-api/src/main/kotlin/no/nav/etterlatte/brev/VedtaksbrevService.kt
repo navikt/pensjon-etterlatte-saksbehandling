@@ -54,7 +54,7 @@ class VedtaksbrevService(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
-            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it).redigering },
+            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
         ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     suspend fun genererPdf(
@@ -68,6 +68,7 @@ class VedtaksbrevService(
             brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
             brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { vedtakStatus, saksbehandler, brev, pdf ->
+            brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
             lagrePdfHvisVedtakFattet(
                 brev.id,
                 pdf,
@@ -132,12 +133,12 @@ class VedtaksbrevService(
             when (brevtype) {
                 Brevtype.VARSEL ->
                     if (it.sakType === SakType.BARNEPENSJON) {
-                        Brevkoder.BP_VARSEL.redigering
+                        Brevkoder.BP_VARSEL
                     } else {
-                        Brevkoder.OMS_VARSEL.redigering
+                        Brevkoder.OMS_VARSEL
                     }
 
-                Brevtype.VEDTAK -> brevKodeMappingVedtak.brevKode(it).redigering
+                Brevtype.VEDTAK -> brevKodeMappingVedtak.brevKode(it)
                 else -> throw UgyldigForespoerselException(
                     "FEIL_BREVKODE_NYTT_INNHOLD",
                     "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",

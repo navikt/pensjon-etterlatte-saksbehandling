@@ -15,7 +15,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -92,7 +91,6 @@ internal class VedtakBehandlingServiceTest(
         service =
             VedtakBehandlingService(
                 repository = repository,
-                featureToggleService = DummyFeatureToggleService().also { it.settBryter(VedtakFeatureToggle.VerifiserPerioder, true) },
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,

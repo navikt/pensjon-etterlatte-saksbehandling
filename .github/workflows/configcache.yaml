@@ -29,8 +29,10 @@ jobs:
         run: cat ${{ secrets.gradlekey }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
+        env:
           cache-encryption-key: ${{ secrets.gradlekey }}
+        with:
+#          cache-encryption-key: ${{ secrets.gradlekey }}
           dependency-graph: generate-and-submit
           cache-read-only: false
       - name: Gradle test and build

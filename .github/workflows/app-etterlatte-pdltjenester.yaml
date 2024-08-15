@@ -34,7 +34,7 @@ on:
       - gradle/libs.versions.toml
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:

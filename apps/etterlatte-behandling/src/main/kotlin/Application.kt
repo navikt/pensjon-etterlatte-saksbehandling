@@ -168,7 +168,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         behandlingFactory = applicationContext.behandlingFactory,
         featureToggleService = applicationContext.featureToggleService,
     )
-    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
+    aktivitetspliktRoutes(
+        aktivitetspliktService = applicationContext.aktivitetspliktService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

@@ -503,6 +503,22 @@ class AktivitetspliktService(
     }
 }
 
+/**
+ * Henter det nyeste bildet på hva som er vurderingen av aktivitetsgrad og unntak fra aktivitet på sak.
+ *
+ * Grunnen til at man må hente ut både unntak og aktivitetgrad fra samme kilde, og gjøre sammenstilling for å
+ * sikre at det er samme kilde kan mse på følgende scenario:
+ *
+ * Man har følgende samling av vurderinger for det som er “riktig” for saken:
+ * |-------- Under 50 % ----|------ over 50 % ----|----- Unntak midlertidig sykdom --->
+ *
+ * Der unntaket er lagt inn nylig. La oss si at det ikke stemmer at det er et unntak allikevel i saken,
+ * og man korrigerer i en behandling:
+ * |-------- Under 50 % ----|------ over 50 % ------->
+ *
+ * Hvis vi nå skal se hva som er “riktig” i saken må man hente ut begge deler, fordi hvis vi henter ut
+ * siste vurdering og siste unntak får man med seg det slettede unntaket.
+ */
 fun hentVurderingForSakHelper(
     aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,

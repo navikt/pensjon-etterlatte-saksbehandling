@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "*"
+      - EY-4287_framleis-encryptionkey-kroell
 
 permissions:
   contents: write
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-encryption-key: ${{ secrets.gradlekey }}
+          cache-encryption-key: ntCTnkBEx22thmeoxTjzgQ==
           dependency-graph: generate-and-submit
           cache-read-only: false
       - name: Gradle test and build

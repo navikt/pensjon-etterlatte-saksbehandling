@@ -25,10 +25,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Print for debug
-        run: |
-          echo ${{secrets.gradlekey}} | sed 's/./& /g'
-          echo ${{secrets.krypteringsnoekkelFnr}} | sed 's/./& /g'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:

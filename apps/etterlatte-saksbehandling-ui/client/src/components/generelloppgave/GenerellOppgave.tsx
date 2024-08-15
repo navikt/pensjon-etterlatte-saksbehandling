@@ -1,7 +1,5 @@
-import { Alert, Button, Heading, Textarea, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
-
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
@@ -49,9 +47,9 @@ export default function GenerellOppgave() {
   } = methods
 
   return (
-    <>
+    <VStack padding="8" gap="4" width="40rem">
       {skalViseSide && (
-        <FormWrapper>
+        <>
           <FormProvider {...methods}>
             <Heading size="large">Opprett generell oppgave</Heading>
 
@@ -91,17 +89,10 @@ export default function GenerellOppgave() {
               <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
             )
           )}
-        </FormWrapper>
+        </>
       )}
 
       {!skalViseSide && <Alert variant="error">Denne funksjonen er ikke tilgjengelig for denne brukerrollen.</Alert>}
-    </>
+    </VStack>
   )
 }
-
-const FormWrapper = styled.div`
-  margin: 2em;
-  width: 25em;
-  display: grid;
-  gap: var(--a-spacing-4);
-`

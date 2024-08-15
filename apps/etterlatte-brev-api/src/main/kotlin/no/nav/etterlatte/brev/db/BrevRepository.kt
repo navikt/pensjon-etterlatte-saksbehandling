@@ -6,10 +6,13 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREVKODE_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_SAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_BREVKODE_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
@@ -41,6 +44,8 @@ import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -74,6 +79,8 @@ class BrevRepository(
         using(sessionOf(ds)) {
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
+
+    fun hentBrevkode(id: BrevID) = ds.hent(HENT_BREVKODE_QUERY, id) { it.stringOrNull("brevkode")?.let { Brevkoder.valueOf(it) } }
 
     fun hentBrevForBehandling(
         behandlingId: UUID,
@@ -128,6 +135,17 @@ class BrevRepository(
         tx
             .lagreHendelse(id, Status.OPPDATERT, payload.toJson())
             .also { require(it == 1) }
+    }
+
+    fun oppdaterBrevkode(
+        id: BrevID,
+        brevkoder: Brevkoder,
+    ) = ds.transaction { tx ->
+        tx.oppdater(
+            OPPDATER_BREVKODE_QUERY,
+            mapOf("id" to id, "brevkode" to brevkoder.name),
+            "Oppdaterer brevkode for brev $id til $brevkoder",
+        )
     }
 
     fun oppdaterMottaker(
@@ -461,6 +479,8 @@ class BrevRepository(
             )
         """
 
+        const val HENT_BREVKODE_QUERY = "SELECT brevkode FROM brev WHERE id = ?"
+
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
@@ -529,6 +549,12 @@ class BrevRepository(
                 landkode = :landkode,
                 land = :land
             WHERE brev_id = :brev_id
+        """
+
+        const val OPPDATER_BREVKODE_QUERY = """
+            UPDATE brev 
+            SET brevkode = :brevkode
+            WHERE id = :id
         """
 
         const val OPPDATER_TITTEL_QUERY = """

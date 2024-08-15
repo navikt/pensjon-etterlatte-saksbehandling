@@ -1,7 +1,7 @@
 import { Alert, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { opprettGenerellOppgave } from '~shared/api/oppgaver'
 import { GenerellOppgaveDto, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
@@ -14,16 +14,19 @@ export default function GenerellOppgave() {
   const [opprettGenerellOppgaveResult, opprettGenerelOppgaveRequest] = useApiCall(opprettGenerellOppgave)
   const skalViseSide = useFeatureEnabledMedDefault('opprette-generell-oppgave', false)
 
-  const methods = useForm<GenerellOppgaveDto>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<GenerellOppgaveDto>({
     defaultValues: {
       merknad: '',
       sakIds: '',
       type: Oppgavetype.GENERELL_OPPGAVE,
-      kilde: OppgaveKilde.BEHANDLING,
+      kilde: OppgaveKilde.SAKSBEHANDLER,
     },
   })
-
-  const { reset } = methods
 
   useEffect(() => {
     if (opprettGenerellOppgaveResult.status === 'success') {
@@ -40,17 +43,11 @@ export default function GenerellOppgave() {
     })
   }
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = methods
-
   return (
-    <VStack padding="8" gap="4" width="40rem">
+    <VStack padding="8" gap="8" width="40rem">
       {skalViseSide && (
-        <>
-          <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(opprett)}>
+          <VStack gap="4">
             <Heading size="large">Opprett generell oppgave</Heading>
 
             <TextField
@@ -76,20 +73,20 @@ export default function GenerellOppgave() {
             <Button type="submit" onClick={handleSubmit(opprett)} variant="primary">
               Opprett
             </Button>
-          </FormProvider>
 
-          {mapAllApiResult(
-            opprettGenerellOppgaveResult,
-            <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
-            null,
-            (error) => (
-              <ApiErrorAlert>{error.detail}</ApiErrorAlert>
-            ),
-            () => (
-              <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
-            )
-          )}
-        </>
+            {mapAllApiResult(
+              opprettGenerellOppgaveResult,
+              <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
+              null,
+              (error) => (
+                <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+              ),
+              () => (
+                <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
+              )
+            )}
+          </VStack>
+        </form>
       )}
 
       {!skalViseSide && <Alert variant="error">Denne funksjonen er ikke tilgjengelig for denne brukerrollen.</Alert>}

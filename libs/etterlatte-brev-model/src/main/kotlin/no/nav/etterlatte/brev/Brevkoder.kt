@@ -103,4 +103,7 @@ enum class Brevkoder(
     ),
 
     OVERSENDELSE_KLAGE(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER),
+    KLAGE_OVERSENDELSE_BLANKETT(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT),
+
+    OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF),
 }

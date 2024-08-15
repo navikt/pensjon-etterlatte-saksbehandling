@@ -265,6 +265,7 @@ class BrevRepository(
                             "soeker_fnr" to ulagretBrev.soekerFnr,
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
                             "brevtype" to ulagretBrev.brevtype.name,
+                            "brevkode" to ulagretBrev.brevkode.name,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -498,8 +499,8 @@ class BrevRepository(
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype, brevkode) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype, :brevkode) 
             ON CONFLICT DO NOTHING;
         """
 

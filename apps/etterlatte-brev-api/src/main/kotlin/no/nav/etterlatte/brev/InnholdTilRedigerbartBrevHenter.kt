@@ -122,6 +122,7 @@ class InnholdTilRedigerbartBrevHenter(
                 personerISak = generellBrevData.personerISak,
                 innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
+                brevkode = kode,
             )
         }
     }
@@ -134,4 +135,5 @@ internal data class OpprettBrevRequest(
     val personerISak: PersonerISak,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevkode: Brevkoder,
 )

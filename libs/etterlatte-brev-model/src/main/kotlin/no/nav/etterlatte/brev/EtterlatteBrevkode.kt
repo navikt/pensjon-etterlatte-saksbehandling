@@ -65,6 +65,8 @@ enum class EtterlatteBrevKode(
 
     KLAGE_OVERSENDELSE_BRUKER(Brevtype.OVERSENDELSE_KLAGE, "Klagen er oversendt til NAV Klageinstans Vest"),
     KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT, "Oversendelse til KA"),
+
+    OPPLASTET_PDF(Brevtype.OPPLASTET_PDF),
 }
 
 enum class Brevtype {

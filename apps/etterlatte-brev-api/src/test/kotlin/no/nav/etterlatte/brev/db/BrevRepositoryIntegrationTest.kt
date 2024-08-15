@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
@@ -445,6 +446,7 @@ internal class BrevRepositoryIntegrationTest(
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
         innholdVedlegg = innhold_vedlegg,
         brevtype = Brevtype.VEDTAK,
+        brevkode = Brevkoder.BP_INNVILGELSE,
     )
 
     private fun opprettMottaker() =

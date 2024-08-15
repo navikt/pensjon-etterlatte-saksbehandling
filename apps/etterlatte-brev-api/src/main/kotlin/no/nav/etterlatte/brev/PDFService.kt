@@ -74,6 +74,7 @@ class PDFService(
                     innhold = innhold,
                     innholdVedlegg = null,
                     brevtype = Brevtype.OPPLASTET_PDF,
+                    brevkode = Brevkoder.OPPLASTET_PDF,
                 ),
             )
 

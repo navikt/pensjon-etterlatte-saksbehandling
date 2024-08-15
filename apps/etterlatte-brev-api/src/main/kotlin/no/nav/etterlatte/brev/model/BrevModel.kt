@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
@@ -91,6 +92,7 @@ data class OpprettNyttBrev(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
     val brevtype: Brevtype,
+    val brevkode: Brevkoder,
 ) {
     val status: Status = Status.OPPRETTET
 }

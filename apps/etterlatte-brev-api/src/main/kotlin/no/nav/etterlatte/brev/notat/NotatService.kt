@@ -73,12 +73,13 @@ class NotatService(
                         opprettet = Tidspunkt.now(),
                         innhold =
                             BrevInnhold(
-                                tittel = notatData.brevkode.tittel ?: "Internt notat",
+                                tittel = notatData.brevkode.ferdigstilling.tittel ?: "Internt notat",
                                 spraak = Spraak.NB,
                                 payload = null,
                             ),
                         innholdVedlegg = listOf(),
                         brevtype = Brevtype.NOTAT,
+                        brevkode = notatData.brevkode,
                     ),
             )
         try {

@@ -557,9 +557,8 @@ class OppgaveService(
             throw IkkeFunnetException("GO-01-SAK-IKKE-FUNNET", "Følgende saks-ID-er ble ikke funnet: $finnesIkke")
         }
 
-        val oppgaveListe: MutableList<OppgaveIntern> = mutableListOf()
-        for (sak in saker) {
-            oppgaveListe.add(
+        val oppgaveListe: List<OppgaveIntern> =
+            saker.map { sak ->
                 opprettNyOppgaveMedReferanseOgSak(
                     referanse = referanse,
                     sak = sak,
@@ -568,9 +567,8 @@ class OppgaveService(
                     merknad = merknad,
                     frist = frist,
                     saksbehandler = saksbehandler,
-                ),
-            )
-        }
+                )
+            }
 
         oppgaveDao.opprettOppgaveBulk(oppgaveListe)
     }

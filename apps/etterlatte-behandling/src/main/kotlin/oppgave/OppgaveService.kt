@@ -281,7 +281,7 @@ class OppgaveService(
         return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
-    // TODO: hentEndringerForOppgave Kan fjernes over tid
+    @Deprecated("Se på forrigesaksbehandler feltet")
     fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
         oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao
             .hentEndringerForOppgave(oppgave.id)

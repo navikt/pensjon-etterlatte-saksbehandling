@@ -6,6 +6,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
@@ -134,5 +135,6 @@ internal class VedtaksbrevUnderkjentRiverTest {
             Tidspunkt.now(),
             mottaker = mockk(),
             brevtype = Brevtype.VEDTAK,
+            brevkoder = Brevkoder.BP_AVSLAG,
         )
 }

@@ -446,7 +446,7 @@ internal class BrevRepositoryIntegrationTest(
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
         innholdVedlegg = innhold_vedlegg,
         brevtype = Brevtype.VEDTAK,
-        brevkode = Brevkoder.BP_INNVILGELSE,
+        brevkoder = Brevkoder.BP_INNVILGELSE,
     )
 
     private fun opprettMottaker() =

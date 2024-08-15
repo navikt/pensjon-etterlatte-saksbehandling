@@ -83,7 +83,7 @@ class Brevoppretter(
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                     brevtype = brevtype,
-                    brevkode = brevkode,
+                    brevkoder = brevkode,
                 )
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }

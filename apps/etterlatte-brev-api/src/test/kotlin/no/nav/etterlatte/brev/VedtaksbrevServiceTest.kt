@@ -711,6 +711,7 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
         brevtype = Brevtype.VEDTAK,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettGenerellBrevdata(

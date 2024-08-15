@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingUnderBehandlingFinnesAlleredeException
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -582,6 +583,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
             brevtype = Brevtype.MANUELT,
+            brevkoder = Brevkoder.TILBAKEKREVING,
         )
 
     private fun vedtaksbrev() = opprettetBrevDto(Random.nextLong())

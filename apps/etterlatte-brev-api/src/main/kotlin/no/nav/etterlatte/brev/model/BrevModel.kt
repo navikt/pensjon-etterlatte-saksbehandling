@@ -57,6 +57,7 @@ fun opprettBrevFra(
     mottaker = opprettNyttBrev.mottaker,
     opprettet = opprettNyttBrev.opprettet,
     brevtype = opprettNyttBrev.brevtype,
+    brevkoder = opprettNyttBrev.brevkoder,
 )
 
 class Pdf(
@@ -92,7 +93,7 @@ data class OpprettNyttBrev(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
     val brevtype: Brevtype,
-    val brevkode: Brevkoder,
+    val brevkoder: Brevkoder,
 ) {
     val status: Status = Status.OPPRETTET
 }

@@ -79,7 +79,7 @@ class NotatService(
                             ),
                         innholdVedlegg = listOf(),
                         brevtype = Brevtype.NOTAT,
-                        brevkode = notatData.brevkode,
+                        brevkoder = notatData.brevkode,
                     ),
             )
         try {

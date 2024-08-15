@@ -159,7 +159,7 @@ data class VedtakEndringDTO(
 
 data class NyOppgaveBulkDto(
     val merknad: String,
-    val sakIds: String,
+    val sakIds: List<Long>,
     val type: OppgaveType,
     val kilde: OppgaveKilde,
 )

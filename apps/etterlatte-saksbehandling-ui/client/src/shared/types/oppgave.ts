@@ -24,7 +24,7 @@ export interface GenerellEndringshendelse {
 
 export interface GenerellOppgaveDto {
   merknad: string
-  sakIds: string
+  sakIds: number[]
   type: Oppgavetype
   kilde: OppgaveKilde
 }

@@ -119,19 +119,15 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             post("/opprett") {
                 kunSaksbehandler {
                     val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
-
-                    val sakIds: List<Long> =
-                        oppgaveBulkDto.sakIds
-                            .split(
-                                ",",
-                            ).map { it.trim() }
-                            .filter { it.isNotEmpty() }
-                            .map { it.toLong() }
-
                     inTransaction {
-                        service.opprettOppgaveBulk("", sakIds, oppgaveBulkDto.kilde, oppgaveBulkDto.type, oppgaveBulkDto.merknad)
+                        service.opprettOppgaveBulk(
+                            "",
+                            oppgaveBulkDto.sakIds,
+                            oppgaveBulkDto.kilde,
+                            oppgaveBulkDto.type,
+                            oppgaveBulkDto.merknad,
+                        )
                     }
-
                     call.respond(HttpStatusCode.OK)
                 }
             }

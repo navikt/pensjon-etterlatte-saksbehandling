@@ -9,6 +9,10 @@ import { mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
+interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
+  sakIds: string
+}
+
 export default function GenerellOppgave() {
   useSidetittel('Opprett generell oppgave')
   const [opprettGenerellOppgaveResult, opprettGenerelOppgaveRequest] = useApiCall(opprettGenerellOppgave)
@@ -19,7 +23,7 @@ export default function GenerellOppgave() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<GenerellOppgaveDto>({
+  } = useForm<GenerellOppgaveForm>({
     defaultValues: {
       merknad: '',
       sakIds: '',
@@ -34,9 +38,12 @@ export default function GenerellOppgave() {
     }
   }, [opprettGenerellOppgaveResult, reset])
 
-  const opprett = (data: GenerellOppgaveDto) => {
+  const opprett = (data: GenerellOppgaveForm) => {
     opprettGenerelOppgaveRequest({
-      sakIds: data.sakIds,
+      sakIds: data.sakIds
+        .split(',')
+        .filter((id) => id !== '')
+        .map((id) => Number(id)),
       merknad: data.merknad,
       type: data.type,
       kilde: data.kilde,

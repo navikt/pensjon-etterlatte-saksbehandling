@@ -552,8 +552,6 @@ class OppgaveService(
 
         if (!saker.map { it.id }.containsAll(sakIds)) {
             val finnesIkke = sakIds.filterNot { it in saker.map { sak -> sak.id } }
-
-            // TODO: finne bedre feilkode?
             throw IkkeFunnetException("GO-01-SAK-IKKE-FUNNET", "Følgende saks-ID-er ble ikke funnet: $finnesIkke")
         }
 

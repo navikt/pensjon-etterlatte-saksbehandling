@@ -229,24 +229,6 @@ internal class OppgaveServiceTest(
     }
 
     @Test
-    fun `skal ikke kunne tildele oppgave med saksbehandler felt satt`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave =
-            oppgaveService.opprettOppgave(
-                "referanse",
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
-            )
-        val nysaksbehandler = "nysaksbehandler"
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        assertThrows<OppgaveAlleredeTildeltSaksbehandler> {
-            oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
-        }
-    }
-
-    @Test
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
         val err =
@@ -363,7 +345,7 @@ internal class OppgaveServiceTest(
                 null,
             )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
@@ -383,7 +365,7 @@ internal class OppgaveServiceTest(
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
         assertThrows<OppgaveKanIkkeEndres> {
-            oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
+            oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
@@ -394,7 +376,7 @@ internal class OppgaveServiceTest(
         val nysaksbehandler = "nysaksbehandler"
         val err =
             assertThrows<OppgaveIkkeFunnet> {
-                oppgaveService.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
+                oppgaveService.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
         assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
@@ -415,7 +397,7 @@ internal class OppgaveServiceTest(
         oppgaveService.fjernSaksbehandler(nyOppgave.id)
         val oppgaveUtenSaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler.id)
-        Assertions.assertNull(oppgaveUtenSaksbehandler.saksbehandler)
+        assertNull(oppgaveUtenSaksbehandler.saksbehandler)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveUtenSaksbehandler.status)
     }
 
@@ -907,7 +889,7 @@ internal class OppgaveServiceTest(
         assertEquals(2, hentEndringerForOppgave.size)
 
         val endringTildelt = hentEndringerForOppgave[0]
-        Assertions.assertNull(endringTildelt.oppgaveFoer.saksbehandler)
+        assertNull(endringTildelt.oppgaveFoer.saksbehandler)
         assertEquals("nysaksbehandler", endringTildelt.oppgaveEtter.saksbehandler?.ident)
 
         val endringStatus = hentEndringerForOppgave[1]
@@ -1105,7 +1087,7 @@ internal class OppgaveServiceTest(
 
         val saksbehandlerHentet = oppgaveService.hentOppgaveUnderBehandling(behandlingId)?.saksbehandler
 
-        Assertions.assertNull(saksbehandlerHentet?.ident)
+        assertNull(saksbehandlerHentet?.ident)
     }
 
     @Test

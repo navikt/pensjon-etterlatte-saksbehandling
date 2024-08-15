@@ -68,11 +68,11 @@ export const saksbehandlereIEnhetApi = async (args: {
   return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
 }
 
-export const byttSaksbehandlerApi = async (args: {
+export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
 }
 
 export const fjernSaksbehandlerApi = async (args: {

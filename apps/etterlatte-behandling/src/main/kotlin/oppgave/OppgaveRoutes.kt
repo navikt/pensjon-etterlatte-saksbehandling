@@ -196,15 +196,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(HttpStatusCode.OK)
                 }
             }
-            post("bytt-saksbehandler") {
-                kunSaksbehandlerMedSkrivetilgang {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                    inTransaction {
-                        service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
+
             delete("saksbehandler") {
                 kunSaksbehandlerMedSkrivetilgang {
                     inTransaction { service.fjernSaksbehandler(oppgaveId) }

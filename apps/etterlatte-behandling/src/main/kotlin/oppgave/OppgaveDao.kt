@@ -359,7 +359,7 @@ class OppgaveDaoImpl(
                         """.trimIndent(),
                     )
 
-                statement.setString(1, oppgaveStatus.toString())
+                statement.setString(1, oppgaveStatus.name)
                 statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()

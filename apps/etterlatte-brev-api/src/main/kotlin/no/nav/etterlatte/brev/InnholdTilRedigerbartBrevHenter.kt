@@ -31,7 +31,7 @@ class InnholdTilRedigerbartBrevHenter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
@@ -52,7 +52,7 @@ class InnholdTilRedigerbartBrevHenter(
 
         val kode = brevKodeMapping(brevkodeRequest)
         val tittel =
-            kode.tittel ?: (
+            kode.ferdigstilling.tittel ?: (
                 generellBrevData.forenkletVedtak
                     ?.type
                     ?.somTittel()
@@ -84,7 +84,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         BrevbakerRequest.fra(
-                            brevKode = kode,
+                            brevKode = kode.redigering,
                             brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
@@ -102,7 +102,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.brevtype,
+                        kode.redigering.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,

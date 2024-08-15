@@ -101,7 +101,7 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
                     <em>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</em>
                   </BodyLong>
                   <BodyLong>
-                    <b>Merknad:</b> {oppgave.merknad}
+                    <strong>Merknad:</strong> {oppgave.merknad}
                   </BodyLong>
                 </>
               )}

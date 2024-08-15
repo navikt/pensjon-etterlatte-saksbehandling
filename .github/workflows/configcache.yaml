@@ -26,13 +26,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Test printing your secret (Remove this step in production)
-        run: cat ${{ secrets.gradlekey }}
+        run: cat ${{ secrets.krypteringsnoekkelFnr }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        env:
-          cache-encryption-key: ${{ secrets.gradlekey }}
         with:
-#          cache-encryption-key: ${{ secrets.gradlekey }}
+          cache-encryption-key: ${{ secrets.gradlekey }}
           dependency-graph: generate-and-submit
           cache-read-only: false
       - name: Gradle test and build

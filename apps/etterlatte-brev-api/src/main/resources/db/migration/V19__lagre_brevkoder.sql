@@ -1,2 +1,2 @@
 ALTER TABLE brev
-    ADD COLUMN brevkoder varchar;
+    ADD COLUMN brevkoder TEXT;

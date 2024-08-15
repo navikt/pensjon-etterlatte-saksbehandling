@@ -163,12 +163,13 @@ internal fun Route.aktivitetspliktRoutes(
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            val vurdering =
-                if (featureToggleService.isEnabled(AktivitetToggle.FLERE_PERIODER_VURDERING, false)) {
-                    inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
-                } else {
-                    inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
-                }
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
+            call.respond(vurdering ?: HttpStatusCode.NotFound)
+        }
+
+        get("/ny") {
+            logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
             call.respond(vurdering ?: HttpStatusCode.NotFound)
         }
 
@@ -208,12 +209,13 @@ internal fun Route.aktivitetspliktRoutes(
     route("/api/sak/{$SAKID_CALL_PARAMETER}/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
-            val vurdering =
-                if (featureToggleService.isEnabled(AktivitetToggle.FLERE_PERIODER_VURDERING, false)) {
-                    inTransaction { aktivitetspliktService.hentVurderingForBehandling(behandlingId) }
-                } else {
-                    inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
-                }
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
+            call.respond(vurdering ?: HttpStatusCode.NotFound)
+        }
+
+        get("/ny") {
+            logger.info("Henter ny aktivitetsplikt vurdering for behandlingId=$behandlingId")
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForBehandling(behandlingId) }
             call.respond(vurdering ?: HttpStatusCode.NotFound)
         }
 

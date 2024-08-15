@@ -15,10 +15,10 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
+export const VilkaarsvurderingKnapper = (props: { behandlingId: string; kanGaaTilNeste: boolean }) => {
   const { next, goto } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const { behandlingId } = props
+  const { behandlingId, kanGaaTilNeste } = props
   const vedtaksresultat = useVedtaksResultat()
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
@@ -52,6 +52,24 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
       next()
     })
   }
+  const genererNesteKnapp = () => {
+    switch (vedtaksresultat) {
+      case 'innvilget':
+      case 'endring':
+      case 'opphoer':
+        return (
+          <Button variant="primary" loading={isPending(oppdaterStatusResult)} onClick={sjekkGyldighetOgOppdaterStatus}>
+            {handlinger.NESTE.navn}
+          </Button>
+        )
+      case 'avslag':
+        return (
+          <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
+            {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
+          </Button>
+        )
+    }
+  }
 
   return (
     <>
@@ -63,30 +81,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         apiResult: oppdaterStatusResult,
         errorMessage: 'Kunne ikke oppdatere status',
       })}
-      <BehandlingHandlingKnapper>
-        {(() => {
-          switch (vedtaksresultat) {
-            case 'innvilget':
-            case 'endring':
-            case 'opphoer':
-              return (
-                <Button
-                  variant="primary"
-                  loading={isPending(oppdaterStatusResult)}
-                  onClick={sjekkGyldighetOgOppdaterStatus}
-                >
-                  {handlinger.NESTE.navn}
-                </Button>
-              )
-            case 'avslag':
-              return (
-                <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-                  {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
-                </Button>
-              )
-          }
-        })()}
-      </BehandlingHandlingKnapper>
+      <BehandlingHandlingKnapper>{kanGaaTilNeste && genererNesteKnapp()}</BehandlingHandlingKnapper>
     </>
   )
 }

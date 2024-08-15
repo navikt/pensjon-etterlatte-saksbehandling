@@ -95,7 +95,6 @@ export const Resultat = (props: Props) => {
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
 
-  const kanGaaTilNeste = !!vilkaarsvurdering.resultat && virkningstidspunktSamsvarer
   return (
     <>
       <Box paddingBlock="12 4" paddingInline="16 14">
@@ -228,7 +227,7 @@ export const Resultat = (props: Props) => {
             Du må se over vurderingene og sjekke at de fortsatt er riktige.
           </OppdatertGrunnlagAlert>
         )}
-        <VilkaarsvurderingKnapper behandlingId={behandlingId} kanGaaTilNeste={kanGaaTilNeste} />
+        <VilkaarsvurderingKnapper behandlingId={behandlingId} />
       </Box>
     </>
   )

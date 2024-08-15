@@ -15,10 +15,10 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-export const VilkaarsvurderingKnapper = (props: { behandlingId: string; kanGaaTilNeste: boolean }) => {
+export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const { behandlingId, kanGaaTilNeste } = props
+  const { behandlingId } = props
   const vedtaksresultat = useVedtaksResultat()
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
@@ -81,7 +81,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string; kanGaaTi
         apiResult: oppdaterStatusResult,
         errorMessage: 'Kunne ikke oppdatere status',
       })}
-      <BehandlingHandlingKnapper>{kanGaaTilNeste && genererNesteKnapp()}</BehandlingHandlingKnapper>
+      <BehandlingHandlingKnapper>{genererNesteKnapp()}</BehandlingHandlingKnapper>
     </>
   )
 }

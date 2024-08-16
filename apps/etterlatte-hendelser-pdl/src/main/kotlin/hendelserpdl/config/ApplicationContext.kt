@@ -31,7 +31,7 @@ class ApplicationContext(
         ),
     private val personHendelseFordeler: PersonHendelseFordeler =
         PersonHendelseFordeler(
-            kafkaProduser = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(env.getValue(KAFKA_RAPID_TOPIC)),
+            kafkaProduser = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC)),
             pdlTjenesterKlient = pdlTjenesterKlient,
         ),
     val leesahKonsument: PersonhendelseKonsument =

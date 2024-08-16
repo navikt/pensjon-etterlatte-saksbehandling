@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -536,6 +537,38 @@ class OppgaveService(
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
         )
+    }
+
+    fun opprettOppgaveBulk(
+        referanse: String,
+        sakIds: List<Long>,
+        kilde: OppgaveKilde?,
+        type: OppgaveType,
+        merknad: String?,
+        frist: Tidspunkt? = null,
+        saksbehandler: String? = null,
+    ) {
+        val saker: List<Sak> = sakDao.hentSaker("", 1000, sakIds, emptyList())
+
+        if (!saker.map { it.id }.containsAll(sakIds)) {
+            val finnesIkke = sakIds.filterNot { it in saker.map { sak -> sak.id } }
+            throw IkkeFunnetException("GO-01-SAK-IKKE-FUNNET", "Følgende saks-ID-er ble ikke funnet: $finnesIkke")
+        }
+
+        val oppgaveListe: List<OppgaveIntern> =
+            saker.map { sak ->
+                opprettNyOppgaveMedReferanseOgSak(
+                    referanse = referanse,
+                    sak = sak,
+                    kilde = kilde,
+                    type = type,
+                    merknad = merknad,
+                    frist = frist,
+                    saksbehandler = saksbehandler,
+                )
+            }
+
+        oppgaveDao.opprettOppgaveBulk(oppgaveListe)
     }
 
     fun opprettOppgave(

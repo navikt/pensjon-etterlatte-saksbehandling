@@ -16,6 +16,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -110,6 +111,24 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                             service.genererStatsForOppgaver(Kontekst.get().AppUser.name())
                         },
                     )
+                }
+            }
+        }
+
+        route("/bulk") {
+            post("/opprett") {
+                kunSaksbehandler {
+                    val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
+                    inTransaction {
+                        service.opprettOppgaveBulk(
+                            "",
+                            oppgaveBulkDto.sakIds,
+                            oppgaveBulkDto.kilde,
+                            oppgaveBulkDto.type,
+                            oppgaveBulkDto.merknad,
+                        )
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

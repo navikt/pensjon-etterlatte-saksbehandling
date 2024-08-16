@@ -405,13 +405,13 @@ internal fun Route.behandlingRoutes(
 }
 
 data class ViderefoertOpphoerRequest(
-    @JsonProperty("dato") private val _dato: String,
+    @JsonProperty("dato") private val _dato: String?,
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
     val vilkaar: VilkaarType?,
 ) {
-    val dato: YearMonth = _dato.tilYearMonth()
+    val dato: YearMonth = _dato!!.tilYearMonth()
 }
 
 data class ViderefoertOpphoer(

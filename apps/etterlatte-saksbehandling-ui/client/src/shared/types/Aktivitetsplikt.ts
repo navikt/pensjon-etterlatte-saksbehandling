@@ -69,6 +69,11 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
 }
 
 export interface IAktivitetspliktVurdering {
+  aktivitet?: IAktivitetspliktAktivitetsgrad
+  unntak?: IAktivitetspliktUnntak
+}
+
+export interface IAktivitetspliktVurderingNy {
   aktivitet?: IAktivitetspliktAktivitetsgrad[]
   unntak?: IAktivitetspliktUnntak[]
 }

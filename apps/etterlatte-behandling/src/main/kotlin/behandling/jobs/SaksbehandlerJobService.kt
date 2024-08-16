@@ -71,7 +71,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
         is PingResultUp -> {
             val tidbrukt =
                 measureTime {
-                    val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
+                    val sbidenter = saksbehandlerInfoDao.hentAlleSaksbehandlerIdenter()
                     logger.info("Antall saksbehandlingsidenter vi henter identer for ${sbidenter.size}")
 
                     // SupervisorJob så noen kall kan feile uten å cancle parent job
@@ -126,7 +126,7 @@ internal suspend fun oppdaterSaksbehandlerNavn(
         is PingResultUp -> {
             val tidbrukt =
                 measureTime {
-                    val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
+                    val sbidenter = saksbehandlerInfoDao.hentAlleSaksbehandlerIdenter()
                     logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
                     val filtrerteIdenter = sbidenter.filter { !saksbehandlerInfoDao.saksbehandlerFinnes(it) }
                     logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")

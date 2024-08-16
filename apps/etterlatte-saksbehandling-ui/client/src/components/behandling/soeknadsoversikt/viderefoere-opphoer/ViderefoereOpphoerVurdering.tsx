@@ -214,26 +214,30 @@ export const ViderefoereOpphoerVurdering = ({
             </Stack>
           </RadioGroup>
         </div>
-        <MonthPicker {...monthpickerProps}>
-          <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
-        </MonthPicker>
-        {mapResult(vilkaartyperResult, {
-          initial: <ApiWarningAlert>Du må sette virkningstidspunkt først</ApiWarningAlert>,
-          pending: <Spinner label="Laster vilkårstyper" />,
-          error: () => <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>,
-          success: (typer) => (
-            <UNSAFE_Combobox
-              label="Velg vilkåret som gjør at saken opphører"
-              options={typer.typer.map((i) => i.tittel)}
-              onToggleSelected={(option) => {
-                setVilkaar(option)
-                setVilkaarError('')
-              }}
-              selectedOptions={!!vilkaar ? [vilkaar!] : []}
-              error={vilkaarError ? vilkaarError : false}
-            />
-          ),
-        })}
+        {skalViderefoere !== JaNei.NEI && (
+          <>
+            <MonthPicker {...monthpickerProps}>
+              <MonthPicker.Input label="Opphørstidspunkt" {...inputProps} />
+            </MonthPicker>
+            {mapResult(vilkaartyperResult, {
+              initial: <ApiWarningAlert>Du må sette virkningstidspunkt først</ApiWarningAlert>,
+              pending: <Spinner label="Laster vilkårstyper" visible />,
+              error: () => <ApiErrorAlert>Kunne ikke laste vilkårstyper</ApiErrorAlert>,
+              success: (typer) => (
+                <UNSAFE_Combobox
+                  label="Velg vilkåret som gjør at saken opphører"
+                  options={typer.typer.map((i) => i.tittel)}
+                  onToggleSelected={(option) => {
+                    setVilkaar(option)
+                    setVilkaarError('')
+                  }}
+                  selectedOptions={!!vilkaar ? [vilkaar!] : []}
+                  error={vilkaarError ? vilkaarError : false}
+                />
+              ),
+            })}
+          </>
+        )}
         <SoeknadsoversiktTextArea
           label="Begrunnelse"
           placeholder="Valgfritt"

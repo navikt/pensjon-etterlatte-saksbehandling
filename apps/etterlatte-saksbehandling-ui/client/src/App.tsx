@@ -24,6 +24,7 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
+import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -56,6 +57,7 @@ function App() {
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
+                  <Route path="/generelloppgave/*" element={<GenerellOppgave />} />
                   <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />

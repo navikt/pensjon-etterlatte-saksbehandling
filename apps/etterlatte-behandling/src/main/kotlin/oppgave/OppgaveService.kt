@@ -23,9 +23,9 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -79,7 +79,6 @@ class OppgaveService(
         }
     }
 
-    // TODO: Slå sammen tildel og bytt... Hvorfor er det to forskjellige?!!?!
     fun tildelSaksbehandler(
         oppgaveId: UUID,
         saksbehandler: String,
@@ -91,31 +90,9 @@ class OppgaveService(
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
 
-        val eksisterendeSaksbehandler = hentetOppgave.saksbehandler?.ident
-        if (eksisterendeSaksbehandler.isNullOrEmpty() || eksisterendeSaksbehandler == Fagsaksystem.EY.navn) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
-
-            // TODO: Fjerne dette. Midlertidig løsning for å støtte gammel flyt
-            if (hentetOppgave.status == Status.NY) {
-                oppgaveDao.endreStatusPaaOppgave(oppgaveId, Status.UNDER_BEHANDLING)
-            }
-        } else {
-            throw OppgaveAlleredeTildeltSaksbehandler(oppgaveId, eksisterendeSaksbehandler)
-        }
-    }
-
-    fun byttSaksbehandler(
-        oppgaveId: UUID,
-        saksbehandler: String,
-    ) {
-        val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw OppgaveIkkeFunnet(oppgaveId)
-
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
 
-        // TODO: Fjerne dette. Midlertidig løsning for å støtte gammel flyt
+        // Må ha denne for å ikke overskride attesteringstatus på oppgaver
         if (hentetOppgave.status == Status.NY) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, Status.UNDER_BEHANDLING)
         }
@@ -291,7 +268,6 @@ class OppgaveService(
 
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         val oppgaveId = oppgave.id
-        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
         val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandlerIdent != null) {
@@ -301,11 +277,12 @@ class OppgaveService(
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
         return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
-    // TODO: hentEndringerForOppgave Kan fjernes over tid
+    @Deprecated("Se på forrigesaksbehandler feltet")
     fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
         oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao
             .hentEndringerForOppgave(oppgave.id)
@@ -536,6 +513,38 @@ class OppgaveService(
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
         )
+    }
+
+    fun opprettOppgaveBulk(
+        referanse: String,
+        sakIds: List<Long>,
+        kilde: OppgaveKilde?,
+        type: OppgaveType,
+        merknad: String?,
+        frist: Tidspunkt? = null,
+        saksbehandler: String? = null,
+    ) {
+        val saker: List<Sak> = sakDao.hentSaker("", 1000, sakIds, emptyList())
+
+        if (!saker.map { it.id }.containsAll(sakIds)) {
+            val finnesIkke = sakIds.filterNot { it in saker.map { sak -> sak.id } }
+            throw IkkeFunnetException("GO-01-SAK-IKKE-FUNNET", "Følgende saks-ID-er ble ikke funnet: $finnesIkke")
+        }
+
+        val oppgaveListe: List<OppgaveIntern> =
+            saker.map { sak ->
+                opprettNyOppgaveMedReferanseOgSak(
+                    referanse = referanse,
+                    sak = sak,
+                    kilde = kilde,
+                    type = type,
+                    merknad = merknad,
+                    frist = frist,
+                    saksbehandler = saksbehandler,
+                )
+            }
+
+        oppgaveDao.opprettOppgaveBulk(oppgaveListe)
     }
 
     fun opprettOppgave(

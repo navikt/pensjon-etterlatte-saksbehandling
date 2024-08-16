@@ -78,7 +78,7 @@ class SaksbehandlerInfoDao(
             }
         }
 
-    fun hentalleSaksbehandlere(): List<String> =
+    fun hentAlleSaksbehandlerIdenter(): List<String> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

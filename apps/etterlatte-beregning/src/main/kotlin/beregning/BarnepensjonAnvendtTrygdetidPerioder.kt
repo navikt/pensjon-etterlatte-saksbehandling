@@ -33,7 +33,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
         trygdetider: List<TrygdetidDto>,
         beregningsGrunnlag: BeregningsGrunnlag,
         fom: LocalDate,
-    ): List<AnvendtTrygdetid> {
+    ): AnvendtTrygdetidPeriodeUtrekning {
         if (trygdetider.size != 1) {
             throw UgyldigForespoerselException(
                 code = "FEIL_ANTALL_TRYGDETIDER",
@@ -42,11 +42,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
         }
 
         return trygdetider.first().toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
-            anvendtPerioder(
-                listOf(
-                    GrunnlagMedPeriode(it, fom, null),
-                ),
-            ).anvendt.first().data
+            anvendtPerioder(listOf(GrunnlagMedPeriode(it, fom, null)))
         } ?: throw TrygdetidIkkeOpprettet()
     }
 

@@ -301,11 +301,14 @@ class BeregnBarnepensjonService(
                 KonstantGrunnlag(
                     FaktumNode(
                         verdi =
-                            BarnepensjonAnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
-                                trygdetider,
-                                beregningsGrunnlag,
-                                fom,
-                            ),
+                            BarnepensjonAnvendtTrygdetidPerioder
+                                .finnKonstantTrygdetidPerioder(
+                                    trygdetider,
+                                    beregningsGrunnlag,
+                                    fom,
+                                ).anvendt
+                                .first()
+                                .data,
                         kilde = beregningsGrunnlag.kilde,
                         beskrivelse = "Konstant anvendt trygdetider",
                     ),

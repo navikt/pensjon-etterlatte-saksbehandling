@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
+import no.nav.etterlatte.libs.regler.PeriodisertResultat
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
@@ -68,12 +69,20 @@ object BarnepensjonAnvendtTrygdetidPerioder {
                     )
                 }
             }.map { aktueltResultat ->
-                GrunnlagMedPeriode(
-                    data = aktueltResultat.resultat.verdi,
-                    fom = aktueltResultat.periode.fraDato,
-                    tom = aktueltResultat.periode.tilDato,
+                Pair(
+                    GrunnlagMedPeriode(
+                        data = aktueltResultat.resultat.verdi,
+                        fom = aktueltResultat.periode.fraDato,
+                        tom = aktueltResultat.periode.tilDato,
+                    ),
+                    aktueltResultat,
                 )
-            }.let { AnvendtTrygdetidPeriodeUtrekning(it.kombinerOverlappendePerioder()) }
+            }.let {
+                AnvendtTrygdetidPeriodeUtrekning(
+                    anvendt = it.map { it.first }.kombinerOverlappendePerioder(),
+                    utrekning = it.map { it.second },
+                )
+            }
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
         begegningsmetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
@@ -103,4 +112,5 @@ object BarnepensjonAnvendtTrygdetidPerioder {
 
 data class AnvendtTrygdetidPeriodeUtrekning(
     val anvendt: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
+    val utrekning: List<PeriodisertResultat<AnvendtTrygdetid>>,
 )

@@ -49,6 +49,7 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
+    private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -81,7 +82,9 @@ class BeregnBarnepensjonService(
         }
 
         val anvendtTrygdetider =
-            BarnepensjonAnvendtTrygdetidPerioder.finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
+            BarnepensjonAnvendtTrygdetidPerioder
+                .finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
+                .also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(behandling.id, it) }
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
@@ -306,7 +309,8 @@ class BeregnBarnepensjonService(
                                     trygdetider,
                                     beregningsGrunnlag,
                                     fom,
-                                ).anvendt
+                                ).also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(beregningsGrunnlag.behandlingId, it) }
+                                .anvendt
                                 .first()
                                 .data,
                         kilde = beregningsGrunnlag.kilde,

@@ -13,7 +13,7 @@ data class Miljoevariabler private constructor(
 
     operator fun get(key: EnvEnum) = props[key.key()]
 
-    fun getOrDefault(
+    fun getOrDefault( // TODO: Denne bør vi kunne fase ut
         key: EnvEnum,
         value: String,
     ) = props.getOrDefault(key.key(), value)
@@ -31,6 +31,7 @@ data class Miljoevariabler private constructor(
         return Miljoevariabler(toMutableMap)
     }
 
+    // TODO: Denne bør vi kunne fase ut
     fun containsKey(key: EnvEnum) = props.containsKey(key.key())
 
     companion object {

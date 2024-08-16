@@ -69,8 +69,8 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
 }
 
 export interface IAktivitetspliktVurdering {
-  aktivitet?: IAktivitetspliktAktivitetsgrad
-  unntak?: IAktivitetspliktUnntak
+  aktivitet?: IAktivitetspliktAktivitetsgrad[]
+  unntak?: IAktivitetspliktUnntak[]
 }
 
 export interface IAktivitetspliktAktivitetsgrad {
@@ -80,6 +80,7 @@ export interface IAktivitetspliktAktivitetsgrad {
   oppgaveId: string
   aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
+  tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string
@@ -91,6 +92,7 @@ export interface IAktivitetspliktUnntak {
   behandlingId: string | undefined
   oppgaveId: string
   unntak: AktivitetspliktUnntakType
+  fom: string
   tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler

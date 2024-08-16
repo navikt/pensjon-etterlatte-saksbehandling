@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregnOverstyrBeregningService
@@ -60,6 +61,7 @@ class ApplicationContext {
         )
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
+    val anvendtTrygdetidRepository = AnvendtTrygdetidRepository(dataSource)
     val beregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
@@ -75,6 +77,7 @@ class ApplicationContext {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
+            anvendtTrygdetidRepository = anvendtTrygdetidRepository,
         )
     val beregnOmstillingsstoenadService =
         BeregnOmstillingsstoenadService(

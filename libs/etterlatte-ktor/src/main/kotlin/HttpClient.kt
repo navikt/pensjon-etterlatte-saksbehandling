@@ -25,6 +25,7 @@ fun httpClientClientCredentials(
     azureAppJwk: String,
     azureAppWellKnownUrl: String,
     azureAppScope: String,
+    forventSuksess: Boolean = true,
     ekstraJacksoninnstillinger: ((o: ObjectMapper) -> Unit) = { },
 ) = httpClient(
     ekstraJacksoninnstillinger = ekstraJacksoninnstillinger,
@@ -43,7 +44,7 @@ fun httpClientClientCredentials(
             }
         }
     },
-    forventSuksess = true,
+    forventSuksess = forventSuksess,
 )
 
 fun httpClient(

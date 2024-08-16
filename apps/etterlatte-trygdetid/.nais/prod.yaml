@@ -105,7 +105,5 @@ spec:
         - application: etterlatte-grunnlag
         - application: kodeverk-api
           namespace: team-rocket
-          cluster: prod-gcp
       external:
-        - host: kodeverk-api.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -1,5 +1,17 @@
 package no.nav.etterlatte.brev
 
+/*
+Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
+Saksbehandler kan redigere den redigerbare delen, og ved PDF-generering sender vi den delen over til brevbakeren,
+så den delen blir fletta inn i ferdigstillingsmalen.
+
+For å få metadata og oppsett rundt riktig, er vi avhengige av å vite hvilken mal den redigerbare delen er basert på,
+og hvilken mal ferdigstillingsdelen er basert på. Denne enumen er nettopp den koplinga.
+
+Det er også ei logisk kopling mellom redigerbart utfall og ferdigstillingsmal - det vil for eksempel ikke gi meining
+å bruke den redigerbare delen for tilbakekreving i ferdigstillingsmalen for vedtak avslag.
+Så her modellerer vi det eksplisitt.
+*/
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
     val ferdigstilling: EtterlatteBrevKode = redigering,
@@ -72,5 +84,38 @@ enum class Brevkoder(
     ),
     AVVIST_KLAGE(EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD, EtterlatteBrevKode.AVVIST_KLAGE_FERDIG),
 
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    BARNEPENSJON_INFORMASJON_DOEDSFALL(EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL, EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV),
+    BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(
+        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+    BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
+        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+    ),
+
     OVERSENDELSE_KLAGE(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER),
+    KLAGE_OVERSENDELSE_BLANKETT(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT),
+
+    OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF),
 }

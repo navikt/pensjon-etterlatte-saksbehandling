@@ -40,8 +40,8 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
@@ -79,7 +79,7 @@ private class Server(
     fun run() =
         with(context) {
             dataSource.migrate()
-            setReady().also { engine.start(true) }
+            engine.run()
         }
 }
 
@@ -168,7 +168,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         behandlingFactory = applicationContext.behandlingFactory,
         featureToggleService = applicationContext.featureToggleService,
     )
-    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
+    aktivitetspliktRoutes(
+        aktivitetspliktService = applicationContext.aktivitetspliktService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -48,6 +49,19 @@ internal class SaksbehandlerInfoDaoTest(
 
         val randomidentfinnesikke = saksbehandlerInfoDao.saksbehandlerFinnes("ident")
         randomidentfinnesikke shouldBe false
+    }
+
+    @Test
+    fun `Kan hente alle saksbehandlere sine identer og navn`() {
+        val sbporsgrunn = SaksbehandlerInfo("identporsgrunn", "navn")
+        val sbaalesund = SaksbehandlerInfo("identaalesund", "navn2")
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
+
+        val allesaksbehandlere = saksbehandlerInfoDao.hentAlleSaksbehandlere()
+        allesaksbehandlere.size shouldBe 2
+        allesaksbehandlere shouldContain sbporsgrunn
+        allesaksbehandlere shouldContain sbaalesund
     }
 
     @Test

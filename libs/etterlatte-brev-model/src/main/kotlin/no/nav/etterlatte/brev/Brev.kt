@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -77,6 +78,7 @@ data class Brev(
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
     val brevtype: Brevtype,
+    val brevkoder: Brevkoder?,
     val journalpostId: String? = null,
     val bestillingId: String? = null,
 ) {

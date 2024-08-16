@@ -33,7 +33,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
 
       {mapApiResult(
         status,
-        <Spinner label="Henter dokumenter" visible />,
+        <Spinner label="Henter dokumenter" />,
         (error) => (
           <ApiErrorAlert>{error.detail || 'Det har oppstått en feil ved henting av dokumenter'}</ApiErrorAlert>
         ),

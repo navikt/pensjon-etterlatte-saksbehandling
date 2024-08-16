@@ -45,6 +45,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [, requesthentOppgaveForBehandlingEkte] = useApiCall(hentOppgaveForReferanseUnderBehandling)
   const [, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const onSubmit = () => {
     next()
@@ -97,12 +98,12 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         })
       }
     })
-  }, [behandlingId, sakId])
+  }, [behandlingId, sakId, tilbakestilt])
 
   if (isPendingOrInitial(hentBrevStatus)) {
-    return <Spinner visible label="Henter brev ..." />
+    return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {
-    return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
+    return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
   }
 
   return (
@@ -136,7 +137,13 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
           </Box>
         </Sidebar>
 
-        {!!varselbrev && <RedigerbartBrev brev={varselbrev} kanRedigeres={redigerbar} />}
+        {!!varselbrev && (
+          <RedigerbartBrev
+            brev={varselbrev}
+            kanRedigeres={redigerbar}
+            tilbakestillingsaction={() => setTilbakestilt(true)}
+          />
+        )}
 
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}

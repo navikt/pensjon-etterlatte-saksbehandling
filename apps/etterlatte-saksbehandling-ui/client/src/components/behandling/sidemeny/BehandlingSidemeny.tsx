@@ -118,7 +118,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
             <>
               {mapApiResult(
                 fetchVedtakStatus,
-                <Spinner label="Henter vedtaksdetaljer" visible />,
+                <Spinner label="Henter vedtaksdetaljer" />,
                 () => (
                   <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
                 ),
@@ -145,7 +145,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         apiResult: oppgaveResult,
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
-      {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
+
+      <Spinner label="Henter saksbehandler for oppgave" visible={isPending(oppgaveResult)} />
+
       <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
         <Tabs.List>
           <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
@@ -169,7 +171,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         {erFoerstegangsbehandling && (
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <Sjekkliste behandling={behandling} />
-            {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
+
+            <Spinner label="Henter sjekkliste ..." visible={isPending(hentSjekklisteResult)} />
+
             {!erFerdigBehandlet(behandling.status) &&
               isFailureHandler({
                 apiResult: hentSjekklisteResult,

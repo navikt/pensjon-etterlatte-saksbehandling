@@ -148,9 +148,11 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           />
         </>
       )}
-      {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label="Henter vilkårsvurdering" />}
-      {isPending(opprettNyVilkaarsvurderingStatus) && <Spinner visible={true} label="Oppretter vilkårsvurdering" />}
-      {isPending(slettVilkaarsvurderingStatus) && <Spinner visible={true} label="Sletter vilkårsvurdering" />}
+
+      <Spinner visible={isPending(vilkaarsvurderingStatus)} label="Henter vilkårsvurdering" />
+      <Spinner visible={isPending(opprettNyVilkaarsvurderingStatus)} label="Oppretter vilkårsvurdering" />
+      <Spinner visible={isPending(slettVilkaarsvurderingStatus)} label="Sletter vilkårsvurdering" />
+
       {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}

@@ -14,6 +14,7 @@ services:
       RINA_URL: https://rina-ss3-q.adeo.no
       KODEVERK_URL: https://kodeverk-api.nav.no
       MODIAPERSONOVERSIKT_URL: https://navikt.github.io/modiapersonoversikt/#
+      BISYS_URL: https://bidrag.dev.intern.nav.no/
       PSAK_URL: https://pensjon-psak-q2.dev.adeo.no/psak
       APP_VERSION: 1
       # Lokale URL-er skal kommenteres ut når de ikke er i bruk

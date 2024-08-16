@@ -72,7 +72,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
         </ToggleGroup>
 
         {mapResult(hendelserResult, {
-          pending: <Spinner visible label="Henter hendelser..." />,
+          pending: <Spinner label="Henter hendelser..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,
           success: ({ hendelser }) => (
             <>

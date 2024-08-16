@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgr
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -24,6 +25,10 @@ class AktivitetspliktAktivitetsgradDao(
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
+        check(oppgaveId != null || behandlingId != null) {
+            "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave"
+        }
+
         with(it) {
             val stmt =
                 prepareStatement(
@@ -72,7 +77,7 @@ class AktivitetspliktAktivitetsgradDao(
         }
     }
 
-    fun hentAktivitetsgradForOppgave(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
+    fun hentAktivitetsgradForOppgave(oppgaveId: UUID): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -81,33 +86,46 @@ class AktivitetspliktAktivitetsgradDao(
                         SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE oppgave_id = ?
+                        ORDER BY fom ASC NULLS FIRST
                         """.trimMargin(),
                     )
                 stmt.setObject(1, oppgaveId)
 
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+                stmt.executeQuery().toList { toAktivitetsgrad() }
             }
         }
 
-    fun hentNyesteAktivitetsgrad(sakId: Long): AktivitetspliktAktivitetsgrad? =
+    fun hentNyesteAktivitetsgrad(sakId: Long): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
-                        FROM aktivitetsplikt_aktivitetsgrad
+                        SELECT behandling_id, oppgave_id FROM aktivitetsplikt_aktivitetsgrad
                         WHERE sak_id = ?
-                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        ORDER BY endret::jsonb ->> 'tidspunkt' DESC
                         LIMIT 1
-                        """.trimMargin(),
+                        """.trimIndent(),
                     )
                 stmt.setLong(1, sakId)
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+
+                val (behandlingId, oppgaveId) =
+                    stmt.executeQuery().singleOrNull {
+                        getString("behandling_id") to getString("oppgave_id")
+                    } ?: return@hentConnection emptyList()
+
+                if (behandlingId != null) {
+                    hentAktivitetsgradForBehandling(UUID.fromString(behandlingId))
+                } else {
+                    requireNotNull(oppgaveId) {
+                        "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
+                    }
+                    hentAktivitetsgradForOppgave(UUID.fromString(oppgaveId))
+                }
             }
         }
 
-    fun hentAktivitetsgradForBehandling(behandlingId: UUID): AktivitetspliktAktivitetsgrad? =
+    fun hentAktivitetsgradForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -116,11 +134,12 @@ class AktivitetspliktAktivitetsgradDao(
                         SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE behandling_id = ?
+                        ORDER BY fom ASC NULLS FIRST
                         """.trimMargin(),
                     )
                 stmt.setObject(1, behandlingId)
 
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+                stmt.executeQuery().toList { toAktivitetsgrad() }
             }
         }
 

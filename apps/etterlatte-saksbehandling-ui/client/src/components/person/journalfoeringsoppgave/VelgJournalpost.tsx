@@ -39,7 +39,7 @@ export default function VelgJournalpost({ journalpostStatus }: { journalpostStat
   return (
     <JournalpostContainer>
       {mapResult(journalpostStatus, {
-        pending: <Spinner label="Henter journalpost for bruker" visible />,
+        pending: <Spinner label="Henter journalpost for bruker" />,
         error: (error) => (
           <ApiErrorAlert>
             {error.detail || 'Feil ved henting av journalpost. Kan ikke fortsette behandlingen.'}
@@ -53,7 +53,7 @@ export default function VelgJournalpost({ journalpostStatus }: { journalpostStat
 
             {mapApiResult(
               dokument,
-              <Spinner label="Klargjør forhåndsvisning av PDF" visible />,
+              <Spinner label="Klargjør forhåndsvisning av PDF" />,
               (error) => (
                 <ApiErrorAlert>{error.detail || 'Feil ved henting av PDF'}</ApiErrorAlert>
               ),

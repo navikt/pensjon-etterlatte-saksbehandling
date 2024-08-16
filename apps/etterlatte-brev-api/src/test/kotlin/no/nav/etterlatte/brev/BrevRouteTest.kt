@@ -263,6 +263,7 @@ internal class BrevRouteTest {
                     ),
                 ),
             brevtype = Brevtype.INFORMASJON,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient =

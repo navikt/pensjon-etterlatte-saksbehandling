@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
@@ -17,7 +18,7 @@ import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametre {
-    abstract val brevkode: EtterlatteBrevKode
+    abstract val brevkode: Brevkoder
 
     abstract fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar
 
@@ -27,7 +28,7 @@ sealed class BrevParametre {
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
@@ -37,7 +38,7 @@ sealed class BrevParametre {
     data class AktivitetspliktInformasjon6Mnd(
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             AktivitetspliktInformasjon6MndBrevdata(redusertEtterInntekt, nasjonalEllerUtland)
@@ -47,7 +48,7 @@ sealed class BrevParametre {
     data class OmstillingsstoenadInformasjonMottattSoeknadRedigerbar(
         val mottattDato: LocalDate,
         val borINorgeEllerIkkeAvtaleland: Boolean,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonMottattSoeknad(
@@ -59,7 +60,7 @@ sealed class BrevParametre {
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
     data class OmstillingsstoenadInformasjonInnhentingAvOpplysninger(
         val borIUtlandet: Boolean,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInnhentingAvOpplysninger(borIUtlandet = borIUtlandet)
@@ -69,7 +70,7 @@ sealed class BrevParametre {
     data class OmstillingsstoenadInformasjonDoedsfallRedigerbar(
         val bosattUtland: Boolean,
         val avdoedNavn: String,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonDoedsfall(
@@ -84,7 +85,7 @@ sealed class BrevParametre {
         val bosattUtland: Boolean,
         val avdoedNavn: String,
         val erOver18Aar: Boolean,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
+        override val brevkode: Brevkoder = Brevkoder.BARNEPENSJON_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonDoedsfall(
@@ -97,22 +98,37 @@ sealed class BrevParametre {
 
     @JsonTypeName("BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD")
     data class BarnepensjonMottattSoeknad(
+        val mottattDato: LocalDate,
         val borINorgeEllerIkkeAvtaleland: Boolean,
         val erOver18aar: Boolean,
         val bosattUtland: Boolean,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
+        override val brevkode: Brevkoder = Brevkoder.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonMottattSoeknad(
+                mottattDato = mottattDato,
                 borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
                 erOver18aar = erOver18aar,
                 bosattUtland = bosattUtland,
             )
     }
 
+    @JsonTypeName("BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
+    data class BarnepensjonInformasjonInnhentingAvOpplysninger(
+        val erOver18aar: Boolean,
+        val borIUtlandet: Boolean,
+        override val brevkode: Brevkoder = Brevkoder.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+    ) : BrevParametre() {
+        override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
+            BarnepensjonInnhentingAvOpplysninger(
+                erOver18aar = erOver18aar,
+                borIUtlandet = borIUtlandet,
+            )
+    }
+
     @JsonTypeName("TOMT_BREV")
     class TomtBrev : BrevParametre() {
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.TOM_DELMAL
+        override val brevkode: Brevkoder = Brevkoder.TOMT_INFORMASJONSBREV
 
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar = ManueltBrevData()
     }

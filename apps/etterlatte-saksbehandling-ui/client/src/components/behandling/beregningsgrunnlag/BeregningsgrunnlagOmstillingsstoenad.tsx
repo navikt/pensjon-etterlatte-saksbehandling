@@ -98,7 +98,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     <>
       <>
         {mapResult(beregningsgrunnlagOMSResult, {
-          pending: <Spinner visible label="Henter beregningsgrunnlag..." />,
+          pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: (beregningsgrunnlag) => (
             <>

@@ -95,7 +95,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
                       </i>
                     </p>
                     {isPending(slettet) ? (
-                      <Spinner visible={true} variant="neutral" label="Sletter" margin="1em" />
+                      <Spinner variant="neutral" label="Sletter" margin="1em" />
                     ) : (
                       <>
                         <SlettEndreWrapper onClick={() => fjernAktivitet(aktivitet.id)}>Slett</SlettEndreWrapper>

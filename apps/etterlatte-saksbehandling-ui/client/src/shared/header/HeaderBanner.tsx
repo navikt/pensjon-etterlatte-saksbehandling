@@ -2,6 +2,7 @@ import { Search } from './Search'
 import { ReleaseAlerts } from './ReleaseAlerts'
 import { InternalHeader, Spacer } from '@navikt/ds-react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { AppSwitcher } from '~shared/header/AppSwitcher'
 
 export const HeaderBanner = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -10,6 +11,7 @@ export const HeaderBanner = () => {
       <InternalHeader.Title href="/">Gjenny</InternalHeader.Title>
       <Spacer />
       <Search />
+      <AppSwitcher />
       <ReleaseAlerts />
       <InternalHeader.User
         data-theme="dark"

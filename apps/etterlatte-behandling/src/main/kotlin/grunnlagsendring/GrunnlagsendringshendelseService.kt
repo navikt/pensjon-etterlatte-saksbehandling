@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -145,6 +146,14 @@ class GrunnlagsendringshendelseService(
             opprettHendelseAvTypeForPerson(
                 sivilstandHendelse.fnr,
                 GrunnlagsendringsType.SIVILSTAND,
+            )
+        }
+
+    fun opprettFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> =
+        inTransaction {
+            opprettHendelseAvTypeForPerson(
+                hendelse.fnr,
+                GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
             )
         }
 

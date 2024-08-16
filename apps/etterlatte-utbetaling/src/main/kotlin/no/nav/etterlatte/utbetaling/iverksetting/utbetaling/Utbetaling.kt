@@ -151,6 +151,7 @@ enum class OppdragKlassifikasjonskode(
     OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR"),
     FORSKUDDSSKATT("FSKTSKAT"),
     FEILKONTO("KL_KODE_FEIL_PEN"),
+    FEILKONTO_OMSTILLINGSTOENAD("KL_KODE_FEIL_OMSTILL"),
     MOTPOSTERING("TBMOTOBS", tekniskArt = true),
     BFRISKAT("BFRISKAT"),
     BSKTKRED("BSKTKRED"), // Kreditor disponerer - dette er mest sannsynlig verge
@@ -168,6 +169,7 @@ enum class OppdragKlassifikasjonskode(
                 "OMSTILLINGOR" -> OMSTILLINGSTOENAD_OPTP
                 "FSKTSKAT" -> FORSKUDDSSKATT
                 "KL_KODE_FEIL_PEN" -> FEILKONTO
+                "KL_KODE_FEIL_OMSTILL" -> FEILKONTO_OMSTILLINGSTOENAD
                 "TBMOTOBS" -> MOTPOSTERING
                 "BFRISKAT" -> BFRISKAT
                 "BSKTKRED" -> BSKTKRED

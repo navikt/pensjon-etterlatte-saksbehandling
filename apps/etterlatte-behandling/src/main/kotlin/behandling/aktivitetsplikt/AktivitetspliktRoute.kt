@@ -11,9 +11,11 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -39,7 +42,10 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
             "Aktivitet id er ikke i path params",
         )
 
-internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: AktivitetspliktService) {
+internal fun Route.aktivitetspliktRoutes(
+    aktivitetspliktService: AktivitetspliktService,
+    featureToggleService: FeatureToggleService,
+) {
     val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
@@ -106,6 +112,23 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
         }
     }
 
+    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt/vurdering") {
+        get {
+            kunSaksbehandler {
+                logger.info("Henter aktivitetsvurdering for sak $sakId")
+                val dto =
+                    inTransaction {
+                        runBlocking {
+                            aktivitetspliktService.hentVurderingForSak(
+                                sakId = sakId,
+                            )
+                        }
+                    }
+                call.respond(dto)
+            }
+        }
+    }
+
     route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/revurdering") {
         post {
             kunSystembruker {
@@ -140,6 +163,12 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
+            call.respond(vurdering ?: HttpStatusCode.NotFound)
+        }
+
+        get("/ny") {
+            logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
             val vurdering = inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
             call.respond(vurdering ?: HttpStatusCode.NotFound)
         }
@@ -180,6 +209,12 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
     route("/api/sak/{$SAKID_CALL_PARAMETER}/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
+            val vurdering = inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
+            call.respond(vurdering ?: HttpStatusCode.NotFound)
+        }
+
+        get("/ny") {
+            logger.info("Henter ny aktivitetsplikt vurdering for behandlingId=$behandlingId")
             val vurdering = inTransaction { aktivitetspliktService.hentVurderingForBehandling(behandlingId) }
             call.respond(vurdering ?: HttpStatusCode.NotFound)
         }

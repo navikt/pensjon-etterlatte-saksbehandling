@@ -109,6 +109,7 @@ class BrevdistribuererTest {
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
         brevtype = Brevtype.MANUELT,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker() =

@@ -81,7 +81,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
             <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} />
 
             {mapResult(personSoekResult, {
-              pending: <Spinner visible={true} label="Søker etter personer" />,
+              pending: <Spinner label="Søker etter personer" />,
               success: (personer) => {
                 return (
                   <Table className="table" zebraStripes>

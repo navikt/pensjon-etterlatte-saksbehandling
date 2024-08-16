@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -307,6 +308,7 @@ class BrevApiKlientTest : BrevApiKlient {
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
             brevtype = Brevtype.MANUELT,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 }
 

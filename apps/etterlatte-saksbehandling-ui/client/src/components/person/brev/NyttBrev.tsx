@@ -26,6 +26,7 @@ export default function NyttBrev() {
 
   const { brevId, sakId } = useParams()
   const [kanRedigeres, setKanRedigeres] = useState(false)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
@@ -37,7 +38,7 @@ export default function NyttBrev() {
         setKanRedigeres(false)
       }
     })
-  }, [brevId, sakId])
+  }, [brevId, sakId, tilbakestilt])
 
   return (
     <>
@@ -52,7 +53,7 @@ export default function NyttBrev() {
 
       {mapApiResult(
         brevStatus,
-        <Spinner label="Henter brev ..." visible />,
+        <Spinner label="Henter brev ..." />,
         () => (
           <ApiErrorAlert>Feil oppsto ved henting av brev</ApiErrorAlert>
         ),
@@ -75,7 +76,11 @@ export default function NyttBrev() {
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
               ) : (
-                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} />
+                <RedigerbartBrev
+                  brev={brev}
+                  kanRedigeres={kanRedigeres}
+                  tilbakestillingsaction={() => setTilbakestilt(true)}
+                />
               )}
             </Column>
             <Column>

@@ -1,6 +1,5 @@
-package no.nav.etterlatte.no.nav.etterlatte.grunnbeloep
+package no.nav.etterlatte.grunnbeloep
 
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import java.time.YearMonth
 
 class GrunnbeloepService(

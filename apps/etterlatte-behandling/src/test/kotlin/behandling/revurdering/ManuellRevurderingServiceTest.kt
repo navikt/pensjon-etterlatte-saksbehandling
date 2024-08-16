@@ -913,7 +913,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         with(applicationContext.oppgaveService) {
             this.hentOppgaverForReferanse(behandling.id.toString()).forEach {
                 if (it.manglerSaksbehandler()) {
-                    this.byttSaksbehandler(it.id, saksbehandlerId) // for aa kunne ferdgistille oppgaven
+                    this.tildelSaksbehandler(it.id, saksbehandlerId) // for aa kunne ferdgistille oppgaven
                 }
                 this.ferdigstillOppgave(
                     id = it.id,

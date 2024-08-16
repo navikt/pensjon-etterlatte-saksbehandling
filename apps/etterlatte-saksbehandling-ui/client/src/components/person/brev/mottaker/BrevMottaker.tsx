@@ -36,7 +36,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             Sjekk om bruker har verge
           </Alert>
         ),
-        pending: <Spinner visible label="Henter eventuelle verger" margin="0" />,
+        pending: <Spinner label="Henter eventuelle verger" margin="0" />,
         error: (error) => (
           <ApiErrorAlert>
             {error.detail || 'Feil oppsto ved henting av eventuelle verger. Prøv igjen senere'}

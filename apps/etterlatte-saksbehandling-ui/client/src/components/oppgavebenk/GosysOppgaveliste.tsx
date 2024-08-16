@@ -109,7 +109,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
       />
 
       {mapResult(gosysOppgaverResult, {
-        pending: <Spinner label="Henter Gosys-oppgaver" visible />,
+        pending: <Spinner label="Henter Gosys-oppgaver" />,
         error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys-oppgaver'}</ApiErrorAlert>,
         success: () => (
           <GosysOppgaver

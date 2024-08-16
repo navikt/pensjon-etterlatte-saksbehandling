@@ -1,7 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevForSak, opprettBrevForSak, slettBrev } from '~shared/api/brev'
+import { hentBrevForSak, slettBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { BodyShort, Box, Button, HStack, Modal, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
@@ -12,8 +11,8 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
+import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -53,28 +52,13 @@ const handlingKnapp = (brev: IBrev) => {
 }
 
 export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {
-  const navigate = useNavigate()
-
   const [brevListe, hentBrev] = useApiCall(hentBrevForSak)
-  const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
-
-  const kanOppretteBrevMedGittType = useFeatureEnabledMedDefault('kan-opprette-brev-med-data-for-spesifikk-type', false)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
       hentBrev(Number(sakResult.data.sak.id))
     }
   }, [sakResult])
-
-  const opprettNyttBrevOgRedirect = () => {
-    if (isSuccess(sakResult)) {
-      opprettBrev(Number(sakResult.data.sak.id), (brev) => {
-        navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)
-      })
-    } else {
-      throw Error('SakID mangler!')
-    }
-  }
 
   if (isFailure(sakResult)) {
     return (
@@ -92,7 +76,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
     <Box padding="8">
       {mapApiResult(
         brevListe,
-        <Spinner visible label="Henter brev for sak ..." />,
+        <Spinner label="Henter brev for sak ..." />,
         () => (
           <ApiErrorAlert>Feil ved henting av brev...</ApiErrorAlert>
         ),
@@ -102,6 +86,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
               <Table.Row>
                 <Table.HeaderCell>ID</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>Distribuert</Table.HeaderCell>
                 <Table.HeaderCell>Type</Table.HeaderCell>
                 <Table.HeaderCell>Navn</Table.HeaderCell>
                 <Table.HeaderCell>Adresse</Table.HeaderCell>
@@ -119,6 +104,9 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                   <Table.DataCell>{b.id}</Table.DataCell>
                   <Table.DataCell>
                     <BrevStatusTag status={b.status} />
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    {b.status === BrevStatus.DISTRIBUERT ? formaterDatoMedKlokkeslett(b.statusEndret) : '-'}
                   </Table.DataCell>
                   <Table.DataCell>{formaterBrevtype(b.brevtype)}</Table.DataCell>
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
@@ -141,19 +129,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
       <div>
         {mapSuccess(sakResult, (sak) => (
           <HStack gap="4">
-            {kanOppretteBrevMedGittType ? (
-              <NyttBrevModal sakId={sak.sak.id} sakType={sak.sak.sakType} />
-            ) : (
-              <Button
-                variant="primary"
-                icon={<DocPencilIcon />}
-                iconPosition="right"
-                onClick={opprettNyttBrevOgRedirect}
-                loading={isPending(nyttBrevStatus)}
-              >
-                Nytt brev
-              </Button>
-            )}
+            <NyttBrevModal sakId={sak.sak.id} sakType={sak.sak.sakType} />
             <LastOppBrev sak={sak.sak} />
           </HStack>
         ))}

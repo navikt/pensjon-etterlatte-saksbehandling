@@ -94,6 +94,7 @@ enum class OppgaveKilde {
     TILBAKEKREVING,
     GJENOPPRETTING,
     SAKSBEHANDLER,
+    BRUKERDIALOG,
 }
 
 enum class OppgaveType {
@@ -154,6 +155,13 @@ data class VedtakEndringDTO(
     val vedtakHendelse: VedtakHendelse,
     val vedtakType: VedtakType,
     val opphoerFraOgMed: YearMonth? = null,
+)
+
+data class NyOppgaveBulkDto(
+    val merknad: String,
+    val sakIds: List<Long>,
+    val type: OppgaveType,
+    val kilde: OppgaveKilde,
 )
 
 data class NyOppgaveDto(

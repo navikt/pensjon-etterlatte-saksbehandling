@@ -97,7 +97,7 @@ export const EndreBruker = ({
               />
 
               {mapResult(personResult, {
-                pending: <Spinner visible label="Søker etter person..." />,
+                pending: <Spinner label="Søker etter person..." />,
                 success: (person) => (
                   <>
                     <Alert variant="info" size="small">

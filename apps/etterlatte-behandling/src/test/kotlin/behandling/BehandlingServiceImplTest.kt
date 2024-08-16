@@ -596,15 +596,14 @@ internal class BehandlingServiceImplTest {
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
     fun `skal gi ugyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er foer foerste virk`(sakType: SakType) {
-        val gyldigVirkningstidspunkt =
+        shouldThrow<VirkFoerIverksattVirk> {
             sjekkOmVirkningstidspunktErGyldig(
                 sakType = sakType,
                 behandlingType = BehandlingType.REVURDERING,
                 virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
                 foersteVirk = YearMonth.of(2024, Month.JANUARY),
             )
-
-        gyldigVirkningstidspunkt shouldBe false
+        }
     }
 
     @ParameterizedTest
@@ -683,7 +682,7 @@ internal class BehandlingServiceImplTest {
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
 
         return runBlocking {
-            behandlingService.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            behandlingService.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request, false)
         }
     }
 

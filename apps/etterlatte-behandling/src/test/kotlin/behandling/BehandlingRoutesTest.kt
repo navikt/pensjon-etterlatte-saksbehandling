@@ -192,7 +192,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
+            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
         } returns true
 
         withTestApplication { client ->
@@ -235,7 +235,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
+            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
         } returns false
 
         withTestApplication { client ->

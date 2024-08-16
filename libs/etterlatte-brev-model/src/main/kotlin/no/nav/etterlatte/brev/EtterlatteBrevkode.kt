@@ -1,5 +1,11 @@
 package no.nav.etterlatte.brev
 
+/*
+Denne enumen brukes primært for kommunikasjonen mot brevbakeren.
+
+Denne enumen henger tett sammen med Brevkoder-enumen.
+Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
+ */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
     val tittel: String? = null,
@@ -24,6 +30,7 @@ enum class EtterlatteBrevKode(
     BARNEPENSJON_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
     BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
     BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om barnepensjon"),
+    BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(Brevtype.INFORMASJON, "Du må sende oss flere opplysninger"),
 
     OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om omstillingsstønad"),
     OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om omstillingsstønad"),
@@ -64,6 +71,8 @@ enum class EtterlatteBrevKode(
 
     KLAGE_OVERSENDELSE_BRUKER(Brevtype.OVERSENDELSE_KLAGE, "Klagen er oversendt til NAV Klageinstans Vest"),
     KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT, "Oversendelse til KA"),
+
+    OPPLASTET_PDF(Brevtype.OPPLASTET_PDF),
 }
 
 enum class Brevtype {

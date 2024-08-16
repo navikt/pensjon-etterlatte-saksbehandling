@@ -18,8 +18,6 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.config.BeregningFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -61,17 +59,12 @@ class ReguleringTest {
 
     @BeforeEach
     fun setup() {
-        val featureToggleService = DummyFeatureToggleService()
-
-        featureToggleService.settBryter(BeregningFeatureToggle.Foreldreloes, false)
-
         beregnBarnepensjonService =
             BeregnBarnepensjonService(
                 grunnlagKlient = grunnlagKlient,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
-                featureToggleService = featureToggleService,
             )
     }
 

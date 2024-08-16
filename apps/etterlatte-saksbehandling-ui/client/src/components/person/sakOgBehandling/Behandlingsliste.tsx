@@ -120,7 +120,9 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
           Ingen behandlinger på sak
         </Alert>
       )}
-      {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}
+
+      <Spinner visible={isPending(generellbehandlingStatus)} label="Henter generelle behandlinger" />
+
       {isFailureHandler({
         apiResult: generellbehandlingStatus,
         errorMessage: 'Vi klarte ikke å hente generelle behandligner',

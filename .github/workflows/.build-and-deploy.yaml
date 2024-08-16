@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write
       id-token: write
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
@@ -29,7 +29,10 @@ jobs:
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.gradlekey }}
+          dependency-graph: generate-and-submit
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

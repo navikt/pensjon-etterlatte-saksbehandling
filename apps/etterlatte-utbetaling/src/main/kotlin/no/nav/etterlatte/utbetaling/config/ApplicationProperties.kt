@@ -62,10 +62,10 @@ data class ApplicationProperties(
                     serviceUserUsername = requireEnvValue(srvuser),
                     serviceUserPassword = requireEnvValue(srvpwd),
                     leaderElectorPath = requireEnvValue(ELECTOR_PATH),
-                    grensesnittavstemmingEnabled = getValue(GRENSESNITTAVSTEMMING_ENABLED).toBoolean(),
-                    konsistensavstemmingEnabled = getValue(KONSISTENSAVSTEMMING_ENABLED).toBoolean(),
-                    grensesnittavstemmingOMSEnabled = getValue(GRENSESNITTAVSTEMMING_OMS_ENABLED).toBoolean(),
-                    konsistensavstemmingOMSEnabled = getValue(KONSISTENSAVSTEMMING_OMS_ENABLED).toBoolean(),
+                    grensesnittavstemmingEnabled = requireEnvValue(GRENSESNITTAVSTEMMING_ENABLED).toBoolean(),
+                    konsistensavstemmingEnabled = requireEnvValue(KONSISTENSAVSTEMMING_ENABLED).toBoolean(),
+                    grensesnittavstemmingOMSEnabled = requireEnvValue(GRENSESNITTAVSTEMMING_OMS_ENABLED).toBoolean(),
+                    konsistensavstemmingOMSEnabled = requireEnvValue(KONSISTENSAVSTEMMING_OMS_ENABLED).toBoolean(),
                 )
             }
     }

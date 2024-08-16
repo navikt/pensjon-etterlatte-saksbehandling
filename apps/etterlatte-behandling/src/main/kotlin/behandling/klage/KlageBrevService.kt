@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.klage
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -72,10 +71,9 @@ class KlageBrevService(
                     brukerTokenInfo = saksbehandler,
                 )
             val notatTilKa =
-                journalfoerNotatKa(
-                    klage = klage,
-                    brukerInfoToken = saksbehandler,
-                )
+                runBlocking {
+                    brevApiKlient.journalfoerNotatKa(klage, saksbehandler)
+                }
             logger.info(
                 "Journalførte notat til KA for innstilling i klageId=${klage.id} på " +
                     "journalpostId=${notatTilKa.journalpostId}",
@@ -171,13 +169,5 @@ class KlageBrevService(
     ): Brev =
         runBlocking {
             brevApiKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-        }
-
-    private fun journalfoerNotatKa(
-        klage: Klage,
-        brukerInfoToken: BrukerTokenInfo,
-    ): OpprettJournalpostDto =
-        runBlocking {
-            brevApiKlient.journalfoerNotatKa(klage, brukerInfoToken)
         }
 }

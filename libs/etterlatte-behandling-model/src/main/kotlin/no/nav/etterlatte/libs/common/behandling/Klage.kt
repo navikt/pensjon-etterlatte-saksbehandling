@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -262,7 +263,10 @@ data class Klage(
 
     fun kanAvbryte(): Boolean = KlageStatus.kanAvbryte(this.status)
 
-    fun tilBrevbakerBlankett(): BrevbakerBlankettDTO {
+    fun tilPdfgenDTO(
+        soekerFnr: String,
+        soekerNavn: String,
+    ): KlageBlankettPdfgenDTO {
         if (this.utfall !is KlageUtfallMedData.StadfesteVedtak) {
             throw IllegalStateException("Kan ikke lage en oversendelsesblankett for noe som ikke er innstilling")
         }
@@ -272,11 +276,11 @@ data class Klage(
                 "Fant ikke definerte formkrav for det vi skal lage blankett for",
             )
 
-        return BrevbakerBlankettDTO(
+        return KlageBlankettPdfgenDTO(
             formkrav =
-                FormkravBrevbaker(
+                FormkravPdfgen(
                     vedtaketKlagenGjelder =
-                        VedtakKlagenGjelderBrevbaker(
+                        VedtakKlagenGjelderPdfgen(
                             datoAttestert = formkrav.vedtaketKlagenGjelder!!.datoAttestert!!.toLocalDate(),
                             vedtakType = formkrav.vedtaketKlagenGjelder.vedtakType!!,
                         ),
@@ -288,7 +292,9 @@ data class Klage(
                     begrunnelse = formkrav.begrunnelse,
                 ),
             hjemmel = innstilling.lovhjemmel.lesbarTekst(),
+            sakId = this.sak.id,
             sakType = this.sak.sakType,
+            sakGjelder = "$soekerNavn ($soekerFnr)",
             internKommentar = innstilling.internKommentar,
             ovesendelseTekst = innstilling.innstillingTekst,
             klager = this.innkommendeDokument?.innsender ?: "",
@@ -348,20 +354,53 @@ data class Klage(
     }
 }
 
-data class BrevbakerBlankettDTO(
-    val formkrav: FormkravBrevbaker,
+/**
+ * DTO-en brukes i PDFGEN og må ikke endres uten å kontrollere mot koden i PDFGEN.
+ * PDFGEN kaster ikke feil dersom en verdi får nytt navn eller mangler.
+ **/
+data class KlageBlankettPdfgenDTO(
+    val formkrav: FormkravPdfgen,
     val hjemmel: String,
+    val sakId: Long,
     val sakType: SakType,
+    val sakGjelder: String,
     val internKommentar: String?,
     val ovesendelseTekst: String,
     val klager: String,
     val klageDato: LocalDate,
 ) {
     val innhold: List<String> = emptyList()
+
+    @JsonProperty
+    @Suppress("unused")
+    val sakTypeFormatert =
+        when (sakType) {
+            SakType.BARNEPENSJON -> "Barnepensjon"
+            SakType.OMSTILLINGSSTOENAD -> "Omstillingsstønad"
+        }
+
+    @JsonProperty
+    @Suppress("unused")
+    val vedtakTypeFormatert =
+        when (formkrav.vedtaketKlagenGjelder.vedtakType) {
+            VedtakType.INNVILGELSE -> "Innvilgelse"
+            VedtakType.OPPHOER -> "Opphør"
+            VedtakType.AVSLAG -> "Avslag på søknad"
+            VedtakType.ENDRING -> "Revurdering"
+            VedtakType.TILBAKEKREVING -> "Tilbakekreving"
+            VedtakType.AVVIST_KLAGE -> "Avvist klage"
+        }
 }
 
-data class FormkravBrevbaker(
-    val vedtaketKlagenGjelder: VedtakKlagenGjelderBrevbaker,
+data class SakOgPersonKlagenGjelderPdfgen(
+    val sakId: Long,
+    val sakType: SakType,
+    val navn: String,
+    val fnr: String,
+)
+
+data class FormkravPdfgen(
+    val vedtaketKlagenGjelder: VedtakKlagenGjelderPdfgen,
     val erKlagenSignert: Boolean,
     val gjelderKlagenNoeKonkretIVedtaket: Boolean,
     val erKlagerPartISaken: Boolean,
@@ -370,7 +409,7 @@ data class FormkravBrevbaker(
     val begrunnelse: String?,
 )
 
-data class VedtakKlagenGjelderBrevbaker(
+data class VedtakKlagenGjelderPdfgen(
     val datoAttestert: LocalDate,
     val vedtakType: VedtakType,
 )

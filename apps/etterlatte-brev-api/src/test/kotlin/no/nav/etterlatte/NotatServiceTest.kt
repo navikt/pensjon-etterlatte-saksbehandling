@@ -14,7 +14,7 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.notat.StrukturertBrev
+import no.nav.etterlatte.brev.notat.StrukturertNotat
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
@@ -87,7 +87,7 @@ class NotatServiceTest(
             notatService.journalfoerNotatISak(
                 sakId = sakId,
                 notatData =
-                    StrukturertBrev.KlageBlankett(
+                    StrukturertNotat.KlageBlankett(
                         klage = klage,
                     ),
                 bruker = simpleSaksbehandler(),
@@ -129,7 +129,7 @@ class NotatServiceTest(
                 notatService.journalfoerNotatISak(
                     sakId = sakId,
                     notatData =
-                        StrukturertBrev.KlageBlankett(
+                        StrukturertNotat.KlageBlankett(
                             klage = klage,
                         ),
                     bruker = simpleSaksbehandler(),

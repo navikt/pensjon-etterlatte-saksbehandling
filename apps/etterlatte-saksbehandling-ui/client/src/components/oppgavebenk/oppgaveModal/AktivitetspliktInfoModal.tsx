@@ -29,7 +29,7 @@ import {
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
 import {
-  hentAktivitspliktVurdering,
+  hentAktivitspliktVurderingForOppgave,
   opprettAktivitspliktAktivitetsgrad,
   opprettAktivitspliktUnntak,
 } from '~shared/api/aktivitetsplikt'
@@ -74,7 +74,7 @@ export const AktivitetspliktInfoModal = ({
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
   const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgrad)
   const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntak)
-  const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
+  const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForOppgave)
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
 
   const {

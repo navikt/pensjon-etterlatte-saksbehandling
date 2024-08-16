@@ -411,7 +411,7 @@ data class ViderefoertOpphoerRequest(
     val kravdato: LocalDate? = null,
     val vilkaar: VilkaarType?,
 ) {
-    val dato: YearMonth = _dato!!.tilYearMonth()
+    val dato: YearMonth? = _dato?.tilYearMonth()
 }
 
 data class ViderefoertOpphoer(

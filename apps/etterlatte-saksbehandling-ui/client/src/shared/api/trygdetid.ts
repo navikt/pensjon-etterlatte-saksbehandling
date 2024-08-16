@@ -31,9 +31,6 @@ export const slettTrygdetidsgrunnlag = async (args: {
     `/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag/${args.trygdetidGrunnlagId}`
   )
 
-export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
-  apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
-
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-status`, {})
 
@@ -42,16 +39,6 @@ export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise
 
 export interface StatusOppdatert {
   statusOppdatert: boolean
-}
-
-export const sorterLand = (landListe: ILand[]): ILand[] => {
-  landListe.sort((a: ILand, b: ILand) => {
-    if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
-      return 1
-    }
-    return -1
-  })
-  return landListe
 }
 
 export interface TrygdetidAvtaleOptions {
@@ -256,16 +243,6 @@ export interface IBeregnetTrygdetidGrunnlag {
 export enum ITrygdetidGrunnlagType {
   FAKTISK = 'FAKTISK',
   FREMTIDIG = 'FREMTIDIG',
-}
-
-export interface ILand {
-  gyldigFra: string
-  gyldigTil: string
-  isoLandkode: string
-  beskrivelse: {
-    term: string
-    tekst: string
-  }
 }
 
 export interface IOpplysningerDifferanse {

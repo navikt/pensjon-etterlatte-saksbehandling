@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid.klienter
+package no.nav.etterlatte.kodeverk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -6,10 +6,9 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.SocketTimeoutException
-import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.Headers.NAV_CONSUMER_ID
+import no.nav.etterlatte.libs.ktor.Headers
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -36,7 +35,7 @@ class KodeverkKlient(
                         Resource(
                             clientId = clientId,
                             url = "$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb",
-                            additionalHeaders = mapOf(NAV_CONSUMER_ID to applicationName),
+                            additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

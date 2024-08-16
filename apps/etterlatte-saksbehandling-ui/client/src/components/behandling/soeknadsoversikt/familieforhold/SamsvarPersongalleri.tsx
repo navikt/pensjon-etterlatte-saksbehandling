@@ -13,8 +13,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { ILand } from '~shared/api/trygdetid'
 import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { ILand } from '~utils/kodeverk'
 
 export function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')

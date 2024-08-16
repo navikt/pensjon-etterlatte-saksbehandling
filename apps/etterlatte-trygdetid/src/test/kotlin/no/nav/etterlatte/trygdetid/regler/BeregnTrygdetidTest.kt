@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid.regler
 
+import LandNormalisert
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -9,7 +10,6 @@ import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
-import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, sorterLand } from '~shared/api/trygdetid'
+import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
@@ -18,6 +18,8 @@ import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 interface Props {
   redigerbar: boolean

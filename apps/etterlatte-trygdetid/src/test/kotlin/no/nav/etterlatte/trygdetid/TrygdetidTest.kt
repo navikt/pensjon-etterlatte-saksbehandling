@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

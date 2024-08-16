@@ -1,5 +1,3 @@
-package no.nav.etterlatte.trygdetid
-
 enum class LandNormalisert(
     val isoCode: String,
     val beskrivelse: String,

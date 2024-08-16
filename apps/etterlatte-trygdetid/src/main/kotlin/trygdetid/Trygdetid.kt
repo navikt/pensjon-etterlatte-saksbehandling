@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException

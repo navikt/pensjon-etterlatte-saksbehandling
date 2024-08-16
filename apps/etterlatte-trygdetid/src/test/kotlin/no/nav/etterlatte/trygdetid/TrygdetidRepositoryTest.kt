@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe

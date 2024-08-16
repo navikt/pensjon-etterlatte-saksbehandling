@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus

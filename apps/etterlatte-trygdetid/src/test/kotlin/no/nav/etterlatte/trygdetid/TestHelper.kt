@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus

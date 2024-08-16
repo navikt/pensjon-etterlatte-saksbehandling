@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import LandNormalisert
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe

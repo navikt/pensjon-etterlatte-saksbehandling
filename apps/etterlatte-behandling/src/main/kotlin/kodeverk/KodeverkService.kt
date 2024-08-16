@@ -1,11 +1,7 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
-import no.nav.etterlatte.trygdetid.klienter.BetydningMedIsoKode
-import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
-import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
 import java.util.concurrent.TimeUnit
 
 class KodeverkService(

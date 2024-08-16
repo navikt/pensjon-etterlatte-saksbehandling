@@ -115,6 +115,8 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
@@ -330,6 +332,7 @@ internal class ApplicationContext(
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
+    val kodeverkService = KodeverkService(KodeverkKlient(config, httpClient()))
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 

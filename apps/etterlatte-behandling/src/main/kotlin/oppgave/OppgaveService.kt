@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -80,7 +79,6 @@ class OppgaveService(
         }
     }
 
-    // TODO: Slå sammen tildel og bytt... Hvorfor er det to forskjellige?!!?!
     fun tildelSaksbehandler(
         oppgaveId: UUID,
         saksbehandler: String,
@@ -92,31 +90,9 @@ class OppgaveService(
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
 
-        val eksisterendeSaksbehandler = hentetOppgave.saksbehandler?.ident
-        if (eksisterendeSaksbehandler.isNullOrEmpty() || eksisterendeSaksbehandler == Fagsaksystem.EY.navn) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
-
-            // TODO: Fjerne dette. Midlertidig løsning for å støtte gammel flyt
-            if (hentetOppgave.status == Status.NY) {
-                oppgaveDao.endreStatusPaaOppgave(oppgaveId, Status.UNDER_BEHANDLING)
-            }
-        } else {
-            throw OppgaveAlleredeTildeltSaksbehandler(oppgaveId, eksisterendeSaksbehandler)
-        }
-    }
-
-    fun byttSaksbehandler(
-        oppgaveId: UUID,
-        saksbehandler: String,
-    ) {
-        val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw OppgaveIkkeFunnet(oppgaveId)
-
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
 
-        // TODO: Fjerne dette. Midlertidig løsning for å støtte gammel flyt
+        // Må ha denne for å ikke overskride attesteringstatus på oppgaver
         if (hentetOppgave.status == Status.NY) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, Status.UNDER_BEHANDLING)
         }
@@ -292,7 +268,6 @@ class OppgaveService(
 
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         val oppgaveId = oppgave.id
-        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
         val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandlerIdent != null) {
@@ -302,11 +277,12 @@ class OppgaveService(
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
         return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
-    // TODO: hentEndringerForOppgave Kan fjernes over tid
+    @Deprecated("Se på forrigesaksbehandler feltet")
     fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
         oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao
             .hentEndringerForOppgave(oppgave.id)

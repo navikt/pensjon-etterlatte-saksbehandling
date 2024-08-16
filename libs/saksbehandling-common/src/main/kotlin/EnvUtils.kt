@@ -31,9 +31,6 @@ data class Miljoevariabler private constructor(
         return Miljoevariabler(toMutableMap)
     }
 
-    // TODO: Denne bør vi kunne fase ut
-    fun containsKey(key: EnvEnum) = props.containsKey(key.key())
-
     companion object {
         fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())
 

@@ -417,7 +417,7 @@ data class ViderefoertOpphoerRequest(
 data class ViderefoertOpphoer(
     val skalViderefoere: JaNei,
     val behandlingId: UUID,
-    val dato: YearMonth,
+    val dato: YearMonth?,
     val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,

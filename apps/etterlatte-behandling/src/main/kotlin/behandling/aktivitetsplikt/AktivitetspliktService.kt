@@ -155,7 +155,19 @@ class AktivitetspliktService(
         return varigUnntak != null
     }
 
-    fun hentAktiviteter(behandlingId: UUID) = aktivitetspliktDao.hentAktiviteter(behandlingId)
+    fun hentAktiviteter(
+        behandlingId: UUID? = null,
+        sakId: Long? = null,
+    ): List<AktivitetspliktAktivitet> =
+        (
+            if (behandlingId != null) {
+                aktivitetspliktDao.hentAktiviteterForBehandling(behandlingId)
+            } else if (sakId != null) {
+                aktivitetspliktDao.hentAktiviteterForSak(sakId)
+            } else {
+                throw ManglerSakEllerBehandlingIdException()
+            }
+        )
 
     fun upsertAktivitet(
         behandlingId: UUID,
@@ -582,6 +594,12 @@ class TomErFoerFomException :
     UgyldigForespoerselException(
         code = "TOM_ER_FOER_FOM",
         detail = "Til og med dato er kan ikke være før fra og med dato",
+    )
+
+class ManglerSakEllerBehandlingIdException :
+    UgyldigForespoerselException(
+        code = "MANGLER_SAK_ELLER_BEHANDLING_ID",
+        detail = "Forespørsel mangler sak eller behandling id",
     )
 
 data class AktivitetspliktVurderingGammel(

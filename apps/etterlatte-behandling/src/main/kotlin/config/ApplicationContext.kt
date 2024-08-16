@@ -116,6 +116,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
 import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -283,6 +284,7 @@ internal class ApplicationContext(
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
+    val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -332,7 +334,7 @@ internal class ApplicationContext(
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
-    val kodeverkService = KodeverkService(KodeverkKlient(config, httpClient()))
+    val kodeverkService = KodeverkService(kodeverkKlient)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 

@@ -111,6 +111,7 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 vilkaarsvuderingKlient = VilkaarsvurderingTest(),
+                kodeverkKlient = KodeverkKlientTest(),
             )
     }
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class KodeverkServiceTest {
-    private val mockKlient = mockk<KodeverkKlient>()
+    private val mockKlient = mockk<KodeverkKlientImpl>()
     private val service = KodeverkService(mockKlient)
     private val saksbehandler = simpleSaksbehandler()
 

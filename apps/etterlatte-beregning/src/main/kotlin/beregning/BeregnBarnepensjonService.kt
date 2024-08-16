@@ -87,7 +87,7 @@ class BeregnBarnepensjonService(
             opprettBeregningsgrunnlag(
                 beregningsGrunnlag,
                 trygdetidListe,
-                anvendtTrygdetider,
+                anvendtTrygdetider.anvendt,
                 virkningstidspunkt.atDay(1),
                 null,
             )

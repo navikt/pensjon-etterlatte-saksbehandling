@@ -45,7 +45,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
                 listOf(
                     GrunnlagMedPeriode(it, fom, null),
                 ),
-            ).first().data
+            ).anvendt.first().data
         } ?: throw TrygdetidIkkeOpprettet()
     }
 
@@ -73,7 +73,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
                     fom = aktueltResultat.periode.fraDato,
                     tom = aktueltResultat.periode.tilDato,
                 )
-            }.kombinerOverlappendePerioder()
+            }.let { AnvendtTrygdetidPeriodeUtrekning(it.kombinerOverlappendePerioder()) }
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
         begegningsmetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
@@ -100,3 +100,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
                 sikkerlogger().warn("Fant ikke trygdetid for avdoed $avdoed i $this")
             }
 }
+
+data class AnvendtTrygdetidPeriodeUtrekning(
+    val anvendt: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
+)

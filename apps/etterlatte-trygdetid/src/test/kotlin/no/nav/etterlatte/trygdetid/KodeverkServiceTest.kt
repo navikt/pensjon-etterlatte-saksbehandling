@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
 import no.nav.etterlatte.trygdetid.klienter.Betydning
@@ -16,29 +17,30 @@ import org.junit.jupiter.api.Test
 internal class KodeverkServiceTest {
     private val mockKlient = mockk<KodeverkKlient>()
     private val service = KodeverkService(mockKlient)
+    private val saksbehandler = simpleSaksbehandler()
 
     @Test
     fun `Hent alle landkoder`() {
-        coEvery { mockKlient.hentLandkoder() } returns opprettLandkoderResponse()
+        coEvery { mockKlient.hentLandkoder(saksbehandler) } returns opprettLandkoderResponse()
 
         runBlocking {
-            val land = service.hentAlleLand()
+            val land = service.hentAlleLand(saksbehandler)
 
             assertEquals(5, land.size)
-            coVerify(exactly = 1) { mockKlient.hentLandkoder() }
+            coVerify(exactly = 1) { mockKlient.hentLandkoder(saksbehandler) }
         }
     }
 
     @Test
     fun `Cache for landkode fungerer`() {
-        coEvery { mockKlient.hentLandkoder() } returns opprettLandkoderResponse()
+        coEvery { mockKlient.hentLandkoder(saksbehandler) } returns opprettLandkoderResponse()
 
         runBlocking {
-            val land = service.hentAlleLand()
+            val land = service.hentAlleLand(saksbehandler)
             assertEquals(5, land.size)
         }
 
-        coVerify(exactly = 1) { mockKlient.hentLandkoder() }
+        coVerify(exactly = 1) { mockKlient.hentLandkoder(saksbehandler) }
     }
 
     @Test
@@ -53,14 +55,14 @@ internal class KodeverkServiceTest {
             mapOf(
                 Pair(
                     LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
-                    listOf<Betydning>(betydning),
+                    listOf(betydning),
                 ),
             )
 
-        coEvery { mockKlient.hentLandkoder() } returns KodeverkResponse(testdatasandwich)
+        coEvery { mockKlient.hentLandkoder(saksbehandler) } returns KodeverkResponse(testdatasandwich)
 
         runBlocking {
-            val alleLand = service.hentAlleLand()
+            val alleLand = service.hentAlleLand(saksbehandler)
             assertEquals(1, alleLand.size)
             val land = alleLand[0]
             assertEquals(LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.beskrivelse, land.beskrivelse.tekst)

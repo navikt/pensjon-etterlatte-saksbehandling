@@ -76,6 +76,7 @@ class ApplicationContext(
                 azureAppJwk = config.getString("azure.app.jwk"),
                 azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
                 azureAppScope = config.getString("etterlatteproxy.scope"),
+                forventSuksess = false,
             ),
             objectMapper = simuleringObjectMapper(),
         ),

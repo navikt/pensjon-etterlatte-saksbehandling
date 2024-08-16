@@ -45,7 +45,6 @@ import no.nav.etterlatte.utbetaling.simulering.SimuleringDao
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
-import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -53,7 +52,6 @@ import java.time.temporal.ChronoUnit
 class ApplicationContext(
     val env: Miljoevariabler = getRapidEnv(),
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env),
-    rapidConnection: RapidsConnection? = null,
     val jmsConnectionFactory: EtterlatteJmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,

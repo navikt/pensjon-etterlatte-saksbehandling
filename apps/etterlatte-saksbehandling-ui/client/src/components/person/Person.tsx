@@ -57,8 +57,6 @@ export const Person = () => {
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
   const skalViseAktivitet = useFeatureEnabledMedDefault('flere-perioder-aktivitet-vurdering', false)
 
-  console.log(skalViseAktivitet)
-
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.concurrent.TimeUnit
 

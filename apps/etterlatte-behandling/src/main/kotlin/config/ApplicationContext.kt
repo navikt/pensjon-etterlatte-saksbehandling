@@ -325,7 +325,7 @@ internal class ApplicationContext(
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.requireEnvValue(ELECTOR_PATH), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))

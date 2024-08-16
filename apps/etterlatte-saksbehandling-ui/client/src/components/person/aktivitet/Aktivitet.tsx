@@ -3,7 +3,7 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { BodyShort, Box, Heading, Table, VStack } from '@navikt/ds-react'
 import {
-  IAktivitetspliktVurdering,
+  IAktivitetspliktVurderingNy,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
@@ -14,7 +14,7 @@ import Spinner from '~shared/Spinner'
 
 export const Aktivitet = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }): ReactNode => {
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForSak)
-  const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
+  const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNy>()
 
   useEffect(() => {
     if (isSuccess(sakResult)) {

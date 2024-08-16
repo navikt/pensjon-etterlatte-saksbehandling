@@ -88,7 +88,7 @@ spec:
     - name: KODEVERK_URL
       value: "http://kodeverk-api.team-rocket/api/v1/kodeverk"
     - name: KODEVERK_CLIENT_ID
-      value: api://prod-gcp.team-rocket.kodeverk-api/.default
+      value: prod-gcp.team-rocket.kodeverk-api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

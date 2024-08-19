@@ -7,7 +7,8 @@ import { Familieforhold } from '~shared/types/Person'
 
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
 import { Result } from '~shared/api/apiUtils'
-import { ILand } from '~shared/api/trygdetid'
+
+import { ILand } from '~utils/kodeverk'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null

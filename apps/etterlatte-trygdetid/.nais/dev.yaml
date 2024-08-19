@@ -75,10 +75,6 @@ spec:
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-grunnlag
-    - name: KODEVERK_URL
-      value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
-    - name: KODEVERK_CLIENT_ID
-      value: dev-gcp.team-rocket.kodeverk-api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -91,8 +87,6 @@ spec:
         - application: etterlatte-trygdetid-kafka
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-testdata-behandler
-        - application: kodeverk-api
-          namespace: team-rocket
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp
@@ -101,5 +95,4 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
       external:
-        - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: etterlatte-unleash-api.nav.cloud.nais.io

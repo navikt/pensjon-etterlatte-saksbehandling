@@ -4,8 +4,8 @@ import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenj
 import { ListeItemMedSpacingIMellom } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 import { Result } from '~shared/api/apiUtils'
-import { ILand } from '~shared/api/trygdetid'
 import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { ILand } from '~utils/kodeverk'
 
 export function StatsborgerskapVisning(props: {
   statsborgerskap?: string

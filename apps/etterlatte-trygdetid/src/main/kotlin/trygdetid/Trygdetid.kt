@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.Period

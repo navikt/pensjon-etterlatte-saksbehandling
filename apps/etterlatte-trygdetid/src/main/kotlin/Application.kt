@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
-import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
 
 fun main() {
@@ -28,7 +27,6 @@ class Server(
             ) {
                 trygdetid(trygdetidService, behandlingKlient)
                 avtale(avtaleService, behandlingKlient)
-                kodeverk(kodeverkService)
             }
         }
 

@@ -14,7 +14,7 @@ Så her modellerer vi det eksplisitt.
 */
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
-    val ferdigstilling: EtterlatteBrevKode = redigering,
+    val ferdigstilling: EtterlatteBrevKode,
     /* Har et mål om å få denne bort fra å være nullable,
     men må finne en god løsning på opplasta PDF + revurderingsvedtak først
      */
@@ -151,9 +151,14 @@ enum class Brevkoder(
 
     OVERSENDELSE_KLAGE(
         EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER,
+        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER,
         tittel = "Klagen er oversendt til NAV Klageinstans Vest",
     ),
-    KLAGE_OVERSENDELSE_BLANKETT(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT, tittel = "Oversendelse til KA"),
+    KLAGE_OVERSENDELSE_BLANKETT(
+        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,
+        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,
+        tittel = "Oversendelse til KA",
+    ),
 
-    OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF),
+    OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF, EtterlatteBrevKode.OPPLASTET_PDF),
 }

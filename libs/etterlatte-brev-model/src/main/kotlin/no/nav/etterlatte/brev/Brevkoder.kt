@@ -25,6 +25,7 @@ enum class Brevkoder(
     TILBAKEKREVING(
         EtterlatteBrevKode.TILBAKEKREVING_INNHOLD,
         EtterlatteBrevKode.TILBAKEKREVING_FERDIG,
+        "Vedtak om tilbakekreving",
     ),
     TOMT_INFORMASJONSBREV(
         EtterlatteBrevKode.TOM_DELMAL,
@@ -104,7 +105,7 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon fra 1. januar 2024",
     ),
-    AVVIST_KLAGE(EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD, EtterlatteBrevKode.AVVIST_KLAGE_FERDIG),
+    AVVIST_KLAGE(EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD, EtterlatteBrevKode.AVVIST_KLAGE_FERDIG, "Vedtak om avvist klage"),
 
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,

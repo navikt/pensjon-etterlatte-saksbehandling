@@ -1,5 +1,9 @@
 package no.nav.etterlatte.brev.model
 
+/* Ikke utvid denne direkte,
+utvid heller BrevDataFerdigstilling eller BrevDataRedigerbar,
+avhengig av hva du lager
+*/
 interface BrevData
 
 interface BrevDataFerdigstilling : BrevData {

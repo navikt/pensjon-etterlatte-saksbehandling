@@ -94,7 +94,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.redigering.brevtype,
+                        kode.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,

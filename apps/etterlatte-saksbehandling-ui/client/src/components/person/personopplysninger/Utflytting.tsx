@@ -1,9 +1,9 @@
 import React, { ReactNode } from 'react'
-import { ILand } from '~shared/api/trygdetid'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { AirplaneIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
+import { ILand } from '~utils/kodeverk'
 
 interface UtflyttingDTO {
   tilflyttingsland?: string

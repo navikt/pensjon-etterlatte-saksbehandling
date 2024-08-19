@@ -35,6 +35,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.kodeverk.kodeverk
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -213,6 +214,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
 
     tilgangRoutes(applicationContext.tilgangService)
+    kodeverk(applicationContext.kodeverkService)
 }
 
 private fun Route.settOppTilganger(

@@ -6,13 +6,11 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_KEYSTORE_PATH
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
 import java.net.InetAddress
 import java.util.Properties
-import java.util.UUID
 
 interface KafkaConfig {
     fun producerConfig(): Properties
@@ -27,11 +25,6 @@ class GcpKafkaConfig(
     private val clientId: String,
 ) : KafkaConfig {
     companion object {
-        private fun generateInstanceId(env: Miljoevariabler): String {
-            if (env.containsKey(NAIS_APP_NAME)) return InetAddress.getLocalHost().hostName
-            return UUID.randomUUID().toString()
-        }
-
         fun fromEnv(env: Miljoevariabler): KafkaConfig =
             GcpKafkaConfig(
                 bootstrapServers = env.requireEnvValue(KAFKA_BROKERS),
@@ -39,7 +32,7 @@ class GcpKafkaConfig(
                 truststorePassword = env.requireEnvValue(KAFKA_CREDSTORE_PASSWORD),
                 keystoreLocation = env.requireEnvValue(KAFKA_KEYSTORE_PATH),
                 keystorePassword = env.requireEnvValue(KAFKA_CREDSTORE_PASSWORD),
-                clientId = generateInstanceId(env),
+                clientId = InetAddress.getLocalHost().hostName,
             )
     }
 

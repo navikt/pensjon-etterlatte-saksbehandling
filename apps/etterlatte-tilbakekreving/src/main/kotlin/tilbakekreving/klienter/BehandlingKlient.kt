@@ -50,11 +50,15 @@ class BehandlingKlient(
         }
     }
 
-    suspend fun avbrytTilbakekreving(sakId: SakId) {
+    suspend fun avbrytTilbakekreving(
+        sakId: SakId,
+        merknad: String,
+    ) {
         logger.info("Avbryter tilbakekreving i sak ${sakId.value}")
         try {
             httpClient.put("$url/tilbakekreving/${sakId.value}/avbryt") {
                 contentType(ContentType.Application.Json)
+                setBody(AvbrytRequest(merknad))
             }
         } catch (e: Exception) {
             throw Exception("Klarte ikke å avbryte tilbakekreving for sak $sakId", e)
@@ -64,4 +68,8 @@ class BehandlingKlient(
 
 data class OppgaveStatusRequest(
     val paaVent: Boolean,
+)
+
+data class AvbrytRequest(
+    val merknad: String,
 )

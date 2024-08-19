@@ -256,7 +256,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
 
         // Avbryter tilbakekreving
-        val avbruttTilbakekreving = runBlocking { service.avbrytTilbakekreving(sak.id) }
+        val avbruttTilbakekreving = runBlocking { service.avbrytTilbakekreving(sak.id, "merknad") }
         val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
         val avbruttOppgave = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
 

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid.klienter
+package no.nav.etterlatte.kodeverk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -6,28 +6,31 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.SocketTimeoutException
-import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.Headers.NAV_CONSUMER_ID
+import no.nav.etterlatte.libs.ktor.Headers
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
-class KodeverkKlient(
+interface KodeverkKlient {
+    suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse
+}
+
+class KodeverkKlientImpl(
     config: Config,
     httpKlient: HttpClient,
-) {
-    private val logger = LoggerFactory.getLogger(KodeverkKlient::class.java)
+) : KodeverkKlient {
+    private val logger = LoggerFactory.getLogger(KodeverkKlientImpl::class.java)
     private val url = config.getString("kodeverk.resource.url")
     private val clientId = config.getString("kodeverk.client.id")
     private val applicationName = config.getString("applicationName")
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpKlient)
 
-    suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse =
+    override suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse =
         try {
             logger.info("Henter alle landkoder fra Kodeverk")
             downstreamResourceClient
@@ -36,7 +39,7 @@ class KodeverkKlient(
                         Resource(
                             clientId = clientId,
                             url = "$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb",
-                            additionalHeaders = mapOf(NAV_CONSUMER_ID to applicationName),
+                            additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

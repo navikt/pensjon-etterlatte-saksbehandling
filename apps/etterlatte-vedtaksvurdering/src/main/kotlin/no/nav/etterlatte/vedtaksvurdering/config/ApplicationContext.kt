@@ -131,7 +131,7 @@ class ApplicationContext {
 
     private val vedtakshendelserProdusent: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
         } else {
             object : KafkaProdusent<String, String> {
                 override fun publiser(

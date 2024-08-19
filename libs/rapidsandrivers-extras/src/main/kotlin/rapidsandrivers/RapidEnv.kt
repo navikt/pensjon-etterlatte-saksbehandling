@@ -3,9 +3,8 @@ package no.nav.etterlatte.rapidsandrivers
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.rapidsandrivers.RapidKey.KAFKA_BOOTSTRAP_SERVERS
-import no.nav.etterlatte.rapidsandrivers.RapidKey.KAFKA_BROKERS
-import no.nav.etterlatte.rapidsandrivers.RapidKey.KAFKA_CREDSTORE_PASSWORD
 import no.nav.helse.rapids_rivers.AivenConfig
 import no.nav.helse.rapids_rivers.Config
 import org.apache.kafka.clients.CommonClientConfigs
@@ -19,14 +18,12 @@ fun getRapidEnv(): Miljoevariabler =
         .systemEnv()
         .append(RapidKey.KAFKA_CONSUMER_GROUP_ID) { it[NAIS_APP_NAME]!!.replace("-", "") }
 
-fun configFromEnvironment(env: Miljoevariabler): Config {
-    val gcpConfigAvailable = env.containsKey(KAFKA_BROKERS) && env.containsKey(KAFKA_CREDSTORE_PASSWORD)
-    return if (gcpConfigAvailable) {
+fun configFromEnvironment(env: Miljoevariabler) =
+    if (appIsInGCP()) {
         AivenConfig.default
     } else {
         LocalKafkaConfig(env)
     }
-}
 
 class LocalKafkaConfig(
     private val env: Miljoevariabler,

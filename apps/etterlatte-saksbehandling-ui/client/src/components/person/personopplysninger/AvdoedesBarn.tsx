@@ -6,10 +6,20 @@ import { AlderTag } from '~components/person/personopplysninger/components/Alder
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
+import { SakType } from '~shared/types/sak'
 
-export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactNode => {
+export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?: Familiemedlem[] }): ReactNode => {
+  const opprettHeading = (): string => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return 'Søsken (avdødes barn)'
+      case SakType.OMSTILLINGSSTOENAD:
+        return 'Barn (avdødes barn)'
+    }
+  }
+
   return (
-    <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
+    <Personopplysning heading={opprettHeading()} icon={<ChildEyesIcon />}>
       <Table>
         <Table.Header>
           <Table.Row>

@@ -60,7 +60,7 @@ app.get(
 )
 
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
-app.use('/api/kodeverk', kodeverkRouter)
+app.use('/api/kodeverk', kodeverkRouter) //TOOD: neste commit skal denne flyttes til behandling
 app.use('/api/github', githubRouter)
 
 app.use(
@@ -85,6 +85,7 @@ app.use(
     '/api/generellbehandling',
     '/api/sjekkliste',
     '/api/bosattutland',
+    '/api/kodeverk',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

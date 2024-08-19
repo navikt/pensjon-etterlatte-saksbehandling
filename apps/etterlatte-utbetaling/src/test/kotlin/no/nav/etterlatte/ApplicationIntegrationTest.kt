@@ -69,7 +69,6 @@ class ApplicationIntegrationTest {
         ApplicationContext(
             env = Miljoevariabler.systemEnv(),
             properties = applicationProperties,
-            rapidConnection = rapidsConnection,
             jmsConnectionFactory = connectionFactory,
             behandlingKlient = mockk(),
             vedtaksvurderingKlient = mockk(),

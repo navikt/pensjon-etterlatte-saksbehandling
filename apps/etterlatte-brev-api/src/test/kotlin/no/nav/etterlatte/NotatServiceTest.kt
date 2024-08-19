@@ -1,19 +1,18 @@
 package no.nav.etterlatte
 
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.NotatService
-import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.Avsender
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
+import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.notat.NotatMal
+import no.nav.etterlatte.brev.notat.NotatRepository
+import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.StrukturertNotat
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -32,114 +31,124 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.pensjon.brevbaker.api.model.Telefonnummer
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @ExtendWith(GenerellDatabaseExtension::class)
 class NotatServiceTest(
     dataSource: DataSource,
 ) {
-    private val brevRepository: BrevRepository = BrevRepository(dataSource)
-    private val adresseService: AdresseService = mockk()
-    private val brevbakerService: BrevbakerService = mockk()
-    private val grunnlagService: GrunnlagService = mockk()
-    private val dokarkivKlient: DokarkivKlient = mockk()
+    private val notatRepository = spyk(NotatRepository(dataSource))
+    private val pdfGeneratorKlient = mockk<PdfGeneratorKlient>()
+    private val dokarkivService = mockk<DokarkivService>()
+    private val grunnlagService = mockk<GrunnlagService>()
 
     private val notatService =
         NotatService(
-            brevRepository = brevRepository,
-            adresseService = adresseService,
-            brevbakerService = brevbakerService,
-            grunnlagService = grunnlagService,
-            dokarkivKlient = dokarkivKlient,
+            notatRepository,
+            pdfGeneratorKlient,
+            dokarkivService,
+            grunnlagService,
         )
 
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
+    }
+
     @Test
-    fun `journalfoerNotatISak oppretter brev og innhold, og journalfører mot dokarkiv`() {
-        val sakId = 1L
+    fun `Generer PDF for klageblankett (forhåndsvisning)`() {
+        val sakId = Random.nextLong()
         val klage = klageForInnstilling(sakId)
 
         coEvery {
-            adresseService.hentAvsender(any())
-        } returns
-            Avsender(
-                kontor = "Nav",
-                telefonnummer = Telefonnummer(""),
-                saksbehandler = "Saks Behandler",
-                attestant = null,
+            grunnlagService.hentGrunnlagForSak(
+                sakId,
+                any(),
             )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { pdfGeneratorKlient.genererPdf(any(), any()) } returns "pdf".toByteArray()
 
-        val dummyPdf = Pdf("Hello world".toByteArray())
-        coEvery { grunnlagService.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { brevbakerService.genererPdf(any(), any()) } returns dummyPdf
-        coEvery { dokarkivKlient.opprettJournalpost(any(), any()) } returns
-            OpprettJournalpostResponse(
-                "123",
-                true,
+        runBlocking {
+            notatService.genererPdf(StrukturertNotat.KlageBlankett(klage), simpleSaksbehandler())
+        }
+
+        coVerify(exactly = 1) { grunnlagService.hentGrunnlagForSak(sakId, any()) }
+        coVerify(exactly = 1) { pdfGeneratorKlient.genererPdf(any(), NotatMal.KLAGE_OVERSENDELSE_BLANKETT) }
+    }
+
+    @Test
+    fun `journalfoerNotatISak oppretter brev og innhold, og journalfører mot dokarkiv`() {
+        val sakId = Random.nextLong()
+        val klage = klageForInnstilling(sakId)
+
+        coEvery {
+            grunnlagService.hentGrunnlagForSak(
+                sakId,
+                any(),
             )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { pdfGeneratorKlient.genererPdf(any(), any()) } returns "pdf".toByteArray()
+        coEvery { dokarkivService.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
 
         runBlocking {
             notatService.journalfoerNotatISak(
-                sakId = sakId,
-                notatData =
-                    StrukturertNotat.KlageBlankett(
-                        klage = klage,
-                    ),
-                bruker = simpleSaksbehandler(),
+                StrukturertNotat.KlageBlankett(klage),
+                simpleSaksbehandler(),
             )
         }
 
-        val notatForKlage = brevRepository.hentBrevForBehandling(klage.id, Brevtype.NOTAT)
+        coVerify(exactly = 1) {
+            grunnlagService.hentGrunnlagForSak(sakId, any())
+            pdfGeneratorKlient.genererPdf(any(), NotatMal.KLAGE_OVERSENDELSE_BLANKETT)
+            dokarkivService.journalfoer(any())
 
-        Assertions.assertEquals(1, notatForKlage.size)
+            notatRepository.hentForReferanse(klage.id.toString())
+            notatRepository.opprett(any(), any())
+            notatRepository.hent(any())
 
-        val oversendelseNotat = notatForKlage.first()
-        Assertions.assertEquals(Status.JOURNALFOERT, oversendelseNotat.status)
-        val pdfinnhold = brevRepository.hentPdf(oversendelseNotat.id)
-        Assertions.assertArrayEquals(dummyPdf.bytes, pdfinnhold?.bytes)
+            notatRepository.settJournalfoert(any(), any(), any())
+        }
     }
 
     @Test
     fun `hvis journalføring feiler settes brevet til slettet`() {
-        val sakId = 3L
+        val sakId = Random.nextLong()
         val klage = klageForInnstilling(sakId)
 
         coEvery {
-            adresseService.hentAvsender(any())
-        } returns
-            Avsender(
-                kontor = "Nav",
-                telefonnummer = Telefonnummer(""),
-                saksbehandler = "Saks Behandler",
-                attestant = null,
+            grunnlagService.hentGrunnlagForSak(
+                sakId,
+                any(),
             )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { pdfGeneratorKlient.genererPdf(any(), any()) } returns "pdf".toByteArray()
+        coEvery { dokarkivService.journalfoer(any()) } throws Exception()
 
-        val dummyPdf = Pdf("Hello world".toByteArray())
-        coEvery { grunnlagService.hentGrunnlagForSak(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { brevbakerService.genererPdf(any(), any()) } returns dummyPdf
-        coEvery { dokarkivKlient.opprettJournalpost(any(), any()) } throws Exception("Å nei")
-
-        try {
+        assertThrows<Exception> {
             runBlocking {
-                notatService.journalfoerNotatISak(
-                    sakId = sakId,
-                    notatData =
-                        StrukturertNotat.KlageBlankett(
-                            klage = klage,
-                        ),
-                    bruker = simpleSaksbehandler(),
-                )
+                notatService.journalfoerNotatISak(StrukturertNotat.KlageBlankett(klage), simpleSaksbehandler())
             }
-        } catch (_: Exception) {
         }
 
-        val notaterForKlage = brevRepository.hentBrevForBehandling(klage.id, Brevtype.NOTAT)
-        Assertions.assertTrue(notaterForKlage.isEmpty())
+        notatRepository.hentForReferanse(klage.id.toString())
+
+        coVerify(exactly = 1) {
+            grunnlagService.hentGrunnlagForSak(sakId, any())
+            pdfGeneratorKlient.genererPdf(any(), NotatMal.KLAGE_OVERSENDELSE_BLANKETT)
+            dokarkivService.journalfoer(any())
+            notatRepository.slett(any())
+        }
+
+        coVerify(exactly = 0) {
+            notatRepository.settJournalfoert(any(), any(), any())
+        }
     }
 }
 

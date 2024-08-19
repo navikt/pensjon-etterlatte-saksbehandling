@@ -52,37 +52,36 @@ abstract class BehandlingIntegrationTest {
         server.start()
         val props = dbExtension.properties()
 
+        var systemEnv = Miljoevariabler.systemEnv()
+        mapOf(
+            KafkaKey.KAFKA_RAPID_TOPIC to "test",
+            DatabaseConfig.DB_HOST to props.host,
+            DatabaseConfig.DB_USERNAME to props.username,
+            DatabaseConfig.DB_PASSWORD to props.password,
+            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
+            DatabaseConfig.DB_DATABASE to props.databaseName,
+            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
+            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
+            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
+            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
+            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
+            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
+            EnvKey.NORG2_URL to "http://localhost",
+            EnvKey.NAVANSATT_URL to "http://localhost",
+            EnvKey.SKJERMING_URL to "http://localhost",
+            TestEnvKey.OPPGAVE_URL to "http://localhost",
+            TestEnvKey.PEN_URL to "http://localhost",
+            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
+            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
+            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
+            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
+            TestEnvKey.OPPGAVE_SCOPE to "scope",
+        ).forEach { i -> systemEnv = systemEnv.append(i.key, { i.value }) }
         applicationContext =
             ApplicationContext(
-                env =
-                    Miljoevariabler.systemEnv().append(
-                        mapOf(
-                            KafkaKey.KAFKA_RAPID_TOPIC to "test",
-                            DatabaseConfig.DB_HOST to props.host,
-                            DatabaseConfig.DB_USERNAME to props.username,
-                            DatabaseConfig.DB_PASSWORD to props.password,
-                            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
-                            DatabaseConfig.DB_DATABASE to props.databaseName,
-                            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
-                            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
-                            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
-                            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
-                            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
-                            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
-                            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
-                            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
-                            EnvKey.NORG2_URL to "http://localhost",
-                            EnvKey.NAVANSATT_URL to "http://localhost",
-                            EnvKey.SKJERMING_URL to "http://localhost",
-                            TestEnvKey.OPPGAVE_URL to "http://localhost",
-                            TestEnvKey.PEN_URL to "http://localhost",
-                            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
-                            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
-                            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
-                            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
-                            TestEnvKey.OPPGAVE_SCOPE to "scope",
-                        ),
-                    ),
+                env = systemEnv,
                 config =
                     ConfigFactory.parseMap(
                         mapOf(
@@ -112,6 +111,7 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 vilkaarsvuderingKlient = VilkaarsvurderingTest(),
+                kodeverkKlient = KodeverkKlientTest(),
             )
     }
 

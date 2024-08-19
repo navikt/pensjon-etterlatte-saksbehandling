@@ -1,9 +1,9 @@
 import { Button, Table } from '@navikt/ds-react'
 import React from 'react'
-import { ILand } from '~shared/api/trygdetid'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
 import { TrashIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
+import { ILand } from '~utils/kodeverk'
 
 export default function SEDLandMedDokumenter({
   landListe,

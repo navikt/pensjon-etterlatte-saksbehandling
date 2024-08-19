@@ -1,10 +1,4 @@
-import {
-  ILand,
-  ITrygdetid,
-  ITrygdetidGrunnlag,
-  ITrygdetidGrunnlagType,
-  slettTrygdetidsgrunnlag,
-} from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType, slettTrygdetidsgrunnlag } from '~shared/api/trygdetid'
 import { IconSize } from '~shared/types/Icon'
 import { BodyShort, Button, Detail, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
@@ -17,6 +11,7 @@ import Spinner from '~shared/Spinner'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ILand } from '~utils/kodeverk'
 
 type Props = {
   trygdetid: ITrygdetid

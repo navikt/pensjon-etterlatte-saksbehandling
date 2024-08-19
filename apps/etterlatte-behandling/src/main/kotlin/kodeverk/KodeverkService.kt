@@ -1,10 +1,8 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
-import no.nav.etterlatte.trygdetid.klienter.BetydningMedIsoKode
-import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
-import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.concurrent.TimeUnit
 
 class KodeverkService(
@@ -16,10 +14,10 @@ class KodeverkService(
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build<CacheKey, KodeverkResponse>()
 
-    suspend fun hentAlleLand(): List<Land> {
+    suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<Land> {
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER)
-                ?: klient.hentLandkoder().also { cache.put(CacheKey.LANDKODER, it) }
+                ?: klient.hentLandkoder(brukerTokenInfo).also { cache.put(CacheKey.LANDKODER, it) }
 
         return landkoder
             .betydninger

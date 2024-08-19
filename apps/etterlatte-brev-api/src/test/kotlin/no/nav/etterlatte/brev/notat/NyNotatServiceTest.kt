@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -156,7 +157,7 @@ internal class NyNotatServiceTest(
         coVerify {
             behandlingServiceMock.hentSak(sakId, saksbehandler)
             dokarkivServiceMock.journalfoer(capture(journalpostRequest))
-            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload))
+            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload.toJsonNode()))
         }
 
         with(journalpostRequest.captured) {

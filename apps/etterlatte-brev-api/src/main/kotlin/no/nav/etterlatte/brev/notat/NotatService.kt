@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
-import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatMal
@@ -32,7 +32,7 @@ class NotatService(
     private val notatRepository: NotatRepository,
     private val pdfGeneratorKlient: PdfGeneratorKlient,
     private val dokarkivService: DokarkivService,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,7 +90,7 @@ class NotatService(
         blankett: StrukturertNotat.KlageBlankett,
         bruker: BrukerTokenInfo,
     ): ByteArray {
-        val grunnlag = grunnlagKlient.hentGrunnlagForSak(blankett.klage.sak.id, bruker)
+        val grunnlag = grunnlagService.hentGrunnlagForSak(blankett.klage.sak.id, bruker)
         val soeker = grunnlag.mapSoeker(null)
 
         return pdfGeneratorKlient.genererPdf(

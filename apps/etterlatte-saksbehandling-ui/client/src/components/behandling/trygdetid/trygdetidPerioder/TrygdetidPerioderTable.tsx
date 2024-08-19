@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ILand, ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType } from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType } from '~shared/api/trygdetid'
 import { isPending, Result } from '~shared/api/apiUtils'
 import { BodyShort, Box, Button, Detail, HStack, Label, Table } from '@navikt/ds-react'
 import { FaktiskTrygdetidExpandableRowContent } from '~components/behandling/trygdetid/trygdetidPerioder/components/FaktiskTrygdetidExpandableRowContent'
@@ -7,6 +7,7 @@ import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { ILand } from '~utils/kodeverk'
 
 interface PeriodeRedigeringModus {
   redigerPeriode: boolean

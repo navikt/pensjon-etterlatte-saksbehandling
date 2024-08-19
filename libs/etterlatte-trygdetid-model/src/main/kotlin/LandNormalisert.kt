@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.libs.common.trygdetid.land
 
 enum class LandNormalisert(
     val isoCode: String,

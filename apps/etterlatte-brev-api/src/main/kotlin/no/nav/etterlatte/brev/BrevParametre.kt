@@ -85,7 +85,7 @@ sealed class BrevParametre {
         val bosattUtland: Boolean,
         val avdoedNavn: String,
         val erOver18Aar: Boolean,
-        override val brevkode: Brevkoder = Brevkoder.BARNEPENSJON_INFORMASJON_DOEDSFALL,
+        override val brevkode: Brevkoder = Brevkoder.BP_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonDoedsfall(

@@ -135,18 +135,6 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
     ),
-    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(
-        // TODO: Denne er duplikat og skal smelte saman med OMS_INFORMASJON_DOEDSFALL
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
-        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
-        "Informasjon om omstillingsstønad",
-    ),
-    BARNEPENSJON_INFORMASJON_DOEDSFALL(
-        // TODO: Denne er duplikat og skal smelte saman med BP_INFORMASJON_DOEDSFALL
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
-        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
-        "Informasjon om barnepensjon",
-    ),
     BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,

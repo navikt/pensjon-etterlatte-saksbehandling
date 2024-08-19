@@ -71,7 +71,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
     return undefined
   }
 
-  function lagre(grunnlag: BeregningsGrunnlagPostDto, onSuccess?: (grunnlag) => void) {
+  function lagre(grunnlag: BeregningsGrunnlagPostDto, onSuccess?: (grunnlag: BeregningsGrunnlagPostDto) => void) {
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,

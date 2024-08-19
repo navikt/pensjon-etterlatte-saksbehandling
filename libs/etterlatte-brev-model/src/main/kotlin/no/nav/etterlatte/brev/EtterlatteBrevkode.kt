@@ -71,6 +71,7 @@ enum class EtterlatteBrevKode(
     KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT),
 
     OPPLASTET_PDF(Brevtype.OPPLASTET_PDF),
+    INGEN_REDIGERBAR_DEL(Brevtype.INGEN),
 }
 
 enum class Brevtype {
@@ -83,6 +84,7 @@ enum class Brevtype {
     NOTAT,
     OVERSENDELSE_KLAGE,
     SLETTET_VARSEL,
+    INGEN, // Til bruk for å modellere at brevet ikke har en redigerbar del
     ;
 
     fun erKobletTilEnBehandling(): Boolean = this in listOf(VEDTAK, VARSEL, VEDLEGG)

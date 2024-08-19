@@ -150,15 +150,25 @@ enum class Brevkoder(
     ),
 
     OVERSENDELSE_KLAGE(
-        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER,
+        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
         EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER,
         tittel = "Klagen er oversendt til NAV Klageinstans Vest",
     ),
     KLAGE_OVERSENDELSE_BLANKETT(
-        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,
+        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
         EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT,
         tittel = "Oversendelse til KA",
     ),
 
-    OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF, EtterlatteBrevKode.OPPLASTET_PDF),
+    OPPLASTET_PDF(
+        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
+        EtterlatteBrevKode.OPPLASTET_PDF,
+    ),
+    ;
+
+    init {
+        require(redigering != ferdigstilling) {
+            "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
+        }
+    }
 }

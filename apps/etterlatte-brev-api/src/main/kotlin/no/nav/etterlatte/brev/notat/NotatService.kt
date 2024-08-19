@@ -73,7 +73,7 @@ class NotatService(
                         opprettet = Tidspunkt.now(),
                         innhold =
                             BrevInnhold(
-                                tittel = notatData.brevkode.tittel ?: "Internt notat",
+                                tittel = notatData.brevkode.tittel,
                                 spraak = Spraak.NB,
                                 payload = null,
                             ),

@@ -15,10 +15,7 @@ Så her modellerer vi det eksplisitt.
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
     val ferdigstilling: EtterlatteBrevKode,
-    /* Har et mål om å få denne bort fra å være nullable,
-    men må finne en god løsning på opplasta PDF + revurderingsvedtak først
-     */
-    val tittel: String? = null,
+    val tittel: String,
 ) {
     OMREGNING(
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
@@ -55,7 +52,11 @@ enum class Brevkoder(
         EtterlatteBrevKode.BARNEPENSJON_OPPHOER,
         "Opphør av barnepensjon",
     ),
-    BP_REVURDERING(EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL, EtterlatteBrevKode.BARNEPENSJON_REVURDERING),
+    BP_REVURDERING(
+        EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL,
+        EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
+        "Vedtak om endring av barnepensjon",
+    ),
     BP_VARSEL(
         EtterlatteBrevKode.BARNEPENSJON_VARSEL_UTFALL,
         EtterlatteBrevKode.BARNEPENSJON_VARSEL,
@@ -95,6 +96,7 @@ enum class Brevkoder(
     OMS_REVURDERING(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_UTFALL,
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING,
+        "Vedtak om endring av omstillingsstønad",
     ),
     OMS_VARSEL(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL,
@@ -163,6 +165,7 @@ enum class Brevkoder(
     OPPLASTET_PDF(
         EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
         EtterlatteBrevKode.OPPLASTET_PDF,
+        "Ubrukt tittel",
     ),
     ;
 

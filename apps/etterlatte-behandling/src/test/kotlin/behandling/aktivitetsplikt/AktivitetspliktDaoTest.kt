@@ -32,7 +32,7 @@ class AktivitetspliktDaoTest(
         dao.opprettAktivitet(behandlingId, nyAktivtet, kilde)
         dao.opprettAktivitet(UUID.randomUUID(), nyAktivtet, kilde)
 
-        val aktiviteter = dao.hentAktiviteter(behandlingId)
+        val aktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
 
         aktiviteter.size shouldBe 1
     }
@@ -44,7 +44,7 @@ class AktivitetspliktDaoTest(
 
         dao.opprettAktivitet(behandlingId, nyAktivitet, kilde) shouldBe 1
 
-        val hentAktiviteter = dao.hentAktiviteter(behandlingId)
+        val hentAktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
         hentAktiviteter.first().asClue { aktivitet ->
             aktivitet.sakId shouldBe nyAktivitet.sakId
             aktivitet.behandlingId shouldBe behandlingId
@@ -64,7 +64,7 @@ class AktivitetspliktDaoTest(
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val gammelAktivitet = dao.hentAktiviteter(behandlingId).first()
+            val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
                     id = gammelAktivitet.id,
@@ -79,7 +79,7 @@ class AktivitetspliktDaoTest(
                 kilde.copy("Z1111111"),
             ) shouldBe 1
 
-            val aktiviteter = dao.hentAktiviteter(behandlingId)
+            val aktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
             aktiviteter shouldHaveSize 1
             aktiviteter.first().asClue { oppdatertAktivitet ->
                 oppdatertAktivitet.id shouldBe gammelAktivitet.id
@@ -99,7 +99,7 @@ class AktivitetspliktDaoTest(
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val gammelAktivitet = dao.hentAktiviteter(behandlingId).first()
+            val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
                     id = gammelAktivitet.id,
@@ -123,11 +123,11 @@ class AktivitetspliktDaoTest(
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+            val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
             dao.slettAktivitet(aktivitet.id, behandlingId)
 
-            dao.hentAktiviteter(behandlingId) shouldHaveSize 0
+            dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 0
         }
 
         @Test
@@ -135,11 +135,11 @@ class AktivitetspliktDaoTest(
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+            val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
             dao.slettAktivitet(aktivitet.id, UUID.randomUUID())
 
-            dao.hentAktiviteter(behandlingId) shouldHaveSize 1
+            dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 1
         }
     }
 
@@ -153,12 +153,12 @@ class AktivitetspliktDaoTest(
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
-            dao.hentAktiviteter(forrigeBehandling) shouldHaveSize 3
-            dao.hentAktiviteter(nyBehandling) shouldHaveSize 0
+            dao.hentAktiviteterForBehandling(forrigeBehandling) shouldHaveSize 3
+            dao.hentAktiviteterForBehandling(nyBehandling) shouldHaveSize 0
 
             dao.kopierAktiviteter(forrigeBehandling, nyBehandling) shouldBe 3
 
-            dao.hentAktiviteter(nyBehandling).asClue {
+            dao.hentAktiviteterForBehandling(nyBehandling).asClue {
                 it shouldHaveSize 3
                 it.forEach { aktivitet ->
                     aktivitet.sakId shouldBe nyAktivitet.sakId

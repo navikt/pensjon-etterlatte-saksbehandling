@@ -8,7 +8,7 @@ Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
  */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
-    val tittel: String? = null,
+    val tittel: String? = null, // Bruk bare denne for vedlegg. Bruk ellers tittel-feltet i Brevkoder
 ) {
     BARNEPENSJON_AVSLAG(Brevtype.VEDTAK),
     BARNEPENSJON_AVSLAG_UTFALL(Brevtype.VEDTAK),
@@ -59,7 +59,7 @@ enum class EtterlatteBrevKode(
     AVVIST_KLAGE_FERDIG(Brevtype.VEDTAK),
 
     TOM_DELMAL(Brevtype.MANUELT),
-    TOM_MAL_INFORMASJONSBREV(Brevtype.INFORMASJON, "Informasjonsbrev"),
+    TOM_MAL_INFORMASJONSBREV(Brevtype.INFORMASJON),
     TOM_MAL(Brevtype.MANUELT),
     UTSATT_KLAGEFRIST(Brevtype.INFORMASJON),
 

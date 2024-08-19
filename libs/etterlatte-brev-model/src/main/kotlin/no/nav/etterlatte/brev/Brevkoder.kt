@@ -29,6 +29,7 @@ enum class Brevkoder(
     TOMT_INFORMASJONSBREV(
         EtterlatteBrevKode.TOM_DELMAL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+        "Informasjonsbrev",
     ),
     BP_AVSLAG(
         EtterlatteBrevKode.BARNEPENSJON_AVSLAG_UTFALL,

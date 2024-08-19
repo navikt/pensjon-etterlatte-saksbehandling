@@ -114,8 +114,6 @@ spec:
       value: https://pensjon-utland.intern.nav.no/gjenny
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
-    - name: KODEVERK_URL
-      value: https://kodeverk-api.nav.no
     - name: MODIAPERSONOVERSIKT_URL
       value: https://app.adeo.no/modiapersonoversikt
     - name: BISYS_URL
@@ -133,7 +131,6 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

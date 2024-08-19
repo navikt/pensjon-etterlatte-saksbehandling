@@ -15,7 +15,7 @@ Så her modellerer vi det eksplisitt.
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
     val ferdigstilling: EtterlatteBrevKode = redigering,
-    val tittel: String? = ferdigstilling.tittel,
+    val tittel: String? = null,
 ) {
     OMREGNING(
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,

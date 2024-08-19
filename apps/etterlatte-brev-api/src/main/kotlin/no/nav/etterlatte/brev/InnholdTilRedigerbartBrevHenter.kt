@@ -52,7 +52,7 @@ class InnholdTilRedigerbartBrevHenter(
 
         val kode = brevKodeMapping(brevkodeRequest)
         val tittel =
-            kode.ferdigstilling.tittel ?: (
+            kode.tittel ?: (
                 generellBrevData.forenkletVedtak
                     ?.type
                     ?.somTittel()

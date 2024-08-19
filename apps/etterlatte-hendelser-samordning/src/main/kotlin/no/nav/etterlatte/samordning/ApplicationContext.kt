@@ -16,7 +16,7 @@ class ApplicationContext(
             kafkaProduser =
                 GcpKafkaConfig
                     .fromEnv(env)
-                    .rapidsAndRiversProducer(env.getValue(KAFKA_RAPID_TOPIC)),
+                    .rapidsAndRiversProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC)),
         )
 
     val konsument =

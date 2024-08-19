@@ -86,7 +86,9 @@ spec:
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: KODEVERK_URL
-      value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
+      value: "http://kodeverk-api.team-rocket/api/v1/kodeverk"
+    - name: KODEVERK_CLIENT_ID
+      value: prod-gcp.team-rocket.kodeverk-api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -101,6 +103,7 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
+        - application: kodeverk-api
+          namespace: team-rocket
       external:
-        - host: kodeverk-api.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io

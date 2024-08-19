@@ -9,9 +9,9 @@ import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
-import { ILand } from '~shared/api/trygdetid'
 import { Result } from '~shared/api/apiUtils'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { ILand } from '~utils/kodeverk'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;

@@ -26,7 +26,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { avbrytGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
@@ -48,6 +47,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;

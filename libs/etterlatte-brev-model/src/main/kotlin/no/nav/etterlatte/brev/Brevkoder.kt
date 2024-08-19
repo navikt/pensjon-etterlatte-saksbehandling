@@ -47,7 +47,11 @@ enum class Brevkoder(
         EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_FORELDRELOES,
         "Vedtak om innvilget barnepensjon",
     ),
-    BP_OPPHOER(EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL, EtterlatteBrevKode.BARNEPENSJON_OPPHOER, "Opphør av barnepensjon"),
+    BP_OPPHOER(
+        EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL,
+        EtterlatteBrevKode.BARNEPENSJON_OPPHOER,
+        "Opphør av barnepensjon",
+    ),
     BP_REVURDERING(EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL, EtterlatteBrevKode.BARNEPENSJON_REVURDERING),
     BP_VARSEL(
         EtterlatteBrevKode.BARNEPENSJON_VARSEL_UTFALL,
@@ -105,7 +109,11 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon fra 1. januar 2024",
     ),
-    AVVIST_KLAGE(EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD, EtterlatteBrevKode.AVVIST_KLAGE_FERDIG, "Vedtak om avvist klage"),
+    AVVIST_KLAGE(
+        EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD,
+        EtterlatteBrevKode.AVVIST_KLAGE_FERDIG,
+        "Vedtak om avvist klage",
+    ),
 
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
@@ -127,12 +135,14 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
     ),
-    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL( // TODO: Denne er duplikat og skal smelte saman med OMS_INFORMASJON_DOEDSFALL
+    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(
+        // TODO: Denne er duplikat og skal smelte saman med OMS_INFORMASJON_DOEDSFALL
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om omstillingsstønad",
     ),
-    BARNEPENSJON_INFORMASJON_DOEDSFALL( // TODO: Denne er duplikat og skal smelte saman med BP_INFORMASJON_DOEDSFALL
+    BARNEPENSJON_INFORMASJON_DOEDSFALL(
+        // TODO: Denne er duplikat og skal smelte saman med BP_INFORMASJON_DOEDSFALL
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon",
@@ -148,7 +158,10 @@ enum class Brevkoder(
         "Du må sende oss flere opplysninger",
     ),
 
-    OVERSENDELSE_KLAGE(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER, tittel = "Klagen er oversendt til NAV Klageinstans Vest"),
+    OVERSENDELSE_KLAGE(
+        EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER,
+        tittel = "Klagen er oversendt til NAV Klageinstans Vest",
+    ),
     KLAGE_OVERSENDELSE_BLANKETT(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT, tittel = "Oversendelse til KA"),
 
     OPPLASTET_PDF(EtterlatteBrevKode.OPPLASTET_PDF),

@@ -15,6 +15,9 @@ Så her modellerer vi det eksplisitt.
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,
     val ferdigstilling: EtterlatteBrevKode = redigering,
+    /* Har et mål om å få denne bort fra å være nullable,
+    men må finne en god løsning på opplasta PDF + revurderingsvedtak først
+     */
     val tittel: String? = null,
 ) {
     OMREGNING(

@@ -8,7 +8,11 @@ Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
  */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
-    val tittel: String? = null, // Bruk bare denne for vedlegg. Bruk ellers tittel-feltet i Brevkoder
+    /*
+    Bruk bare tittel-feltet her for vedlegg. Bruk ellers tittel-feltet i Brevkoder
+    Har et mål om å få bort denne herifra, men da må vi først restrukturere litt så vedlegg får sin egen modell
+     */
+    val tittel: String? = null,
 ) {
     BARNEPENSJON_AVSLAG(Brevtype.VEDTAK),
     BARNEPENSJON_AVSLAG_UTFALL(Brevtype.VEDTAK),

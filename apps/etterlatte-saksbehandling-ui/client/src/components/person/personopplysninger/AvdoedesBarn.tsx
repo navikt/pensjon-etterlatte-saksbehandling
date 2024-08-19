@@ -9,6 +9,15 @@ import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { SakType } from '~shared/types/sak'
 
 export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?: Familiemedlem[] }): ReactNode => {
+  const alleBarn =
+    avdoede
+      ?.flatMap((a) => a.barn)
+      .map((b) => b)
+      .filter((b) => !!b) || []
+
+  const alleBarnFnr = alleBarn.map(({ foedselsnummer }) => foedselsnummer)
+  const unikeBarn = alleBarn.filter(({ foedselsnummer }, i) => !alleBarnFnr.includes(foedselsnummer, i + 1))
+
   const opprettHeading = (): string => {
     switch (sakType) {
       case SakType.BARNEPENSJON:
@@ -30,31 +39,27 @@ export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?:
         </Table.Header>
         <Table.Body>
           {!!avdoede?.length ? (
-            avdoede.map((doed, i) =>
-              !!doed.barn?.length ? (
-                doed.barn.map((barn, index) => (
-                  <Table.Row key={index}>
-                    <Table.DataCell>
-                      {barn.fornavn} {barn.etternavn}
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <HStack gap="4">
-                        <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
-                        {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
-                      </HStack>
-                    </Table.DataCell>
-                    <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
-                  </Table.Row>
-                ))
-              ) : (
-                <Table.Row key={i}>
-                  <Table.DataCell colSpan={3}>
-                    <Heading size="small">
-                      Ingen barn for avdoed: {doed.fornavn} {doed.etternavn}
-                    </Heading>
+            !!unikeBarn?.length ? (
+              unikeBarn.map((barn, index) => (
+                <Table.Row key={index}>
+                  <Table.DataCell>
+                    {barn.fornavn} {barn.etternavn}
                   </Table.DataCell>
+                  <Table.DataCell>
+                    <HStack gap="4">
+                      <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
+                      {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
+                    </HStack>
+                  </Table.DataCell>
+                  <BostedsadresseDataCell bostedsadresse={barn.bostedsadresse} index={0} />
                 </Table.Row>
-              )
+              ))
+            ) : (
+              <Table.Row>
+                <Table.DataCell colSpan={3}>
+                  <Heading size="small">Ingen barn</Heading>
+                </Table.DataCell>
+              </Table.Row>
             )
           ) : (
             <Table.Row>

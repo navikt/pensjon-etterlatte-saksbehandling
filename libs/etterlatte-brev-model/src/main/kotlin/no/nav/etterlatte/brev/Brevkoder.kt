@@ -55,10 +55,12 @@ enum class Brevkoder(
     BP_INFORMASJON_DOEDSFALL(
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+        "Informasjon om barnepensjon",
     ),
     BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+        "Informasjon om barnepensjon",
     ),
 
     OMS_INFORMASJON_DOEDSFALL(
@@ -128,7 +130,7 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om omstillingsstønad",
     ),
-    BARNEPENSJON_INFORMASJON_DOEDSFALL(
+    BARNEPENSJON_INFORMASJON_DOEDSFALL( // TODO: Denne er duplikat og skal smelte saman med BP_INFORMASJON_DOEDSFALL
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon",

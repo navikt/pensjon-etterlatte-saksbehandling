@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory
 
 interface KodeverkKlient {
     suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse
+
+    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse
 }
 
 class KodeverkKlientImpl(
@@ -55,6 +57,36 @@ class KodeverkKlientImpl(
             )
         } catch (e: Exception) {
             logger.error("Henting av landkoder feilet", e)
+            throw e
+        }
+
+    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse =
+        try {
+            logger.info("Henter arkivtemaer fra Kodeverk")
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$url/Arkivtemaer/koder/betydninger?ekskluderUgyldige=true&spraak=nb",
+                            additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource ->
+                        resource.response.let { objectMapper.readValue<KodeverkResponse>(it.toString()) }
+                    },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: SocketTimeoutException) {
+            logger.warn("Timeout mot kodeverk ved henting av arkivtemaer")
+
+            throw TimeoutForespoerselException(
+                code = "KODEVERK_TIMEOUT",
+                detail = "Henting av arkivtemaer fra kodeverk tok for lang tid... Prøv igjen om litt.",
+            )
+        } catch (e: Exception) {
+            logger.error("Henting av arkivtemaer feilet", e)
             throw e
         }
 }

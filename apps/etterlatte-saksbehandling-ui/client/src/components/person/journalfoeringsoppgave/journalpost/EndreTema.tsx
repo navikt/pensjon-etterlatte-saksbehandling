@@ -1,5 +1,5 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { hentKodeverkArkivtemaer, RsKode } from '~shared/api/kodeverk'
+import { hentKodeverkArkivtemaer, Beskrivelse } from '~shared/api/kodeverk'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isInitial, mapApiResult } from '~shared/api/apiUtils'
@@ -14,15 +14,15 @@ export const EndreTema = ({
   oppdater,
 }: {
   journalpost: Journalpost
-  oppdater: (kode: RsKode) => void
+  oppdater: (kode: Beskrivelse) => void
 }) => {
-  const [gammelKode, settGammelKode] = useState<RsKode>()
-  const [valgtKode, settValgtKode] = useState<RsKode>()
+  const [gammelKode, settGammelKode] = useState<Beskrivelse>()
+  const [valgtKode, settValgtKode] = useState<Beskrivelse>()
   const [temaStatus, apiHentTema] = useApiCall(hentKodeverkArkivtemaer)
 
   useEffect(() => {
     if (isInitial(temaStatus) && !!journalpost) {
-      apiHentTema(undefined, (koder: RsKode[]) => {
+      apiHentTema(undefined, (koder: Beskrivelse[]) => {
         const kode = koder.find((kode) => kode.navn === journalpost?.tema)
         settGammelKode(kode)
         settValgtKode(kode)

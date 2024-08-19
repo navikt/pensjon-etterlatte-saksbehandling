@@ -9,8 +9,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.ktor2.servercio)
-    implementation(libs.ktor2.servercorejvm)
-    implementation(libs.ktor2.webjars)
 
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avro) {

@@ -112,7 +112,7 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt/vurdering") {
+    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {
         route("aktivitet") {
             get {
                 kunSaksbehandler {

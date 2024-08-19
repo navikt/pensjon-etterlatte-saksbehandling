@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.oversendelsebrev
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -103,7 +102,7 @@ class OversendelseBrevServiceImpl(
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(
-                            tittel = EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER.tittel ?: "Klage oversendelse",
+                            tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel ?: "Klage oversendelse",
                             spraak = spraak,
                         ),
                     innholdVedlegg = listOf(),

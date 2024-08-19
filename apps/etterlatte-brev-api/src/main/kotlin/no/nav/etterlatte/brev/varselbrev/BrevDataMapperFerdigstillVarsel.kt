@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.varselbrev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.EtterlatteBrevKode
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
@@ -42,7 +42,7 @@ class BrevDataMapperFerdigstillVarsel(
             } else {
                 ManueltBrevMedTittelData(
                     request.innholdMedVedlegg.innhold(),
-                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL.tittel,
+                    Brevkoder.OMS_VARSEL.tittel,
                 )
             }
         }

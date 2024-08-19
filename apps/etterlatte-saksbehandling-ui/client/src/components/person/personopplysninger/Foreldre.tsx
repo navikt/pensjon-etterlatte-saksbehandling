@@ -75,11 +75,7 @@ export const Foreldre = ({
                   {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
                 </HStack>
               </Table.DataCell>
-              {!!levende.bostedsadresse ? (
-                <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
-              ) : (
-                <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
-              )}
+              <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
               <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
             </Table.Row>
           ))}

@@ -7,6 +7,7 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TRUSTSTORE_PATH
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
+import no.nav.etterlatte.libs.common.appIsInGCP
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -17,6 +18,13 @@ import java.util.UUID
 interface KafkaConfig {
     fun producerConfig(): Properties
 }
+
+fun hentKafkaConfig(env: Miljoevariabler) =
+    if (appIsInGCP()) {
+        GcpKafkaConfig.fromEnv(env)
+    } else {
+        LocalKafkaConfig(env[KAFKA_BROKERS]!!)
+    }
 
 class GcpKafkaConfig(
     private val bootstrapServers: String,

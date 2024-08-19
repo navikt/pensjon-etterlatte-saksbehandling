@@ -74,7 +74,6 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonDoedsfall(
-                innhold = emptyList(),
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
             )
@@ -89,7 +88,6 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             BarnepensjonInformasjonDoedsfall(
-                innhold = emptyList(),
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
                 erOver18aar = erOver18Aar,

@@ -8,11 +8,6 @@ Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
  */
 enum class EtterlatteBrevKode(
     val brevtype: Brevtype,
-    /*
-    Bruk bare tittel-feltet her for vedlegg. Bruk ellers tittel-feltet i Brevkoder
-    Har et mål om å få bort denne herifra, men da må vi først restrukturere litt så vedlegg får sin egen modell
-     */
-    val tittel: String? = null,
 ) {
     BARNEPENSJON_AVSLAG(Brevtype.VEDTAK),
     BARNEPENSJON_AVSLAG_UTFALL(Brevtype.VEDTAK),
@@ -29,8 +24,8 @@ enum class EtterlatteBrevKode(
     BARNEPENSJON_VARSEL_UTFALL(Brevtype.VARSEL),
     BARNEPENSJON_VEDTAK_OMREGNING(Brevtype.VEDTAK),
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG(Brevtype.VEDTAK),
-    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(Brevtype.VEDLEGG, "Trygdetid i vedlegg beregning av barnepensjon"),
-    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
+    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(Brevtype.VEDLEGG),
+    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG),
     BARNEPENSJON_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON),
     BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(Brevtype.INFORMASJON),
     BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON),
@@ -51,9 +46,9 @@ enum class EtterlatteBrevKode(
     OMSTILLINGSSTOENAD_VARSEL_UTFALL(Brevtype.VARSEL),
     OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT(Brevtype.VARSEL),
     OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT_UTFALL(Brevtype.VARSEL),
-    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
-    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT, "Varsel om aktivitetsplikt for omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG),
+    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(Brevtype.INFORMASJON),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(Brevtype.INFORMASJON),
     TILBAKEKREVING_INNHOLD(Brevtype.VEDTAK),
@@ -89,3 +84,12 @@ enum class Brevtype {
 
     fun erKobletTilEnBehandling(): Boolean = this in listOf(VEDTAK, VARSEL, VEDLEGG)
 }
+
+fun tittelForVedlegg(kode: EtterlatteBrevKode) =
+    when (kode) {
+        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL -> "Trygdetid i vedlegg beregning av barnepensjon"
+        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL -> "Utfall ved beregning av omstillingsstønad"
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
+        else -> throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
+    }

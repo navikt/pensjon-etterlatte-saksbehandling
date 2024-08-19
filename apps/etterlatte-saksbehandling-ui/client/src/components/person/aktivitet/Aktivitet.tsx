@@ -12,8 +12,8 @@ import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
-const velgDoedsdato = (avdoede: Familiemedlem[] | undefined): Date => {
-  if (!avdoede || avdoede.length === 0) return new Date()
+const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
+  if (avdoede.length === 0) return new Date()
   else if (avdoede.length === 1) return avdoede[0].doedsdato!!
   else
     return avdoede.reduce((foersteAvdoed, andreAvdoed) =>

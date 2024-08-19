@@ -114,9 +114,11 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
         put("/avbryt") {
             kunSystembruker {
-                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
-                service.avbrytTilbakekreving(sakId)
-                call.respond(HttpStatusCode.OK)
+                medBody<AvbrytRequest> {
+                    val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                    service.avbrytTilbakekreving(sakId, it.merknad)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
@@ -124,6 +126,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
 data class OppgaveStatusRequest(
     val paaVent: Boolean,
+)
+
+data class AvbrytRequest(
+    val merknad: String,
 )
 
 data class TilbakekrevingSendeBrevRequest(

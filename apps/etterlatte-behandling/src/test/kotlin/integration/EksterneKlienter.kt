@@ -480,6 +480,8 @@ class KodeverkKlientTest : KodeverkKlient {
             ),
         )
     }
+
+    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse = KodeverkResponse(emptyMap())
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

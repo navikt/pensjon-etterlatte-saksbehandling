@@ -94,6 +94,7 @@ enum class OppgaveKilde {
     TILBAKEKREVING,
     GJENOPPRETTING,
     SAKSBEHANDLER,
+    BRUKERDIALOG,
 }
 
 enum class OppgaveType {
@@ -109,6 +110,8 @@ enum class OppgaveType {
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
     AKTIVITETSPLIKT,
     AKTIVITETSPLIKT_REVURDERING,
+    AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
+    GENERELL_OPPGAVE,
     ;
 
     companion object {
@@ -152,6 +155,13 @@ data class VedtakEndringDTO(
     val vedtakHendelse: VedtakHendelse,
     val vedtakType: VedtakType,
     val opphoerFraOgMed: YearMonth? = null,
+)
+
+data class NyOppgaveBulkDto(
+    val merknad: String,
+    val sakIds: List<Long>,
+    val type: OppgaveType,
+    val kilde: OppgaveKilde,
 )
 
 data class NyOppgaveDto(

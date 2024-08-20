@@ -24,6 +24,7 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
+import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -46,23 +47,24 @@ function App() {
           <Versioncheck />
           <BrowserRouter basename="/">
             <ScrollToTop />
-            <HeaderBanner />
-            <ErrorBoundary>
-              <ConfigContext.Provider value={hentConfigStatus.data}>
+            <ConfigContext.Provider value={hentConfigStatus.data}>
+              <HeaderBanner />
+              <ErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
-                  <Route path="/person/:fnr" element={<Person />} />
+                  <Route path="/person" element={<Person />} />
+                  <Route path="/person/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                  <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
+                  <Route path="/generelloppgave/*" element={<GenerellOppgave />} />
                   <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </ConfigContext.Provider>
-            </ErrorBoundary>
+              </ErrorBoundary>
+            </ConfigContext.Provider>
           </BrowserRouter>
         </div>
       )}

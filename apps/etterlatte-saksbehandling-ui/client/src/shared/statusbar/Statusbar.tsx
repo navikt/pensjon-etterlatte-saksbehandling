@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { BodyShort, Box, HelpText, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
+import { BodyShort, Box, HelpText, HStack, Label, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
@@ -11,6 +11,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -56,7 +57,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
         <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
           <Label>
-            <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
+            <PersonLink fnr={person.foedselsnummer}>{genererNavn(person)}</PersonLink>
           </Label>
 
           <DoedsdatoTag doedsdato={person.doedsdato} />

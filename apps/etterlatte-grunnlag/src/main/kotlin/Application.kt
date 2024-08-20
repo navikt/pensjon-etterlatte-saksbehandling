@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
+import no.nav.etterlatte.EnvKey.PDLTJENESTER_URL
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -25,7 +26,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import org.slf4j.Logger
@@ -51,7 +51,7 @@ class ApplicationBuilder {
         )
     }
 
-    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
+    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env[PDLTJENESTER_URL]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient)
@@ -75,7 +75,6 @@ class ApplicationBuilder {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
-            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)

@@ -1,11 +1,14 @@
 package no.nav.etterlatte.statistikk.service
 
 import io.kotest.assertions.asClue
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -45,12 +48,14 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
+import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -310,6 +315,42 @@ class StatistikkServiceTest {
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
         }
+    }
+
+    @Test
+    fun `produserStoenadStatistikkForMaaned henter aktivitetspliktdata for omstillingsstønad-vedtak`() {
+        val stoenadRepository = mockk<StoenadRepository>(relaxed = true)
+        val mockAktivitetspliktService = mockk<AktivitetspliktService>()
+
+        val omsSakId = 10000L..11231L
+        val bpSakId = 5000L..7000L
+
+        val omsStoenadRad =
+            omsSakId.map {
+                stoenadRad(sakId = it, sakYtelse = SakType.OMSTILLINGSSTOENAD.name)
+            }
+        val bpStoenadRad =
+            bpSakId.map {
+                stoenadRad(sakId = it, sakYtelse = SakType.BARNEPENSJON.name)
+            }
+        val service =
+            StatistikkService(
+                stoenadRepository = stoenadRepository,
+                sakRepository = sakRepo,
+                behandlingKlient = behandlingKlient,
+                beregningKlient = beregningKlient,
+                aktivitetspliktService = mockAktivitetspliktService,
+            )
+        val brukteOmsIder = slot<List<Long>>()
+
+        val statistikkMaaned = YearMonth.of(2024, Month.JULY)
+        every { stoenadRepository.hentStoenadRaderInnenforMaaned(statistikkMaaned) } returns omsStoenadRad + bpStoenadRad
+        every { mockAktivitetspliktService.mapAktivitetForSaker(capture(brukteOmsIder), statistikkMaaned) } returns emptyMap()
+
+        service.produserStoenadStatistikkForMaaned(statistikkMaaned)
+
+        brukteOmsIder.captured.shouldContainAll(omsSakId.map { it })
+        brukteOmsIder.captured.shouldNotContainAnyOf(bpSakId.map { it })
     }
 }
 

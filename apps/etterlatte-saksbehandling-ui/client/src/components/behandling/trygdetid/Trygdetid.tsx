@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, sorterLand } from '~shared/api/trygdetid'
+import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
@@ -13,12 +13,13 @@ import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 interface Props {
   redigerbar: boolean
@@ -45,8 +46,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
-
-  const visFlereTrygdetider = useFeatureEnabledMedDefault('foreldreloes', false)
 
   const personopplysninger = usePersonopplysninger()
 
@@ -132,7 +131,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
         {landListe && (
           <>
-            {(trygdetider.length == 1 || !visFlereTrygdetider) && (
+            {trygdetider.length == 1 && (
               <EnkelPersonTrygdetid
                 redigerbar={redigerbar}
                 behandling={behandling}
@@ -142,7 +141,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                 fetchTrygdetider={fetchTrygdetider}
               />
             )}
-            {trygdetider.length > 1 && visFlereTrygdetider && (
+            {trygdetider.length > 1 && (
               <>
                 <Box maxWidth="fit-content">
                   <Alert variant="info">Det finnes flere avdøde, husk å oppdatere for alle</Alert>
@@ -196,10 +195,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           </>
         )}
 
-        {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
-          <Spinner visible={true} label="Henter trygdetid" />
-        )}
-        {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
+        <Spinner label="Henter trygdetid" visible={isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)} />
+        <Spinner label="Oppretter trygdetid" visible={isPending(opprettTrygdetidRequest)} />
 
         {isFailureHandler({
           apiResult: hentTrygdetidRequest,

@@ -173,7 +173,7 @@ fun Route.brevRoute(
                     service.opprettNyttManueltBrev(
                         sakId,
                         brukerTokenInfo,
-                        Brevkoder.TOMT_INFORMASJONSBREV.redigering,
+                        Brevkoder.TOMT_INFORMASJONSBREV,
                     ) { ManueltBrevData() }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

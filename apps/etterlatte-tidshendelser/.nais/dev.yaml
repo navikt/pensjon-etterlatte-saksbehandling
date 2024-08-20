@@ -17,10 +17,10 @@ spec:
             envVarPrefix: DB
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics
@@ -81,6 +81,6 @@ spec:
         - application: etterlatte-behandling
     inbound:
       rules:
-        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

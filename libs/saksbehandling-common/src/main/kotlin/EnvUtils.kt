@@ -9,17 +9,11 @@ fun Map<String, String>.requireEnvValue(key: String) =
 data class Miljoevariabler private constructor(
     val props: Map<String, String>,
 ) {
-    fun requireEnvValue(key: String): String = props.requireEnvValue(key)
+    fun requireEnvValue(key: EnvEnum): String = props.requireEnvValue(key.key())
 
-    fun requireEnvValue(key: EnvEnum): String = requireEnvValue(key.key())
+    operator fun get(key: EnvEnum) = props[key.key()]
 
-    operator fun get(key: String) = props[key]
-
-    operator fun get(key: EnvEnum) = get(key.key())
-
-    fun getValue(key: EnvEnum): String = props.getValue(key.key())
-
-    fun getOrDefault(
+    fun getOrDefault( // TODO: Denne bør vi kunne fase ut
         key: EnvEnum,
         value: String,
     ) = props.getOrDefault(key.key(), value)
@@ -28,20 +22,6 @@ data class Miljoevariabler private constructor(
         key: EnvEnum,
         value: (Miljoevariabler) -> String,
     ) = Miljoevariabler(props + (key.key() to value(this)))
-
-    fun append(props: Map<EnvEnum, String>): Miljoevariabler {
-        val toMutableMap = this.props.toMutableMap()
-        toMutableMap.putAll(
-            props.entries.associate { it.key.key() to it.value },
-        )
-        return Miljoevariabler(toMutableMap)
-    }
-
-    fun containsKey(key: String) = props.containsKey(key)
-
-    fun containsKey(key: EnvEnum) = containsKey(key.key())
-
-    fun value(property: String): String = props.getValue(property)
 
     companion object {
         fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())

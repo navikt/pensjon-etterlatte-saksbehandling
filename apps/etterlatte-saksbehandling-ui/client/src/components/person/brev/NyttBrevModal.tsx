@@ -3,13 +3,84 @@ import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
-import { Controller, useForm } from 'react-hook-form'
+import { Control, Controller, useForm } from 'react-hook-form'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+
+const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="nasjonalEllerUtland"
+    control={control}
+    legend="Er bruker bosatt i Norge eller utlandet?"
+    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
+    radios={
+      <>
+        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
+        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
+      </>
+    }
+  />
+)
+
+const RedusertEtterInntektRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="redusertEtterInntekt"
+    control={control}
+    legend="Er stønaden redusert etter inntekt?"
+    errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
+    radios={
+      <>
+        <Radio value={JaNei.JA}>Ja</Radio>
+        <Radio value={JaNei.NEI}>Nei</Radio>
+      </>
+    }
+  />
+)
+
+const BorINorgeEllerIkkeAvtaleland = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="borINorgeEllerIkkeAvtaleland"
+    control={control}
+    legend="Bor brukeren i Norge eller i ikke-avtaleland?"
+    description="Dette gjelder også EØS/avtale-land der søknad skal behandles uten å mottas fra utenlandske trygdemyndigheter."
+    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller i ikke-avtaleland"
+    radios={
+      <>
+        <Radio value={JaNei.JA}>Ja</Radio>
+        <Radio value={JaNei.NEI}>Nei</Radio>
+      </>
+    }
+  />
+)
+
+const ErOver18Aar = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledRadioGruppe
+    name="erOver18Aar"
+    control={control}
+    legend="Er bruker over 18 år?"
+    errorVedTomInput="Du må velge om bruker er over 18 år"
+    radios={
+      <>
+        <Radio value={JaNei.JA}>Ja</Radio>
+        <Radio value={JaNei.NEI}>Nei</Radio>
+      </>
+    }
+  />
+)
+
+const SoeknadMottattDato = ({ control }: { control: Control<FilledFormData, any> }) => (
+  <ControlledDatoVelger
+    name="mottattDato"
+    label="Når ble søknaden mottatt?"
+    control={control}
+    errorVedTomInput="Du må velge når søknaden ble mottatt"
+  />
+)
 
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -36,7 +107,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)
-      navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
+      navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)
     })
   }
 
@@ -73,16 +144,32 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
                       Informasjon om aktivitetsplikt ved 4 måneder
                     </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
+                      Informasjon om aktivitetsplikt ved 6 måneder - varig unntak
+                    </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
                       Informasjon om dødsfall
+                    </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD}>
+                      Kvitteringsbrev på mottatt søknad
+                    </option>
+                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                      Innhenting av opplysninger
                     </option>
                   </>
                 )}
                 {sakType === SakType.BARNEPENSJON && (
-                  <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                  <>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD}>
+                      Kvitteringsbrev på mottatt søknad
+                    </option>
+                    <option value={FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                      Innhenting av opplysninger
+                    </option>
+                  </>
                 )}
               </Select>
-
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
                 <>
                   <Select
@@ -99,30 +186,6 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     <option value="OVER_50_PROSENT">Over 50%</option>
                   </Select>
                   <ControlledRadioGruppe
-                    name="nasjonalEllerUtland"
-                    control={control}
-                    legend="Er bruker bosatt i Norge eller utlandet?"
-                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
-                    radios={
-                      <>
-                        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
-                        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
-                      </>
-                    }
-                  />
-                  <ControlledRadioGruppe
-                    name="redusertEtterInntekt"
-                    control={control}
-                    legend="Er stønaden redusert etter inntekt?"
-                    errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
-                    radios={
-                      <>
-                        <Radio value={JaNei.JA}>Ja</Radio>
-                        <Radio value={JaNei.NEI}>Nei</Radio>
-                      </>
-                    }
-                  />
-                  <ControlledRadioGruppe
                     name="utbetaling"
                     control={control}
                     legend="Kommer stønaden til utbetaling?"
@@ -134,6 +197,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                       </>
                     }
                   />
+                  <RedusertEtterInntektRadio control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
+                </>
+              )}
+              {FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND === skjemaet.type && (
+                <>
+                  <RedusertEtterInntektRadio control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
                 </>
               )}
               {[
@@ -141,18 +212,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                 FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD,
               ].includes(skjemaet.type) && (
                 <>
-                  <ControlledRadioGruppe
-                    name="nasjonalEllerUtland"
-                    control={control}
-                    legend="Er bruker bosatt i Norge eller utlandet?"
-                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
-                    radios={
-                      <>
-                        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
-                        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
-                      </>
-                    }
-                  />
+                  <NasjonalEllerUtlandRadio control={control} />
                   <Controller
                     rules={{
                       required: true,
@@ -171,20 +231,32 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     }}
                   />
                   {FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD === skjemaet.type && (
-                    <ControlledRadioGruppe
-                      name="erOver18Aar"
-                      control={control}
-                      legend="Er bruker over 18 år?"
-                      errorVedTomInput="Du må velge om bruker er over 18 år"
-                      radios={
-                        <>
-                          <Radio value={JaNei.JA}>Ja</Radio>
-                          <Radio value={JaNei.NEI}>Nei</Radio>
-                        </>
-                      }
-                    />
+                    <ErOver18Aar control={control} />
                   )}
                 </>
+              )}
+              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD && (
+                <>
+                  <SoeknadMottattDato control={control} />
+                  <ErOver18Aar control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
+                  <BorINorgeEllerIkkeAvtaleland control={control} />
+                </>
+              )}
+              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+                <>
+                  <ErOver18Aar control={control} />
+                  <NasjonalEllerUtlandRadio control={control} />
+                </>
+              )}
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
+                <>
+                  <SoeknadMottattDato control={control} />
+                  <BorINorgeEllerIkkeAvtaleland control={control} />
+                </>
+              )}
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+                <NasjonalEllerUtlandRadio control={control} />
               )}
             </VStack>
           </Modal.Body>
@@ -217,7 +289,9 @@ export type BrevParametre =
       nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
-      type: FormType.TOMT_BREV
+      type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND
+      redusertEtterInntekt: boolean
+      nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD
@@ -225,10 +299,34 @@ export type BrevParametre =
       avdoedNavn: string
     }
   | {
+      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD
+      mottattDato: Date
+      borINorgeEllerIkkeAvtaleland: boolean
+    }
+  | {
+      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      borIUtlandet: boolean
+    }
+  | {
       type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
       bosattUtland: boolean
       avdoedNavn: string
       erOver18Aar: boolean
+    }
+  | {
+      type: FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD
+      mottattDato: Date
+      bosattUtland: boolean
+      erOver18aar: boolean
+      borINorgeEllerIkkeAvtaleland: boolean
+    }
+  | {
+      type: FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      borIUtlandet: boolean
+      erOver18aar: boolean
+    }
+  | {
+      type: FormType.TOMT_BREV
     }
 
 type FilledFormData = {
@@ -239,6 +337,8 @@ type FilledFormData = {
   nasjonalEllerUtland?: NasjonalEllerUtland
   avdoedNavn?: string
   erOver18Aar?: JaNei | ''
+  mottattDato?: Date
+  borINorgeEllerIkkeAvtaleland?: JaNei
 }
 
 enum NasjonalEllerUtland {
@@ -249,8 +349,13 @@ enum NasjonalEllerUtland {
 enum FormType {
   TOMT_BREV = 'TOMT_BREV',
   OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
+  OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND',
   OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
+  OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD = 'OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD',
+  OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
   BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
+  BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD = 'BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD',
+  BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -263,9 +368,11 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
-    case FormType.TOMT_BREV:
+    case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND:
       return {
         type: formdata.type,
+        redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
+        nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
     case FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
@@ -273,12 +380,41 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
       }
+    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD:
+      return {
+        type: formdata.type,
+        mottattDato: formdata.mottattDato!!,
+        borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
+      }
+    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+      return {
+        type: formdata.type,
+        borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+      }
     case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
         type: formdata.type,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
         erOver18Aar: formdata.erOver18Aar === JaNei.JA,
+      }
+    case FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD:
+      return {
+        type: formdata.type,
+        mottattDato: formdata.mottattDato!!,
+        bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        erOver18aar: formdata.erOver18Aar === JaNei.JA,
+        borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
+      }
+    case FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+      return {
+        type: formdata.type,
+        borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
+        erOver18aar: formdata.erOver18Aar === JaNei.JA,
+      }
+    case FormType.TOMT_BREV:
+      return {
+        type: formdata.type,
       }
     default:
       throw new Error('Valgt type er ikke gyldig')

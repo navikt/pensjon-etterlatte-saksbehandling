@@ -114,10 +114,10 @@ spec:
       value: https://pensjon-utland-q2.intern.dev.nav.no/gjenny
     - name: RINA_URL
       value: https://rina-ss3-q.adeo.no
-    - name: KODEVERK_URL
-      value: https://kodeverk-api.nav.no
     - name: MODIAPERSONOVERSIKT_URL
       value: https://navikt.github.io/modiapersonoversikt/#
+    - name: BISYS_URL
+      value: https://bidrag.dev.intern.nav.no/
     - name: PSAK_URL
       value: https://pensjon-psak-q2.dev.adeo.no/psak
     - name: APP_VERSION
@@ -131,7 +131,6 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
@@ -144,6 +143,6 @@ spec:
         - application: etterlatte-utbetaling
     inbound:
       rules:
-        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

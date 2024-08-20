@@ -8,10 +8,11 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
 import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, ILand } from '~shared/api/trygdetid'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand } from '~utils/kodeverk'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -50,7 +51,7 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
 export const visLandInfoFraKodeverkEllerDefault = (landListeResult: Result<ILand[]>, statsborgerskap?: string) => {
   return mapApiResult(
     landListeResult,
-    <Spinner label="Henter landliste" visible={true} />,
+    <Spinner label="Henter landliste" />,
     () => <>{statsborgerskap ?? 'Ukjent'}</>,
     (landListe) => <>{statsborgerskap ? finnLandSomTekst(statsborgerskap, landListe) : 'Ukjent'}</>
   )

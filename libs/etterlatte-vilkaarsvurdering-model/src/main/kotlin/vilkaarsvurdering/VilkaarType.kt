@@ -76,7 +76,7 @@ enum class VilkaarType(
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_TRE_POENGAAR_2024(
         402,
         """
-        Ja. Den avdøde har mindre enn 20 års botid, men har minimum tre poengår. Trygdetid beregnes bare etter faktiske poengår
+        Ja. Den avdøde har mindre enn 20 års botid, men har minimum fem poengår. Trygdetid beregnes bare etter faktiske poengår
         """.trimIndent(),
     ),
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE_2024(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
@@ -123,7 +123,7 @@ enum class VilkaarType(
     OMS_ETTERLATTE_LEVER(90, "Lever den etterlatte?"),
     OMS_DOEDSFALL(100, "Dødsfall ektefelle/partner/samboer"),
     OMS_OEVRIGE_VILKAAR(105, "Øvrige vilkår for ytelser"),
-    OMS_OVERLAPPENDE_YTELSER(110, "Bortfall rettigheter etter § 17-11 første ledd?"),
+    OMS_OVERLAPPENDE_YTELSER(110, "Rett til omstillingsstønad utfra § 17-11 første ledd?"),
     OMS_SIVILSTAND(120, "Rett til omstillingsstønad igjen etter § 17-11 andre ledd?"),
     OMS_YRKESSKADE(200, "Dødsfall som skyldes yrkesskade eller yrkessykdom"),
     OMS_AVDOEDES_MEDLEMSKAP(300, "Avdødes forutgående medlemskap - Folketrygden"),
@@ -159,6 +159,9 @@ enum class VilkaarType(
     OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_YRKESSKADE(403, "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
     OMS_VURDERING_AV_EKSPORT(450, "Vurdering av eksport"),
     OMS_RETT_UTEN_TIDSBEGRENSNING(500, "Rett til stønad uten tidsbegrensning?"),
+    OMS_AKTIVITETSPLIKT(600, "Langvarig manglende aktivitet"),
+
+    // Vilkårene OMS_AKTIVITET_ETTER_6_MND og tilhørende unntak eksisterer på gamle vurderinger og kan ikke slettes.
     OMS_AKTIVITET_ETTER_6_MND(600, "Krav til aktivitet etter 6 måneder"),
     OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT(
         601,

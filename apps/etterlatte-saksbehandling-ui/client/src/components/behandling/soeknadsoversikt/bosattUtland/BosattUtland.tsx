@@ -1,7 +1,6 @@
 import { MottatteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/MottatteSeder'
 import { SendteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/SendteSeder'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { Bosattutland, lagreBosattutland } from '~shared/api/bosattutland'
@@ -15,6 +14,8 @@ import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 export const BosattUtland = ({
   behandlingId,
@@ -101,7 +102,9 @@ export const BosattUtland = ({
         apiResult: hentAlleLandRequest,
         errorMessage: 'Vi klarte ikke å hente landlisten, den er påkrevd for å kunne fylle inn SED data',
       })}
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+
+      <Spinner visible={isPending(hentAlleLandRequest)} label="Henter land" />
+
       {alleLandKodeverk && (
         <>
           <MottatteSeder

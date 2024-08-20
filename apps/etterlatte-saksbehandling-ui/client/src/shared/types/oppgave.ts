@@ -22,6 +22,13 @@ export interface GenerellEndringshendelse {
   endringer: EndringLinje[]
 }
 
+export interface GenerellOppgaveDto {
+  merknad: string
+  sakIds: number[]
+  type: Oppgavetype
+  kilde: OppgaveKilde
+}
+
 export interface EndringLinje {
   tittel: string
   beskrivelse?: string
@@ -72,6 +79,8 @@ export enum Oppgavetype {
   GJENOPPRETTING_ALDERSOVERGANG = 'GJENOPPRETTING_ALDERSOVERGANG',
   AKTIVITETSPLIKT = 'AKTIVITETSPLIKT',
   AKTIVITETSPLIKT_REVURDERING = 'AKTIVITETSPLIKT_REVURDERING',
+  AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK = 'AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK',
+  GENERELL_OPPGAVE = 'GENERELL_OPPGAVE',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [

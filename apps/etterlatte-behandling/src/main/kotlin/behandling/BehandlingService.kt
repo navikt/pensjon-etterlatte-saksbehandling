@@ -64,11 +64,25 @@ class BehandlingFinnesIkkeException(
 
 class KravdatoMaaFinnesHvisBosattutland(
     message: String,
-) : UgyldigForespoerselException(code = "BOSATTUTLAND_MÅ_HA_KRAVDATO", detail = message)
+) : UgyldigForespoerselException(code = "BOSATTUTLAND_MAA_HA_KRAVDATO", detail = message)
 
 class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
-) : UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
+) : UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
+
+class VirkningstidspunktKanIkkeVaereEtterOpphoer :
+    UgyldigForespoerselException(
+        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
+        detail = "Virkningstidspunkt kan ikke være etter opphør",
+    )
+
+class VirkFoerIverksattVirk(
+    virk: YearMonth,
+    foersteVirk: YearMonth,
+) : UgyldigForespoerselException(
+        code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK",
+        detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
+    )
 
 class BehandlingNotFoundException(
     behandlingId: UUID,
@@ -100,6 +114,12 @@ class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling :
     UgyldigForespoerselException(
         "KAN_IKKE_OPPRETTE_REVURDERING_MANGLER_FOERSTEGANGSBEHANDLING_IVERKSATT",
         "Kan ikke opprette revurdering når man mangler føstegangsbehandling med virkningstidspunkt",
+    )
+
+class VilkaarMaaFinnesHvisViderefoertOpphoer :
+    UgyldigForespoerselException(
+        "VIDEREFOERT_OPPHOER_MAA_HA_VILKAAR",
+        "Vilkår må angis hvis opphør skal videreføres",
     )
 
 interface BehandlingService {
@@ -145,6 +165,11 @@ interface BehandlingService {
         viderefoertOpphoer: ViderefoertOpphoer,
     )
 
+    fun fjernViderefoertOpphoer(
+        behandlingId: UUID,
+        kilde: Grunnlagsopplysning.Kilde,
+    )
+
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -169,6 +194,7 @@ interface BehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
+        overstyr: Boolean,
     ): Boolean
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
@@ -351,6 +377,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
+        overstyr: Boolean,
     ): Boolean {
         val behandling =
             requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
@@ -360,21 +387,27 @@ internal class BehandlingServiceImpl(
         }
 
         return when (behandling.type) {
-            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
-            BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
+            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling, overstyr)
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                erGyldigVirkningstidspunktFoerstegangsbehandling(
+                    request,
+                    behandling,
+                    brukerTokenInfo,
+                )
+
             else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
         }
     }
 
     /*
      * Gyldig virkningstidspunkt for førstegangsbehandling er basert på dødsdato opp mot når bruker har krav
-     * på å søke.
+     * på å søke, samt eventuell opphørsdato.
      * Kravdato er når søknad mottatt. Med unntak av utlandssak hvor egen kravdato kan være eksplisitt angitt.
      *
      * Virk er da gyldig hvis:
-     * 1. Saktype BP, den er etter dødsdato og den er samme dag eller etter 3 år før kravdato
-     * 2. Saktype OMS, den er etter dødsdato og den etter 3 år før kravdato
-     * 3. Den er etter dødsdato og
+     * 1. Saktype BP, den er etter dødsdato, ikke etter eventuelt opphør, og den er samme måned eller etter 3 år før kravdato
+     * 2. Saktype OMS, den er etter dødsdato, ikke etter eventuelt opphør, og den er etter 3 år før kravdato
+     *
      *
      * UNNTAK:
      * 1. I saker med ukjent avdød vil dødsdato mangle og det vil derfor ikke være mulig å validere.
@@ -391,11 +424,14 @@ internal class BehandlingServiceImpl(
         behandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
+        val virkningstidspunkt = request.dato
+        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
         if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             return true
         }
 
-        val virkningstidspunkt = request.dato
         val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
@@ -425,6 +461,7 @@ internal class BehandlingServiceImpl(
                 SakType.OMSTILLINGSSTOENAD ->
                     // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+
                 SakType.BARNEPENSJON ->
                     // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
@@ -433,18 +470,31 @@ internal class BehandlingServiceImpl(
     }
 
     /*
-     * Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
+     * Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken,
+     * og kan heller ikke være etter opphørsdato.
      */
     private fun erGyldigVirkningstidspunktRevurdering(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
+        overstyr: Boolean,
     ): Boolean {
         val virkningstidspunkt = request.dato
+        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+        }
+
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
-        if (foersteVirkDato == null) {
+        return if (foersteVirkDato == null) {
             throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
+        } else if (virkningstidspunkt.isBefore(foersteVirkDato)) {
+            // Vi tillater virkningstidspunkt før første virk dersom saksbehandler vil overstyre
+            if (overstyr) {
+                true
+            } else {
+                throw VirkFoerIverksattVirk(virkningstidspunkt, foersteVirkDato)
+            }
         } else {
-            return virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
+            virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
         }
     }
 
@@ -729,7 +779,11 @@ internal class BehandlingServiceImpl(
         if (viderefoertOpphoer.skalViderefoere == JaNei.JA &&
             viderefoertOpphoer.vilkaar == null
         ) {
-            throw InternfeilException("Kunne ikke oppdatere videreført opphør for behandling $behandlingId fordi vilkår mangla")
+            throw VilkaarMaaFinnesHvisViderefoertOpphoer()
+        }
+
+        if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
         }
 
         behandling
@@ -739,6 +793,11 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreStatus(it)
             }
     }
+
+    override fun fjernViderefoertOpphoer(
+        behandlingId: UUID,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
 
     override fun hentAapenRegulering(sakId: Long): UUID? =
         behandlingDao
@@ -771,4 +830,11 @@ internal class BehandlingServiceImpl(
         enheterSomSkalFiltreres: List<String>,
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
+
+    private fun virkningstidspunktErEtterOpphoerFraOgMed(
+        virkningstidspunkt: YearMonth?,
+        opphoerFraOgMed: YearMonth?,
+    ) = opphoerFraOgMed != null &&
+        virkningstidspunkt != null &&
+        virkningstidspunkt.isAfter(opphoerFraOgMed)
 }

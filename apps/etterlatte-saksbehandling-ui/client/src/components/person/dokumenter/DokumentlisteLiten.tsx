@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Detail, Heading, HStack, Link } from '@navikt/ds-react'
+import { Alert, BodyShort, Detail, Heading, HStack, Link } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Journalstatus } from '~shared/types/Journalpost'
@@ -9,6 +9,8 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -31,7 +33,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
 
       {mapApiResult(
         status,
-        <Spinner label="Henter dokumenter" visible />,
+        <Spinner label="Henter dokumenter" />,
         (error) => (
           <ApiErrorAlert>{error.detail || 'Det har oppstått en feil ved henting av dokumenter'}</ApiErrorAlert>
         ),
@@ -72,16 +74,17 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <HStack justify="end">
-              <Button
+              <PersonButtonLink
+                fnr={fnr}
+                fane={PersonOversiktFane.DOKUMENTER}
                 variant="tertiary"
                 size="small"
-                as={Link}
-                href={`/person/${fnr}?fane=DOKUMENTER`}
                 target="_blank"
+                rel="noreferrer noopener"
                 icon={<ExternalLinkIcon />}
               >
                 Gå til dokumentoversikten
-              </Button>
+              </PersonButtonLink>
             </HStack>
           </>
         )

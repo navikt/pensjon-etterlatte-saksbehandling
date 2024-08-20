@@ -73,6 +73,11 @@ export interface IAktivitetspliktVurdering {
   unntak?: IAktivitetspliktUnntak
 }
 
+export interface IAktivitetspliktVurderingNy {
+  aktivitet?: IAktivitetspliktAktivitetsgrad[]
+  unntak?: IAktivitetspliktUnntak[]
+}
+
 export interface IAktivitetspliktAktivitetsgrad {
   id: string
   sakId: number
@@ -80,6 +85,7 @@ export interface IAktivitetspliktAktivitetsgrad {
   oppgaveId: string
   aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
+  tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string
@@ -91,6 +97,7 @@ export interface IAktivitetspliktUnntak {
   behandlingId: string | undefined
   oppgaveId: string
   unntak: AktivitetspliktUnntakType
+  fom: string
   tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler

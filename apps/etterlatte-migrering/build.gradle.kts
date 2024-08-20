@@ -1,7 +1,6 @@
 plugins {
     id("etterlatte.common")
     id("etterlatte.postgres")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -15,8 +14,8 @@ dependencies {
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:etterlatte-brev-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
-    implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
     testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))

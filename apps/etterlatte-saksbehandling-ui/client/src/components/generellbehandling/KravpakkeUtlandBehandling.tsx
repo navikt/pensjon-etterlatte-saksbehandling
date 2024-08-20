@@ -26,7 +26,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { avbrytGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
@@ -48,6 +47,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -66,7 +67,7 @@ export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: Navigat
   hentSak(sakId)
     .then((sak) => {
       if (sak.ok) {
-        navigate(`/person/${sak.data.ident}`)
+        navigate('/person', { state: { fnr: sak.data.ident } })
       } else {
         navigate('/')
       }
@@ -113,7 +114,7 @@ const KravpakkeUtlandBehandling = (props: {
 
   const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
-      window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
+      window.open(`/person/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
     })
   }
 
@@ -196,9 +197,8 @@ const KravpakkeUtlandBehandling = (props: {
                     apiResult: avdoedeStatus,
                     errorMessage: 'Klarte ikke å hente informasjon om avdøed',
                   })}
-                  {isPendingOrInitial(avdoedeStatus) && (
-                    <Spinner visible={true} label="Henter opplysninger om avdøde" />
-                  )}
+
+                  <Spinner visible={isPendingOrInitial(avdoedeStatus)} label="Henter opplysninger om avdøde" />
                 </div>
               ) : (
                 <Alert variant="warning">
@@ -208,7 +208,7 @@ const KravpakkeUtlandBehandling = (props: {
               )}
               {mapApiResult(
                 hentAlleLandRequest,
-                <Spinner visible={true} label="Laster landliste" />,
+                <Spinner label="Laster landliste" />,
                 () => (
                   <ApiErrorAlert>Vi klarte ikke å hente landlisten</ApiErrorAlert>
                 ),
@@ -467,7 +467,9 @@ const KravpakkeUtlandBehandling = (props: {
                 Behandlingen er oppdatert
               </Alert>
             )}
-            {isPendingOrInitial(gjeldendeSakStatus) && <Spinner visible={true} label="Henter opplysninger om sak" />}
+
+            <Spinner visible={isPendingOrInitial(gjeldendeSakStatus)} label="Henter opplysninger om sak" />
+
             {isFailureHandler({
               errorMessage: 'Vi klarte ikke å hente gjeldende sak',
               apiResult: gjeldendeSakStatus,

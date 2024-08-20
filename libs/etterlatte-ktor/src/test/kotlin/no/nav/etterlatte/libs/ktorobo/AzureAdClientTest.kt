@@ -17,7 +17,6 @@ import io.mockk.spyk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
@@ -106,8 +105,8 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker OBO cachet access token ved parallele kall`() =
-        runTest {
+    fun `bruker OBO cachet access token ved parallele kall`() {
+        runBlocking {
             val cache: AsyncCache<OboTokenRequest, AccessToken> =
                 Caffeine
                     .newBuilder()
@@ -122,6 +121,7 @@ internal class AzureAdClientTest {
 
             assertEquals(1, httpClient.called)
         }
+    }
 
     @Test
     fun `henter client credentials access token hvis det ikke finnes noe i cache`() {
@@ -173,8 +173,8 @@ internal class AzureAdClientTest {
     }
 
     @Test
-    fun `bruker client credentials cachet access token ved parallele kall`() =
-        runTest {
+    fun `bruker client credentials cachet access token ved parallele kall`() {
+        runBlocking {
             val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
                 Caffeine
                     .newBuilder()
@@ -189,6 +189,7 @@ internal class AzureAdClientTest {
 
             assertEquals(1, httpClient.called)
         }
+    }
 
     @Test
     fun `bruker client credentials viss JWT-claims er systembruker`() {

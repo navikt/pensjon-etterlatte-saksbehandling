@@ -44,7 +44,7 @@ export const OpprettJournalfoeringsoppgave = ({
     return <Alert variant="warning">Kan ikke opprette oppgave for feilregistrert journalpost</Alert>
 
   return mapResult(sakStatus, {
-    pending: <Spinner label="Henter sak" visible />,
+    pending: <Spinner label="Henter sak" />,
     error: (error) => <ApiErrorAlert>{error.detail || 'Feil ved henting av sak for bruker'}</ApiErrorAlert>,
     success: (sakMedBehandlinger) => (
       <>

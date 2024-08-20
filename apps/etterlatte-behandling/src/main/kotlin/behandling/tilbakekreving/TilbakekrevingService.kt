@@ -132,7 +132,10 @@ class TilbakekrevingService(
         }
     }
 
-    fun avbrytTilbakekreving(sakId: Long): TilbakekrevingBehandling =
+    fun avbrytTilbakekreving(
+        sakId: Long,
+        merknad: String,
+    ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Avbryter tilbakekreving for sakId=$sakId")
 
@@ -147,7 +150,7 @@ class TilbakekrevingService(
                     ),
                 )
 
-            oppgaveService.avbrytAapneOppgaverMedReferanse(tilbakekreving.id.toString())
+            oppgaveService.avbrytAapneOppgaverMedReferanse(tilbakekreving.id.toString(), merknad)
 
             tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 

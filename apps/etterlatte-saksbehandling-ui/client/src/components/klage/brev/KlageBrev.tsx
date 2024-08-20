@@ -1,7 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { erKlageRedigerbar, Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -36,16 +36,17 @@ export function KlageBrev() {
   const brevId = hentBrevId(klage)
   const sakId = klage?.sak?.id
   const [hentetBrev, apiHentBrev] = useApiCall(hentBrev)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   useEffect(() => {
     if (!sakId || !brevId) {
       return
     }
     void apiHentBrev({ brevId, sakId })
-  }, [brevId, sakId])
+  }, [brevId, sakId, tilbakestilt])
 
   if (!klage) {
-    return <Spinner visible label="Henter klage" />
+    return <Spinner label="Henter klage" />
   }
 
   const redigerbar = erKlageRedigerbar(klage)
@@ -81,7 +82,7 @@ export function KlageBrev() {
         {mapApiResult(
           hentetBrev,
           <SpinnerContainer>
-            <Spinner visible label="Henter brevet" />
+            <Spinner label="Henter brevet" />
           </SpinnerContainer>,
           () => (
             <ApiErrorAlert>Kunne ikke hente brevet. Prøv å laste siden på nytt</ApiErrorAlert>
@@ -90,7 +91,13 @@ export function KlageBrev() {
             if (brev.status === BrevStatus.DISTRIBUERT || brev.prosessType !== BrevProsessType.REDIGERBAR) {
               return <ForhaandsvisningBrev brev={brev} />
             } else {
-              return <RedigerbartBrev brev={brev} kanRedigeres={redigerbar} />
+              return (
+                <RedigerbartBrev
+                  brev={brev}
+                  kanRedigeres={redigerbar}
+                  tilbakestillingsaction={() => setTilbakestilt(true)}
+                />
+              )
             }
           }
         )}

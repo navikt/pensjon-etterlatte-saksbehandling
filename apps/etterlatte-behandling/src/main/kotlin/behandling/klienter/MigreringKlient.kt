@@ -52,7 +52,7 @@ class MigreringKlient(
 
     override suspend fun ping(konsument: String?): PingResult =
         client.ping(
-            pingUrl = url.plus("/internal/isready"),
+            pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,

@@ -14,9 +14,14 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
-import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -37,8 +42,6 @@ import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
-import no.nav.etterlatte.libs.common.behandling.Mottaker
-import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
@@ -49,6 +52,7 @@ import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -74,6 +78,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.random.Random
+import no.nav.etterlatte.brev.model.Status as BrevStatus
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KlageServiceImplTest : BehandlingIntegrationTest() {
@@ -547,17 +552,33 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     }
 
     private fun opprettetBrevDto(brevId: Long) =
-        OpprettetBrevDto(
+        Brev(
             id = brevId,
             status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
+                    foedselsnummer = MottakerFoedselsnummer("19448310410"),
                     orgnummer = null,
+                    adresse =
+                        Adresse(
+                            adresseType = "",
+                            landkode = "",
+                            land = "",
+                        ),
                 ),
             journalpostId = null,
-            bestillingsID = null,
+            bestillingId = null,
+            sakId = 0,
+            behandlingId = null,
+            tittel = null,
+            spraak = Spraak.NB,
+            prosessType = BrevProsessType.REDIGERBAR,
+            soekerFnr = "",
+            statusEndret = Tidspunkt.now(),
+            opprettet = Tidspunkt.now(),
+            brevtype = Brevtype.MANUELT,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun randomString() = Random.nextLong().toString()

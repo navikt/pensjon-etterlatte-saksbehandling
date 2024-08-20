@@ -75,22 +75,23 @@ export default function BehandleJournalfoeringOppgave() {
   }, [oppgaveId])
 
   if (isPendingOrInitial(oppgaveStatus)) {
-    return <Spinner visible label="Henter oppgavedetaljer..." />
+    return <Spinner label="Henter oppgavedetaljer..." />
   } else if (isPending(sakStatus)) {
-    return <Spinner visible label="Henter sak..." />
+    return <Spinner label="Henter sak..." />
   }
 
   return (
     <>
       <StickyToppMeny>
         <StatusBarPersonHenter ident={oppgave?.fnr} />
-        <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+        <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
       </StickyToppMeny>
+
       <GridContainer>
         <Column>
           <Box padding="8">
             {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
-              <Spinner visible label="Laster journalpost" />
+              <Spinner label="Laster journalpost" />
             ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
               <OppdaterJournalpost
                 initialJournalpost={journalpostStatus.data}

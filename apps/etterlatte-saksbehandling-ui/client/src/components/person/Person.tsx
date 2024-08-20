@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import Spinner from '~shared/Spinner'
@@ -9,6 +9,7 @@ import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
   BellIcon,
+  BriefcaseClockIcon,
   BulletListIcon,
   CogRotationIcon,
   EnvelopeClosedIcon,
@@ -30,6 +31,8 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
+import { Aktivitet } from '~components/person/aktivitet/Aktivitet'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -39,26 +42,27 @@ export enum PersonOversiktFane {
   NOTATER = 'NOTATER',
   SAMORDNING = 'SAMORDNING',
   HENDELSER = 'HENDELSER',
+  AKTIVITET = 'AKTIVITET',
 }
 
 export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
+  const { fnr } = usePersonLocationState(search.get('key'))
 
   const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
+  const skalViseAktivitet = useFeatureEnabledMedDefault('flere-perioder-aktivitet-vurdering', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
 
-    setSearch({ fane: valgtFane })
+    setSearch({ fane: valgtFane }, { state: { fnr } })
     setFane(valgtFane)
   }
-
-  const { fnr } = useParams()
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
@@ -89,10 +93,11 @@ export const Person = () => {
         <PdlPersonStatusBar person={person} />
       ))}
 
-      <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+      <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
+
       {mapAllApiResult(
         personNavnResult,
-        <Spinner visible label="Laster personinfo ..." />,
+        <Spinner label="Laster personinfo ..." />,
         null,
         (error) => (
           <Box padding="8">{handleError(error)}</Box>
@@ -107,6 +112,9 @@ export const Person = () => {
                 icon={<PersonIcon />}
               />
               <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
+              {isOmstillingsstoenad(sakResult) && skalViseAktivitet && (
+                <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
+              )}
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
               {skalViseNotater && (
@@ -139,6 +147,9 @@ export const Person = () => {
             )}
             <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
               <SamordningSak fnr={person.foedselsnummer} sakResult={sakResult} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
+              <Aktivitet fnr={person.foedselsnummer} sakResult={sakResult} />
             </Tabs.Panel>
           </Tabs>
         )

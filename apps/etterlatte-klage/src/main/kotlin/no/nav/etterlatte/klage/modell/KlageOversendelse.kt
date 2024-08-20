@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageMottaker
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
-import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.klage.kodeverk.Fagsystem
 import no.nav.klage.kodeverk.Ytelse
@@ -15,6 +15,7 @@ import java.time.LocalDate
 enum class KabalSakType {
     KLAGE,
     ANKE,
+    ANKE_I_TRYGDERETTEN,
 }
 
 enum class KabalKlagerType {
@@ -155,7 +156,7 @@ data class KabalOversendelse(
     }
 }
 
-fun Mottaker.tilKlagerPart(): KabalKlagerPart {
+fun KlageMottaker.tilKlagerPart(): KabalKlagerPart {
     val fnr = this.foedselsnummer
     if (fnr != null) {
         return KabalKlagerPart(

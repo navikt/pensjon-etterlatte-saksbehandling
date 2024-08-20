@@ -16,6 +16,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -114,6 +115,24 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        route("/bulk") {
+            post("/opprett") {
+                kunSaksbehandler {
+                    val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
+                    inTransaction {
+                        service.opprettOppgaveBulk(
+                            "",
+                            oppgaveBulkDto.sakIds,
+                            oppgaveBulkDto.kilde,
+                            oppgaveBulkDto.type,
+                            oppgaveBulkDto.merknad,
+                        )
+                    }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
                 kunSaksbehandler {
@@ -196,15 +215,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(HttpStatusCode.OK)
                 }
             }
-            post("bytt-saksbehandler") {
-                kunSaksbehandlerMedSkrivetilgang {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                    inTransaction {
-                        service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
+
             delete("saksbehandler") {
                 kunSaksbehandlerMedSkrivetilgang {
                     inTransaction { service.fjernSaksbehandler(oppgaveId) }

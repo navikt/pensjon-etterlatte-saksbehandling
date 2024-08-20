@@ -75,6 +75,10 @@ spec:
     max: 2
     min: 2
   env:
+    - name: KODEVERK_URL
+      value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
+    - name: KODEVERK_CLIENT_ID
+      value: dev-gcp.team-rocket.kodeverk-api
     - name: JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
       value: "06-23"
     - name: JOBB_SAKSBEHANDLER_OPENING_HOURS
@@ -182,7 +186,10 @@ spec:
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: dev-gcp
+        - application: kodeverk-api
+          namespace: team-rocket
       external:
+        - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: skjermede-personer-pip.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
@@ -213,6 +220,6 @@ spec:
         - application: etterlatte-testdata-behandler
         - application: etterlatte-utbetaling
         - application: etterlatte-api
-        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

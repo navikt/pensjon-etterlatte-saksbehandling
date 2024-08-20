@@ -1,11 +1,14 @@
 plugins {
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.common")
     id("etterlatte.postgres")
 }
 
 tasks.jar.configure {
     dependsOn(":libs:etterlatte-mq:jar")
+}
+
+repositories {
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -18,23 +21,18 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-mq"))
     implementation(project(":libs:etterlatte-migrering-model"))
-
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.jackson)
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.mq.jakarta.client)
-    implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsimulering)
     implementation(libs.navfelles.tjenestespesifikasjoner.avstemming)
 
     implementation(libs.database.kotliquery)
+    implementation(libs.cache.caffeine)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { Box, Button, ErrorSummary, Heading, HStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ErrorSummary, Heading, HStack, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
@@ -12,6 +12,7 @@ import {
   feilIKomplettePerioderOverIntervall,
   mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
+  PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
@@ -44,24 +45,37 @@ const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
   })),
 })
 
+function manglendeSoeskenIEksisterendeSoeskenjustering(
+  soesken: IPdlPerson[],
+  soeskenjusteringDto?: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
+): PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[] {
+  const perioderMedMangler = (soeskenjusteringDto ?? []).filter((periode) =>
+    periode.data.every(
+      (soeskenIBeregning) => !soesken.some((soesken) => soeskenIBeregning.foedselsnummer === soesken.foedselsnummer)
+    )
+  )
+  return perioderMedMangler
+}
+
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const { behandling, onSubmit, setSoeskenJusteringManglerIkke } = props
   const personopplysninger = usePersonopplysninger()
+  const [visFeil, setVisFeil] = useState(false)
+  const [skjulManglendeSoesken, setSkjulManglendeSoesken] = useState(false)
   if (!personopplysninger) {
     return null
   }
-  const [visFeil, setVisFeil] = useState(false)
 
-  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
-  const soesken =
-    (avdoede &&
-      hentLevendeSoeskenFraAvdoedeForSoeker(
-        avdoede,
-        personopplysninger.soeker?.opplysning?.foedselsnummer as string
-      )) ??
-    []
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
+    personopplysninger.avdoede,
+    personopplysninger.soeker?.opplysning.foedselsnummer
+  )
 
-  const { handleSubmit, control, watch } = useForm<{
+  const manglendeSoesken = useMemo(() => {
+    return manglendeSoeskenIEksisterendeSoeskenjustering(soesken, behandling.beregningsGrunnlag?.soeskenMedIBeregning)
+  }, [behandling.beregningsGrunnlag?.soeskenMedIBeregning, personopplysninger.avdoede])
+
+  const { handleSubmit, control, watch, reset } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
   }>({
     defaultValues: {
@@ -93,6 +107,32 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     ),
   ]
 
+  function oppdaterSoeskenTilJustering() {
+    if (manglendeSoesken.length === 0) {
+      return
+    }
+    setSkjulManglendeSoesken(true)
+    const allePerioder = mapListeFraDto(behandling.beregningsGrunnlag!!.soeskenMedIBeregning)
+    const oppdatertePerioder = allePerioder.map((periode) => {
+      const manglendeSoeskenForPeriode = soesken.filter((soesken) =>
+        periode.data.every((sib) => sib.foedselsnummer !== soesken.foedselsnummer)
+      )
+      return {
+        ...periode,
+        data: [
+          ...periode.data,
+          ...manglendeSoeskenForPeriode.map(
+            (soesken): SoeskenMedIBeregning => ({
+              foedselsnummer: soesken.foedselsnummer,
+              skalBrukes: false,
+            })
+          ),
+        ],
+      }
+    })
+    reset({ soeskenMedIBeregning: oppdatertePerioder })
+  }
+
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
       ...acc,
@@ -117,18 +157,34 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
 
   return (
-    <>
-      <Box paddingInline="16" paddingBlock="16 4">
-        <Heading level="2" size="medium">
-          Søskenjustering
-        </Heading>
-      </Box>
+    <VStack gap="4">
+      <Heading level="3" size="small">
+        Søskenjustering
+      </Heading>
+      {manglendeSoesken.length > 0 && !skjulManglendeSoesken && (
+        <div style={{ maxWidth: '40rem' }}>
+          <Alert variant="warning">
+            <VStack gap="4">
+              <BodyShort>
+                Den lagrede søskenjusteringen har ikke med alle avdødes barn. For å få riktig søskenjustering må de
+                manglende søskene legges til periodene.
+              </BodyShort>
+              <BodyShort>
+                <Button onClick={oppdaterSoeskenTilJustering}>Oppdater søsken</Button>
+              </BodyShort>
+            </VStack>
+          </Alert>
+        </div>
+      )}
       <FamilieforholdWrapper>
         {personopplysninger.soeker && (
-          <Barn person={personopplysninger.soeker?.opplysning} doedsdato={avdoede?.opplysning.doedsdato} />
+          <Barn
+            person={personopplysninger.soeker?.opplysning}
+            doedsdato={personopplysninger.soeker?.opplysning.doedsdato}
+          />
         )}
       </FamilieforholdWrapper>
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle">
         {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>
@@ -153,29 +209,25 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             ))}
           </UstiletListe>
           {behandles && (
-            <Box paddingBlock="4" paddingInline="16">
-              <HStack gap="4" align="center">
-                <Button
-                  size="small"
-                  variant="secondary"
-                  type="button"
-                  onClick={() =>
-                    append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))
-                  }
-                >
-                  Legg til periode
-                </Button>
+            <HStack gap="4" align="center">
+              <Button
+                size="small"
+                variant="secondary"
+                type="button"
+                onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
+              >
+                Legg til periode
+              </Button>
 
-                <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
-                  Lagre søskenjustering
-                </Button>
-                {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-              </HStack>
-            </Box>
+              <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
+                Lagre søskenjustering
+              </Button>
+              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+            </HStack>
           )}
         </form>
       </Box>
-    </>
+    </VStack>
   )
 }
 

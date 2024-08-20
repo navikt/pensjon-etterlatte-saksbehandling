@@ -115,12 +115,13 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
         Valg av utfall i brev
       </Heading>
       <BodyLong spacing>
-        Her velger du hvilket utfall som gjelder slik at det blir riktig informasjon i brevet.
+        Velg hvilke utfall som gjelder i saken for å få riktig informasjon i brevet. Valgene du gjør under har bare
+        betydning for hvilken tekst som kommer i brevet.
       </BodyLong>
 
       <MapApiResult
         result={hentBrevutfallOgEtterbetalingResult}
-        mapInitialOrPending={<Spinner visible={true} label="Henter brevutfall .." />}
+        mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
         mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
         mapSuccess={() =>
           visSkjema ? (

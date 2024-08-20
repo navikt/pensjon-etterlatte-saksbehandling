@@ -2,8 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -43,7 +41,6 @@ import java.util.UUID
 
 class VedtakBehandlingService(
     private val repository: VedtaksvurderingRepository,
-    private val featureToggleService: FeatureToggleService,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
@@ -147,10 +144,8 @@ class VedtakBehandlingService(
                 }
             }
 
-        if (featureToggleService.isEnabled(VedtakFeatureToggle.VerifiserPerioder, false)) {
-            beregningOgAvkorting?.let {
-                VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
-            }
+        beregningOgAvkorting?.let {
+            VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
         }
 
         return VedtakOgRapid(
@@ -720,12 +715,3 @@ class ManglerAvkortetYtelse :
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
     )
-
-enum class VedtakFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    VerifiserPerioder("verifiser-perioder"),
-    ;
-
-    override fun key() = key
-}

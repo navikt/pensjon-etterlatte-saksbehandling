@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
     id("java-library")
     id("java-test-fixtures")
@@ -14,5 +13,5 @@ dependencies {
     testFixturesImplementation(libs.mq.jakarta.client)
     testFixturesImplementation(libs.messaginghub.pooled.jms)
     testFixturesImplementation(libs.test.mockk)
-    testFixturesImplementation(libs.kotlinx.coroutinescore)
+    testFixturesImplementation(libs.ktor2.servertests)
 }

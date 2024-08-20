@@ -545,6 +545,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
+                db.oppdaterBrevkoder(brev.id, Brevkoder.TOMT_INFORMASJONSBREV)
             }
 
             coVerify {
@@ -573,6 +574,7 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrev(brev.id)
                 db.lagrePdf(brev.id, any())
+                db.oppdaterBrevkoder(brev.id, Brevkoder.TOMT_INFORMASJONSBREV)
             }
 
             coVerify {
@@ -600,6 +602,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
+                db.oppdaterBrevkoder(brev.id, Brevkoder.TOMT_INFORMASJONSBREV)
             }
 
             coVerify {
@@ -657,6 +660,9 @@ internal class VedtaksbrevServiceTest {
                 db.oppdaterPayload(brev.id, tomPayload)
                 db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(opprettVedleggPayload())))
                 db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)))
+                db.hentBrevkoder(brev.id)
+                db.oppdaterBrevkoder(brev.id, Brevkoder.OMS_OPPHOER)
+                db.oppdaterTittel(brev.id, Brevkoder.OMS_OPPHOER.tittel!!)
             }
 
             coVerify {
@@ -711,6 +717,7 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
         brevtype = Brevtype.VEDTAK,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettGenerellBrevdata(

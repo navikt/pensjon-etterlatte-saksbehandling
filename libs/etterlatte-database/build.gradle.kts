@@ -1,18 +1,10 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
     id("java-library")
     id("java-test-fixtures")
 }
 
-repositories {
-    maven("https://packages.confluent.io/maven/")
-}
-
 dependencies {
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.database.postgresql)
     implementation(libs.database.flywaydb)
@@ -30,10 +22,4 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.jupiter)
     testFixturesImplementation(libs.test.testcontainer.postgresql)
     testFixturesImplementation(libs.database.flywaydb)
-
-    tasks {
-        withType<Test> {
-            useJUnitPlatform()
-        }
-    }
 }

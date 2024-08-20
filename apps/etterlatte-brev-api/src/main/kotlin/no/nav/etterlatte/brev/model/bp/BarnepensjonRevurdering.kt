@@ -36,6 +36,7 @@ data class BarnepensjonRevurdering(
     val harFlereUtbetalingsperioder: Boolean,
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
+    val erMigrertYrkesskade: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -51,6 +52,7 @@ data class BarnepensjonRevurdering(
             erForeldreloes: Boolean,
             avdoede: List<Avdoed>,
             datoVedtakOmgjoering: LocalDate?,
+            erMigrertYrkesskade: Boolean,
         ): BarnepensjonRevurdering {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
@@ -89,6 +91,7 @@ data class BarnepensjonRevurdering(
                             )
                     },
                 feilutbetaling = feilutbetaling,
+                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

@@ -141,6 +141,17 @@ class SanksjonRepository(
             endret = stringOrNull("endret")?.let { objectMapper.readValue(it) },
             beskrivelse = string("beskrivelse"),
         )
+
+    fun hentSanksjonMedId(sanksjonId: UUID): Sanksjon? =
+        dataSource.transaction { tx ->
+            queryOf(
+                statement =
+                    """
+                    SELECT * FROM sanksjon WHERE id = ?
+                    """.trimIndent(),
+                sanksjonId,
+            ).let { query -> tx.run(query.map { it.toSanksjon() }.asSingle) }
+        }
 }
 
 data class Sanksjon(

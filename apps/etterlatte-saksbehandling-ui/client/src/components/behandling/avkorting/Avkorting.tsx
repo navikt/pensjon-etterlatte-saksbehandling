@@ -60,7 +60,7 @@ export const Avkorting = ({
     <Box paddingBlock="8 0">
       <VStack gap="8">
         {mapResult(avkortingStatus, {
-          pending: <Spinner visible label="Henter avkorting" />,
+          pending: <Spinner label="Henter avkorting" />,
           error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
           success: () => (
             <AvkortingInntekt

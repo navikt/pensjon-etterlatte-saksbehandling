@@ -4,6 +4,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
+import no.nav.etterlatte.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_TOPIC
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -16,7 +18,7 @@ class KafkaConsumerInstitusjonsopphold(
 ) : Kafkakonsument<KafkaOppholdHendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumerInstitusjonsopphold::class.java.name),
         consumer = KafkaConsumer<String, KafkaOppholdHendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
-        topic = env.requireEnvValue("INSTITUSJONSOPPHOLD_TOPIC"),
+        topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun stream() {
@@ -37,3 +39,11 @@ data class KafkaOppholdHendelse(
     var type: InstitusjonsoppholdsType,
     var kilde: InstitusjonsoppholdKilde,
 )
+
+enum class InstitusjonsoppholdKey : EnvEnum {
+    INSTITUSJONSOPPHOLD_GROUP_ID,
+    INSTITUSJONSOPPHOLD_TOPIC,
+    ;
+
+    override fun key() = name
+}

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.database
 
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_DATABASE
 import no.nav.etterlatte.libs.database.DatabaseConfig.DB_HOST
@@ -20,13 +21,13 @@ class ApplicationProperties(
                 ApplicationProperties(
                     jdbcUrl =
                         env[DB_JDBC_URL] ?: jdbcUrl(
-                            getValue(DB_HOST),
-                            getValue(DB_PORT).toInt(),
-                            getValue(DB_DATABASE),
+                            requireEnvValue(DB_HOST),
+                            requireEnvValue(DB_PORT).toInt(),
+                            requireEnvValue(DB_DATABASE),
                         ),
-                    dbUsername = getValue(DB_USERNAME),
-                    dbPassword = getValue(DB_PASSWORD),
-                    httpPort = get("HTTP_PORT")?.toInt() ?: 8080,
+                    dbUsername = requireEnvValue(DB_USERNAME),
+                    dbPassword = requireEnvValue(DB_PASSWORD),
+                    httpPort = get(HTTP_PORT)?.toInt() ?: 8080,
                 )
             }
     }

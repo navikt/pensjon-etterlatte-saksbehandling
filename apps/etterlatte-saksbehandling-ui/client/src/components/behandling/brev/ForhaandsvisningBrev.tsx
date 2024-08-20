@@ -32,7 +32,7 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
 
   return (
     <Container>
-      {isPendingOrInitial(pdf) && <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />}
+      {isPendingOrInitial(pdf) && <Spinner label="Klargjør forhåndsvisning av PDF ..." />}
       {isSuccess(pdf) && !!fileURL && <PdfViewer src={fileURL} />}
       {isFailureHandler({
         apiResult: pdf,

@@ -19,6 +19,8 @@ import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 import { JaNei } from '~shared/types/ISvar'
 
+import { ILand } from '~utils/kodeverk'
+
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
 ): Promise<ApiResponse<GrunnlagsendringsListe>> => {
@@ -45,8 +47,9 @@ export const fastsettVirkningstidspunkt = async (args: {
   dato: Date
   begrunnelse: string
   kravdato: Date | null
+  overstyr: boolean
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
-  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
+  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt?overstyr=${args.overstyr}`, {
     dato: args.dato,
     begrunnelse: args.begrunnelse,
     kravdato: args.kravdato ? format(args.kravdato, DatoFormat.AAR_MAANED_DAG) : null,
@@ -122,6 +125,9 @@ export const lagreViderefoertOpphoer = async ({
   })
 }
 
+export const slettViderefoertOpphoer = async (args: { behandlingId: string }): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/behandling/${args.behandlingId}/viderefoert-opphoer`)
+
 export const lagreBoddEllerArbeidetUtlandet = async (args: {
   behandlingId: string
   begrunnelse: string
@@ -189,3 +195,4 @@ export const hentBrevutfallOgEtterbetalingApi = async (
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path

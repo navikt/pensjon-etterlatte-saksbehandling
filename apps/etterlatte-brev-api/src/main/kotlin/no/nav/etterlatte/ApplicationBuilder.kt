@@ -5,16 +5,20 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.BrevKey.BREVBAKER_SCOPE
 import no.nav.etterlatte.BrevKey.BREVBAKER_URL
 import no.nav.etterlatte.BrevKey.CLAMAV_ENDPOINT_URL
-import no.nav.etterlatte.BrevKey.DOKARKIV_URL
+import no.nav.etterlatte.BrevKey.DOKDIST_SCOPE
 import no.nav.etterlatte.BrevKey.DOKDIST_URL
-import no.nav.etterlatte.BrevKey.PDFGEN_URL
+import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
 import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
+import no.nav.etterlatte.EnvKey.DOKARKIV_SCOPE
+import no.nav.etterlatte.EnvKey.DOKARKIV_URL
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
@@ -81,7 +85,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -116,12 +119,12 @@ class ApplicationBuilder {
 
     private val brevbaker =
         BrevbakerKlient(
-            httpClient("BREVBAKER_SCOPE"),
+            httpClient(BREVBAKER_SCOPE),
             env.requireEnvValue(BREVBAKER_URL),
         )
 
     private val regoppslagKlient =
-        RegoppslagKlient(httpClient("REGOPPSLAG_SCOPE"), env.requireEnvValue(REGOPPSLAG_URL))
+        RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
     private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue(NAVANSATT_URL))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
@@ -155,12 +158,12 @@ class ApplicationBuilder {
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val dokarkivKlient =
-        DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue(DOKARKIV_URL))
+        DokarkivKlient(httpClient(DOKARKIV_SCOPE, false), env.requireEnvValue(DOKARKIV_URL))
 
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
     private val distribusjonKlient =
-        DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue(DOKDIST_URL))
+        DistribusjonKlient(httpClient(DOKDIST_SCOPE, false), env.requireEnvValue(DOKDIST_URL))
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
@@ -264,7 +267,6 @@ class ApplicationBuilder {
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
-            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             val brevgenerering =
                 StartInformasjonsbrevgenereringRiver(
@@ -299,7 +301,7 @@ class ApplicationBuilder {
         }
 
     private fun httpClient(
-        scope: String? = null,
+        scope: EnvEnum? = null,
         forventStatusSuccess: Boolean = true,
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
@@ -322,11 +324,12 @@ class ApplicationBuilder {
 }
 
 enum class BrevKey : EnvEnum {
+    BREVBAKER_SCOPE,
     BREVBAKER_URL,
     CLAMAV_ENDPOINT_URL,
-    DOKARKIV_URL,
+    DOKDIST_SCOPE,
     DOKDIST_URL,
-    PDFGEN_URL,
+    REGOPPSLAG_SCOPE,
     REGOPPSLAG_URL,
     SAF_BASE_URL,
     SAF_SCOPE,

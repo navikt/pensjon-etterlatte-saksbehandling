@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("etterlatte.libs")
 }
 
@@ -14,9 +13,4 @@ dependencies {
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.mockk)
-}
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-    }
 }

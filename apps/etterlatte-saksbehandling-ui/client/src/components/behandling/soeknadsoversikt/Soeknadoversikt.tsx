@@ -76,6 +76,8 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
   }
 
+  const viderefoertOpphoerEnabled = useFeatureEnabledMedDefault('viderefoer-opphoer', false)
+
   return (
     <>
       <Box paddingInline="16" paddingBlock="16 4">
@@ -118,13 +120,11 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             >
               {{ info: <GrunnlagForVirkningstidspunkt /> }}
             </Virkningstidspunkt>{' '}
+            {viderefoertOpphoerEnabled && <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />}
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
-        {useFeatureEnabledMedDefault('viderefoer-opphoer', false) && (
-          <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
-        )}
       </Box>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">

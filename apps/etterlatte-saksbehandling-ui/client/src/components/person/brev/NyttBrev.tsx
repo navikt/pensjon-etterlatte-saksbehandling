@@ -15,7 +15,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
@@ -24,8 +24,9 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
 
-  const { brevId, sakId, fnr } = useParams()
+  const { brevId, sakId } = useParams()
   const [kanRedigeres, setKanRedigeres] = useState(false)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
@@ -37,16 +38,22 @@ export default function NyttBrev() {
         setKanRedigeres(false)
       }
     })
-  }, [brevId, sakId])
+  }, [brevId, sakId, tilbakestilt])
 
   return (
     <>
-      <StatusBarPersonHenter ident={fnr} />
-      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}?fane=BREV`} />
+      {mapSuccess(brevStatus, (brev) => (
+        <>
+          <StatusBarPersonHenter ident={brev.soekerFnr} />
+          <NavigerTilbakeMeny to="/person?fane=BREV" state={{ fnr: brev.soekerFnr }}>
+            Tilbake til brevoversikt
+          </NavigerTilbakeMeny>
+        </>
+      ))}
 
       {mapApiResult(
         brevStatus,
-        <Spinner label="Henter brev ..." visible />,
+        <Spinner label="Henter brev ..." />,
         () => (
           <ApiErrorAlert>Feil oppsto ved henting av brev</ApiErrorAlert>
         ),
@@ -69,7 +76,11 @@ export default function NyttBrev() {
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
               ) : (
-                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} />
+                <RedigerbartBrev
+                  brev={brev}
+                  kanRedigeres={kanRedigeres}
+                  tilbakestillingsaction={() => setTilbakestilt(true)}
+                />
               )}
             </Column>
             <Column>

@@ -1,33 +1,27 @@
-import { BodyLong, Loader } from '@navikt/ds-react'
+import { BodyLong, HStack, Loader, LoaderProps } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-interface Props {
-  visible: boolean
+interface Props extends Omit<LoaderProps, 'title'> {
+  visible?: boolean // default: true
   label: string
   margin?: string
-  variant?: 'neutral' | 'interaction' | 'inverted'
 }
 
-const Spinner = ({ visible, label, margin = '3em', variant }: Props) => {
-  if (!visible) return null
+const Spinner = ({ visible, label, margin = '3em', ...rest }: Props) => {
+  if (visible === false) return null
 
   return (
     <SpinnerWrap $margin={margin}>
-      <div className="spinner-overlay">
-        <div className="spinner-content">
-          <Loader variant={variant} />
-          {label && <BodyLong spacing>{label}</BodyLong>}
-        </div>
-      </div>
+      <HStack gap="4" align="center" justify="center">
+        <Loader {...rest} title={label} />
+        {label && <BodyLong>{label}</BodyLong>}
+      </HStack>
     </SpinnerWrap>
   )
 }
 
 const SpinnerWrap = styled.div<{ $margin: string }>`
-  display: flex;
-  justify-content: center;
   margin: ${(props) => props.$margin};
-  text-align: center;
 `
 
 export default Spinner

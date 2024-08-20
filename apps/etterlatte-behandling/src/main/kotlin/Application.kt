@@ -22,7 +22,7 @@ import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
 import no.nav.etterlatte.behandling.selftest.selfTestRoute
-import no.nav.etterlatte.behandling.sjekklisteRoute
+import no.nav.etterlatte.behandling.sjekkliste.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
@@ -35,13 +35,14 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.kodeverk.kodeverk
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
@@ -79,7 +80,7 @@ private class Server(
     fun run() =
         with(context) {
             dataSource.migrate()
-            setReady().also { engine.start(true) }
+            engine.run()
         }
 }
 
@@ -90,6 +91,8 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
         context.oppgaveFristGaarUtJobb,
+        context.opprettDoedshendelseJob,
+        context.behandleDoedshendelseJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -166,7 +169,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         behandlingFactory = applicationContext.behandlingFactory,
         featureToggleService = applicationContext.featureToggleService,
     )
-    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
+    aktivitetspliktRoutes(
+        aktivitetspliktService = applicationContext.aktivitetspliktService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(
@@ -174,7 +180,11 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         sakService = applicationContext.sakService,
     )
     vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
-    revurderingRoutes(revurderingService = applicationContext.revurderingService)
+    revurderingRoutes(
+        revurderingService = applicationContext.revurderingService,
+        manuellRevurderingService = applicationContext.manuellRevurderingService,
+        omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
+    )
     omregningRoutes(omregningService = applicationContext.omregningService)
     migreringRoutes(migreringService = applicationContext.migreringService)
     bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)
@@ -204,6 +214,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
 
     tilgangRoutes(applicationContext.tilgangService)
+    kodeverk(applicationContext.kodeverkService)
 }
 
 private fun Route.settOppTilganger(

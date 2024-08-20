@@ -101,6 +101,10 @@ class OppgaveDaoMedEndringssporingImpl(
         oppgaveDao.opprettOppgave(oppgaveIntern)
     }
 
+    override fun opprettOppgaveBulk(oppgaveListe: List<OppgaveIntern>) {
+        oppgaveDao.opprettOppgaveBulk(oppgaveListe)
+    }
+
     override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? = oppgaveDao.hentOppgave(oppgaveId)
 
     override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)

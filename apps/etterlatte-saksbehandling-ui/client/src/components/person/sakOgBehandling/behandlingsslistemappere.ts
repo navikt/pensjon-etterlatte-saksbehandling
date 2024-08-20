@@ -63,6 +63,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Omgjøring på eget intitiativ'
     case Revurderingaarsak.OMGJOERING_ETTER_KRAV_FRA_BRUKER:
       return 'Omgjøring etter krav fra bruker'
+    case Revurderingaarsak.REVURDERE_ETTER_OPPHOER:
+      return 'Revurdere etter opphør'
     case Revurderingaarsak.OPPHOER_3_AAR_ETTER_DOEDSFALL:
       return 'Opphør 3 år etter dødsfall'
     case Revurderingaarsak.OPPHOER_AV_2_UTVIDEDE_AAR:

@@ -13,11 +13,11 @@ import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
 import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
 import { Innflytting } from '~components/person/personopplysninger/Innflytting'
-import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import styled from 'styled-components'
+import { hentAlleLand } from '~shared/api/behandling'
 
 export const Personopplysninger = ({
   sakResult,
@@ -54,7 +54,7 @@ export const Personopplysninger = ({
             {!!sak ? (
               <>
                 {mapResult(familieOpplysningerResult, {
-                  pending: <Spinner visible={true} label="Henter opplysninger" />,
+                  pending: <Spinner label="Henter opplysninger" />,
                   error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger'}</ApiErrorAlert>,
                   success: ({ soeker, avdoede, gjenlevende }) => (
                     <>

@@ -24,7 +24,7 @@ import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
@@ -69,6 +69,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
     )
   }, [])
 
+  const erBarnepensjon = behandling.sakType == SakType.BARNEPENSJON
   return (
     <SidebarPanel $border id="sjekklistePanel">
       {sjekklisteValideringsfeil && (
@@ -88,7 +89,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
         <>
           <BodyLong>
             Gjennomgå alle punktene og marker de som krever handling.{' '}
-            <Link href={behandling.sakType == SakType.BARNEPENSJON ? rutinerBP : rutinerOMS} target="_blank">
+            <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
               Her finner du rutine til punktene.
             </Link>
           </BodyLong>
@@ -104,13 +105,21 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            {soeker?.foedselsnummer ? (
-              <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
-                Personoversikt i Gosys
-              </Link>
-            ) : (
-              <Alert variant="warning">Mangler fødselsnummer på søker</Alert>
-            )}
+            <VStack gap="4">
+              <Heading size="small">Lenker</Heading>
+              {soeker?.foedselsnummer ? (
+                <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
+                  Personoversikt i Gosys
+                </Link>
+              ) : (
+                <Alert variant="warning">Mangler fødselsnummer på søker</Alert>
+              )}
+              {erBarnepensjon && (
+                <Link href={configContext['bisysUrl']} target="_blank">
+                  Bisys <ExternalLinkIcon />
+                </Link>
+              )}
+            </VStack>
           </HMargin>
 
           <VStack gap="4">
@@ -150,17 +159,14 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               <TextField
                 label="Ønsket skattetrekk"
                 name="OnsketSkattetrekk"
-                value={sjekkliste.onsketSkattetrekk || undefined}
+                value={sjekkliste.onsketSkattetrekk || ''}
                 onChange={(e) => {
-                  const isNumberOrEmpty = /^\d*$/.test(e.target.value)
-                  if (isNumberOrEmpty) {
-                    const oppdatert = {
-                      ...sjekkliste,
-                      onsketSkattetrekk: e.target.value === '' ? undefined : Number(e.target.value),
-                    }
-                    dispatch(updateSjekkliste(oppdatert))
-                    fireOpppdater(oppdatert)
+                  const oppdatert = {
+                    ...sjekkliste,
+                    onsketSkattetrekk: e.target.value,
                   }
+                  dispatch(updateSjekkliste(oppdatert))
+                  fireOpppdater(oppdatert)
                 }}
                 readOnly={!redigerbar}
               />
@@ -222,7 +228,6 @@ const SjekklisteItem = ({
         apiResult: itemUpdateResult,
         errorMessage: 'En feil oppsto ved oppdatering av sjekklista',
       })}
-
       <Checkbox
         checked={avkrysset}
         readOnly={!redigerbar}
@@ -239,6 +244,6 @@ const SjekklisteItem = ({
 }
 
 const HMargin = styled.div`
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 2em;
+  margin-bottom: 2em;
 `

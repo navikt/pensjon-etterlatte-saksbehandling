@@ -88,7 +88,7 @@ internal class VilkaarsvurderingRepositoryTest(
         with(oppdatertVilkaarsvurdering.resultat!!) {
             utfall shouldBe vilkaarsvurderingResultat.utfall
             kommentar shouldBe vilkaarsvurderingResultat.kommentar
-            // TODO tidspunkt shouldBe vilkaarsvurderingResultat.tidspunkt
+            tidspunkt shouldBe vilkaarsvurderingResultat.tidspunkt
             saksbehandler shouldBe vilkaarsvurderingResultat.saksbehandler
         }
     }
@@ -139,7 +139,7 @@ internal class VilkaarsvurderingRepositoryTest(
         oppdatertVilkaarsvurdering.vilkaar.first { it.id == vilkaar.id }.let {
             with(it.vurdering!!) {
                 kommentar shouldBe vurdertVilkaar.vurdering.kommentar
-                // TODO tidspunkt shouldBe vurdertVilkaar.vurdering.tidspunkt
+                tidspunkt shouldBe vurdertVilkaar.vurdering.tidspunkt
                 saksbehandler shouldBe vurdertVilkaar.vurdering.saksbehandler
             }
             it.hovedvilkaar.resultat shouldBe Utfall.IKKE_VURDERT

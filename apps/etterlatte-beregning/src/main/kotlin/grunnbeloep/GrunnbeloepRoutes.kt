@@ -5,7 +5,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import java.time.YearMonth
 
 fun Route.grunnbeloep(service: GrunnbeloepService) {

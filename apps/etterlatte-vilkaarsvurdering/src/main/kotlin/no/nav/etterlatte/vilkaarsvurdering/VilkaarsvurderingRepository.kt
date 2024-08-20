@@ -48,14 +48,14 @@ class VilkaarsvurderingRepository(
         }
 
     fun hentMigrertYrkesskadefordel(
-        behandlingId: UUID,
+        sakId: Long,
         tx: TransactionalSession? = null,
     ) = tx.session {
         hent(
             queryString = Queries.HENT_MIGRERT_YRKESSKADE,
             params =
                 mapOf(
-                    "behandling_id" to behandlingId,
+                    "sak_id" to sakId,
                 ),
         ) {
             true
@@ -393,7 +393,7 @@ class VilkaarsvurderingRepository(
         """
 
         const val HENT_MIGRERT_YRKESSKADE = """
-            SELECT behandling_id FROM migrert_yrkesskade WHERE behandling_id = :behandling_id
+            SELECT sak_id FROM migrert_yrkesskade WHERE sak_id = :sak_id
         """
 
         const val HENT_VILKAAR = """

@@ -1,7 +1,6 @@
 plugins {
     id("etterlatte.common")
     id("etterlatte.postgres")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -18,35 +17,21 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 
     implementation(libs.database.kotliquery)
 
-    implementation(libs.ktor2.servercore)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientauth)
     implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.servercontentnegotiation)
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.ktor2.statuspages)
-    implementation(libs.ktor2.clientauth)
-    implementation(libs.ktor2.clientlogging)
     implementation(libs.ktor2.jackson)
-    implementation(libs.ktor2.auth)
-    implementation(libs.ktor2.authjwt)
+    implementation(libs.ktor2.clientauth)
     implementation(libs.cache.caffeine)
-
-    implementation(libs.bundles.jackson)
-
-    implementation(libs.navfelles.tokenclientcore)
-    implementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.okhttp)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))

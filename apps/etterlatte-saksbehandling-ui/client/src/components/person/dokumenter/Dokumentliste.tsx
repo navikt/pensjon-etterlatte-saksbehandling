@@ -51,7 +51,7 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
               dokumenter,
               <Table.Row>
                 <Table.DataCell colSpan={100}>
-                  <Spinner margin="0" visible label="Henter dokumenter" />
+                  <Spinner margin="0" label="Henter dokumenter" />
                 </Table.DataCell>
               </Table.Row>,
               () => (

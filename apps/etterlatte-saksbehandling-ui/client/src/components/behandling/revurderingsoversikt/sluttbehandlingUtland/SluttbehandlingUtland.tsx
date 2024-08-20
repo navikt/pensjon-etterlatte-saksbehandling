@@ -7,7 +7,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
@@ -20,6 +19,8 @@ import { formaterDato } from '~utils/formatering/dato'
 
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -111,7 +112,7 @@ export default function SluttbehandlingUtland({
         </Heading>
         {mapAllApiResult(
           kravpakkeStatus,
-          <Spinner visible={true} label="Henter kravpakke" />,
+          <Spinner label="Henter kravpakke" />,
           null,
           () => (
             <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
@@ -158,7 +159,9 @@ export default function SluttbehandlingUtland({
         Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+
+      <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
+
       {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
           redigerbar={redigerbar}
@@ -200,7 +203,7 @@ export default function SluttbehandlingUtland({
       {visHistorikk &&
         mapAllApiResult(
           hentRevurderingerForSakMedAarsakStatus,
-          <Spinner visible={true} label="Henter historikk" />,
+          <Spinner label="Henter historikk" />,
           null,
           () => <ApiErrorAlert>Klarte ikke å hente historikken</ApiErrorAlert>,
           (revurderingsinfoliste) => (

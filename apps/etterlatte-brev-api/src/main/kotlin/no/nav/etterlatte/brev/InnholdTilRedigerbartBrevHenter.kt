@@ -31,7 +31,7 @@ class InnholdTilRedigerbartBrevHenter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
@@ -84,7 +84,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         BrevbakerRequest.fra(
-                            brevKode = kode,
+                            brevKode = kode.redigering,
                             brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
@@ -102,7 +102,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.brevtype,
+                        kode.redigering.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,
@@ -122,6 +122,7 @@ class InnholdTilRedigerbartBrevHenter(
                 personerISak = generellBrevData.personerISak,
                 innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
+                brevkode = kode,
             )
         }
     }
@@ -134,4 +135,5 @@ internal data class OpprettBrevRequest(
     val personerISak: PersonerISak,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevkode: Brevkoder,
 )

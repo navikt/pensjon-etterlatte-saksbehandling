@@ -258,6 +258,7 @@ internal class BrevServiceTest {
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
         brevtype = Brevtype.INFORMASJON,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker() =

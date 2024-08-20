@@ -129,7 +129,7 @@ export const KnyttTilAnnenSak = ({
             Avslutt
           </Button>
 
-          <Button variant="secondary" onClick={() => navigate(`/person/${sak.ident}`)}>
+          <Button variant="secondary" onClick={() => navigate('/person', { state: { fnr: sak.ident } })}>
             Gå til sak {sak.id}
           </Button>
           <Button
@@ -187,7 +187,7 @@ export const KnyttTilAnnenSak = ({
             </Button>
           </HStack>
         ),
-        pending: <Spinner visible label="Henter sak..." />,
+        pending: <Spinner label="Henter sak..." />,
         success: (annenSak) => (
           <>
             {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}

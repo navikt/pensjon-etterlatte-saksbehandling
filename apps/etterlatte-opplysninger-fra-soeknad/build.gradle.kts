@@ -1,12 +1,12 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.etterlatte.common)
 
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

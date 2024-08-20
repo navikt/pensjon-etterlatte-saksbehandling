@@ -1,8 +1,8 @@
-import { ILand } from '~shared/api/trygdetid'
 import React from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { BodyShort, ErrorSummary, Heading } from '@navikt/ds-react'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
+import { ILand } from '~utils/kodeverk'
 
 export const SendteSeder = ({
   landliste,

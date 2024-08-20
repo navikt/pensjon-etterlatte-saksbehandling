@@ -62,6 +62,8 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
   AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
   AKTIVITETSPLIKT_REVURDERING: 'Aktivitetsplikt revurdering',
+  AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK: 'Aktivitetsplikt informasjon - varig unntak',
+  GENERELL_OPPGAVE: 'Generell oppgave',
 } as const
 
 export const FRISTFILTER = {

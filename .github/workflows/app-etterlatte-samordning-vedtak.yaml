@@ -37,7 +37,7 @@ on:
       - gradle/libs.versions.toml
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -48,15 +48,7 @@ jobs:
 
   build:
     if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/.build.yaml
-    secrets: inherit
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    uses: ./.github/workflows/.deploy.yaml
-    with:
-      image: ${{ needs.build.outputs.image }}
+    uses: ./.github/workflows/.build-and-deploy.yaml
     secrets: inherit
 
   deploy-api-dev:
@@ -65,7 +57,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     timeout-minutes: 10
     steps:
@@ -82,7 +74,7 @@ jobs:
     needs: [deploy-api-dev, build]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     timeout-minutes: 10
     steps:

@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
-import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -120,115 +120,6 @@ internal class BeregnTrygdetidTest {
         val resultat = beregnTrygdetidForPeriode.anvend(grunnlag, RegelPeriode(LocalDate.now()))
 
         resultat.verdi shouldBe forventetPeriode
-    }
-
-    @Test
-    fun `antallDagerForEnMaanedTrygdetid skal returnere 30`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.of(1, 0, 0)))
-
-        val resultat = dagerPrMaanedTrygdetid.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 30
-    }
-
-    @Test
-    fun `totalTrygdetidFraPerioder skal summere perioder `() {
-        val grunnlag =
-            totalTrygdetidGrunnlag(
-                listOf(
-                    Period.of(1, 1, 1),
-                    Period.of(1, 1, 1),
-                ),
-            )
-
-        val resultat = totalTrygdetidFraPerioder.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe Period.of(2, 2, 2)
-    }
-
-    @Test
-    fun `totalTrygdetidFraPerioder skal summere perioder og legge til en maaned for hver 30 resterende dager`() {
-        val grunnlag =
-            totalTrygdetidGrunnlag(
-                listOf(
-                    Period.ofDays(11),
-                    Period.ofDays(21),
-                    Period.ofDays(29),
-                ),
-            )
-
-        val resultat = totalTrygdetidFraPerioder.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe Period.of(0, 2, 1)
-    }
-
-    @Test
-    fun `totalTrygdetidFraPerioder skal summere perioder og normalisere overskytende maaneder til aar`() {
-        val grunnlag =
-            totalTrygdetidGrunnlag(
-                listOf(
-                    Period.ofMonths(11),
-                    Period.ofMonths(2),
-                ),
-            )
-
-        val resultat = totalTrygdetidFraPerioder.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe Period.of(1, 1, 0)
-    }
-
-    @Test
-    fun `totalTrygdetidFraPerioder skal normalisere overskytende dager til maaned`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.ofDays(31)))
-
-        val resultat = totalTrygdetidFraPerioder.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe Period.of(0, 1, 1)
-    }
-
-    @Test
-    fun `maksTrygdetid skal returnere 40`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.of(1, 0, 0)))
-
-        val resultat = maksTrygdetid.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 40
-    }
-
-    @Test
-    fun `totalTrygdetidAvrundet skal runde opp dersom trygdetid har 6 maaneder eller mer`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.of(10, 6, 2)))
-
-        val resultat = totalTrygdetidAvrundet.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 11
-    }
-
-    @Test
-    fun `totalTrygdetidAvrundet skal runde ned dersom trygdetid har 5 maaneder eller mindre`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.of(10, 5, 2)))
-
-        val resultat = totalTrygdetidAvrundet.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 10
-    }
-
-    @Test
-    fun `beregnAntallAarTrygdetid skal returnere total trygdetid naar denne er mindre enn maks trygdetid`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.ofYears(39)))
-
-        val resultat = beregnAntallAarTotalTrygdetid.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 39
-    }
-
-    @Test
-    fun `beregnAntallAarTrygdetid skal returnere maks trygdetid naar denne er mindre enn total trygdetid`() {
-        val grunnlag = totalTrygdetidGrunnlag(listOf(Period.ofYears(41)))
-
-        val resultat = beregnAntallAarTotalTrygdetid.anvend(grunnlag, RegelPeriode(LocalDate.now()))
-
-        resultat.verdi shouldBe 40
     }
 
     private fun totalTrygdetidGrunnlag(perioder: List<Period>) =
@@ -916,6 +807,157 @@ internal class BeregnTrygdetidTest {
                     null,
                     null,
                     true,
+                ),
+                Arguments.of(
+                    // ...arguments =
+                    "Ikke mer enn en oppjustering",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(1994, 2, 10),
+                                til = LocalDate.of(2004, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.STORBRITANNIA.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2005, 3, 2),
+                                til = LocalDate.of(2008, 12, 31),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2009, 1, 1),
+                                til = LocalDate.of(2011, 12, 12),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = true,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2012, 11, 1),
+                                til = LocalDate.of(2012, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2014, 5, 23),
+                                til = LocalDate.of(2019, 3, 25),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2019, 10, 1),
+                                til = LocalDate.of(2019, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2013, 6, 1),
+                                til = LocalDate.of(2014, 5, 4),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.DANMARK.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2020, 6, 1),
+                                til = LocalDate.of(2021, 6, 3),
+                            ),
+                            poengInnAar = true,
+                            poengUtAar = true,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.POLEN.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2022, 1, 1),
+                                til = LocalDate.of(2022, 7, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FREMTIDIG,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2022, 8, 23),
+                                til = LocalDate.of(2044, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = false,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(1, 5, 0),
+                                antallMaaneder = 17,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(27, 1, 0),
+                                antallMaaneder = 325,
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true,
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(22, 5, 0),
+                                antallMaaneder = 269,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                            ),
+                        samletTrygdetidNorge = 21,
+                        samletTrygdetidTeoretisk = 40,
+                        prorataBroek = IntBroek(17, 325),
+                        overstyrt = false,
+                        yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
+                    ),
+                    null,
+                    null,
+                    false,
                 ),
             )
 

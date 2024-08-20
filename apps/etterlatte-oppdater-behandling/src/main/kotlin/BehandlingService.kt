@@ -14,9 +14,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.behandling.JobbType
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
@@ -26,6 +28,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -59,6 +62,8 @@ interface BehandlingService {
 
     fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
 
+    fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): HttpResponse
+
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
@@ -75,6 +80,13 @@ interface BehandlingService {
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
     ): OpprettRevurderingForAktivitetspliktResponse
+
+    fun opprettOppgaveAktivitetspliktVarigUnntak(
+        sakId: Long,
+        frist: Tidspunkt,
+        referanse: String? = null,
+        jobbType: JobbType,
+    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
@@ -182,6 +194,14 @@ class BehandlingServiceImpl(
         }
     }
 
+    override fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse) =
+        runBlocking {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/folkeregisteridentifikatorhendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(hendelse)
+            }
+        }
+
     override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
         runBlocking {
             behandlingKlient
@@ -283,6 +303,27 @@ class BehandlingServiceImpl(
                         ),
                     )
                 }.body<OpprettRevurderingForAktivitetspliktResponse>()
+        }
+
+    override fun opprettOppgaveAktivitetspliktVarigUnntak(
+        sakId: Long,
+        frist: Tidspunkt,
+        referanse: String?,
+        jobbType: JobbType,
+    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
+        runBlocking {
+            behandlingKlient
+                .post("$url/api/sak/$sakId/aktivitetsplikt/varigUnntak") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+                            sakId = sakId,
+                            referanse = referanse,
+                            frist = frist,
+                            jobbType = jobbType,
+                        ),
+                    )
+                }.body<OpprettOppgaveForAktivitetspliktVarigUnntakResponse>()
         }
 
     override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {

@@ -21,31 +21,18 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
+    implementation(project(":libs:etterlatte-trygdetid-model"))
 
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.servercore)
-    implementation(libs.ktor2.servercio)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientjackson)
-    implementation(libs.ktor2.clientciojvm)
-    implementation(libs.ktor2.clientauth)
-    implementation(libs.ktor2.clientlogging)
-    implementation(libs.ktor2.metricsmicrometer)
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.servercontentnegotiation)
-    implementation(libs.ktor2.jackson)
-    implementation(libs.ktor2.auth)
-    implementation(libs.ktor2.statuspages)
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.kotlin.result)
-
-    implementation(libs.bundles.jackson)
-    implementation(libs.bundles.navfelles.token)
+    implementation(libs.cache.caffeine)
+    implementation(libs.navfelles.tokenvalidationktor2) {
+        exclude("io.ktor", "ktor-server")
+    }
+    implementation(libs.ktor2.server) // For å kompensere for exclude-en over
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:etterlatte-funksjonsbrytere"))

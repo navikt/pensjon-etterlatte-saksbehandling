@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_MIGRERING_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
+import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.SKJERMING_URL
@@ -68,6 +69,8 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
+import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
@@ -97,6 +100,12 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseJob
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.BehandleDoedshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseJob
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -106,6 +115,9 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
@@ -116,7 +128,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
-import no.nav.etterlatte.libs.ktor.AppConfig.HTTP_PORT
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -239,7 +250,7 @@ internal class ApplicationContext(
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_RAPID_TOPIC))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         },
@@ -253,11 +264,11 @@ internal class ApplicationContext(
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
-            env.getValue(NAVANSATT_URL),
+            env.requireEnvValue(NAVANSATT_URL),
         ).also {
             it.asyncPing()
         },
-    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue(NORG2_URL)),
+    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
@@ -267,12 +278,13 @@ internal class ApplicationContext(
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue(ETTERLATTE_TILBAKEKREVING_URL)),
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL)),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
+    val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -312,15 +324,17 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
+    val opprettDoedshendelseDao = OpprettDoedshendelseDao(autoClosingDatabase)
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue(SKJERMING_URL))
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.get(ELECTOR_PATH), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
-    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue(ETTERLATTE_KLAGE_API_URL))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue(ETTERLATTE_MIGRERING_URL))
+    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
+    val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
+    val kodeverkService = KodeverkService(kodeverkKlient)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
@@ -384,15 +398,28 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            klageService = klageService,
-            behandlingService = behandlingService,
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
+    val manuellRevurderingService =
+        ManuellRevurderingService(
+            revurderingService = revurderingService,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagsService,
+            oppgaveService = oppgaveService,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+        )
+    val omgjoeringKlageRevurderingService =
+        OmgjoeringKlageRevurderingService(
+            revurderingService = revurderingService,
+            oppgaveService = oppgaveService,
+            klageService = klageService,
+            behandlingDao = behandlingDao,
+            grunnlagService = grunnlagsService,
+        )
 
     val aktivitetspliktService =
         AktivitetspliktService(
@@ -404,6 +431,7 @@ internal class ApplicationContext(
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
+            featureToggleService = featureToggleService,
         )
 
     val gyldighetsproevingService =
@@ -443,6 +471,7 @@ internal class ApplicationContext(
             pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val opprettDoedshendelseService = OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =
@@ -481,6 +510,48 @@ internal class ApplicationContext(
             krrKlient = krrKlient,
         )
 
+    val opprettDoedshendelseJob =
+        OpprettDoedshendelseJob(
+            mellom18og20PaaReformtidspunktDao = opprettDoedshendelseDao,
+            opprettDoedshendelseService = opprettDoedshendelseService,
+            featureToggleService = featureToggleService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+
+    val behandleDoedshendelseService =
+        BehandleDoedshendelseService(
+            doedshendelseDao = doedshendelseDao,
+            doedshendelseKontrollpunktService =
+                BehandleDoedshendelseKontrollpunktService(
+                    pdlTjenesterKlient = pdlTjenesterKlient,
+                    sakService = sakService,
+                    behandlingService = behandlingService,
+                ),
+            featureToggleService = featureToggleService,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
+            deodshendelserProducer = deodshendelserProducer,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            grunnlagService = grunnlagsService,
+            krrKlient = krrKlient,
+        )
+
+    val behandleDoedshendelseJob =
+        BehandleDoedshendelseJob(
+            doedshendelseDao,
+            behandleDoedshendelseService = behandleDoedshendelseService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            featureToggleService = featureToggleService,
+            sakTilgangDao = sakTilgangDao,
+        )
+
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
@@ -511,7 +582,7 @@ internal class ApplicationContext(
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,

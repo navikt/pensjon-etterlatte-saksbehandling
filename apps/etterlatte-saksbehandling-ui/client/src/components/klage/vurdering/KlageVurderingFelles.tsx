@@ -17,6 +17,8 @@ import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -94,7 +96,7 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
       <Modal width="medium" ref={oversendelseRef} header={{ heading: 'Innstillingsbrev' }}>
         <Modal.Body>
           {mapResult(oversendelseBrev, {
-            pending: <Spinner visible label="Laster brevet" />,
+            pending: <Spinner label="Laster brevet" />,
             success: (hentetBrev) => <ForhaandsvisningBrev brev={hentetBrev} />,
             error: <ApiErrorAlert>Kunne ikke hente brevet, prøv å laste siden på nytt.</ApiErrorAlert>,
           })}
@@ -104,7 +106,7 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
       <Modal width="medium" ref={blankettRef} header={{ heading: 'Blankett til KA' }}>
         <Modal.Body>
           {mapResult(forhaandsvisningBlankett, {
-            pending: <Spinner visible label="Henter pdf" />,
+            pending: <Spinner label="Henter pdf" />,
             success: () => (blankettFileUrl ? <PdfViewer src={`${blankettFileUrl}#toolbar=0`} /> : null),
             error: <ApiErrorAlert>Kunne ikke forhåndsvise blanketten. Prøv å laste siden på nytt</ApiErrorAlert>,
           })}
@@ -160,14 +162,15 @@ const Maksbredde = styled.div`
 
 export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
   return (
-    <Button
-      as="a"
+    <PersonButtonLink
+      fnr={props.klage.sak.ident}
+      fane={PersonOversiktFane.BREV}
       variant="primary"
       icon={<EnvelopeClosedIcon />}
-      href={`/person/${props.klage.sak.ident}?fane=BREV`}
       target="_blank"
+      rel="noreferrer noopener"
     >
       Opprett brev
-    </Button>
+    </PersonButtonLink>
   )
 }

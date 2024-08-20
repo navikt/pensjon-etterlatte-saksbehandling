@@ -3,6 +3,7 @@ import {
   AktivitetspliktOppfolging,
   IAktivitet,
   IAktivitetspliktVurdering,
+  IAktivitetspliktVurderingNy,
   IOpprettAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
@@ -22,8 +23,9 @@ export const opprettAktivitetspliktOppfolging = async (args: {
 }): Promise<ApiResponse<AktivitetspliktOppfolging>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt`, { ...args.request })
 
-export const hentAktiviteter = async (args: { behandlingId: string }): Promise<ApiResponse<IAktivitet[]>> =>
-  apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
+export const hentAktiviteterForBehandling = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<IAktivitet[]>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitet = async (args: {
   behandlingId: string
@@ -37,7 +39,14 @@ export const slettAktivitet = async (args: {
 }): Promise<ApiResponse<IAktivitet[]>> =>
   apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
 
-export const hentAktivitspliktVurdering = async (args: {
+export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitet[]>> =>
+  apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`)
+
+export const hentAktivitspliktVurderingForSak = async (args: {
+  sakId: number
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> => apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
+
+export const hentAktivitspliktVurderingForOppgave = async (args: {
   sakId: number
   oppgaveId: string
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ILand, ITrygdetid, ITrygdetidGrunnlagType, slettTrygdetidsgrunnlag } from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlagType, slettTrygdetidsgrunnlag } from '~shared/api/trygdetid'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { CalendarIcon, PlusIcon } from '@navikt/aksel-icons'
@@ -11,6 +11,7 @@ import {
 import { TrygdetidPerioderTable } from '~components/behandling/trygdetid/trygdetidPerioder/TrygdetidPerioderTable'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { ILand } from '~utils/kodeverk'
 
 interface Props {
   trygdetid: ITrygdetid

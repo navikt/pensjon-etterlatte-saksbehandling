@@ -4,9 +4,13 @@ import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/Omgjoer
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
+import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
-import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
+import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
+import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -48,9 +52,16 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+        <PersonButtonLink
+          size="small"
+          icon={<EyeIcon />}
+          fnr={fnr || '-'}
+          fane={PersonOversiktFane.HENDELSER}
+          queryParams={{ referanse: referanse || '-' }}
+          disabled={!fnr}
+        >
           Se hendelse
-        </Button>
+        </PersonButtonLink>
       )
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
@@ -122,6 +133,18 @@ export const HandlingerForOppgave = ({
       return (
         erInnloggetSaksbehandlerOppgave && (
           <AktivitetspliktRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
+    case Oppgavetype.GENERELL_OPPGAVE:
+      return (
+        oppgave.status !== Oppgavestatus.FERDIGSTILT && (
+          <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
+    case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
     default:

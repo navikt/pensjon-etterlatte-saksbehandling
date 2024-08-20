@@ -8,6 +8,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -22,6 +23,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -160,10 +162,9 @@ internal fun Route.behandlingRoutes(
 
         post("/virkningstidspunkt") {
             kunSkrivetilgang {
-                logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
-                logger.debug("Tok imot virkningstidspunktrequest")
-                logger.debug("Virkningstidspunktrequest hadde dato {}", body.dato)
+                val overstyr = call.request.queryParameters["overstyr"].toBoolean()
+                logger.debug("Virkningstidspunkt forsøkes satt til {} (overstyr={})", body.dato, overstyr)
 
                 val erGyldigVirkningstidspunkt =
                     inTransaction {
@@ -172,6 +173,7 @@ internal fun Route.behandlingRoutes(
                                 behandlingId,
                                 brukerTokenInfo,
                                 body,
+                                overstyr,
                             )
                         }
                     }
@@ -256,6 +258,7 @@ internal fun Route.behandlingRoutes(
                             vilkaar = body.vilkaar,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
+                            aktiv = true,
                         )
 
                     inTransaction {
@@ -271,6 +274,20 @@ internal fun Route.behandlingRoutes(
                     logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
+            }
+        }
+
+        delete("/viderefoert-opphoer") {
+            kunSkrivetilgang {
+                logger.debug("Prøver å fjerne videreført opphør")
+
+                inTransaction {
+                    behandlingService.fjernViderefoertOpphoer(
+                        behandlingId,
+                        brukerTokenInfo.lagGrunnlagsopplysning(),
+                    )
+                }
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -388,21 +405,22 @@ internal fun Route.behandlingRoutes(
 }
 
 data class ViderefoertOpphoerRequest(
-    @JsonProperty("dato") private val _dato: String,
+    @JsonProperty("dato") private val _dato: String?,
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
     val vilkaar: VilkaarType?,
 ) {
-    val dato: YearMonth = _dato.tilYearMonth()
+    val dato: YearMonth? = _dato?.tilYearMonth()
 }
 
 data class ViderefoertOpphoer(
     val skalViderefoere: JaNei,
     val behandlingId: UUID,
-    val dato: YearMonth,
+    val dato: YearMonth?,
     val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
     val kravdato: LocalDate?,
+    val aktiv: Boolean = true,
 )

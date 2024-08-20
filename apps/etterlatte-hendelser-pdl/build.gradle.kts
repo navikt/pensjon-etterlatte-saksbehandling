@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.avro)
     id("etterlatte.common")
 }
+repositories {
+    maven("https://packages.confluent.io/maven/")
+}
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
@@ -9,31 +12,17 @@ dependencies {
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-pdl-model"))
 
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.clientcore)
-    implementation(libs.ktor2.clientloggingjvm)
-    implementation(libs.ktor2.clientauth)
-    implementation(libs.ktor2.clientjackson)
     implementation(libs.ktor2.servercio)
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.servercontentnegotiation)
-    implementation(libs.ktor2.calllogging)
-    implementation(libs.ktor2.jackson)
 
-    implementation(libs.jackson.databind)
-    implementation(libs.jackson.modulekotlin)
-    implementation(libs.jackson.datatypejsr310)
-
-    implementation(libs.kafka.clients)
     implementation(libs.kafka.avro) {
         exclude("org.apache.commons", "commons-compress")
     }
     implementation(libs.commons.compress)
     implementation(libs.kafka.avroserializer)
 
+    testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(libs.ktor2.jackson)
     testImplementation(libs.test.testcontainer.kafka)
-    testImplementation(libs.el.api)
-    testImplementation(libs.el.impl)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))

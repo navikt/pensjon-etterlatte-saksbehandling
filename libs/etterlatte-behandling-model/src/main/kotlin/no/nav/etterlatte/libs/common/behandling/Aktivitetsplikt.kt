@@ -15,19 +15,27 @@ data class OpprettAktivitetspliktOppfolging(
     val aktivitet: String,
 )
 
+enum class JobbType(
+    val beskrivelse: String,
+) {
+    OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
+    OMS_DOED_12MND("Vurdering av aktivitetsplikt OMS etter 12 mnd"),
+    OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK("Infobrev om OMS etter 6 mnd - varig unntak"),
+}
+
 data class OpprettRevurderingForAktivitetspliktDto(
     val sakId: Long,
     val frist: Tidspunkt,
     val behandlingsmaaned: YearMonth,
     val jobbType: JobbType,
-) {
-    enum class JobbType(
-        val beskrivelse: String,
-    ) {
-        OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
-        OMS_DOED_12MND("Vurdering av aktivitetsplikt OMS etter 12 mnd"),
-    }
-}
+)
+
+data class OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+    val sakId: Long,
+    val referanse: String? = null,
+    val frist: Tidspunkt,
+    val jobbType: JobbType,
+)
 
 data class OpprettRevurderingForAktivitetspliktResponse(
     val opprettetRevurdering: Boolean = false,
@@ -35,4 +43,9 @@ data class OpprettRevurderingForAktivitetspliktResponse(
     val nyBehandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val forrigeBehandlingId: UUID,
+)
+
+data class OpprettOppgaveForAktivitetspliktVarigUnntakResponse(
+    val opprettetOppgave: Boolean = false,
+    val oppgaveId: UUID? = null,
 )

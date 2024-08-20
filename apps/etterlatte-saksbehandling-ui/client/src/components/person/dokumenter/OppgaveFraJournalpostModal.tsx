@@ -3,7 +3,7 @@ import { Alert, Button, Detail, Heading, HStack, Link, Modal, VStack } from '@na
 import React, { useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
-import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -56,13 +56,11 @@ export const OppgaveFraJournalpostModal = ({
 
   const opprettJournalfoeringsoppgave = () => {
     if (isSuccess(sakStatus)) {
-      const oppgaveType = Oppgavetype.JOURNALFOERING
-
       apiOpprettOppgave(
         {
           sakId: sakStatus.data.sak.id,
           request: {
-            oppgaveType,
+            oppgaveType: Oppgavetype.JOURNALFOERING,
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
@@ -103,7 +101,7 @@ export const OppgaveFraJournalpostModal = ({
 
         <Modal.Body>
           {mapResult(gosysResult, {
-            pending: <Spinner label="Sjekker om det finnes Gosys-oppgaver tilknyttet journalposten" visible />,
+            pending: <Spinner label="Sjekker om det finnes Gosys-oppgaver tilknyttet journalposten" />,
             error: (error) => (
               <ApiErrorAlert>{error.detail || 'Feil oppsto ved henting av oppgaver fra Gosys'}</ApiErrorAlert>
             ),
@@ -154,7 +152,7 @@ export const OppgaveFraJournalpostModal = ({
           })}
 
           {mapResult(hentOppgaverStatus, {
-            pending: <Spinner visible label="Sjekker om det allerede finnes en oppgave" />,
+            pending: <Spinner label="Sjekker om det allerede finnes en oppgave" />,
             success: () =>
               kanOppretteOppgave ? (
                 isSuccess(sakStatus) ? (
@@ -180,6 +178,10 @@ export const OppgaveFraJournalpostModal = ({
         </Modal.Body>
 
         <Modal.Footer>
+          {mapFailure(flyttOppgaveResult, (error) => (
+            <ApiErrorAlert>{error.detail || 'Ukjent feil oppsto ved flytting av oppgave'}</ApiErrorAlert>
+          ))}
+
           <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Avbryt

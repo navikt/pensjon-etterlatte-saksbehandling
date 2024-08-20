@@ -8,23 +8,31 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
-import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.kodeverk.Beskrivelse
+import no.nav.etterlatte.kodeverk.Betydning
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkResponse
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.Mottaker
-import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -36,6 +44,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -43,6 +52,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -209,13 +219,13 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto = opprettetBrevDto(brevId++)
+    ): Brev = opprettetBrevDto(brevId++)
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto = opprettetBrevDto(brevId++)
+    ): Brev = opprettetBrevDto(brevId++)
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -247,7 +257,7 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto = opprettetBrevDto(brevId)
+    ): Brev = opprettetBrevDto(brevId)
 
     override suspend fun slettVedtaksbrev(
         klageId: UUID,
@@ -269,25 +279,41 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto = opprettetBrevDto(brevId)
+    ): Brev = opprettetBrevDto(brevId)
 
     override suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto = opprettetBrevDto(brevId)
+    ): Brev = opprettetBrevDto(brevId)
 
     private fun opprettetBrevDto(brevId: Long) =
-        OpprettetBrevDto(
+        Brev(
             id = brevId,
-            status = BrevStatus.OPPRETTET,
+            status = Status.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
+                    foedselsnummer = MottakerFoedselsnummer("19448310410"),
                     orgnummer = null,
+                    adresse =
+                        Adresse(
+                            adresseType = "",
+                            landkode = "",
+                            land = "",
+                        ),
                 ),
             journalpostId = null,
-            bestillingsID = null,
+            bestillingId = null,
+            sakId = 0,
+            behandlingId = null,
+            tittel = null,
+            spraak = Spraak.NB,
+            prosessType = BrevProsessType.REDIGERBAR,
+            soekerFnr = "",
+            statusEndret = Tidspunkt.now(),
+            opprettet = Tidspunkt.now(),
+            brevtype = Brevtype.MANUELT,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 }
 
@@ -435,6 +461,27 @@ class VilkaarsvurderingTest : VilkaarsvurderingKlient {
         get() = "vilkårsvurdering"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+}
+
+class KodeverkKlientTest : KodeverkKlient {
+    override suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse {
+        val betydning =
+            Betydning(
+                gyldigTil = "1900-01-01",
+                gyldigFra = "9999-12-31",
+                beskrivelser = mapOf(Pair("nb", Beskrivelse("term", "tekst"))),
+            )
+        return KodeverkResponse(
+            mapOf(
+                Pair(
+                    LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
+                    listOf(betydning),
+                ),
+            ),
+        )
+    }
+
+    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse = KodeverkResponse(emptyMap())
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

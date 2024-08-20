@@ -46,6 +46,7 @@ export interface Feilutbetaling {
 export enum FeilutbetalingValg {
   NEI = 'NEI',
   JA_VARSEL = 'JA_VARSEL',
+  JA_INGEN_VARSEL_MOTREGNES = 'JA_INGEN_VARSEL_MOTREGNES',
   JA_INGEN_TK = 'JA_INGEN_TK',
 }
 

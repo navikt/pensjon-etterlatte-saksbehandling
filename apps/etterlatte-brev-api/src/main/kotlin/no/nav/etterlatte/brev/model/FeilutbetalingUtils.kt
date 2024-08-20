@@ -6,6 +6,7 @@ fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
     when (feilutbetalingValg) {
         FeilutbetalingValg.NEI -> FeilutbetalingType.INGEN_FEILUTBETALING
         FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
+        FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
         FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
     }
 

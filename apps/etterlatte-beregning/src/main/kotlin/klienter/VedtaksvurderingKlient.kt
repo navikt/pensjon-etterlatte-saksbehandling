@@ -30,7 +30,7 @@ class VedtaksvurderingKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : VedtaksvurderingKlient {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlientImpl::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 

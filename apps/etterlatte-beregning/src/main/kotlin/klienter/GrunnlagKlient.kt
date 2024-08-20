@@ -31,7 +31,7 @@ class GrunnlagKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : GrunnlagKlient {
-    private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)

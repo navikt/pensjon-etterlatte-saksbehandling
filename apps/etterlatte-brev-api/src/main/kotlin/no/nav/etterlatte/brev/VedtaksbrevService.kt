@@ -31,7 +31,7 @@ class VedtaksbrevService(
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
     private val behandlingService: BehandlingService,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrev(id: BrevID): Brev {
         logger.info("Henter brev (id=$id)")

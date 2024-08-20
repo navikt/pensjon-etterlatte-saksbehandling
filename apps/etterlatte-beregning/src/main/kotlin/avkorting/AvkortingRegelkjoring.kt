@@ -28,7 +28,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 object AvkortingRegelkjoring {
-    private val logger = LoggerFactory.getLogger(AvkortingRegelkjoring::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun beregnInntektsavkorting(
         periode: Periode,

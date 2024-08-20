@@ -28,7 +28,7 @@ class SanksjonService(
     private val sanksjonRepository: SanksjonRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
-    private val logger = LoggerFactory.getLogger(SanksjonService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
         if (!featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {

@@ -31,7 +31,7 @@ class VilkaarsvurderingRepository(
 ) : Transactions<VilkaarsvurderingRepository> {
     override fun <R> inTransaction(block: VilkaarsvurderingRepository.(TransactionalSession) -> R): R = ds.transaction { this.block(it) }
 
-    private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->

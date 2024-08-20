@@ -59,7 +59,7 @@ class BehandlingKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : BehandlingKlient {
-    private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.notat
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -7,7 +8,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import org.slf4j.LoggerFactory
@@ -37,9 +37,23 @@ class PdfGeneratorKlient(
                 setBody(request)
             }.body()
     }
+
+    suspend fun genererPdf(
+        request: PdfGenRequest,
+        mal: NotatMal,
+    ): ByteArray {
+        logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
+
+        return klient
+            .post("$apiUrl/notat/${mal.navn}") {
+                header(CORRELATION_ID, getCorrelationId())
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+    }
 }
 
 data class PdfGenRequest(
     val tittel: String,
-    val payload: Slate,
+    val payload: JsonNode,
 )

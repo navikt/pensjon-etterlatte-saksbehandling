@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.notat.StrukturertBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.pensjon.brevbaker.api.model.Felles
@@ -45,7 +44,7 @@ data class BrevbakerRequest internal constructor(
                 language = LanguageCode.spraakToLanguageCode(spraak),
             )
 
-        fun finnVergesNavn(
+        private fun finnVergesNavn(
             brevKode: EtterlatteBrevKode,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,
@@ -78,17 +77,6 @@ data class BrevbakerRequest internal constructor(
                     EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
                     EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
                 )
-
-        fun fraStrukturertBrev(
-            strukturertBrev: StrukturertBrev,
-            felles: Felles,
-        ): BrevbakerRequest =
-            BrevbakerRequest(
-                kode = strukturertBrev.brevkode.ferdigstilling,
-                letterData = strukturertBrev.tilLetterdata(),
-                felles = felles,
-                language = LanguageCode.spraakToLanguageCode(strukturertBrev.spraak),
-            )
     }
 }
 

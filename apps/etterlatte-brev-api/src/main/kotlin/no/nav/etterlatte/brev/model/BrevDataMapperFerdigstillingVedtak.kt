@@ -3,17 +3,17 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.EtterlatteBrevKode.AVVIST_KLAGE_FERDIG
-import no.nav.etterlatte.brev.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
-import no.nav.etterlatte.brev.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
-import no.nav.etterlatte.brev.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_FORELDRELOES
-import no.nav.etterlatte.brev.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
-import no.nav.etterlatte.brev.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
-import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
-import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
-import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
-import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
-import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
+import no.nav.etterlatte.brev.Brevkoder.AVVIST_KLAGE
+import no.nav.etterlatte.brev.Brevkoder.BP_AVSLAG
+import no.nav.etterlatte.brev.Brevkoder.BP_INNVILGELSE
+import no.nav.etterlatte.brev.Brevkoder.BP_INNVILGELSE_FORELDRELOES
+import no.nav.etterlatte.brev.Brevkoder.BP_OPPHOER
+import no.nav.etterlatte.brev.Brevkoder.BP_REVURDERING
+import no.nav.etterlatte.brev.Brevkoder.OMS_AVSLAG
+import no.nav.etterlatte.brev.Brevkoder.OMS_INNVILGELSE
+import no.nav.etterlatte.brev.Brevkoder.OMS_OPPHOER
+import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
+import no.nav.etterlatte.brev.Brevkoder.TILBAKEKREVING
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -89,8 +89,8 @@ class BrevDataMapperFerdigstillingVedtak(
                     soekerUnder18,
                 )
             }
-            return when (kode.ferdigstilling) {
-                BARNEPENSJON_REVURDERING ->
+            return when (kode) {
+                BP_REVURDERING ->
                     barnepensjonRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -104,8 +104,8 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
-                BARNEPENSJON_INNVILGELSE,
-                BARNEPENSJON_INNVILGELSE_FORELDRELOES,
+                BP_INNVILGELSE,
+                BP_INNVILGELSE_FORELDRELOES,
                 ->
                     barnepensjonInnvilgelse(
                         bruker,
@@ -119,13 +119,13 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         systemkilde,
                     )
-                BARNEPENSJON_AVSLAG ->
+                BP_AVSLAG ->
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
-                BARNEPENSJON_OPPHOER ->
+                BP_OPPHOER ->
                     barnepensjonOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -134,7 +134,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         virkningstidspunkt?.atDay(1),
                     )
 
-                OMSTILLINGSSTOENAD_INNVILGELSE ->
+                OMS_INNVILGELSE ->
                     omstillingsstoenadInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
@@ -145,7 +145,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                     )
 
-                OMSTILLINGSSTOENAD_REVURDERING ->
+                OMS_REVURDERING ->
                     omstillingsstoenadRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -158,12 +158,12 @@ class BrevDataMapperFerdigstillingVedtak(
                         virkningstidspunkt!!,
                     )
 
-                OMSTILLINGSSTOENAD_AVSLAG ->
+                OMS_AVSLAG ->
                     OmstillingsstoenadAvslag.fra(
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
-                OMSTILLINGSSTOENAD_OPPHOER ->
+                OMS_OPPHOER ->
                     omstillingsstoenadOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -172,7 +172,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                     )
 
-                TILBAKEKREVING_FERDIG ->
+                TILBAKEKREVING ->
                     TilbakekrevingBrevDTO.fra(
                         innholdMedVedlegg.innhold(),
                         tilbakekreving,
@@ -181,7 +181,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         soekerNavn,
                     )
 
-                AVVIST_KLAGE_FERDIG ->
+                AVVIST_KLAGE ->
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,

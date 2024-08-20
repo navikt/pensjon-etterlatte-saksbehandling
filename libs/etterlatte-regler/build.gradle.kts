@@ -1,3 +1,5 @@
+
+import org.gradle.kotlin.dsl.api
 import java.io.FileOutputStream
 import java.util.Properties
 
@@ -33,13 +35,14 @@ sourceSets {
 }
 
 tasks.register("generateVersionProperties") {
-    val get = generatedVersionDir.get()
-    val propertiesFile = file("$get/version.properties")
-    propertiesFile.parentFile.mkdirs()
-    val properties = Properties()
-    properties.setProperty("version", "$version")
-    val out = FileOutputStream(propertiesFile)
-    properties.store(out, null)
+    doLast {
+        val propertiesFile = file("${generatedVersionDir.get()}/version.properties")
+        propertiesFile.parentFile.mkdirs()
+        val properties = Properties()
+        properties.setProperty("version", "$version")
+        val out = FileOutputStream(propertiesFile)
+        properties.store(out, null)
+    }
 }
 
 tasks.named("processResources") {

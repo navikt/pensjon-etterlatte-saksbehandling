@@ -17,7 +17,6 @@ import { omgjoeringAvslagKanOpprettes, revurderingKanOpprettes } from '~componen
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAvslagModal'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 
 export enum OppgaveValg {
@@ -30,7 +29,6 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
 
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
-  const omgjoerAvslagEnabled = useFeatureEnabledMedDefault('omgjoer-avslag', false)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -74,13 +72,12 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                   <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
                 )}
-                {omgjoerAvslagEnabled &&
-                  omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                    <OmgjoerAvslagModal
-                      sakId={sak.id}
-                      harAapenBehandling={behandlinger.some((behandling) => statusErRedigerbar(behandling.status))}
-                    />
-                  )}
+                {omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                  <OmgjoerAvslagModal
+                    sakId={sak.id}
+                    harAapenBehandling={behandlinger.some((behandling) => statusErRedigerbar(behandling.status))}
+                  />
+                )}
               </VStack>
 
               <VStack gap="4">

@@ -293,7 +293,6 @@ internal class BehandlingRoutesTest {
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         behandlingFactory,
-                        featureToggleService,
                     )
                 }
             block(client)

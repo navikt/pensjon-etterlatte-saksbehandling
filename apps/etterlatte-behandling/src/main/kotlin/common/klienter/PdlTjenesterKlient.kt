@@ -59,10 +59,7 @@ class PdlTjenesterKlientImpl(
     private val client: HttpClient,
 ) : PdlTjenesterKlient {
     private val url = config.getString("pdltjenester.url")
-
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(PdlTjenesterKlientImpl::class.java)
-    }
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,

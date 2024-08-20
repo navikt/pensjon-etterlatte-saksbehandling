@@ -11,7 +11,7 @@ class AldersovergangerService(
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(AldersovergangerService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun execute(jobb: HendelserJobb): List<Long> {
         logger.info("Handling jobb ${jobb.id}, type=${jobb.type} (${jobb.type.beskrivelse})")

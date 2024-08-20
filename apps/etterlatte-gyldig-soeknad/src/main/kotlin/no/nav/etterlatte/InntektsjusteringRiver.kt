@@ -24,7 +24,7 @@ internal class InntektsjusteringRiver(
     private val behandlingKlient: BehandlingClient,
     private val journalfoerInntektsjusteringService: JournalfoerInntektsjusteringService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(InntektsjusteringRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {

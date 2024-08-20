@@ -2,22 +2,24 @@ package no.nav.etterlatte.migrering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.slf4j.LoggerFactory
 
-private val logger = LoggerFactory.getLogger("migreringRoute")
-
 internal fun Route.migreringRoute(pesysRepository: PesysRepository) {
+    val logger = routeLogger
     route("migrering") {
         post("{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}") {
             kunSystembruker {

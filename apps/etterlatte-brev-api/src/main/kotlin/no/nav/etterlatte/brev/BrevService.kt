@@ -22,7 +22,7 @@ class BrevService(
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
 ) {
-    private val logger = LoggerFactory.getLogger(BrevService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 

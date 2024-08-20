@@ -15,7 +15,7 @@ class JobbPollerTask(
     private val openingHours: OpeningHours,
     private val jobbPoller: JobbPoller,
 ) : TimerJob {
-    private val logger = LoggerFactory.getLogger(JobbPollerTask::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun schedule(): Timer {
         logger.info("Starter polling av jobber pr $periode")

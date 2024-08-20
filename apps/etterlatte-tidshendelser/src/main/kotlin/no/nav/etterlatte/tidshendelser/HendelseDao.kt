@@ -15,7 +15,7 @@ import javax.sql.DataSource
 class HendelseDao(
     private val datasource: DataSource,
 ) : Transactions<HendelseDao> {
-    private val logger = LoggerFactory.getLogger(HendelseDao::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun <R> inTransaction(block: HendelseDao.(TransactionalSession) -> R): R =
         datasource.transaction {

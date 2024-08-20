@@ -12,7 +12,7 @@ class AutomatiskBehandlingService(
     val service: VedtakBehandlingService,
     val behandlingKlient: BehandlingKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(AutomatiskBehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun vedtakStegvis(
         behandlingId: UUID,

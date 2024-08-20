@@ -18,7 +18,7 @@ class DokarkivKlient(
     private val client: HttpClient,
     private val url: String,
 ) {
-    private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpostRequest,

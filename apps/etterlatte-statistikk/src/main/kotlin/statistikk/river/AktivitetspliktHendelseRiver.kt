@@ -17,7 +17,7 @@ class AktivitetspliktHendelseRiver(
     rapidsConnection: RapidsConnection,
     private val aktivitetspliktService: AktivitetspliktService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, AktivitetspliktHendelse.OPPDATERT) {

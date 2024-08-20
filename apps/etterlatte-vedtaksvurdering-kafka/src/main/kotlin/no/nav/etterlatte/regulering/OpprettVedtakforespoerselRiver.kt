@@ -30,7 +30,7 @@ internal class OpprettVedtakforespoerselRiver(
     private val vedtak: VedtakService,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
-    private val logger = LoggerFactory.getLogger(OpprettVedtakforespoerselRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGNA) {

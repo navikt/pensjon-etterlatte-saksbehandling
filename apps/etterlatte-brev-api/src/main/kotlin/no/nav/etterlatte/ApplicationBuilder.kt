@@ -92,8 +92,6 @@ import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
-import no.nav.etterlatte.rivers.StartBrevgenereringRepository
-import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
@@ -154,8 +152,6 @@ class ApplicationBuilder {
         )
 
     private val db = BrevRepository(datasource)
-
-    private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val dokarkivKlient =
         DokarkivKlient(httpClient(DOKARKIV_SCOPE, false), env.requireEnvValue(DOKARKIV_URL))
@@ -268,16 +264,10 @@ class ApplicationBuilder {
             },
             configFromEnvironment = { configFromEnvironment(it) },
         ) { rapidsConnection, _ ->
-            val brevgenerering =
-                StartInformasjonsbrevgenereringRiver(
-                    brevgenereringRepository,
-                    rapidsConnection,
-                )
             rapidsConnection.register(
                 object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
                         datasource.migrate()
-                        brevgenerering.init()
                     }
                 },
             )

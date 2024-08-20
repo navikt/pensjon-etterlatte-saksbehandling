@@ -30,7 +30,6 @@ private fun settOppRivers(
     VedtakAttestertRiver(rapidsConnection, behandlingservice)
     AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
     YtelseIkkeLoependeRiver(rapidsConnection, behandlingservice)
-    OpprettBrevRiver(rapidsConnection, behandlingservice, featureToggleService)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
 }

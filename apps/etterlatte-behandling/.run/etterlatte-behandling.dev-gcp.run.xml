@@ -55,6 +55,8 @@
       <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23" />
       <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23" />
       <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23" />
+      <env name="KODEVERK_CLIENT_ID" value="dev-gcp.team-rocket.kodeverk-api" />
+      <env name="KODEVERK_URL" value="https://kodeverk-api.nav.no/api/v1/kodeverk" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />

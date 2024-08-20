@@ -18,7 +18,7 @@ import { validerStringNumber } from '~components/person/journalfoeringsoppgave/n
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
 import { SakType } from '~shared/types/sak'
-import { oppdaterBeregingsGrunnlag, oppdaterBeregingsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregningsGrunnlag, oppdaterBeregningsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -95,7 +95,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             grunnlag,
           },
           () => {
-            dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+            dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
             paaLagre()
           }
         )
@@ -111,7 +111,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           },
           () => {
             dispatch(
-              oppdaterBeregingsGrunnlag({ ...beregningsgrunnlagBP, institusjonsopphold: grunnlag.institusjonsopphold })
+              oppdaterBeregningsGrunnlag({ ...beregningsgrunnlagBP, institusjonsopphold: grunnlag.institusjonsopphold })
             )
             paaLagre()
           }
@@ -131,7 +131,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             grunnlag,
           },
           () => {
-            dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+            dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
             paaLagre()
           }
         )
@@ -148,7 +148,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           },
           () => {
             dispatch(
-              oppdaterBeregingsGrunnlag({
+              oppdaterBeregningsGrunnlag({
                 ...beregningsgrunnlagBP,
                 beregningsMetode: grunnlag.beregningsMetode,
                 institusjonsopphold: grunnlag.institusjonsopphold,

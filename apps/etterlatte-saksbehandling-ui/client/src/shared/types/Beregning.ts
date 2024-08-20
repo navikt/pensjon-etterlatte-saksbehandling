@@ -81,7 +81,7 @@ export interface BeregningsGrunnlagDto {
   institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-  begegningsmetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
+  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
 }
 
 export interface BeregningsGrunnlagOMSDto {
@@ -108,7 +108,7 @@ export interface BeregningsGrunnlagPostDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-  begegningsmetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
+  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
 }
 
 export interface BeregningsGrunnlagOMSPostDto {

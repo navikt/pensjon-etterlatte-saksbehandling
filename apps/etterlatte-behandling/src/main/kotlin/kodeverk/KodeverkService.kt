@@ -14,6 +14,12 @@ class KodeverkService(
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build<CacheKey, KodeverkResponse>()
 
+    private val cacheArkivtemaer =
+        Caffeine
+            .newBuilder()
+            .expireAfterWrite(1, TimeUnit.DAYS)
+            .build<CacheKey, KodeverkResponse>()
+
     suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<Land> {
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER)
@@ -44,10 +50,26 @@ class KodeverkService(
                 }
             }
     }
+
+    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): List<Beskrivelse> {
+        val arkivtemaer =
+            cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
+                ?: klient.hentArkivTemaer(brukerTokenInfo).also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
+        return arkivtemaer.betydninger.map {
+            Beskrivelse(
+                it.key,
+                it.value
+                    .first()
+                    .beskrivelser["nb"]!!
+                    .tekst,
+            )
+        }
+    }
 }
 
 private enum class CacheKey {
     LANDKODER,
+    ARKIVTEMAER,
 }
 
 data class Land(

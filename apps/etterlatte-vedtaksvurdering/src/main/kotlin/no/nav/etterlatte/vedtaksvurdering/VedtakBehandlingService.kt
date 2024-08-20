@@ -47,7 +47,7 @@ class VedtakBehandlingService(
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkOmVedtakErLoependePaaDato(
         sakId: Long,

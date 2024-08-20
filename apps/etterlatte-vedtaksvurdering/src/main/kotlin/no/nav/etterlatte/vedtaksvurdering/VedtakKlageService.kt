@@ -28,7 +28,7 @@ class VedtakKlageService(
     private val repository: VedtaksvurderingRepository,
     private val rapidService: VedtaksvurderingRapidService,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakKlageService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettEllerOppdaterVedtakOmAvvisning(klage: Klage): Vedtak {
         logger.info("Oppretter eller oppdaterer vedtak for klage med id=${klage.id}")

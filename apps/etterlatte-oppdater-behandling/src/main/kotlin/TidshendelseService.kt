@@ -25,7 +25,7 @@ import java.util.UUID
 class TidshendelseService(
     private val behandlingService: BehandlingService,
 ) {
-    private val logger = LoggerFactory.getLogger(TidshendelseService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     enum class TidshendelserJobbType(
         val beskrivelse: String,

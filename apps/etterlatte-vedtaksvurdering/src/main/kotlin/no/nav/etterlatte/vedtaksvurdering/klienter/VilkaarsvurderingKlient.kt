@@ -30,7 +30,7 @@ class VilkaarsvurderingKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : VilkaarsvurderingKlient {
-    private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlientImpl::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 

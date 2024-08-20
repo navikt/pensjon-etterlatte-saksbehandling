@@ -35,7 +35,7 @@ internal class ReguleringsforespoerselRiver(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
-    private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.REGULERING_STARTA) {

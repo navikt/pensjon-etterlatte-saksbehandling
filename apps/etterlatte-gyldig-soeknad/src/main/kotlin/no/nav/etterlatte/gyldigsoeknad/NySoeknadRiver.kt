@@ -31,7 +31,7 @@ internal class NySoeknadRiver(
     private val behandlingKlient: BehandlingClient,
     private val journalfoerSoeknadService: JournalfoerSoeknadService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(NySoeknadRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {

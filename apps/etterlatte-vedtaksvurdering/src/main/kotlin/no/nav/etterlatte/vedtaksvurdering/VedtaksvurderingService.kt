@@ -6,7 +6,7 @@ import java.util.UUID
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentVedtak(vedtakId: Long): Vedtak? {
         logger.info("Henter vedtak med id=$vedtakId")

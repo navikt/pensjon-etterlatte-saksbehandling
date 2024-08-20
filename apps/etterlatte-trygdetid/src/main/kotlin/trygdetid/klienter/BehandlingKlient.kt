@@ -29,7 +29,7 @@ class BehandlingKlient(
     config: Config,
     httpClient: HttpClient,
 ) : BehandlingTilgangsSjekk {
-    private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
     private val azureAdClient = AzureAdClient(config)

@@ -15,7 +15,7 @@ import java.time.YearMonth
 class VedtakSamordningService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakSamordningService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentVedtak(vedtakId: Long): VedtakSamordningDto? {
         logger.debug("Henter vedtak med id=$vedtakId")

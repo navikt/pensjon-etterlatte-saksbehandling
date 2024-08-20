@@ -70,10 +70,8 @@ class KlageBrevService(
                     brevId = innstillingsbrev.brevId,
                     brukerTokenInfo = saksbehandler,
                 )
-            val notatTilKa =
-                runBlocking {
-                    brevApiKlient.journalfoerNotatKa(klage, saksbehandler)
-                }
+            val notatTilKa = brevApiKlient.journalfoerNotatKa(klage, saksbehandler)
+
             logger.info(
                 "Journalførte notat til KA for innstilling i klageId=${klage.id} på " +
                     "journalpostId=${notatTilKa.journalpostId}",

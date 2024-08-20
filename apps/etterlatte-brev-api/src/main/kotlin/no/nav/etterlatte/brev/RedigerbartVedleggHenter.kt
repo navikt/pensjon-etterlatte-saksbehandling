@@ -50,7 +50,7 @@ class RedigerbartVedleggHenter(
         return vedlegg
             .map {
                 BrevInnholdVedlegg(
-                    tittel = it.first.tittel!!,
+                    tittel = tittelForVedlegg(it.first),
                     key = it.second,
                     payload =
                         brevbakerService.hentRedigerbarTekstFraBrevbakeren(

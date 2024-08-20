@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erForeldreloes
 import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
-import no.nav.etterlatte.brev.behandling.somTittel
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -51,13 +50,6 @@ class InnholdTilRedigerbartBrevHenter(
             )
 
         val kode = brevKodeMapping(brevkodeRequest)
-        val tittel =
-            kode.tittel ?: (
-                generellBrevData.forenkletVedtak
-                    ?.type
-                    ?.somTittel()
-                    ?.let { "Vedtak om $it" } ?: "Tittel mangler"
-            )
         return coroutineScope {
             val brevDataRedigerbarRequest =
                 BrevDataRedigerbarRequest(
@@ -102,7 +94,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.redigering.brevtype,
+                        kode.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,
@@ -120,7 +112,7 @@ class InnholdTilRedigerbartBrevHenter(
                 sakType = generellBrevData.sak.sakType,
                 enhet = generellBrevData.sak.enhet,
                 personerISak = generellBrevData.personerISak,
-                innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
+                innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
                 brevkode = kode,
             )

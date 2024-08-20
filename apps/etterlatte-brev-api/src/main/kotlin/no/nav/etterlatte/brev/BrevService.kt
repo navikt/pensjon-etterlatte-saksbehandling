@@ -40,7 +40,7 @@ class BrevService(
                 behandlingId = null,
                 bruker = bruker,
                 brevKodeMapping = { brevkode },
-                brevtype = brevkode.ferdigstilling.brevtype,
+                brevtype = brevkode.brevtype,
                 brevDataMapping = brevDataMapping,
             ).first
 

@@ -102,7 +102,7 @@ class OversendelseBrevServiceImpl(
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(
-                            tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel ?: "Klage oversendelse",
+                            tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel,
                             spraak = spraak,
                         ),
                     innholdVedlegg = listOf(),

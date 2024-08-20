@@ -99,8 +99,6 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: BEHANDLING_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: SAMORDNEVEDTAK_URL
       value: https://sam.prod-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE

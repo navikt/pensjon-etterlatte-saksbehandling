@@ -86,10 +86,14 @@ enum class Brevtype {
 }
 
 fun tittelForVedlegg(kode: EtterlatteBrevKode) =
-    when (kode) {
-        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL -> "Trygdetid i vedlegg beregning av barnepensjon"
-        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL -> "Utfall ved beregning av omstillingsstønad"
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
-        else -> throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
+    if (kode.erVedlegg) {
+        when (kode) {
+            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL -> "Trygdetid i vedlegg beregning av barnepensjon"
+            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
+            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL -> "Utfall ved beregning av omstillingsstønad"
+            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
+            else -> throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
+        }
+    } else {
+        throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
     }

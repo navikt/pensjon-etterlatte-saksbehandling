@@ -743,7 +743,7 @@ internal class BeregnBarnepensjonServiceTest {
             ),
         institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
-        begegningsmetodeFlereAvdoede = avdoedeBeregningmetode,
+        beregningsMetodeFlereAvdoede = avdoedeBeregningmetode,
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -768,7 +768,7 @@ internal class BeregnBarnepensjonServiceTest {
             },
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
-        begegningsmetodeFlereAvdoede = defaultAvdoedeBeregningmetode(),
+        beregningsMetodeFlereAvdoede = defaultAvdoedeBeregningmetode(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =

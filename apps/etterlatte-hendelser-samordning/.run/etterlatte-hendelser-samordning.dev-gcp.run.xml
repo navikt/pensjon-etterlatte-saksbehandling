@@ -1,0 +1,34 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-hendelser-samordning.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="HTTP_PORT" value="8097" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-hendelser-samordning" />
+      <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
+      <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
+      <env name="KAFKA_BROKERS" value="0.0.0.0:9092" />
+      <env name="KAFKA_TRUSTSTORE_PATH" value="/var/run/secrets/nais.io/kafka/client.truststore.jks" />
+      <env name="SAMORDNINGVEDTAK_HENDELSE_TOPIC" value="sam-vedtak-samhandlersvar" />
+      <env name="SAMORDNINGVEDTAK_HENDELSE_GROUP_ID" value="etterlatte-v1" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-hendelser-samordning.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="false" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-hendelser-samordning/.env.dev-gcp" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-hendelser-samordning/.run/etterlatte-hendelser-samordning.dev-gcp.run.xml" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH=".env" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

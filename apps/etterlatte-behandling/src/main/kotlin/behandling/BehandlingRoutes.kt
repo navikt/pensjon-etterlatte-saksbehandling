@@ -17,8 +17,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -32,7 +30,6 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SendBrev
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -54,15 +51,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-enum class BehandlingFeatures(
-    private val key: String,
-) : FeatureToggle {
-    OMGJOERE_AVSLAG("omgjoer-avslag"),
-    ;
-
-    override fun key(): String = key
-}
-
 data class OmgjoeringRequest(
     val skalKopiere: Boolean,
 )
@@ -72,7 +60,6 @@ internal fun Route.behandlingRoutes(
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     behandlingFactory: BehandlingFactory,
-    featureToggleService: FeatureToggleService,
 ) {
     val logger = routeLogger
 
@@ -89,9 +76,6 @@ internal fun Route.behandlingRoutes(
     }
 
     post("/api/behandling/omgjoer-avslag-avbrudd/{$SAKID_CALL_PARAMETER}") {
-        if (!featureToggleService.isEnabled(BehandlingFeatures.OMGJOERE_AVSLAG, false)) {
-            throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
-        }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val skalKopiereRequest = call.receive<OmgjoeringRequest>()
             val behandlingOgOppgave = behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)

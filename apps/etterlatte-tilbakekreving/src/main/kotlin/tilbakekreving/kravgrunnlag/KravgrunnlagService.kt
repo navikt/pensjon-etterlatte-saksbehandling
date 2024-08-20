@@ -97,7 +97,7 @@ class KravgrunnlagService(
                     "Kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value} er endret i sak ${kravgrunnlag.sakId.value}" +
                         " avbryter eksisterende tilbakekreving og oppretter ny",
                 )
-                behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
+                behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId, "Avbrutt fordi kravgrunnlag er endret")
                 behandlingKlient.opprettTilbakekreving(kravgrunnlag.sakId, kravgrunnlag)
             }
         }
@@ -109,7 +109,7 @@ class KravgrunnlagService(
                 "Kravgrunnlag for sak ${kravOgVedtakstatus.sakId.value} har blitt nullet ut og er ikke lenger aktuelt - " +
                     "avbryter tilbakekreving",
             )
-            behandlingKlient.avbrytTilbakekreving(kravOgVedtakstatus.sakId)
+            behandlingKlient.avbrytTilbakekreving(kravOgVedtakstatus.sakId, "Avbrutt fordi det ikke lenger foreligger en feilutbetaling")
         }
     }
 }

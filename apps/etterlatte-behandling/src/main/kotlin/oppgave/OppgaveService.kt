@@ -584,14 +584,25 @@ class OppgaveService(
      * Skal kun brukes til:
      *  - automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
      *  - journalposter som avbrytes/annuleres
+     *  - automatisk avbrudd når kravgrunnlag i tilbakekreving er nullet ut
+     *  - automatisk avbrudd når kravgrunnlag i tilbakekreving er endret
      */
-    fun avbrytAapneOppgaverMedReferanse(referanse: String) {
+    fun avbrytAapneOppgaverMedReferanse(
+        referanse: String,
+        merknad: String? = null,
+    ) {
         logger.info("Avbryter åpne oppgaver med referanse=$referanse")
 
         oppgaveDao
             .hentOppgaverForReferanse(referanse)
             .filterNot(OppgaveIntern::erAvsluttet)
-            .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
+            .forEach {
+                if (merknad != null) {
+                    oppgaveDao.oppdaterStatusOgMerknad(it.id, merknad, Status.AVBRUTT)
+                } else {
+                    oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+                }
+            }
     }
 
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =

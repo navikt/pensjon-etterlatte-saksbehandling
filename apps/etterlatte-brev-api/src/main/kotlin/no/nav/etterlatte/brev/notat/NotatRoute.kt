@@ -13,48 +13,28 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.behandling.BrevbakerBlankettDTO
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class StrukturertBrev {
-    abstract val brevkode: Brevkoder
-    abstract val sak: Sak
-    abstract val soekerFnr: String
-    open val behandlingId: UUID? = null
-    open val spraak = Spraak.NB
-
-    abstract fun tilLetterdata(): Any
-
+sealed class StrukturertNotat {
     @JsonTypeName("KLAGE_BLANKETT")
     data class KlageBlankett(
         val klage: Klage,
-    ) : StrukturertBrev() {
-        override val brevkode: Brevkoder = Brevkoder.KLAGE_OVERSENDELSE_BLANKETT
-        override val sak: Sak = klage.sak
-        override val soekerFnr: String = klage.sak.ident
-        override val behandlingId = klage.id
-
-        override fun tilLetterdata(): BrevbakerBlankettDTO = klage.tilBrevbakerBlankett()
-    }
+    ) : StrukturertNotat()
 }
 
 data class NotatRequest(
-    val data: StrukturertBrev,
+    val data: StrukturertNotat,
 )
 
 const val NOTAT_ID_CALL_PARAMETER = "notatId"
@@ -140,20 +120,37 @@ fun Route.notatRoute(
                 }
             }
 
+            /*
+             * Kun brukt av klage. Burde på sikt fjernes og flytte klage over på det generelle API-et over
+             */
             post("/forhaandsvis") {
                 withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
-                    logger.info("Forhåndsviser notatpdf i sak $sakId")
+                    logger.info("Forhåndsviser klageblankett i sak $sakId")
                     medBody<NotatRequest> {
-                        call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo).bytes)
+                        call.respond(
+                            notatService.genererPdf(
+                                (it.data as StrukturertNotat.KlageBlankett),
+                                brukerTokenInfo,
+                            ),
+                        )
                     }
                 }
             }
 
+            /*
+             * Kun brukt av klage. Burde på sikt fjernes og flytte klage over på det generelle API-et over
+             */
             post("/journalfoer") {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
-                    logger.info("Journalfører notat ")
+                    logger.info("Journalfører klageblankett i sak $sakId")
+
                     medBody<NotatRequest> {
-                        call.respond(notatService.journalfoerNotatISak(sakId, it.data, brukerTokenInfo))
+                        call.respond(
+                            notatService.journalfoerNotatISak(
+                                (it.data as StrukturertNotat.KlageBlankett),
+                                brukerTokenInfo,
+                            ),
+                        )
                     }
                 }
             }

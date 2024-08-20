@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
@@ -60,14 +61,19 @@ class NyNotatService(
 
     suspend fun genererPdf(id: NotatID): ByteArray {
         val notat = hent(id)
-        val payload = hentPayload(id)
 
-        return pdfGeneratorKlient.genererPdf(
-            PdfGenRequest(
-                tittel = notat.tittel,
-                payload = payload,
-            ),
-        )
+        return if (notat.kanRedigeres()) {
+            val payload = hentPayload(id)
+
+            pdfGeneratorKlient.genererPdf(
+                PdfGenRequest(
+                    tittel = notat.tittel,
+                    payload = payload.toJsonNode(),
+                ),
+            )
+        } else {
+            notatRepository.hentPdf(id)
+        }
     }
 
     suspend fun opprett(
@@ -82,8 +88,8 @@ class NyNotatService(
         val id =
             notatRepository.opprett(
                 NyttNotat(
-                    sak.id,
-                    tittel,
+                    sakId = sak.id,
+                    tittel = tittel,
                     payload =
                         when (mal) {
                             NotatMal.TOM_MAL ->
@@ -104,6 +110,8 @@ class NyNotatService(
                             NotatMal.MANUELL_SAMORDNING -> {
                                 opprettSamordningsnotatPayload(params)
                             }
+
+                            NotatMal.KLAGE_OVERSENDELSE_BLANKETT -> TODO("Foreløpig ikke støttet i ny service")
                         },
                     mal = mal,
                 ),

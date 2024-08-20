@@ -8,9 +8,12 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.kodeverk(kodeverkService: KodeverkService) {
-    route("api/kodeverk/land") {
-        get {
+    route("api/kodeverk") {
+        get("/land") {
             call.respond(kodeverkService.hentAlleLand(brukerTokenInfo))
+        }
+        get("/arkivtemaer") {
+            call.respond(kodeverkService.hentArkivTemaer(brukerTokenInfo))
         }
     }
 }

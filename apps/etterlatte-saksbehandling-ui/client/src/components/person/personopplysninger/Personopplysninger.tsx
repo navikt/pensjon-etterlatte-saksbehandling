@@ -69,7 +69,7 @@ export const Personopplysninger = ({
                       {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                         <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
                       )}
-                      <AvdoedesBarn avdoede={avdoede} />
+                      <AvdoedesBarn sakType={sak.sakType} avdoede={avdoede} />
                       {mapSuccess(landListeResult, (landListe) => (
                         <>
                           <Statsborgerskap

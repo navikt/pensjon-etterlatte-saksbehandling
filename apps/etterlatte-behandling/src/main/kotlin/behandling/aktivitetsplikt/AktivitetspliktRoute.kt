@@ -112,50 +112,69 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt/vurdering") {
-        get {
-            kunSaksbehandler {
-                logger.info("Henter aktivitetsvurdering for sak $sakId")
-                val dto =
-                    inTransaction {
-                        runBlocking {
-                            aktivitetspliktService.hentVurderingForSak(
-                                sakId = sakId,
+    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {
+        route("aktivitet") {
+            get {
+                kunSaksbehandler {
+                    logger.info("Henter aktiviteter for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentAktiviteter(
+                                    sakId = sakId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+        }
+
+        route("vurdering") {
+            get {
+                kunSaksbehandler {
+                    logger.info("Henter aktivitetsvurdering for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentVurderingForSak(
+                                    sakId = sakId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+        }
+
+        route("revurdering") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
+                    val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
+                                request,
+                                brukerTokenInfo,
                             )
                         }
-                    }
-                call.respond(dto)
+                    call.respond(opprettet)
+                }
             }
         }
-    }
 
-    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/revurdering") {
-        post {
-            kunSystembruker {
-                logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
-                val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
-                val opprettet =
-                    inTransaction {
-                        aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
-                            request,
-                            brukerTokenInfo,
-                        )
-                    }
-                call.respond(opprettet)
-            }
-        }
-    }
-
-    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/varigUnntak") {
-        post {
-            kunSystembruker {
-                logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
-                val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
-                val opprettet =
-                    inTransaction {
-                        aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
-                    }
-                call.respond(opprettet)
+        route("varigUnntak") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
+                        }
+                    call.respond(opprettet)
+                }
             }
         }
     }

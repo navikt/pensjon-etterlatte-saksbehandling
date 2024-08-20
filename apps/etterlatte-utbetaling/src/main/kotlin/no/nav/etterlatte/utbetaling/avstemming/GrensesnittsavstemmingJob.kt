@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -50,7 +51,37 @@ class GrensesnittsavstemmingJob(
         fun run() {
             log.info("Starter $jobbNavn")
             if (leaderElection.isLeader()) {
-                grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
+                /**
+                 * Periode kan spesifiseres her dersom man ønsker å gjøre avstemming for en gitt dato.
+                 * Dette kan være kjekt dersom avstemming feiler eller man av andre grunner har behov
+                 * for å kjøre avstemming på nytt.
+                 *
+                 * Eksempel:
+                 *
+                 * periode =
+                 *   Avstemmingsperiode(
+                 *     fraOgMed = Tidspunkt.parse("2024-01-02T23:00:00.00Z"),
+                 *     til = Tidspunkt.parse("2024-01-03T23:00:00.00Z"),
+                 *   )
+                 */
+
+                listOf(
+                    Avstemmingsperiode(
+                        fraOgMed = Tidspunkt.parse("2024-01-02T23:00:00.00Z"),
+                        til = Tidspunkt.parse("2024-01-03T23:00:00.00Z"),
+                    ),
+                    Avstemmingsperiode(
+                        fraOgMed = Tidspunkt.parse("2024-01-03T23:00:00.00Z"),
+                        til = Tidspunkt.parse("2024-01-04T23:00:00.00Z"),
+                    ),
+                ).forEach {
+                    // TODO skal fjernes når avstemming er kjørt
+                    grensesnittsavstemmingService.startGrensesnittsavstemming(
+                        saktype = saktype,
+                        periode = it,
+                    )
+                }
+                // grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
             }
         }
     }

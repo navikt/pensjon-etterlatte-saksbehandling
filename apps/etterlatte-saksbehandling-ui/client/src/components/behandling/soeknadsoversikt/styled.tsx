@@ -1,9 +1,5 @@
 import styled from 'styled-components'
 
-export const InfoElement = styled.div<{ $wide?: boolean }>`
-  width: ${(props) => (props.$wide ? '100%' : '15em')};
-`
-
 export const Vurdering = styled.div`
   padding: 0 0 0 var(--a-spacing-3);
   min-width: 18.75rem;

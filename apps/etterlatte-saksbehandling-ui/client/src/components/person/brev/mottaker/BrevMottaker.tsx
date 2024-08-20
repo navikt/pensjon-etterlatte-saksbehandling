@@ -135,6 +135,8 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </>
           }
         />
+
+        <Info label="Distribusjonsmetode" tekst={mottaker.tvingSentralPrint ? 'Tving sentral print' : 'Automatisk'} />
       </VStack>
     </Box>
   )

@@ -43,6 +43,7 @@ class Brevdistribuerer(
                 type = distribusjonsType,
                 tidspunkt = DistribusjonsTidspunktType.KJERNETID,
                 adresse = mottaker.adresse,
+                tvingSentralPrint = mottaker.tvingSentralPrint,
             ).also { logger.info("Distribuerte brev $id") }
     }
 }

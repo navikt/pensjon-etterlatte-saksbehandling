@@ -102,9 +102,7 @@ class GrunnlagsendringshendelseService(
         }
 
     fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
-        if (doedshendelseService.kanBrukeDeodshendelserJob()) {
-            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
-        }
+        doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
 
         if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {
             return inTransaction {

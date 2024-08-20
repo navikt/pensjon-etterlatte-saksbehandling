@@ -1,7 +1,6 @@
 import { Box, Button, Checkbox, CheckboxGroup, HGrid, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  ILand,
   ITrygdetid,
   ITrygdetidGrunnlag,
   ITrygdetidGrunnlagType,
@@ -15,6 +14,7 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { ILand } from '~utils/kodeverk'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined

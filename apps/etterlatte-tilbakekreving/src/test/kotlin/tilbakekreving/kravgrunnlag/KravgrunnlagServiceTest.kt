@@ -60,13 +60,13 @@ class KravgrunnlagServiceTest {
     fun `skal avbryte gjeldende tilbakekreving og opprette ny naar kravgrunnlag har status ENDR og perioder`() {
         val kravgrunnlag = kravgrunnlag(status = KravgrunnlagStatus.ENDR)
 
-        coEvery { behandlingKlient.avbrytTilbakekreving(any()) } just runs
+        coEvery { behandlingKlient.avbrytTilbakekreving(any(), any()) } just runs
         coEvery { behandlingKlient.opprettTilbakekreving(any(), any()) } just runs
 
         kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
 
         coVerify(exactly = 1) {
-            behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
+            behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId, any())
             behandlingKlient.opprettTilbakekreving(kravgrunnlag.sakId, kravgrunnlag)
         }
     }
@@ -84,12 +84,12 @@ class KravgrunnlagServiceTest {
     fun `skal avbryte tilbakekreving naar kravOgVedtakstatus har status AVSL`() {
         val kravOgVedtakstatus = kravOgVedtakStatus(status = KravgrunnlagStatus.AVSL)
 
-        coEvery { behandlingKlient.avbrytTilbakekreving(any()) } just runs
+        coEvery { behandlingKlient.avbrytTilbakekreving(any(), any()) } just runs
 
         kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
 
         coVerify(exactly = 1) {
-            behandlingKlient.avbrytTilbakekreving(kravOgVedtakstatus.sakId)
+            behandlingKlient.avbrytTilbakekreving(kravOgVedtakstatus.sakId, any())
         }
     }
 

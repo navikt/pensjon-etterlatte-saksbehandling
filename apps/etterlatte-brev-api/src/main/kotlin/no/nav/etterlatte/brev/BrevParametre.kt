@@ -70,7 +70,7 @@ sealed class BrevParametre {
     data class OmstillingsstoenadInformasjonDoedsfallRedigerbar(
         val bosattUtland: Boolean,
         val avdoedNavn: String,
-        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
+        override val brevkode: Brevkoder = Brevkoder.OMS_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(req: BrevDataRedigerbarRequest): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonDoedsfall(

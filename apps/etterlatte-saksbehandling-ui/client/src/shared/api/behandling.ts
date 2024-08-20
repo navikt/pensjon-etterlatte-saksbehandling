@@ -19,6 +19,8 @@ import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 import { JaNei } from '~shared/types/ISvar'
 
+import { ILand } from '~utils/kodeverk'
+
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
 ): Promise<ApiResponse<GrunnlagsendringsListe>> => {
@@ -193,3 +195,4 @@ export const hentBrevutfallOgEtterbetalingApi = async (
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path

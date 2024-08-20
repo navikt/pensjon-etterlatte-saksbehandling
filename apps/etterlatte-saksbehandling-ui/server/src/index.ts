@@ -7,7 +7,6 @@ import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { kodeverkRouter } from './routers/kodeverkRouter'
 import { githubRouter } from './routers/githubRouter'
 import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
@@ -60,7 +59,6 @@ app.get(
 )
 
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
-app.use('/api/kodeverk', kodeverkRouter)
 app.use('/api/github', githubRouter)
 
 app.use(
@@ -85,6 +83,7 @@ app.use(
     '/api/generellbehandling',
     '/api/sjekkliste',
     '/api/bosattutland',
+    '/api/kodeverk',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

@@ -8,7 +8,7 @@ import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBereg
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   oppdaterBehandlingsstatus,
-  oppdaterBeregingsGrunnlag,
+  oppdaterBeregningsGrunnlag,
   oppdaterBeregning,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
@@ -55,7 +55,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
         dispatch(
-          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
+          oppdaterBeregningsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
       }
       hentTrygdetiderRequest(behandling.id)
@@ -100,7 +100,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       ...behandling.beregningsGrunnlag,
       beregningsMetode,
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
+      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
     }
     lagreBeregningsgrunnlagRequest(
@@ -108,7 +108,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag,
       },
-      () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+      () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
     )
   }
 
@@ -117,7 +117,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       ...behandling.beregningsGrunnlag,
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
+      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },
@@ -128,7 +128,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag,
       },
-      () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+      () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
     )
   }
 

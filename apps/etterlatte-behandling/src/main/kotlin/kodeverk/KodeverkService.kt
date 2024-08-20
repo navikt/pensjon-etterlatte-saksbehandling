@@ -1,17 +1,20 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
-import no.nav.etterlatte.trygdetid.klienter.BetydningMedIsoKode
-import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
-import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
 import java.util.concurrent.TimeUnit
 
 class KodeverkService(
     private val klient: KodeverkKlient,
 ) {
     private val cache =
+        Caffeine
+            .newBuilder()
+            .expireAfterWrite(1, TimeUnit.DAYS)
+            .build<CacheKey, KodeverkResponse>()
+
+    private val cacheArkivtemaer =
         Caffeine
             .newBuilder()
             .expireAfterWrite(1, TimeUnit.DAYS)
@@ -47,10 +50,26 @@ class KodeverkService(
                 }
             }
     }
+
+    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): List<Beskrivelse> {
+        val arkivtemaer =
+            cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
+                ?: klient.hentArkivTemaer(brukerTokenInfo).also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
+        return arkivtemaer.betydninger.map {
+            Beskrivelse(
+                it.key,
+                it.value
+                    .first()
+                    .beskrivelser["nb"]!!
+                    .tekst,
+            )
+        }
+    }
 }
 
 private enum class CacheKey {
     LANDKODER,
+    ARKIVTEMAER,
 }
 
 data class Land(

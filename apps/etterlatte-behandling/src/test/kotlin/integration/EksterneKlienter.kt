@@ -28,6 +28,10 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.kodeverk.Beskrivelse
+import no.nav.etterlatte.kodeverk.Betydning
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkResponse
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -48,6 +52,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -456,6 +461,27 @@ class VilkaarsvurderingTest : VilkaarsvurderingKlient {
         get() = "vilkårsvurdering"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+}
+
+class KodeverkKlientTest : KodeverkKlient {
+    override suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse {
+        val betydning =
+            Betydning(
+                gyldigTil = "1900-01-01",
+                gyldigFra = "9999-12-31",
+                beskrivelser = mapOf(Pair("nb", Beskrivelse("term", "tekst"))),
+            )
+        return KodeverkResponse(
+            mapOf(
+                Pair(
+                    LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
+                    listOf(betydning),
+                ),
+            ),
+        )
+    }
+
+    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse = KodeverkResponse(emptyMap())
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

@@ -101,7 +101,7 @@ class BeregningsGrunnlagService(
                             institusjonsoppholdBeregningsgrunnlag =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
-                            begegningsmetodeFlereAvdoede = beregningsGrunnlag.begegningsmetodeFlereAvdoede ?: emptyList(),
+                            beregningsMetodeFlereAvdoede = beregningsGrunnlag.beregningsMetodeFlereAvdoede ?: emptyList(),
                         ),
                     )
             }

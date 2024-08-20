@@ -71,7 +71,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun hentAktiviteter(behandlingId: UUID): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -83,6 +83,23 @@ class AktivitetspliktDao(
                         """.trimMargin(),
                     )
                 stmt.setObject(1, behandlingId)
+
+                stmt.executeQuery().toList { toAktivitet() }
+            }
+        }
+
+    fun hentAktiviteterForSak(sakId: Long): List<AktivitetspliktAktivitet> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_aktivitet
+                        WHERE sak_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, sakId)
 
                 stmt.executeQuery().toList { toAktivitet() }
             }

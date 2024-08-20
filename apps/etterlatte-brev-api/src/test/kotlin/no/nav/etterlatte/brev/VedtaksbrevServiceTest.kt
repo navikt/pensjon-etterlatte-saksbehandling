@@ -662,7 +662,7 @@ internal class VedtaksbrevServiceTest {
                 db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)))
                 db.hentBrevkoder(brev.id)
                 db.oppdaterBrevkoder(brev.id, Brevkoder.OMS_OPPHOER)
-                db.oppdaterTittel(brev.id, Brevkoder.OMS_OPPHOER.ferdigstilling.tittel!!)
+                db.oppdaterTittel(brev.id, Brevkoder.OMS_OPPHOER.tittel!!)
             }
 
             coVerify {

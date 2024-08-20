@@ -17,7 +17,7 @@ import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
-import { oppdaterBeregingsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregningsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
 interface PeriodeRedigeringModus {
@@ -69,7 +69,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
             hentBeregningsgrunnlagOMSRequest(behandling.id, (result) => {
               if (result)
                 dispatch(
-                  oppdaterBeregingsGrunnlagOMS({
+                  oppdaterBeregningsGrunnlagOMS({
                     ...result,
                     institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
                   })

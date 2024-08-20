@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.kodeverk
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.coEvery
@@ -7,15 +7,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
-import no.nav.etterlatte.trygdetid.klienter.Betydning
-import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
-import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class KodeverkServiceTest {
-    private val mockKlient = mockk<KodeverkKlient>()
+    private val mockKlient = mockk<KodeverkKlientImpl>()
     private val service = KodeverkService(mockKlient)
     private val saksbehandler = simpleSaksbehandler()
 
@@ -69,6 +66,5 @@ internal class KodeverkServiceTest {
         }
     }
 
-    private fun opprettLandkoderResponse(): KodeverkResponse =
-        objectMapper.readValue(javaClass.getResource("/kodeverk/landkoder.json")!!.readText())
+    private fun opprettLandkoderResponse(): KodeverkResponse = objectMapper.readValue(javaClass.getResource("/landkoder.json")!!.readText())
 }

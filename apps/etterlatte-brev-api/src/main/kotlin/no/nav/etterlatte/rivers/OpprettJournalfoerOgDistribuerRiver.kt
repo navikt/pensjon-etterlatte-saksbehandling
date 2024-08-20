@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevID
@@ -85,17 +84,17 @@ class OpprettJournalfoerOgDistribuerRiver(
                         brevKodeMapping = { brevKode },
                         brevtype = brevKode.brevtype,
                     ) {
-                        when (brevKode.redigering) {
-                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> {
+                        when (brevKode) {
+                            Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
                                 opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                             }
-                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                            Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
                             }
-                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> {
+                            Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettOmstillingsstoenadInformasjonDoedsfall(
                                     sakId,

@@ -23,8 +23,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 enum class DoedshendelseFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
-    KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
-    KanLagreDoedshendelseForEPS("pensjon-etterlatte.kan-lage-doedhendelse-for-eps"),
     KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
     ;
 
@@ -41,15 +39,7 @@ class DoedshendelseService(
     fun settHendelseTilFerdigOgOppdaterBrevId(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) =
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
 
-    fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
-
     fun kanSendeBrevOgOppretteOppgave() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)
-
-    private fun kanLagreDoedshendelseForEPS() =
-        featureToggleService.isEnabled(
-            toggleId = DoedshendelseFeatureToggle.KanLagreDoedshendelseForEPS,
-            defaultValue = false,
-        )
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
@@ -72,8 +62,8 @@ class DoedshendelseService(
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
         val barn = finnBeroerteBarn(avdoed)
-        val samboere = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
-        val ektefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefeller(avdoed, samboere) else emptyList()
+        val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
+        val ektefeller = finnBeroerteEktefeller(avdoed, samboere)
         val alleBeroerte = barn + ektefeller + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {

@@ -68,21 +68,19 @@ class DoedshendelseJobService(
     }
 
     private fun run(bruker: BrukerTokenInfo) {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            val doedshendelserSomSkalHaanderes =
-                inTransaction {
-                    val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
-                    logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
+        val doedshendelserSomSkalHaanderes =
+            inTransaction {
+                val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
+                logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                    val doedshendelserSomSkalHaanderes = hendelserErGamleNok(nyeDoedshendelser)
-                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
-                    doedshendelserSomSkalHaanderes
-                }
-            doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                inTransaction {
-                    logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    haandterDoedshendelse(doedshendelse, bruker)
-                }
+                val doedshendelserSomSkalHaanderes = hendelserErGamleNok(nyeDoedshendelser)
+                logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+                doedshendelserSomSkalHaanderes
+            }
+        doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+            inTransaction {
+                logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                haandterDoedshendelse(doedshendelse, bruker)
             }
         }
     }

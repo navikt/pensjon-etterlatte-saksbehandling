@@ -28,12 +28,13 @@ class SakendringerDao(
     }
 
     internal fun opprettSak(block: (connection: Connection) -> Sak) =
-        connectionAutoclosing.hentConnection { connection ->
-            block(connection)
-        }
+        connectionAutoclosing
+            .hentConnection { connection ->
+                block(connection)
+            }.also { lagreEndringerPaaSak(null, it) }
 
     internal fun lagreEndringerPaaSak(
-        sakFoer: Sak,
+        sakFoer: Sak?,
         sakEtter: Sak,
     ) = connectionAutoclosing.hentConnection {
         with(it) {

@@ -47,7 +47,7 @@ class SakSkrivDao(
         type: SakType,
         enhet: String,
     ): Sak =
-        connectionAutoclosing.hentConnection { connection ->
+        sakendringerDao.opprettSak { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(

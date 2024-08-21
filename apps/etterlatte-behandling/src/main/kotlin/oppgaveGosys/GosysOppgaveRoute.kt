@@ -50,12 +50,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
                     val sakId = call.request.queryParameters["sakid"]!!.toLong()
-                    val nyOppgave =
-                        inTransaction {
-                            runBlocking {
-                                gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
-                            }
-                        }
+                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }

@@ -16,6 +16,7 @@ class SakendringerDao(
 ) {
     internal fun lagreEndringerPaaSak(
         id: SakId,
+        kallendeMetode: String,
         block: (connection: Connection) -> Unit,
     ): Int {
         val foer = requireNotNull(hentSak(id)) { "Må ha en sak for å kunne endre den" }
@@ -23,11 +24,12 @@ class SakendringerDao(
             block(connection)
         }
         val etter = requireNotNull(hentSak(id)) { "Må ha en sak etter endring" }
-        return lagreEndringerPaaSak(foer, etter)
+        return lagreEndringerPaaSak(foer, etter, kallendeMetode)
     }
 
     internal fun lagreEndringerPaaSaker(
         saker: Collection<SakId>,
+        kallendeMetode: String,
         block: (connection: Connection) -> Unit,
     ) = saker.forEach {
         val foer = requireNotNull(hentSak(it)) { "Må ha en sak for å kunne endre den" }
@@ -35,25 +37,28 @@ class SakendringerDao(
             block(connection)
         }
         val etter = requireNotNull(hentSak(it)) { "Må ha en sak etter endring" }
-        lagreEndringerPaaSak(foer, etter)
+        lagreEndringerPaaSak(foer, etter, kallendeMetode)
     }
 
-    internal fun opprettSak(block: (connection: Connection) -> Sak) =
-        connectionAutoclosing
-            .hentConnection { connection ->
-                block(connection)
-            }.also { lagreEndringerPaaSak(null, it) }
+    internal fun opprettSak(
+        kallendeMetode: String,
+        block: (connection: Connection) -> Sak,
+    ) = connectionAutoclosing
+        .hentConnection { connection ->
+            block(connection)
+        }.also { lagreEndringerPaaSak(null, it, kallendeMetode) }
 
     internal fun lagreEndringerPaaSak(
         sakFoer: Sak?,
         sakEtter: Sak,
+        kallendeMetode: String,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO sakendringer(id, sakId, sakFoer, sakEtter, tidspunkt, saksbehandler)
-                    VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?, ?)
+                    INSERT INTO sakendringer(id, sakId, sakFoer, sakEtter, tidspunkt, saksbehandler, kallendeMetode)
+                    VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?, ?, ?)
                     """.trimIndent(),
                 )
             statement.setObject(1, UUID.randomUUID())
@@ -62,6 +67,7 @@ class SakendringerDao(
             statement.setJsonb(4, sakEtter)
             statement.setTidspunkt(5, Tidspunkt.now())
             statement.setString(6, Kontekst.get().AppUser.name())
+            statement.setString(7, kallendeMetode)
 
             statement.executeUpdate()
         }

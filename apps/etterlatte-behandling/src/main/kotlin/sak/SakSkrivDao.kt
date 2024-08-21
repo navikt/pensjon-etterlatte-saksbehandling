@@ -26,7 +26,7 @@ class SakSkrivDao(
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
-        sakendringerDao.lagreEndringerPaaSak(sakId) { connection ->
+        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterAdresseBeskyttelse") { connection ->
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)
@@ -45,7 +45,7 @@ class SakSkrivDao(
         type: SakType,
         enhet: String,
     ): Sak =
-        sakendringerDao.opprettSak { connection ->
+        sakendringerDao.opprettSak("opprettSak") { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
@@ -64,7 +64,7 @@ class SakSkrivDao(
         }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
-        sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }) {
+        sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }, "oppdaterEnheterPaaSaker") {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -86,7 +86,7 @@ class SakSkrivDao(
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
-    ) = sakendringerDao.lagreEndringerPaaSaker(sakIder) {
+    ) = sakendringerDao.lagreEndringerPaaSaker(sakIder, "markerSakerMedSkjerming") {
         with(it) {
             val statement =
                 prepareStatement(

@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
 
 class SakSkrivDao(
+    private val sakendringerDao: SakendringerDao,
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     private val mapTilSak: ResultSet.() -> Sak = {
@@ -27,7 +28,7 @@ class SakSkrivDao(
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
-        connectionAutoclosing.hentConnection { connection ->
+        sakendringerDao.lagreEndringerPaaSak(sakId) { connection ->
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)

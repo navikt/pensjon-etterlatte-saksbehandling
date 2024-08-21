@@ -150,6 +150,7 @@ import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
@@ -308,8 +309,9 @@ internal class ApplicationContext(
     val vedtaksbehandlingDao = VedtaksbehandlingDao(autoClosingDatabase)
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
-    val sakSkrivDao = SakSkrivDao(autoClosingDatabase)
     val sakLesDao = SakLesDao(autoClosingDatabase)
+    val sakendringerDao = SakendringerDao(autoClosingDatabase) { sakLesDao.hentSak(it) }
+    val sakSkrivDao = SakSkrivDao(sakendringerDao, autoClosingDatabase)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,

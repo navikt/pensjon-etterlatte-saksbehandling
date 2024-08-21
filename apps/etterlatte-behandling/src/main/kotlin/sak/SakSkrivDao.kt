@@ -1,6 +1,5 @@
 package no.nav.etterlatte.sak
 
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -13,7 +12,6 @@ import java.sql.ResultSet
 
 class SakSkrivDao(
     private val sakendringerDao: SakendringerDao,
-    private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     private val mapTilSak: ResultSet.() -> Sak = {
         Sak(
@@ -76,9 +74,9 @@ class SakSkrivDao(
                         where id = ?
                         """.trimIndent(),
                     )
-                saker.forEach {
-                    statement.setString(1, it.enhet)
-                    statement.setLong(2, it.id)
+                saker.forEach { sak ->
+                    statement.setString(1, sak.enhet)
+                    statement.setLong(2, sak.id)
                     statement.executeUpdate()
                 }
             }
@@ -88,20 +86,19 @@ class SakSkrivDao(
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
-    ): Int =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        UPDATE sak 
-                        set erSkjermet = ? 
-                        where id = any(?)
-                        """.trimIndent(),
-                    )
-                statement.setBoolean(1, skjermet)
-                statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
-                statement.executeUpdate()
-            }
+    ) = sakendringerDao.lagreEndringerPaaSaker(sakIder) {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE sak 
+                    set erSkjermet = ? 
+                    where id = any(?)
+                    """.trimIndent(),
+                )
+            statement.setBoolean(1, skjermet)
+            statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
+            statement.executeUpdate()
         }
+    }
 }

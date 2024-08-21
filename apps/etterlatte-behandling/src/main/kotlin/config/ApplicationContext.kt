@@ -311,7 +311,7 @@ internal class ApplicationContext(
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
     val sakLesDao = SakLesDao(autoClosingDatabase)
     val sakendringerDao = SakendringerDao(autoClosingDatabase) { sakLesDao.hentSak(it) }
-    val sakSkrivDao = SakSkrivDao(sakendringerDao, autoClosingDatabase)
+    val sakSkrivDao = SakSkrivDao(sakendringerDao)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,

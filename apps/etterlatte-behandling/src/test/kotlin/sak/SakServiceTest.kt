@@ -62,6 +62,7 @@ internal class SakServiceTest {
     val saksbehandlerService = mockk<SaksbehandlerService>()
     val skjermingKlient = mockk<SkjermingKlient>()
     val sakDao = mockk<SakDao>()
+    val sakLesDao = mockk<SakLesDao>()
     val grunnlagservice = mockk<GrunnlagService>()
 
     @BeforeEach
@@ -85,10 +86,10 @@ internal class SakServiceTest {
                         sikkerDigitalPostkasse = null,
                     )
             }
-        service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+        service = SakServiceImpl(sakDao, sakLesDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
 
         every {
-            sakDao.finnSakMedGraderingOgSkjerming(
+            sakLesDao.finnSakMedGraderingOgSkjerming(
                 any(),
             )
         } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
@@ -171,7 +172,7 @@ internal class SakServiceTest {
                 SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+        every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
                     id = 1,
@@ -185,7 +186,7 @@ internal class SakServiceTest {
 
         saker.size shouldBe 1
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test
@@ -197,7 +198,7 @@ internal class SakServiceTest {
                 SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+        every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
                     id = 1,
@@ -211,7 +212,7 @@ internal class SakServiceTest {
 
         saker.size shouldBe 0
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test
@@ -223,7 +224,7 @@ internal class SakServiceTest {
                 SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+        every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
                     id = 1,
@@ -237,7 +238,7 @@ internal class SakServiceTest {
 
         saker.size shouldBe 1
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test
@@ -245,7 +246,7 @@ internal class SakServiceTest {
         saksbehandlerKontekst()
         val sakId: Long = 1
         coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns PersonMedSakerOgRoller(KONTANT_FOT.value, emptyList())
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 Sak(
                     id = sakId,
@@ -260,7 +261,7 @@ internal class SakServiceTest {
         finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
 
         coVerify { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
     }
 
     @Test
@@ -274,20 +275,20 @@ internal class SakServiceTest {
                     SakidOgRolle(sakId, Saksrolle.AVDOED),
                 ),
             )
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
 
         val finnSakerOmsOgHvisAvdoed = service.finnSakerOmsOgHvisAvdoed(KONTANT_FOT.value)
 
         finnSakerOmsOgHvisAvdoed shouldContainExactly listOf(sakId)
 
         coVerify { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) }
     }
 
     @Test
     fun `finnEllerOpprettSak feiler hvis PDL ikke finner geografisk tilknytning`() {
         val responseException = ResponseException(mockk(), "Oops")
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } throws responseException
@@ -302,7 +303,7 @@ internal class SakServiceTest {
 
         thrown.message shouldContain "Oops"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify {
             listOf(norg2Klient) wasNot Called
@@ -316,7 +317,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301"),
             )
         } returns emptyList()
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -326,14 +327,14 @@ internal class SakServiceTest {
         thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
         thrown.arbeidsFordelingRequest.geografiskOmraade shouldBe "0301"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
     }
 
     @Test
     fun `finnEllerOpprettSak lagre enhet hvis enhet er funnet`() {
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns
@@ -362,9 +363,9 @@ internal class SakServiceTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
-        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
+        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -385,7 +386,7 @@ internal class SakServiceTest {
     @Test
     fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
         systemBrukerKontekst()
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
@@ -431,9 +432,9 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
-        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
+        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -453,7 +454,7 @@ internal class SakServiceTest {
     @Test
     fun `skal sette skjerming hvis skjermingstjenesten sier at person er skjermet`() {
         saksbehandlerKontekst()
-        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
+        every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         } returns
@@ -484,8 +485,8 @@ internal class SakServiceTest {
             )
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
+        verify(exactly = 1) { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -507,13 +508,13 @@ internal class SakServiceTest {
     fun `Hent enkeltsak - Bruker har ingen saker`() {
         saksbehandlerKontekst()
 
-        every { sakDao.finnSaker(any()) } returns emptyList()
+        every { sakLesDao.finnSaker(any()) } returns emptyList()
 
         assertThrows<PersonManglerSak> {
             service.hentEnkeltSakForPerson("ident")
         }
 
-        verify { sakDao.finnSaker(any()) }
+        verify { sakLesDao.finnSaker(any()) }
     }
 
     @Test
@@ -522,7 +523,7 @@ internal class SakServiceTest {
 
         val ident = Random.nextLong().toString()
 
-        every { sakDao.finnSaker(any()) } returns
+        every { sakLesDao.finnSaker(any()) } returns
             listOf(
                 Sak(
                     ident = ident,
@@ -536,7 +537,7 @@ internal class SakServiceTest {
             service.hentEnkeltSakForPerson(ident)
         }
 
-        verify { sakDao.finnSaker(ident) }
+        verify { sakLesDao.finnSaker(ident) }
     }
 
     @Test
@@ -552,7 +553,7 @@ internal class SakServiceTest {
                 id = Random.nextLong(),
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
             )
-        every { sakDao.finnSaker(any()) } returns
+        every { sakLesDao.finnSaker(any()) } returns
             listOf(
                 sak,
             )
@@ -561,7 +562,7 @@ internal class SakServiceTest {
 
         enkeltsak shouldBe sak
 
-        verify { sakDao.finnSaker(ident) }
+        verify { sakLesDao.finnSaker(ident) }
     }
 
     @Test
@@ -570,7 +571,7 @@ internal class SakServiceTest {
 
         val ident = Random.nextLong().toString()
 
-        every { sakDao.finnSaker(any()) } returns
+        every { sakLesDao.finnSaker(any()) } returns
             listOf(
                 Sak(
                     ident = ident,
@@ -584,7 +585,7 @@ internal class SakServiceTest {
             service.hentEnkeltSakForPerson(ident)
         }
 
-        verify { sakDao.finnSaker(ident) }
+        verify { sakLesDao.finnSaker(ident) }
     }
 
     @Test
@@ -600,7 +601,7 @@ internal class SakServiceTest {
                 id = Random.nextLong(),
                 enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
             )
-        every { sakDao.finnSaker(any()) } returns
+        every { sakLesDao.finnSaker(any()) } returns
             listOf(
                 sak,
             )
@@ -609,7 +610,7 @@ internal class SakServiceTest {
 
         enkeltsak shouldBe sak
 
-        verify { sakDao.finnSaker(ident) }
+        verify { sakLesDao.finnSaker(ident) }
     }
 
     @Test
@@ -626,12 +627,12 @@ internal class SakServiceTest {
                 enhet = enhet.enhetNr,
             )
 
-        every { sakDao.finnSaker(any()) } returns listOf(sak)
+        every { sakLesDao.finnSaker(any()) } returns listOf(sak)
 
         val enkeltsak = service.hentEnkeltSakForPerson(ident)
 
         enkeltsak shouldBe sak
 
-        verify { sakDao.finnSaker(ident) }
+        verify { sakLesDao.finnSaker(ident) }
     }
 }

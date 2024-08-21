@@ -147,6 +147,7 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
@@ -308,6 +309,7 @@ internal class ApplicationContext(
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
     val sakDao = SakDao(autoClosingDatabase)
+    val sakLesDao = SakLesDao(autoClosingDatabase)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,
@@ -341,7 +343,7 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
@@ -378,7 +380,7 @@ internal class ApplicationContext(
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             behandlingService = behandlingService,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
@@ -464,6 +466,7 @@ internal class ApplicationContext(
     val sakService =
         SakServiceImpl(
             sakDao,
+            sakLesDao,
             skjermingKlient,
             enhetService,
             grunnlagsService,
@@ -569,7 +572,7 @@ internal class ApplicationContext(
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             hendelseDao = hendelseDao,
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,

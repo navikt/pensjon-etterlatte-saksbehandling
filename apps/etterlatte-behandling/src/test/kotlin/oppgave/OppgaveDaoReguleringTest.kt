@@ -21,6 +21,7 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporing
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -38,6 +39,7 @@ internal class OppgaveDaoReguleringTest(
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
     private lateinit var sakDao: SakDao
+    private lateinit var sakLesDao: SakLesDao
     private lateinit var oppgaveService: OppgaveService
 
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
@@ -47,7 +49,8 @@ internal class OppgaveDaoReguleringTest(
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
         sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
-        oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, mockk(), mockk())
+        sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, mockk(), mockk())
 
         saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
 

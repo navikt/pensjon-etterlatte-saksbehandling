@@ -27,14 +27,14 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.PaaVent
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class TilbakekrevingService(
     private val tilbakekrevingDao: TilbakekrevingDao,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,

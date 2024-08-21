@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -57,12 +58,13 @@ internal class OppgaveServiceTest(
     val dataSource: DataSource,
 ) {
     private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+    private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelseDao, hendelser)
+    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, hendelseDao, hendelser)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private val azureGroupToGroupIDMap =

@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -59,6 +60,7 @@ internal class TilgangServiceTest(
     private lateinit var tilgangService: TilgangService
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakDao
+    private lateinit var sakLesDao: SakLesDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
@@ -72,8 +74,9 @@ internal class TilgangServiceTest(
     fun beforeAll() {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
 
-        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
+        sakService = SakServiceImpl(sakRepo, sakLesDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

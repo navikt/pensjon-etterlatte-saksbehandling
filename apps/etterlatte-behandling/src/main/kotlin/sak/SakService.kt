@@ -101,6 +101,7 @@ class ManglerTilgangTilEnhet(
 
 class SakServiceImpl(
     private val dao: SakDao,
+    private val lesDao: SakLesDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
@@ -134,7 +135,7 @@ class SakServiceImpl(
     }
 
     override fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak> {
-        val saker = dao.hentSakerMedIder(sakIder)
+        val saker = lesDao.hentSakerMedIder(sakIder)
         return saker.associateBy { it.id }
     }
 
@@ -145,7 +146,7 @@ class SakServiceImpl(
         ekskluderteSaker: List<Long>,
         sakType: SakType?,
     ): List<Sak> =
-        dao
+        lesDao
             .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
@@ -177,7 +178,7 @@ class SakServiceImpl(
     private fun finnSakerForPerson(
         ident: String,
         sakType: SakType? = null,
-    ) = dao.finnSaker(ident, sakType)
+    ) = lesDao.finnSaker(ident, sakType)
 
     override fun markerSakerMedSkjerming(
         sakIder: List<Long>,
@@ -248,7 +249,7 @@ class SakServiceImpl(
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
         settEnhetOmAdresebeskyttet(sak, hentetGradering)
-        sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
+        sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
@@ -379,16 +380,16 @@ class SakServiceImpl(
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
-    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> = dao.finnSakerMedGraderingOgSkjerming(sakIder)
+    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
         ident: String,
         type: SakType,
     ): Sak? = finnSakForPerson(ident, type).sjekkEnhet()
 
-    override fun finnSak(id: Long): Sak? = dao.hentSak(id).sjekkEnhet()
+    override fun finnSak(id: Long): Sak? = lesDao.hentSak(id).sjekkEnhet()
 
-    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
+    override fun finnFlyktningForSak(id: Long): Flyktning? = lesDao.hentSak(id).sjekkEnhet()?.let { lesDao.finnFlyktningForSak(id) }
 
     private fun Sak?.sjekkEnhet() =
         this?.let { sak ->

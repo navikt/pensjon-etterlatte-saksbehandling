@@ -45,7 +45,7 @@ class BehandlingSakRoutesTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll

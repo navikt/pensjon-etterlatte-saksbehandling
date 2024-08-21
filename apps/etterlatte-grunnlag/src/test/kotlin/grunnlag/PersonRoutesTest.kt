@@ -20,6 +20,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
@@ -39,11 +40,11 @@ import org.junit.jupiter.api.TestInstance
 internal class PersonRoutesTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -54,13 +55,13 @@ internal class PersonRoutesTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
     fun `returnerer 401 uten gyldig token`() {
         testApplication {
-            runServer(server, "api/grunnlag") {
+            runServer(mockOAuth2Server, "api/grunnlag") {
                 personRoute(grunnlagService, behandlingKlient)
             }
 
@@ -90,7 +91,7 @@ internal class PersonRoutesTest {
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -114,7 +115,7 @@ internal class PersonRoutesTest {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -127,7 +128,7 @@ internal class PersonRoutesTest {
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
-        runServer(server, "api/grunnlag") {
+        runServer(mockOAuth2Server, "api/grunnlag") {
             personRoute(grunnlagService, behandlingKlient)
         }
 }

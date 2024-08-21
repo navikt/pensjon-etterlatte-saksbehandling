@@ -46,7 +46,7 @@ internal class OversendelsesbrevRouteTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach

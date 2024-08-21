@@ -66,7 +66,7 @@ class TilgangsstyringTest {
         @BeforeAll
         @JvmStatic
         fun before() {
-            mockOAuth2Server.start()
+            mockOAuth2Server.startRandomPort()
         }
 
         @AfterAll

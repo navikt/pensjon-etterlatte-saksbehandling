@@ -154,9 +154,11 @@ class GosysOppgaveServiceImpl(
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     override suspend fun hentJournalfoeringsoppgave(
@@ -165,9 +167,11 @@ class GosysOppgaveServiceImpl(
     ): List<GosysOppgave> {
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     private fun List<GosysOppgave>.filterForEnheter(user: User) =

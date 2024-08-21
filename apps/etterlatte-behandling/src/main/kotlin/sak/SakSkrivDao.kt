@@ -4,7 +4,6 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -13,27 +12,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
-
-data class SakMedUtlandstilknytning(
-    val ident: String,
-    val sakType: SakType,
-    val id: Long,
-    val enhet: String,
-    val utlandstilknytning: Utlandstilknytning?,
-) {
-    companion object {
-        fun fra(
-            sak: Sak,
-            utlandstilknytning: Utlandstilknytning?,
-        ) = SakMedUtlandstilknytning(
-            ident = sak.ident,
-            sakType = sak.sakType,
-            id = sak.id,
-            enhet = sak.enhet,
-            utlandstilknytning = utlandstilknytning,
-        )
-    }
-}
 
 class SakSkrivDao(
     private val connectionAutoclosing: ConnectionAutoclosing,

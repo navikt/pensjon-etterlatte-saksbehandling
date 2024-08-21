@@ -13,6 +13,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toUUID30
@@ -45,7 +46,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SimuleringOsRouteTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     private val simuleringDao: SimuleringDao = mockk()
@@ -61,7 +62,7 @@ class SimuleringOsRouteTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -71,7 +72,7 @@ class SimuleringOsRouteTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -123,7 +124,7 @@ class SimuleringOsRouteTest {
             }
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 utbetalingRoutes(simuleringOsService, behandlingKlient)
             }
 
@@ -176,5 +177,5 @@ class SimuleringOsRouteTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = "Z991122") }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = "Z991122") }
 }

@@ -21,6 +21,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
@@ -57,7 +58,7 @@ internal class DoedshendelseRouteTest(
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach

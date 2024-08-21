@@ -23,6 +23,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -50,7 +51,7 @@ import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningsGrunnlagRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
@@ -67,12 +68,12 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -100,7 +101,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnBeregningsGrunnlag(any()) } returns null
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -166,7 +167,7 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -202,7 +203,7 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -223,7 +224,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -243,7 +244,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
@@ -301,7 +302,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
@@ -359,7 +360,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
@@ -410,7 +411,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -444,7 +445,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -469,7 +470,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -509,7 +510,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
@@ -573,7 +574,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
@@ -677,7 +678,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
@@ -768,7 +769,7 @@ internal class BeregningsGrunnlagRoutesTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
-    private val systemToken: String by lazy { server.issueSystembrukerToken() }
+    private val systemToken: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 }

@@ -18,6 +18,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -52,7 +53,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AutomatiskBehandlingRoutesKtTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtakService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
@@ -60,7 +61,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -76,7 +77,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -118,7 +119,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 )
             coEvery { rapidService.sendToRapid(any()) } just runs
 
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 automatiskBehandlingRoutes(
                     automatiskBehandlingService,
                     behandlingKlient,
@@ -195,7 +196,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coEvery { rapidService.sendToRapid(any()) } just runs
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -251,7 +252,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     listOf(lagOppgave(behandlingId, Status.ATTESTERING))
                 coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -308,7 +309,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         ),
                     )
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -338,7 +339,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
     private fun lagOppgave(
         referanse: UUID,

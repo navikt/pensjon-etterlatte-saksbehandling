@@ -13,6 +13,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -35,17 +36,17 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PersonRouteTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val personService: PersonService = mockk()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -60,7 +61,7 @@ class PersonRouteTest {
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -89,7 +90,7 @@ class PersonRouteTest {
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -117,7 +118,7 @@ class PersonRouteTest {
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -147,7 +148,7 @@ class PersonRouteTest {
         } returns mockGeografiskTilknytning()
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -178,7 +179,7 @@ class PersonRouteTest {
         } throws PdlForesporselFeilet("Noe feilet")
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -207,7 +208,7 @@ class PersonRouteTest {
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 personRoute(personService)
             }
 
@@ -224,7 +225,7 @@ class PersonRouteTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private companion object {
         const val PERSON_ENDEPUNKT = "/person"

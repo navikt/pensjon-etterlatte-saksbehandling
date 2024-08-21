@@ -17,6 +17,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -37,21 +38,21 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SamordningVedtakRouteTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val samordningVedtakService = mockk<SamordningVedtakService>()
     private lateinit var config: Config
     private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @Nested
     inner class MaskinportenApi {
         @BeforeEach
         fun before() {
-            config = config(server.config.httpServer.port(), Issuer.MASKINPORTEN.issuerName)
+            config = config(mockOAuth2Server.config.httpServer.port(), Issuer.MASKINPORTEN.issuerName)
             applicationConfig = HoconApplicationConfig(config)
         }
 
@@ -186,7 +187,7 @@ class SamordningVedtakRouteTest {
             claims["consumer"] = mapOf("ID" to "0192:0123456789")
             maskinportenScope?.let { claims["scope"] = it }
 
-            return server
+            return mockOAuth2Server
                 .issueToken(
                     issuerId = Issuer.MASKINPORTEN.issuerName,
                     claims = claims,
@@ -201,7 +202,7 @@ class SamordningVedtakRouteTest {
 
         @BeforeEach
         fun before() {
-            config = config(server.config.httpServer.port(), Issuer.AZURE.issuerName)
+            config = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
             applicationConfig = HoconApplicationConfig(config)
         }
 
@@ -284,7 +285,7 @@ class SamordningVedtakRouteTest {
                     ),
                 )
 
-            return server
+            return mockOAuth2Server
                 .issueToken(
                     issuerId = Issuer.AZURE.issuerName,
                     claims = claimSet.allClaims,
@@ -309,7 +310,7 @@ class SamordningVedtakRouteTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 }
 

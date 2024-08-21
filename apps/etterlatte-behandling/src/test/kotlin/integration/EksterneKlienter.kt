@@ -405,12 +405,6 @@ class PesysKlientTest : PesysKlient {
         fnr: String,
         bruker: BrukerTokenInfo,
     ): List<SakSammendragResponse> = emptyList()
-
-    override suspend fun erTilstoetendeBehandlet(
-        fnr: String,
-        doedsdato: LocalDate,
-        bruker: BrukerTokenInfo,
-    ): Boolean = false
 }
 
 class KrrklientTest : KrrKlient {

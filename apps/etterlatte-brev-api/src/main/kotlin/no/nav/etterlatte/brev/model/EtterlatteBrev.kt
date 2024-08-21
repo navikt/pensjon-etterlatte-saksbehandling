@@ -36,6 +36,7 @@ data class BarnepensjonBeregning(
     val bruktTrygdetid: TrygdetidMedBeregningsmetode,
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean = false,
+    val forskjelligTrygdetid: ForskjelligTrygdetid? = null,
 ) : BrevdataMedInnhold
 
 data class BarnepensjonBeregningsperiode(
@@ -96,6 +97,20 @@ data class TrygdetidMedBeregningsmetode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
     val ident: String,
+)
+
+data class ForskjelligTrygdetid(
+    val foersteTrygdetid: TrygdetidDto,
+    val foersteVirkningsdato: LocalDate,
+    val senereVirkningsdato: LocalDate,
+    val harForskjelligMetode: Boolean,
+    val erForskjellig: Boolean,
+)
+
+data class ForskjelligAvdoedPeriode(
+    val foersteAvdoed: Avdoed,
+    val senereAvdoed: Avdoed,
+    val senereVirkningsdato: LocalDate,
 )
 
 data class Trygdetidsperiode(

@@ -55,7 +55,7 @@ internal class SakRoutesTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.start()
     }
 
     @AfterEach

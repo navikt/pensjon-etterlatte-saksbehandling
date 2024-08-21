@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -34,12 +34,12 @@ import javax.sql.DataSource
 internal class KlageDaoImplTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var klageDao: KlageDaoImpl
 
     @BeforeAll
     fun setup() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 

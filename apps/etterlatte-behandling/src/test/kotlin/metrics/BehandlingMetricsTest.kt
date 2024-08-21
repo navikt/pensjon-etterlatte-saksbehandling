@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -34,14 +34,14 @@ internal class BehandlingMetricsTest(
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var gjenopprettingDao: GjenopprettingMetrikkerDao
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var behandlingMetrics: BehandlingMetrics
 
     private val testreg = CollectorRegistry(true)
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(ds))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(ds))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),

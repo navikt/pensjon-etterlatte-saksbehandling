@@ -35,7 +35,7 @@ data class SakMedUtlandstilknytning(
     }
 }
 
-class SakDao(
+class SakSkrivDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     private val mapTilSak: ResultSet.() -> Sak = {

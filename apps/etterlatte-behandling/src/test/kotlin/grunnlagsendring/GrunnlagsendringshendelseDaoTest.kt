@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.samsvarMellomPdlOgGrunnlagDoed
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,13 +45,13 @@ import javax.sql.DataSource
 internal class GrunnlagsendringshendelseDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
     private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

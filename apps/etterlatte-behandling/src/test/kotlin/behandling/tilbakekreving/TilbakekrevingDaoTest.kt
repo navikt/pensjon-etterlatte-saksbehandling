@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,14 +25,14 @@ import javax.sql.DataSource
 class TilbakekrevingDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
 
     private lateinit var sak: Sak
 
     @BeforeAll
     fun setup() {
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
 
         nyKontekstMedBrukerOgDatabase(mockk(), dataSource)
@@ -45,7 +45,7 @@ class TilbakekrevingDaoTest(
             it.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""").executeUpdate()
             it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
         }
-        sak = sakDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
+        sak = sakSkrivDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
     }
 
     @Test

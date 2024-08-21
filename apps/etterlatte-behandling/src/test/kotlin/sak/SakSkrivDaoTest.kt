@@ -38,10 +38,10 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SakDaoTest(
+internal class SakSkrivDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var tilgangService: TilgangService
     private lateinit var behandlingRepo: BehandlingDao
@@ -55,7 +55,7 @@ internal class SakDaoTest(
     @BeforeAll
     fun beforeAll() {
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
-        sakRepo = SakDao(connectionAutoclosing)
+        sakRepo = SakSkrivDao(connectionAutoclosing)
         sakLesDao = SakLesDao(connectionAutoclosing)
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))

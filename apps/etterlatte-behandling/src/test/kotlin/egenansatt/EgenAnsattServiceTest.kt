@@ -34,10 +34,10 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
-import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -55,7 +55,7 @@ internal class EgenAnsattServiceTest(
 ) {
     private val sikkerLogg: Logger = sikkerlogger()
 
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
@@ -90,7 +90,7 @@ internal class EgenAnsattServiceTest(
             }
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
         oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))

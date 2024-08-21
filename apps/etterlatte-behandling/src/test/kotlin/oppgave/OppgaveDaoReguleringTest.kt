@@ -20,8 +20,8 @@ import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporing
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -38,7 +38,7 @@ internal class OppgaveDaoReguleringTest(
 ) {
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var oppgaveService: OppgaveService
 
@@ -48,7 +48,7 @@ internal class OppgaveDaoReguleringTest(
     fun beforeAll() {
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, mockk(), mockk())
 
@@ -66,9 +66,9 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Skal tilbakestille oppgaver under attestering`() {
-        val sakEn = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val sakTo = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val sakTre = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakEn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakTo = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakTre = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
 
         val sakerTilRegulering = listOf(sakEn.id, sakTo.id)
 
@@ -85,7 +85,7 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Setter forrige saksbehandler ved tilbakestilling`() {
-        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveAttestert = lagOppgave(sakId = sak.id, status = Status.UNDER_BEHANDLING)
         oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(oppgaveAttestert.id, "", Status.ATTESTERING)
         oppgaveDao.settNySaksbehandler(oppgaveAttestert.id, "Ikke Ole")

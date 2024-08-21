@@ -34,10 +34,10 @@ import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.person.krr.KrrKlient
-import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.TilgangServiceImpl
@@ -59,7 +59,7 @@ internal class TilgangServiceTest(
 ) {
     private lateinit var tilgangService: TilgangService
     private lateinit var sakService: SakService
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
@@ -73,7 +73,7 @@ internal class TilgangServiceTest(
     @BeforeAll
     fun beforeAll() {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
 
         sakService = SakServiceImpl(sakRepo, sakLesDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)

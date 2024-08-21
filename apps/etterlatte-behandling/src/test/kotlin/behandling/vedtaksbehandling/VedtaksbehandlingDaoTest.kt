@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ import javax.sql.DataSource
 internal class VedtaksbehandlingDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var vedtaksbehandlingDao: VedtaksbehandlingDao
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var klageDao: KlageDao
@@ -53,7 +53,7 @@ internal class VedtaksbehandlingDaoTest(
     fun beforeAll() {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingTest(dataSource))
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))

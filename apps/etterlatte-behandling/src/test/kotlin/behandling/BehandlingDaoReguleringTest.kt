@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -33,12 +33,12 @@ internal class BehandlingDaoReguleringTest(
         private val dbExtension = DatabaseExtension()
     }
 
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

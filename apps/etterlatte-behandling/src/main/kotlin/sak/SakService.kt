@@ -100,7 +100,7 @@ class ManglerTilgangTilEnhet(
     )
 
 class SakServiceImpl(
-    private val dao: SakDao,
+    private val dao: SakSkrivDao,
     private val lesDao: SakLesDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,

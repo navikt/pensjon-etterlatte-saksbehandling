@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ internal class BehandlingMetricsOppgaveTest(
     private val ds: DataSource,
 ) {
     private lateinit var oppgaveDao: OppgaveDaoImpl
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
 
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveMetrikkerDao: OppgaveMetrikkerDao
@@ -42,7 +42,7 @@ internal class BehandlingMetricsOppgaveTest(
     @BeforeAll
     fun beforeAll() {
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
-        sakDao = SakDao(ConnectionAutoclosingTest(ds))
+        sakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(ds))
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
@@ -137,16 +137,16 @@ internal class BehandlingMetricsOppgaveTest(
     }
 
     private fun opprettOppgaver() {
-        sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.NY, "saksbehandler1"))
         }
-        sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.UNDER_BEHANDLING, "saksbehandler2"))
         }
-        sakDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FEILREGISTRERT, "saksbehandler1"))
         }
-        sakDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FERDIGSTILT, "saksbehandler3"))
         }
     }

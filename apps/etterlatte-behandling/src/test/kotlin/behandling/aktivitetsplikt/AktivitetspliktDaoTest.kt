@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,12 +23,12 @@ class AktivitetspliktDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktDao(ConnectionAutoclosingTest(ds))
-    private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
+    private val sakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(ds))
 
     @Test
     fun `skal hente aktiviteter for behandling`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivtet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+        val nyAktivtet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
         dao.opprettAktivitet(behandlingId, nyAktivtet, kilde)
         dao.opprettAktivitet(UUID.randomUUID(), nyAktivtet, kilde)
 
@@ -40,7 +40,7 @@ class AktivitetspliktDaoTest(
     @Test
     fun `skal opprette ny aktivetet`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+        val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
 
         dao.opprettAktivitet(behandlingId, nyAktivitet, kilde) shouldBe 1
 
@@ -62,7 +62,7 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal oppdatere eksisterende aktivitet`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
             val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
@@ -97,7 +97,7 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal ikke oppdatere eksisterende aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
             val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
@@ -121,7 +121,7 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal slette aktivitet`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
             val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
@@ -133,7 +133,7 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal ikke slette aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
             val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
@@ -149,7 +149,7 @@ class AktivitetspliktDaoTest(
         fun `skal kopiere aktiviteter fra tidligere behandling`() {
             val forrigeBehandling = UUID.randomUUID()
             val nyBehandling = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)

@@ -146,9 +146,9 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.person.krr.KrrKlientImpl
-import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
@@ -308,7 +308,7 @@ internal class ApplicationContext(
     val vedtaksbehandlingDao = VedtaksbehandlingDao(autoClosingDatabase)
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
-    val sakDao = SakDao(autoClosingDatabase)
+    val sakSkrivDao = SakSkrivDao(autoClosingDatabase)
     val sakLesDao = SakLesDao(autoClosingDatabase)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
@@ -465,7 +465,7 @@ internal class ApplicationContext(
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
-            sakDao,
+            sakSkrivDao,
             sakLesDao,
             skjermingKlient,
             enhetService,

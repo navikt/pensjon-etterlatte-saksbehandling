@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,7 +28,7 @@ class OmregningServiceTest(
     fun `lagrer kjoering med all relevant informasjon`() {
         val connection = ConnectionAutoclosingTest(dataSource)
 
-        val sak = SakDao(connection).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
+        val sak = SakSkrivDao(connection).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val service =
             OmregningService(

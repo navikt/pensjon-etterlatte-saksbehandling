@@ -19,12 +19,6 @@ interface PesysKlient {
         fnr: String,
         bruker: BrukerTokenInfo,
     ): List<SakSammendragResponse>
-
-    suspend fun erTilstoetendeBehandlet(
-        fnr: String,
-        doedsdato: LocalDate,
-        bruker: BrukerTokenInfo,
-    ): Boolean
 }
 
 class PesysKlientImpl(
@@ -50,28 +44,6 @@ class PesysKlientImpl(
                     Resource(
                         clientId = clientId,
                         url = "$resourceUrl/sak/sammendragWonderful",
-                        additionalHeaders = mapOf("fnr" to fnr),
-                    ),
-                brukerTokenInfo = bruker,
-            ).mapBoth(
-                success = { resource -> objectMapper.readValue(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
-    }
-
-    override suspend fun erTilstoetendeBehandlet(
-        fnr: String,
-        doedsdato: LocalDate,
-        bruker: BrukerTokenInfo,
-    ): Boolean {
-        logger.info("Sjekker om tilstøtende er behandlet i Pesys for ${fnr.maskerFnr()}")
-
-        return downstreamResourceClient
-            .get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/sak/tilstotendeBehandlet?dodsdato=$doedsdato",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
                 brukerTokenInfo = bruker,

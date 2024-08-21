@@ -66,8 +66,8 @@ class SakSkrivDao(
         }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
-        connectionAutoclosing.hentConnection { connection ->
-            with(connection) {
+        sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }) {
+            with(it) {
                 val statement =
                     prepareStatement(
                         """
@@ -79,9 +79,8 @@ class SakSkrivDao(
                 saker.forEach {
                     statement.setString(1, it.enhet)
                     statement.setLong(2, it.id)
-                    statement.addBatch()
+                    statement.executeUpdate()
                 }
-                statement.executeBatch()
             }
         }
     }

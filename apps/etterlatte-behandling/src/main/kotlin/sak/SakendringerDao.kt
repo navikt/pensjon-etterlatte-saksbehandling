@@ -1,6 +1,5 @@
 package no.nav.etterlatte.sak
 
-import jdk.jfr.internal.EventWriterKey.block
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,6 +24,18 @@ class SakendringerDao(
         }
         val etter = requireNotNull(hentSak(id)) { "Må ha en sak etter endring" }
         return lagreEndringerPaaSak(foer, etter)
+    }
+
+    internal fun lagreEndringerPaaSaker(
+        saker: Collection<SakId>,
+        block: (connection: Connection) -> Unit,
+    ) = saker.forEach {
+        val foer = requireNotNull(hentSak(it)) { "Må ha en sak for å kunne endre den" }
+        connectionAutoclosing.hentConnection { connection ->
+            block(connection)
+        }
+        val etter = requireNotNull(hentSak(it)) { "Må ha en sak etter endring" }
+        lagreEndringerPaaSak(foer, etter)
     }
 
     internal fun opprettSak(block: (connection: Connection) -> Sak) =

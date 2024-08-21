@@ -100,7 +100,7 @@ data class TrygdetidMedBeregningsmetode(
 )
 
 data class ForskjelligTrygdetid(
-    val foersteTrygdetid: TrygdetidDto,
+    val foersteTrygdetid: TrygdetidMedBeregningsmetode,
     val foersteVirkningsdato: LocalDate,
     val senereVirkningsdato: LocalDate,
     val harForskjelligMetode: Boolean,

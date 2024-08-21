@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -41,7 +42,7 @@ internal class OppgaveDaoTest(
     @BeforeAll
     fun beforeAll() {
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
-        sakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         saktilgangDao = SakTilgangDao(dataSource)
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(

@@ -37,6 +37,7 @@ import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -57,8 +58,8 @@ import javax.sql.DataSource
 internal class OppgaveServiceTest(
     val dataSource: DataSource,
 ) {
-    private val sakSkrivDao: SakSkrivDao = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
     private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()

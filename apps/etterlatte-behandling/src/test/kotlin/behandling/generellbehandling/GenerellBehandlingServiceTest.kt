@@ -47,6 +47,7 @@ import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -87,8 +88,8 @@ internal class GenerellBehandlingServiceTest(
     fun beforeAll() {
         dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
         hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
             BehandlingDao(

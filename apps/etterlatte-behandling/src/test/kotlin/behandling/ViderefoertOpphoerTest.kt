@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -80,7 +81,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer viderefoert opphoer`() {
         val sak =
-            SakSkrivDao(connection).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -105,7 +106,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `inaktiverer opphør`() {
         val sak =
-            SakSkrivDao(connection).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -148,7 +149,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `lagrer aktiv og inaktive opphoer paa samme behandling`() {
         val sak =
-            SakSkrivDao(connection).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,
@@ -208,7 +209,7 @@ class ViderefoertOpphoerTest(
     @Test
     fun `feiler ved oppretting hvis det skal viderefoeres og vilkaar mangler`() {
         val sak =
-            SakSkrivDao(connection).opprettSak(
+            SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
                 Enheter.defaultEnhet.enhetNr,

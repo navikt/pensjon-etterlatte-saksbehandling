@@ -53,8 +53,8 @@ internal class SakSkrivDaoTest(
     @BeforeAll
     fun beforeAll() {
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
-        sakRepo = SakSkrivDao(connectionAutoclosing)
         sakLesDao = SakLesDao(connectionAutoclosing)
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =

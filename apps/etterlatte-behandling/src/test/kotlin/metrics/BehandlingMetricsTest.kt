@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -41,7 +42,7 @@ internal class BehandlingMetricsTest(
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(ds))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),

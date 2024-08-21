@@ -345,7 +345,7 @@ internal class SakServiceTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } returns 0
+        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
 
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
@@ -388,7 +388,7 @@ internal class SakServiceTest {
         systemBrukerKontekst()
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } returns 0
+        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         every {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns
@@ -467,7 +467,7 @@ internal class SakServiceTest {
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
-        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } returns 1
+        every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
 
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(

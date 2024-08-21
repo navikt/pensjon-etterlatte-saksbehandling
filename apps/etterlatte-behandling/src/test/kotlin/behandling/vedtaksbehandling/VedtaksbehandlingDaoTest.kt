@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -30,6 +31,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -53,7 +55,7 @@ internal class VedtaksbehandlingDaoTest(
     fun beforeAll() {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingTest(dataSource))
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))

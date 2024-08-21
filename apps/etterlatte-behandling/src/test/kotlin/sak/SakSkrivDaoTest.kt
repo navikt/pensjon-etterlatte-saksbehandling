@@ -17,10 +17,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -149,17 +147,6 @@ internal class SakSkrivDaoTest(
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)
-    }
-
-    @Test
-    fun `kan lagre og hente flyktning`() {
-        val flyktning = Flyktning(true, LocalDate.of(2024, 1, 1), "Migrert", Grunnlagsopplysning.Pesys.create())
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-
-        sakRepo.oppdaterFlyktning(opprettSak.id, flyktning)
-        val oppdatertFlyktning = sakLesDao.finnFlyktningForSak(opprettSak.id)
-
-        Assertions.assertEquals(flyktning, oppdatertFlyktning)
     }
 
     @Test

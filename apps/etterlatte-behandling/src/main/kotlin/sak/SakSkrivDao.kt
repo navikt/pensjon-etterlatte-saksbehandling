@@ -2,13 +2,11 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
-import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
@@ -23,23 +21,6 @@ class SakSkrivDao(
             id = getLong("id"),
             enhet = getString("enhet"),
         )
-    }
-
-    fun oppdaterFlyktning(
-        sakId: Long,
-        flyktning: Flyktning,
-    ) {
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        "UPDATE sak set flyktning = ? where id = ?",
-                    )
-                statement.setJsonb(1, flyktning)
-                statement.setLong(2, sakId)
-                statement.executeUpdate()
-            }
-        }
     }
 
     fun oppdaterAdresseBeskyttelse(

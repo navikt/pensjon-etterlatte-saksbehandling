@@ -78,11 +78,6 @@ interface SakService {
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
-    fun oppdaterFlyktning(
-        sakId: Long,
-        flyktning: Flyktning,
-    )
-
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
@@ -109,13 +104,6 @@ class SakServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun oppdaterFlyktning(
-        sakId: Long,
-        flyktning: Flyktning,
-    ) {
-        dao.oppdaterFlyktning(sakId, flyktning)
-    }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
         val saker = finnSakerForPerson(fnr)

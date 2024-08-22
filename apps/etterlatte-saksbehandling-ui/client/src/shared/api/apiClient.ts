@@ -96,7 +96,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       if (response.status >= 500) {
         if (shouldLogError) {
           logger.generalError({
-            msg: 'Fikk feil i kall mot backend',
+            msg: `Fikk feil i kall mot backend. Url: ${url}`,
             errorInfo: { url, method, error },
           })
         }

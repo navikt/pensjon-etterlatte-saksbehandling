@@ -48,6 +48,7 @@ data class OmstillingsstoenadRevurdering(
             revurderingaarsak: Revurderingaarsak?,
             navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            datoVedtakOmgjoering: LocalDate?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -96,8 +97,7 @@ data class OmstillingsstoenadRevurdering(
                     ) ||
                         revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                // TODO klage kobler seg på her
-                datoVedtakOmgjoering = null,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),

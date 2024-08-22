@@ -156,6 +156,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         sakType,
                         vedtakType!!,
                         virkningstidspunkt!!,
+                        klage,
                     )
 
                 OMSTILLINGSSTOENAD_AVSLAG ->
@@ -437,6 +438,7 @@ class BrevDataMapperFerdigstillingVedtak(
         sakType: SakType,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
+        klage: Klage?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -464,6 +466,14 @@ class BrevDataMapperFerdigstillingVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
+        val datoVedtakOmgjoering =
+            klage
+                ?.formkrav
+                ?.formkrav
+                ?.vedtaketKlagenGjelder
+                ?.datoAttestert
+                ?.toLocalDate()
+
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
             avkortingsinfo.await(),
@@ -476,6 +486,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 .single()
                 .navn,
             requireNotNull(vilkaarsvurdering.await()),
+            datoVedtakOmgjoering,
         )
     }
 

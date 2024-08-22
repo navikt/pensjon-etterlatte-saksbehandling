@@ -20,12 +20,12 @@ fun finnEventuellForskjelligAvdoedPeriode(
 
     checkNotNull(foersteAvdoed) {
         sikkerlogger().error(
-            "Har en beregning som bruker forskjellige avdøde i første og siste periode, men avdød i " +
+            "Har en beregning som bruker forskjellige avdøde i første og siste periode, men unik avdød i " +
                 "første periode kunne ikke finnes i listen over avdøde. Avdøde i første beregningperiode:" +
                 " ${foerstePeriode.avdoedeForeldre}, avdøde i siste beregningsperiode: " +
                 "${sistePeriode.avdoedeForeldre}, avdøde vi kjenner til: $avdoede.",
         )
-        "Har en beregning som bruker forskjellige avdøde i første og siste periode, men avdød i første periode" +
+        "Har en beregning som bruker forskjellige avdøde i første og siste periode, men unik avdød i første periode" +
             " kunne ikke finnes i listen over avdøde. Se sikkerlogg for detaljer"
     }
     val sisteAvdoedIdent = sistePeriode.avdoedeForeldre?.singleOrNull { it != foersteAvdoedIdent }

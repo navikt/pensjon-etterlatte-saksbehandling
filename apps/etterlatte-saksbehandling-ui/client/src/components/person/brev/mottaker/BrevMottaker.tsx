@@ -1,5 +1,5 @@
 import { AdresseType, IBrev } from '~shared/types/Brev'
-import { Alert, Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
@@ -8,6 +8,7 @@ import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottaker
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { DigitalKontaktinformasjon, hentKontaktinformasjonKRR } from '~shared/api/krr'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
   const [brevState, setBrevState] = useState<IBrev>(brev)
@@ -16,6 +17,8 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   const adresse = mottaker?.adresse
 
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
+  const [kontaktinfoResult, hentKontaktinfo] = useApiCall(hentKontaktinformasjonKRR)
+
   useEffect(() => {
     if (!brev.behandlingId) {
       return
@@ -27,6 +30,12 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
       opplysningstype: 'SOEKER_PDL_V1',
     })
   }, [brev])
+
+  useEffect(() => {
+    if (brev.mottaker.foedselsnummer?.value) {
+      hentKontaktinfo(brev.mottaker.foedselsnummer.value)
+    }
+  }, [brev.mottaker.foedselsnummer?.value])
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
@@ -135,9 +144,32 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </>
           }
         />
-
-        <Info label="Distribusjonsmetode" tekst={mottaker.tvingSentralPrint ? 'Tving sentral print' : 'Automatisk'} />
       </VStack>
+
+      {mapResult(kontaktinfoResult, {
+        pending: <Loader />,
+        success: (res?: DigitalKontaktinformasjon) => (
+          <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
+            <Heading size="xsmall" spacing>
+              Kontakt- og reservasjonsregisteret
+            </Heading>
+
+            {res ? (
+              <>
+                <Info label="Kan varsles" tekst={res.kanVarsles ? 'Ja' : 'Nei'} />
+                <Info label="Reservert mot digital kommunikasjon" tekst={res.reservert ? 'Ja' : 'Nei'} />
+              </>
+            ) : (
+              'Ikke registrert i KRR'
+            )}
+          </Box>
+        ),
+      })}
+
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
+        <Heading size="xsmall">Distribusjonsmetode</Heading>
+        <BodyShort>{mottaker.tvingSentralPrint ? 'Tving sentral print' : 'Automatisk'}</BodyShort>
+      </Box>
     </Box>
   )
 }

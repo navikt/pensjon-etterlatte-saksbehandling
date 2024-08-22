@@ -4,7 +4,7 @@ data class DigitalKontaktinformasjon(
     val personident: String,
     val aktiv: Boolean,
     val kanVarsles: Boolean?,
-    val reservert: Boolean?,
+    val reservert: Boolean?, // Om man er reservert mot kommunikasjon på nett
     val spraak: String?,
     val epostadresse: String?,
     val mobiltelefonnummer: String?,

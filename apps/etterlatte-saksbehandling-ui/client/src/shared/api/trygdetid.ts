@@ -1,8 +1,25 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
-export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (fnr: string): Promise<void> => {
+export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (fnr: string): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
   apiClient.post("trygdetid_v2/pesys/grunnlag", { foedselsnummer: fnr })
+
+export interface TrygdetidsperioderPesys {
+  ufoeretrygd: string,
+  alderspensjon: string
+}
+
+export interface TrygdetidPeriodePesys {
+  isoCode?: String, // ISO 3166-1 alpha-3 code:
+  fra?: String, //TODO: eller date?
+  til?: String,
+  poengInnAar?: Boolean,
+  poengUtAar?: Boolean,
+  prorata?: Boolean,
+  kilde: {
+    tidspunkt: string
+    type: string
+  }
 }
 
 export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>

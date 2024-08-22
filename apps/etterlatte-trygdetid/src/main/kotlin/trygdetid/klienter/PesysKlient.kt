@@ -26,13 +26,14 @@ data class TrygdetidsgrunnlagRequest(val fnr: String, val dato: LocalDate)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TrygdetidsgrunnlagListe(
-    val land: String? = null, //TODO: iso3 kode
+    val land: String? = null, //ISO 3166-1 alpha-3 code
     val fomDato: Date? = null,
     val tomDato: Date? = null,
     val poengIInnAr: Boolean? = null,
     val poengIUtAr: Boolean? = null,
     val ikkeProRata: Boolean? = null
 )
+
 data class SakIdTrygdetidsgrunnlagListePairResponse(val sakId: Long, val trygdetidsgrunnlagListe: TrygdetidsgrunnlagListe)
 
 data class TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(

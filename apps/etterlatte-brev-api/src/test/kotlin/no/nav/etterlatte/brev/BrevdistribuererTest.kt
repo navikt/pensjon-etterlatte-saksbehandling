@@ -38,7 +38,7 @@ class BrevdistribuererTest {
 
         every { db.hentBrev(any()) } returns brev
         every { db.hentJournalpostId(any()) } returns journalpostId
-        every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any()) } returns "123"
+        every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any(), any()) } returns "123"
 
         val bestillingsID = brevdistribuerer.distribuer(brev.id)
         bestillingsID shouldBe "123"
@@ -52,6 +52,7 @@ class BrevdistribuererTest {
                 DistribusjonsType.ANNET,
                 DistribusjonsTidspunktType.KJERNETID,
                 brev.mottaker.adresse,
+                false,
             )
         }
     }

@@ -20,6 +20,7 @@ export interface Mottaker {
   }
   orgnummer?: string
   adresse: Adresse
+  tvingSentralPrint: boolean
 }
 
 export interface Adresse {

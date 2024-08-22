@@ -42,7 +42,7 @@ internal class DistribusjonServiceTest {
         val type = DistribusjonsType.VEDTAK
         val tidspunkt = DistribusjonsTidspunktType.KJERNETID
 
-        val bestillingsID = service.distribuerJournalpost(brevId, journalpostId, type, tidspunkt, opprettAdresse())
+        val bestillingsID = service.distribuerJournalpost(brevId, journalpostId, type, tidspunkt, opprettAdresse(), false)
 
         assertEquals(distribusjonResponse.bestillingsId, bestillingsID)
 

@@ -27,6 +27,7 @@ fun mottakerFraAdresse(
             landkode = regoppslag.adresse.landkode,
             land = regoppslag.adresse.land,
         ),
+    tvingSentralPrint = false,
 )
 
 fun tomMottaker(fnr: Folkeregisteridentifikator) =

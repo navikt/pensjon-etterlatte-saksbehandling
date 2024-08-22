@@ -1,14 +1,14 @@
 package no.nav.etterlatte.brev
 
+interface Brevbakerkode
+
 /*
 Denne enumen brukes primært for kommunikasjonen mot brevbakeren.
 
 Denne enumen henger tett sammen med Brevkoder-enumen.
 Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
  */
-enum class EtterlatteBrevKode(
-    val erVedlegg: Boolean = false,
-) {
+enum class EtterlatteBrevKode : Brevbakerkode {
     BARNEPENSJON_AVSLAG,
     BARNEPENSJON_AVSLAG_UTFALL,
     BARNEPENSJON_INNVILGELSE,
@@ -24,8 +24,6 @@ enum class EtterlatteBrevKode(
     BARNEPENSJON_VARSEL_UTFALL,
     BARNEPENSJON_VEDTAK_OMREGNING,
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
-    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(erVedlegg = true),
-    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(erVedlegg = true),
     BARNEPENSJON_INFORMASJON_DOEDSFALL,
     BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
     BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
@@ -46,9 +44,6 @@ enum class EtterlatteBrevKode(
     OMSTILLINGSSTOENAD_VARSEL_UTFALL,
     OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT,
     OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT_UTFALL,
-    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(erVedlegg = true),
-    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(erVedlegg = true),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD,
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
     TILBAKEKREVING_INNHOLD,
@@ -59,7 +54,6 @@ enum class EtterlatteBrevKode(
 
     TOM_DELMAL,
     TOM_MAL_INFORMASJONSBREV,
-    TOM_MAL,
     UTSATT_KLAGEFRIST,
 
     KLAGE_OVERSENDELSE_BRUKER,
@@ -85,15 +79,11 @@ enum class Brevtype {
     fun erKobletTilEnBehandling(): Boolean = this in listOf(VEDTAK, VARSEL, VEDLEGG)
 }
 
-fun tittelForVedlegg(kode: EtterlatteBrevKode) =
-    if (kode.erVedlegg) {
-        when (kode) {
-            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL -> "Trygdetid i vedlegg beregning av barnepensjon"
-            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
-            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL -> "Utfall ved beregning av omstillingsstønad"
-            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL -> "Utfall ved forhåndsvarsel av feilutbetaling"
-            else -> throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
-        }
-    } else {
-        throw IllegalArgumentException("Denne funksjonen er bare for vedlegg, $kode er ikke et vedlegg")
-    }
+enum class Vedlegg(
+    val tittel: String,
+) : Brevbakerkode {
+    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL("Trygdetid i vedlegg beregning av barnepensjon"),
+    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
+    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL("Utfall ved beregning av omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
+}

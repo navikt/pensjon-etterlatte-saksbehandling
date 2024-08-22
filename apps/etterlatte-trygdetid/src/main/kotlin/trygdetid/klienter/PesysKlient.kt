@@ -25,7 +25,7 @@ interface PesysKlient {
 data class TrygdetidsgrunnlagRequest(val fnr: String, val dato: LocalDate)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TrygdetidsgrunnlagListe(
+data class Trygdetidsgrunnlag(
     val land: String? = null, //ISO 3166-1 alpha-3 code
     val fomDato: Date? = null,
     val tomDato: Date? = null,
@@ -34,11 +34,16 @@ data class TrygdetidsgrunnlagListe(
     val ikkeProRata: Boolean? = null
 )
 
-data class SakIdTrygdetidsgrunnlagListePairResponse(val sakId: Long, val trygdetidsgrunnlagListe: TrygdetidsgrunnlagListe)
+data class TrygdetidsgrunnlagListe(
+    val trygdetidsgrunnlagListe: List<Trygdetidsgrunnlag>,
+    val trygdetidsgrunnlagKap20Liste: List<Trygdetidsgrunnlag>
+)
+
+data class SakIdTrygdetidsgrunnlagListePairResponse(val sakId: Long, val trygdetidsgrunnlag: TrygdetidsgrunnlagListe)
 
 data class TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(
-    val trygdetidUfoeretrygdpensjon: SakIdTrygdetidsgrunnlagListePairResponse,
-    val trygdetidAlderspensjon: SakIdTrygdetidsgrunnlagListePairResponse
+    val trygdetidUfoeretrygdpensjon: SakIdTrygdetidsgrunnlagListePairResponse?,
+    val trygdetidAlderspensjon: SakIdTrygdetidsgrunnlagListePairResponse?
 )
 
 class PesysKlientImpl(
@@ -64,7 +69,7 @@ class PesysKlientImpl(
         return TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(trygdetidUfoerepensjon, trygdetidAlderspensjon)
     }
 
-    private suspend fun hentTrygdetidsgrunnlagListeForLopendeUforetrygd(fnr: String, brukerTokenInfo: BrukerTokenInfo): SakIdTrygdetidsgrunnlagListePairResponse {
+    private suspend fun hentTrygdetidsgrunnlagListeForLopendeUforetrygd(fnr: String, brukerTokenInfo: BrukerTokenInfo): SakIdTrygdetidsgrunnlagListePairResponse? {
         return downstreamResourceClient.post(
             resource = Resource(
                 clientId = clientId,
@@ -73,12 +78,12 @@ class PesysKlientImpl(
             brukerTokenInfo = brukerTokenInfo,
             postBody = TrygdetidsgrunnlagRequest(fnr, LocalDate.now())
         ).mapBoth(
-            success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse>(resource.response.toString()) },
+            success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
             failure = { errorResponse -> throw errorResponse },
         )
     }
 
-    private suspend fun hentTrygdetidslisteForLoependeAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo): SakIdTrygdetidsgrunnlagListePairResponse {
+    private suspend fun hentTrygdetidslisteForLoependeAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo): SakIdTrygdetidsgrunnlagListePairResponse? {
         return downstreamResourceClient.post(
             resource = Resource(
                 clientId = clientId,
@@ -87,7 +92,7 @@ class PesysKlientImpl(
             brukerTokenInfo = brukerTokenInfo,
             postBody = TrygdetidsgrunnlagRequest(fnr, LocalDate.now())
         ).mapBoth(
-            success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse>(resource.response.toString()) },
+            success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
             failure = { errorResponse -> throw errorResponse },
         )
     }

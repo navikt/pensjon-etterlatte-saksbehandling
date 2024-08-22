@@ -60,9 +60,11 @@ fun Route.trygdetid(
     route("/api/trygdetid_v2") {
         post("/pesys") {
             withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                val trygdetidsgrunnlag = trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-                    fnr = fnr.value,
-                    brukerTokenInfo = brukerTokenInfo
+                call.respond(
+                        trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
+                        fnr = fnr.value,
+                        brukerTokenInfo = brukerTokenInfo
+                    )
                 )
             }
         }

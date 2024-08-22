@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
-import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagListe
+import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -118,20 +118,23 @@ interface TrygdetidService {
     suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
         fnr: String,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): TrygdetidsperioderPesys
 }
 
 data class TrygdetidsperioderPesys(
-    val ufoeretrygd: TrygdetidPeriodePesys,
-    val alderspensjon: TrygdetidPeriodePesys,
+    val ufoeretrygd: TrygdetidsPeriodeListe?,
+    val alderspensjon: TrygdetidsPeriodeListe?,
 )
 
-fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder () {
+fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder () =
     TrygdetidsperioderPesys(
-        ufoeretrygd = trygdetidUfoeretrygdpensjon.trygdetidsgrunnlagListe.tilTrygdetidsPeriode(),
-        alderspensjon = trygdetidAlderspensjon.trygdetidsgrunnlagListe.tilTrygdetidsPeriode()
+        ufoeretrygd = TrygdetidsPeriodeListe(trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map { it.tilTrygdetidsPeriode() }),
+        alderspensjon = TrygdetidsPeriodeListe(trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map { it.tilTrygdetidsPeriode() })
     )
-}
+
+data class TrygdetidsPeriodeListe(
+    val trygdetidsGrunnlagListe: List<TrygdetidPeriodePesys>?,
+)
 
 data class TrygdetidPeriodePesys(
     val isoCode: String?, // ISO 3166-1 alpha-3 code:
@@ -140,10 +143,10 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: Grunnlagsopplysning.Kilde, // Grunnlagsopplysning.Pesys(Tidspunkt.now())
+    val kilde: Grunnlagsopplysning.Kilde,
 )
 
-fun TrygdetidsgrunnlagListe.tilTrygdetidsPeriode() =
+fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
     TrygdetidPeriodePesys(
         isoCode = land,
         fra = fomDato?.let { toNorskLocalDate(it.toInstant()) },
@@ -169,9 +172,7 @@ class TrygdetidServiceImpl(
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
 
-    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo) {
-        pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
-    }
+    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
 
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,

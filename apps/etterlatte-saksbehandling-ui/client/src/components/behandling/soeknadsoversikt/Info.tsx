@@ -1,6 +1,6 @@
 import { BodyShort, Detail, Label } from '@navikt/ds-react'
-import { InfoElement } from './styled'
 import { ReactNode } from 'react'
+import styled from 'styled-components'
 
 interface InfoProps {
   label: string
@@ -20,3 +20,7 @@ export const Info = ({ label, tekst, undertekst, wide }: InfoProps) => {
     </InfoElement>
   )
 }
+
+const InfoElement = styled.div<{ $wide?: boolean }>`
+  width: ${(props) => (props.$wide ? '100%' : '15em')};
+`

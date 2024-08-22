@@ -24,7 +24,7 @@ internal class LoependeYtelserforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
-    private val logger = LoggerFactory.getLogger(LoependeYtelserforespoerselRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.SAK_FUNNET) {

@@ -83,7 +83,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         behandlingId = null,
                         bruker = brukerTokenInfo,
                         brevKodeMapping = { brevKode },
-                        brevtype = brevKode.redigering.brevtype,
+                        brevtype = brevKode.brevtype,
                     ) {
                         when (brevKode.redigering) {
                             EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> {

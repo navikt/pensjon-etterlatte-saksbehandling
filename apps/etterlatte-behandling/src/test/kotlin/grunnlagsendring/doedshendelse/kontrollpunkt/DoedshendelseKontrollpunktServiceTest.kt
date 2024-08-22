@@ -81,20 +81,6 @@ class DoedshendelseKontrollpunktServiceTest {
     fun oppsett() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, bruker) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, bruker) } returns emptyList()
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalOMS.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns false
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalBP.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns false
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
@@ -401,20 +387,6 @@ class DoedshendelseKontrollpunktServiceTest {
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse)
-    }
-
-    @Test
-    fun `Skal opprette kontrollpunkt hvis saken er behandlet i Pesys`() {
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalBP.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns true
-
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP, bruker) shouldBe
-            listOf(DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys)
     }
 
     @Test

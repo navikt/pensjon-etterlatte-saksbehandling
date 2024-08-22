@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
 internal class ClientCallLogging private constructor() {
-    private val logger = LoggerFactory.getLogger(ClientCallLogging::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val requestStartTime = AttributeKey<Long>("requestStartTime")
 
     companion object : HttpClientPlugin<Any, ClientCallLogging> {

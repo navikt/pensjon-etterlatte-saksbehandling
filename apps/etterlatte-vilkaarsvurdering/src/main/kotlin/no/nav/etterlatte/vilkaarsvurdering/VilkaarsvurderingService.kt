@@ -35,7 +35,7 @@ class VilkaarsvurderingService(
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 

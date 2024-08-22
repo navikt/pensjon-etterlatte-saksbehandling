@@ -33,6 +33,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-tilbakekreving
+        tier: db-f1-micro
         databases:
           - name: tilbakekreving
             envVarPrefix: DB

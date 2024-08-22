@@ -581,8 +581,8 @@ internal class GenerellBehandlingServiceTest(
                 .hentOppgaverForReferanse(opprettBehandling.id.toString())
                 .single(OppgaveIntern::erAttestering)
 
-        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
-        assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
+        val todagerfrem = Tidspunkt.now().plus(2L, ChronoUnit.DAYS).toNorskLocalDate()
+        assertEquals(todagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
 
         service.attester(oppdaterBehandling.id, attestant)
@@ -647,9 +647,9 @@ internal class GenerellBehandlingServiceTest(
             }
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
+        val todagerfrem = Tidspunkt.now().plus(2L, ChronoUnit.DAYS).toNorskLocalDate()
 
-        assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
+        assertEquals(todagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
         val ugyldigAttesteringsForespoersel =
             assertThrows<UgyldigAttesteringsForespoersel> {

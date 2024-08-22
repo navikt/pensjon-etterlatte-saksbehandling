@@ -28,6 +28,8 @@ data class UtbetalingNotFoundException(
 class UtbetalingDao(
     private val dataSource: DataSource,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun opprettUtbetaling(utbetaling: Utbetaling) =
         dataSource
             .transaction { tx ->
@@ -461,8 +463,4 @@ class UtbetalingDao(
             "12" -> UtbetalingStatus.FEILET
             else -> UtbetalingStatus.FEILET
         }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(UtbetalingDao::class.java)
-    }
 }

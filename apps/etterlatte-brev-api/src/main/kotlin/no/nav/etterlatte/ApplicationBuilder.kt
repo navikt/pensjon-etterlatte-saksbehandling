@@ -249,7 +249,7 @@ class ApplicationBuilder {
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
+    private val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 

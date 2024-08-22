@@ -53,7 +53,7 @@ class SamordningsKlientImpl(
     config: Config,
     private val httpClient: HttpClient,
 ) : SamordningsKlient {
-    private val logger = LoggerFactory.getLogger(SamordningsKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val resourceUrl = config.getString("samordnevedtak.resource.url")
 

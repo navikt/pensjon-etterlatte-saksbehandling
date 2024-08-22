@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -56,7 +57,7 @@ import javax.sql.DataSource
 internal class VilkaarsvurderingRoutesTest(
     private val ds: DataSource,
 ) {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val grunnlagVersjon = 12L
@@ -66,7 +67,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
 
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -96,15 +97,15 @@ internal class VilkaarsvurderingRoutesTest(
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -142,7 +143,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal hente vilkaarsvurdering med ny versjon på behandlingens grunnlag`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -170,7 +171,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -192,7 +193,7 @@ internal class VilkaarsvurderingRoutesTest(
         coEvery { behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any(), any()) } returns false
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val response =
@@ -211,7 +212,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val nyBehandlingId = UUID.randomUUID()
@@ -234,7 +235,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -280,7 +281,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -366,7 +367,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -424,7 +425,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -469,7 +470,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -514,7 +515,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `revurdering skal kopiere siste vilkaarsvurdering ved opprettele som default`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -554,7 +555,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `revurdering skal ikke kopiere siste vilkaarsvurdering naar kopierVedRevurdering er false`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -593,7 +594,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `Skal slette eksisterende vilkaarsvurdering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -613,7 +614,7 @@ internal class VilkaarsvurderingRoutesTest(
     @Test
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
@@ -637,7 +638,7 @@ internal class VilkaarsvurderingRoutesTest(
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -663,7 +664,7 @@ internal class VilkaarsvurderingRoutesTest(
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -692,7 +693,7 @@ internal class VilkaarsvurderingRoutesTest(
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -723,7 +724,7 @@ internal class VilkaarsvurderingRoutesTest(
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
@@ -761,7 +762,7 @@ internal class VilkaarsvurderingRoutesTest(
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 

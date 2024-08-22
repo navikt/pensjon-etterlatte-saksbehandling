@@ -8,8 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
@@ -50,12 +48,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
                     val sakId = call.request.queryParameters["sakid"]!!.toLong()
-                    val nyOppgave =
-                        inTransaction {
-                            runBlocking {
-                                gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
-                            }
-                        }
+                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }

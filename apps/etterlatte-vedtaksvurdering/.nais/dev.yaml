@@ -16,6 +16,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-vedtaksvurdering
+        tier: db-f1-micro
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
@@ -89,8 +90,6 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
-    - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: SAMORDNEVEDTAK_URL
       value: https://sam-q2.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE

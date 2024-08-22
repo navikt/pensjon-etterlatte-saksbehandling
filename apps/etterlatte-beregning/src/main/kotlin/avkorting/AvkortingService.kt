@@ -22,7 +22,7 @@ class AvkortingService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
 ) {
-    private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun hentAvkorting(
         behandlingId: UUID,

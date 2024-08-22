@@ -33,6 +33,8 @@ class KvitteringMottaker(
     jmsConnectionFactory: EtterlatteJmsConnectionFactory,
     queue: String,
 ) : MessageListener {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         jmsConnectionFactory.start(
             listener = {
@@ -172,10 +174,6 @@ class KvitteringMottaker(
         "08" -> oppdragAvvist(utbetaling)
         "12" -> oppdragFeilet(utbetaling, oppdragXml)
         else -> oppdragFeilet(utbetaling, oppdragXml)
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
     }
 
     private fun UtbetalingResponseDto.toMessage(): Map<String, Any> {

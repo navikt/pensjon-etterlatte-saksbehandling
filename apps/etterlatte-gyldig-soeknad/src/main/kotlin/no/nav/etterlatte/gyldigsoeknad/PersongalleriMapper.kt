@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.slf4j.LoggerFactory
 
 object PersongalleriMapper {
-    private val logger = LoggerFactory.getLogger(PersongalleriMapper::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentPersongalleriFraSoeknad(soeknad: InnsendtSoeknad): Persongalleri {
         logger.info("Hent persongalleri fra søknad")

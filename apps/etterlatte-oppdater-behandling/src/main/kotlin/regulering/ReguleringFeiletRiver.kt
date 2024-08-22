@@ -18,7 +18,7 @@ internal class ReguleringFeiletRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(ReguleringFeiletRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, FEILA) {

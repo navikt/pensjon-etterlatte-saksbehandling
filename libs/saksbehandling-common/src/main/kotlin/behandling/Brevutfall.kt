@@ -23,6 +23,7 @@ data class Feilutbetaling(
 enum class FeilutbetalingValg {
     NEI,
     JA_VARSEL,
+    JA_INGEN_VARSEL_MOTREGNES,
     JA_INGEN_TK,
 }
 

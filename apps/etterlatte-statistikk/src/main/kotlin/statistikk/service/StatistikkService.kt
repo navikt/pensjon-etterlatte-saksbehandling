@@ -54,7 +54,7 @@ class StatistikkService(
     private val beregningKlient: BeregningKlient,
     private val aktivitetspliktService: AktivitetspliktService,
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun registrerStatistikkForVedtak(
         vedtak: VedtakDto,

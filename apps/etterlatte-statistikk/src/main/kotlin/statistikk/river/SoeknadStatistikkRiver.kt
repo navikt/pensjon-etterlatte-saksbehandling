@@ -22,7 +22,7 @@ class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
     private val statistikkService: SoeknadStatistikkService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, EventNames.FORDELER_STATISTIKK) {

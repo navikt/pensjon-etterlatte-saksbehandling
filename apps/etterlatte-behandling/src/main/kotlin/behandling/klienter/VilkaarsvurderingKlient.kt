@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.klienter
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl.Companion.logger
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -12,6 +11,8 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface VilkaarsvurderingKlient : Pingable {
@@ -30,6 +31,7 @@ class VilkaarsvurderingKlientImpl(
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun kopierVilkaarsvurdering(
         kopierTilBehandling: UUID,

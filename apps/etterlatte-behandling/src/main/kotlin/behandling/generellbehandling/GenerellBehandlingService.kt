@@ -147,7 +147,7 @@ class GenerellBehandlingService(
         }
 
         val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(saksbehandler.ident)
-        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
+        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
         val merknad =
             "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}."
 
@@ -155,7 +155,7 @@ class GenerellBehandlingService(
             referanse = generellBehandling.id.toString(),
             type = OppgaveType.KRAVPAKKE_UTLAND,
             merknad = merknad,
-            frist = trettiDagerFremITid,
+            frist = toDagerFremITid,
         )
 
         oppdaterBehandling(

@@ -169,6 +169,7 @@ class BrevRepository(
                         "poststed" to mottaker.adresse.poststed,
                         "landkode" to mottaker.adresse.landkode,
                         "land" to mottaker.adresse.land,
+                        "tving_sentral_print" to mottaker.tvingSentralPrint,
                     ),
                 ).asUpdate,
             ).also { require(it == 1) }
@@ -434,6 +435,7 @@ class BrevRepository(
                             landkode = row.string("landkode"),
                             land = row.string("land"),
                         ),
+                    tvingSentralPrint = row.boolean("tving_sentral_print"),
                 ),
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
             journalpostId = row.stringOrNull("journalpost_id"),
@@ -551,7 +553,8 @@ class BrevRepository(
                 postnummer = :postnummer,
                 poststed = :poststed,
                 landkode = :landkode,
-                land = :land
+                land = :land,
+                tving_sentral_print = :tving_sentral_print
             WHERE brev_id = :brev_id
         """
 

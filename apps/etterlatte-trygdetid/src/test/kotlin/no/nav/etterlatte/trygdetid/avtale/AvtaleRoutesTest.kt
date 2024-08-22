@@ -20,6 +20,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtale
@@ -44,16 +45,16 @@ internal class AvtaleRoutesTest {
 
     private val service = AvtaleService(repository)
 
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun afterAll() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @BeforeEach
@@ -234,7 +235,7 @@ internal class AvtaleRoutesTest {
     private fun testApplication(block: suspend (client: HttpClient) -> Unit) {
         io.ktor.server.testing.testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     avtale(service, behandlingKlient)
                 }
 
@@ -242,5 +243,5 @@ internal class AvtaleRoutesTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

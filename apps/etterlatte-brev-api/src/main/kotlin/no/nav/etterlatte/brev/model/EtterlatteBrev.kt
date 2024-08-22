@@ -169,6 +169,7 @@ fun TrygdetidDto.fromDto(
 
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
+    FEILUTBETALING_4RG_UTEN_VARSEL,
     FEILUTBETALING_MED_VARSEL,
     INGEN_FEILUTBETALING,
 }

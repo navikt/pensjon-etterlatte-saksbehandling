@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, CheckboxGroup, HGrid, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Box, Button, Checkbox, CheckboxGroup, HGrid, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   ITrygdetid,
@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { ILand } from '~utils/kodeverk'
+import { ControlledSingleSelectCombobox } from '~shared/components/combobox/ControlledSingleSelectCombobox'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -39,15 +40,13 @@ export const TrygdetidGrunnlag = ({
 }: Props) => {
   const { behandlingId } = useParams()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    control,
-    getValues,
-  } = useForm<OppdaterTrygdetidGrunnlag>({
+  const { register, handleSubmit, control } = useForm<OppdaterTrygdetidGrunnlag>({
     defaultValues: eksisterendeGrunnlag
-      ? { ...eksisterendeGrunnlag, prorata: !eksisterendeGrunnlag.prorata }
+      ? {
+          ...eksisterendeGrunnlag,
+          prorata: !eksisterendeGrunnlag.prorata,
+          bosted: landListe.find((land) => land.isoLandkode === eksisterendeGrunnlag.bosted)?.beskrivelse.tekst,
+        }
       : initialState(trygdetidGrunnlagType),
   })
 
@@ -60,7 +59,12 @@ export const TrygdetidGrunnlag = ({
         behandlingId,
         trygdetidId,
         // Flippe verdi av prorata for å matche backend
-        trygdetidgrunnlag: { ...data, prorata: !data.prorata },
+        trygdetidgrunnlag: {
+          ...data,
+          prorata: !data.prorata,
+          // Gjøre om land valgt fra lesbar tekst til land kode
+          bosted: landListe.find((land) => land.beskrivelse.tekst === data.bosted)!.isoLandkode,
+        },
       },
       (respons) => {
         setTrygdetid(respons)
@@ -73,25 +77,13 @@ export const TrygdetidGrunnlag = ({
       <form onSubmit={handleSubmit((data) => onSubmit(data))}>
         <VStack gap="2">
           <HGrid gap="4" columns="15rem min-content 12rem">
-            <Select
-              {...register('bosted', {
-                required: {
-                  value: true,
-                  message: 'Obligatorisk',
-                },
-              })}
+            <ControlledSingleSelectCombobox
+              name="bosted"
+              control={control}
               label="Land"
-              key={`${getValues().bosted}-${trygdetidGrunnlagType}`}
-              autoComplete="off"
-              error={errors.bosted?.message}
-            >
-              <option value="">Velg land</option>
-              {landListe.map((land) => (
-                <option key={`${land.isoLandkode}-${trygdetidGrunnlagType}`} value={land.isoLandkode}>
-                  {land.beskrivelse.tekst}
-                </option>
-              ))}
-            </Select>
+              errorVedTomInput="Obligatorisk"
+              options={landListe.map((land) => land.beskrivelse.tekst)}
+            />
 
             <ControlledDatoVelger
               name="periodeFra"

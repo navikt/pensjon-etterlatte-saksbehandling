@@ -9,8 +9,8 @@ fun finnEventuellForskjelligAvdoedPeriode(
     avdoede: List<Avdoed>,
     utbetalingsinfo: Utbetalingsinfo,
 ): ForskjelligAvdoedPeriode? {
-    val foerstePeriode = utbetalingsinfo.beregningsperioder.first()
-    val sistePeriode = utbetalingsinfo.beregningsperioder.last()
+    val foerstePeriode = utbetalingsinfo.beregningsperioder.minBy { it.datoFOM }
+    val sistePeriode = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }
 
     if (foerstePeriode.avdoedeForeldre?.toSet() == sistePeriode.avdoedeForeldre?.toSet()) {
         return null

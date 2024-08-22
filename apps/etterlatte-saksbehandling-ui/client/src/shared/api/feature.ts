@@ -7,10 +7,12 @@ export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiRespon
     return apiClient.post(`/feature`, { features: brytere })
   }
 
-  try {
-    return post()
-  } catch (e) {
-    logger.generalError({ message: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
-    return post()
-  }
+   return post().then((res) => {
+     if(res.ok) {
+       return res
+     } else {
+       logger.generalError({ message: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
+       return res
+     }
+   })
 }

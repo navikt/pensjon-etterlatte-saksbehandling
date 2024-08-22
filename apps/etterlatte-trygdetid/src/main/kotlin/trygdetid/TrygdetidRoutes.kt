@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.route.withParam
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -56,109 +57,70 @@ fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("/api/trygdetid_v2/{$BEHANDLINGID_CALL_PARAMETER}") {
-        get {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Henter trygdetid for behandling $behandlingId")
-                val trygdetider = trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                if (trygdetider.isNotEmpty()) {
-                    call.respond(trygdetider.map { it.toDto() })
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
+    route("/api/trygdetid_v2") {
+        post("/pesys") {
+            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
+                val trygdetidsgrunnlag = trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
+                    fnr = fnr.value,
+                    brukerTokenInfo = brukerTokenInfo
+                )
+            }
+        }
+        route("/{$BEHANDLINGID_CALL_PARAMETER}") {
+            get {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Henter trygdetid for behandling $behandlingId")
+                    val trygdetider = trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                    if (trygdetider.isNotEmpty()) {
+                        call.respond(trygdetider.map { it.toDto() })
+                    } else {
+                        call.respond(HttpStatusCode.NoContent)
+                    }
                 }
             }
-        }
 
-        post {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
-                trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
-                call.respond(
-                    trygdetidService
-                        .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                        .map { it.toDto() },
-                )
-            }
-        }
-
-        post("oppdater-opplysningsgrunnlag") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
-
-                trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
-                call.respond(
-                    trygdetidService
-                        .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                        .minBy { it.ident }
-                        .toDto(),
-                )
-            }
-        }
-
-        post("overstyr") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
-                val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
-
-                trygdetidService.overstyrNorskPoengaaarForTrygdetid(
-                    trygdetidOverstyringDto.id,
-                    behandlingId,
-                    trygdetidOverstyringDto.overstyrtNorskPoengaar,
-                    brukerTokenInfo,
-                )
-                call.respond(
-                    trygdetidService
-                        .hentTrygdetidIBehandlingMedId(
-                            behandlingId,
-                            trygdetidOverstyringDto.id,
-                            brukerTokenInfo,
-                        )!!
-                        .toDto(),
-                )
-            }
-        }
-
-        post("yrkesskade") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppdater trygdetid (yrkesskade) for behandling $behandlingId")
-                val trygdetidYrkesskadeDto = call.receive<TrygdetidYrkesskadeDto>()
-
-                trygdetidService.setYrkesskade(
-                    trygdetidYrkesskadeDto.id,
-                    behandlingId,
-                    trygdetidYrkesskadeDto.yrkesskade,
-                    brukerTokenInfo,
-                )
-
-                call.respond(
-                    trygdetidService
-                        .hentTrygdetidIBehandlingMedId(
-                            behandlingId,
-                            trygdetidYrkesskadeDto.id,
-                            brukerTokenInfo,
-                        )!!
-                        .toDto(),
-                )
-            }
-        }
-
-        route("{$TRYGDETIDID_CALL_PARAMETER}") {
-            post("grunnlag") {
+            post {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
-                    val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
+                    logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
+                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                    call.respond(
+                        trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                            .map { it.toDto() },
+                    )
+                }
+            }
 
-                    trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
+            post("oppdater-opplysningsgrunnlag") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
+
+                    trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
+                    call.respond(
+                        trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                            .minBy { it.ident }
+                            .toDto(),
+                    )
+                }
+            }
+
+            post("overstyr") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
+                    val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
+
+                    trygdetidService.overstyrNorskPoengaaarForTrygdetid(
+                        trygdetidOverstyringDto.id,
                         behandlingId,
-                        trygdetidId(),
-                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
+                        trygdetidOverstyringDto.overstyrtNorskPoengaar,
                         brukerTokenInfo,
                     )
                     call.respond(
                         trygdetidService
                             .hentTrygdetidIBehandlingMedId(
                                 behandlingId,
-                                trygdetidId(),
+                                trygdetidOverstyringDto.id,
                                 brukerTokenInfo,
                             )!!
                             .toDto(),
@@ -166,14 +128,40 @@ fun Route.trygdetid(
                 }
             }
 
-            delete("/grunnlag/{trygdetidGrunnlagId}") {
+            post("yrkesskade") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
-                        logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
-                        trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
+                    logger.info("Oppdater trygdetid (yrkesskade) for behandling $behandlingId")
+                    val trygdetidYrkesskadeDto = call.receive<TrygdetidYrkesskadeDto>()
+
+                    trygdetidService.setYrkesskade(
+                        trygdetidYrkesskadeDto.id,
+                        behandlingId,
+                        trygdetidYrkesskadeDto.yrkesskade,
+                        brukerTokenInfo,
+                    )
+
+                    call.respond(
+                        trygdetidService
+                            .hentTrygdetidIBehandlingMedId(
+                                behandlingId,
+                                trygdetidYrkesskadeDto.id,
+                                brukerTokenInfo,
+                            )!!
+                            .toDto(),
+                    )
+                }
+            }
+
+            route("{$TRYGDETIDID_CALL_PARAMETER}") {
+                post("grunnlag") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
+                        val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
+
+                        trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                             behandlingId,
                             trygdetidId(),
-                            trygdetidGrunnlagId,
+                            trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                             brukerTokenInfo,
                         )
                         call.respond(
@@ -187,100 +175,15 @@ fun Route.trygdetid(
                         )
                     }
                 }
-            }
-        }
 
-        post("/oppdater-status") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val statusOppdatert =
-                    trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
-            }
-        }
-
-        post("/kopier/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
-                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        route("/migrering") {
-            post {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
-                    val overstyringDto = call.receive<MigreringOverstyringDto>()
-                    trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
-                        behandlingId,
-                        overstyringDto.ident,
-                        overstyringDto.detaljertBeregnetTrygdetidResultat,
-                    )
-                    call.respond(
-                        trygdetidService
-                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                            .first { trygdetid -> trygdetid.ident == overstyringDto.ident }
-                            .toDto(),
-                    )
-                }
-            }
-
-            post("/manuell/opprett") {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    val overskriv = call.request.queryParameters["overskriv"]?.toBoolean() ?: false
-
-                    logger.info("Oppretter trygdetid med overstyrt for behandling $behandlingId (overskriv: $overskriv)")
-                    trygdetidService.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
-
-            route("/{$TRYGDETIDID_CALL_PARAMETER}") {
-                post("/manuell/lagre") {
+                delete("/grunnlag/{trygdetidGrunnlagId}") {
                     withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                        logger.info("Oppdaterer trygdetid med overstyrt for behandling $behandlingId")
-                        val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
-
-                        val eksisterendeTygdetid =
-                            trygdetidService.hentTrygdetidIBehandlingMedId(
+                        withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
+                            logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
+                            trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
                                 behandlingId,
                                 trygdetidId(),
-                                brukerTokenInfo,
-                            ) ?: throw GenerellIkkeFunnetException()
-
-                        val trygdetid =
-                            trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
-                                behandlingId,
-                                eksisterendeTygdetid.ident,
-                                beregnetTrygdetid,
-                            )
-
-                        behandlingKlient.settBehandlingStatusTrygdetidOppdatert(trygdetid.behandlingId, brukerTokenInfo)
-
-                        call.respond(
-                            trygdetidService
-                                .hentTrygdetidIBehandlingMedId(
-                                    behandlingId,
-                                    trygdetidId(),
-                                    brukerTokenInfo,
-                                )!!
-                                .toDto(),
-                        )
-                    }
-                }
-
-                post("/uten_fremtidig") {
-                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                        logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")
-
-                        val trygdetid =
-                            trygdetidService.hentTrygdetidIBehandlingMedId(behandlingId, trygdetidId(), brukerTokenInfo)
-
-                        if (trygdetid != null) {
-                            trygdetidService.reberegnUtenFremtidigTrygdetid(
-                                behandlingId,
-                                trygdetid.id,
+                                trygdetidGrunnlagId,
                                 brukerTokenInfo,
                             )
                             call.respond(
@@ -292,8 +195,123 @@ fun Route.trygdetid(
                                     )!!
                                     .toDto(),
                             )
-                        } else {
-                            call.respond(HttpStatusCode.NoContent)
+                        }
+                    }
+                }
+            }
+
+            post("/oppdater-status") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                    val statusOppdatert =
+                        trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
+                }
+            }
+
+            post("/kopier/{forrigeBehandlingId}") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
+                    val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+                    trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            route("/migrering") {
+                post {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
+                        val overstyringDto = call.receive<MigreringOverstyringDto>()
+                        trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
+                            behandlingId,
+                            overstyringDto.ident,
+                            overstyringDto.detaljertBeregnetTrygdetidResultat,
+                        )
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                                .first { trygdetid -> trygdetid.ident == overstyringDto.ident }
+                                .toDto(),
+                        )
+                    }
+                }
+
+                post("/manuell/opprett") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        val overskriv = call.request.queryParameters["overskriv"]?.toBoolean() ?: false
+
+                        logger.info("Oppretter trygdetid med overstyrt for behandling $behandlingId (overskriv: $overskriv)")
+                        trygdetidService.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv, brukerTokenInfo)
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+
+                route("/{$TRYGDETIDID_CALL_PARAMETER}") {
+                    post("/manuell/lagre") {
+                        withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                            logger.info("Oppdaterer trygdetid med overstyrt for behandling $behandlingId")
+                            val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
+
+                            val eksisterendeTygdetid =
+                                trygdetidService.hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId(),
+                                    brukerTokenInfo,
+                                ) ?: throw GenerellIkkeFunnetException()
+
+                            val trygdetid =
+                                trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
+                                    behandlingId,
+                                    eksisterendeTygdetid.ident,
+                                    beregnetTrygdetid,
+                                )
+
+                            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(
+                                trygdetid.behandlingId,
+                                brukerTokenInfo
+                            )
+
+                            call.respond(
+                                trygdetidService
+                                    .hentTrygdetidIBehandlingMedId(
+                                        behandlingId,
+                                        trygdetidId(),
+                                        brukerTokenInfo,
+                                    )!!
+                                    .toDto(),
+                            )
+                        }
+                    }
+
+                    post("/uten_fremtidig") {
+                        withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                            logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")
+
+                            val trygdetid =
+                                trygdetidService.hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId(),
+                                    brukerTokenInfo
+                                )
+
+                            if (trygdetid != null) {
+                                trygdetidService.reberegnUtenFremtidigTrygdetid(
+                                    behandlingId,
+                                    trygdetid.id,
+                                    brukerTokenInfo,
+                                )
+                                call.respond(
+                                    trygdetidService
+                                        .hentTrygdetidIBehandlingMedId(
+                                            behandlingId,
+                                            trygdetidId(),
+                                            brukerTokenInfo,
+                                        )!!
+                                        .toDto(),
+                                )
+                            } else {
+                                call.respond(HttpStatusCode.NoContent)
+                            }
                         }
                     }
                 }

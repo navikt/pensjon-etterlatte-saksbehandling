@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -109,18 +110,38 @@ interface TrygdetidService {
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
+        fnr: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
+
+data class TrygdetidPeriodePesys(
+    val land: String,
+    val fra: LocalDate,
+    val til: LocalDate,
+    val poengInnAar: Boolean,
+    val poengUtAar: Boolean,
+    val prorata: Boolean,
+    val kilde: Grunnlagsopplysning.Kilde, // Grunnlagsopplysning.Pesys(Tidspunkt.now())
+)
 
 class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
+    private val pesysKlient: PesysKlient
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
+    }
+
+    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo) {
+        val trygdetidsgrunnlagUforeOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo)
     }
 
     override suspend fun hentTrygdetiderIBehandling(

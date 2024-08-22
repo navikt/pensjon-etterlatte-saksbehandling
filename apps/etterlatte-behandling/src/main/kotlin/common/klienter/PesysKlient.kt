@@ -23,11 +23,11 @@ interface PesysKlient {
 
 class PesysKlientImpl(
     config: Config,
-    pen: HttpClient,
+    httpClient: HttpClient,
 ) : PesysKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
+    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")

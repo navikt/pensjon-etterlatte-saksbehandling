@@ -59,7 +59,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
           ),
       })}
 
-      <HStack gap="4" justify="space-between">
+      <HStack gap="2" justify="space-between">
         <Heading spacing level="2" size="medium">
           Mottaker{' '}
           {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
@@ -71,7 +71,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
         <div>{kanRedigeres && <BrevMottakerModal brev={brevState} setBrev={setBrevState} />}</div>
       </HStack>
 
-      <VStack gap="4">
+      <VStack gap="2">
         <Info
           wide
           label="Navn"
@@ -155,10 +155,10 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </Heading>
 
             {res ? (
-              <>
+              <VStack gap="2">
                 <Info label="Kan varsles" tekst={res.kanVarsles ? 'Ja' : 'Nei'} />
                 <Info label="Reservert mot digital kommunikasjon" tekst={res.reservert ? 'Ja' : 'Nei'} />
-              </>
+              </VStack>
             ) : (
               'Ikke registrert i KRR'
             )}

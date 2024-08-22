@@ -5,8 +5,8 @@ export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (fnr: string): Prom
   apiClient.post("trygdetid_v2/pesys/grunnlag", { foedselsnummer: fnr })
 
 export interface TrygdetidsperioderPesys {
-  ufoeretrygd: string,
-  alderspensjon: string
+  ufoeretrygd: TrygdetidPeriodePesys,
+  alderspensjon: TrygdetidPeriodePesys
 }
 
 export interface TrygdetidPeriodePesys {

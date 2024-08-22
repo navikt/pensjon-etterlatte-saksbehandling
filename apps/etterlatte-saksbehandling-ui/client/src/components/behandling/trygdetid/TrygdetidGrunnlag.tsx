@@ -52,6 +52,14 @@ export const TrygdetidGrunnlag = ({
 
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
+  const lagLesbarLandliste = (): Array<string> => {
+    const indexTilNorge = landListe.findIndex((land) => land.isoLandkode === 'NOR')
+    const kopiAvLandListe = [...landListe]
+    // Flytt "Norge" til å være første i listen over land
+    kopiAvLandListe.unshift(kopiAvLandListe.splice(indexTilNorge, 1)[0])
+    return kopiAvLandListe.map((land) => land.beskrivelse.tekst)
+  }
+
   const onSubmit = (data: OppdaterTrygdetidGrunnlag) => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
@@ -82,7 +90,7 @@ export const TrygdetidGrunnlag = ({
               control={control}
               label="Land"
               errorVedTomInput="Obligatorisk"
-              options={landListe.map((land) => land.beskrivelse.tekst)}
+              options={lagLesbarLandliste()}
             />
 
             <ControlledDatoVelger

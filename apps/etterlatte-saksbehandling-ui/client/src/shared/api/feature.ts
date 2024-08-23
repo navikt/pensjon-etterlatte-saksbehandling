@@ -1,4 +1,4 @@
-import {apiClient, ApiError, ApiResponse, ApiSuccess} from '~shared/api/apiClient'
+import {apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
 import { IFeature } from '~shared/types/IFeature'
 import { logger } from '~utils/logger'
 

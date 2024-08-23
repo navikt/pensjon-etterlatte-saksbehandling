@@ -54,7 +54,11 @@ internal class InntektsjusteringRiverTest {
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
-        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns OpprettJournalpostResponse("123", true)
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns
+            OpprettJournalpostResponse(
+                "JournalId123",
+                true,
+            )
         coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns ""
 
         val melding =
@@ -84,6 +88,7 @@ internal class InntektsjusteringRiverTest {
                     OppgaveKilde.BRUKERDIALOG,
                     OppgaveType.GENERELL_OPPGAVE,
                     merknad = "Mottatt inntektsjustering",
+                    referanse = "JournalId123",
                 ),
             )
         }

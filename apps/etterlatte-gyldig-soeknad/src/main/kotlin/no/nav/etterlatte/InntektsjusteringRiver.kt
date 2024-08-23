@@ -67,6 +67,7 @@ internal class InntektsjusteringRiver(
                         OppgaveKilde.BRUKERDIALOG,
                         OppgaveType.GENERELL_OPPGAVE,
                         merknad = "Mottatt inntektsjustering",
+                        referanse = journalpostResponse.journalpostId,
                     ),
                 )
             }

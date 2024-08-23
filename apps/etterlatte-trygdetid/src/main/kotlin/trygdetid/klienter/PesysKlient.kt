@@ -36,7 +36,6 @@ data class Trygdetidsgrunnlag(
 
 data class TrygdetidsgrunnlagListe(
     val trygdetidsgrunnlagListe: List<Trygdetidsgrunnlag>,
-    val trygdetidsgrunnlagKap20Liste: List<Trygdetidsgrunnlag>
 )
 
 data class SakIdTrygdetidsgrunnlagListePairResponse(val sakId: Long, val trygdetidsgrunnlag: TrygdetidsgrunnlagListe)

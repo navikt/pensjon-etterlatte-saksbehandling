@@ -1,11 +1,13 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
-export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (fnr: string): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
-  apiClient.post("trygdetid_v2/pesys/grunnlag", { foedselsnummer: fnr })
+export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (
+  fnr: string
+): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
+  apiClient.post('trygdetid_v2/pesys/grunnlag', { foedselsnummer: fnr })
 
 export interface TrygdetidsperioderPesys {
-  ufoeretrygd: TrygdetidsperiodeListe,
+  ufoeretrygd: TrygdetidsperiodeListe
   alderspensjon: TrygdetidsperiodeListe
 }
 
@@ -14,12 +16,12 @@ export interface TrygdetidsperiodeListe {
 }
 
 export interface TrygdetidPeriodePesys {
-  isoCode: String, // ISO 3166-1 alpha-3 code:
-  fra: String, //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
-  til: String,
-  poengInnAar?: Boolean,
-  poengUtAar?: Boolean,
-  prorata?: Boolean,
+  isoCountryCode: String // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
+  fra: String //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
+  til: String
+  poengInnAar?: Boolean
+  poengUtAar?: Boolean
+  prorata?: Boolean
   kilde: {
     tidspunkt: string
     type: string

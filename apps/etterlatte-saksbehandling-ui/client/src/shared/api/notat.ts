@@ -12,12 +12,25 @@ export enum NotatMal {
   TOM_MAL = 'TOM_MAL',
 }
 
-export function opprettNotatForSak(args: { sakId: number; mal: string }): Promise<ApiResponse<Notat>> {
-  return apiClient.post(`/notat/sak/${args.sakId}?mal=${args.mal}`, {})
+export function opprettNotatForSak(args: {
+  sakId: number
+  referanse?: string
+  mal: string
+}): Promise<ApiResponse<Notat>> {
+  const params = new URLSearchParams({
+    mal: args.mal,
+  })
+  if (args.referanse) params.append('referanse', args.referanse)
+
+  return apiClient.post(`/notat/sak/${args.sakId}?${params}`, {})
 }
 
 export function hentNotaterForSak(sakId: number): Promise<ApiResponse<Notat[]>> {
   return apiClient.get(`/notat/sak/${sakId}`)
+}
+
+export function hentNotaterForReferanse(referanse: string): Promise<ApiResponse<Notat[]>> {
+  return apiClient.get(`/notat/referanse/${referanse}`)
 }
 
 export function slettNotat(id: number): Promise<ApiResponse<Notat>> {

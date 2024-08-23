@@ -44,6 +44,12 @@ class NyNotatService(
         return notatRepository.hentForSak(sakId)
     }
 
+    fun hentForReferanse(referanse: String): List<Notat> {
+        logger.info("Henter notat for referanse $referanse")
+
+        return notatRepository.hentForReferanse(referanse)
+    }
+
     fun hentPayload(id: NotatID): Slate = notatRepository.hentPayload(id)
 
     fun oppdaterPayload(
@@ -80,15 +86,19 @@ class NyNotatService(
         sakId: Long,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
+        referanse: String? = null,
         params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = behandlingService.hentSak(sakId, bruker)
 
+        logger.info("Oppretter notat for sak $sakId og referanse '$referanse'")
+
         val id =
             notatRepository.opprett(
                 NyttNotat(
                     sakId = sak.id,
+                    referanse = referanse,
                     tittel = tittel,
                     payload =
                         when (mal) {

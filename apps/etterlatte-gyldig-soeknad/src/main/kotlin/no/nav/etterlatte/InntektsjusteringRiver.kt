@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -39,7 +39,6 @@ internal class InntektsjusteringRiver(
         context: MessageContext,
     ) {
         val inntektsjustering = packet.inntektsjustering()
-
         try {
             logger.info("Mottatt inntektsjustering (id=${inntektsjustering.id})")
 
@@ -68,6 +67,7 @@ internal class InntektsjusteringRiver(
                         OppgaveKilde.BRUKERDIALOG,
                         OppgaveType.GENERELL_OPPGAVE,
                         merknad = "Mottatt inntektsjustering",
+                        referanse = journalpostResponse.journalpostId,
                     ),
                 )
             }
@@ -82,7 +82,7 @@ internal class InntektsjusteringRiver(
     }
 
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =
-        objectMapper.readValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue())
+        this[InntektsjusteringInnsendt.inntektsjusteringInnhold].let { objectMapper.treeToValue<Inntektsjustering>(it) }
 }
 
 // TODO i felles repo

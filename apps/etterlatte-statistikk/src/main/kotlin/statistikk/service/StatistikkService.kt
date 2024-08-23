@@ -65,7 +65,7 @@ class StatistikkService(
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
             val enhet = vedtak.attestasjon?.attesterendeEnhet
-            if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG.enhetNr)) {
+            if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
                 return sakRad to null
             }
             val stoenadRad =

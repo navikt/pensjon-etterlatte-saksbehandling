@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -65,7 +66,7 @@ internal class DoedshendelseServiceTest {
 
     @BeforeEach
     fun beforeAll() {
-        nyKontekstMedBruker(mockk())
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
     }
 
     @Test

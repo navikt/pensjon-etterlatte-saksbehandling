@@ -77,7 +77,7 @@ class AktivitetspliktServiceTest {
             oppgaveService,
             featureToggleService,
         )
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
             every { ident() } returns "Z999999"

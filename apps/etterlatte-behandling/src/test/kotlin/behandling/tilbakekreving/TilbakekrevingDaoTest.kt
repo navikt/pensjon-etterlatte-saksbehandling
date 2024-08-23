@@ -4,9 +4,11 @@ import behandling.tilbakekreving.kravgrunnlag
 import behandling.tilbakekreving.tilbakekrevingVurdering
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.User
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -36,7 +38,7 @@ class TilbakekrevingDaoTest(
         sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
 
-        nyKontekstMedBrukerOgDatabase(mockk(), dataSource)
+        nyKontekstMedBrukerOgDatabase(mockk<User>().also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
     @BeforeEach

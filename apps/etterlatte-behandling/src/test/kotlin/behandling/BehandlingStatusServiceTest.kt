@@ -56,7 +56,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingStatusServiceTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
@@ -78,6 +77,7 @@ internal class BehandlingStatusServiceTest {
 
     @BeforeEach
     fun before() {
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
         nyKontekstMedBruker(user)
     }
 

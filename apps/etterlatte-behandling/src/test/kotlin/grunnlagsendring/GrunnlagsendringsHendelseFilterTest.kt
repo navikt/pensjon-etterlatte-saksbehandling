@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
@@ -41,7 +42,11 @@ class GrunnlagsendringsHendelseFilterTest {
         service = GrunnlagsendringsHendelseFilter(vedtakklient, behandlingService)
         val tokenValidationContext = mockk<TokenValidationContext>()
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
-        val systembruker = SystemUser(tokenValidationContext, brukerTokenInfo)
+        val systembruker =
+            spyk(SystemUser(tokenValidationContext, brukerTokenInfo)).also {
+                every { it.name() } returns
+                    this::class.java.simpleName
+            }
         val databasekontekst = mockk<DatabaseContext>()
         Kontekst.set(Context(systembruker, databasekontekst, mockedSakTilgangDao()))
     }

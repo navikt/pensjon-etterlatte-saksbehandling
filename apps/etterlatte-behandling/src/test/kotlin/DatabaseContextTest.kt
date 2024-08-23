@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.mockk.mockk
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import java.sql.Connection
 import javax.sql.DataSource
@@ -26,8 +27,11 @@ class DatabaseContextTest(
 class ConnectionAutoclosingTest(
     val dataSource: DataSource,
 ) : ConnectionAutoclosing() {
+    private val context = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+
     override fun <T> hentConnection(block: (connection: Connection) -> T): T =
         if (manglerKontekst()) {
+            Kontekst.set(context)
             dataSource.connection.use {
                 block(it)
             }

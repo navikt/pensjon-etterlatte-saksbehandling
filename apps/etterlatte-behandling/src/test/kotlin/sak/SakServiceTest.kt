@@ -127,15 +127,17 @@ internal class SakServiceTest {
 
         val saksbehandler = simpleSaksbehandler(claims = mapOf(Claims.groups to tilgangsgrupper.map { it.name }))
         nyKontekstMedBruker(
-            SaksbehandlerMedEnheterOgRoller(
-                tokenValidationContext,
-                saksbehandlerService,
-                SaksbehandlerMedRoller(
+            spyk(
+                SaksbehandlerMedEnheterOgRoller(
+                    tokenValidationContext,
+                    saksbehandlerService,
+                    SaksbehandlerMedRoller(
+                        saksbehandler,
+                        groups,
+                    ),
                     saksbehandler,
-                    groups,
                 ),
-                saksbehandler,
-            ),
+            ).also { every { it.name() } returns this::class.java.simpleName },
         )
     }
 
@@ -159,7 +161,7 @@ internal class SakServiceTest {
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         nyKontekstMedBruker(
-            SystemUser(tokenValidationContext, brukerTokenInfo),
+            spyk(SystemUser(tokenValidationContext, brukerTokenInfo)).also { every { it.name() } returns this::class.java.simpleName },
         )
     }
 

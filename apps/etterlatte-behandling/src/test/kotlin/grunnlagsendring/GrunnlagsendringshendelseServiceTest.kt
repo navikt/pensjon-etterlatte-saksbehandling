@@ -15,6 +15,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -89,7 +90,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @BeforeEach
     fun before() {
-        nyKontekstMedBruker(mockk())
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
 
         grunnlagsendringshendelseService =
             spyk(

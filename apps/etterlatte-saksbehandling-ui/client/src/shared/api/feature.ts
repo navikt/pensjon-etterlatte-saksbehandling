@@ -12,7 +12,8 @@ export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiRespon
 }
 
 async function retry(promise: () => Promise<ApiResponse<IFeature[]>>) {
-  return retryInner(2, promise)
+  const numTries = 2
+  return retryInner(numTries, promise)
 }
 
 async function retryInner(

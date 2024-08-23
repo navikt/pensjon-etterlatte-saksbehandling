@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -17,17 +16,15 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import org.slf4j.LoggerFactory
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
-    private val pesysKlient: PesysKlient,
+    pesysKlient: PesysKlient,
     private val behandlingService: BehandlingService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
     private val kontrollpunktEktefelleService = DoedshendelseKontrollpunktEktefelleService()
     private val kontrollpunktAvdoedService = DoedshendelseKontrollpunktAvdoedService()
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
@@ -46,14 +43,7 @@ class DoedshendelseKontrollpunktService(
                 } else {
                     val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                    val fellesKontrollpunkter =
-                        fellesKontrollpunkter(
-                            hendelse,
-                            sak,
-                            avdoed,
-                            barn,
-                            bruker,
-                        )
+                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, barn)
 
                     barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
                 }
@@ -69,20 +59,13 @@ class DoedshendelseKontrollpunktService(
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                     val omsKontrollpunkter =
                         kontrollpunktOMSService.identifiser(
-                            hendelse,
-                            sak,
-                            eps,
-                            avdoed,
-                            bruker,
+                            hendelse = hendelse,
+                            sak = sak,
+                            eps = eps,
+                            avdoed = avdoed,
+                            bruker = bruker,
                         )
-                    val fellesKontrollpunkts =
-                        fellesKontrollpunkter(
-                            hendelse,
-                            sak,
-                            avdoed,
-                            eps,
-                            bruker,
-                        )
+                    val fellesKontrollpunkts = fellesKontrollpunkter(hendelse, sak, eps)
 
                     ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkts
                 }
@@ -97,20 +80,13 @@ class DoedshendelseKontrollpunktService(
                     val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                     val omsKontrollpunkter =
                         kontrollpunktOMSService.identifiser(
-                            hendelse,
-                            sak,
-                            samboer,
-                            avdoed,
-                            bruker,
+                            hendelse = hendelse,
+                            sak = sak,
+                            eps = samboer,
+                            avdoed = avdoed,
+                            bruker = bruker,
                         )
-                    val fellesKontrollpunkter =
-                        fellesKontrollpunkter(
-                            hendelse,
-                            sak,
-                            avdoed,
-                            samboer,
-                            bruker,
-                        )
+                    val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak, samboer)
 
                     avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
                 }
@@ -156,15 +132,12 @@ class DoedshendelseKontrollpunktService(
     private fun fellesKontrollpunkter(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
-        avdoed: PersonDTO,
         gjenlevende: PersonDTO,
-        bruker: BrukerTokenInfo,
     ): List<DoedshendelseKontrollpunkt> {
         val duplikatKontrollpunkt = kontrollerDuplikatHendelse(hendelse, sak)
         val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
-        val haandtertAvPesys = behandletAvPesys(avdoed, gjenlevende, bruker)
 
-        return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt, haandtertAvPesys)
+        return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt)
     }
 
     private fun kontrollerAktivAdresse(gjenlevende: PersonDTO): DoedshendelseKontrollpunkt? =
@@ -202,27 +175,4 @@ class DoedshendelseKontrollpunktService(
             else -> null
         }
     }
-
-    private fun behandletAvPesys(
-        avdoed: PersonDTO,
-        gjenlevende: PersonDTO,
-        bruker: BrukerTokenInfo,
-    ): DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys? =
-        runBlocking {
-            try {
-                if (pesysKlient.erTilstoetendeBehandlet(
-                        gjenlevende.foedselsnummer.verdi.value,
-                        avdoed.doedsdato!!.verdi,
-                        bruker,
-                    )
-                ) {
-                    DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                logger.error("Feil ved kall til Pesys for å sjekke om tilstøtt har blitt behandlet", e)
-                null // TODO: Fjern try-catch når vi har testet at grensesnittet fungerer som det skal mot Pesys
-            }
-        }
 }

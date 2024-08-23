@@ -36,6 +36,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kodeverk.kodeverk
+import no.nav.etterlatte.krr.krrRoute
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -214,6 +215,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
 
     tilgangRoutes(applicationContext.tilgangService)
     kodeverk(applicationContext.kodeverkService)
+    krrRoute(applicationContext.tilgangService, applicationContext.krrKlient)
 }
 
 private fun Route.settOppTilganger(

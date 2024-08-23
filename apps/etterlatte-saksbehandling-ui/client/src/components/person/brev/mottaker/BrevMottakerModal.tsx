@@ -1,4 +1,4 @@
-import { Button, Heading, HGrid, HStack, Modal, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
+import { Button, Heading, HGrid, HStack, Modal, Radio, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -7,6 +7,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -213,6 +214,21 @@ export function BrevMottakerModal({ brev, setBrev }: Props) {
                   error={errors?.adresse?.land?.message}
                 />
               </HGrid>
+
+              <ControlledRadioGruppe
+                name="tvingSentralPrint"
+                control={control}
+                legend="Distribusjonsmetode"
+                description="Automatisk er anbefalt ettersom tjenesten da tar hensyn til brukerens valg i KRR. Dersom
+                det er behov for utsending av fysisk brev kan du tvinge sentral print."
+                radios={
+                  <>
+                    <Radio value={false}>Automatisk</Radio>
+                    <Radio value={true}>Tving sentral print</Radio>
+                  </>
+                }
+              />
+
               {isFailureHandler({
                 apiResult: mottakerStatus,
                 errorMessage: 'Kunne ikke oppdatere mottaker.',

@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -24,7 +25,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AldersovergangRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val aldersovergangService = mockk<AldersovergangService>()
 
@@ -33,20 +34,20 @@ internal class AldersovergangRoutesTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
-    private val token: String by lazy { server.issueSystembrukerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 
     @Test
     fun `skal delegere til aldersovergangservice`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 aldersovergang(behandlingKlient, aldersovergangService)
             }
 

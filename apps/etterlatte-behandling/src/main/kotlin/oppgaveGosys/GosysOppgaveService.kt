@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgaveGosys
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
@@ -92,10 +93,8 @@ class GosysOppgaveServiceImpl(
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<String, Map<String, String>> { _ ->
-                inTransaction {
-                    saksbehandlerInfoDao.hentAlleSaksbehandlere().associate {
-                        it.ident to it.navn
-                    }
+                saksbehandlerInfoDao.hentAlleSaksbehandlere().associate {
+                    it.ident to it.navn
                 }
             }
 
@@ -155,9 +154,11 @@ class GosysOppgaveServiceImpl(
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     override suspend fun hentJournalfoeringsoppgave(
@@ -166,9 +167,11 @@ class GosysOppgaveServiceImpl(
     ): List<GosysOppgave> {
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     private fun List<GosysOppgave>.filterForEnheter(user: User) =
@@ -188,7 +191,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .tilGosysOppgave()
+            .run { inTransaction { tilGosysOppgave() } }
             .also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
@@ -210,15 +213,17 @@ class GosysOppgaveServiceImpl(
         }
 
         val nyOppgave =
-            oppgaveService.opprettOppgave(
-                referanse = gosysOppgave.journalpostId,
-                sakId = sakId,
-                kilde = OppgaveKilde.SAKSBEHANDLER,
-                type = OppgaveType.JOURNALFOERING,
-                merknad = gosysOppgave.beskrivelse,
-                frist = gosysOppgave.frist,
-                saksbehandler = brukerTokenInfo.ident(),
-            )
+            inTransaction {
+                oppgaveService.opprettOppgave(
+                    referanse = gosysOppgave.journalpostId,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.SAKSBEHANDLER,
+                    type = OppgaveType.JOURNALFOERING,
+                    merknad = gosysOppgave.beskrivelse,
+                    frist = gosysOppgave.frist,
+                    saksbehandler = brukerTokenInfo.ident(),
+                )
+            }
 
         val feilregistrertOppgaveId =
             feilregistrer(
@@ -262,8 +267,7 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave =
         gosysOppgaveKlient
-            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .tilGosysOppgave()
+            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo).run { inTransaction { tilGosysOppgave() } }
 
     override suspend fun feilregistrer(
         oppgaveId: String,

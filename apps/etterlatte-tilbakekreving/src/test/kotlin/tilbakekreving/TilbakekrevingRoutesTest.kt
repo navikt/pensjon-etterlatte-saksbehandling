@@ -16,6 +16,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -26,17 +27,17 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val service = mockk<TilbakekrevingService>()
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun afterAll() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
         confirmVerified(service)
     }
 
@@ -128,12 +129,12 @@ internal class TilbakekrevingRoutesTest {
 
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 tilbakekrevingRoutes(service)
             }
             block(this)
         }
     }
 
-    private val token: String by lazy { server.issueSystembrukerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 }

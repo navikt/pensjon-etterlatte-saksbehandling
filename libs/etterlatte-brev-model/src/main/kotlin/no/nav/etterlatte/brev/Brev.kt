@@ -54,6 +54,7 @@ data class Mottaker(
     val foedselsnummer: MottakerFoedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
+    val tvingSentralPrint: Boolean = false,
 ) {
     fun erGyldig(): Boolean =
         if (navn.isBlank()) {

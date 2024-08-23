@@ -9,12 +9,12 @@ import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
-import { KnyttTilAnnentBruker } from './KnyttTilAnnenBruker'
+import { KnyttTilAnnenBruker } from './KnyttTilAnnenBruker'
 import { OpprettJournalfoeringsoppgave } from './OpprettJournalfoeringsoppgave'
 
 enum AvvikHandling {
   UTGAAR = 'UTGAAR',
-  OVERFOER = 'OVERFOER',
+  KNYTT_TIL_ANNEN_SAK = 'KNYTT_TIL_ANNEN_SAK',
   FEILREGISTRER = 'FEILREGISTRER',
   OPPRETT_OPPGAVE = 'OPPRETT_OPPGAVE',
 }
@@ -77,7 +77,7 @@ export const HaandterAvvikModal = ({
             value={aarsak || ''}
             onChange={(checked) => setAarsak(checked as AvvikHandling)}
           >
-            <Radio value={AvvikHandling.OVERFOER}>Overfør til Gjenny</Radio>
+            <Radio value={AvvikHandling.KNYTT_TIL_ANNEN_SAK}>Knytt til annen sak</Radio>
             <Radio value={AvvikHandling.FEILREGISTRER}>
               {journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? 'Opphev feilregistrering' : 'Feilregistrer'}
             </Radio>
@@ -93,13 +93,9 @@ export const HaandterAvvikModal = ({
               <FeilregistrerJournalpost journalpost={journalpost} />
             ))}
 
-          {aarsak === AvvikHandling.OVERFOER &&
+          {aarsak === AvvikHandling.KNYTT_TIL_ANNEN_SAK &&
             (kanEndreJournalpost(journalpost) ? (
-              <KnyttTilAnnentBruker
-                journalpost={journalpost}
-                sakStatus={sakStatus}
-                lukkModal={() => setIsOpen(false)}
-              />
+              <KnyttTilAnnenBruker journalpost={journalpost} sakStatus={sakStatus} lukkModal={() => setIsOpen(false)} />
             ) : (
               <KnyttTilAnnenSak journalpost={journalpost} sakStatus={sakStatus} lukkModal={() => setIsOpen(false)} />
             ))}

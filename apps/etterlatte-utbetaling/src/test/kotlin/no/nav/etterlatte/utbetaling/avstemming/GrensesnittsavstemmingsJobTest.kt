@@ -60,10 +60,10 @@ internal class GrensesnittsavstemmingsJobTest {
         grensesnittavstemming.run()
         omsGrensesnittavstemming.run()
 
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON, any())
         }
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD, any())
         }
         assertTrue(leaderElection.isLeader())

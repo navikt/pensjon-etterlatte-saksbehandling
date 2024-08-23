@@ -84,6 +84,7 @@ app.use(
     '/api/sjekkliste',
     '/api/bosattutland',
     '/api/kodeverk',
+    '/api/krr',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

@@ -7,6 +7,7 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
+import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -16,8 +17,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.UUID
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -84,13 +83,3 @@ internal class InntektsjusteringRiver(
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =
         this[InntektsjusteringInnsendt.inntektsjusteringInnhold].let { objectMapper.treeToValue<Inntektsjustering>(it) }
 }
-
-// TODO i felles repo
-data class Inntektsjustering(
-    val id: UUID,
-    val arbeidsinntekt: Int,
-    val naeringsinntekt: Int,
-    val arbeidsinntektUtland: Int,
-    val naeringsinntektUtland: Int,
-    val tidspunkt: LocalDateTime,
-)

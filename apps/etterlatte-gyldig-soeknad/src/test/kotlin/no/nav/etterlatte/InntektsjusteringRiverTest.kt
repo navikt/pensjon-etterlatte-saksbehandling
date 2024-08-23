@@ -16,6 +16,7 @@ import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT
+import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -24,7 +25,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import kotlin.random.Random
 
@@ -49,7 +50,7 @@ internal class InntektsjusteringRiverTest {
                 naeringsinntekt = 200,
                 arbeidsinntektUtland = 300,
                 naeringsinntektUtland = 400,
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Instant.now(),
             )
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak

@@ -58,7 +58,7 @@ class SakendringerDao(
                 prepareStatement(
                     """
                     INSERT INTO sakendringer(id, sakId, sakFoer, sakEtter, tidspunkt, saksbehandler, kallendeMetode)
-                    VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?, ?, ?)
+                    VALUES(?::UUID, ?, ?::JSONB, ?::JSONB, ?, ?, ?)
                     """.trimIndent(),
                 )
             statement.setObject(1, UUID.randomUUID())

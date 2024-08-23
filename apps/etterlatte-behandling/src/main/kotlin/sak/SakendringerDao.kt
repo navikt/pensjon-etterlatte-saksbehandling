@@ -57,17 +57,17 @@ class SakendringerDao(
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO sakendringer(id, sakId, sakFoer, sakEtter, tidspunkt, saksbehandler, kallendeMetode)
-                    VALUES(?::UUID, ?, ?::JSONB, ?::JSONB, ?, ?, ?)
+                    INSERT INTO endringer(tabell, id, foer, etter, tidspunkt, saksbehandler, kallendeMetode)
+                    VALUES(?, ?::UUID, ?::JSONB, ?::JSONB, ?, ?, ?)
                     """.trimIndent(),
                 )
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, sakEtter.id)
+            statement.setObject(1, "sak")
+            statement.setObject(2, UUID.randomUUID())
             statement.setJsonb(3, sakFoer)
             statement.setJsonb(4, sakEtter)
             statement.setTidspunkt(5, Tidspunkt.now())
             statement.setString(6, Kontekst.get().AppUser.name())
-            statement.setString(7, kallendeMetode)
+            statement.setString(7, "${this::class.java.simpleName}: $kallendeMetode")
 
             statement.executeUpdate()
         }

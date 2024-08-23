@@ -1,10 +1,10 @@
-CREATE TABLE sakendringer
+CREATE TABLE endringer
 (
     id             UUID PRIMARY KEY,
-    sakId          BIGINT NOT NULL,
-    sakFoer        JSONB,
-    sakEtter       JSONB,
+    tabell         TEXT   NOT NULL,
+    foer           JSONB,
+    etter          JSONB,
     tidspunkt      TIMESTAMP,
-    saksbehandler  TEXT NOT NULL,
-    kallendeMetode TEXT NOT NULL
+    saksbehandler  TEXT   NOT NULL,
+    kallendeMetode TEXT   NOT NULL
 );

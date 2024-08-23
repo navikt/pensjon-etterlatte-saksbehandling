@@ -7,8 +7,7 @@ export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiRespon
     return apiClient.post(`/feature`, { features: brytere })
   }
 
-  const promise = () => post()
-  return retry(promise)
+  return retry(() => post())
 }
 
 async function retry(promise: () => Promise<ApiResponse<IFeature[]>>) {

@@ -33,7 +33,7 @@ class AppBuilder(
                 httpClient(EnvKey.DOKARKIV_SCOPE),
                 env.requireEnvValue(DOKARKIV_URL),
             ),
-            PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL)),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/eypdfgen"),
         )
     }
 
@@ -43,8 +43,7 @@ class AppBuilder(
                 httpClient(EnvKey.DOKARKIV_SCOPE),
                 env.requireEnvValue(DOKARKIV_URL),
             ),
-            // TODO skal få egen mal og path
-            PdfGeneratorKlient(httpClient(), "http://ey-pdfgen/api/v1/genpdf/notat"),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/inntektsjustering"),
         )
     }
 

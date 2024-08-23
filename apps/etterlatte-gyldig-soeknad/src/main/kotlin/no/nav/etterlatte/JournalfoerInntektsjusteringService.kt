@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 import java.util.Base64
 import java.util.UUID
@@ -92,7 +93,10 @@ class JournalfoerInntektsjusteringService(
 
         return runBlocking {
             retry {
-                pdfgenKlient.genererPdf(jsonInnhold(sakId, inntektsaar, inntektsjustering), "tom_mal")
+                pdfgenKlient.genererPdf(
+                    jsonInnhold(sakId, inntektsaar, inntektsjustering),
+                    "inntektsjustering_nytt_aar_v1",
+                )
             }.let {
                 when (it) {
                     is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
@@ -106,7 +110,6 @@ class JournalfoerInntektsjusteringService(
     }
 }
 
-// TODO skal erstattes med egen mal
 private fun jsonInnhold(
     sakId: Long,
     aar: String,
@@ -114,40 +117,15 @@ private fun jsonInnhold(
 ): JsonNode {
     val json = """
     {
-      "tittel" : "Inntektsjustering $aar",
-      "payload" : [
-        {
-          "type" : "heading-three",
-          "children" : [
-            {
-              "type" : "paragraph",
-              "text" : "Inntekt for sak $sakId ble mottatt ${inntektsjustering.tidspunkt}"
-            }
-          ]
-        },
-        {
-          "type" : "paragraph",
-          "children" : [
-            {
-              "type" : "paragraph",
-              "text" : "Arbeidsinntekt: ${inntektsjustering.arbeidsinntekt}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Næringsinntekt: ${inntektsjustering.naeringsinntekt}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Arbeidsinntekt utland: ${inntektsjustering.arbeidsinntektUtland}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Næringsinntekt utland: ${inntektsjustering.naeringsinntektUtland}"
-            }
-          ]
-        }
-      ]
+      "sakId" : $sakId,
+      "aar": $aar,
+      "arbeidsinntekt": ${inntektsjustering.arbeidsinntekt},
+      "naeringsinntekt": ${inntektsjustering.naeringsinntekt},
+      "arbeidsinntektUtland": ${inntektsjustering.arbeidsinntektUtland},
+      "naeringsinntektUtland": ${inntektsjustering.naeringsinntektUtland},
+      "tidspunkt": ${inntektsjustering.tidspunkt.toJson()}
     }
 """
+    // "inntektsjustering" : ${inntektsjustering.toJson()}
     return objectMapper.readTree(json)
 }

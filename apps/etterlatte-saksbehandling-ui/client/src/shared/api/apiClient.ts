@@ -100,7 +100,6 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
             errorInfo: { url, method, error },
           })
         }
-        //unleash wrapper kaster ikke det
         console.error(error, response)
         return { ...error, ok: false }
       } else {

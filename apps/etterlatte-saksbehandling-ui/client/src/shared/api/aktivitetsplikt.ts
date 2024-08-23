@@ -42,6 +42,18 @@ export const slettAktivitet = async (args: {
 export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitet[]>> =>
   apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`)
 
+export const opprettAktivitetForSak = async (args: {
+  sakId: number
+  request: IOpprettAktivitet
+}): Promise<ApiResponse<IAktivitet[]>> =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const slettAktivitetForSak = async (args: {
+  sakId: number
+  aktivitetId: string
+}): Promise<ApiResponse<IAktivitet[]>> =>
+  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
+
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number
 }): Promise<ApiResponse<IAktivitetspliktVurderingNy>> => apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)

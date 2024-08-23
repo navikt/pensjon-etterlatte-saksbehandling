@@ -112,7 +112,7 @@ export const Person = () => {
                 icon={<PersonIcon />}
               />
               <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
-              {isOmstillingsstoenad(sakResult) && skalViseAktivitet && (
+              {isOmstillingsstoenad(sakResult) && !skalViseAktivitet && (
                 <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
               )}
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />

@@ -137,9 +137,13 @@ async function errorFrom(response: Response): Promise<JsonError> {
   try {
     return JSON.parse(responseContent)
   } catch (err) {
-    logger.generalError({ msg: responseContent || `Feil oppsto ved parsing av JSON-error. HTTP-kode: ${response.status} url: ${response.url}` })
+    logger.generalError({
+      msg:
+        `${responseContent} $Url: ${response.url}` ||
+        `Feil oppsto ved parsing av JSON-error. HTTP-kode: ${response.status} url: ${response.url}`,
+    })
 
-    return { status: response.status, detail: 'Fikk feil i kall mot backend' }
+    return { status: response.status, detail: `Fikk feil i kall mot backend Url: ${response.url}` }
   }
 }
 

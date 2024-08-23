@@ -184,6 +184,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
                 valueAsNumber: true,
                 required: { value: true, message: 'Må settes' },
                 validate: validerStringNumber,
+                shouldUnregister: true,
               })}
               label={
                 <HStack gap="2">

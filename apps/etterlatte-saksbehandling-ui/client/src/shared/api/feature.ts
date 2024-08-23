@@ -1,4 +1,4 @@
-import {apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
+import { apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
 import { IFeature } from '~shared/types/IFeature'
 import { logger } from '~utils/logger'
 
@@ -7,7 +7,7 @@ export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiRespon
     return apiClient.post(`/feature`, { features: brytere })
   }
 
-  const promise = () => post();
+  const promise = () => post()
   return retry(promise)
 }
 
@@ -15,15 +15,25 @@ async function retry(promise: () => Promise<ApiResponse<IFeature[]>>) {
   return retryInner(2, promise)
 }
 
-async function retryInner(times: number, promise: () => Promise<ApiResponse<IFeature[]>>) {
+async function retryInner(
+  times: number,
+  promise: () => Promise<ApiResponse<IFeature[]>>
+): Promise<ApiResponse<IFeature[]> | ApiError> {
   if (times < 1) {
     return { ok: false } as ApiError
   }
-  const res = await promise();
-  if (res.ok) {
-    return res
-  } else {
-    logger.generalError({message: 'Feil i henting av brytere mot Unleash. Prøver på nytt'})
-    return retryInner(times -1, promise)
-  }
+
+  return promise()
+    .then((res) => {
+      if (res.ok) {
+        return res
+      } else {
+        logger.generalError({ message: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
+        return retryInner(times - 1, promise)
+      }
+    })
+    .catch((err) => {
+      logger.generalError({ message: `Feil i henting av brytere mot Unleash. Prøver på nytt... error: ${err}` })
+      return retryInner(times - 1, promise)
+    })
 }

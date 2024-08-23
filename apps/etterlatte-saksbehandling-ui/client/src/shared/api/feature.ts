@@ -7,7 +7,7 @@ export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiRespon
     return apiClient.post(`/feature`, { features: brytere })
   }
 
-  let promise = () => post();
+  const promise = () => post();
   return retry(promise)
 }
 
@@ -19,7 +19,7 @@ async function retryInner(times: number, promise: () => Promise<ApiResponse<IFea
   if (times < 1) {
     return { ok: false } as ApiError
   }
-  let res = await promise();
+  const res = await promise();
   if (res.ok) {
     return res
   } else {

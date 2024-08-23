@@ -14,9 +14,9 @@ export interface TrygdetidsperiodeListe {
 }
 
 export interface TrygdetidPeriodePesys {
-  isoCode?: String, // ISO 3166-1 alpha-3 code:
-  fra?: String, //TODO: eller date?
-  til?: String,
+  isoCode: String, // ISO 3166-1 alpha-3 code:
+  fra: String, //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
+  til: String,
   poengInnAar?: Boolean,
   poengUtAar?: Boolean,
   prorata?: Boolean,

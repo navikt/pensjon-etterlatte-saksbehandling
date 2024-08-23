@@ -137,9 +137,9 @@ data class TrygdetidsPeriodeListe(
 )
 
 data class TrygdetidPeriodePesys(
-    val isoCode: String?, // ISO 3166-1 alpha-3 code:
-    val fra: LocalDate?,
-    val til: LocalDate?,
+    val isoCode: String, // ISO 3166-1 alpha-3 code:
+    val fra: LocalDate,
+    val til: LocalDate,
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
@@ -148,9 +148,9 @@ data class TrygdetidPeriodePesys(
 
 fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
     TrygdetidPeriodePesys(
-        isoCode = land,
-        fra = fomDato?.let { toNorskLocalDate(it.toInstant()) },
-        til = tomDato?.let { toNorskLocalDate(it.toInstant()) },
+        isoCode = land!!,
+        fra = toNorskLocalDate(fomDato.toInstant()),
+        til = toNorskLocalDate(fomDato.toInstant()),
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),

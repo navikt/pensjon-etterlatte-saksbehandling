@@ -101,7 +101,9 @@ class BeregningsGrunnlagService(
                             institusjonsoppholdBeregningsgrunnlag =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
-                            beregningsMetodeFlereAvdoede = beregningsGrunnlag.beregningsMetodeFlereAvdoede ?: emptyList(),
+                            beregningsMetodeFlereAvdoede =
+                                beregningsGrunnlag.beregningsMetodeFlereAvdoede
+                                    ?: emptyList(),
                         ),
                     )
             }
@@ -163,7 +165,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag,
+                forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
                 revurderingVirk,
             )
 
@@ -323,7 +325,8 @@ class BeregningsGrunnlagService(
                 val nyePerioder = mutableListOf<OverstyrBeregningGrunnlagDao>()
                 grunnlag.forEach {
                     val erFoerRegulering = it.datoTOM != null && it.datoTOM!! < reguleringsmaaned
-                    val erOverRegulering = it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
+                    val erOverRegulering =
+                        it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
 
                     if (erFoerRegulering) {
                         nyePerioder.add(it)
@@ -331,7 +334,12 @@ class BeregningsGrunnlagService(
                         val forrigeMaaned = reguleringsmaaned.minusMonths(1)
                         val eksisterende =
                             it.copy(
-                                datoTOM = LocalDate.of(reguleringsmaaned.year, forrigeMaaned.month, forrigeMaaned.lengthOfMonth()),
+                                datoTOM =
+                                    LocalDate.of(
+                                        reguleringsmaaned.year,
+                                        forrigeMaaned.month,
+                                        forrigeMaaned.lengthOfMonth(),
+                                    ),
                             )
                         val nyPeriode =
                             tilpassOverstyrtBeregningsgrunnlagForRegulering(

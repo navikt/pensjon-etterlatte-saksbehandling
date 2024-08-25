@@ -81,13 +81,16 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
     if (anvendteTrygdetiderIdenter.isEmpty()) {
         throw ManglerAvdoedBruktTilTrygdetid()
     }
+    // Ikke alle trygdetider er nødvendigvis brukt i beregningen, og har da ikke en anvendt trygdetid beregnet med
+    // For disse trygdetidene fyller vi bare inn det som er brukt i den siste beregningsmetoden.
+    // Brevet hvilke trygdetider den kan bruke til å si noe om beregningsmetode anvendt / i grunnlag
     val fallbackMetode =
         anvendteTrygdetiderIdenter[beregningsperioder.maxBy { it.datoFOM }.trygdetidForIdent]
             ?: throw ManglerAvdoedBruktTilTrygdetid()
 
     return trygdetid.map {
-        val releventMetode = anvendteTrygdetiderIdenter[it.ident] ?: fallbackMetode
-        it.fromDto(releventMetode.beregningsMetodeAnvendt, releventMetode.beregningsMetodeFraGrunnlag, avdoede)
+        val relevantMetode = anvendteTrygdetiderIdenter[it.ident] ?: fallbackMetode
+        it.fromDto(relevantMetode.beregningsMetodeAnvendt, relevantMetode.beregningsMetodeFraGrunnlag, avdoede)
     }
 }
 

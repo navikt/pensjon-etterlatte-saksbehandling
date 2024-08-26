@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 /**
@@ -14,7 +16,7 @@ class TestRapid : RapidsConnection() {
     }
 
     fun sendTestMessage(message: String) {
-        notifyMessage(message, this)
+        notifyMessage(message, this, PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
     }
 
     override fun publish(message: String) {

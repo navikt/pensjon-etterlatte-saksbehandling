@@ -27,8 +27,12 @@ internal class InntektsjusteringVarselRiver(
         val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
         logger.info("Starter varsel om inntektsjustering for $inntektsaar")
 
-        // TODO: hente saker som skal varsles
+        // TODO: hente alle saker som skal varsles
 
-        // TODO: sende varsel om inntektsjustering
+        // TODO: sende varsel om inntektsjustering pr sak
+
+        // TODO: marker som varslet?
+
+        // TODO: rapporter tilbake?
     }
 }

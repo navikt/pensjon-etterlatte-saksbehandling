@@ -1,12 +1,12 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering.dao
 
+import kotlinx.coroutines.runBlocking
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -16,96 +16,55 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.Transactions
-import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
 import org.slf4j.LoggerFactory
 import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(
-    private val ds: DataSource,
+    private val vilkaarsvurderingKlientDao: VilkaarsvurderingKlientDao,
     private val delvilkaarRepository: DelvilkaarRepository,
 ) : Transactions<VilkaarsvurderingRepository> {
-    override fun <R> inTransaction(block: VilkaarsvurderingRepository.(TransactionalSession) -> R): R = ds.transaction { this.block(it) }
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hent(behandlingId: UUID): Vilkaarsvurdering? =
-        using(sessionOf(ds)) { session ->
-            queryOf(Queries.HENT_VILKAARSVURDERING, mapOf("behandling_id" to behandlingId))
-                .let { query ->
-                    session.run(
-                        query
-                            .map { row ->
-                                val vilkaarsvurderingId = row.uuid("id")
-                                row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
-                            }.asSingle,
-                    )
-                }
-        }
+    // TODO: se over struktur med runblocking her
+    fun hent(behandlingId: UUID): Vilkaarsvurdering? = runBlocking { vilkaarsvurderingKlientDao.hent(behandlingId) }
 
+    // TODO: trenger å gjøre behandlingKlient.hentBehandling(behandlingId, bruker).sak, o.l.
     fun hentMigrertYrkesskadefordel(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        hent(
-            queryString = Queries.HENT_MIGRERT_YRKESSKADE,
-            params =
-                mapOf(
-                    "sak_id" to sakId,
-                ),
-        ) {
-            true
-        } ?: false
-    }
-
-    private fun hentNonNull(
         behandlingId: UUID,
-        tx: TransactionalSession,
-    ): Vilkaarsvurdering {
-        val params = mapOf("behandling_id" to behandlingId)
-        return tx.hent(Queries.HENT_VILKAARSVURDERING, params) { row ->
-            val vilkaarsvurderingId = row.uuid("id")
-            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
-        } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
-    }
+        sakId: Long,
+    ): Boolean = runBlocking { vilkaarsvurderingKlientDao.erMigrertYrkesskadefordel(behandlingId, sakId) }
 
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
-        ds.transaction { tx ->
-            opprettVilkaarsvurdering(vilkaarsvurdering, tx)
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
+        runBlocking {
+            vilkaarsvurderingKlientDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         }
-
-        return hentNonNull(vilkaarsvurdering.behandlingId)
-    }
 
     fun kopierVilkaarsvurdering(
         nyVilkaarsvurdering: Vilkaarsvurdering,
         kopiertFraId: UUID,
     ): Vilkaarsvurdering {
-        ds.transaction { tx ->
-            lagreVilkaarsvurderingResultatKopiering(nyVilkaarsvurdering, tx)
-            opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
+        opprettVilkaarsvurdering(nyVilkaarsvurdering)
+        runBlocking {
+            vilkaarsvurderingKlientDao.kopierVilkaarsvurdering(
+                OpprettVilkaarsvurderingFraBehandling(kopiertFraId, nyVilkaarsvurdering),
+            )
         }
-
-        return hentNonNull(nyVilkaarsvurdering.behandlingId)
+        return hent(nyVilkaarsvurdering.behandlingId)!!
     }
 
-    private fun opprettVilkaarsvurdering(
-        vilkaarsvurdering: Vilkaarsvurdering,
-        tx: TransactionalSession,
-    ) {
-        val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
-        vilkaarsvurdering.vilkaar.forEach { vilkaar ->
-            val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-            delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
+    fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
+        runBlocking {
+            vilkaarsvurderingKlientDao.slettTotalVurdering(behandlingId)
         }
-    }
 
     private fun opprettVilkaarsvurderingKilde(
         vilkaarsvurderingId: UUID,
@@ -122,13 +81,13 @@ class VilkaarsvurderingRepository(
         ).let { tx.run(it.asUpdate) }
     }
 
-    fun lagreVilkaarsvurderingResultatKopiering(
+    fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
-        vilkaarsvurdering: Vilkaarsvurdering,
     ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
+            val vilkaarsvurdering = hentNonNull(behandlingId)
             vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let {
                 session.run(
                     it.asExecute,
@@ -139,18 +98,14 @@ class VilkaarsvurderingRepository(
         return hentNonNull(behandlingId)
     }
 
-    private fun lagreVilkaarsvurderingResultatKopiering(
-        nyVilkaarsvurdering: Vilkaarsvurdering,
-        tx: TransactionalSession,
+    private fun lagreVilkaarsvurderingResultat(
+        behandlingId: UUID,
+        virkningstidspunkt: LocalDate,
+        resultat: VilkaarsvurderingResultat,
+        vilkaarsvurdering: Vilkaarsvurdering,
     ): Vilkaarsvurdering {
-        vilkaarsvurderingResultatQuery(
-            nyVilkaarsvurdering,
-            nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
-            nyVilkaarsvurdering.resultat!!,
-        ).let {
-            tx.run(it.asExecute)
-        }
-        return hentNonNull(nyVilkaarsvurdering.behandlingId, tx)
+        vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat)
+        return hent(behandlingId)!!
     }
 
     private fun vilkaarsvurderingResultatQuery(
@@ -169,17 +124,6 @@ class VilkaarsvurderingRepository(
                 "resultat_saksbehandler" to resultat.saksbehandler,
             ),
     )
-
-    fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
-
-            queryOf(Queries.SLETT_VILKAARSVURDERING_RESULTAT, mapOf("id" to vilkaarsvurdering.id))
-                .let { session.run(it.asUpdate) }
-        }
-
-        return hentNonNull(behandlingId)
-    }
 
     fun lagreVilkaarResultat(
         behandlingId: UUID,

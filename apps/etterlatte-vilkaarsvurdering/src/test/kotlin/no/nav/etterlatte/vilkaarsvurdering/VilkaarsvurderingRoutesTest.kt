@@ -49,6 +49,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource

@@ -16,6 +16,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -41,7 +44,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val opprettVilkaarsvurderingMedResultat =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
                 opprettetVilkaarsvurdering.behandlingId,
                 vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -78,7 +81,7 @@ internal class VilkaarsvurderingRepositoryTest(
         val nyttVirkningstidspunkt = opprettetVilkaarsvurdering.virkningstidspunkt.minusYears(1)
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
                 opprettetVilkaarsvurdering.behandlingId,
                 nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -97,7 +100,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal sette resultat paa vilkaarsvurdering og slette det`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
             opprettetVilkaarsvurdering.behandlingId,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat,

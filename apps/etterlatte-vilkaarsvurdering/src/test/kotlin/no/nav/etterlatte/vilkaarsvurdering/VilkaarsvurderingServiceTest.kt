@@ -49,6 +49,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.RegisterExtension
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -754,7 +757,7 @@ internal class VilkaarsvurderingServiceTest(
                 ),
             )
 
-        return repository.lagreVilkaarsvurderingResultat(
+        return repository.lagreVilkaarsvurderingResultatKopiering(
             behandlingId = opprettetVilkaarsvudering.behandlingId,
             virkningstidspunkt = LocalDate.of(2024, 1, 1),
             resultat =

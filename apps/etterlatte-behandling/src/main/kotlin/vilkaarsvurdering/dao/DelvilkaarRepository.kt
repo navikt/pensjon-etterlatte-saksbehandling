@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering.dao
 
 import kotliquery.Row
 import kotliquery.TransactionalSession
@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.VurdertVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarTypeOgUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
 import java.util.UUID
 
 class DelvilkaarRepository {

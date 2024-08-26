@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import vilkaarsvurdering.Vilkaarsvurdering
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID

@@ -154,6 +154,8 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -602,6 +604,9 @@ internal class ApplicationContext(
         MigreringService(
             behandlingService = behandlingService,
         )
+
+    val vilkaarsvurderingService = VilkaarsvurderingService(null, behandlingService, grunnlagKlient, behandlingsStatusService)
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {

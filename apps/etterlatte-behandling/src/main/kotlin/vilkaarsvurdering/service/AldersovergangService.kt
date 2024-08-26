@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering.service
 
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarTypeOgUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -24,7 +24,7 @@ class AldersovergangService(
     ): Vilkaarsvurdering {
         val vilkaarsvurdering =
             vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-                ?: vilkaarsvurderingService // TODO: skal skje i behandling
+                ?: vilkaarsvurderingService
                     .kopierVilkaarsvurdering(
                         behandlingId = behandlingId,
                         kopierFraBehandling = loependeBehandlingId,

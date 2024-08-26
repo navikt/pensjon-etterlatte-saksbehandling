@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar

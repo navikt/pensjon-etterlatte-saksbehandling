@@ -23,6 +23,7 @@ class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst,
     val sakTilgangDao: SakTilgangDao,
+    val brukerTokenInfo: BrukerTokenInfo,
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller = this.AppUser as SaksbehandlerMedEnheterOgRoller
 }

@@ -79,10 +79,6 @@ spec:
     max: 4
     min: 2
   env:
-    - name: ETTERLATTE_BEHANDLING_URL
-      value: http://etterlatte-behandling
-    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
@@ -92,15 +88,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: etterlatte-behandling # la stå
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
-        - application: etterlatte-behandling
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-vilkaarsvurdering-kafka
-    outbound:
-      rules:
-        - application: etterlatte-behandling
-        - application: etterlatte-grunnlag
-      external:
-        - host: etterlatte-unleash-api.nav.cloud.nais.io

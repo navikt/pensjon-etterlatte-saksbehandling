@@ -10,8 +10,10 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import java.util.UUID
 
+// TODO: legg til i app.kt
 fun Route.aldersovergang(aldersovergangService: AldersovergangService) {
     route("/api/vilkaarsvurdering/aldersovergang") {
         val logger = routeLogger

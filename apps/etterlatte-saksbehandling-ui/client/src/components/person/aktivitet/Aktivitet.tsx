@@ -1,8 +1,12 @@
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { BodyShort, Box, Heading, Table, VStack } from '@navikt/ds-react'
-import { tekstAktivitetspliktUnntakType, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Heading, Table, Tag, VStack } from '@navikt/ds-react'
+import {
+  AktivitetspliktUnntakType,
+  tekstAktivitetspliktUnntakType,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitspliktVurderingForSak } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
@@ -113,6 +117,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                       <Table.Header>
                         <Table.Row>
                           <Table.HeaderCell scope="col">Unntak</Table.HeaderCell>
+                          <Table.HeaderCell scope="col">Type</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
@@ -126,6 +131,14 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                             {vurdering.unntak.map((unntak) => (
                               <Table.Row key={unntak.id}>
                                 <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
+                                <Table.DataCell>
+                                  <Tag variant="neutral">
+                                    {unntak.unntak ===
+                                    AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                                      ? 'Varig'
+                                      : 'Midlertidig'}
+                                  </Tag>
+                                </Table.DataCell>
                                 <Table.DataCell>{unntak.fom ? formaterDato(unntak.fom) : '-'}</Table.DataCell>
                                 <Table.DataCell>{unntak.tom ? formaterDato(unntak.tom) : '-'}</Table.DataCell>
                                 <Table.DataCell>{unntak.beskrivelse ? unntak.beskrivelse : '-'}</Table.DataCell>
@@ -138,7 +151,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                           </>
                         ) : (
                           <Table.Row>
-                            <Table.DataCell colSpan={6}>Finner ingen unntak</Table.DataCell>
+                            <Table.DataCell colSpan={7}>Finner ingen unntak</Table.DataCell>
                           </Table.Row>
                         )}
                       </Table.Body>

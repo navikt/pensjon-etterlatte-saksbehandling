@@ -24,19 +24,22 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 internal class TrygdetidsfaktorTest {
+    val trygdetidIdent = "22511075258"
+
     private val trygdetid =
         samletTrygdetid(
             BeregningsMetode.NASJONAL,
             samletTrygdetidNorge = Beregningstall(40.0),
             samletTrygdetidTeoretisk = Beregningstall(30.0),
             broek = IntBroek(1, 2),
+            ident = trygdetidIdent,
         )
 
     @Test
     fun `trygdetidRegel skal returnere 40 aars trygdetid for nasjonal`() {
         val resultat = anvendtTrygdetidRegel.anvend(TrygdetidGrunnlag(trygdetid), REGEL_PERIODE)
 
-        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
+        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0), trygdetidIdent)
     }
 
     @Test
@@ -58,7 +61,7 @@ internal class TrygdetidsfaktorTest {
                 REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
+        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0), trygdetidIdent)
     }
 
     @Test

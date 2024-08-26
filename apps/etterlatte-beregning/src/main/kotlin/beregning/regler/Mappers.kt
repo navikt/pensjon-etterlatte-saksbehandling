@@ -20,5 +20,5 @@ fun TrygdetidDto.toSamlet(beregningsMetode: BeregningsMetode): SamletTrygdetidMe
 data class AnvendtTrygdetid(
     val beregningsMetode: BeregningsMetode,
     val trygdetid: Beregningstall,
-    val ident: String? = null,
+    val ident: String,
 )

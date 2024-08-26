@@ -79,7 +79,7 @@ fun samletTrygdetid(
     samletTrygdetidNorge: Beregningstall? = null,
     samletTrygdetidTeoretisk: Beregningstall? = null,
     broek: IntBroek? = null,
-    ident: String? = null,
+    ident: String,
 ) = FaktumNode(
     SamletTrygdetidMedBeregningsMetode(
         beregningsMetode = beregningsMetode,

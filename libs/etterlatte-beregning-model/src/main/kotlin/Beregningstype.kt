@@ -25,7 +25,7 @@ data class SamletTrygdetidMedBeregningsMetode(
     val samletTrygdetidNorge: Beregningstall?,
     val samletTrygdetidTeoretisk: Beregningstall?,
     val prorataBroek: IntBroek?,
-    val ident: String?,
+    val ident: String,
 ) {
     fun broek() = Beregningstall(this.prorataBroek?.let { it.teller.toDouble() / it.nevner.toDouble() } ?: 1.0)
 }

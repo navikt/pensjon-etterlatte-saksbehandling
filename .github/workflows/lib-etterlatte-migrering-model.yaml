@@ -8,6 +8,7 @@ on:
     paths:
       - libs/etterlatte-migrering-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

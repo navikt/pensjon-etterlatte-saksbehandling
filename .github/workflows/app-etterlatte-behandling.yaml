@@ -51,7 +51,6 @@ on:
       - libs/etterlatte-funksjonsbrytere/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
-      - "!**/test/**"
 
 permissions:
   contents: write

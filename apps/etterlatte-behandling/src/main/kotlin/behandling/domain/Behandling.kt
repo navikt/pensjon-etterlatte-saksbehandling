@@ -228,6 +228,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         kilde = kilde,
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
+        relatertBehandlingId = relatertBehandlingId,
     )
 
 fun Behandling.toBehandlingSammendrag() =

@@ -79,8 +79,19 @@ class BrevdataFacade(
                 }
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
             val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
+            val relatertKlageId =
+                when (behandling?.revurderingsaarsak) {
+                    Revurderingaarsak.OMGJOERING_ETTER_KLAGE -> {
+                        requireNotNull(behandling.relatertBehandlingId) {
+                            "Vi må få med den relaterte klagen til behanldingen hvis dette vedtaket er en omgjøring " +
+                                "etter klage, for å få riktig brev."
+                        }
+                    }
+                    else -> null
+                }
 
-            val forenkletVedtak = vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo)
+            val forenkletVedtak =
+                vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo, relatertKlageId)
 
             GenerellBrevData(
                 sak = sak,
@@ -100,6 +111,7 @@ class BrevdataFacade(
         saksbehandlerIdent: String,
         attestantIdent: String?,
         bruker: BrukerTokenInfo,
+        relatertKlageId: String?,
     ): Pair<ForenkletVedtak?, Revurderingaarsak?> =
         when (vedtak?.type) {
             VedtakType.INNVILGELSE,
@@ -121,7 +133,8 @@ class BrevdataFacade(
                             revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                             klage =
                                 if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-                                    behandlingService.hentKlageForBehandling(vedtakInnhold.behandling.id, sak.id, bruker)
+                                    val klageId = UUID.fromString(relatertKlageId)
+                                    behandlingService.hentKlage(klageId, bruker)
                                 } else {
                                     null
                                 },

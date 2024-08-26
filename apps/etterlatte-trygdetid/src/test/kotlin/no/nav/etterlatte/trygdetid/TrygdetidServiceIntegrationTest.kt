@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -59,6 +60,7 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<BehandlingKlient>(),
                 grunnlagKlient,
                 TrygdetidBeregningService,
+                mockk<PesysKlient>()
             )
     }
 

@@ -16,7 +16,7 @@ import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
-export const KnyttTilAnnentBruker = ({
+export const KnyttTilAnnenBruker = ({
   journalpost,
   sakStatus,
   lukkModal,

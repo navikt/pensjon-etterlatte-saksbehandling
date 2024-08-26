@@ -5,7 +5,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Box, ErrorMessage, Heading, Label, Table } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Box, Heading, Label, Table } from '@navikt/ds-react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
@@ -14,6 +14,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
 import { compareDesc } from 'date-fns'
+import { SakType } from '~shared/types/sak'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -71,7 +72,20 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
             simuleringrespons ? (
               <SimuleringBeregning data={simuleringrespons} />
             ) : (
-              <ErrorMessage size="small">Simuleringstjenesten ga ikke svar.</ErrorMessage>
+              <>
+                {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+                  <BodyLong>
+                    Fant ingen utbetalinger å simulere. Dette kan være fordi omstillingsstønaden er avkortet til 0 på
+                    grunn av inntekt, sanksjon e.l.
+                  </BodyLong>
+                )}
+                {behandling.sakType == SakType.BARNEPENSJON && (
+                  <BodyLong>
+                    Fant ingen utbetalinger å simulere. Dette kan være fordi barnepensjonen er avkortet til 0 på grunn
+                    av uføretrygd e.l.
+                  </BodyLong>
+                )}
+              </>
             ),
           error: () => <ApiErrorAlert>Feil ved simulering</ApiErrorAlert>,
         })}

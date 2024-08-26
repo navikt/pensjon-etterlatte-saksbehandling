@@ -75,7 +75,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentBehandlingerForSak(sakid: Long): List<Behandling> =
+    fun hentBehandlingerForSak(sakid: no.nav.etterlatte.libs.common.sak.SakId): List<Behandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -92,7 +92,7 @@ class BehandlingDao(
         }
 
     fun hentAlleRevurderingerISakMedAarsak(
-        sakid: Long,
+        sakid: no.nav.etterlatte.libs.common.sak.SakId,
         revurderingaarsak: Revurderingaarsak,
     ): List<Revurdering> =
         connectionAutoclosing.hentConnection {

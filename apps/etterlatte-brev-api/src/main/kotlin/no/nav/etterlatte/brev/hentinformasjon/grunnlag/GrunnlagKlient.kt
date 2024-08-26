@@ -29,7 +29,7 @@ class GrunnlagKlient(
     private val baseUrl = config.getString("grunnlag.resource.url")
 
     internal suspend fun hentGrunnlagForSak(
-        sakid: Long,
+        sakid: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
         try {

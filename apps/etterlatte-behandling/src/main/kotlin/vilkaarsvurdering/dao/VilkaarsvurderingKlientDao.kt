@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -88,6 +89,20 @@ class VilkaarsvurderingKlientDao(
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+
+    suspend fun lagreVilkaarsvurderingResultatvanlig(
+        behandlingId: UUID,
+        vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
+    ): Vilkaarsvurdering =
+        downstreamResourceClient
+            .post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/resultat/$behandlingId"),
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                postBody = vurdertVilkaarsvurderingDto,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },

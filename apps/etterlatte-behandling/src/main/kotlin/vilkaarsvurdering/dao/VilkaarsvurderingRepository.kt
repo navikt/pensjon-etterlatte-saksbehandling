@@ -5,8 +5,6 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -19,6 +17,7 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
@@ -66,6 +65,20 @@ class VilkaarsvurderingRepository(
             vilkaarsvurderingKlientDao.slettTotalVurdering(behandlingId)
         }
 
+    fun lagreVilkaarsvurderingResultat(
+        behandlingId: UUID,
+        virkningstidspunkt: LocalDate,
+        resultat: VilkaarsvurderingResultat,
+    ): Vilkaarsvurdering {
+        val vv = hent(behandlingId)!!
+        return runBlocking {
+            vilkaarsvurderingKlientDao.lagreVilkaarsvurderingResultatvanlig(
+                behandlingId,
+                VurdertVilkaarsvurderingDto(virkningstidspunkt, resultat, vv),
+            )
+        }
+    }
+
     private fun opprettVilkaarsvurderingKilde(
         vilkaarsvurderingId: UUID,
         kopiertFraId: UUID,
@@ -79,23 +92,6 @@ class VilkaarsvurderingRepository(
                     "kopiert_fra" to kopiertFraId,
                 ),
         ).let { tx.run(it.asUpdate) }
-    }
-
-    fun lagreVilkaarsvurderingResultat(
-        behandlingId: UUID,
-        virkningstidspunkt: LocalDate,
-        resultat: VilkaarsvurderingResultat,
-    ): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
-            vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let {
-                session.run(
-                    it.asExecute,
-                )
-            }
-        }
-
-        return hentNonNull(behandlingId)
     }
 
     private fun lagreVilkaarsvurderingResultat(

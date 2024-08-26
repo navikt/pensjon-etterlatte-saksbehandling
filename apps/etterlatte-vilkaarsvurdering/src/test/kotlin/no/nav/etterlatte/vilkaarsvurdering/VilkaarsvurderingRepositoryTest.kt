@@ -44,7 +44,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val opprettVilkaarsvurderingMedResultat =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
                 opprettetVilkaarsvurdering.behandlingId,
                 vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -81,7 +81,7 @@ internal class VilkaarsvurderingRepositoryTest(
         val nyttVirkningstidspunkt = opprettetVilkaarsvurdering.virkningstidspunkt.minusYears(1)
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
                 opprettetVilkaarsvurdering.behandlingId,
                 nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -100,7 +100,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal sette resultat paa vilkaarsvurdering og slette det`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
+        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
             opprettetVilkaarsvurdering.behandlingId,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat,

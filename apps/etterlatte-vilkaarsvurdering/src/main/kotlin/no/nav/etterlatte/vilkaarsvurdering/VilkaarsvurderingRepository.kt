@@ -122,21 +122,20 @@ class VilkaarsvurderingRepository(
         ).let { tx.run(it.asUpdate) }
     }
 
-    fun lagreVilkaarsvurderingResultatKopiering(
-        behandlingId: UUID,
+    fun lagreVilkaarsvurderingResultatvanlig(
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
         vilkaarsvurdering: Vilkaarsvurdering,
     ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
-            vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let {
+            vilkaarsvurderingResultatQuery(vilkaarsvurdering.id, virkningstidspunkt, resultat).let {
                 session.run(
                     it.asExecute,
                 )
             }
         }
 
-        return hentNonNull(behandlingId)
+        return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
     private fun lagreVilkaarsvurderingResultatKopiering(
@@ -144,7 +143,7 @@ class VilkaarsvurderingRepository(
         tx: TransactionalSession,
     ): Vilkaarsvurdering {
         vilkaarsvurderingResultatQuery(
-            nyVilkaarsvurdering,
+            nyVilkaarsvurdering.id,
             nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
             nyVilkaarsvurdering.resultat!!,
         ).let {
@@ -154,14 +153,14 @@ class VilkaarsvurderingRepository(
     }
 
     private fun vilkaarsvurderingResultatQuery(
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurderingId: UUID,
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
     ) = queryOf(
         statement = Queries.LAGRE_VILKAARSVURDERING_RESULTAT,
         paramMap =
             mapOf(
-                "id" to vilkaarsvurdering.id,
+                "id" to vilkaarsvurderingId,
                 "virkningstidspunkt" to virkningstidspunkt,
                 "resultat_utfall" to resultat.utfall.name,
                 "resultat_kommentar" to resultat.kommentar,

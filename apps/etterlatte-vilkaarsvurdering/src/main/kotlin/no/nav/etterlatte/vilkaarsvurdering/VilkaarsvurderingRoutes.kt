@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withParam
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import vilkaarsvurdering.VilkaarTypeOgUtfall
 import vilkaarsvurdering.Vilkaarsvurdering
@@ -157,7 +158,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             logger.info("Sletter vilkårsvurdering for $behandlingId")
 
             try {
-                vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
+                vilkaarsvurderingService.slettVilkaarsvurderingResultat(behandlingId)
                 call.respond(HttpStatusCode.OK)
             } catch (e: BehandlingstilstandException) {
                 logger.error(
@@ -170,33 +171,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         route("/resultat") {
             post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-                val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
-                val vurdertResultat =
-                    vurdertResultatDto.toVilkaarsvurderingResultat(
-                        brukerTokenInfo.ident(),
-                    )
+                val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingDto>()
 
                 logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                try {
-                    val (vilkaarsvurdering, behandlingGrunnlagversjon) =
-                        vilkaarsvurderingService.oppdaterTotalVurdering(
-                            behandlingId,
-                            brukerTokenInfo,
-                            vurdertResultat,
-                        )
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagversjon,
-                        ),
-                    )
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet",
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                }
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterTotalVurdering(vurdertResultatDto)
+                call.respond(vilkaarsvurdering)
             }
 
             delete("/{$BEHANDLINGID_CALL_PARAMETER}") {

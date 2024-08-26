@@ -757,7 +757,7 @@ internal class VilkaarsvurderingServiceTest(
                 ),
             )
 
-        return repository.lagreVilkaarsvurderingResultatKopiering(
+        return repository.lagreVilkaarsvurderingResultatvanlig(
             behandlingId = opprettetVilkaarsvudering.behandlingId,
             virkningstidspunkt = LocalDate.of(2024, 1, 1),
             resultat =

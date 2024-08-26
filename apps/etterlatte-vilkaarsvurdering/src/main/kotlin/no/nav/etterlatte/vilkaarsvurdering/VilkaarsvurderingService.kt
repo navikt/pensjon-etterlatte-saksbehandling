@@ -14,15 +14,14 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
 import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
@@ -53,28 +52,12 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
 
-    suspend fun oppdaterTotalVurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        resultat: VilkaarsvurderingResultat,
-    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
-        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
-            val virkningstidspunkt =
-                behandling.virkningstidspunkt?.dato?.atDay(1)
-                    ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
-            val vilkaarsvurdering =
-                vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatKopiering(
-                    behandlingId = behandlingId,
-                    virkningstidspunkt = virkningstidspunkt,
-                    resultat = resultat,
-                )
-            if (vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon) {
-                vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
-            }
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-            VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
-        }
+    fun oppdaterTotalVurdering(vurdertVilkaar: VurdertVilkaarsvurderingDto): Vilkaarsvurdering =
+        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
+            vurdertVilkaar.virkningstidspunkt,
+            vurdertVilkaar.resultat,
+            vurdertVilkaar.vilkaarsvurdering,
+        )
 
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)

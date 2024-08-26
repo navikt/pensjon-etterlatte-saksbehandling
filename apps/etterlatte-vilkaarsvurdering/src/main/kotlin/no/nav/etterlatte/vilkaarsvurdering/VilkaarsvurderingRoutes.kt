@@ -126,18 +126,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            logger.info("Sletter vilkårsvurdering for $behandlingId")
-
-            try {
-                vilkaarsvurderingService.slettVilkaarsvurderingResultat(behandlingId)
+        delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarsvurderingId}") {
+            withUuidParam("vilkaarsvurderingId") { vilkaarsvurderingId ->
+                logger.info("Sletter vilkårsvurdering for $behandlingId $vilkaarsvurderingId")
+                vilkaarsvurderingService.slettVilkaarsvurdering(vilkaarsvurderingId)
                 call.respond(HttpStatusCode.OK)
-            } catch (e: BehandlingstilstandException) {
-                logger.error(
-                    "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
-                        "Statussjekk feilet for behandling feilet",
-                )
-                call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
             }
         }
 

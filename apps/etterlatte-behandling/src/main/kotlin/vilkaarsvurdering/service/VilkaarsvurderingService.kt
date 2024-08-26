@@ -274,7 +274,7 @@ class VilkaarsvurderingService(
         val vilkaarsvurdering =
             vilkaarsvurderingRepository.hent(behandlingId)
                 ?: throw IllegalStateException("Vilkårsvurderingen eksisterer ikke")
-        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.id)
+        vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId, vilkaarsvurdering.id)
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)
     }
 

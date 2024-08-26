@@ -96,7 +96,12 @@ class VilkaarsvurderingRepository(
         grunnlagVersjon: Long,
     ) = runBlocking { vilkaarsvurderingKlientDao.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
 
-    fun slettVilkaarvurdering(id: UUID) = runBlocking { vilkaarsvurderingKlientDao.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
+    fun slettVilkaarvurdering(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
+    ) = runBlocking {
+        vilkaarsvurderingKlientDao.slettVilkaarsvurdering(behandlingId, vilkaarsvurderingId)
+    }
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")

@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
@@ -48,6 +47,8 @@ class VilkaarsvurderingService(
 
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
+
+    fun slettVilkaarsvurdering(vilkaarsvurderingId: UUID): Boolean = vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurderingId)
 
     fun oppdaterVurderingPaaVilkaar(oppdatertvilkaar: OppdaterVurdertVilkaar): Vilkaarsvurdering =
         vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(oppdatertvilkaar.behandlingId, oppdatertvilkaar.vurdertVilkaar)
@@ -169,12 +170,6 @@ class BehandlingstilstandException : IllegalStateException()
 class VilkaarsvurderingTilstandException(
     message: String,
 ) : IllegalStateException(message)
-
-class VilkaarsvurderingIkkeFunnet :
-    IkkeFunnetException(
-        code = "VILKAARSVURDERING_IKKE_FUNNET",
-        detail = "Vilkårsvurdering ikke funnet",
-    )
 
 class VilkaarsvurderingManglerResultat :
     UgyldigForespoerselException(

@@ -216,11 +216,11 @@ class VilkaarsvurderingRepository(
                 delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
             }.let { hentNonNull(behandlingId) }
 
-    fun slettVilkaarvurdering(id: UUID) =
+    fun slettVilkaarvurdering(vilkaarsvurderingId: UUID) =
         ds.transaction { tx ->
-            queryOf(Queries.SLETT_VILKAARSVURDERING_KILDE, mapOf("vilkaarsvurdering_id" to id))
+            queryOf(Queries.SLETT_VILKAARSVURDERING_KILDE, mapOf("vilkaarsvurdering_id" to vilkaarsvurderingId))
                 .let { tx.run(it.asUpdate) }
-            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("id" to id))
+            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("id" to vilkaarsvurderingId))
                 .let { tx.run(it.asUpdate) }
         } == 1
 

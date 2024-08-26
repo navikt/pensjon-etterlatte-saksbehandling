@@ -150,4 +150,22 @@ class VilkaarsvurderingKlientDao(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
+
+    suspend fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
+    ): Vilkaarsvurdering =
+        downstreamResourceClient
+            .delete(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/$vilkaarsvurderingId",
+                    ),
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                postBody = "",
+            ).mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
 }

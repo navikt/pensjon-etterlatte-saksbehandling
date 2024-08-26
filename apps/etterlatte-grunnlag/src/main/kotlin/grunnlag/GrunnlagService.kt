@@ -3,6 +3,7 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -192,6 +193,7 @@ class RealGrunnlagService(
             soeker = soker?.opplysning?.asPersonopplysning(),
             avdoede = avdode.map { it.opplysning.asPersonopplysning() },
             gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+            annenForelder = persongalleri.annenForelder,
         )
     }
 
@@ -630,6 +632,7 @@ data class PersonopplysningerResponse(
     val soeker: Personopplysning?,
     val avdoede: List<Personopplysning>,
     val gjenlevende: List<Personopplysning>,
+    val annenForelder: AnnenForelder?,
 )
 
 data class Personopplysning(

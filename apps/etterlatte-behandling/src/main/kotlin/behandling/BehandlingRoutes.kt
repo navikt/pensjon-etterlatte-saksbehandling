@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -325,6 +326,14 @@ internal fun Route.behandlingRoutes(
             kunSkrivetilgang {
                 val redigertFamilie = call.receive<RedigertFamilieforhold>()
                 behandlingService.endrePersongalleri(behandlingId, brukerTokenInfo, redigertFamilie)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/rediger-annen-forelder") {
+            kunSkrivetilgang {
+                val annenForelder = call.receive<AnnenForelder>()
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, annenForelder)
                 call.respond(HttpStatusCode.OK)
             }
         }

@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class InntektsjusteringVarselRiverTest {
-    private fun testRapid() = TestRapid().apply { InntektsjusteringVarselRiver(this) }
+internal class InntektsjusteringInfobrevRiverTest {
+    private fun testRapid() = TestRapid().apply { InntektsjusteringInfobrevRiver(this) }
 
     @Test
-    fun `skal starte inntektsjustering varsel jobb`() {
+    fun `skal starte inntektsjustering infobrev jobb`() {
         // TODO: test
     }
 }

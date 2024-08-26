@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.InntektsjusteringHendelseEvents
 import rapidsandrivers.InntektsjusteringHendelseType
 
-internal class InntektsjusteringVarselRiver(
+internal class InntektsjusteringInfobrevRiver(
     rapidsConnection: RapidsConnection,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.SEND_VARSEL) {
+        initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.SEND_INFOBREV) {
             validate { it.requireKey(InntektsjusteringHendelseEvents.inntektsaar) }
         }
     }

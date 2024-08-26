@@ -3,6 +3,7 @@ package no.nav.etterlatte.tilbakekreving
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -13,7 +14,7 @@ import javax.sql.DataSource
 data class TilbakekrevingHendelse(
     val id: UUID,
     val opprettet: Tidspunkt,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val payload: String,
     val status: TilbakekrevingHendelseStatus,
     val type: TilbakekrevingHendelseType,
@@ -40,7 +41,7 @@ class TilbakekrevingHendelseRepository(
     private val dataSource: DataSource,
 ) {
     fun lagreTilbakekrevingHendelse(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         payload: String,
         type: TilbakekrevingHendelseType,
         jmsTimestamp: Tidspunkt? = null,
@@ -77,7 +78,7 @@ class TilbakekrevingHendelseRepository(
             }
         }
 
-    fun hentSisteTilbakekrevingHendelse(sakId: no.nav.etterlatte.libs.common.sak.SakId): TilbakekrevingHendelse? =
+    fun hentSisteTilbakekrevingHendelse(sakId: SakId): TilbakekrevingHendelse? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -111,7 +112,7 @@ class TilbakekrevingHendelseRepository(
         }
 
     fun ferdigstillTilbakekrevingHendelse(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         id: UUID,
     ): UUID =
         using(sessionOf(dataSource)) { session ->

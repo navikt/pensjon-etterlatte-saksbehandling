@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -31,7 +32,7 @@ class BrevdataFacade(
     private val behandlingService: BehandlingService,
 ) {
     suspend fun hentGenerellBrevData(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         behandlingId: UUID?,
         overstyrSpraak: Spraak? = null,
         brukerTokenInfo: BrukerTokenInfo,

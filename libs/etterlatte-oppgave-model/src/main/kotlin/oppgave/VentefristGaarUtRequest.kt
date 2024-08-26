@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.oppgave
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 import java.util.UUID
 
@@ -16,7 +17,7 @@ data class VentefristerGaarUtResponse(
 )
 
 data class VentefristGaarUt(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val referanse: String,
     val oppgaveId: UUID,
     val oppgavekilde: OppgaveKilde,

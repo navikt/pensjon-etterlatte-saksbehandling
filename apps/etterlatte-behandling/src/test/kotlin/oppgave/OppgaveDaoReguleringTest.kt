@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -97,7 +98,7 @@ internal class OppgaveDaoReguleringTest(
 
     private fun lagOppgave(
         status: Status = Status.UNDER_BEHANDLING,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         saksbehandler: String = "Ole",
     ): OppgaveIntern {
         val oppgave =

@@ -19,6 +19,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -29,7 +30,7 @@ import no.nav.etterlatte.sak.TilgangService
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilSak: (sakId: no.nav.etterlatte.libs.common.sak.SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilSak: (sakId: SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
@@ -177,7 +178,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 }
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
-    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
+    sakId: SakId? = null,
     enhetNr: String? = null,
 ): Boolean {
     application.log.debug("Sjekker skrivetilgang")
@@ -199,7 +200,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
-private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: no.nav.etterlatte.libs.common.sak.SakId? = null): String? {
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: SakId? = null): String? {
     val sakTilgangDao = Kontekst.get().sakTilgangDao
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
@@ -224,7 +225,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: no
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
-    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
+    sakId: SakId? = null,
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
@@ -242,7 +243,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
-    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
+    sakId: SakId? = null,
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {

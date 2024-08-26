@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -413,7 +414,7 @@ internal class BehandlingStatusServiceTest {
 
     private fun oppgave(
         oppgaveId: UUID = UUID.randomUUID(),
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         status: Status = Status.UNDER_BEHANDLING,
     ) = OppgaveIntern(
         id = oppgaveId,

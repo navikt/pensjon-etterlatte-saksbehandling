@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -34,7 +35,7 @@ fun vedtak(
             ),
         ),
     ident: String = "12345678913",
-    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
+    sakId: SakId = 1,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),

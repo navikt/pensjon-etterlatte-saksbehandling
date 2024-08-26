@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -192,7 +193,7 @@ class GrunnlagsendringshendelseDao(
         }
 
     fun hentGrunnlagsendringshendelserMedStatuserISak(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         statuser: List<GrunnlagsendringStatus>,
     ): List<Grunnlagsendringshendelse> =
         connectionAutoclosing.hentConnection {
@@ -215,7 +216,7 @@ class GrunnlagsendringshendelseDao(
         }
 
     fun hentGrunnlagsendringshendelserMedStatuserISakAvType(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         statuser: List<GrunnlagsendringStatus>,
         type: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> =
@@ -240,7 +241,7 @@ class GrunnlagsendringshendelseDao(
             }
         }
 
-    fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Grunnlagsendringshendelse> =
+    fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: SakId): List<Grunnlagsendringshendelse> =
         hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
             listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),

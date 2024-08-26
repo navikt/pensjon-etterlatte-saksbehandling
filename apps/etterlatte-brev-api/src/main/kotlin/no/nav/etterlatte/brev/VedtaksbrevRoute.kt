@@ -10,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -116,6 +117,6 @@ fun Route.vedtaksbrevRoute(
 
 data class ResetPayloadRequest(
     val brevId: Long,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val brevtype: Brevtype,
 )

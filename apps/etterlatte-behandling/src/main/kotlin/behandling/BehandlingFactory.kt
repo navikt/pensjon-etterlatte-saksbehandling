@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -168,7 +169,7 @@ class BehandlingFactory(
     }
 
     fun opprettBehandling(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
@@ -233,7 +234,7 @@ class BehandlingFactory(
     }
 
     fun opprettOmgjoeringAvslag(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         saksbehandler: Saksbehandler,
         skalKopiere: Boolean,
     ): Behandling {
@@ -343,7 +344,7 @@ class BehandlingFactory(
         }
     }
 
-    internal fun hentDataForOpprettBehandling(sakId: no.nav.etterlatte.libs.common.sak.SakId): DataHentetForOpprettBehandling {
+    internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.hentBehandlingerForSak(sak.id)
@@ -422,7 +423,7 @@ sealed class AvslagOmgjoering {
         )
 
     class FoerstegangsbehandlingFeilStatus(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         behandlingId: UUID,
     ) : UgyldigForespoerselException(
             "FOERSTEGANGSBEHANDLING_UGYLDIG_STATUS",

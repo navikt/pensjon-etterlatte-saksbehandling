@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
 class AktivitetspliktKopierService(
@@ -20,7 +21,7 @@ class AktivitetspliktKopierService(
     }
 
     fun kopierVurdering(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         behandlingId: UUID,
     ) {
         val vurdering = hentVurderingForBehandling(behandlingId)

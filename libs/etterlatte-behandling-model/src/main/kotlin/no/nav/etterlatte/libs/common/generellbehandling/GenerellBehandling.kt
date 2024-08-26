@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.generellbehandling
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
@@ -15,7 +16,7 @@ data class Attestant(
 
 data class GenerellBehandling(
     val id: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val opprettet: Tidspunkt,
     val type: GenerellBehandlingType,
     val innhold: Innhold?,
@@ -58,11 +59,11 @@ data class GenerellBehandling(
     companion object {
         fun opprettFraType(
             type: GenerellBehandlingType,
-            sakId: no.nav.etterlatte.libs.common.sak.SakId,
+            sakId: SakId,
         ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null, null, Status.OPPRETTET)
 
         fun opprettUtland(
-            sakId: no.nav.etterlatte.libs.common.sak.SakId,
+            sakId: SakId,
             behandlingreferanse: UUID?,
         ) = GenerellBehandling(
             UUID.randomUUID(),

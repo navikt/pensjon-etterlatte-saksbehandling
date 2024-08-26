@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDate
@@ -37,7 +38,7 @@ internal fun lagGrunnlagsopplysning(
 )
 
 internal fun lagGrunnlagHendelse(
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     hendelseNummer: Long,
     opplysningType: Opplysningstype,
     id: UUID = UUID.randomUUID(),

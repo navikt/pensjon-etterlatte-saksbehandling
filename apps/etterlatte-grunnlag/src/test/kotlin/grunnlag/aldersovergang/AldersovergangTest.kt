@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -127,7 +128,7 @@ class AldersovergangTest(
         }
 
     private fun OpplysningDao.leggTilOpplysning(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         opplysningTypeSoeker: Opplysningstype,
         node: TextNode,
         fnr: Folkeregisteridentifikator,

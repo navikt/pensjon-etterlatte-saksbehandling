@@ -1,12 +1,13 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val type: GrunnlagsendringsType,
     val opprettet: LocalDateTime,
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,

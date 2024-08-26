@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -20,7 +21,7 @@ class AktivitetspliktUnntakDao(
 ) {
     fun opprettUnntak(
         unntak: LagreAktivitetspliktUnntak,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
@@ -110,7 +111,7 @@ class AktivitetspliktUnntakDao(
             }
         }
 
-    fun hentNyesteUnntak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<AktivitetspliktUnntak> =
+    fun hentNyesteUnntak(sakId: SakId): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -194,7 +195,7 @@ class AktivitetspliktUnntakDao(
 
 data class AktivitetspliktUnntak(
     val id: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val unntak: AktivitetspliktUnntakType,

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -71,7 +72,7 @@ class BehandlingKlient(
     }
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")

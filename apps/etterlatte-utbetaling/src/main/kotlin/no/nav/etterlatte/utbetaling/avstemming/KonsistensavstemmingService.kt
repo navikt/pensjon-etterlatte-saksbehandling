@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -232,7 +233,7 @@ fun gjeldendeLinjerForEnDato(
 }
 
 data class UtbetalingslinjerPerSak(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val saktype: Saktype,
     val fnr: String,
     val utbetalingslinjer: List<Utbetalingslinje>,

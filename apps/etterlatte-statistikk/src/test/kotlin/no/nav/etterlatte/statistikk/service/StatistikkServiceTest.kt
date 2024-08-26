@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -357,7 +358,7 @@ class StatistikkServiceTest {
 fun vedtak(
     vedtakId: Long = 0,
     virk: YearMonth = YearMonth.of(2022, 8),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId = 0,
+    sakId: SakId = 0,
     ident: String = "",
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
@@ -386,7 +387,7 @@ fun vedtak(
 
 fun behandling(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
+    sakId: SakId = 1L,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),

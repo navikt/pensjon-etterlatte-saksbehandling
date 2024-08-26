@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
@@ -28,7 +29,7 @@ import java.util.UUID
 class TilbakekrevingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentTilbakekrevinger(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<TilbakekrevingBehandling> =
+    fun hentTilbakekrevinger(sakId: SakId): List<TilbakekrevingBehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekrevinger = selectTilbakekrevinger(this, sakId)
@@ -45,7 +46,7 @@ class TilbakekrevingDao(
 
     private fun selectTilbakekrevinger(
         connection: Connection,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
     ): List<TilbakekrevingBehandling> =
         with(connection) {
             val statement =
@@ -73,7 +74,7 @@ class TilbakekrevingDao(
             }
         }
 
-    fun hentNyesteTilbakekreving(sakId: no.nav.etterlatte.libs.common.sak.SakId): TilbakekrevingBehandling =
+    fun hentNyesteTilbakekreving(sakId: SakId): TilbakekrevingBehandling =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekreving = hentNyesteTilbakekrevingForSak(this, sakId)
@@ -88,7 +89,7 @@ class TilbakekrevingDao(
 
     private fun hentNyesteTilbakekrevingForSak(
         connection: Connection,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
     ): TilbakekrevingBehandling? =
         with(connection) {
             val statement =

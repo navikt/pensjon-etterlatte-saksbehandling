@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -27,7 +28,7 @@ class InnholdTilRedigerbartBrevHenter(
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
     internal suspend fun hentInnData(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,

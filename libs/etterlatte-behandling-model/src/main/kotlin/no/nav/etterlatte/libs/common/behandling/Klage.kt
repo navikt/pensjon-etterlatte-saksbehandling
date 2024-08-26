@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -361,7 +362,7 @@ data class Klage(
 data class KlageBlankettPdfgenDTO(
     val formkrav: FormkravPdfgen,
     val hjemmel: String,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val sakType: SakType,
     val sakGjelder: String,
     val internKommentar: String?,
@@ -393,7 +394,7 @@ data class KlageBlankettPdfgenDTO(
 }
 
 data class SakOgPersonKlagenGjelderPdfgen(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val sakType: SakType,
     val navn: String,
     val fnr: String,

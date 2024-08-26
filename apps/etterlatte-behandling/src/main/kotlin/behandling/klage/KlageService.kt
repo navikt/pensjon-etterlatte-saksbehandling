@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
@@ -52,14 +53,14 @@ import java.util.UUID
 
 interface KlageService {
     fun opprettKlage(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage
 
     fun hentKlage(id: UUID): Klage?
 
-    fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage>
+    fun hentKlagerISak(sakId: SakId): List<Klage>
 
     fun lagreFormkravIKlage(
         klageId: UUID,
@@ -137,7 +138,7 @@ class KlageServiceImpl(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun opprettKlage(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage {
@@ -168,7 +169,7 @@ class KlageServiceImpl(
 
     override fun hentKlage(id: UUID): Klage? = klageDao.hentKlage(id)
 
-    override fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage> = klageDao.hentKlagerISak(sakId)
+    override fun hentKlagerISak(sakId: SakId): List<Klage> = klageDao.hentKlagerISak(sakId)
 
     override fun lagreFormkravIKlage(
         klageId: UUID,

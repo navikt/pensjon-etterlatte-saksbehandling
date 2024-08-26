@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -138,7 +139,7 @@ class AvkortingRepository(
 
     fun lagreAvkorting(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         avkorting: Avkorting,
     ) {
         dataSource.transaction { tx ->
@@ -208,7 +209,7 @@ class AvkortingRepository(
 
     private fun lagreAarsoppgjoer(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         aarsoppgjoer: Aarsoppgjoer,
         tx: TransactionalSession,
     ) = queryOf(

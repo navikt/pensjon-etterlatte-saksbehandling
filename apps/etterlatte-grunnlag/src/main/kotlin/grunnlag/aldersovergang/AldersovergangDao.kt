@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag.aldersovergang
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
@@ -92,7 +93,7 @@ class AldersovergangDao(
     }
 
     fun hentAlder(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         opplysningType: Opplysningstype,
         paaDato: LocalDate,
         tx: TransactionalSession? = null,

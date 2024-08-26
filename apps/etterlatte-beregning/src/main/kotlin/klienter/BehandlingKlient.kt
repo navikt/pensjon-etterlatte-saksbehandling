@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -28,12 +29,12 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     ): DetaljertBehandling
 
     suspend fun hentFoersteVirkningsdato(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): FoersteVirkDto
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling
 
@@ -102,7 +103,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentFoersteVirkningsdato(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): FoersteVirkDto {
         logger.info("Henter foersteVirkningsdato med saksId=$sakId")
@@ -134,7 +135,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentSisteIverksatteBehandling(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         retry<SisteIverksatteBehandling> {

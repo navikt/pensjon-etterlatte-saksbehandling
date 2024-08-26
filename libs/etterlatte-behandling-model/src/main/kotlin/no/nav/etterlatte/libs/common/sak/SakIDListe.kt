@@ -14,7 +14,7 @@ data class SakIDListe(
 
 data class BehandlingOgSak(
     val behandlingId: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
 )
 
 data class HentSakerRequest(

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.hentinformasjon.behandling
 
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -9,7 +10,7 @@ class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
 ) {
     suspend fun hentSak(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingKlient.hentSak(sakId, brukerTokenInfo)
 
@@ -39,13 +40,13 @@ class BehandlingService(
     ) = behandlingKlient.hentKlage(klageId, brukerTokenInfo)
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo)
 
     suspend fun hentKlageForBehandling(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Klage? {
         val hentKlagerForSak = behandlingKlient.hentKlagerForSak(sakId, bruker)

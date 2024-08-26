@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.doedshendelse
 
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
@@ -9,5 +10,5 @@ class DoedshendelseReminder(
     val beroertFnr: String,
     val relasjon: Relasjon,
     val endret: Tidspunkt,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
+    val sakId: SakId? = null,
 )

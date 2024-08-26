@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -75,7 +76,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentBehandlingerForSak(sakid: no.nav.etterlatte.libs.common.sak.SakId): List<Behandling> =
+    fun hentBehandlingerForSak(sakid: SakId): List<Behandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -92,7 +93,7 @@ class BehandlingDao(
         }
 
     fun hentAlleRevurderingerISakMedAarsak(
-        sakid: no.nav.etterlatte.libs.common.sak.SakId,
+        sakid: SakId,
         revurderingaarsak: Revurderingaarsak,
     ): List<Revurdering> =
         connectionAutoclosing.hentConnection {

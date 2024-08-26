@@ -6,6 +6,7 @@ import jakarta.jms.MessageListener
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
@@ -95,7 +96,7 @@ class KravgrunnlagConsumer(
         }
 
     private fun sjekkAtSisteHendelseForSakErFerdigstilt(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         jmsTimestampNyHendelse: Tidspunkt,
     ) {
         val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId)

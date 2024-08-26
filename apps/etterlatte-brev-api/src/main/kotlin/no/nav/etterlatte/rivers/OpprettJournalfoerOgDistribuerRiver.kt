@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAtt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
@@ -67,7 +68,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
         packet: JsonMessage,
@@ -132,7 +133,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private fun RapidsConnection.svarSuksess(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevID: BrevID,
         brevkode: Brevkoder,
     ) {
@@ -153,7 +154,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         borIutland: Boolean,
         erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
@@ -163,7 +164,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         borIutland: Boolean,
     ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
         borIutland,
@@ -171,14 +172,14 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
         borIutland,
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Avdoed> =
+    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
 }
 

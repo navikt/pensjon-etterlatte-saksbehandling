@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,7 +44,7 @@ class BehandlingServiceTest {
 
     private fun klage(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
     ): Klage =
         Klage(
             behandlingId,

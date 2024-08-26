@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.pensjon.brevbaker.api.model.Bruker
 import no.nav.pensjon.brevbaker.api.model.Felles
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -11,7 +12,7 @@ import java.time.LocalDate
 
 object BrevbakerHelpers {
     fun mapFelles(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         soeker: Soeker,
         avsender: Avsender,
         vergeNavn: String? = null,

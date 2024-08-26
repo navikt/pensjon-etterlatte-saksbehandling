@@ -5,13 +5,13 @@ import java.math.BigDecimal
 data class KjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
 )
 
 data class LagreKjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val beregningBeloepFoer: BigDecimal,
     val beregningBeloepEtter: BigDecimal,
     val beregningGFoer: BigDecimal,

@@ -52,6 +52,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -169,7 +170,7 @@ fun mockSaksbehandler(
 
 fun opprettBehandling(
     type: BehandlingType,
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -192,7 +193,7 @@ fun opprettBehandling(
 
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -232,7 +233,7 @@ fun foerstegangsbehandling(
 
 fun revurdering(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -295,7 +296,7 @@ fun ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdato
 
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
+    sakId: SakId = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     gjelderPerson: String,

@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -30,7 +31,7 @@ class ManuellRevurderingService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettManuellRevurderingWrapper(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
         paaGrunnAvOppgaveId: String? = null,
@@ -99,7 +100,7 @@ class ManuellRevurderingService(
     }
 
     private fun opprettManuellRevurdering(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
         paaGrunnAvHendelse: UUID?,

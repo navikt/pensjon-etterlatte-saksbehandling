@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -33,7 +34,7 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<OppgaveIntern>
+    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern>
 
     fun hentOppgaver(
         enheter: List<String>,
@@ -215,7 +216,7 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<OppgaveIntern> =
+    override fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

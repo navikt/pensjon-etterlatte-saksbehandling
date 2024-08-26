@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
@@ -84,7 +85,7 @@ class TilbakekrevingskomponentenKlient(
     }
 
     fun hentKravgrunnlag(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
         logger.info(

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -74,12 +75,12 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
     fun oppdaterFlyktning(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         flyktning: Flyktning,
     )
 
@@ -110,7 +111,7 @@ class SakServiceImpl(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun oppdaterFlyktning(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         flyktning: Flyktning,
     ) {
         dao.oppdaterFlyktning(sakId, flyktning)
@@ -355,13 +356,13 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
     ) {
         val erSkjermet =
             runBlocking {

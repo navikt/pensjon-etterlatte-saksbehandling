@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -27,18 +28,18 @@ interface BrevApiKlient {
 
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun ferdigstillOversendelseBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     )
@@ -47,7 +48,7 @@ interface BrevApiKlient {
      * @return journalpostId til brevets journalpost
      */
     suspend fun journalfoerBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto
@@ -56,13 +57,13 @@ interface BrevApiKlient {
      * @return bestillingsId for distribusjonen
      */
     suspend fun distribuerBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto
 
     suspend fun hentBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
@@ -118,7 +119,7 @@ class BrevApiKlientObo(
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         post(
@@ -129,7 +130,7 @@ class BrevApiKlientObo(
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
@@ -140,7 +141,7 @@ class BrevApiKlientObo(
     }
 
     override suspend fun ferdigstillOversendelseBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -153,7 +154,7 @@ class BrevApiKlientObo(
     }
 
     override suspend fun journalfoerBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto =
@@ -164,7 +165,7 @@ class BrevApiKlientObo(
         )
 
     override suspend fun distribuerBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto =
@@ -175,7 +176,7 @@ class BrevApiKlientObo(
         )
 
     override suspend fun hentBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =

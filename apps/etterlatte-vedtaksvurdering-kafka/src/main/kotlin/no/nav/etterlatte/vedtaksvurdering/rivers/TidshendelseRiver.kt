@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.IDENTIFISERT_SAK
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VILKAARSVURDERT
@@ -99,7 +100,7 @@ class TidshendelseRiver(
     private fun handleIdentifisertSak(
         packet: JsonMessage,
         type: String,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         dryrun: Boolean,
     ): Boolean {
         val hendelseData = mutableMapOf<String, Any>()
@@ -132,7 +133,7 @@ class TidshendelseRiver(
 
     private fun handleVilkarsvurdertOgSkalFatteVedtak(
         packet: JsonMessage,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         dryrun: Boolean,
         context: MessageContext,
     ): Boolean {

@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -81,7 +82,7 @@ class BehandlingKlientImpl(
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 
     override suspend fun harTilgangTilSak(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilSak(sakId, skrivetilgang, bruker)

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -148,7 +149,7 @@ data class VedtakSamordningPeriode(
 
 data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
     val tilbakekreving: ObjectNode,

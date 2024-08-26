@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag.aldersovergang
 
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -14,7 +15,7 @@ class AldersovergangService(
         dao.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned)
 
     fun hentAlder(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         rolle: PersonRolle,
         paaDato: LocalDate,
     ): Alder? =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.UUID
@@ -24,14 +25,14 @@ enum class JobbType(
 }
 
 data class OpprettRevurderingForAktivitetspliktDto(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val frist: Tidspunkt,
     val behandlingsmaaned: YearMonth,
     val jobbType: JobbType,
 )
 
 data class OpprettOppgaveForAktivitetspliktVarigUnntakDto(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val referanse: String? = null,
     val frist: Tidspunkt,
     val jobbType: JobbType,

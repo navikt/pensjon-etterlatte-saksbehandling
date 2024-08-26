@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.oppgave
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -20,7 +21,7 @@ data class OppgaveIntern(
     val id: UUID,
     val status: Status,
     val enhet: String,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: OppgaveSaksbehandler? = null,
@@ -146,7 +147,7 @@ data class RedigerFristGosysRequest(
 )
 
 data class SakIdOgReferanse(
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val referanse: String,
 )
 

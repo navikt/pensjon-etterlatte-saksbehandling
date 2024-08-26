@@ -41,6 +41,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -90,7 +91,7 @@ class BrevRepository(
             it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
-    fun hentBrevForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Brev> =
+    fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) {
             it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
         }

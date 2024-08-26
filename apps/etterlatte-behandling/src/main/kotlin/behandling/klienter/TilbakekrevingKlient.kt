@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -24,7 +25,7 @@ interface TilbakekrevingKlient : Pingable {
 
     suspend fun hentKravgrunnlag(
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag
 }
@@ -56,7 +57,7 @@ class TilbakekrevingKlientImpl(
 
     override suspend fun hentKravgrunnlag(
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
         logger.info("Henter oppdatert kravgrunnlag tilknyttet tilbakekreving for sak $sakId")

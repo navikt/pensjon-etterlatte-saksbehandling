@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
@@ -17,7 +18,7 @@ import javax.sql.DataSource
 data class Pesyskopling(
     val pesysId: PesysId,
     val behandlingId: UUID,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
 )
 
 internal class PesysRepository(
@@ -90,7 +91,7 @@ internal class PesysRepository(
     fun lagreKoplingTilBehandling(
         behandlingId: UUID,
         pesysId: PesysId,
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         tx: TransactionalSession? = null,
     ) {
         tx.session {

@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -22,7 +23,7 @@ import java.util.UUID.randomUUID
 data class Trygdetid(
     val id: UUID = randomUUID(),
     val ident: String,
-    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    val sakId: SakId,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),

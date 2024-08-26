@@ -9,6 +9,7 @@ import io.mockk.slot
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -162,7 +163,7 @@ class TidshendelseRiverTest {
 
 fun lagMeldingForVurdertLoependeYtelse(
     hendelseId: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,
@@ -192,7 +193,7 @@ fun lagMeldingForVurdertLoependeYtelse(
 }
 
 fun lagMeldingForVurdertLoependeYtelse(
-    sakId: no.nav.etterlatte.libs.common.sak.SakId,
+    sakId: SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,

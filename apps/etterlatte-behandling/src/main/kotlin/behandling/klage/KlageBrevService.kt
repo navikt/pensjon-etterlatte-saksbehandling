@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -119,7 +120,7 @@ class KlageBrevService(
     }
 
     private fun ferdigstillOgDistribuerBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         saksbehandler: Saksbehandler,
     ): Pair<Tidspunkt, String> =
@@ -161,7 +162,7 @@ class KlageBrevService(
         }
 
     private fun hentBrev(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =

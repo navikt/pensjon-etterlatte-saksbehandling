@@ -10,6 +10,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -45,7 +46,7 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentTilbakekrevinger(sakId: no.nav.etterlatte.libs.common.sak.SakId) =
+    fun hentTilbakekrevinger(sakId: SakId) =
         inTransaction {
             logger.info("Henter tilbakekrevinger sak=$sakId")
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
@@ -110,7 +111,7 @@ class TilbakekrevingService(
         }
 
     fun endreTilbakekrevingOppgaveStatus(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         paaVent: Boolean,
     ) {
         inTransaction {
@@ -133,7 +134,7 @@ class TilbakekrevingService(
     }
 
     fun avbrytTilbakekreving(
-        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        sakId: SakId,
         merknad: String,
     ): TilbakekrevingBehandling =
         inTransaction {

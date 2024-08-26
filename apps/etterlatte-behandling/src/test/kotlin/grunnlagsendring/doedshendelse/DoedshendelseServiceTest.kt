@@ -46,7 +46,6 @@ internal class DoedshendelseServiceTest {
         DoedshendelseService(
             pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = dao,
-            featureToggleService = toggle,
         )
 
     private val avdoed =

@@ -1,10 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.dao
 
 import kotlinx.coroutines.runBlocking
-import kotliquery.Row
-import kotliquery.Session
-import kotliquery.TransactionalSession
-import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -17,7 +13,6 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
 import org.slf4j.LoggerFactory
 import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.Vilkaarsvurdering

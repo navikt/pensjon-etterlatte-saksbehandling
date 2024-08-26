@@ -9,25 +9,18 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
-import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
-import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.StatusOppdatertDto
 import vilkaarsvurdering.VilkaarTypeOgUtfall
 import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
@@ -39,12 +32,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
             if (vilkaarsvurdering != null) {
-                call.respond(
-                    toDto(
-                        vilkaarsvurdering,
-                        behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                    ),
-                )
+                call.respond(vilkaarsvurdering)
             } else {
                 logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
                 call.respond(HttpStatusCode.NoContent)
@@ -61,13 +49,6 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
             call.respond(mapOf("rettUtenTidsbegrensning" to result))
-        }
-
-        // TODO: må ha connection med behandling
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
-            logger.info("Henter vilkårtyper for $behandlingId")
-            val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId, brukerTokenInfo)
-            call.respond(VilkaartypeDTO(result))
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
@@ -156,27 +137,6 @@ data class StatusOppdatertDto(
     val statusOppdatert: Boolean,
 )
 
-private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
-    VurdertVilkaar(
-        vilkaarId = vilkaarId,
-        hovedvilkaar = hovedvilkaar,
-        unntaksvilkaar = unntaksvilkaar,
-        vurdering =
-            VilkaarVurderingData(
-                kommentar = kommentar,
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = saksbehandler,
-            ),
-    )
-
-private fun VurdertVilkaarsvurderingResultatDto.toVilkaarsvurderingResultat(saksbehandler: String) =
-    VilkaarsvurderingResultat(
-        utfall = resultat,
-        kommentar = kommentar,
-        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-        saksbehandler = saksbehandler,
-    )
-
 data class VurdertVilkaarDto(
     val vilkaarId: UUID,
     val hovedvilkaar: VilkaarTypeOgUtfall,
@@ -194,10 +154,6 @@ fun toDto(
     resultat = vilkaarsvurdering.resultat,
     grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
     behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
-)
-
-data class VilkaartypeDTO(
-    val typer: List<VilkaartypePair>,
 )
 
 data class VilkaartypePair(

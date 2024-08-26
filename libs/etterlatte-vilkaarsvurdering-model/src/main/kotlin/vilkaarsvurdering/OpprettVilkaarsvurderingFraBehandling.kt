@@ -7,3 +7,7 @@ data class OpprettVilkaarsvurderingFraBehandling(
     val forrigeBehandling: UUID,
     val vilkaarsvurdering: Vilkaarsvurdering,
 )
+
+data class OpprettVilkaarsvurderingMotBehandling(
+    val forrigeBehandling: UUID,
+)

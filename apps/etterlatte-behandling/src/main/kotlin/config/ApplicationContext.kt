@@ -61,8 +61,6 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
@@ -154,6 +152,7 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -274,7 +273,6 @@ internal class ApplicationContext(
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
-    val vilkaarsvuderingKlient: VilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
@@ -605,7 +603,9 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
         )
 
-    val vilkaarsvurderingService = VilkaarsvurderingService(null, behandlingService, grunnlagKlient, behandlingsStatusService)
+    // TODO: håndter grunnlagklienten her,,
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(VilkaarsvurderingRepository(), behandlingService, grunnlagKlient, behandlingsStatusService)
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 
     // Jobs

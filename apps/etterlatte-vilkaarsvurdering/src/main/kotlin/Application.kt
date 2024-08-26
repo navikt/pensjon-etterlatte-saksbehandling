@@ -25,8 +25,8 @@ class Server(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
-                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
-                aldersovergang(behandlingKlient, aldersovergangService)
+                vilkaarsvurdering(vilkaarsvurderingService)
+                aldersovergang(aldersovergangService)
             }
         }
 

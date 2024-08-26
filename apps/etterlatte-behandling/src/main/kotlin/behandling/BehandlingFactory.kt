@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -45,6 +44,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -60,7 +60,7 @@ class BehandlingFactory(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -302,8 +302,9 @@ class BehandlingFactory(
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
                 // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-                vilkaarsvurderingKlient.kopierVilkaarsvurdering(
-                    kopierTilBehandling = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
                     brukerTokenInfo = saksbehandler,
                 )

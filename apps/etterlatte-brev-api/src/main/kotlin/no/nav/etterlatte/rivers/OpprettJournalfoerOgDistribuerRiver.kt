@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -101,6 +102,11 @@ class OpprettJournalfoerOgDistribuerRiver(
                                     borIutland,
                                 )
                             }
+                            Brevkoder.OMS_INNTEKTSJUSTERING -> {
+                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                                // TODO: skal vi ha inntektsår også?
+                                opprettOmstillingsstoenadInntektsjustering(borIutland)
+                            }
                             else -> ManueltBrevData()
                         }
                     }
@@ -177,6 +183,11 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland,
         hentAvdoede(sakId),
     )
+
+    private fun opprettOmstillingsstoenadInntektsjustering(borIutland: Boolean) =
+        OmstillingsstoenadInntektsjustering.fra(
+            borIutland,
+        )
 
     private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede

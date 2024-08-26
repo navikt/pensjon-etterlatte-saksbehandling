@@ -115,6 +115,12 @@ enum class Brevkoder(
         "Vedtak om endring av omstillingsstønad",
         Brevtype.VEDTAK,
     ),
+    OMS_INNTEKTSJUSTERING(
+        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING,
+        "Varselbrev - oppdatere endringer i inntekt",
+        Brevtype.VARSEL,
+    ),
     OMS_VARSEL(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL,
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL,

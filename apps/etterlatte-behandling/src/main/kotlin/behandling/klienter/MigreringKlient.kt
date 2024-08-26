@@ -23,7 +23,7 @@ class MigreringKlient(
     suspend fun opprettManuellMigrering(
         behandlingId: UUID,
         pesysId: Long,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ) {
         retry {
             client.post("$url/migrering/$sakId/$behandlingId") {

@@ -21,7 +21,7 @@ data class MaanedStoenadRad(
     val beregningType: String,
     val anvendtSats: String,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakNummer: Long,
     val tekniskTid: Tidspunkt,
     val sakYtelse: String,

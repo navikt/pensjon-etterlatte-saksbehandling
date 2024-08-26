@@ -84,7 +84,7 @@ class TilbakekrevingskomponentenKlient(
     }
 
     fun hentKravgrunnlag(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
         logger.info(

@@ -88,7 +88,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun hentAktiviteterForSak(sakId: Long): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<AktivitetspliktAktivitet> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -212,7 +212,7 @@ class AktivitetspliktDao(
 
 data class AktivitetspliktAktivitet(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID,
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
@@ -238,7 +238,7 @@ data class AktivitetspliktAktivitet(
 
 data class LagreAktivitetspliktAktivitet(
     val id: UUID? = null,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
     val tom: LocalDate? = null,

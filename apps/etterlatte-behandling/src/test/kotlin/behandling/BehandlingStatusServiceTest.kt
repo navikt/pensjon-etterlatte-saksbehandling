@@ -413,7 +413,7 @@ internal class BehandlingStatusServiceTest {
 
     private fun oppgave(
         oppgaveId: UUID = UUID.randomUUID(),
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         status: Status = Status.UNDER_BEHANDLING,
     ) = OppgaveIntern(
         id = oppgaveId,

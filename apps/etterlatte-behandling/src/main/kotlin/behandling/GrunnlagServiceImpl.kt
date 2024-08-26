@@ -25,7 +25,7 @@ interface GrunnlagService {
 
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         sakType: SakType,
     )
 
@@ -35,7 +35,7 @@ interface GrunnlagService {
     )
 
     suspend fun leggTilNyeOpplysningerBareSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysninger: NyeSaksopplysninger,
     )
 
@@ -70,7 +70,7 @@ class GrunnlagServiceImpl(
 
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         sakType: SakType,
     ) {
         grunnlagKlient.oppdaterGrunnlag(
@@ -85,7 +85,7 @@ class GrunnlagServiceImpl(
     ) = grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger)
 
     override suspend fun leggTilNyeOpplysningerBareSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysninger: NyeSaksopplysninger,
     ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
 

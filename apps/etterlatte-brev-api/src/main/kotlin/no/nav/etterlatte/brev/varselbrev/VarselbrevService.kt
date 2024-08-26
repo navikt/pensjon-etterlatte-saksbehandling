@@ -27,7 +27,7 @@ internal class VarselbrevService(
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
     suspend fun opprettVarselbrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {

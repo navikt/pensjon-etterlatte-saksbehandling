@@ -22,7 +22,7 @@ import java.util.UUID
 
 data class OpprettVedtak(
     val soeker: Folkeregisteridentifikator,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     val behandlingId: UUID,
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -33,7 +33,7 @@ data class OpprettVedtak(
 data class Vedtak(
     val id: Long,
     val soeker: Folkeregisteridentifikator,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     /** kan være ID-en til en behandling, klage eller tilbakekreving */
     val behandlingId: UUID,

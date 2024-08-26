@@ -31,7 +31,7 @@ class BrevdataFacade(
     private val behandlingService: BehandlingService,
 ) {
     suspend fun hentGenerellBrevData(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID?,
         overstyrSpraak: Spraak? = null,
         brukerTokenInfo: BrukerTokenInfo,

@@ -10,7 +10,7 @@ data class LagretHendelse(
     val inntruffet: Tidspunkt?,
     val vedtakId: Long?,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val ident: String?,
     val identType: String?,
     val kommentar: String?,

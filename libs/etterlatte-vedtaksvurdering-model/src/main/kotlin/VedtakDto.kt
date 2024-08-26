@@ -148,7 +148,7 @@ data class VedtakSamordningPeriode(
 
 data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
     val tilbakekreving: ObjectNode,

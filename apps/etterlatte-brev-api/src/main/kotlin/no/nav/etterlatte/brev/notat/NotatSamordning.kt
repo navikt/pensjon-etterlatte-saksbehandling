@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.NotatParametre
 import no.nav.etterlatte.brev.model.Slate
 
 class SamordningsnotatParametre(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val vedtakId: Long,
     val samordningsmeldingId: Long,
     val kommentar: String,

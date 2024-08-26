@@ -27,7 +27,7 @@ class InnholdTilRedigerbartBrevHenter(
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
     internal suspend fun hentInnData(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,

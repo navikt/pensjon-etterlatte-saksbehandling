@@ -8,7 +8,7 @@ data class InstitusjonsoppholdService(
     private val institusjonsoppholdDao: InstitusjonsoppholdDao,
 ) {
     fun leggInnInstitusjonsoppholdBegrunnelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
         institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse,
     ) {

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 data class AktivitetspliktDto(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     // TODO: Denne har vi et forhold til når vi lager oppgaver / revurderinger, men vi trenger også å vite om den
     //   for statistikk sin del. Det er nok hensiktsmessig å løfte denne mer eksplisitt fram, men er litt usikker på
     //   hvordan vi bør løse det på lang sikt. Enn så lenge kan den utledes fra grunnlag, men det er litt sårbart

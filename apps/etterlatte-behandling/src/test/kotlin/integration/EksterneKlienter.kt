@@ -101,7 +101,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
         )
 
     override suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -181,7 +181,7 @@ class VedtakKlientTest : VedtakKlient {
         }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
@@ -197,7 +197,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
 
     override suspend fun hentKravgrunnlag(
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
         TODO("Not yet implemented")
@@ -223,38 +223,38 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId++)
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
     override suspend fun ferdigstillOversendelseBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
     override suspend fun journalfoerBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto = JournalpostIdDto(UUID.randomUUID().toString())
 
     override suspend fun distribuerBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto = BestillingsIdDto(UUID.randomUUID().toString())
 
     override suspend fun hentBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)

@@ -118,7 +118,7 @@ internal class NySoeknadRiver(
         }
 
     private fun JsonMessage.oppdaterMed(
-        sakId: Long?,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId?,
         journalpostResponse: OpprettJournalpostResponse,
     ): JsonMessage =
         this.apply {

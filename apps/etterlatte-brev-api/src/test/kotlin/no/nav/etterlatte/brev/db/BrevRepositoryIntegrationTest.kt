@@ -432,7 +432,7 @@ internal class BrevRepositoryIntegrationTest(
     }
 
     private fun ulagretBrev(
-        sakId: Long = Random.nextLong(),
+        sakId: no.nav.etterlatte.libs.common.sak.SakId = Random.nextLong(),
         behandlingId: UUID? = null,
         innhold: BrevInnhold? = null,
         innhold_vedlegg: List<BrevInnholdVedlegg>? = null,

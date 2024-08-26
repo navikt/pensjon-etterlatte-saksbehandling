@@ -12,6 +12,6 @@ class TilbakekrevingService(
 
     fun hentKravgrunnlag(
         kravgrunnlagId: Long,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ): Kravgrunnlag = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, kravgrunnlagId)
 }

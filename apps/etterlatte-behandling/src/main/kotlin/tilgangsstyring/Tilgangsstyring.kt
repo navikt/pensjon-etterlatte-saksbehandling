@@ -29,7 +29,7 @@ import no.nav.etterlatte.sak.TilgangService
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilSak: (sakId: no.nav.etterlatte.libs.common.sak.SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
@@ -177,7 +177,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 }
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
-    sakId: Long? = null,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
     enhetNr: String? = null,
 ): Boolean {
     application.log.debug("Sjekker skrivetilgang")
@@ -199,7 +199,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
-private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Long? = null): String? {
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: no.nav.etterlatte.libs.common.sak.SakId? = null): String? {
     val sakTilgangDao = Kontekst.get().sakTilgangDao
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
@@ -224,7 +224,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
-    sakId: Long? = null,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
@@ -242,7 +242,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
-    sakId: Long? = null,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {

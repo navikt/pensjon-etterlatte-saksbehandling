@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 
 data class BehandlingsBehov(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val persongalleri: Persongalleri,
     val mottattDato: String,
 )

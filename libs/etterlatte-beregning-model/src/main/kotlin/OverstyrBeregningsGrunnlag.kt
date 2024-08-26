@@ -15,7 +15,7 @@ data class OverstyrBeregningGrunnlagDao(
     val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,
     val prorataBroekNevner: Long?,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val beskrivelse: String,
     val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,

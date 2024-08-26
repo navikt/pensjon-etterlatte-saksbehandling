@@ -20,7 +20,7 @@ class AktivitetspliktKopierService(
     }
 
     fun kopierVurdering(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ) {
         val vurdering = hentVurderingForBehandling(behandlingId)

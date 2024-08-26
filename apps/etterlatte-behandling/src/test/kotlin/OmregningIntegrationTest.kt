@@ -42,7 +42,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    private var sakId: Long = 0L
+    private var sakId: no.nav.etterlatte.libs.common.sak.SakId = 0L
 
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {

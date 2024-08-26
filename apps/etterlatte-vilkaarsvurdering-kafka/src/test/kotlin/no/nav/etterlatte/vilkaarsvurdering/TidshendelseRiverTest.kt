@@ -149,7 +149,7 @@ class TidshendelseRiverTest {
 
     private fun lagMeldingForVurdertLoependeYtelse(
         hendelseId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingsmaaned: YearMonth,
         behandlingIdPerReformtidspunkt: String? = null,
         steg: String = "VURDERT_LOEPENDE_YTELSE",

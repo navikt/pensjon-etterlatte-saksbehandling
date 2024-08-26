@@ -31,7 +31,7 @@ class Behandler(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun behandle(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandling: UUID,
         behandlingssteg: Behandlingssteg,
         packet: JsonMessage,

@@ -32,7 +32,7 @@ interface GrunnlagKlient {
     ): Grunnlagsopplysning<Persongalleri>?
 
     suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
 
@@ -121,7 +121,7 @@ class GrunnlagKlientObo(
     }
 
     override suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
         try {

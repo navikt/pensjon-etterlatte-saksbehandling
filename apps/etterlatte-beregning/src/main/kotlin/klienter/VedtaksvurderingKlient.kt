@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 interface VedtaksvurderingKlient {
     suspend fun hentIverksatteVedtak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
 }
@@ -38,7 +38,7 @@ class VedtaksvurderingKlientImpl(
     private val resourceUrl = config.getString("vedtaksvurdering.resource.url")
 
     override suspend fun hentIverksatteVedtak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
         logger.info("Henter iverksatte vedtak for sak=$sakId")

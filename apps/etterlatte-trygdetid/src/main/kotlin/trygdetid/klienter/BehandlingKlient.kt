@@ -30,7 +30,8 @@ class BehandlingKlientException(
 class BehandlingKlient(
     config: Config,
     httpClient: HttpClient,
-) : BehandlingTilgangsSjekk, PersonTilgangsSjekk {
+) : BehandlingTilgangsSjekk,
+    PersonTilgangsSjekk {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
@@ -48,7 +49,7 @@ class BehandlingKlient(
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
         skrivetilgang: Boolean,
-        bruker: Saksbehandler
+        bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilPerson(foedselsnummer, skrivetilgang, bruker)
 
     suspend fun kanOppdatereTrygdetid(
@@ -70,7 +71,7 @@ class BehandlingKlient(
     }
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")

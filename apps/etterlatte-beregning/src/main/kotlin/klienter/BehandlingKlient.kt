@@ -28,12 +28,12 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     ): DetaljertBehandling
 
     suspend fun hentFoersteVirkningsdato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): FoersteVirkDto
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling
 
@@ -102,7 +102,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentFoersteVirkningsdato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): FoersteVirkDto {
         logger.info("Henter foersteVirkningsdato med saksId=$sakId")
@@ -134,7 +134,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         retry<SisteIverksatteBehandling> {

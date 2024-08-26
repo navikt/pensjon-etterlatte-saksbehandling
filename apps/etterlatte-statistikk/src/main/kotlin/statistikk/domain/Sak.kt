@@ -57,7 +57,7 @@ enum class SakYtelsesgruppe {
 data class SakRad(
     val id: Long,
     val referanseId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val mottattTidspunkt: Tidspunkt,
     val registrertTidspunkt: Tidspunkt,
     val ferdigbehandletTidspunkt: Tidspunkt?,

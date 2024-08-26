@@ -52,14 +52,14 @@ import java.util.UUID
 
 interface KlageService {
     fun opprettKlage(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage
 
     fun hentKlage(id: UUID): Klage?
 
-    fun hentKlagerISak(sakId: Long): List<Klage>
+    fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage>
 
     fun lagreFormkravIKlage(
         klageId: UUID,
@@ -137,7 +137,7 @@ class KlageServiceImpl(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun opprettKlage(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage {
@@ -168,7 +168,7 @@ class KlageServiceImpl(
 
     override fun hentKlage(id: UUID): Klage? = klageDao.hentKlage(id)
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> = klageDao.hentKlagerISak(sakId)
+    override fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage> = klageDao.hentKlagerISak(sakId)
 
     override fun lagreFormkravIKlage(
         klageId: UUID,

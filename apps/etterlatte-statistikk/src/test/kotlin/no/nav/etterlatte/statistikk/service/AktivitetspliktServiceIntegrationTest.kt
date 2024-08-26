@@ -255,7 +255,7 @@ class AktivitetspliktServiceIntegrationTest(
 }
 
 fun aktivitetspliktDto(
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     avdoedDoedsmaaned: YearMonth = YearMonth.now().minusMonths(6),
     aktivitetsgrad: List<AktivitetspliktAktivitetsgradDto> = emptyList(),
     unntak: List<UnntakFraAktivitetDto> = emptyList(),

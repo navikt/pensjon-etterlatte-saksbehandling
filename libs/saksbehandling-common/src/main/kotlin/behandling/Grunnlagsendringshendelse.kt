@@ -8,7 +8,7 @@ data class PersonMedSakerOgRoller(
 )
 
 data class SakidOgRolle(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val rolle: Saksrolle,
 )
 

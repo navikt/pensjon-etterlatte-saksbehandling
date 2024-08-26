@@ -37,7 +37,7 @@ interface BehandlingKlient :
     ): DetaljertBehandling
 
     suspend fun hentSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak
 
@@ -92,7 +92,7 @@ interface BehandlingKlient :
     ): Boolean
 
     suspend fun hentOppgaverForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<OppgaveIntern>
 
@@ -150,7 +150,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak {
         logger.info("Henter sak med id $sakId")
@@ -173,7 +173,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentOppgaverForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<OppgaveIntern> {
         logger.info("Henter oppgaver for sak med id $sakId")
@@ -376,7 +376,7 @@ class BehandlingKlientImpl(
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 
     override suspend fun harTilgangTilSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilSak(sakId, skrivetilgang, bruker)

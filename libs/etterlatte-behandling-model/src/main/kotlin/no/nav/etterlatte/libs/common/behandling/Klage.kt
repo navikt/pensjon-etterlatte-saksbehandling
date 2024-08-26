@@ -361,7 +361,7 @@ data class Klage(
 data class KlageBlankettPdfgenDTO(
     val formkrav: FormkravPdfgen,
     val hjemmel: String,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     val sakGjelder: String,
     val internKommentar: String?,
@@ -393,7 +393,7 @@ data class KlageBlankettPdfgenDTO(
 }
 
 data class SakOgPersonKlagenGjelderPdfgen(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     val navn: String,
     val fnr: String,

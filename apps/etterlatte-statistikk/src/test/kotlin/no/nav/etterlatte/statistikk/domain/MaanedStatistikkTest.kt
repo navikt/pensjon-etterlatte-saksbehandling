@@ -120,7 +120,7 @@ fun stoenadRad(
     beregningType: String = "papir",
     anvendtSats: String = "123123",
     behandlingId: UUID = UUID.randomUUID(),
-    sakId: Long = -1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = -1L,
     sakNummer: Long = -1L,
     tekniskTid: Tidspunkt = Tidspunkt.now(),
     sakYtelse: String = "",

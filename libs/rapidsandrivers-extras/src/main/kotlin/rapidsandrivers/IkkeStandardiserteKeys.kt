@@ -27,7 +27,7 @@ const val BOR_I_UTLAND_KEY = "bor_i_utland"
 const val ER_OVER_18_AAR = "er_over_18_aar"
 const val KONTEKST_KEY = "kontekst"
 
-var JsonMessage.sakId: Long
+var JsonMessage.sakId: no.nav.etterlatte.libs.common.sak.SakId
     get() = this[SAK_ID_KEY].asLong()
     set(name) {
         this[SAK_ID_KEY] = name

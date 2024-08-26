@@ -68,7 +68,7 @@ interface VedtakKlient {
     ): VedtakDto
 
     suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO
@@ -327,7 +327,7 @@ class VedtakKlientImpl(
     }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {

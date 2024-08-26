@@ -19,17 +19,17 @@ import java.util.UUID
 
 interface VedtakService {
     fun harLoependeYtelserFra(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
     ): LoependeYtelseDTO
 
     fun opprettVedtakFattOgAttester(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ): VedtakOgRapid
 
     fun opprettVedtakOgFatt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ): VedtakOgRapid
 
@@ -49,7 +49,7 @@ class VedtakServiceImpl(
     private val url: String,
 ) : VedtakService {
     override fun harLoependeYtelserFra(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
     ): LoependeYtelseDTO =
         runBlocking {
@@ -57,7 +57,7 @@ class VedtakServiceImpl(
         }
 
     override fun opprettVedtakFattOgAttester(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
@@ -65,7 +65,7 @@ class VedtakServiceImpl(
         }
 
     override fun opprettVedtakOgFatt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {

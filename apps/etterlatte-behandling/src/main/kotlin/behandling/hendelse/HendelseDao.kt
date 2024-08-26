@@ -70,7 +70,7 @@ class HendelseDao(
 
     fun behandlingHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: String,
         status: BehandlingStatus,
     ) = lagreHendelse(
@@ -89,7 +89,7 @@ class HendelseDao(
 
     fun klageHendelse(
         klageId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         hendelse: KlageHendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -111,7 +111,7 @@ class HendelseDao(
 
     fun generellBehandlingHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         hendelse: GenerellBehandlingHendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -133,7 +133,7 @@ class HendelseDao(
 
     fun tilbakekrevingHendelse(
         tilbakekrevingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         vedtakId: Long?,
         hendelse: TilbakekrevingHendelseType,
         inntruffet: Tidspunkt,
@@ -156,7 +156,7 @@ class HendelseDao(
 
     fun vedtakHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         vedtakId: Long,
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
@@ -179,7 +179,7 @@ class HendelseDao(
 
     fun opppdatertGrunnlagHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: String?,
     ) = lagreHendelse(
         UlagretHendelse(
@@ -195,7 +195,7 @@ class HendelseDao(
         ),
     )
 
-    fun hentHendelserISak(sakId: Long): List<LagretHendelse> =
+    fun hentHendelserISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<LagretHendelse> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

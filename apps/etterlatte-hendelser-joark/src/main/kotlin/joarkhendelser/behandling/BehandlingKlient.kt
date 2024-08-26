@@ -52,7 +52,7 @@ class BehandlingKlient(
             .longValue()
 
     suspend fun opprettOppgave(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         merknad: String,
         referanse: String,
     ): UUID =

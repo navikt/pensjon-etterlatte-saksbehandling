@@ -1051,7 +1051,7 @@ class BehandlingFactoryTest {
     }
 
     private fun sak(
-        sakId: Long = 1L,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
         enhet: String = Enheter.defaultEnhet.enhetNr,
     ): Sak =

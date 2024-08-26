@@ -1681,7 +1681,7 @@ internal class VedtakBehandlingServiceTest(
         saktype: SakType = SakType.BARNEPENSJON,
         revurderingAarsak: Revurderingaarsak? = null,
         revurderingInfo: RevurderingInfo? = null,
-        sakId: Long = 1L,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
         opphoerFom: YearMonth? = null,
     ): DetaljertBehandling =
         DetaljertBehandling(

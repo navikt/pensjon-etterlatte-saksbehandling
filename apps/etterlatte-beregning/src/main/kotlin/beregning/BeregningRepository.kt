@@ -68,7 +68,7 @@ class BeregningRepository(
         }
     }
 
-    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? =
+    fun hentOverstyrBeregning(sakId: no.nav.etterlatte.libs.common.sak.SakId): OverstyrBeregning? =
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
@@ -103,7 +103,7 @@ class BeregningRepository(
         }
     }
 
-    fun deaktiverOverstyrtBeregning(sakId: Long) {
+    fun deaktiverOverstyrtBeregning(sakId: no.nav.etterlatte.libs.common.sak.SakId) {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.updateOverstyrtberegning,

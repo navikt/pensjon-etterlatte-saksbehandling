@@ -25,14 +25,14 @@ class OmregningService(
     private val revurderingService: AutomatiskRevurderingService,
     private val omregningDao: OmregningDao,
 ) {
-    fun hentForrigeBehandling(sakId: Long) =
+    fun hentForrigeBehandling(sakId: no.nav.etterlatte.libs.common.sak.SakId) =
         behandlingService.hentSisteIverksatte(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
     fun hentPersongalleri(id: UUID) = runBlocking { grunnlagService.hentPersongalleri(id) }
 
     fun opprettOmregning(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         fraDato: LocalDate,
         revurderingAarsak: Revurderingaarsak,
         prosessType: Prosesstype,

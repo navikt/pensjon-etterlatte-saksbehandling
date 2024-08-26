@@ -127,7 +127,7 @@ class AldersovergangTest(
         }
 
     private fun OpplysningDao.leggTilOpplysning(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysningTypeSoeker: Opplysningstype,
         node: TextNode,
         fnr: Folkeregisteridentifikator,

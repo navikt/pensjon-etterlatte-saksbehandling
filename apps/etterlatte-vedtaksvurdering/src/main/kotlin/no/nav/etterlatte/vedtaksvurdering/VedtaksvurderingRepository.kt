@@ -280,7 +280,7 @@ class VedtaksvurderingRepository(
     ): Vedtak = requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """

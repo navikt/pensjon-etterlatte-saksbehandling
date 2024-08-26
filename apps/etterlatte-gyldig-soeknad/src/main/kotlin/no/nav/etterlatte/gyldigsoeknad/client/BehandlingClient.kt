@@ -62,7 +62,7 @@ class BehandlingClient(
     }
 
     fun opprettOppgave(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         oppgave: NyOppgaveDto,
     ) = runBlocking {
         sakOgBehandlingApp

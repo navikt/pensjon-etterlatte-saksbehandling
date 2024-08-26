@@ -67,7 +67,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
         packet: JsonMessage,
@@ -132,7 +132,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private fun RapidsConnection.svarSuksess(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevID: BrevID,
         brevkode: Brevkoder,
     ) {
@@ -153,7 +153,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         borIutland: Boolean,
         erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
@@ -163,7 +163,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         borIutland: Boolean,
     ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
         borIutland,
@@ -171,14 +171,14 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
         borIutland,
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
+    private suspend fun hentAvdoede(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
 }
 

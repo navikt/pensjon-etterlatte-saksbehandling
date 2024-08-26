@@ -14,7 +14,7 @@ class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
 ) {
     fun opprettAutomatiskRevurdering(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
         virkningstidspunkt: LocalDate? = null,
@@ -43,7 +43,7 @@ class AutomatiskRevurderingService(
     }
 
     fun validerSakensTilstand(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         revurderingAarsak: Revurderingaarsak,
     ) {
         if (revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {

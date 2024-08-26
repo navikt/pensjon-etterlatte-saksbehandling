@@ -85,7 +85,7 @@ enum class BrevVedleggKey {
 }
 
 data class OpprettNyttBrev(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,

@@ -125,11 +125,11 @@ class VilkaarMaaFinnesHvisViderefoertOpphoer :
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
-    fun hentBehandlingerForSak(sakId: Long): List<Behandling>
+    fun hentBehandlingerForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Behandling>
 
     fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger
 
-    fun hentSisteIverksatte(sakId: Long): Behandling?
+    fun hentSisteIverksatte(sakId: no.nav.etterlatte.libs.common.sak.SakId): Behandling?
 
     fun avbrytBehandling(
         behandlingId: UUID,
@@ -197,7 +197,7 @@ interface BehandlingService {
         overstyr: Boolean,
     ): Boolean
 
-    fun hentFoersteVirk(sakId: Long): YearMonth?
+    fun hentFoersteVirk(sakId: no.nav.etterlatte.libs.common.sak.SakId): YearMonth?
 
     fun oppdaterGrunnlagOgStatus(
         behandlingId: UUID,
@@ -215,14 +215,14 @@ interface BehandlingService {
         skalSendeBrev: Boolean,
     )
 
-    fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
+    fun hentUtlandstilknytningForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): Utlandstilknytning?
 
     fun lagreOpphoerFom(
         behandlingId: UUID,
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenRegulering(sakId: Long): UUID?
+    fun hentAapenRegulering(sakId: no.nav.etterlatte.libs.common.sak.SakId): UUID?
 }
 
 internal class BehandlingServiceImpl(
@@ -244,11 +244,12 @@ internal class BehandlingServiceImpl(
             listOf(behandling).filterForEnheter().firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.hentBehandlingerForSak(sakId).filterForEnheter()
+    private fun hentBehandlingerForSakId(sakId: no.nav.etterlatte.libs.common.sak.SakId) =
+        behandlingDao.hentBehandlingerForSak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? = hentBehandlingForId(behandlingId)
 
-    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> = hentBehandlingerForSakId(sakId)
+    override fun hentBehandlingerForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Behandling> = hentBehandlingerForSakId(sakId)
 
     /**
      * Funksjon for uthenting av [SakMedUtlandstilknytning] og tilknyttede [Behandling]er.
@@ -282,7 +283,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentSisteIverksatte(sakId: Long): Behandling? =
+    override fun hentSisteIverksatte(sakId: no.nav.etterlatte.libs.common.sak.SakId): Behandling? =
         hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
@@ -511,7 +512,7 @@ internal class BehandlingServiceImpl(
             }?.opplysning
             ?.doedsdato
 
-    override fun hentFoersteVirk(sakId: Long): YearMonth? {
+    override fun hentFoersteVirk(sakId: no.nav.etterlatte.libs.common.sak.SakId): YearMonth? {
         val behandlinger = hentBehandlingerForSak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
@@ -586,7 +587,8 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? = hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
+    override fun hentUtlandstilknytningForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): Utlandstilknytning? =
+        hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
 
     override fun lagreOpphoerFom(
         behandlingId: UUID,
@@ -799,7 +801,7 @@ internal class BehandlingServiceImpl(
         kilde: Grunnlagsopplysning.Kilde,
     ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
 
-    override fun hentAapenRegulering(sakId: Long): UUID? =
+    override fun hentAapenRegulering(sakId: no.nav.etterlatte.libs.common.sak.SakId): UUID? =
         behandlingDao
             .hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING)
             .singleOrNull {

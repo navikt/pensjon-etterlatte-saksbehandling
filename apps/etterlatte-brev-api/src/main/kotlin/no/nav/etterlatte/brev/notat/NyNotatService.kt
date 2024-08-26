@@ -38,7 +38,7 @@ class NyNotatService(
 
     fun hent(id: NotatID): Notat = notatRepository.hent(id)
 
-    fun hentForSak(sakId: Long): List<Notat> {
+    fun hentForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Notat> {
         logger.info("Henter notater for sak $sakId")
 
         return notatRepository.hentForSak(sakId)
@@ -77,7 +77,7 @@ class NyNotatService(
     }
 
     suspend fun opprett(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
         params: NotatParametre? = null,

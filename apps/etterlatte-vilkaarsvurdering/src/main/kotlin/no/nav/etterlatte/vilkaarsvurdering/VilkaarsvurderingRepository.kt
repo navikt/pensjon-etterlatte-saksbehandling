@@ -48,7 +48,7 @@ class VilkaarsvurderingRepository(
         }
 
     fun hentMigrertYrkesskadefordel(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         tx: TransactionalSession? = null,
     ) = tx.session {
         hent(

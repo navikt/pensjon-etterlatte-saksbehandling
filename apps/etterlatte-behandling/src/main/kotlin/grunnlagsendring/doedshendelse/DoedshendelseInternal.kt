@@ -20,7 +20,7 @@ data class DoedshendelseInternal internal constructor(
     val utfall: Utfall? = null,
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
-    val sakId: Long? = null,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
     val kontrollpunkter: List<DoedshendelseKontrollpunkt>? = null,
     val migrertMellomAttenOgTjue: Boolean = false,
 ) {
@@ -57,7 +57,7 @@ data class DoedshendelseInternal internal constructor(
         )
 
     fun tilAvbrutt(
-        sakId: Long? = null,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
         oppgaveId: UUID? = null,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): DoedshendelseInternal =
@@ -81,7 +81,7 @@ data class DoedshendelseInternal internal constructor(
 
     fun tilBehandlet(
         utfall: Utfall,
-        sakId: Long?,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,

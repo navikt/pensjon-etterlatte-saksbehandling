@@ -30,7 +30,7 @@ class ManuellRevurderingService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettManuellRevurderingWrapper(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
         paaGrunnAvOppgaveId: String? = null,
@@ -99,7 +99,7 @@ class ManuellRevurderingService(
     }
 
     private fun opprettManuellRevurdering(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
         paaGrunnAvHendelse: UUID?,

@@ -34,7 +34,7 @@ fun vedtak(
             ),
         ),
     ident: String = "12345678913",
-    sakId: Long = 1,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),

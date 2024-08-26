@@ -30,7 +30,7 @@ class BehandlingService(
     private val clientId: String,
 ) {
     suspend fun hentSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
     ): Sak =
         retryOgPakkUt {
@@ -144,7 +144,7 @@ class BehandlingService(
 
     suspend fun tildelSaksbehandler(
         navn: String,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
     ) {
         val oppgaver: List<OppgaveIntern> =

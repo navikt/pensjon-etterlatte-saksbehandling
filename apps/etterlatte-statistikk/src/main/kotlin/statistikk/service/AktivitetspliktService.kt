@@ -19,7 +19,7 @@ class AktivitetspliktService(
     }
 
     fun hentAktivitet(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         sisteMaaned: YearMonth,
     ): StatistikkAktivitet? = aktivitetspliktRepo.hentAktivitetspliktForMaaned(sakId, sisteMaaned)
 

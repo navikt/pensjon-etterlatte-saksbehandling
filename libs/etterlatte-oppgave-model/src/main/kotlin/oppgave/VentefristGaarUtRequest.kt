@@ -16,7 +16,7 @@ data class VentefristerGaarUtResponse(
 )
 
 data class VentefristGaarUt(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val referanse: String,
     val oppgaveId: UUID,
     val oppgavekilde: OppgaveKilde,

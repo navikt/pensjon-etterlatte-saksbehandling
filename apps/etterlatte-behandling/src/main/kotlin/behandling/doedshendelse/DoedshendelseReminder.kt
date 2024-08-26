@@ -9,5 +9,5 @@ class DoedshendelseReminder(
     val beroertFnr: String,
     val relasjon: Relasjon,
     val endret: Tidspunkt,
-    val sakId: Long? = null,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
 )

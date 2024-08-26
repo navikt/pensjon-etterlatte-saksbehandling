@@ -75,7 +75,7 @@ class BrevbakerRequestTest {
         brevData: BrevData = mockk(),
         avsender: Avsender = Avsender("", Telefonnummer("123"), "", ""),
         soekerOgEventuellVerge: SoekerOgEventuellVerge = mockk(),
-        sakId: Long = 2L,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId = 2L,
         spraak: Spraak = Spraak.NB,
         sakType: SakType = SakType.BARNEPENSJON,
     ) = BrevbakerRequest.fra(

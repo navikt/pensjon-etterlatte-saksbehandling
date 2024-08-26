@@ -133,7 +133,7 @@ class AvkortingService(
 
     private suspend fun kopierOgReberegnAvkorting(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
@@ -143,7 +143,7 @@ class AvkortingService(
 
     private suspend fun reberegnOgLagreAvkorting(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
@@ -176,7 +176,7 @@ class AvkortingService(
     }
 
     private suspend fun hentAvkortingForrigeBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id

@@ -60,7 +60,7 @@ class JournalfoerInntektsjusteringService(
 
     private fun opprettDokument(
         tittel: String,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         inntektsaar: String,
         inntektsjustering: Inntektsjustering,
     ): JournalpostDokument {
@@ -84,7 +84,7 @@ class JournalfoerInntektsjusteringService(
     ): String = "etterlatte:${sakType.name.lowercase()}:inntektsjustering:$id"
 
     private fun opprettArkivPdf(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         inntektsaar: String,
         inntektsjustering: Inntektsjustering,
     ): DokumentVariant.ArkivPDF {
@@ -108,7 +108,7 @@ class JournalfoerInntektsjusteringService(
 
 // TODO skal erstattes med egen mal
 private fun jsonInnhold(
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     aar: String,
     inntektsjustering: Inntektsjustering,
 ): JsonNode {

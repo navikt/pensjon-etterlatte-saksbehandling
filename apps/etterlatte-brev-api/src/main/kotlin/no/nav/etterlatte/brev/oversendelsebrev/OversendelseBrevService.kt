@@ -57,7 +57,7 @@ interface OversendelseBrevService {
 
     fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
 
@@ -198,7 +198,7 @@ class OversendelseBrevServiceImpl(
 
     override fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brev = brevRepository.hentBrev(brevId)
@@ -319,7 +319,7 @@ data class OversendelseBrevFerdigstillingData(
 
 class MismatchSakOgBrevException(
     brevId: BrevID,
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
 ) : UgyldigForespoerselException(
         code = "SAKID_MATCHER_IKKE",
         detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",

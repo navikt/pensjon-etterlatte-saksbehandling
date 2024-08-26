@@ -68,6 +68,6 @@ fun Grunnlag.folkMedRolle(rolle: PersonRolle): List<String> {
 }
 
 data class Metadata(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val versjon: Long,
 )

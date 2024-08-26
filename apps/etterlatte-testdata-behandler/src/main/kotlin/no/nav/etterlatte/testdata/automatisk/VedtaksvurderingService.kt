@@ -16,7 +16,7 @@ class VedtaksvurderingService(
     private val clientId: String,
 ) {
     suspend fun fattVedtak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): VedtakOgRapid =
@@ -33,7 +33,7 @@ class VedtaksvurderingService(
         }
 
     suspend fun attesterOgIverksettVedtak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): VedtakOgRapid =

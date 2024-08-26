@@ -138,7 +138,7 @@ class AvkortingRepository(
 
     fun lagreAvkorting(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         avkorting: Avkorting,
     ) {
         dataSource.transaction { tx ->
@@ -208,7 +208,7 @@ class AvkortingRepository(
 
     private fun lagreAarsoppgjoer(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         aarsoppgjoer: Aarsoppgjoer,
         tx: TransactionalSession,
     ) = queryOf(

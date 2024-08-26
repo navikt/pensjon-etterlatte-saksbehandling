@@ -80,7 +80,7 @@ class GenerellBehandlingDao(
             }
         }
 
-    fun hentGenerellBehandlingForSak(sakId: Long): List<GenerellBehandling> =
+    fun hentGenerellBehandlingForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<GenerellBehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

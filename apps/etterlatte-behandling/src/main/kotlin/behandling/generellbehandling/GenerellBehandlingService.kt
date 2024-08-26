@@ -323,13 +323,14 @@ class GenerellBehandlingService(
 
     fun hentBehandlingMedId(id: UUID): GenerellBehandling? = generellBehandlingDao.hentGenerellBehandlingMedId(id)
 
-    fun hentBehandlingerForSak(sakId: Long): List<GenerellBehandling> = generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
+    fun hentBehandlingerForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<GenerellBehandling> =
+        generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
 
     private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
         generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
 
     suspend fun hentKravpakkeForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): KravPakkeMedAvdoed {
         val (kravpakke, forstegangsbehandlingMedKravpakke) =

@@ -16,7 +16,7 @@ class AutomatiskBehandlingService(
 
     suspend fun vedtakStegvis(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
         kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid =
@@ -37,7 +37,7 @@ class AutomatiskBehandlingService(
 
     private suspend fun opprettOgFattVedtak(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")

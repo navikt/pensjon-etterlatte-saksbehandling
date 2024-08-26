@@ -29,7 +29,7 @@ class BehandlingKlient(
     private val resourceUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak =
         get(
@@ -40,7 +40,7 @@ class BehandlingKlient(
         )
 
     internal suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         get(
@@ -134,7 +134,7 @@ class BehandlingKlient(
         )
 
     internal suspend fun hentKlagerForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Klage> =
         get(

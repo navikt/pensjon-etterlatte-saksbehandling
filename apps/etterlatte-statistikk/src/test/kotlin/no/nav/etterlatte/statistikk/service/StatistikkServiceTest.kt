@@ -357,7 +357,7 @@ class StatistikkServiceTest {
 fun vedtak(
     vedtakId: Long = 0,
     virk: YearMonth = YearMonth.of(2022, 8),
-    sakId: Long = 0,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 0,
     ident: String = "",
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
@@ -386,7 +386,7 @@ fun vedtak(
 
 fun behandling(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),

@@ -22,7 +22,7 @@ interface KlageDao {
 
     fun hentKlage(id: UUID): Klage?
 
-    fun hentKlagerISak(sakId: Long): List<Klage>
+    fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage>
 
     fun oppdaterKabalStatus(
         klageId: UUID,
@@ -85,7 +85,7 @@ class KlageDaoImpl(
             }
         }
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> =
+    override fun hentKlagerISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Klage> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

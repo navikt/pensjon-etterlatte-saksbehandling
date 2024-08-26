@@ -50,7 +50,7 @@ class VedtakBehandlingService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkOmVedtakErLoependePaaDato(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
@@ -369,7 +369,7 @@ class VedtakBehandlingService(
         return null
     }
 
-    suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
+    suspend fun samordningsinfo(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<SamordningsvedtakWrapper> {
         val vedtaksliste = repository.hentVedtakForSak(sakId)
         return vedtaksliste.firstOrNull()?.let { vedtak ->
             return samordningsKlient
@@ -690,7 +690,7 @@ class VedtakBehandlingService(
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> =
+    fun hentIverksatteVedtakISak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Vedtak> =
         repository
             .hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }

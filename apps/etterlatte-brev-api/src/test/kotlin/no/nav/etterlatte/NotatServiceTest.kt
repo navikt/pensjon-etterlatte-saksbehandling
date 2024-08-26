@@ -152,7 +152,7 @@ class NotatServiceTest(
     }
 }
 
-private fun klageForInnstilling(sakId: Long): Klage =
+private fun klageForInnstilling(sakId: no.nav.etterlatte.libs.common.sak.SakId): Klage =
     Klage
         .ny(
             sak =

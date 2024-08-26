@@ -119,7 +119,7 @@ class KlageBrevService(
     }
 
     private fun ferdigstillOgDistribuerBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         saksbehandler: Saksbehandler,
     ): Pair<Tidspunkt, String> =
@@ -161,7 +161,7 @@ class KlageBrevService(
         }
 
     private fun hentBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =

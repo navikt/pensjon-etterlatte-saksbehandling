@@ -26,10 +26,10 @@ class BrevService(
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 
-    fun hentBrevForSak(sakId: Long): List<Brev> = db.hentBrevForSak(sakId)
+    fun hentBrevForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Brev> = db.hentBrevForSak(sakId)
 
     suspend fun opprettNyttManueltBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
         brevkode: Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,

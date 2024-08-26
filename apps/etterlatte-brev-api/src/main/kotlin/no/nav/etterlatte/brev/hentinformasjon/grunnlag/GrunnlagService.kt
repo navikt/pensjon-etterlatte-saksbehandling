@@ -29,7 +29,7 @@ class GrunnlagService(
 ) {
     suspend fun hentGrunnlag(
         vedtakType: VedtakType?,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ) = when (vedtakType) {
@@ -53,7 +53,7 @@ class GrunnlagService(
     )
 
     suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
     ) = klient.hentGrunnlagForSak(sakId, bruker)
 

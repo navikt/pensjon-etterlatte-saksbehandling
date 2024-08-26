@@ -68,7 +68,7 @@ data class Mottaker(
 
 data class Brev(
     val id: BrevID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID?,
     val tittel: String?,
     val spraak: Spraak,

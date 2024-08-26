@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagKlient : Pingable {
-    suspend fun hentGrunnlag(sakId: Long): Grunnlag?
+    suspend fun hentGrunnlag(sakId: no.nav.etterlatte.libs.common.sak.SakId): Grunnlag?
 
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
 
@@ -49,12 +49,12 @@ interface GrunnlagKlient : Pingable {
     )
 
     suspend fun lagreNyeSaksopplysningerBareSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksopplysninger: NyeSaksopplysninger,
     )
 
     suspend fun leggInnNyttGrunnlagSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysningsbehov: Opplysningsbehov,
     )
 
@@ -85,7 +85,7 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun leggInnNyttGrunnlagSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysningsbehov: Opplysningsbehov,
     ) {
         client
@@ -128,7 +128,7 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun lagreNyeSaksopplysningerBareSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksopplysninger: NyeSaksopplysninger,
     ) {
         client
@@ -142,7 +142,7 @@ class GrunnlagKlientImpl(
     /**
      * Henter komplett grunnlag for sak
      **/
-    override suspend fun hentGrunnlag(sakId: Long): Grunnlag? =
+    override suspend fun hentGrunnlag(sakId: no.nav.etterlatte.libs.common.sak.SakId): Grunnlag? =
         client
             .get("$apiUrl/grunnlag/sak/$sakId") {
                 accept(ContentType.Application.Json)

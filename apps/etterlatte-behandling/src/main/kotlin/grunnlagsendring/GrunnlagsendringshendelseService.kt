@@ -53,9 +53,10 @@ class GrunnlagsendringshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentGyldigeHendelserForSak(sakId: Long) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
+    fun hentGyldigeHendelserForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId) =
+        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
 
-    fun hentAlleHendelserForSak(sakId: Long): List<Grunnlagsendringshendelse> {
+    fun hentAlleHendelserForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Grunnlagsendringshendelse> {
         logger.info("Henter alle relevante hendelser for sak $sakId")
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
@@ -64,7 +65,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSakAvType(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         type: GrunnlagsendringsType,
     ) = inTransaction {
         logger.info("Henter alle relevante hendelser for sak $sakId")
@@ -166,7 +167,7 @@ class GrunnlagsendringshendelseService(
                 ),
         )
 
-    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> =
+    fun opprettEndretGrunnbeloepHendelse(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Grunnlagsendringshendelse> =
         inTransaction {
             opprettHendelseAvTypeForSak(
                 sakId,
@@ -338,7 +339,7 @@ class GrunnlagsendringshendelseService(
     }
 
     private fun opprettHendelseAvTypeForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val hendelseId = UUID.randomUUID()
@@ -452,7 +453,7 @@ class GrunnlagsendringshendelseService(
     }
 
     internal fun erDuplikatHendelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {

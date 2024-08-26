@@ -11,7 +11,7 @@ interface TilgangService {
     ): Boolean
 
     fun harTilgangTilSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
@@ -107,7 +107,7 @@ class TilgangServiceImpl(
     }
 
     override fun harTilgangTilSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: throw GenerellIkkeFunnetException()

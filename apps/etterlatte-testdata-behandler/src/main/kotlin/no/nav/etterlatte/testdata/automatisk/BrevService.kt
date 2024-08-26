@@ -14,7 +14,7 @@ class BrevService(
     private val clientId: String,
 ) {
     suspend fun opprettOgDistribuerVedtaksbrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) {
@@ -25,7 +25,7 @@ class BrevService(
 
     private suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
     ): Brev =
         klient

@@ -53,7 +53,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
             "BehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.sakId: Long
+inline val PipelineContext<*, ApplicationCall>.sakId: no.nav.etterlatte.libs.common.sak.SakId
     get() =
         call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
             "SakId er ikke i path params",

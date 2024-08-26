@@ -9,7 +9,7 @@ class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
 ) {
     suspend fun hentSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingKlient.hentSak(sakId, brukerTokenInfo)
 
@@ -39,13 +39,13 @@ class BehandlingService(
     ) = behandlingKlient.hentKlage(klageId, brukerTokenInfo)
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo)
 
     suspend fun hentKlageForBehandling(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
     ): Klage? {
         val hentKlagerForSak = behandlingKlient.hentKlagerForSak(sakId, bruker)

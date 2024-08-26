@@ -13,7 +13,7 @@ import javax.sql.DataSource
 data class TilbakekrevingHendelse(
     val id: UUID,
     val opprettet: Tidspunkt,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val payload: String,
     val status: TilbakekrevingHendelseStatus,
     val type: TilbakekrevingHendelseType,
@@ -40,7 +40,7 @@ class TilbakekrevingHendelseRepository(
     private val dataSource: DataSource,
 ) {
     fun lagreTilbakekrevingHendelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         payload: String,
         type: TilbakekrevingHendelseType,
         jmsTimestamp: Tidspunkt? = null,
@@ -77,7 +77,7 @@ class TilbakekrevingHendelseRepository(
             }
         }
 
-    fun hentSisteTilbakekrevingHendelse(sakId: Long): TilbakekrevingHendelse? =
+    fun hentSisteTilbakekrevingHendelse(sakId: no.nav.etterlatte.libs.common.sak.SakId): TilbakekrevingHendelse? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -111,7 +111,7 @@ class TilbakekrevingHendelseRepository(
         }
 
     fun ferdigstillTilbakekrevingHendelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         id: UUID,
     ): UUID =
         using(sessionOf(dataSource)) { session ->

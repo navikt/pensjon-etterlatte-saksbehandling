@@ -28,7 +28,7 @@ class Brevoppretter(
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
     suspend fun opprettVedtaksbrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
@@ -56,7 +56,7 @@ class Brevoppretter(
     }
 
     suspend fun opprettBrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
@@ -89,7 +89,7 @@ class Brevoppretter(
         }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,

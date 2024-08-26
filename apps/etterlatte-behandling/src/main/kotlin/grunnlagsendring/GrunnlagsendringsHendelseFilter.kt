@@ -17,7 +17,7 @@ class GrunnlagsendringsHendelseFilter(
     val behandlingService: BehandlingService,
 ) {
     fun hendelseErRelevantForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         grunnlagendringType: GrunnlagsendringsType,
     ): Boolean {
         if (!ikkeRelevanteHendelserForOpphoertSak(grunnlagendringType)) {

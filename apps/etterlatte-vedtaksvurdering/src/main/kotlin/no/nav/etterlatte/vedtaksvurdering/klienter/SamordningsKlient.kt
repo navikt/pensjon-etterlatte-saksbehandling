@@ -158,7 +158,7 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRe
 internal data class SamordneVedtakRequest(
     val pid: Folkeregisteridentifikator,
     val vedtakId: Long,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val virkFom: LocalDate?,
     val virkTom: LocalDate?,
     val fagomrade: String,

@@ -30,7 +30,7 @@ class SanksjonRepository(
 
     fun opprettSanksjon(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandlerIdent: String,
         sanksjon: LagreSanksjon,
     ) {
@@ -62,7 +62,7 @@ class SanksjonRepository(
 
     fun opprettSanksjonFraKopi(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         sanksjon: Sanksjon,
     ) {
         dataSource.transaction { tx ->
@@ -157,7 +157,7 @@ class SanksjonRepository(
 data class Sanksjon(
     val id: UUID?,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val type: SanksjonType,
     val fom: YearMonth,
     val tom: YearMonth?,
@@ -168,7 +168,7 @@ data class Sanksjon(
 
 data class LagreSanksjon(
     val id: UUID?,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val type: SanksjonType,
     val fom: LocalDate,
     val tom: LocalDate?,

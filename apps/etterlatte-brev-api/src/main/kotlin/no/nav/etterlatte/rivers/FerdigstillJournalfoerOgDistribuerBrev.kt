@@ -21,7 +21,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
 
     suspend fun ferdigstillOgGenererPDF(
         brevKode: Brevkoder,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
         brevId: BrevID,
@@ -47,7 +47,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
 
     suspend fun journalfoerOgDistribuer(
         brevKode: Brevkoder,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {

@@ -45,7 +45,7 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentTilbakekrevinger(sakId: Long) =
+    fun hentTilbakekrevinger(sakId: no.nav.etterlatte.libs.common.sak.SakId) =
         inTransaction {
             logger.info("Henter tilbakekrevinger sak=$sakId")
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
@@ -110,7 +110,7 @@ class TilbakekrevingService(
         }
 
     fun endreTilbakekrevingOppgaveStatus(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         paaVent: Boolean,
     ) {
         inTransaction {
@@ -133,7 +133,7 @@ class TilbakekrevingService(
     }
 
     fun avbrytTilbakekreving(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         merknad: String,
     ): TilbakekrevingBehandling =
         inTransaction {

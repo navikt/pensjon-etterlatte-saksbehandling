@@ -168,7 +168,7 @@ class BehandlingFactory(
     }
 
     fun opprettBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
@@ -233,7 +233,7 @@ class BehandlingFactory(
     }
 
     fun opprettOmgjoeringAvslag(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: Saksbehandler,
         skalKopiere: Boolean,
     ): Behandling {
@@ -343,7 +343,7 @@ class BehandlingFactory(
         }
     }
 
-    internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
+    internal fun hentDataForOpprettBehandling(sakId: no.nav.etterlatte.libs.common.sak.SakId): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.hentBehandlingerForSak(sak.id)
@@ -422,7 +422,7 @@ sealed class AvslagOmgjoering {
         )
 
     class FoerstegangsbehandlingFeilStatus(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
     ) : UgyldigForespoerselException(
             "FOERSTEGANGSBEHANDLING_UGYLDIG_STATUS",

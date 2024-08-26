@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val type: GrunnlagsendringsType,
     val opprettet: LocalDateTime,
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,

@@ -37,7 +37,7 @@ internal fun lagGrunnlagsopplysning(
 )
 
 internal fun lagGrunnlagHendelse(
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     hendelseNummer: Long,
     opplysningType: Opplysningstype,
     id: UUID = UUID.randomUUID(),

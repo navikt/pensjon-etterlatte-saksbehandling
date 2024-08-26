@@ -14,7 +14,7 @@ interface BehandlingTilgangsSjekk {
 
 interface SakTilgangsSjekk {
     suspend fun harTilgangTilSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         skrivetilgang: Boolean = false,
         bruker: Saksbehandler,
     ): Boolean

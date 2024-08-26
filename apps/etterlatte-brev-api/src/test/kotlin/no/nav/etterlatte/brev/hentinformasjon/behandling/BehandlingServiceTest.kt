@@ -43,7 +43,7 @@ class BehandlingServiceTest {
 
     private fun klage(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ): Klage =
         Klage(
             behandlingId,

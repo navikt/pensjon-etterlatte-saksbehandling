@@ -20,7 +20,7 @@ class AktivitetspliktUnntakDao(
 ) {
     fun opprettUnntak(
         unntak: LagreAktivitetspliktUnntak,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
@@ -110,7 +110,7 @@ class AktivitetspliktUnntakDao(
             }
         }
 
-    fun hentNyesteUnntak(sakId: Long): List<AktivitetspliktUnntak> =
+    fun hentNyesteUnntak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -194,7 +194,7 @@ class AktivitetspliktUnntakDao(
 
 data class AktivitetspliktUnntak(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val unntak: AktivitetspliktUnntakType,

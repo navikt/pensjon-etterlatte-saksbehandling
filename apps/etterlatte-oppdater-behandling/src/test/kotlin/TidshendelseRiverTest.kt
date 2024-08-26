@@ -162,7 +162,7 @@ class TidshendelseRiverTest {
 
 fun lagMeldingForVurdertLoependeYtelse(
     hendelseId: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,
@@ -192,7 +192,7 @@ fun lagMeldingForVurdertLoependeYtelse(
 }
 
 fun lagMeldingForVurdertLoependeYtelse(
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,

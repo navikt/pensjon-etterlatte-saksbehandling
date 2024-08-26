@@ -28,7 +28,7 @@ private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.Reg
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
     behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
@@ -50,7 +50,7 @@ fun behandling(
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
     ident: String =
         GrunnlagTestData()
             .avdoede

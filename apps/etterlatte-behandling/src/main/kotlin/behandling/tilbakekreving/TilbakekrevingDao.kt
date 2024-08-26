@@ -28,7 +28,7 @@ import java.util.UUID
 class TilbakekrevingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentTilbakekrevinger(sakId: Long): List<TilbakekrevingBehandling> =
+    fun hentTilbakekrevinger(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<TilbakekrevingBehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekrevinger = selectTilbakekrevinger(this, sakId)
@@ -45,7 +45,7 @@ class TilbakekrevingDao(
 
     private fun selectTilbakekrevinger(
         connection: Connection,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ): List<TilbakekrevingBehandling> =
         with(connection) {
             val statement =
@@ -73,7 +73,7 @@ class TilbakekrevingDao(
             }
         }
 
-    fun hentNyesteTilbakekreving(sakId: Long): TilbakekrevingBehandling =
+    fun hentNyesteTilbakekreving(sakId: no.nav.etterlatte.libs.common.sak.SakId): TilbakekrevingBehandling =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekreving = hentNyesteTilbakekrevingForSak(this, sakId)
@@ -88,7 +88,7 @@ class TilbakekrevingDao(
 
     private fun hentNyesteTilbakekrevingForSak(
         connection: Connection,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ): TilbakekrevingBehandling? =
         with(connection) {
             val statement =

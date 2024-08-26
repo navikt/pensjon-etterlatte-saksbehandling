@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 data class Trygdetid(
     val id: UUID = randomUUID(),
     val ident: String,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),

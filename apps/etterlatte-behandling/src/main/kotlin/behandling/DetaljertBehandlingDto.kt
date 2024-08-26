@@ -20,7 +20,7 @@ import java.util.UUID
  **/
 data class DetaljertBehandlingDto(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val sakType: SakType,
     val sakEnhetId: String,
     val gyldighetsprøving: GyldighetsResultat?,

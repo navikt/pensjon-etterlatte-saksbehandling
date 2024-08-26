@@ -44,7 +44,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     ): Boolean
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling
 }
@@ -142,7 +142,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")

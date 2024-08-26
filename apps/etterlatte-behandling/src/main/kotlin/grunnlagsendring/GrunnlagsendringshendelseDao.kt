@@ -192,7 +192,7 @@ class GrunnlagsendringshendelseDao(
         }
 
     fun hentGrunnlagsendringshendelserMedStatuserISak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         statuser: List<GrunnlagsendringStatus>,
     ): List<Grunnlagsendringshendelse> =
         connectionAutoclosing.hentConnection {
@@ -215,7 +215,7 @@ class GrunnlagsendringshendelseDao(
         }
 
     fun hentGrunnlagsendringshendelserMedStatuserISakAvType(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         statuser: List<GrunnlagsendringStatus>,
         type: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> =
@@ -240,7 +240,7 @@ class GrunnlagsendringshendelseDao(
             }
         }
 
-    fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: Long): List<Grunnlagsendringshendelse> =
+    fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Grunnlagsendringshendelse> =
         hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
             listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),

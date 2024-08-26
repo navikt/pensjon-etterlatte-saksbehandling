@@ -97,7 +97,7 @@ internal class OppgaveDaoReguleringTest(
 
     private fun lagOppgave(
         status: Status = Status.UNDER_BEHANDLING,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: String = "Ole",
     ): OppgaveIntern {
         val oppgave =

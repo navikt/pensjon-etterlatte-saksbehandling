@@ -46,7 +46,7 @@ class VedtaksbrevService(
     }
 
     suspend fun opprettVedtaksbrev(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
@@ -123,7 +123,7 @@ class VedtaksbrevService(
     }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

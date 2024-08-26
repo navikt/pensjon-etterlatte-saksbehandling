@@ -232,7 +232,7 @@ fun gjeldendeLinjerForEnDato(
 }
 
 data class UtbetalingslinjerPerSak(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val saktype: Saktype,
     val fnr: String,
     val utbetalingslinjer: List<Utbetalingslinje>,

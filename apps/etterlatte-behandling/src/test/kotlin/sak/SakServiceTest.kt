@@ -243,7 +243,7 @@ internal class SakServiceTest {
     @Test
     fun `finn OMS sak for ident sak sin ident`() {
         saksbehandlerKontekst()
-        val sakId: Long = 1
+        val sakId: no.nav.etterlatte.libs.common.sak.SakId = 1
         coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns PersonMedSakerOgRoller(KONTANT_FOT.value, emptyList())
         every { sakDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
@@ -266,7 +266,7 @@ internal class SakServiceTest {
     @Test
     fun `finn OMS sak for avdød i persongalleri på sak i finnSakerOmsOgHvisAvdoed`() {
         saksbehandlerKontekst()
-        val sakId: Long = 1
+        val sakId: no.nav.etterlatte.libs.common.sak.SakId = 1
         coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns
             PersonMedSakerOgRoller(
                 KONTANT_FOT.value,

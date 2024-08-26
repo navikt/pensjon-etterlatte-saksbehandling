@@ -23,7 +23,7 @@ data class BrevbakerRequest internal constructor(
             brevData: BrevData,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
-            sakId: Long,
+            sakId: no.nav.etterlatte.libs.common.sak.SakId,
             spraak: Spraak,
             sakType: SakType,
         ): BrevbakerRequest =

@@ -35,7 +35,7 @@ val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -75,7 +75,7 @@ fun opprettVedtak(
 
 fun opprettVedtakTilbakekreving(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -89,7 +89,7 @@ fun opprettVedtakTilbakekreving(
 
 fun opprettVedtakKlage(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -104,7 +104,7 @@ fun opprettVedtakKlage(
 fun vedtak(
     id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
@@ -145,7 +145,7 @@ fun vedtak(
 )
 
 fun vedtakTilbakekreving(
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -166,7 +166,7 @@ fun vedtakTilbakekreving(
 )
 
 fun vedtakKlage(
-    sakId: Long = 142L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 142L,
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,

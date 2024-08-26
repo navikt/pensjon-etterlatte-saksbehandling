@@ -33,7 +33,7 @@ class RedigerbartVedleggHenter(
         behandlingId: UUID?,
         revurderingaarsak: Revurderingaarsak?,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         forenkletVedtak: ForenkletVedtak?,
         enhet: String,
         spraak: Spraak,

@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 typealias NotatID = Long
 
 data class NyttNotat(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val referanse: String? = null,
     val tittel: String,
     val mal: NotatMal,
@@ -15,7 +15,7 @@ data class NyttNotat(
 
 data class Notat(
     val id: NotatID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val journalpostId: String? = null,
     val referanse: String? = null,
     val tittel: String,

@@ -20,7 +20,7 @@ data class OppgaveIntern(
     val id: UUID,
     val status: Status,
     val enhet: String,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: OppgaveSaksbehandler? = null,
@@ -146,7 +146,7 @@ data class RedigerFristGosysRequest(
 )
 
 data class SakIdOgReferanse(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val referanse: String,
 )
 

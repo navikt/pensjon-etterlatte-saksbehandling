@@ -23,7 +23,7 @@ class OpplysningDao(
 
     data class GrunnlagHendelse(
         val opplysning: Grunnlagsopplysning<JsonNode>,
-        val sakId: Long,
+        val sakId: no.nav.etterlatte.libs.common.sak.SakId,
         val hendelseNummer: Long,
     )
 
@@ -51,7 +51,7 @@ class OpplysningDao(
             hendelseNummer = getLong("hendelsenummer"),
         )
 
-    fun hentAlleGrunnlagForSak(sakId: Long): List<GrunnlagHendelse> =
+    fun hentAlleGrunnlagForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -106,7 +106,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
+    fun finnHendelserIGrunnlag(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -128,7 +128,7 @@ class OpplysningDao(
         }
 
     fun finnNyesteGrunnlagForSak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
         connection.use {
@@ -178,7 +178,7 @@ class OpplysningDao(
         }
 
     fun leggOpplysningTilGrunnlag(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
         fnr: Folkeregisteridentifikator? = null,
     ): Long =
@@ -205,7 +205,7 @@ class OpplysningDao(
 
     fun oppdaterVersjonForBehandling(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         hendelsenummer: Long,
     ) = connection.use {
         it
@@ -285,7 +285,7 @@ class OpplysningDao(
 
 data class BehandlingGrunnlagVersjon(
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val hendelsenummer: Long,
     val laast: Boolean,
 )

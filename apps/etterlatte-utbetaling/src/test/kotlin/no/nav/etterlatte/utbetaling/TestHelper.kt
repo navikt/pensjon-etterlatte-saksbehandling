@@ -293,7 +293,7 @@ fun mockKonsistensavstemming(
 )
 
 fun oppdragForKonsistensavstemming(
-    sakId: Long = 1,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
     sakType: Saktype = Saktype.BARNEPENSJON,
     fnr: String = "123456",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>,

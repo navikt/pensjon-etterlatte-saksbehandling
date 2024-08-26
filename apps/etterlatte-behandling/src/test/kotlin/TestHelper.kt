@@ -169,7 +169,7 @@ fun mockSaksbehandler(
 
 fun opprettBehandling(
     type: BehandlingType,
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -192,7 +192,7 @@ fun opprettBehandling(
 
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -232,7 +232,7 @@ fun foerstegangsbehandling(
 
 fun revurdering(
     id: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -295,7 +295,7 @@ fun ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdato
 
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     gjelderPerson: String,

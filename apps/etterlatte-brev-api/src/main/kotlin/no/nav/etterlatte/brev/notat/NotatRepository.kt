@@ -28,7 +28,7 @@ class NotatRepository(
             )
         }!!
 
-    fun hentForSak(sakId: Long): List<Notat> =
+    fun hentForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
                 queryOf(

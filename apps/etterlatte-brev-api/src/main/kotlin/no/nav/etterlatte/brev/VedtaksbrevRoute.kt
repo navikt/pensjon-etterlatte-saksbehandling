@@ -116,6 +116,6 @@ fun Route.vedtaksbrevRoute(
 
 data class ResetPayloadRequest(
     val brevId: Long,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val brevtype: Brevtype,
 )

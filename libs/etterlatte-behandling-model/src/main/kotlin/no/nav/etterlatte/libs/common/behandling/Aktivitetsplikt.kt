@@ -24,14 +24,14 @@ enum class JobbType(
 }
 
 data class OpprettRevurderingForAktivitetspliktDto(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val frist: Tidspunkt,
     val behandlingsmaaned: YearMonth,
     val jobbType: JobbType,
 )
 
 data class OpprettOppgaveForAktivitetspliktVarigUnntakDto(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val referanse: String? = null,
     val frist: Tidspunkt,
     val jobbType: JobbType,

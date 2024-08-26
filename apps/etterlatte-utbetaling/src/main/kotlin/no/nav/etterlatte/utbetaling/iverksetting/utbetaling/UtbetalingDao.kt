@@ -29,6 +29,7 @@ class UtbetalingDao(
     private val dataSource: DataSource,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun opprettUtbetaling(utbetaling: Utbetaling) =
         dataSource
             .transaction { tx ->
@@ -287,7 +288,7 @@ class UtbetalingDao(
             }
         }
 
-    fun hentUtbetalinger(sakId: Long): List<Utbetaling> =
+    fun hentUtbetalinger(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """

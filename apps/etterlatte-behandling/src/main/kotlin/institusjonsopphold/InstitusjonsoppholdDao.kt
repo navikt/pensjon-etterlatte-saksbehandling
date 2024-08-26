@@ -12,7 +12,7 @@ class InstitusjonsoppholdDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     fun lagreInstitusjonsopphold(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
         institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse,
     ) = connectionAutoclosing.hentConnection {

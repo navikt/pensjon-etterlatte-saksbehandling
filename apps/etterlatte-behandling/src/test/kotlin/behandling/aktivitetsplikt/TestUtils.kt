@@ -11,7 +11,7 @@ import java.util.UUID
 
 fun unntak(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     behandlingId: UUID? = null,
     oppgaveId: UUID? = null,
     unntak: AktivitetspliktUnntakType = AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR,
@@ -44,7 +44,7 @@ fun unntak(
 
 fun aktivitetsgrad(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1L,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId = 1L,
     behandlingId: UUID? = null,
     oppgaveId: UUID? = null,
     aktivitetsgrad: AktivitetspliktAktivitetsgradType = AktivitetspliktAktivitetsgradType.AKTIVITET_100,

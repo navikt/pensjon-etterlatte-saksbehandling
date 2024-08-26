@@ -15,7 +15,7 @@ data class Attestant(
 
 data class GenerellBehandling(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val opprettet: Tidspunkt,
     val type: GenerellBehandlingType,
     val innhold: Innhold?,
@@ -58,11 +58,11 @@ data class GenerellBehandling(
     companion object {
         fun opprettFraType(
             type: GenerellBehandlingType,
-            sakId: Long,
+            sakId: no.nav.etterlatte.libs.common.sak.SakId,
         ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null, null, Status.OPPRETTET)
 
         fun opprettUtland(
-            sakId: Long,
+            sakId: no.nav.etterlatte.libs.common.sak.SakId,
             behandlingreferanse: UUID?,
         ) = GenerellBehandling(
             UUID.randomUUID(),

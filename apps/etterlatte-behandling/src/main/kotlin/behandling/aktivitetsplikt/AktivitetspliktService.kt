@@ -75,7 +75,7 @@ class AktivitetspliktService(
     }
 
     suspend fun hentAktivitetspliktDto(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ): AktivitetspliktDto {
@@ -107,7 +107,7 @@ class AktivitetspliktService(
     }
 
     fun oppfyllerAktivitetsplikt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         aktivitetspliktDato: LocalDate,
     ): Boolean {
         val nyesteVurdering = hentVurderingForSak(sakId)
@@ -146,7 +146,7 @@ class AktivitetspliktService(
         }
     }
 
-    private fun harVarigUnntak(sakId: Long): Boolean {
+    private fun harVarigUnntak(sakId: no.nav.etterlatte.libs.common.sak.SakId): Boolean {
         val varigUnntak =
             hentVurderingForSak(sakId)
                 .unntak
@@ -157,7 +157,7 @@ class AktivitetspliktService(
 
     fun hentAktiviteter(
         behandlingId: UUID? = null,
-        sakId: Long? = null,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId? = null,
     ): List<AktivitetspliktAktivitet> =
         (
             if (behandlingId != null) {
@@ -216,7 +216,7 @@ class AktivitetspliktService(
     fun opprettAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
@@ -231,7 +231,7 @@ class AktivitetspliktService(
     fun upsertAktivitetsgradForBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -269,7 +269,7 @@ class AktivitetspliktService(
     fun opprettUnntakForOpppgave(
         unntak: LagreAktivitetspliktUnntak,
         oppgaveId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
@@ -294,7 +294,7 @@ class AktivitetspliktService(
     fun upsertUnntakForBehandling(
         unntak: LagreAktivitetspliktUnntak,
         behandlingId: UUID,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -368,7 +368,7 @@ class AktivitetspliktService(
             )
         }
 
-    fun hentVurderingForSak(sakId: Long): AktivitetspliktVurdering =
+    fun hentVurderingForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): AktivitetspliktVurdering =
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
@@ -497,7 +497,7 @@ class AktivitetspliktService(
     }
 
     private suspend fun sendDtoTilStatistikk(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ) {
@@ -534,7 +534,7 @@ class AktivitetspliktService(
 fun hentVurderingForSakHelper(
     aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
-    sakId: Long,
+    sakId: no.nav.etterlatte.libs.common.sak.SakId,
 ): AktivitetspliktVurdering {
     val aktivitet = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
     val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)

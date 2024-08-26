@@ -15,7 +15,7 @@ import java.util.UUID
 
 data class OpprettBehandling(
     val type: BehandlingType,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val status: BehandlingStatus,
     val soeknadMottattDato: LocalDateTime? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,

@@ -74,12 +74,12 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
     fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         flyktning: Flyktning,
     )
 
@@ -110,7 +110,7 @@ class SakServiceImpl(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         flyktning: Flyktning,
     ) {
         dao.oppdaterFlyktning(sakId, flyktning)
@@ -355,13 +355,13 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
     ) {
         val erSkjermet =
             runBlocking {

@@ -33,7 +33,7 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern>
+    fun hentOppgaverForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<OppgaveIntern>
 
     fun hentOppgaver(
         enheter: List<String>,
@@ -215,7 +215,7 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> =
+    override fun hentOppgaverForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

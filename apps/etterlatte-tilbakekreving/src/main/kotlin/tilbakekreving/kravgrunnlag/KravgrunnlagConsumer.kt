@@ -95,7 +95,7 @@ class KravgrunnlagConsumer(
         }
 
     private fun sjekkAtSisteHendelseForSakErFerdigstilt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         jmsTimestampNyHendelse: Tidspunkt,
     ) {
         val sisteHendelse = hendelseRepository.hentSisteTilbakekrevingHendelse(sakId)

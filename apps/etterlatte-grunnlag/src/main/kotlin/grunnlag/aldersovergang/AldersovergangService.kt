@@ -14,7 +14,7 @@ class AldersovergangService(
         dao.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned)
 
     fun hentAlder(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         rolle: PersonRolle,
         paaDato: LocalDate,
     ): Alder? =

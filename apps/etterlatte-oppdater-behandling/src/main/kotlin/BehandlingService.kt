@@ -75,14 +75,14 @@ interface BehandlingService {
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
     fun opprettRevurderingAktivitetsplikt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
     ): OpprettRevurderingForAktivitetspliktResponse
 
     fun opprettOppgaveAktivitetspliktVarigUnntak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         frist: Tidspunkt,
         referanse: String? = null,
         jobbType: JobbType,
@@ -100,7 +100,7 @@ interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 
     fun opprettOppgave(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         oppgaveType: OppgaveType,
         referanse: String? = null,
         merknad: String? = null,
@@ -110,7 +110,7 @@ interface BehandlingService {
     fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
 
     fun lagreKjoering(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         status: KjoeringStatus,
         kjoering: String,
     )
@@ -259,7 +259,7 @@ class BehandlingServiceImpl(
         }
 
     override fun opprettOppgave(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         oppgaveType: OppgaveType,
         referanse: String?,
         merknad: String?,
@@ -285,7 +285,7 @@ class BehandlingServiceImpl(
         }
 
     override fun opprettRevurderingAktivitetsplikt(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
@@ -306,7 +306,7 @@ class BehandlingServiceImpl(
         }
 
     override fun opprettOppgaveAktivitetspliktVarigUnntak(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         frist: Tidspunkt,
         referanse: String?,
         jobbType: JobbType,
@@ -336,7 +336,7 @@ class BehandlingServiceImpl(
     }
 
     override fun lagreKjoering(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         status: KjoeringStatus,
         kjoering: String,
     ) {

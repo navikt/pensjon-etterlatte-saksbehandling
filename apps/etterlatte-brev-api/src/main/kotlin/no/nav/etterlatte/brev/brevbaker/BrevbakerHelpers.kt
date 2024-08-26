@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 object BrevbakerHelpers {
     fun mapFelles(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         soeker: Soeker,
         avsender: Avsender,
         vergeNavn: String? = null,

@@ -99,7 +99,7 @@ class TidshendelseRiver(
     private fun handleIdentifisertSak(
         packet: JsonMessage,
         type: String,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dryrun: Boolean,
     ): Boolean {
         val hendelseData = mutableMapOf<String, Any>()
@@ -132,7 +132,7 @@ class TidshendelseRiver(
 
     private fun handleVilkarsvurdertOgSkalFatteVedtak(
         packet: JsonMessage,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         dryrun: Boolean,
         context: MessageContext,
     ): Boolean {

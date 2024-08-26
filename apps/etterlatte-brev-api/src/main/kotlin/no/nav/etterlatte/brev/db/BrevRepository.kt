@@ -90,7 +90,7 @@ class BrevRepository(
             it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
-    fun hentBrevForSak(sakId: Long): List<Brev> =
+    fun hentBrevForSak(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<Brev> =
         using(sessionOf(ds)) {
             it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
         }

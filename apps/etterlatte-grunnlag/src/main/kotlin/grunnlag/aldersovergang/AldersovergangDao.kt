@@ -92,7 +92,7 @@ class AldersovergangDao(
     }
 
     fun hentAlder(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         opplysningType: Opplysningstype,
         paaDato: LocalDate,
         tx: TransactionalSession? = null,

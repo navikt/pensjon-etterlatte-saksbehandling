@@ -17,7 +17,7 @@ import javax.sql.DataSource
 data class Pesyskopling(
     val pesysId: PesysId,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
 )
 
 internal class PesysRepository(
@@ -90,7 +90,7 @@ internal class PesysRepository(
     fun lagreKoplingTilBehandling(
         behandlingId: UUID,
         pesysId: PesysId,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         tx: TransactionalSession? = null,
     ) {
         tx.session {

@@ -26,7 +26,7 @@ class PDFService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun lagreOpplastaPDF(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         multiPart: List<PartData>,
     ): Result<Brev> {
         val request =
@@ -57,7 +57,7 @@ class PDFService(
     }
 
     private fun lagrePdf(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         fil: ByteArray,
         innhold: BrevInnhold,
         sak: Sak,

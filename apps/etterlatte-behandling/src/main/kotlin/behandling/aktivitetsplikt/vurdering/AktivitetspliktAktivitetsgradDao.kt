@@ -20,7 +20,7 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     fun opprettAktivitetsgrad(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
@@ -95,7 +95,7 @@ class AktivitetspliktAktivitetsgradDao(
             }
         }
 
-    fun hentNyesteAktivitetsgrad(sakId: Long): List<AktivitetspliktAktivitetsgrad> =
+    fun hentNyesteAktivitetsgrad(sakId: no.nav.etterlatte.libs.common.sak.SakId): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -199,7 +199,7 @@ class AktivitetspliktAktivitetsgradDao(
 
 data class AktivitetspliktAktivitetsgrad(
     val id: UUID,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,

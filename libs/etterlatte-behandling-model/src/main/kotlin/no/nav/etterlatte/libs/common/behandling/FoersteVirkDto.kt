@@ -4,5 +4,5 @@ import java.time.LocalDate
 
 data class FoersteVirkDto(
     val foersteIverksatteVirkISak: LocalDate,
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
 )

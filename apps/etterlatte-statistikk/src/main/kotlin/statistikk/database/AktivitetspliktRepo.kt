@@ -62,7 +62,7 @@ class AktivitetspliktRepo(
      * Den sjekker kun til og med angitt måned for å sikre stabilitet i statistikken som blir produsert
      */
     fun hentAktivitetspliktForMaaned(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         yearMonth: YearMonth,
     ): StatistikkAktivitet? =
         datasource.connection.use { connection ->
@@ -120,7 +120,7 @@ class AktivitetspliktRepo(
 }
 
 data class StatistikkAktivitet(
-    val sakId: Long,
+    val sakId: no.nav.etterlatte.libs.common.sak.SakId,
     val registrert: Tidspunkt,
     val avdoedDoedsmaaned: YearMonth,
     val unntak: List<PeriodisertAktivitetspliktopplysning>,

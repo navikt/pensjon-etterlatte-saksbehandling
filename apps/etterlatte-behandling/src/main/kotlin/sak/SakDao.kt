@@ -53,7 +53,7 @@ class SakDao(
     }
 
     fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         flyktning: Flyktning,
     ) {
         connectionAutoclosing.hentConnection {
@@ -87,7 +87,7 @@ class SakDao(
         }
 
     fun oppdaterAdresseBeskyttelse(
-        sakId: Long,
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
         connectionAutoclosing.hentConnection { connection ->

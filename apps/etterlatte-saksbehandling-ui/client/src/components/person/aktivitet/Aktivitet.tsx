@@ -1,12 +1,8 @@
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { BodyShort, Box, Heading, Table, Tag, VStack } from '@navikt/ds-react'
-import {
-  AktivitetspliktUnntakType,
-  tekstAktivitetspliktUnntakType,
-  tekstAktivitetspliktVurderingType,
-} from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Heading, Table, VStack } from '@navikt/ds-react'
+import { tekstAktivitetspliktUnntakType, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitspliktVurderingForSak } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
@@ -15,6 +11,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
+import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 
 const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -132,12 +129,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                               <Table.Row key={unntak.id}>
                                 <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
                                 <Table.DataCell>
-                                  <Tag variant="neutral">
-                                    {unntak.unntak ===
-                                    AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-                                      ? 'Varig'
-                                      : 'Midlertidig'}
-                                  </Tag>
+                                  <AktivitetspliktUnntakTypeTag unntak={unntak.unntak} />
                                 </Table.DataCell>
                                 <Table.DataCell>{unntak.fom ? formaterDato(unntak.fom) : '-'}</Table.DataCell>
                                 <Table.DataCell>{unntak.tom ? formaterDato(unntak.tom) : '-'}</Table.DataCell>

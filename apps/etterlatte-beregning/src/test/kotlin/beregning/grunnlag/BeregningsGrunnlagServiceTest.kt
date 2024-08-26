@@ -12,12 +12,12 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -695,7 +696,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperioder før reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -774,7 +775,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperioder etter reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -825,7 +826,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperuoder før og etter reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -909,6 +910,44 @@ internal class BeregningsGrunnlagServiceTest {
         }
     }
 
+    @Test
+    fun `skal ikke tillate kun en juridisk forelder hvis ikke registrert i persongalleri`() {
+        val behandlingId = randomUUID()
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+                coEvery { behandlingType } returns BehandlingType.REVURDERING
+            }
+
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        assertThrows<BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri> {
+            runBlocking {
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId,
+                    LagreBeregningsGrunnlag(
+                        soeskenMedIBeregning = emptyList(),
+                        institusjonsopphold = emptyList(),
+                        beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
+                        beregningsMetodeFlereAvdoede =
+                            listOf(
+                                GrunnlagMedPeriode(
+                                    BeregningsmetodeForAvdoed(
+                                        KUN_EN_REGISTRERT_JURIDISK_FORELDER.name,
+                                        BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
+                                    ),
+                                    LocalDate.now().minusYears(1),
+                                ),
+                            ),
+                    ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            }
+        }
+    }
+
     private fun mockBehandling(
         type: SakType,
         uuid: UUID,
@@ -945,13 +984,13 @@ internal class BeregningsGrunnlagServiceTest {
     ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
 
     private fun overstyrtBeregningsgrunnlag(
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = randomUUID(),
         utbetaltBeloep: Long = 0L,
         datoFOM: LocalDate,
         datoTOM: LocalDate? = null,
         beskrivelse: String = "",
     ) = OverstyrBeregningGrunnlagDao(
-        id = UUID.randomUUID(),
+        id = randomUUID(),
         behandlingId = behandlingId,
         datoFOM = datoFOM,
         datoTOM = datoTOM,

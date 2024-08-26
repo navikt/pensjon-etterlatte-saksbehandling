@@ -87,7 +87,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                     val aktiviteter =
                         inTransaction {
-                            aktivitetspliktService.upsertAktivitet(behandlingId, aktivitet, brukerTokenInfo)
+                            aktivitetspliktService.upsertAktivitet(aktivitet, brukerTokenInfo, behandlingId)
                             aktivitetspliktService.hentAktiviteter(behandlingId)
                         }
                     call.respond(aktiviteter)
@@ -101,7 +101,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val aktiviteter =
                             inTransaction {
-                                aktivitetspliktService.slettAktivitet(behandlingId, aktivitetId, brukerTokenInfo)
+                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, behandlingId)
                                 aktivitetspliktService.hentAktiviteter(behandlingId)
                             }
 
@@ -126,6 +126,35 @@ internal fun Route.aktivitetspliktRoutes(
                             }
                         }
                     call.respond(dto)
+                }
+            }
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer aktivitet for sakId=$sakId")
+                    val aktivitet = call.receive<LagreAktivitetspliktAktivitet>()
+
+                    val aktiviteter =
+                        inTransaction {
+                            aktivitetspliktService.upsertAktivitet(aktivitet, brukerTokenInfo, sakId = sakId)
+                            aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                        }
+                    call.respond(aktiviteter)
+                }
+            }
+
+            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
+                delete {
+                    kunSkrivetilgang {
+                        logger.info("Sletter aktivitet $aktivitetId for sakId $sakId")
+
+                        val aktiviteter =
+                            inTransaction {
+                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                            }
+
+                        call.respond(aktiviteter)
+                    }
                 }
             }
         }

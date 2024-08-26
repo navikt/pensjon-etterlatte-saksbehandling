@@ -180,7 +180,7 @@ class VilkaarsvurderingRepository(
         return hentNonNull(behandlingId)
     }
 
-    fun lagreVilkaarResultat(
+    fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar,
     ): Vilkaarsvurdering {

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -10,7 +9,6 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
@@ -21,10 +19,12 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.route.withParam
+import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
+import vilkaarsvurdering.OppdaterVurdertVilkaar
+import vilkaarsvurdering.StatusOppdatertDto
 import vilkaarsvurdering.VilkaarTypeOgUtfall
 import vilkaarsvurdering.Vilkaarsvurdering
 import vilkaarsvurdering.VurdertVilkaar
@@ -63,6 +63,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             call.respond(mapOf("rettUtenTidsbegrensning" to result))
         }
 
+        // TODO: må ha connection med behandling
         get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
             logger.info("Henter vilkårtyper for $behandlingId")
             val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId, brukerTokenInfo)
@@ -88,23 +89,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
-            val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(brukerTokenInfo.ident())
+            val vurdertVilkaarDto = call.receive<OppdaterVurdertVilkaar>()
 
             logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
             try {
                 val vilkaarsvurdering =
-                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                        behandlingId,
-                        brukerTokenInfo,
-                        vurdertVilkaar,
-                    )
-                call.respond(
-                    toDto(
-                        vilkaarsvurdering,
-                        behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                    ),
-                )
+                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(vurdertVilkaarDto)
+                call.respond(vilkaarsvurdering)
             } catch (e: BehandlingstilstandException) {
                 logger.error(
                     "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
@@ -120,37 +111,18 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
-            val statusOppdatert =
-                vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
-            call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status/{grunnlagsVersjon}") {
+            val grunnlagsVersjon = call.parameters["grunnlagsVersjon"]!!.toLong()
+            vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, grunnlagsVersjon)
+            call.respond(HttpStatusCode.OK, StatusOppdatertDto(true))
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
-            withParam("vilkaarId") { vilkaarId ->
+            withUuidParam("vilkaarId") { vilkaarId ->
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
-                try {
-                    val vilkaarsvurdering =
-                        vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId)
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                        ),
-                    )
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet",
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                } catch (e: VilkaarsvurderingTilstandException) {
-                    logger.error(e.message)
-                    call.respond(
-                        HttpStatusCode.PreconditionFailed,
-                        "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat.",
-                    )
-                }
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
+                call.respond(vilkaarsvurdering)
             }
         }
 
@@ -230,15 +202,6 @@ fun toDto(
     grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
     behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
 )
-
-private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
-    vilkaarsvurderingService: VilkaarsvurderingService,
-    behandlingId: UUID,
-): Long =
-    vilkaarsvurderingService
-        .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
-        .metadata
-        .versjon
 
 data class VilkaartypeDTO(
     val typer: List<VilkaartypePair>,

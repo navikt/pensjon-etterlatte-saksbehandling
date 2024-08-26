@@ -14,15 +14,14 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.Transactions
-import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
-import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
 import org.slf4j.LoggerFactory
+import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -62,7 +61,7 @@ class VilkaarsvurderingRepository(
 
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         runBlocking {
-            vilkaarsvurderingKlientDao.slettTotalVurdering(behandlingId)
+            vilkaarsvurderingKlientDao.slettVilkaarsvurderingResultat(behandlingId)
         }
 
     fun lagreVilkaarsvurderingResultat(
@@ -79,91 +78,25 @@ class VilkaarsvurderingRepository(
         }
     }
 
-    private fun opprettVilkaarsvurderingKilde(
-        vilkaarsvurderingId: UUID,
-        kopiertFraId: UUID,
-        tx: TransactionalSession,
-    ) {
-        queryOf(
-            statement = Queries.LAGRE_VILKAARSVURDERING_KILDE,
-            paramMap =
-                mapOf(
-                    "id" to vilkaarsvurderingId,
-                    "kopiert_fra" to kopiertFraId,
-                ),
-        ).let { tx.run(it.asUpdate) }
-    }
-
-    private fun lagreVilkaarsvurderingResultat(
-        behandlingId: UUID,
-        virkningstidspunkt: LocalDate,
-        resultat: VilkaarsvurderingResultat,
-        vilkaarsvurdering: Vilkaarsvurdering,
-    ): Vilkaarsvurdering {
-        vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat)
-        return hent(behandlingId)!!
-    }
-
-    private fun vilkaarsvurderingResultatQuery(
-        vilkaarsvurdering: Vilkaarsvurdering,
-        virkningstidspunkt: LocalDate,
-        resultat: VilkaarsvurderingResultat,
-    ) = queryOf(
-        statement = Queries.LAGRE_VILKAARSVURDERING_RESULTAT,
-        paramMap =
-            mapOf(
-                "id" to vilkaarsvurdering.id,
-                "virkningstidspunkt" to virkningstidspunkt,
-                "resultat_utfall" to resultat.utfall.name,
-                "resultat_kommentar" to resultat.kommentar,
-                "resultat_tidspunkt" to resultat.tidspunkt.toTidspunkt().toTimestamp(),
-                "resultat_saksbehandler" to resultat.saksbehandler,
-            ),
-    )
-
-    fun lagreVilkaarResultat(
+    fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar,
-    ): Vilkaarsvurdering {
-        ds.transaction { tx ->
-            tx.oppdater(
-                query = Queries.LAGRE_VILKAAR_RESULTAT,
-                params =
-                    mapOf(
-                        "id" to vurdertVilkaar.vilkaarId,
-                        "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                        "resultat_tidspunkt" to
-                            vurdertVilkaar.vurdering.tidspunkt
-                                .toTidspunkt()
-                                .toTimestamp(),
-                        "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler,
-                    ),
-                loggtekst = "Lagrer vilkårresultat",
-                ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, tx) },
-            )
+    ): Vilkaarsvurdering =
+        runBlocking {
+            vilkaarsvurderingKlientDao.oppdaterVurderingPaaVilkaar(OppdaterVurdertVilkaar(behandlingId, vurdertVilkaar))
         }
-        return hentNonNull(behandlingId)
-    }
 
     fun slettVilkaarResultat(
         behandlingId: UUID,
         vilkaarId: UUID,
-    ): Vilkaarsvurdering =
-        ds
-            .transaction { tx ->
-                queryOf(Queries.SLETT_VILKAAR_RESULTAT, mapOf("id" to vilkaarId))
-                    .let { tx.run(it.asUpdate) }
+    ): Vilkaarsvurdering = runBlocking { vilkaarsvurderingKlientDao.slettVurderingPaaVilkaar(behandlingId, vilkaarId) }
 
-                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
-            }.let { hentNonNull(behandlingId) }
+    fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ) = runBlocking { vilkaarsvurderingKlientDao.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
 
-    fun slettVilkaarvurdering(id: UUID) =
-        ds.transaction { tx ->
-            queryOf(Queries.SLETT_VILKAARSVURDERING_KILDE, mapOf("vilkaarsvurdering_id" to id))
-                .let { tx.run(it.asUpdate) }
-            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("id" to id))
-                .let { tx.run(it.asUpdate) }
-        } == 1
+    fun slettVilkaarvurdering(id: UUID) = runBlocking { vilkaarsvurderingKlientDao.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
@@ -230,27 +163,6 @@ class VilkaarsvurderingRepository(
         ).let { tx.run(it.asUpdate) }
 
         return vilkaar.id
-    }
-
-    fun oppdaterGrunnlagsversjon(
-        behandlingId: UUID,
-        grunnlagVersjon: Long,
-    ) {
-        ds.transaction { tx ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
-            queryOf(
-                statement = Queries.OPPDATER_GRUNNLAGSVERSJON,
-                paramMap =
-                    mapOf(
-                        "id" to vilkaarsvurdering.id,
-                        "grunnlag_versjon" to grunnlagVersjon,
-                    ),
-            ).let { tx.run(it.asUpdate) }
-
-            logger.info(
-                "Grunnlagsversjon oppdatert til $grunnlagVersjon på vilkårsvurdering for behandling $behandlingId",
-            )
-        }
     }
 
     private fun Row.toVilkaarsvurdering(vilkaar: List<Vilkaar>) =

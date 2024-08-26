@@ -17,9 +17,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withParam
+import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
@@ -29,6 +30,7 @@ import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktIkkeSattExc
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarTypeOgUtfall
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
+import vilkaarsvurdering.StatusOppdatertDto
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(
@@ -190,16 +192,14 @@ fun Route.vilkaarsvurdering(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val statusOppdatert =
-                    vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
-            }
+            val statusOppdatert =
+                vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+            call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                withParam("vilkaarId") { vilkaarId ->
+                withUuidParam("vilkaarId") { vilkaarId ->
                     logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                     try {
                         val vilkaarsvurdering =
@@ -227,6 +227,7 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        // TODO: må ha route til vv
         delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Sletter vilkårsvurdering for $behandlingId")
@@ -304,10 +305,6 @@ fun Route.vilkaarsvurdering(
         }
     }
 }
-
-data class StatusOppdatertDto(
-    val statusOppdatert: Boolean,
-)
 
 private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(

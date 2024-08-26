@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
-import no.nav.etterlatte.libs.ktor.route.withParam
+import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -61,10 +61,10 @@ fun Route.trygdetid(
         post("/pesys") {
             withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
                 call.respond(
-                        trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
+                    trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
                         fnr = fnr.value,
-                        brukerTokenInfo = brukerTokenInfo
-                    )
+                        brukerTokenInfo = brukerTokenInfo,
+                    ),
                 )
             }
         }
@@ -180,7 +180,7 @@ fun Route.trygdetid(
 
                 delete("/grunnlag/{trygdetidGrunnlagId}") {
                     withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                        withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
+                        withUuidParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                             logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
                             trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
                                 behandlingId,
@@ -270,7 +270,7 @@ fun Route.trygdetid(
 
                             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(
                                 trygdetid.behandlingId,
-                                brukerTokenInfo
+                                brukerTokenInfo,
                             )
 
                             call.respond(
@@ -293,7 +293,7 @@ fun Route.trygdetid(
                                 trygdetidService.hentTrygdetidIBehandlingMedId(
                                     behandlingId,
                                     trygdetidId(),
-                                    brukerTokenInfo
+                                    brukerTokenInfo,
                                 )
 
                             if (trygdetid != null) {

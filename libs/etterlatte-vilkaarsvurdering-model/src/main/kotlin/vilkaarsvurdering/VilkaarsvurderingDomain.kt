@@ -8,6 +8,15 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
 import java.util.UUID
 
+data class StatusOppdatertDto(
+    val statusOppdatert: Boolean,
+)
+
+data class OppdaterVurdertVilkaar(
+    val behandlingId: UUID,
+    val vurdertVilkaar: VurdertVilkaar,
+)
+
 data class VilkaarsvurderingMedBehandlingGrunnlagsversjon(
     val vilkaarsvurdering: Vilkaarsvurdering,
     val behandlingGrunnlagVersjon: Long,

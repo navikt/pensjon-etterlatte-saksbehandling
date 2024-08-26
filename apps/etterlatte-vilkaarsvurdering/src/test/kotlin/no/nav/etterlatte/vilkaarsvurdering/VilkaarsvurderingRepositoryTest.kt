@@ -134,7 +134,7 @@ internal class VilkaarsvurderingRepositoryTest(
             )
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarResultat(
+            vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
                 opprettetVilkaarsvurdering.behandlingId,
                 vurdertVilkaar,
             )
@@ -174,7 +174,7 @@ internal class VilkaarsvurderingRepositoryTest(
                     },
             )
 
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaar,
         )
@@ -214,7 +214,7 @@ internal class VilkaarsvurderingRepositoryTest(
                         Utfall.OPPFYLT,
                     ),
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )
@@ -231,7 +231,7 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarOppfylt,
         )
@@ -262,7 +262,7 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )

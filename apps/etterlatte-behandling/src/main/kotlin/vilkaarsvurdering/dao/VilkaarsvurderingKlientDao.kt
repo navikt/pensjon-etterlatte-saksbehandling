@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
 
@@ -84,7 +85,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering =
+    suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         downstreamResourceClient
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
@@ -103,6 +104,48 @@ class VilkaarsvurderingKlientDao(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/resultat/$behandlingId"),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo,
                 postBody = vurdertVilkaarsvurderingDto,
+            ).mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+
+    suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering =
+        downstreamResourceClient
+            .post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/${oppdatervv.behandlingId}"),
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                postBody = oppdatervv.toJson(),
+            ).mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+
+    suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vilkaarId: UUID,
+    ): Vilkaarsvurdering =
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/$vilkaarId"),
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+
+    suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ): Vilkaarsvurdering =
+        downstreamResourceClient
+            .post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/oppdater-status/$grunnlagVersjon",
+                    ),
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                postBody = "",
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },

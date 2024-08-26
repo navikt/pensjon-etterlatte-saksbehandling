@@ -1,8 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -10,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -21,17 +17,13 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
+import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
-
-class VirkningstidspunktIkkeSattException(
-    behandlingId: UUID,
-) : RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagKlient: GrunnlagKlient, // TODO: slett
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -47,11 +39,6 @@ class VilkaarsvurderingService(
             ?.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
             ?: false
 
-    suspend fun hentBehandlingensGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
-
     fun oppdaterTotalVurdering(vurdertVilkaar: VurdertVilkaarsvurderingDto): Vilkaarsvurdering =
         vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
             vurdertVilkaar.virkningstidspunkt,
@@ -62,38 +49,16 @@ class VilkaarsvurderingService(
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
 
-    suspend fun oppdaterVurderingPaaVilkaar(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vurdertVilkaar: VurdertVilkaar,
-    ): Vilkaarsvurdering =
-        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
-            if (vilkaarsvurdering?.resultat != null) {
-                throw VilkaarsvurderingTilstandException(
-                    "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat. " +
-                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
-                )
-            }
-            vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
-        }
+    fun oppdaterVurderingPaaVilkaar(oppdatertvilkaar: OppdaterVurdertVilkaar): Vilkaarsvurdering =
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(oppdatertvilkaar.behandlingId, oppdatertvilkaar.vurdertVilkaar)
 
-    suspend fun slettVurderingPaaVilkaar(
+    fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
         vilkaarId: UUID,
-    ): Vilkaarsvurdering =
-        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
-            if (vilkaarsvurdering?.resultat != null) {
-                throw VilkaarsvurderingTilstandException(
-                    "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. " +
-                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
-                )
-            }
-
-            vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
-        }
+    ): Vilkaarsvurdering {
+        vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
+        return vilkaarsvurderingRepository.hent(behandlingId)!!
+    }
 
     fun kopierVilkaarsvurdering(
         nyVilkaarsvurdering: Vilkaarsvurdering,
@@ -165,73 +130,15 @@ class VilkaarsvurderingService(
                 }
         }
 
-    suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
+    fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
-        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val behandling = oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
-            val vilkaarsvurdering =
-                vilkaarsvurderingRepository.hent(behandlingId)
-                    ?: throw VilkaarsvurderingIkkeFunnet()
-
-            val virkningstidspunktFraBehandling =
-                behandling.virkningstidspunkt?.dato
-                    ?: throw BehandlingVirkningstidspunktIkkeFastsatt()
-
-            if (vilkaarsvurdering.resultat == null) {
-                throw VilkaarsvurderingManglerResultat()
-            }
-
-            if (vilkaarsvurdering.virkningstidspunkt != virkningstidspunktFraBehandling) {
-                throw VirkningstidspunktSamsvarerIkke()
-            }
-
-            // Dersom forrige steg (oversikt) har blitt endret vil statusen være OPPRETTET. Når man trykker videre
-            // fra vilkårsvurdering skal denne validere tilstand og sette status VILKAARSVURDERT.
-            if (behandling.status in listOf(BehandlingStatus.OPPRETTET)) {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-            } else {
-                false
-            }
-        }
-
-    private suspend fun oppdaterGrunnlagsversjon(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): DetaljertBehandling {
-        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+        grunnlagsversjon: Long,
+    ) {
         vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
-            grunnlagVersjon = grunnlag.metadata.versjon,
+            grunnlagVersjon = grunnlagsversjon,
         )
-        return behandling
     }
-
-    private suspend fun <T> tilstandssjekkFoerKjoering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        block: suspend () -> T,
-    ): T {
-        val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-
-        if (!kanVilkaarsvurdere) {
-            throw BehandlingstilstandException()
-        }
-
-        return block()
-    }
-
-    private suspend fun hentDataForVilkaarsvurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<DetaljertBehandling, Grunnlag> =
-        coroutineScope {
-            val behandling = async { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, brukerTokenInfo) }
-
-            Pair(behandling.await(), grunnlag.await())
-        }
 
     suspend fun hentVilkaartyper(
         behandlingId: UUID,

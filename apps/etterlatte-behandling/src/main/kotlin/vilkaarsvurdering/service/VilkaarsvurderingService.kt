@@ -110,7 +110,7 @@ class VilkaarsvurderingService(
                         "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
                 )
             }
-            vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
+            vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
         }
 
     suspend fun slettVurderingPaaVilkaar(

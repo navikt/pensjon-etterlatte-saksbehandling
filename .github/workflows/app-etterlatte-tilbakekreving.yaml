@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-mq/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

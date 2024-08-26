@@ -9,6 +9,7 @@ on:
       - apps/etterlatte-testdata-behandler/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -26,7 +29,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.Instant
+import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.random.Random
 
@@ -52,7 +55,16 @@ internal class InntektsjusteringRiverTest {
                 naeringsinntekt = 200,
                 arbeidsinntektUtland = 300,
                 naeringsinntektUtland = 400,
-                tidspunkt = Instant.now(),
+                tidspunkt =
+                    ZonedDateTime
+                        .now()
+                        .withDayOfMonth(1)
+                        .withMonth(8)
+                        .withYear(2024)
+                        .withHour(5)
+                        .withMinute(6)
+                        .withSecond(7)
+                        .toInstant(),
             )
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
@@ -77,12 +89,13 @@ internal class InntektsjusteringRiverTest {
         testRapid().apply { sendTestMessage(melding) }.inspektør
 
         val journalRequest = slot<OpprettJournalpostRequest>()
+        val pdfDataSlot = slot<JsonNode>()
 
         coVerify(exactly = 1) {
             behandlingKlientMock.finnEllerOpprettSak("123", SakType.OMSTILLINGSSTOENAD)
 
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
-            pdfgenKlient.genererPdf(any(), "inntektsjustering_nytt_aar_v1")
+            pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
             behandlingKlientMock.opprettOppgave(
                 sak.id,
@@ -107,6 +120,16 @@ internal class InntektsjusteringRiverTest {
             dokumenter[0].dokumentvarianter.size shouldBe 1
             dokumenter[0].dokumentvarianter[0].filtype shouldBe "PDFA"
             dokumenter[0].dokumentvarianter[0].variantformat shouldBe "ARKIV"
+        }
+
+        val pdfData = objectMapper.readValue<ArkiverInntektsjustering>(pdfDataSlot.captured.toJson())
+        with(pdfData) {
+            aar shouldBe 2025
+            arbeidsinntekt shouldBe 100
+            naeringsinntekt shouldBe 200
+            arbeidsinntektUtland shouldBe 300
+            naeringsinntektUtland shouldBe 400
+            tidspunkt shouldBe "01.08.2024 05:06:07"
         }
     }
 }

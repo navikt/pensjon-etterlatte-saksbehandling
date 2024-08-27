@@ -9,7 +9,8 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -17,11 +18,6 @@ import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
-import vilkaarsvurdering.OppdaterVurdertVilkaar
-import vilkaarsvurdering.StatusOppdatertDto
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import java.util.UUID
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
@@ -135,28 +131,4 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
 data class StatusOppdatertDto(
     val statusOppdatert: Boolean,
-)
-
-data class VurdertVilkaarDto(
-    val vilkaarId: UUID,
-    val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val kommentar: String?,
-)
-
-fun toDto(
-    vilkaarsvurdering: Vilkaarsvurdering,
-    behandlingGrunnlagVersjon: Long?,
-) = VilkaarsvurderingDto(
-    behandlingId = vilkaarsvurdering.behandlingId,
-    virkningstidspunkt = vilkaarsvurdering.virkningstidspunkt,
-    vilkaar = vilkaarsvurdering.vilkaar,
-    resultat = vilkaarsvurdering.resultat,
-    grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
-    behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
-)
-
-data class VilkaartypePair(
-    val name: String,
-    val tittel: String,
 )

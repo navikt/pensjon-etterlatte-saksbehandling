@@ -18,7 +18,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.VilkaartypePair
@@ -28,9 +31,6 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
-import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
 class VirkningstidspunktIkkeSattException(

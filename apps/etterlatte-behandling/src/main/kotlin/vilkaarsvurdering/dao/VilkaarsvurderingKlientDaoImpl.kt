@@ -7,6 +7,8 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -14,8 +16,6 @@ import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import vilkaarsvurdering.OppdaterVurdertVilkaar
-import vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
 
 interface VilkaarsvurderingKlientDao {

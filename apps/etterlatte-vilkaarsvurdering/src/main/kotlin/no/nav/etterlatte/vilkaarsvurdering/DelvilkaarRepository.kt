@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
 class DelvilkaarRepository {

@@ -1,13 +1,13 @@
 package no.nav.etterlatte.vilkaarsvurdering.dao
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import org.slf4j.LoggerFactory
-import vilkaarsvurdering.OppdaterVurdertVilkaar
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDate
 import java.util.UUID
 

@@ -13,9 +13,13 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -26,10 +30,6 @@ import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingTilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktIkkeSattException
-import vilkaarsvurdering.StatusOppdatertDto
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {

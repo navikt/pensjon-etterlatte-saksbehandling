@@ -2,14 +2,14 @@ package no.nav.etterlatte.vilkaarsvurdering.service
 
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.util.UUID
 

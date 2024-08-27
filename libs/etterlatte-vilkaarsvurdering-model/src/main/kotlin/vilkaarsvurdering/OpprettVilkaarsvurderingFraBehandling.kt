@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
 
 data class OpprettVilkaarsvurderingFraBehandling(

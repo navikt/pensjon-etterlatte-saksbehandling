@@ -1,10 +1,5 @@
-package vilkaarsvurdering
+package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
 import java.util.UUID
 

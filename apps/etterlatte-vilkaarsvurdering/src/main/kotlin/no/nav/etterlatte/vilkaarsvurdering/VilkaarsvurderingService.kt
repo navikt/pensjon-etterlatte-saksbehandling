@@ -1,11 +1,10 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
-import vilkaarsvurdering.OppdaterVurdertVilkaar
-import vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
 
 class VilkaarsvurderingService(
@@ -74,15 +73,3 @@ class BehandlingstilstandException : IllegalStateException()
 class VilkaarsvurderingTilstandException(
     message: String,
 ) : IllegalStateException(message)
-
-class VilkaarsvurderingManglerResultat :
-    UgyldigForespoerselException(
-        code = "VILKAARSVURDERING_MANGLER_RESULTAT",
-        detail = "Vilkårsvurderingen har ikke et resultat",
-    )
-
-class VirkningstidspunktSamsvarerIkke :
-    UgyldigForespoerselException(
-        code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_SAMSVARER_IKKE",
-        detail = "Vilkårsvurderingen har et virkningstidspunkt som ikke samsvarer med behandling",
-    )

@@ -56,6 +56,8 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
@@ -72,8 +74,6 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
-import vilkaarsvurdering.OppdaterVurdertVilkaar
-import vilkaarsvurdering.Vilkaarsvurdering
 import java.time.LocalDate
 import java.util.UUID
 

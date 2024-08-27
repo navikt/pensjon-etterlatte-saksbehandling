@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
@@ -60,10 +61,11 @@ class SakDao(
             with(it) {
                 val statement =
                     prepareStatement(
-                        "UPDATE sak set flyktning = ? where id = ?",
+                        "UPDATE sak set flyktning = ?, sistEndretAv = ? where id = ?",
                     )
                 statement.setJsonb(1, flyktning)
-                statement.setLong(2, sakId)
+                statement.setString(2, Kontekst.get().AppUser.name())
+                statement.setLong(3, sakId)
                 statement.executeUpdate()
             }
         }
@@ -92,9 +94,10 @@ class SakDao(
     ): Int =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
+                val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ?, sistEndretAv = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)
-                statement.setLong(2, sakId)
+                statement.setString(2, Kontekst.get().AppUser.name())
+                statement.setLong(3, sakId)
                 statement.executeUpdate().also {
                     logger.info(
                         "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
@@ -208,12 +211,13 @@ class SakDao(
             with(connection) {
                 val statement =
                     prepareStatement(
-                        "INSERT INTO sak(sakType, fnr, enhet, opprettet) VALUES(?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
+                        "INSERT INTO sak(sakType, fnr, enhet, opprettet, sistEndretAv) VALUES(?, ?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
                     )
                 statement.setString(1, type.name)
                 statement.setString(2, fnr)
                 statement.setString(3, enhet)
                 statement.setTidspunkt(4, Tidspunkt.now())
+                statement.setString(5, Kontekst.get().AppUser.name())
                 requireNotNull(
                     statement
                         .executeQuery()
@@ -229,13 +233,15 @@ class SakDao(
                     prepareStatement(
                         """
                         UPDATE sak 
-                        set enhet = ? 
+                        set enhet = ?,
+                         sistEndretAv = ?
                         where id = ?
                         """.trimIndent(),
                     )
                 saker.forEach {
                     statement.setString(1, it.enhet)
-                    statement.setLong(2, it.id)
+                    statement.setString(2, Kontekst.get().AppUser.name())
+                    statement.setLong(3, it.id)
                     statement.addBatch()
                 }
                 statement.executeBatch()
@@ -277,12 +283,14 @@ class SakDao(
                     prepareStatement(
                         """
                         UPDATE sak 
-                        set erSkjermet = ? 
+                        set erSkjermet = ?,
+                         sistEndretAv = ?
                         where id = any(?)
                         """.trimIndent(),
                     )
                 statement.setBoolean(1, skjermet)
-                statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
+                statement.setString(2, Kontekst.get().AppUser.name())
+                statement.setArray(3, createArrayOf("bigint", sakIder.toTypedArray()))
                 statement.executeUpdate()
             }
         }

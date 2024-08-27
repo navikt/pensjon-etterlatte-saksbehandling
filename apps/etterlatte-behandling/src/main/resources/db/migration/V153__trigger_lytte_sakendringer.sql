@@ -8,7 +8,7 @@ CREATE TABLE logging.t_history
     schemaname text,
     tabname    text,
     operation  text,
-    who        text      DEFAULT current_user,
+    who        text,
     new_val    jsonb,
     old_val    jsonb
 );
@@ -18,19 +18,20 @@ $$
 BEGIN
     IF TG_OP = 'INSERT'
     THEN
-        INSERT INTO logging.t_history (tabname, schemaname, operation, new_val)
-        VALUES (TG_RELNAME, TG_TABLE_SCHEMA, TG_OP, row_to_json(NEW));
+        INSERT INTO logging.t_history (tabname, schemaname, operation, new_val, who)
+        VALUES (TG_RELNAME, TG_TABLE_SCHEMA, TG_OP, row_to_json(NEW), NEW.sistEndretAv);
         RETURN NEW;
     ELSIF TG_OP = 'UPDATE'
     THEN
-        INSERT INTO logging.t_history (tabname, schemaname, operation, new_val, old_val)
+        INSERT INTO logging.t_history (tabname, schemaname, operation, new_val, old_val, who)
         VALUES (TG_RELNAME, TG_TABLE_SCHEMA, TG_OP,
-                row_to_json(NEW), row_to_json(OLD));
+                row_to_json(NEW), row_to_json(OLD), NEW.sistEndretAv);
         RETURN NEW;
     ELSIF TG_OP = 'DELETE'
     THEN
-        INSERT INTO logging.t_history (tabname, schemaname, operation, old_val)
-        VALUES (TG_RELNAME, TG_TABLE_SCHEMA, TG_OP, row_to_json(OLD));
+        -- TODO: who her er ikkje heilt opplagt
+        INSERT INTO logging.t_history (tabname, schemaname, operation, old_val, who)
+        VALUES (TG_RELNAME, TG_TABLE_SCHEMA, TG_OP, row_to_json(OLD), current_user);
         RETURN OLD;
     END IF;
 END;

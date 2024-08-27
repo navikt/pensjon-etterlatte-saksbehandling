@@ -1,0 +1,1 @@
+ALTER TABLE sak ADD COLUMN sistEndretAv TEXT;

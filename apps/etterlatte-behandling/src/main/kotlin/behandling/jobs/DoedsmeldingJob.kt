@@ -26,7 +26,12 @@ class DoedsmeldingJob(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(doedshendelseService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao, null)
+        Context(
+            Self(doedshendelseService::class.java.simpleName),
+            DatabaseContext(dataSource),
+            sakTilgangDao,
+            HardkodaSystembruker.doedshendelse,
+        )
 
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med doedshendelseService=${doedshendelseService::class.simpleName} og periode $interval")

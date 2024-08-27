@@ -8,6 +8,7 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -27,7 +28,12 @@ class DoedsmeldingReminderJob(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(doedshendelseReminderService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao, null)
+        Context(
+            Self(doedshendelseReminderService::class.java.simpleName),
+            DatabaseContext(dataSource),
+            sakTilgangDao,
+            HardkodaSystembruker.doedshendelse,
+        )
 
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med ${doedshendelseReminderService::class.simpleName} og periode $interval")

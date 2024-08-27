@@ -225,4 +225,3 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-utbetaling
         - application: etterlatte-api
-        - application: etterlatte-vilkaarsvurdering-kafka

@@ -2,13 +2,10 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 
-class AppBuilder(
-    props: Miljoevariabler,
-) {
+class AppBuilder {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient =
         httpClientClientCredentials(

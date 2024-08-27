@@ -12,7 +12,7 @@ export const capitalize = (s?: string) => {
 
 export const formaterEnumTilLesbarString = (string: string): string => {
   const storForbokstav = capitalize(string.toLowerCase())
-  return storForbokstav.replace('_', ' ')
+  return storForbokstav.replaceAll('_', ' ')
 }
 
 export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {

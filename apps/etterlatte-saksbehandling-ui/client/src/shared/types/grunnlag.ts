@@ -19,6 +19,7 @@ export interface Personopplysninger {
   soeker?: Personopplysning
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
+  annenForelder?: AnnenForelder
 }
 
 export interface Personopplysning {
@@ -55,3 +56,13 @@ export interface RedigertFamilieforhold {
   gjenlevende: string[]
   avdoede: string[]
 }
+
+export interface AnnenForelder {
+  vurdering: AnnenForelderVurdering
+  begrunnelse: string
+}
+
+export type AnnenForelderVurdering =
+  | 'KUN_EN_REGISTRERT_JURIDISK_FORELDER'
+  | 'UKJENT_FORELDER_IKKE_NORSK_FNR'
+  | 'IKKE_SAMSVAR_MED_PDL'

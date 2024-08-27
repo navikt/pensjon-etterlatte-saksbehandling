@@ -31,7 +31,7 @@ export const AktivitetspliktVurderingVisning = ({
                   <Label>Unntaksperiode</Label>
                   <HStack gap="4">
                     <div>
-                      <Label size="small">Sluttdato</Label>
+                      <Label size="small">Startdato</Label>
                       <BodyShort>
                         {vurdering.unntak.fom ? formaterDato(vurdering.unntak.fom) : 'Mangler startdato'}
                       </BodyShort>

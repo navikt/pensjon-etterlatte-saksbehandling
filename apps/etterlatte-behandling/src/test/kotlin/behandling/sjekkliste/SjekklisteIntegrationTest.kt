@@ -86,7 +86,7 @@ class SjekklisteIntegrationTest(
         opprettet.versjon shouldBe 1
         opprettet.sjekklisteItems.map { it.beskrivelse } shouldContainExactlyInAnyOrder sjekklisteItemsFoerstegangsbehandlingOMS
 
-        opprettet.sjekklisteItems shouldHaveAtLeastSize 12
+        opprettet.sjekklisteItems shouldHaveAtLeastSize 11
         opprettet.sjekklisteItems.forEach {
             it.avkrysset shouldBe false
             it.versjon shouldBe 1

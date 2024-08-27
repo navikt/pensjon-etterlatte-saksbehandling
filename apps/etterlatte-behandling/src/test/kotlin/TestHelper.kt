@@ -55,6 +55,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -112,7 +113,7 @@ fun lagContext(
     testUser,
     databaseContext,
     sakTilgangDao,
-    null,
+    HardkodaSystembruker.testdata,
 )
 
 fun nyKontekstMedBrukerOgDatabaseContext(

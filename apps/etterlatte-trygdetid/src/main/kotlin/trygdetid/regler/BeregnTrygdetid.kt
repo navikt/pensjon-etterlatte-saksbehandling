@@ -435,7 +435,7 @@ val avrundetTrygdetidOgBroek =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Samle avrundet trygdetid og avrundet broek",
-        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING"),
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-OG-BROEK-AVRUNDING"),
     ) benytter avrundetTrygdetid og avrundetBroek med { trygdetid, broek ->
         Pair(trygdetid, broek)
     }

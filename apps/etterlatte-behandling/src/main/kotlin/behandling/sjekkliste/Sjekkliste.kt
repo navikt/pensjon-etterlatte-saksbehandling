@@ -32,7 +32,7 @@ data class OppdaterSjekklisteItem(
     val versjon: Long,
 )
 
-internal val defaultSjekklisteItemsBP =
+internal val skjekklisteItemsFoerstegangsbehandlingBP =
     listOf(
         "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
@@ -47,7 +47,7 @@ internal val defaultSjekklisteItemsBP =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
     )
 
-internal val defaultSjekklisteItemsOMS =
+internal val sjekklisteItemsFoerstegangsbehandlingOMS =
     listOf(
         "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
@@ -62,5 +62,27 @@ internal val defaultSjekklisteItemsOMS =
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
     )
 
-internal val defaultFoerstegangsbehandlingItemsOms =
-    defaultSjekklisteItemsOMS + "Sjekk om bruker har overgangsstønad"
+internal val sjekklisteItemsRevurderingBP =
+    listOf(
+        "Barnet er adoptert",
+        "Barnet er bitt foreldreløs",
+        "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
+        "Flyttet til/fra institusjon",
+        "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
+        "Barnet er flyttet ut av Norge",
+        "Barnet er flyttet til Norge",
+        "Nye bankopplysninger",
+    )
+
+internal val sjekklisteItemsRevurderingOMS =
+    listOf(
+        "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
+        "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
+        "Gjenlevende er innvilget hel uføretrygd",
+        "Gjenlevende er innvilget gradert uføretrygd - oppgave til NAY",
+        "Endring av inntekt",
+        "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
+        "Gjenlevende er innvilget AAP/OMS - oppgave sendt til NAV lokal pga spesiell oppfølging for de med OMS",
+        "Gjenlevende flyttet ut av Norge - eksport",
+        "Gjenlevende flyttet inn til Norge - import",
+    )

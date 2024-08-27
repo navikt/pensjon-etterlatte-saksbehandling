@@ -44,11 +44,15 @@ class SjekklisteService(
 
         val sjekklisteItems =
             when (behandling.sak.sakType) {
-                SakType.BARNEPENSJON -> defaultSjekklisteItemsBP
+                SakType.BARNEPENSJON ->
+                    when (behandling.type) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> skjekklisteItemsFoerstegangsbehandlingBP
+                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingBP
+                    }
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> defaultFoerstegangsbehandlingItemsOms
-                        BehandlingType.REVURDERING -> defaultSjekklisteItemsOMS
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
+                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingOMS
                     }
                 }
             }

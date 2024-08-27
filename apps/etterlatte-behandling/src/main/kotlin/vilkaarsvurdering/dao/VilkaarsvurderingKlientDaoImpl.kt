@@ -125,7 +125,7 @@ class VilkaarsvurderingKlientDaoImpl(
     override suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         downstreamResourceClient
             .delete(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/resultat/$behandlingId"),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

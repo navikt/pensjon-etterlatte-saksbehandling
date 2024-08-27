@@ -1,0 +1,32 @@
+name: .deploy-main.yaml
+
+on:
+  workflow_call:
+    inputs:
+      applikasjon:
+        description: 'Navnet på applikasjonen'
+        required: true
+        type: string
+      branch:
+        description: 'branch'
+        required: true
+        type: string
+
+env:
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-etterlatte-${{ inputs.applikasjon }}:inputs.branch
+
+jobs:
+  deploy-main:
+    name: deploy-main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/etterlatte-${{ inputs.applikasjon }}/.nais/dev.yaml
+          VAR: image=${{ env.image }}

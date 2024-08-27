@@ -84,7 +84,7 @@ class VilkaarsvurderingService(
             if (vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon) {
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
-            inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo) }
+            inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false) }
             VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
         }
 
@@ -92,9 +92,9 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vilkaarsvurdering {
-        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
-        val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
         inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true) }
+        val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
         return vilkaarsvurdering
     }
 
@@ -271,12 +271,12 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true) }
         val vilkaarsvurdering =
             vilkaarsvurderingRepository.hent(behandlingId)
                 ?: throw IllegalStateException("Vilkårsvurderingen eksisterer ikke")
         vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId, vilkaarsvurdering.id)
-        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true) }
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
     }
 
     private fun opprettNyVilkaarsvurdering(

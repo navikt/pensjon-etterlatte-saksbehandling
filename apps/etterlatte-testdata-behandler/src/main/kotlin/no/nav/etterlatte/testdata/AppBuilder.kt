@@ -30,7 +30,7 @@ class AppBuilder {
         )
 
     fun lagBehandler(): Behandler {
-        val vilkaarsvurderingService =
+        val behandlingVilkaarsvurderingService =
             VilkaarsvurderingService(
                 settOppHttpClient("behandling"),
                 "http://etterlatte-behandling",
@@ -88,7 +88,7 @@ class AppBuilder {
             behandlingService = behandlingService,
             trygdetidService = trygdetidService,
             vedtaksvurderingService = vedtaksvurderingService,
-            vilkaarsvurderingService = vilkaarsvurderingService,
+            vilkaarsvurderingService = behandlingVilkaarsvurderingService,
         )
     }
 }

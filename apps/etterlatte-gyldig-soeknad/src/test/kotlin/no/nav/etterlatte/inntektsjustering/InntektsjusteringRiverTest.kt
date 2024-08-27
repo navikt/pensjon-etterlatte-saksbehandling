@@ -29,7 +29,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.util.UUID
 import kotlin.random.Random
 
@@ -55,16 +55,7 @@ internal class InntektsjusteringRiverTest {
                 naeringsinntekt = 200,
                 arbeidsinntektUtland = 300,
                 naeringsinntektUtland = 400,
-                tidspunkt =
-                    ZonedDateTime
-                        .now()
-                        .withDayOfMonth(1)
-                        .withMonth(8)
-                        .withYear(2024)
-                        .withHour(5)
-                        .withMinute(6)
-                        .withSecond(7)
-                        .toInstant(),
+                tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
             )
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak

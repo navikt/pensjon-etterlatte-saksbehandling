@@ -16,10 +16,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
@@ -130,7 +130,7 @@ data class ArkiverInntektsjustering(
 
 fun Inntektsjustering.formatertTidspunkt(): String {
     fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"
-    return with(Tidspunkt(tidspunkt).toLocalDatetimeNorskTid()) {
+    return with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
         "${t(dayOfMonth)}.${t(monthValue)}.$year ${t(hour)}:${t(minute)}:${t(second)}"
     }
 }

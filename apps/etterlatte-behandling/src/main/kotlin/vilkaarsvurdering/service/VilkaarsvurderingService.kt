@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -83,7 +84,7 @@ class VilkaarsvurderingService(
             if (vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon) {
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
-            behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo)
+            inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo) }
             VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
         }
 
@@ -91,9 +92,9 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vilkaarsvurdering {
-        behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false)
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
         val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
-        behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true) }
         return vilkaarsvurdering
     }
 
@@ -183,7 +184,7 @@ class VilkaarsvurderingService(
                     grunnlag.metadata.versjon,
                 )
             } else {
-                behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false)
+                inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, dryRun = false) }
                 VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
             }
         }
@@ -270,12 +271,12 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false)
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false) }
         val vilkaarsvurdering =
             vilkaarsvurderingRepository.hent(behandlingId)
                 ?: throw IllegalStateException("Vilkårsvurderingen eksisterer ikke")
         vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId, vilkaarsvurdering.id)
-        behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)
+        inTransaction { behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true) }
     }
 
     private fun opprettNyVilkaarsvurdering(
@@ -353,7 +354,7 @@ class VilkaarsvurderingService(
             // Dersom forrige steg (oversikt) har blitt endret vil statusen være OPPRETTET. Når man trykker videre
             // fra vilkårsvurdering skal denne validere tilstand og sette status VILKAARSVURDERT.
             if (behandling.status in listOf(BehandlingStatus.OPPRETTET)) {
-                behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
+                inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false) }
                 true
             } else {
                 false
@@ -377,7 +378,7 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> T,
     ): T {
-        behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo) // Kaster exception om ikke det går
+        inTransaction { behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo) } // Kaster exception om ikke det går
         return block()
     }
 
@@ -400,7 +401,7 @@ class VilkaarsvurderingService(
             .map { VilkaartypePair(name = it.name, tittel = it.tittel) }
 
     private fun finnRelevanteTyper(behandlingId: UUID): List<Vilkaar> {
-        val behandling = behandlingService.hentBehandling(behandlingId)!!
+        val behandling = inTransaction { behandlingService.hentBehandling(behandlingId)!! }
         if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             return OmstillingstoenadVilkaar.inngangsvilkaar()
         }

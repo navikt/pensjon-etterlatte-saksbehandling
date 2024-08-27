@@ -153,6 +153,7 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImplVv
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
@@ -288,6 +289,8 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
+    val vvGrunnlagKlient: GrunnlagKlientVV = GrunnlagKlientImplVv(config, httpClient()),
+    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao = VilkaarsvurderingKlientDaoImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -586,10 +589,10 @@ internal class ApplicationContext(
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
-    val vvGrunnlagKlient: GrunnlagKlientVV = GrunnlagKlientImplVv(config, httpClient())
+
     val vilkaarsvurderingService =
         VilkaarsvurderingService(
-            VilkaarsvurderingRepository(VilkaarsvurderingKlientDao(config, httpClient())),
+            VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
             behandlingService,
             vvGrunnlagKlient,
             behandlingsStatusService,

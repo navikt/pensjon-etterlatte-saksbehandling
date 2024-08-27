@@ -112,6 +112,7 @@ fun lagContext(
     testUser,
     databaseContext,
     sakTilgangDao,
+    null,
 )
 
 fun nyKontekstMedBrukerOgDatabaseContext(

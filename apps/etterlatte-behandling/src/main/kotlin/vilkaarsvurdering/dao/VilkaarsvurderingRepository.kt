@@ -12,22 +12,22 @@ import java.time.LocalDate
 import java.util.UUID
 
 class VilkaarsvurderingRepository(
-    private val vilkaarsvurderingKlientDao: VilkaarsvurderingKlientDao,
+    private val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     // TODO: se over struktur med runblocking her
-    fun hent(behandlingId: UUID): Vilkaarsvurdering? = runBlocking { vilkaarsvurderingKlientDao.hent(behandlingId) }
+    fun hent(behandlingId: UUID): Vilkaarsvurdering? = runBlocking { vilkaarsvurderingKlientDaoImpl.hent(behandlingId) }
 
     // TODO: trenger å gjøre behandlingKlient.hentBehandling(behandlingId, bruker).sak, o.l.
     fun hentMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
-    ): Boolean = runBlocking { vilkaarsvurderingKlientDao.erMigrertYrkesskadefordel(behandlingId, sakId) }
+    ): Boolean = runBlocking { vilkaarsvurderingKlientDaoImpl.erMigrertYrkesskadefordel(behandlingId, sakId) }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
         runBlocking {
-            vilkaarsvurderingKlientDao.opprettVilkaarsvurdering(vilkaarsvurdering)
+            vilkaarsvurderingKlientDaoImpl.opprettVilkaarsvurdering(vilkaarsvurdering)
         }
 
     fun kopierVilkaarsvurdering(
@@ -36,7 +36,7 @@ class VilkaarsvurderingRepository(
     ): Vilkaarsvurdering {
         opprettVilkaarsvurdering(nyVilkaarsvurdering)
         runBlocking {
-            vilkaarsvurderingKlientDao.kopierVilkaarsvurdering(
+            vilkaarsvurderingKlientDaoImpl.kopierVilkaarsvurdering(
                 OpprettVilkaarsvurderingFraBehandling(kopiertFraId, nyVilkaarsvurdering),
             )
         }
@@ -45,7 +45,7 @@ class VilkaarsvurderingRepository(
 
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         runBlocking {
-            vilkaarsvurderingKlientDao.slettVilkaarsvurderingResultat(behandlingId)
+            vilkaarsvurderingKlientDaoImpl.slettVilkaarsvurderingResultat(behandlingId)
         }
 
     fun lagreVilkaarsvurderingResultat(
@@ -55,7 +55,7 @@ class VilkaarsvurderingRepository(
     ): Vilkaarsvurdering {
         val vv = hent(behandlingId)!!
         return runBlocking {
-            vilkaarsvurderingKlientDao.lagreVilkaarsvurderingResultatvanlig(
+            vilkaarsvurderingKlientDaoImpl.lagreVilkaarsvurderingResultatvanlig(
                 behandlingId,
                 VurdertVilkaarsvurderingDto(virkningstidspunkt, resultat, vv),
             )
@@ -67,23 +67,23 @@ class VilkaarsvurderingRepository(
         vurdertVilkaar: VurdertVilkaar,
     ): Vilkaarsvurdering =
         runBlocking {
-            vilkaarsvurderingKlientDao.oppdaterVurderingPaaVilkaar(OppdaterVurdertVilkaar(behandlingId, vurdertVilkaar))
+            vilkaarsvurderingKlientDaoImpl.oppdaterVurderingPaaVilkaar(OppdaterVurdertVilkaar(behandlingId, vurdertVilkaar))
         }
 
     fun slettVilkaarResultat(
         behandlingId: UUID,
         vilkaarId: UUID,
-    ): Vilkaarsvurdering = runBlocking { vilkaarsvurderingKlientDao.slettVurderingPaaVilkaar(behandlingId, vilkaarId) }
+    ): Vilkaarsvurdering = runBlocking { vilkaarsvurderingKlientDaoImpl.slettVurderingPaaVilkaar(behandlingId, vilkaarId) }
 
     fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         grunnlagVersjon: Long,
-    ) = runBlocking { vilkaarsvurderingKlientDao.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
+    ) = runBlocking { vilkaarsvurderingKlientDaoImpl.oppdaterGrunnlagsversjon(behandlingId, grunnlagVersjon) }
 
     fun slettVilkaarvurdering(
         behandlingId: UUID,
         vilkaarsvurderingId: UUID,
     ) = runBlocking {
-        vilkaarsvurderingKlientDao.slettVilkaarsvurdering(behandlingId, vilkaarsvurderingId)
+        vilkaarsvurderingKlientDaoImpl.slettVilkaarsvurdering(behandlingId, vilkaarsvurderingId)
     }
 }

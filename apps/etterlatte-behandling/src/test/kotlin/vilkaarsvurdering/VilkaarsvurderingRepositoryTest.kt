@@ -281,7 +281,7 @@ internal class VilkaarsvurderingRepositoryTest(
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
-
+ n
         val vilkaarsvurdering =
             Vilkaarsvurdering(
                 behandlingId = UUID.randomUUID(),

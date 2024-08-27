@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -62,6 +61,7 @@ import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -69,6 +69,11 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
+import vilkaarsvurdering.OppdaterVurdertVilkaar
+import vilkaarsvurdering.Vilkaarsvurdering
 import java.time.LocalDate
 import java.util.UUID
 
@@ -439,23 +444,68 @@ class AxsysKlientTest : AxsysKlient {
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
-class VilkaarsvurderingTest : VilkaarsvurderingKlient {
-    override suspend fun kopierVilkaarsvurdering(
-        kopierTilBehandling: UUID,
-        kopierFraBehandling: UUID,
+class GrunnlagKlientVvTest : GrunnlagKlientVV {
+    override suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+}
+
+class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {
+    override suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? {
+        TODO("Not yet implemented")
     }
 
-    override val serviceName: String
-        get() = "Vilkårsvurderinglient"
-    override val beskrivelse: String
-        get() = "Snakker med vilkårsvurdering"
-    override val endpoint: String
-        get() = "vilkårsvurdering"
+    override suspend fun erMigrertYrkesskadefordel(
+        behandlingId: UUID,
+        sakId: Long,
+    ): Boolean {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lagreVilkaarsvurderingResultatvanlig(
+        behandlingId: UUID,
+        vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vilkaarId: UUID,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
 }
 
 class KodeverkKlientTest : KodeverkKlient {

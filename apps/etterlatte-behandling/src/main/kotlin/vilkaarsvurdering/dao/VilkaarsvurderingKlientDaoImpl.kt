@@ -18,17 +18,54 @@ import vilkaarsvurdering.OppdaterVurdertVilkaar
 import vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
 
-class VilkaarsvurderingKlientDao(
+interface VilkaarsvurderingKlientDao {
+    suspend fun hent(behandlingId: UUID): Vilkaarsvurdering?
+
+    suspend fun erMigrertYrkesskadefordel(
+        behandlingId: UUID,
+        sakId: Long,
+    ): Boolean
+
+    suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
+
+    suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering
+
+    suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering
+
+    suspend fun lagreVilkaarsvurderingResultatvanlig(
+        behandlingId: UUID,
+        vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
+    ): Vilkaarsvurdering
+
+    suspend fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
+    ): Vilkaarsvurdering
+
+    suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ): Vilkaarsvurdering
+
+    suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vilkaarId: UUID,
+    ): Vilkaarsvurdering
+
+    suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering
+}
+
+class VilkaarsvurderingKlientDaoImpl(
     config: Config,
     httpClient: HttpClient,
-) {
+) : VilkaarsvurderingKlientDao {
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? =
+    override suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         downstreamResourceClient
             .get(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
@@ -38,7 +75,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun erMigrertYrkesskadefordel(
+    override suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
     ): Boolean =
@@ -55,7 +92,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
+    override suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
         downstreamResourceClient
             .post(
                 resource =
@@ -70,7 +107,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering =
+    override suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering =
         downstreamResourceClient
             .post(
                 resource =
@@ -85,7 +122,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
+    override suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering =
         downstreamResourceClient
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
@@ -95,7 +132,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun lagreVilkaarsvurderingResultatvanlig(
+    override suspend fun lagreVilkaarsvurderingResultatvanlig(
         behandlingId: UUID,
         vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
     ): Vilkaarsvurdering =
@@ -109,7 +146,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering =
+    override suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering =
         downstreamResourceClient
             .post(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/${oppdatervv.behandlingId}"),
@@ -120,7 +157,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun slettVurderingPaaVilkaar(
+    override suspend fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
         vilkaarId: UUID,
     ): Vilkaarsvurdering =
@@ -133,7 +170,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun oppdaterGrunnlagsversjon(
+    override suspend fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         grunnlagVersjon: Long,
     ): Vilkaarsvurdering =
@@ -151,7 +188,7 @@ class VilkaarsvurderingKlientDao(
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
 
-    suspend fun slettVilkaarsvurdering(
+    override suspend fun slettVilkaarsvurdering(
         behandlingId: UUID,
         vilkaarsvurderingId: UUID,
     ): Vilkaarsvurdering =

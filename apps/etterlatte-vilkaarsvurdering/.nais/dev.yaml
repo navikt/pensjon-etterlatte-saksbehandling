@@ -73,11 +73,8 @@ spec:
     - secret: my-application-unleash-api-token
   accessPolicy:
     inbound:
-      rules: #TODO: sjekk alle her ligger i behandling
+      rules:
         - application: etterlatte-behandling
-        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
-        - application: etterlatte-vilkaarsvurdering-kafka
-        - application: etterlatte-testdata-behandler #
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

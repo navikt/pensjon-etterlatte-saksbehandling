@@ -28,6 +28,7 @@ class GrunnlagKlientException(
     override val cause: Throwable,
 ) : Exception(message, cause)
 
+// TODO: kan merges grunnlagklient som finnes fra før
 class GrunnlagKlientImplVv(
     config: Config,
     httpClient: HttpClient,

@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery

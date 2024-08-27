@@ -6,11 +6,11 @@ import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.BEHANDLING_URL
 import no.nav.etterlatte.EnvKey.DOKARKIV_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
-import no.nav.etterlatte.JournalfoerInntektsjusteringService
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.inntektsjustering.JournalfoerInntektsjusteringService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE

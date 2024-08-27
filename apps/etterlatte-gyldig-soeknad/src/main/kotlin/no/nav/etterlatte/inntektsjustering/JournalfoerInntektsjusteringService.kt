@@ -1,6 +1,5 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
@@ -15,11 +14,11 @@ import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.Base64
 import java.util.UUID
 
@@ -94,8 +93,18 @@ class JournalfoerInntektsjusteringService(
         return runBlocking {
             retry {
                 pdfgenKlient.genererPdf(
-                    jsonInnhold(sakId, inntektsaar, inntektsjustering),
-                    "inntektsjustering_nytt_aar_v1",
+                    input =
+                        ArkiverInntektsjustering(
+                            id = inntektsjustering.id,
+                            sakId = sakId,
+                            aar = inntektsaar,
+                            arbeidsinntekt = inntektsjustering.arbeidsinntekt,
+                            naeringsinntekt = inntektsjustering.naeringsinntekt,
+                            arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
+                            naeringsinntektUtland = inntektsjustering.naeringsinntekt,
+                            tidspunkt = inntektsjustering.tidspunkt,
+                        ).toJsonNode(),
+                    template = "inntektsjustering_nytt_aar_v1",
                 )
             }.let {
                 when (it) {
@@ -110,22 +119,13 @@ class JournalfoerInntektsjusteringService(
     }
 }
 
-private fun jsonInnhold(
-    sakId: Long,
-    aar: String,
-    inntektsjustering: Inntektsjustering,
-): JsonNode {
-    val json = """
-    {
-      "sakId" : $sakId,
-      "aar": $aar,
-      "arbeidsinntekt": ${inntektsjustering.arbeidsinntekt},
-      "naeringsinntekt": ${inntektsjustering.naeringsinntekt},
-      "arbeidsinntektUtland": ${inntektsjustering.arbeidsinntektUtland},
-      "naeringsinntektUtland": ${inntektsjustering.naeringsinntektUtland},
-      "tidspunkt": ${inntektsjustering.tidspunkt.toJson()}
-    }
-"""
-    // "inntektsjustering" : ${inntektsjustering.toJson()}
-    return objectMapper.readTree(json)
-}
+data class ArkiverInntektsjustering(
+    val id: UUID,
+    val sakId: Long,
+    val aar: String,
+    val arbeidsinntekt: Int,
+    val naeringsinntekt: Int,
+    val arbeidsinntektUtland: Int,
+    val naeringsinntektUtland: Int,
+    val tidspunkt: Instant,
+)

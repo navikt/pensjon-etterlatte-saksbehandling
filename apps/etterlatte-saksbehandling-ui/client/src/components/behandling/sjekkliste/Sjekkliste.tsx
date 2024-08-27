@@ -25,7 +25,7 @@ import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandl
 import { useAppDispatch } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -140,30 +140,15 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               readOnly={!redigerbar}
             />
 
-            <TextField
-              label="Kontonummer registrert"
-              name="KontonummerRegistrert"
-              value={sjekkliste.kontonrRegistrert || ''}
-              onChange={(e) => {
-                const oppdatert = {
-                  ...sjekkliste,
-                  kontonrRegistrert: e.currentTarget.value,
-                }
-                dispatch(updateSjekkliste(oppdatert))
-                fireOpppdater(oppdatert)
-              }}
-              readOnly={!redigerbar}
-            />
-
-            {behandling.sakType == SakType.BARNEPENSJON && (
+            {behandling.behandlingType !== IBehandlingsType.REVURDERING && (
               <TextField
-                label="Ønsket skattetrekk"
-                name="OnsketSkattetrekk"
-                value={sjekkliste.onsketSkattetrekk || ''}
+                label="Kontonummer registrert"
+                name="KontonummerRegistrert"
+                value={sjekkliste.kontonrRegistrert || ''}
                 onChange={(e) => {
                   const oppdatert = {
                     ...sjekkliste,
-                    onsketSkattetrekk: e.target.value,
+                    kontonrRegistrert: e.currentTarget.value,
                   }
                   dispatch(updateSjekkliste(oppdatert))
                   fireOpppdater(oppdatert)
@@ -171,6 +156,24 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
                 readOnly={!redigerbar}
               />
             )}
+
+            {behandling.sakType == SakType.BARNEPENSJON &&
+              behandling.behandlingType !== IBehandlingsType.REVURDERING && (
+                <TextField
+                  label="Ønsket skattetrekk"
+                  name="OnsketSkattetrekk"
+                  value={sjekkliste.onsketSkattetrekk || ''}
+                  onChange={(e) => {
+                    const oppdatert = {
+                      ...sjekkliste,
+                      onsketSkattetrekk: e.target.value,
+                    }
+                    dispatch(updateSjekkliste(oppdatert))
+                    fireOpppdater(oppdatert)
+                  }}
+                  readOnly={!redigerbar}
+                />
+              )}
 
             {redigerbar && (
               <ConfirmationPanel

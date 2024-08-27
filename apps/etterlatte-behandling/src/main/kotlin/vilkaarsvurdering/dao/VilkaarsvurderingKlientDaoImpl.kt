@@ -8,6 +8,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -45,7 +46,7 @@ interface VilkaarsvurderingKlientDao {
     suspend fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         grunnlagVersjon: Long,
-    ): Vilkaarsvurdering
+    ): StatusOppdatertDto
 
     suspend fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
@@ -173,7 +174,7 @@ class VilkaarsvurderingKlientDaoImpl(
     override suspend fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         grunnlagVersjon: Long,
-    ): Vilkaarsvurdering =
+    ): StatusOppdatertDto =
         downstreamResourceClient
             .post(
                 resource =

@@ -32,7 +32,7 @@ class AppBuilder {
     fun lagBehandler(): Behandler {
         val vilkaarsvurderingService =
             VilkaarsvurderingService(
-                settOppHttpClient("behandlingvilkaarsvurdering"),
+                settOppHttpClient("behandling"),
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
             )

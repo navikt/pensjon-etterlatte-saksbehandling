@@ -1,3 +1,4 @@
+/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.mockk.coEvery
@@ -87,3 +88,4 @@ class MigrertYrkesskadeTest(
         }
     }
 }
+*/

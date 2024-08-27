@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.vilkaarsvurdering.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
@@ -20,5 +19,4 @@ class ApplicationContext {
         VilkaarsvurderingService(
             vilkaarsvurderingRepository = vilkaarsvurderingRepository,
         )
-    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 }

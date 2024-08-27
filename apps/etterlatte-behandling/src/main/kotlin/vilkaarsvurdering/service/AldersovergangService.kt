@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarTypeOgUtfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VurdertVilkaar
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.util.UUID
 

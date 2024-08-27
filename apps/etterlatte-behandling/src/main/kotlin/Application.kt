@@ -220,7 +220,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     krrRoute(applicationContext.tilgangService, applicationContext.krrKlient)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
-    aldersovergang()
+    aldersovergang(applicationContext.aldersovergangService)
 }
 
 private fun Route.settOppTilganger(

@@ -27,7 +27,7 @@ class OppgaveFristGaarUtJobb(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(oppgaveFristGaarUtJobService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+        Context(Self(oppgaveFristGaarUtJobService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao, null)
 
     override fun schedule(): Timer {
         logger.debug("{} er satt til å starte {} med periode {}", jobbNavn, starttidspunkt, periode)

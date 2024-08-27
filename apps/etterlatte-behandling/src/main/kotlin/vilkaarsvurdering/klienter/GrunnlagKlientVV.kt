@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-interface GrunnlagKlient {
+interface GrunnlagKlientVV {
     suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -28,11 +28,11 @@ class GrunnlagKlientException(
     override val cause: Throwable,
 ) : Exception(message, cause)
 
-class GrunnlagKlientImpl(
+class GrunnlagKlientImplVv(
     config: Config,
     httpClient: HttpClient,
-) : GrunnlagKlient {
-    private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
+) : GrunnlagKlientVV {
+    private val logger = LoggerFactory.getLogger(GrunnlagKlientVV::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)

@@ -69,11 +69,6 @@ spec:
         thresholdPercentage: 90
     max: 4
     min: 2
-  env:
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag/api
-    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: ce96a301-13db-4409-b277-5b27f464d08b
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -81,12 +76,8 @@ spec:
       rules: #TODO: sjekk alle her ligger i behandling
         - application: etterlatte-behandling
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
-        - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-beregning
-        - application: etterlatte-brev-api
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-vilkaarsvurdering-kafka
-        - application: etterlatte-testdata-behandler
+        - application: etterlatte-testdata-behandler #
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

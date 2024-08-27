@@ -32,7 +32,7 @@ class VilkaarsvurderingKlientDao(
         downstreamResourceClient
             .get(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -49,7 +49,7 @@ class VilkaarsvurderingKlientDao(
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel/$sakId",
                     ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -63,7 +63,7 @@ class VilkaarsvurderingKlientDao(
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/${vilkaarsvurdering.behandlingId}/opprett",
                     ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = vilkaarsvurdering.toJson(),
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -78,7 +78,7 @@ class VilkaarsvurderingKlientDao(
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/${vilkaarsvurdering.vilkaarsvurdering.behandlingId}/kopier",
                     ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = vilkaarsvurdering.toJson(),
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -89,7 +89,7 @@ class VilkaarsvurderingKlientDao(
         downstreamResourceClient
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -102,7 +102,7 @@ class VilkaarsvurderingKlientDao(
         downstreamResourceClient
             .post(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/resultat/$behandlingId"),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = vurdertVilkaarsvurderingDto,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -113,7 +113,7 @@ class VilkaarsvurderingKlientDao(
         downstreamResourceClient
             .post(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/${oppdatervv.behandlingId}"),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = oppdatervv.toJson(),
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -127,7 +127,7 @@ class VilkaarsvurderingKlientDao(
         downstreamResourceClient
             .delete(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/$vilkaarId"),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -144,7 +144,7 @@ class VilkaarsvurderingKlientDao(
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/oppdater-status/$grunnlagVersjon",
                     ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = "",
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -162,7 +162,7 @@ class VilkaarsvurderingKlientDao(
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/$vilkaarsvurderingId",
                     ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo,
+                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
                 postBody = "",
             ).mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

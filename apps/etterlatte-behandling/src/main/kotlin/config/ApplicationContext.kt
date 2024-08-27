@@ -152,7 +152,10 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImplVv
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -583,6 +586,15 @@ internal class ApplicationContext(
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+    val vvGrunnlagKlient: GrunnlagKlientVV = GrunnlagKlientImplVv(config, httpClient())
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(
+            VilkaarsvurderingRepository(VilkaarsvurderingKlientDao(config, httpClient())),
+            behandlingService,
+            vvGrunnlagKlient,
+            behandlingsStatusService,
+        )
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -595,18 +607,13 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            vilkaarsvurderingKlient = vilkaarsvuderingKlient,
+            vilkaarsvurderingService = vilkaarsvurderingService,
         )
 
     val migreringService =
         MigreringService(
             behandlingService = behandlingService,
         )
-
-    // TODO: håndter grunnlagklienten her,,
-    val vilkaarsvurderingService =
-        VilkaarsvurderingService(VilkaarsvurderingRepository(), behandlingService, grunnlagKlient, behandlingsStatusService)
-    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {

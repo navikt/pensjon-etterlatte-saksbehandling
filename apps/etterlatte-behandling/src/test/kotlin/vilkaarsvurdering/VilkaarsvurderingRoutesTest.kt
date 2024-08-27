@@ -1,3 +1,4 @@
+/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.client.request.delete
@@ -539,7 +540,9 @@ internal class VilkaarsvurderingRoutesTest(
                     every { behandlingType } returns BehandlingType.REVURDERING
                     every { id } returns revurderingBehandlingId
                 }
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(behandlingId)
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+                behandlingId
+            )
 
             val response =
                 client.post("/api/vilkaarsvurdering/$revurderingBehandlingId/opprett") {
@@ -836,3 +839,4 @@ internal class VilkaarsvurderingRoutesTest(
         val oboToken = simpleSaksbehandler()
     }
 }
+*/

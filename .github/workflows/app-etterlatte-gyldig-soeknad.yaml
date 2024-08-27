@@ -19,6 +19,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

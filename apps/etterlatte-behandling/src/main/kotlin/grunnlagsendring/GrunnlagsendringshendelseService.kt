@@ -101,16 +101,8 @@ class GrunnlagsendringshendelseService(
             opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
         }
 
-    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
+    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl) {
         doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
-
-        if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {
-            return inTransaction {
-                opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
-            }
-        }
-
-        return emptyList()
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> =

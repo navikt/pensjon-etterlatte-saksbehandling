@@ -1,6 +1,5 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
@@ -14,10 +13,12 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.Base64
 import java.util.UUID
 
@@ -31,12 +32,11 @@ class JournalfoerInntektsjusteringService(
 
     fun opprettJournalpost(
         sak: Sak,
-        inntektsaar: String,
         inntektsjustering: Inntektsjustering,
     ): OpprettJournalpostResponse? {
         return try {
-            val tittel = "Inntektsjustering $inntektsaar"
-            val dokument = opprettDokument(tittel, sak.id, inntektsaar, inntektsjustering)
+            val tittel = "Inntektsjustering ${inntektsjustering.inntektsaar}"
+            val dokument = opprettDokument(tittel, sak.id, inntektsjustering)
 
             val request =
                 OpprettJournalpostRequest(
@@ -60,13 +60,12 @@ class JournalfoerInntektsjusteringService(
     private fun opprettDokument(
         tittel: String,
         sakId: Long,
-        inntektsaar: String,
         inntektsjustering: Inntektsjustering,
     ): JournalpostDokument {
         try {
             logger.info("Oppretter PDF for inntektsjustering (id=${inntektsjustering.id})")
 
-            val pdf = opprettArkivPdf(sakId, inntektsaar, inntektsjustering)
+            val pdf = opprettArkivPdf(sakId, inntektsjustering)
 
             return JournalpostDokument(
                 tittel = tittel,
@@ -84,14 +83,26 @@ class JournalfoerInntektsjusteringService(
 
     private fun opprettArkivPdf(
         sakId: Long,
-        inntektsaar: String,
         inntektsjustering: Inntektsjustering,
     ): DokumentVariant.ArkivPDF {
         logger.info("Oppretter arkiv PDF for inntektsjustering med id ${inntektsjustering.id}")
 
         return runBlocking {
             retry {
-                pdfgenKlient.genererPdf(jsonInnhold(sakId, inntektsaar, inntektsjustering), "tom_mal")
+                pdfgenKlient.genererPdf(
+                    input =
+                        ArkiverInntektsjustering(
+                            id = inntektsjustering.id,
+                            sakId = sakId,
+                            aar = inntektsjustering.inntektsaar,
+                            arbeidsinntekt = inntektsjustering.arbeidsinntekt,
+                            naeringsinntekt = inntektsjustering.naeringsinntekt,
+                            arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
+                            naeringsinntektUtland = inntektsjustering.naeringsinntekt,
+                            tidspunkt = inntektsjustering.tidspunkt,
+                        ).toJsonNode(),
+                    template = "inntektsjustering_nytt_aar_v1",
+                )
             }.let {
                 when (it) {
                     is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
@@ -105,48 +116,13 @@ class JournalfoerInntektsjusteringService(
     }
 }
 
-// TODO skal erstattes med egen mal
-private fun jsonInnhold(
-    sakId: Long,
-    aar: String,
-    inntektsjustering: Inntektsjustering,
-): JsonNode {
-    val json = """
-    {
-      "tittel" : "Inntektsjustering $aar",
-      "payload" : [
-        {
-          "type" : "heading-three",
-          "children" : [
-            {
-              "type" : "paragraph",
-              "text" : "Inntekt for sak $sakId ble mottatt ${inntektsjustering.tidspunkt}"
-            }
-          ]
-        },
-        {
-          "type" : "paragraph",
-          "children" : [
-            {
-              "type" : "paragraph",
-              "text" : "Arbeidsinntekt: ${inntektsjustering.arbeidsinntekt}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Næringsinntekt: ${inntektsjustering.naeringsinntekt}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Arbeidsinntekt utland: ${inntektsjustering.arbeidsinntektUtland}"
-            },
-            {
-              "type" : "paragraph",
-              "text" : "Næringsinntekt utland: ${inntektsjustering.naeringsinntektUtland}"
-            }
-          ]
-        }
-      ]
-    }
-"""
-    return objectMapper.readTree(json)
-}
+data class ArkiverInntektsjustering(
+    val id: UUID,
+    val sakId: Long,
+    val aar: Int,
+    val arbeidsinntekt: Int,
+    val naeringsinntekt: Int,
+    val arbeidsinntektUtland: Int,
+    val naeringsinntektUtland: Int,
+    val tidspunkt: Instant,
+)

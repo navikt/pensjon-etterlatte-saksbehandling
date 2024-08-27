@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -62,6 +63,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient,
             grunnlagKlient,
             beregningService,
+            mockk<PesysKlient>()
         )
 
     @BeforeEach

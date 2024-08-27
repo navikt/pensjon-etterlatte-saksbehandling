@@ -9,6 +9,7 @@ on:
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
       - settings.gradle.kts
+      - "!**/test/**"
   pull_request:
     branches:
       - main

@@ -9,7 +9,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
-import { opprettAktivitet } from '~shared/api/aktivitetsplikt'
+import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
@@ -30,23 +30,24 @@ const aktivitetDefaultValue: AktivitetDefaultValue = {
 }
 
 export const NyAktivitet = ({
-  behandling,
   oppdaterAktiviteter,
   redigerAktivitet,
+  behandling = undefined,
+  sakId = undefined,
 }: {
-  behandling: IBehandlingReducer
   oppdaterAktiviteter: (aktiviteter: IAktivitet[]) => void
   redigerAktivitet: IAktivitet | undefined
+  behandling?: IBehandlingReducer
+  sakId?: number
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
+  const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
   const [visForm, setVisForm] = useState(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = behandlingErRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const redigerbar = behandling
+    ? behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
+    : true
 
   const {
     getValues,
@@ -77,24 +78,38 @@ export const NyAktivitet = ({
 
     const opprettAktivitet: IOpprettAktivitet = {
       id: id,
-      sakId: behandling.sakId,
+      sakId: behandling ? behandling.sakId : sakId!!,
       type: type as AktivitetspliktType,
       fom: formatISO(datoFom!, { representation: 'date' }),
       tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
       beskrivelse: beskrivelse,
     }
 
-    opprettAktivitetRequest(
-      {
-        behandlingId: behandling.id,
-        request: opprettAktivitet,
-      },
-      (aktiviteter) => {
-        reset(aktivitetDefaultValue)
-        setVisForm(false)
-        oppdaterAktiviteter(aktiviteter)
-      }
-    )
+    if (behandling) {
+      opprettAktivitetRequest(
+        {
+          behandlingId: behandling.id,
+          request: opprettAktivitet,
+        },
+        (aktiviteter) => {
+          reset(aktivitetDefaultValue)
+          setVisForm(false)
+          oppdaterAktiviteter(aktiviteter)
+        }
+      )
+    } else if (sakId) {
+      opprettAktivitetForSakRequest(
+        {
+          sakId: sakId,
+          request: opprettAktivitet,
+        },
+        (aktiviteter) => {
+          reset(aktivitetDefaultValue)
+          setVisForm(false)
+          oppdaterAktiviteter(aktiviteter)
+        }
+      )
+    }
   }
 
   return (
@@ -146,13 +161,24 @@ export const NyAktivitet = ({
               >
                 Avbryt
               </Button>
-              <Button size="small" variant="primary" type="submit" loading={isPending(opprettAktivitetResponse)}>
+              <Button
+                size="small"
+                variant="primary"
+                type="submit"
+                loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
+              >
                 Lagre
               </Button>
             </HStack>
             {isFailure(opprettAktivitetResponse) && (
               <Alert variant="error">
                 {opprettAktivitetResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
+              </Alert>
+            )}
+
+            {isFailure(opprettAktivitetForSakResponse) && (
+              <Alert variant="error">
+                {opprettAktivitetForSakResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
               </Alert>
             )}
           </VStack>
@@ -165,7 +191,7 @@ export const NyAktivitet = ({
             size="small"
             variant="secondary"
             icon={<PencilIcon aria-hidden fontSize="1.5rem" />}
-            loading={isPending(opprettAktivitetResponse)}
+            loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
             onClick={(e) => {
               e.preventDefault()
               setVisForm(true)

@@ -61,7 +61,7 @@ ktor2-serverresources = { module = "io.ktor:ktor-server-resources", version.ref 
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 ktor2-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.07.23-11.12.ae810566ac12"}
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.08.27-09.45.a87ec0a08b8f" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
@@ -72,15 +72,15 @@ metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-pr
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
-messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.6" }
+messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3.1.6" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.0" }
+mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.0" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024081412411723632093.f3cd450418cb" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version.ref = "tjenestespesifikasjoner-version" }
-navfelles-tjenestespesifikasjoner-oppdragsimulering = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
-navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
+navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
+navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
 navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.8" }
@@ -94,7 +94,7 @@ test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", vers
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
-commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2"}
+commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.2" }
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.4" }
 openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.2.0" }
 

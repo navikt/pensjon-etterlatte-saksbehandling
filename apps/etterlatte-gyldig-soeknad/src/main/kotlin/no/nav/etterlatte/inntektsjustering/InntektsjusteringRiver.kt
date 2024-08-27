@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,17 +7,17 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
+import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.UUID
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -28,7 +28,6 @@ internal class InntektsjusteringRiver(
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {
-            validate { it.requireKey(InntektsjusteringInnsendt.inntektsaar) }
             validate { it.requireKey(InntektsjusteringInnsendt.fnrBruker) }
             validate { it.requireKey(InntektsjusteringInnsendt.inntektsjusteringInnhold) }
         }
@@ -39,7 +38,6 @@ internal class InntektsjusteringRiver(
         context: MessageContext,
     ) {
         val inntektsjustering = packet.inntektsjustering()
-
         try {
             logger.info("Mottatt inntektsjustering (id=${inntektsjustering.id})")
 
@@ -49,14 +47,7 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
-
-            val journalpostResponse =
-                journalfoerInntektsjusteringService.opprettJournalpost(
-                    sak,
-                    inntektsaar,
-                    inntektsjustering,
-                )
+            val journalpostResponse = journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)
 
             if (journalpostResponse == null) {
                 logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
@@ -68,6 +59,7 @@ internal class InntektsjusteringRiver(
                         OppgaveKilde.BRUKERDIALOG,
                         OppgaveType.GENERELL_OPPGAVE,
                         merknad = "Mottatt inntektsjustering",
+                        referanse = journalpostResponse.journalpostId,
                     ),
                 )
             }
@@ -84,13 +76,3 @@ internal class InntektsjusteringRiver(
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =
         objectMapper.readValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue())
 }
-
-// TODO i felles repo
-data class Inntektsjustering(
-    val id: UUID,
-    val arbeidsinntekt: Int,
-    val naeringsinntekt: Int,
-    val arbeidsinntektUtland: Int,
-    val naeringsinntektUtland: Int,
-    val tidspunkt: LocalDateTime,
-)

@@ -49,7 +49,6 @@ class AktivitetspliktDaoTest(
         val hentAktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
         hentAktiviteter.first().asClue { aktivitet ->
             aktivitet.sakId shouldBe nyAktivitet.sakId
-            aktivitet.behandlingId shouldBe behandlingId
             aktivitet.type shouldBe nyAktivitet.type
             aktivitet.fom shouldBe nyAktivitet.fom
             aktivitet.tom shouldBe nyAktivitet.tom
@@ -86,7 +85,6 @@ class AktivitetspliktDaoTest(
             aktiviteter.first().asClue { oppdatertAktivitet ->
                 oppdatertAktivitet.id shouldBe gammelAktivitet.id
                 oppdatertAktivitet.sakId shouldBe gammelAktivitet.sakId
-                oppdatertAktivitet.behandlingId shouldBe gammelAktivitet.behandlingId
                 oppdatertAktivitet.type shouldBe oppdaterAktivitet.type
                 oppdatertAktivitet.fom shouldBe oppdaterAktivitet.fom
                 oppdatertAktivitet.tom shouldBe oppdaterAktivitet.tom
@@ -164,7 +162,6 @@ class AktivitetspliktDaoTest(
                 it shouldHaveSize 3
                 it.forEach { aktivitet ->
                     aktivitet.sakId shouldBe nyAktivitet.sakId
-                    aktivitet.behandlingId shouldBe nyBehandling
                     aktivitet.type shouldBe nyAktivitet.type
                     aktivitet.fom shouldBe nyAktivitet.fom
                     aktivitet.tom shouldBe nyAktivitet.tom

@@ -132,6 +132,32 @@ class AktivitetspliktDao(
         }
     }
 
+    fun opprettAktivitetForSak(
+        sakId: Long,
+        aktivitet: LagreAktivitetspliktAktivitet,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        INSERT INTO aktivitetsplikt_aktivitet(id, sak_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, UUID.randomUUID())
+            stmt.setLong(2, sakId)
+            stmt.setString(3, aktivitet.type.name)
+            stmt.setDate(4, Date.valueOf(aktivitet.fom))
+            stmt.setDate(5, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
+            stmt.setString(6, kilde.toJson())
+            stmt.setString(7, kilde.toJson())
+            stmt.setString(8, aktivitet.beskrivelse)
+
+            stmt.executeUpdate()
+        }
+    }
+
     fun oppdaterAktivitet(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
@@ -158,6 +184,32 @@ class AktivitetspliktDao(
         }
     }
 
+    fun oppdaterAktivitetForSak(
+        sakId: Long,
+        aktivitet: LagreAktivitetspliktAktivitet,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        UPDATE aktivitetsplikt_aktivitet
+                        SET aktivitet_type = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?
+                        WHERE id = ? AND sak_id = ?
+                    """.trimMargin(),
+                )
+            stmt.setString(1, aktivitet.type.name)
+            stmt.setDate(2, Date.valueOf(aktivitet.fom))
+            stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
+            stmt.setString(4, kilde.toJson())
+            stmt.setString(5, aktivitet.beskrivelse)
+            stmt.setObject(6, requireNotNull(aktivitet.id))
+            stmt.setObject(7, sakId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     fun slettAktivitet(
         aktivitetId: UUID,
         behandlingId: UUID,
@@ -172,6 +224,25 @@ class AktivitetspliktDao(
                 )
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, behandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
+
+    fun slettAktivitetForSak(
+        aktivitetId: UUID,
+        sakId: Long,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        DELETE FROM aktivitetsplikt_aktivitet
+                        WHERE id = ? AND sak_id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, aktivitetId)
+            stmt.setObject(2, sakId)
 
             stmt.executeUpdate()
         }
@@ -200,7 +271,6 @@ class AktivitetspliktDao(
         AktivitetspliktAktivitet(
             id = getUUID("id"),
             sakId = getLong("sak_id"),
-            behandlingId = getUUID("behandling_id"),
             type = AktivitetspliktAktivitetType.valueOf(getString("aktivitet_type")),
             fom = getDate("fom").toLocalDate(),
             tom = getDate("tom")?.toLocalDate(),
@@ -213,7 +283,6 @@ class AktivitetspliktDao(
 data class AktivitetspliktAktivitet(
     val id: UUID,
     val sakId: Long,
-    val behandlingId: UUID,
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
     val tom: LocalDate?,

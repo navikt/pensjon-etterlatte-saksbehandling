@@ -26,6 +26,7 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

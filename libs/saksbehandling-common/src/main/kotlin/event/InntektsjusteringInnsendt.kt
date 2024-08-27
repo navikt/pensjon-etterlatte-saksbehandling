@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.event
 object InntektsjusteringInnsendt {
     val fnrBruker = "@fnr_bruker"
     val inntektsjusteringInnhold = "@inntektsjustering_innhold"
-    val inntektsaar = "@inntektsaar"
 }
 
 enum class InntektsjusteringInnsendtHendelseType(

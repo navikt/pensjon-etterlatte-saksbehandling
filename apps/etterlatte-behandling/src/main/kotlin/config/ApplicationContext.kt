@@ -475,7 +475,7 @@ internal class ApplicationContext(
             krrKlient,
             pdlTjenesterKlient,
         )
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
     val opprettDoedshendelseService = OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)

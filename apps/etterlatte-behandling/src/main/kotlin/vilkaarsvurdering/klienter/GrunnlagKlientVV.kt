@@ -38,7 +38,8 @@ class GrunnlagKlientImplVv(
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url")
+    private val url = config.getString("grunnlag.resource.url")
+    private val apiUrl = url.plus("/api")
 
     override suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
@@ -52,7 +53,7 @@ class GrunnlagKlientImplVv(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/behandling/$behandlingId",
+                            url = "$apiUrl/grunnlag/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

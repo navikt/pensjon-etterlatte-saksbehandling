@@ -25,7 +25,13 @@ abstract class ListenerMedLogging : River.PacketListener {
         packet: JsonMessage,
         context: MessageContext,
     ) = withLogContext(packet.correlationId) {
-        haandterPakke(packet, context)
+        try {
+            haandterPakke(packet, context)
+        } catch (e: Exception) {
+            logger.warn("Fikk feil under handtering av melding. Se sikkerlogg for hele meldinga", e)
+            sikkerlogg.warn("Fikk feil under handtering av melding. Meldinga var ${packet.toJson()}", e)
+            throw e
+        }
     }
 
     override fun onError(

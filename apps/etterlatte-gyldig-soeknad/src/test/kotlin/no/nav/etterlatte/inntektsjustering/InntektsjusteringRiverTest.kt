@@ -47,6 +47,7 @@ internal class InntektsjusteringRiverTest {
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),
+                inntektsaar = 2025,
                 arbeidsinntekt = 100,
                 naeringsinntekt = 200,
                 arbeidsinntektUtland = 300,
@@ -69,7 +70,6 @@ internal class InntektsjusteringRiverTest {
                     mapOf(
                         "@event_name" to InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT.eventname,
                         InntektsjusteringInnsendt.fnrBruker to "123",
-                        InntektsjusteringInnsendt.inntektsaar to "2025",
                         InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering.toJson(),
                     ),
                 ).toJson()

@@ -28,7 +28,6 @@ internal class InntektsjusteringRiver(
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {
-            validate { it.requireKey(InntektsjusteringInnsendt.inntektsaar) }
             validate { it.requireKey(InntektsjusteringInnsendt.fnrBruker) }
             validate { it.requireKey(InntektsjusteringInnsendt.inntektsjusteringInnhold) }
         }
@@ -48,14 +47,7 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
-
-            val journalpostResponse =
-                journalfoerInntektsjusteringService.opprettJournalpost(
-                    sak,
-                    inntektsaar,
-                    inntektsjustering,
-                )
+            val journalpostResponse = journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)
 
             if (journalpostResponse == null) {
                 logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")

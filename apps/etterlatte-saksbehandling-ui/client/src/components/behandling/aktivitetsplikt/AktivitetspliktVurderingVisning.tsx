@@ -5,7 +5,7 @@ import {
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
-import { formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import { PencilIcon } from '@navikt/aksel-icons'
 
 export const AktivitetspliktVurderingVisning = ({
@@ -32,15 +32,11 @@ export const AktivitetspliktVurderingVisning = ({
                   <HStack gap="4">
                     <div>
                       <Label size="small">Startdato</Label>
-                      <BodyShort>
-                        {vurdering.unntak.fom ? formaterDato(vurdering.unntak.fom) : 'Mangler startdato'}
-                      </BodyShort>
+                      <BodyShort>{formaterDatoMedFallback(vurdering.unntak.fom, 'Mangler startdato')}</BodyShort>
                     </div>
                     <div>
                       <Label size="small">Sluttdato</Label>
-                      <BodyShort>
-                        {vurdering.unntak.tom ? formaterDato(vurdering.unntak.tom) : 'Mangler sluttdato'}
-                      </BodyShort>
+                      <BodyShort>{formaterDatoMedFallback(vurdering.unntak.tom, 'Mangler sluttdato')}</BodyShort>
                     </div>
                   </HStack>
                 </div>
@@ -71,9 +67,7 @@ export const AktivitetspliktVurderingVisning = ({
                     </div>
                     <div>
                       <Label size="small">Sluttdato</Label>
-                      <BodyShort>
-                        {vurdering.aktivitet.tom ? formaterDato(vurdering.aktivitet.tom) : 'Mangler sluttdato'}
-                      </BodyShort>
+                      <BodyShort>{formaterDatoMedFallback(vurdering.aktivitet.tom, 'Mangler sluttdato')}</BodyShort>
                     </div>
                   </HStack>
                 </div>

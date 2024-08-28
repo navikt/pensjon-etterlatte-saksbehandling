@@ -64,25 +64,16 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
 
 internal val sjekklisteItemsRevurderingBP =
     listOf(
-        "Barnet er adoptert",
-        "Barnet er bitt foreldreløs",
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
-        "Flyttet til/fra institusjon",
         "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
-        "Barnet er flyttet ut av Norge",
-        "Barnet er flyttet til Norge",
-        "Nye bankopplysninger",
+        "Mottatt nye bankopplysninger - sendt oppgave til NØP",
     )
 
 internal val sjekklisteItemsRevurderingOMS =
     listOf(
         "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
-        "Gjenlevende er innvilget hel uføretrygd",
-        "Gjenlevende er innvilget gradert uføretrygd - oppgave til NAY",
-        "Endring av inntekt",
+        "Gjenlevende er innvilget gradert uføretrygd - oppgave til NAY om endring av OMS",
         "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
         "Gjenlevende er innvilget AAP/OMS - oppgave sendt til NAV lokal pga spesiell oppfølging for de med OMS",
-        "Gjenlevende flyttet ut av Norge - eksport",
-        "Gjenlevende flyttet inn til Norge - import",
     )

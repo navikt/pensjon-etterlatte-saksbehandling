@@ -11,18 +11,11 @@ import io.ktor.http.content.TextContent
 import org.slf4j.MDC
 import java.util.UUID
 
-interface PdfGenerator {
-    suspend fun genererPdf(
-        input: JsonNode,
-        template: String,
-    ): ByteArray
-}
-
 class PdfGeneratorKlient(
     private val client: HttpClient,
     private val apiUrl: String,
-) : PdfGenerator {
-    override suspend fun genererPdf(
+) {
+    suspend fun genererPdf(
         input: JsonNode,
         template: String,
     ): ByteArray =

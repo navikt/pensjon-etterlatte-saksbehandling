@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
@@ -16,7 +16,7 @@ import java.util.Base64
 
 class JournalfoerSoeknadService(
     private val dokarkivKlient: DokarkivKlient,
-    private val pdfgenKlient: PdfGenerator,
+    private val pdfgenKlient: PdfGeneratorKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

@@ -10,7 +10,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostDokument
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
-import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
@@ -26,7 +26,7 @@ import java.util.UUID
 
 class JournalfoerInntektsjusteringService(
     private val dokarkivKlient: DokarkivKlient,
-    private val pdfgenKlient: PdfGenerator,
+    private val pdfgenKlient: PdfGeneratorKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

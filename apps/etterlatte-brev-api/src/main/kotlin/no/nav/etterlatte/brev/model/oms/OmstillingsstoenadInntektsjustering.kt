@@ -2,13 +2,11 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 
-class OmstillingsstoenadInntektsjustering(
-    val borIutland: Boolean,
-) : BrevDataRedigerbar {
+class OmstillingsstoenadInntektsjustering : BrevDataRedigerbar {
     companion object {
-        fun fra(borIutland: Boolean): OmstillingsstoenadInntektsjustering =
+        fun fra(): OmstillingsstoenadInntektsjustering =
             OmstillingsstoenadInntektsjustering(
-                borIutland = borIutland,
+                // TODO: Implementere data og meldinger for inntektsjustering
             )
     }
 }

@@ -103,9 +103,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 )
                             }
                             Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                // TODO: skal vi ha inntektsår også?
-                                opprettOmstillingsstoenadInntektsjustering(borIutland)
+                                // TODO: hva med inntektsår?
+                                opprettOmstillingsstoenadInntektsjustering()
                             }
                             else -> ManueltBrevData()
                         }
@@ -184,10 +183,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         hentAvdoede(sakId),
     )
 
-    private fun opprettOmstillingsstoenadInntektsjustering(borIutland: Boolean) =
-        OmstillingsstoenadInntektsjustering.fra(
-            borIutland,
-        )
+    private fun opprettOmstillingsstoenadInntektsjustering() = OmstillingsstoenadInntektsjustering.fra()
 
     private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede

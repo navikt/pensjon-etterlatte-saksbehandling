@@ -89,7 +89,6 @@ import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
-import no.nav.etterlatte.rivers.InntektsjusteringInfobrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
@@ -299,7 +298,6 @@ class ApplicationBuilder {
             VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
             DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
             SamordningsnotatRiver(rapidsConnection, nyNotatService)
-            InntektsjusteringInfobrevRiver(rapidsConnection)
         }
 
     private fun httpClient(

@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.virusskanning.filErForStor
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 
@@ -26,7 +27,7 @@ class PDFService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun lagreOpplastaPDF(
-        sakId: Long,
+        sakId: SakId,
         multiPart: List<PartData>,
     ): Result<Brev> {
         val request =
@@ -57,7 +58,7 @@ class PDFService(
     }
 
     private fun lagrePdf(
-        sakId: Long,
+        sakId: SakId,
         fil: ByteArray,
         innhold: BrevInnhold,
         sak: Sak,

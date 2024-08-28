@@ -43,7 +43,7 @@ class GrunnlagsendringsHendelseFilterTest {
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
         val systembruker = SystemUser(tokenValidationContext, brukerTokenInfo)
         val databasekontekst = mockk<DatabaseContext>()
-        Kontekst.set(Context(systembruker, databasekontekst, mockedSakTilgangDao()))
+        Kontekst.set(Context(systembruker, databasekontekst, mockedSakTilgangDao(), null))
     }
 
     @AfterEach

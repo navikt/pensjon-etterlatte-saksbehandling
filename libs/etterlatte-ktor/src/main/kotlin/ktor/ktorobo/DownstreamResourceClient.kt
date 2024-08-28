@@ -64,7 +64,7 @@ class DownstreamResourceClient(
     suspend fun delete(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        postBody: String,
+        postBody: String? = "",
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.delete(resource.url) {
             bearerAuth(token.accessToken)

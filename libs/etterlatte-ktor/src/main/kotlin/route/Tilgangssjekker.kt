@@ -8,6 +8,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -107,7 +108,7 @@ class Tilgangssjekker(
     }
 
     override suspend fun harTilgangTilSak(
-        sakId: Long,
+        sakId: SakId,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {

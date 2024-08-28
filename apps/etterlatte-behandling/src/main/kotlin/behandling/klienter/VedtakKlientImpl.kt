@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -68,7 +69,7 @@ interface VedtakKlient {
     ): VedtakDto
 
     suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO
@@ -327,7 +328,7 @@ class VedtakKlientImpl(
     }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {

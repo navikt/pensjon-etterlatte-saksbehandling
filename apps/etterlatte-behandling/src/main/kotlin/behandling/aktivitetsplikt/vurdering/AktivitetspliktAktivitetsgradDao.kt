@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -20,7 +21,7 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     fun opprettAktivitetsgrad(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
-        sakId: Long,
+        sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
@@ -95,7 +96,7 @@ class AktivitetspliktAktivitetsgradDao(
             }
         }
 
-    fun hentNyesteAktivitetsgrad(sakId: Long): List<AktivitetspliktAktivitetsgrad> =
+    fun hentNyesteAktivitetsgrad(sakId: SakId): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -199,7 +200,7 @@ class AktivitetspliktAktivitetsgradDao(
 
 data class AktivitetspliktAktivitetsgrad(
     val id: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,

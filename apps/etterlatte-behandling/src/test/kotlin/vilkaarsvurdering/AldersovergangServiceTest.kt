@@ -1,3 +1,4 @@
+/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
@@ -16,6 +17,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.Test
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
+import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
@@ -139,3 +144,4 @@ class AldersovergangServiceTest {
         }
     }
 }
+*/

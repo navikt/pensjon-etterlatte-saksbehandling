@@ -19,7 +19,7 @@ class OppgaveFristGaarUtJobServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val service = OppgaveFristGaarUtJobService(oppgaveService)
     private val dataSource = mockk<DataSource>()
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
 
     @Test
     fun `Skal klare å ta oppgave av vent hvis frist har gått ut`() {

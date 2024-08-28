@@ -73,7 +73,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao()))
+        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao(), null))
     }
 
     @AfterAll

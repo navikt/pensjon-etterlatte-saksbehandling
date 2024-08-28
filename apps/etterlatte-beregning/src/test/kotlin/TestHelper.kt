@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -328,6 +329,7 @@ fun behandling(
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
     opphoerFraOgMed = null,
+    relatertBehandlingId = null,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
@@ -335,7 +337,7 @@ fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, nul
 fun sanksjon(
     id: UUID? = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
-    sakId: Long = 123,
+    sakId: SakId = 123,
     fom: YearMonth = YearMonth.of(2024, 1),
     tom: YearMonth? = YearMonth.of(2024, 2),
     type: SanksjonType = SanksjonType.STANS,
@@ -354,7 +356,7 @@ fun sanksjon(
 
 fun lagreSanksjon(
     id: UUID? = null,
-    sakId: Long = 123,
+    sakId: SakId = 123,
     fom: LocalDate = LocalDate.of(2024, 1, 1),
     tom: LocalDate? = LocalDate.of(2024, 2, 1),
     beskrivelse: String = "Ikke i jobb",

@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -38,7 +39,7 @@ class NyNotatService(
 
     fun hent(id: NotatID): Notat = notatRepository.hent(id)
 
-    fun hentForSak(sakId: Long): List<Notat> {
+    fun hentForSak(sakId: SakId): List<Notat> {
         logger.info("Henter notater for sak $sakId")
 
         return notatRepository.hentForSak(sakId)
@@ -77,7 +78,7 @@ class NyNotatService(
     }
 
     suspend fun opprett(
-        sakId: Long,
+        sakId: SakId,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
         params: NotatParametre? = null,

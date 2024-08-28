@@ -59,7 +59,7 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.BehandlingVilkaarsvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
@@ -131,7 +131,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)

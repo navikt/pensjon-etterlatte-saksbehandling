@@ -34,10 +34,10 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingVilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
-import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService
@@ -77,7 +77,7 @@ class ApplicationContext {
         VedtakBehandlingService(
             repository = repository,
             beregningKlient = beregningKlient,
-            vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
+            vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,

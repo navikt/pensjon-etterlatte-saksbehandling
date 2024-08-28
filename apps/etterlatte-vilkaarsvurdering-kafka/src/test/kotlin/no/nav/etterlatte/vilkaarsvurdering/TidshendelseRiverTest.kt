@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -149,7 +150,7 @@ class TidshendelseRiverTest {
 
     private fun lagMeldingForVurdertLoependeYtelse(
         hendelseId: UUID,
-        sakId: Long,
+        sakId: SakId,
         behandlingsmaaned: YearMonth,
         behandlingIdPerReformtidspunkt: String? = null,
         steg: String = "VURDERT_LOEPENDE_YTELSE",

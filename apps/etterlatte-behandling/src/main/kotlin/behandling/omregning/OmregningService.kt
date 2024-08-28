@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
@@ -25,14 +26,14 @@ class OmregningService(
     private val revurderingService: AutomatiskRevurderingService,
     private val omregningDao: OmregningDao,
 ) {
-    fun hentForrigeBehandling(sakId: Long) =
+    fun hentForrigeBehandling(sakId: SakId) =
         behandlingService.hentSisteIverksatte(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
     fun hentPersongalleri(id: UUID) = runBlocking { grunnlagService.hentPersongalleri(id) }
 
     fun opprettOmregning(
-        sakId: Long,
+        sakId: SakId,
         fraDato: LocalDate,
         revurderingAarsak: Revurderingaarsak,
         prosessType: Prosesstype,

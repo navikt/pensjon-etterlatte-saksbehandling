@@ -8,6 +8,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -23,7 +24,7 @@ class MigreringKlient(
     suspend fun opprettManuellMigrering(
         behandlingId: UUID,
         pesysId: Long,
-        sakId: Long,
+        sakId: SakId,
     ) {
         retry {
             client.post("$url/migrering/$sakId/$behandlingId") {

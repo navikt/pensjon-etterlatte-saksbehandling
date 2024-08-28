@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
     val avsenderMottaker: AvsenderMottaker?
@@ -122,6 +123,8 @@ data class JournalpostDokument(
     val dokumentvarianter: List<DokumentVariant>,
 )
 
+val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.Journalpost")
+
 data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
@@ -130,8 +133,16 @@ data class JournalpostSak(
 ) {
     init {
         if (sakstype == Sakstype.FAGSAK) {
-            check(!fagsakId.isNullOrBlank()) { "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}" }
-            check(!fagsaksystem.isNullOrBlank()) { "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}" }
+            check(!fagsakId.isNullOrBlank()) {
+                val error = "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}"
+                logger.error(error)
+                error
+            }
+            check(!fagsaksystem.isNullOrBlank()) {
+                val error = "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}"
+                logger.error(error)
+                error
+            }
         }
     }
 }

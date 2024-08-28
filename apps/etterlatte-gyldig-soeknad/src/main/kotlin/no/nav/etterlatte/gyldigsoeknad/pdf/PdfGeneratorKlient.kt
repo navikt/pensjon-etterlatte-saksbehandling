@@ -8,20 +8,22 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
-import org.slf4j.MDC
-import java.util.UUID
+import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 
 class PdfGeneratorKlient(
     private val client: HttpClient,
     private val apiUrl: String,
 ) {
     suspend fun genererPdf(
-        input: JsonNode,
-        template: String,
+        payload: JsonNode,
+        mal: String,
     ): ByteArray =
         client
-            .post("$apiUrl/$template") {
-                header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
-                setBody(TextContent(input.toPrettyString(), ContentType.Application.Json))
+            .post("$apiUrl/$mal") {
+                header(CORRELATION_ID, getCorrelationId())
+                contentType(ContentType.Application.Json)
+                setBody(TextContent(payload.toPrettyString(), ContentType.Application.Json))
             }.body()
 }

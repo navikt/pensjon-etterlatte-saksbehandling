@@ -92,7 +92,7 @@ class JournalfoerInntektsjusteringService(
         return runBlocking {
             retry {
                 pdfgenKlient.genererPdf(
-                    input =
+                    payload =
                         ArkiverInntektsjustering(
                             id = inntektsjustering.id,
                             sakId = sakId,
@@ -103,7 +103,7 @@ class JournalfoerInntektsjusteringService(
                             naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
                             tidspunkt = inntektsjustering.formatertTidspunkt(),
                         ).toJsonNode(),
-                    template = "inntektsjustering_nytt_aar_v1",
+                    mal = "inntektsjustering_nytt_aar_v1",
                 )
             }.let {
                 when (it) {

@@ -53,7 +53,6 @@ internal class DoedshendelseRouteTest(
         DoedshendelseService(
             pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = doedshendelseDao,
-            featureToggleService = toggle,
         )
 
     @BeforeAll

@@ -11,6 +11,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
+import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 
 const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -113,6 +114,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                       <Table.Header>
                         <Table.Row>
                           <Table.HeaderCell scope="col">Unntak</Table.HeaderCell>
+                          <Table.HeaderCell scope="col">Type</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
                           <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
@@ -126,6 +128,9 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                             {vurdering.unntak.map((unntak) => (
                               <Table.Row key={unntak.id}>
                                 <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
+                                <Table.DataCell>
+                                  <AktivitetspliktUnntakTypeTag unntak={unntak.unntak} />
+                                </Table.DataCell>
                                 <Table.DataCell>{unntak.fom ? formaterDato(unntak.fom) : '-'}</Table.DataCell>
                                 <Table.DataCell>{unntak.tom ? formaterDato(unntak.tom) : '-'}</Table.DataCell>
                                 <Table.DataCell>{unntak.beskrivelse ? unntak.beskrivelse : '-'}</Table.DataCell>
@@ -138,7 +143,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                           </>
                         ) : (
                           <Table.Row>
-                            <Table.DataCell colSpan={6}>Finner ingen unntak</Table.DataCell>
+                            <Table.DataCell colSpan={7}>Finner ingen unntak</Table.DataCell>
                           </Table.Row>
                         )}
                       </Table.Body>

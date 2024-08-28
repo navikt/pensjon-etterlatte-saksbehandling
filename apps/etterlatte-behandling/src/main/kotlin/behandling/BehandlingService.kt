@@ -21,6 +21,7 @@ import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -209,6 +210,12 @@ interface BehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         redigertFamilieforhold: RedigertFamilieforhold,
+    )
+
+    suspend fun lagreAnnenForelder(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        annenForelder: AnnenForelder,
     )
 
     fun endreSkalSendeBrev(
@@ -534,39 +541,28 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         redigertFamilieforhold: RedigertFamilieforhold,
-    ) {
-        val forrigePersonGalleri =
-            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
-                ?: throw PersongalleriFinnesIkkeException()
-        inTransaction {
-            hentBehandlingOrThrow(behandlingId)
-                .tilOpprettet()
-                .let { behandling ->
-                    val nyeOpplysinger =
-                        listOf(
-                            lagOpplysning(
-                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                                opplysning =
-                                    forrigePersonGalleri
-                                        .copy(
-                                            avdoed = redigertFamilieforhold.avdoede,
-                                            gjenlevende = redigertFamilieforhold.gjenlevende,
-                                        ).toJsonNode(),
-                                periode = null,
-                            ),
-                        )
-                    runBlocking {
-                        grunnlagService.leggTilNyeOpplysninger(
-                            behandlingId,
-                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
-                        )
-                    }
+    ) = endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId,
+        brukerTokenInfo,
+    ) { galleri ->
+        galleri.copy(
+            avdoed = redigertFamilieforhold.avdoede,
+            gjenlevende = redigertFamilieforhold.gjenlevende,
+            annenForelder = redigertFamilieforhold.annenForelder,
+        )
+    }
 
-                    runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
-                    behandlingDao.lagreStatus(behandling)
-                }
-        }
+    override suspend fun lagreAnnenForelder(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        annenForelder: AnnenForelder,
+    ) = endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId,
+        brukerTokenInfo,
+    ) { galleri ->
+        galleri.copy(
+            annenForelder = annenForelder,
+        )
     }
 
     override fun endreSkalSendeBrev(
@@ -838,4 +834,45 @@ internal class BehandlingServiceImpl(
     ) = opphoerFraOgMed != null &&
         virkningstidspunkt != null &&
         virkningstidspunkt.isAfter(opphoerFraOgMed)
+
+    private suspend fun endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        transform: (Persongalleri) -> Persongalleri,
+    ) {
+        val forrigePersonGalleri =
+            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
+                ?: throw PersongalleriFinnesIkkeException()
+        inTransaction {
+            hentBehandlingOrThrow(behandlingId)
+                .tilOpprettet()
+                .let { behandling ->
+                    val nyeOpplysinger =
+                        listOf(
+                            lagOpplysning(
+                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                                opplysning =
+                                    transform(forrigePersonGalleri).toJsonNode(),
+                                periode = null,
+                            ),
+                        )
+                    runBlocking {
+                        grunnlagService.leggTilNyeOpplysninger(
+                            behandlingId,
+                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                        )
+                    }
+
+                    runBlocking {
+                        grunnlagService.oppdaterGrunnlag(
+                            behandling.id,
+                            behandling.sak.id,
+                            behandling.sak.sakType,
+                        )
+                    }
+                    behandlingDao.lagreStatus(behandling)
+                }
+        }
+    }
 }

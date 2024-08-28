@@ -13,7 +13,9 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -24,6 +26,7 @@ class BrevService(
     private val pdfGenerator: PDFGenerator,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 
@@ -134,6 +137,7 @@ class BrevService(
         val brev = sjekkOmBrevKanEndres(id)
 
         if (!brev.mottaker.erGyldig()) {
+            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)

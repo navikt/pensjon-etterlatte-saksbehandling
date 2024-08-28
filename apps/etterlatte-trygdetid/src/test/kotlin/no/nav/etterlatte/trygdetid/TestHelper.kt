@@ -47,6 +47,7 @@ fun behandling(
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
     opphoerFraOgMed = null,
+    relatertBehandlingId = null,
 )
 
 fun trygdetid(

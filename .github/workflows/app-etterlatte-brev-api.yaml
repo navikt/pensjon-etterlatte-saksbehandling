@@ -29,6 +29,7 @@ on:
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-tilbakekreving-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

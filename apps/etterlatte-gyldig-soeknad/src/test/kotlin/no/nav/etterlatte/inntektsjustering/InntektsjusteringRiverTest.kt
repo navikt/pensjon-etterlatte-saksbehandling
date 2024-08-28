@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -15,12 +15,13 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
-import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT
+import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -46,6 +47,7 @@ internal class InntektsjusteringRiverTest {
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),
+                inntektsaar = 2025,
                 arbeidsinntekt = 100,
                 naeringsinntekt = 200,
                 arbeidsinntektUtland = 300,
@@ -66,10 +68,9 @@ internal class InntektsjusteringRiverTest {
             JsonMessage
                 .newMessage(
                     mapOf(
-                        "@event_name" to EVENT_NAME_INNSENDT.eventname,
+                        "@event_name" to InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT.eventname,
                         InntektsjusteringInnsendt.fnrBruker to "123",
-                        InntektsjusteringInnsendt.inntektsaar to "2025",
-                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering,
+                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering.toJson(),
                     ),
                 ).toJson()
 
@@ -81,7 +82,7 @@ internal class InntektsjusteringRiverTest {
             behandlingKlientMock.finnEllerOpprettSak("123", SakType.OMSTILLINGSSTOENAD)
 
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
-            pdfgenKlient.genererPdf(any(), "tom_mal")
+            pdfgenKlient.genererPdf(any(), "inntektsjustering_nytt_aar_v1")
 
             behandlingKlientMock.opprettOppgave(
                 sak.id,

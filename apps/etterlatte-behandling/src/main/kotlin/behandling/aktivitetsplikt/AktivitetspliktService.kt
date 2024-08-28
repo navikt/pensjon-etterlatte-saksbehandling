@@ -171,47 +171,65 @@ class AktivitetspliktService(
         )
 
     fun upsertAktivitet(
-        behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID? = null,
+        sakId: Long? = null,
     ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
-        }
-
-        if (aktivitet.sakId != behandling.sak.id) {
-            throw SakidTilhoererIkkeBehandlingException()
-        }
-
         if (aktivitet.tom != null && aktivitet.tom < aktivitet.fom) {
             throw TomErFoerFomException()
         }
-
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        if (aktivitet.id != null) {
-            aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+
+        if (behandlingId != null) {
+            val behandling =
+                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            if (aktivitet.sakId != behandling.sak.id) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            }
+            runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
+        } else if (sakId != null) {
+            if (aktivitet.sakId != sakId) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitetForSak(sakId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitetForSak(sakId, aktivitet, kilde)
+            }
         } else {
-            aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            throw ManglerSakEllerBehandlingIdException()
         }
-        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
     }
 
     fun slettAktivitet(
-        behandlingId: UUID,
         aktivitetId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID? = null,
+        sakId: Long? = null,
     ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
+        if (behandlingId != null) {
+            val behandling =
+                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
+            runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
+        } else if (sakId != null) {
+            aktivitetspliktDao.slettAktivitetForSak(aktivitetId, sakId)
+        } else {
+            throw ManglerSakEllerBehandlingIdException()
         }
-        aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
-        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
     }
 
     fun opprettAktivitetsgradForOppgave(

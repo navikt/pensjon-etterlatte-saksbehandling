@@ -11,6 +11,7 @@ data class Persongalleri(
     val avdoed: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList(),
     val personerUtenIdent: List<PersonUtenIdent>? = null,
+    val annenForelder: AnnenForelder? = null,
 ) {
     override fun toString(): String =
         "Persongalleri(soeker=${soeker.maskerFnr()}," +
@@ -55,4 +56,16 @@ data class RelatertPerson(
 data class RedigertFamilieforhold(
     val avdoede: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList(),
+    val annenForelder: AnnenForelder?,
 )
+
+data class AnnenForelder(
+    val vurdering: AnnenForelderVurdering,
+    val begrunnelse: String,
+) {
+    enum class AnnenForelderVurdering {
+        KUN_EN_REGISTRERT_JURIDISK_FORELDER,
+        UKJENT_FORELDER_IKKE_NORSK_FNR,
+        IKKE_SAMSVAR_MED_PDL,
+    }
+}

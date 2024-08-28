@@ -69,8 +69,8 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
                 </BodyLong>
               </div>
               <BodyLong>
-                Opprett et manuelt brev som skal sendes ved 6 måneder etter dødsfall. Etter brevet er opprettet og sendt
-                må du ferdigstille oppgaven her.
+                Opprett brev som skal sendes ved 6 måneder etter dødsfall. Etter brevet er opprettet og sendt må du
+                ferdigstille oppgaven her.
               </BodyLong>
 
               <div>
@@ -81,7 +81,7 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
                   fane={PersonOversiktFane.BREV}
                   disabled={!oppgave.fnr}
                 >
-                  Opprett manuelt brev
+                  Gå til brevoversikt
                 </PersonButtonLink>
               </div>
 

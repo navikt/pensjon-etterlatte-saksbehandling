@@ -841,6 +841,7 @@ internal class VedtakBehandlingServiceTest(
                 kilde = Vedtaksloesning.GJENNY,
                 sendeBrev = false,
                 opphoerFraOgMed = null,
+                relatertBehandlingId = null,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1711,6 +1712,7 @@ internal class VedtakBehandlingServiceTest(
             kilde = Vedtaksloesning.GJENNY,
             sendeBrev = true,
             opphoerFraOgMed = opphoerFom,
+            relatertBehandlingId = null,
         )
 
     private companion object {

@@ -60,6 +60,7 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
+        "Sjekk om bruker har overgangsstønad",
     )
 
 internal val sjekklisteItemsRevurderingBP =

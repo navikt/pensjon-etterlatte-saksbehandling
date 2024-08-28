@@ -72,6 +72,7 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
@@ -460,7 +461,7 @@ class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {
     override suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
-    ): Boolean {
+    ): MigrertYrkesskadefordel {
         TODO("Not yet implemented")
     }
 

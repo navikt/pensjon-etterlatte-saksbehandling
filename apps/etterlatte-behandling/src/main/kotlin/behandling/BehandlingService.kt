@@ -783,7 +783,7 @@ internal class BehandlingServiceImpl(
         }
 
         behandling
-            .oppdaterVidereførtOpphoer(viderefoertOpphoer)
+            .oppdaterViderefoertOpphoer(viderefoertOpphoer)
             .also {
                 behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)

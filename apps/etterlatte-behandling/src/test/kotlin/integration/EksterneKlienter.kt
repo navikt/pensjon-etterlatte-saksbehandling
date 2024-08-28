@@ -35,6 +35,8 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -111,69 +113,79 @@ class GrunnlagKlientTest : GrunnlagKlient {
                 ),
         )
 
-    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? =
+        Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+            meta = emptyMap<String, String>().toObjectNode(),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            opplysning =
+                Persongalleri(
+                    "soeker",
+                    "innsender",
+                    listOf("soesken"),
+                    listOf("avdoed"),
+                    listOf("gjenlevende"),
+                ),
+        )
 
     override suspend fun hentGrunnlagForSak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag() // evt Grunnlag.empty()
 
     override suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-    override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-    override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun hentAlleSakIder(fnr: String): Set<Long> = setOf(1L)
 
-    override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
-        TODO("Not yet implemented")
-    }
+    override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
+        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER)))
 
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
+        // NO-OP
     }
 
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
     ) {
-        TODO("Not yet implemented")
+        // NO-OP
     }
 
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
     ) {
-        TODO("Not yet implemented")
+        // NO-OP
     }
 
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
     ) {
+        // NO-OP
     }
 
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
     ) {
+        // NO-OP
     }
 
     override suspend fun laasTilGrunnlagIBehandling(
         id: UUID,
         forrigeBehandling: UUID,
     ) {
-        TODO("Not yet implemented")
+        // NO-OP
     }
 
     override val serviceName: String

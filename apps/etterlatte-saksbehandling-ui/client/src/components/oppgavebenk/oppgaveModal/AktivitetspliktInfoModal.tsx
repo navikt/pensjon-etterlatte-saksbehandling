@@ -1,4 +1,5 @@
 import {
+  Alert,
   BodyLong,
   Button,
   Heading,
@@ -226,6 +227,10 @@ export const AktivitetspliktInfoModal = ({
                                 </option>
                               ))}
                           </Select>
+                          <Alert variant="warning">
+                            Lag oppfølgingsoppgave i Gosys med frist utfra angitt sluttdato for unntaksperiode, eller
+                            sett en passende frist.
+                          </Alert>
                           <div>
                             <Label>Unntaksperiode</Label>
                             <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>

@@ -8,12 +8,9 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
 import { institusjonstype } from '~shared/types/Institusjonsopphold'
-import { SakType } from '~shared/types/sak'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreBP } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
 
-export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
+export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   const [institusjonsHendelserResult, institusjonsHendelserRequest] = useApiCall(
     hentGrunnlagsendringshendelserInstitusjonsoppholdForSak
   )
@@ -31,8 +28,6 @@ export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number
         </Heading>
       </HStack>
       <VStack gap="2">
-        {sakType === SakType.BARNEPENSJON && <InstitusjonsoppholdBeregningsgrunnlagReadMoreBP />}
-        {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         {mapResult(institusjonsHendelserResult, {
           pending: <Spinner label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,

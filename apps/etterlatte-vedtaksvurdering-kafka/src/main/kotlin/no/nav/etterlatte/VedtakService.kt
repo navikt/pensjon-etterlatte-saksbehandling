@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -19,17 +20,17 @@ import java.util.UUID
 
 interface VedtakService {
     fun harLoependeYtelserFra(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
     ): LoependeYtelseDTO
 
     fun opprettVedtakFattOgAttester(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ): VedtakOgRapid
 
     fun opprettVedtakOgFatt(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ): VedtakOgRapid
 
@@ -49,7 +50,7 @@ class VedtakServiceImpl(
     private val url: String,
 ) : VedtakService {
     override fun harLoependeYtelserFra(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
     ): LoependeYtelseDTO =
         runBlocking {
@@ -57,7 +58,7 @@ class VedtakServiceImpl(
         }
 
     override fun opprettVedtakFattOgAttester(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
@@ -65,7 +66,7 @@ class VedtakServiceImpl(
         }
 
     override fun opprettVedtakOgFatt(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {

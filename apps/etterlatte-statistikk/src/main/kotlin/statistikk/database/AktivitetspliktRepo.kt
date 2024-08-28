@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -62,7 +63,7 @@ class AktivitetspliktRepo(
      * Den sjekker kun til og med angitt måned for å sikre stabilitet i statistikken som blir produsert
      */
     fun hentAktivitetspliktForMaaned(
-        sakId: Long,
+        sakId: SakId,
         yearMonth: YearMonth,
     ): StatistikkAktivitet? =
         datasource.connection.use { connection ->
@@ -120,7 +121,7 @@ class AktivitetspliktRepo(
 }
 
 data class StatistikkAktivitet(
-    val sakId: Long,
+    val sakId: SakId,
     val registrert: Tidspunkt,
     val avdoedDoedsmaaned: YearMonth,
     val unntak: List<PeriodisertAktivitetspliktopplysning>,

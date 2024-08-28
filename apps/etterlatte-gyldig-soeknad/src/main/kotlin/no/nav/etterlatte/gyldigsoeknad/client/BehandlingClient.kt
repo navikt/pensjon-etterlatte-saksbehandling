@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.time.LocalDateTime
 import java.util.UUID
@@ -62,7 +63,7 @@ class BehandlingClient(
     }
 
     fun opprettOppgave(
-        sakId: Long,
+        sakId: SakId,
         oppgave: NyOppgaveDto,
     ) = runBlocking {
         sakOgBehandlingApp

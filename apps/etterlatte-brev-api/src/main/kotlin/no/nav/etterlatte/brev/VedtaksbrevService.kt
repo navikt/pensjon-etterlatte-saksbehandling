@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -49,7 +50,7 @@ class VedtaksbrevService(
     }
 
     suspend fun opprettVedtaksbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
@@ -127,7 +128,7 @@ class VedtaksbrevService(
     }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

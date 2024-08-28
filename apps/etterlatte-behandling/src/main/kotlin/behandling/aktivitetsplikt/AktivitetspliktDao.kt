@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -88,7 +89,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun hentAktiviteterForSak(sakId: Long): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -282,7 +283,7 @@ class AktivitetspliktDao(
 
 data class AktivitetspliktAktivitet(
     val id: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
     val tom: LocalDate?,
@@ -307,7 +308,7 @@ data class AktivitetspliktAktivitet(
 
 data class LagreAktivitetspliktAktivitet(
     val id: UUID? = null,
-    val sakId: Long,
+    val sakId: SakId,
     val type: AktivitetspliktAktivitetType,
     val fom: LocalDate,
     val tom: LocalDate? = null,

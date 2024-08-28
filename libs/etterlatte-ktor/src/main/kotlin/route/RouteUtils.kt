@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -53,7 +54,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
             "BehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.sakId: Long
+inline val PipelineContext<*, ApplicationCall>.sakId: SakId
     get() =
         call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
             "SakId er ikke i path params",

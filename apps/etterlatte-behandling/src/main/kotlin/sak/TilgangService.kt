@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
 interface TilgangService {
@@ -11,7 +12,7 @@ interface TilgangService {
     ): Boolean
 
     fun harTilgangTilSak(
-        sakId: Long,
+        sakId: SakId,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
@@ -107,7 +108,7 @@ class TilgangServiceImpl(
     }
 
     override fun harTilgangTilSak(
-        sakId: Long,
+        sakId: SakId,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: throw GenerellIkkeFunnetException()

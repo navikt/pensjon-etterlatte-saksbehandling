@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.domain
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
@@ -120,7 +121,7 @@ fun stoenadRad(
     beregningType: String = "papir",
     anvendtSats: String = "123123",
     behandlingId: UUID = UUID.randomUUID(),
-    sakId: Long = -1L,
+    sakId: SakId = -1L,
     sakNummer: Long = -1L,
     tekniskTid: Tidspunkt = Tidspunkt.now(),
     sakYtelse: String = "",

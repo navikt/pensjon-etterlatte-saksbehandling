@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -29,7 +30,7 @@ class BehandlingKlient(
     private val resourceUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak =
         get(
@@ -40,7 +41,7 @@ class BehandlingKlient(
         )
 
     internal suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         get(
@@ -134,7 +135,7 @@ class BehandlingKlient(
         )
 
     internal suspend fun hentKlagerForSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Klage> =
         get(

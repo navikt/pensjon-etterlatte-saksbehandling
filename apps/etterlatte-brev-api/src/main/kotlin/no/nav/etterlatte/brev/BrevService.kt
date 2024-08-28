@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -29,10 +30,10 @@ class BrevService(
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 
-    fun hentBrevForSak(sakId: Long): List<Brev> = db.hentBrevForSak(sakId)
+    fun hentBrevForSak(sakId: SakId): List<Brev> = db.hentBrevForSak(sakId)
 
     suspend fun opprettNyttManueltBrev(
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
         brevkode: Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,

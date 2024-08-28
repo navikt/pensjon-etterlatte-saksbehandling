@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -59,7 +60,7 @@ class JournalfoerInntektsjusteringService(
 
     private fun opprettDokument(
         tittel: String,
-        sakId: Long,
+        sakId: SakId,
         inntektsjustering: Inntektsjustering,
     ): JournalpostDokument {
         try {
@@ -82,7 +83,7 @@ class JournalfoerInntektsjusteringService(
     ): String = "etterlatte:${sakType.name.lowercase()}:inntektsjustering:$id"
 
     private fun opprettArkivPdf(
-        sakId: Long,
+        sakId: SakId,
         inntektsjustering: Inntektsjustering,
     ): DokumentVariant.ArkivPDF {
         logger.info("Oppretter arkiv PDF for inntektsjustering med id ${inntektsjustering.id}")

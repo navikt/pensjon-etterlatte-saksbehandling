@@ -6,6 +6,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -48,7 +49,7 @@ class VilkaarsvurderingRepository(
         }
 
     fun hentMigrertYrkesskadefordel(
-        sakId: Long,
+        sakId: SakId,
         tx: TransactionalSession? = null,
     ) = tx.session {
         hent(

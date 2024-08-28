@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -1051,7 +1052,7 @@ class BehandlingFactoryTest {
     }
 
     private fun sak(
-        sakId: Long = 1L,
+        sakId: SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
         enhet: String = Enheter.defaultEnhet.enhetNr,
     ): Sak =

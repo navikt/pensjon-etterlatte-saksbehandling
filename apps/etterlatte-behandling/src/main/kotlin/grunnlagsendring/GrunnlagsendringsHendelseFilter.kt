@@ -6,6 +6,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 
 class KunSystembrukerException(
@@ -17,7 +18,7 @@ class GrunnlagsendringsHendelseFilter(
     val behandlingService: BehandlingService,
 ) {
     fun hendelseErRelevantForSak(
-        sakId: Long,
+        sakId: SakId,
         grunnlagendringType: GrunnlagsendringsType,
     ): Boolean {
         if (!ikkeRelevanteHendelserForOpphoertSak(grunnlagendringType)) {

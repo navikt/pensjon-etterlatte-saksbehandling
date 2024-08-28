@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.service.AktivitetForMaaned
@@ -21,7 +22,7 @@ data class MaanedStoenadRad(
     val beregningType: String,
     val anvendtSats: String,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val sakNummer: Long,
     val tekniskTid: Tidspunkt,
     val sakYtelse: String,

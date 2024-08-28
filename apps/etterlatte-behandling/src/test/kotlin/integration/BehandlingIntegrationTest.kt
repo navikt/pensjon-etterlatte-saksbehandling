@@ -95,11 +95,10 @@ abstract class BehandlingIntegrationTest {
                 rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
                 skjermingHttpKlient = skjermingHttpClient(),
-                grunnlagHttpClient = grunnlagHttpClient(),
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientObo = GrunnlagKlientTest(),
+                grunnlagKlientDownstream = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
@@ -112,7 +111,6 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                vvGrunnlagKlient = GrunnlagKlientVvTest(),
                 vilkaarsvurderingKlientDaoImpl = VilkaarsvurderingKlientDaoTest(),
             )
     }

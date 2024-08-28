@@ -13,13 +13,14 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientDownstream
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GrunnlagKlientVVOboTest {
+internal class GrunnlagKlientTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val config: Config = mockk(relaxed = true)
@@ -27,7 +28,7 @@ internal class GrunnlagKlientVVOboTest {
     @Test
     fun `skal hente grunnlag`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val klient = GrunnlagKlientImpl(config, mockHttpClient(grunnlag))
+        val klient = GrunnlagKlientDownstream(config, mockHttpClient(grunnlag))
         val hentetGrunnlag =
             runBlocking {
                 klient.hentGrunnlag(1)

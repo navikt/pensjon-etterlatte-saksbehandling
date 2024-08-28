@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -51,7 +51,7 @@ interface GrunnlagService {
 }
 
 class GrunnlagServiceImpl(
-    private val grunnlagKlient: GrunnlagKlientImpl,
+    private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,

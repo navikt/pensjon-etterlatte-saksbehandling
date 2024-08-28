@@ -32,12 +32,16 @@ import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkResponse
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -75,7 +79,6 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
-import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
 import java.time.LocalDate
 import java.util.UUID
 
@@ -108,6 +111,10 @@ class GrunnlagKlientTest : GrunnlagKlient {
                 ),
         )
 
+    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun hentGrunnlagForSak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -117,6 +124,68 @@ class GrunnlagKlientTest : GrunnlagKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun leggInnNyttGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
+    }
+
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        request: OppdaterGrunnlagRequest,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lagreNyeSaksopplysninger(
+        behandlingId: UUID,
+        saksopplysninger: NyeSaksopplysninger,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lagreNyeSaksopplysningerBareSak(
+        sakId: SakId,
+        saksopplysninger: NyeSaksopplysninger,
+    ) {
+    }
+
+    override suspend fun leggInnNyttGrunnlagSak(
+        sakId: SakId,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
+    }
+
+    override suspend fun laasTilGrunnlagIBehandling(
+        id: UUID,
+        forrigeBehandling: UUID,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override val serviceName: String
+        get() = TODO("Not yet implemented")
+    override val beskrivelse: String
+        get() = TODO("Not yet implemented")
+    override val endpoint: String
+        get() = TODO("Not yet implemented")
+
+    override suspend fun ping(konsument: String?): PingResult {
+        TODO("Not yet implemented")
+    }
 }
 
 class BeregningKlientTest : BeregningKlient {
@@ -444,13 +513,6 @@ class AxsysKlientTest : AxsysKlient {
         get() = "endpoint"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
-}
-
-class GrunnlagKlientVvTest : GrunnlagKlientVV {
-    override suspend fun hentGrunnlagForBehandling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 }
 
 class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {

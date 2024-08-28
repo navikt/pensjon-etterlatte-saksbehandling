@@ -136,7 +136,7 @@ internal class NyNotatServiceTest(
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
         coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
-        coEvery { pdfGeneratorKlientMock.genererPdf(any()) } returns "pdf".toByteArray()
+        coEvery { pdfGeneratorKlientMock.genererPdf(any(), any()) } returns "pdf".toByteArray()
 
         val nyttNotat =
             runBlocking {
@@ -159,7 +159,7 @@ internal class NyNotatServiceTest(
         coVerify {
             behandlingServiceMock.hentSak(sakId, saksbehandler)
             dokarkivServiceMock.journalfoer(capture(journalpostRequest))
-            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload.toJsonNode()))
+            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload.toJsonNode()), NotatMal.TOM_MAL)
         }
 
         with(journalpostRequest.captured) {

@@ -28,17 +28,6 @@ class PdfGeneratorKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun genererPdf(request: PdfGenRequest): ByteArray {
-        logger.info("Genererer PDF med ey-pdfgen")
-
-        return klient
-            .post("$apiUrl/notat/tom_mal") {
-                header(CORRELATION_ID, getCorrelationId())
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
-    }
-
     suspend fun genererPdf(
         request: PdfGenRequest,
         mal: NotatMal,

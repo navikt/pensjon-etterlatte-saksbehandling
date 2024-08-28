@@ -77,6 +77,7 @@ class NyNotatService(
                     tittel = notat.tittel,
                     payload = payload.toJsonNode(),
                 ),
+                NotatMal.TOM_MAL,
             )
         } else {
             notatRepository.hentPdf(id)

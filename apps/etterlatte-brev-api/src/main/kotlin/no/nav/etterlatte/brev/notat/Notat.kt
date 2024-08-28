@@ -27,6 +27,7 @@ data class Notat(
 
 enum class NotatMal(
     val navn: String,
+    val sti: String = "notat",
 ) {
     TOM_MAL("tom_mal"),
     NORDISK_VEDLEGG("nordisk_vedlegg"),

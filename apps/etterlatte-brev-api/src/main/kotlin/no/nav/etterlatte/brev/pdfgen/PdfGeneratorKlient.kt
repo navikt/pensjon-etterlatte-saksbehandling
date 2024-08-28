@@ -38,7 +38,7 @@ class PdfGeneratorKlient(
         logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
 
         return klient
-            .post("$apiUrl/notat/${mal.navn}") {
+            .post("$apiUrl/${mal.sti}/${mal.navn}") {
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(PdfGenRequest(tittel, payload.toJsonNode()))

@@ -13,8 +13,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
@@ -87,13 +89,7 @@ class VilkaarsvurderingRepository(
         kopiertFraId: UUID,
     ): Vilkaarsvurdering {
         ds.transaction { tx ->
-            opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
-            lagreVilkaarsvurderingResultat(
-                nyVilkaarsvurdering.behandlingId,
-                nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
-                nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
-                tx,
-            )
+            lagreVilkaarsvurderingResultatKopiering(nyVilkaarsvurdering, tx)
             opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
         }
 
@@ -126,44 +122,45 @@ class VilkaarsvurderingRepository(
         ).let { tx.run(it.asUpdate) }
     }
 
-    fun lagreVilkaarsvurderingResultat(
-        behandlingId: UUID,
+    fun lagreVilkaarsvurderingResultatvanlig(
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
+        vilkaarsvurdering: Vilkaarsvurdering,
     ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
-            vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let {
+            vilkaarsvurderingResultatQuery(vilkaarsvurdering.id, virkningstidspunkt, resultat).let {
                 session.run(
                     it.asExecute,
                 )
             }
         }
 
-        return hentNonNull(behandlingId)
+        return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
-    private fun lagreVilkaarsvurderingResultat(
-        behandlingId: UUID,
-        virkningstidspunkt: LocalDate,
-        resultat: VilkaarsvurderingResultat,
+    private fun lagreVilkaarsvurderingResultatKopiering(
+        nyVilkaarsvurdering: Vilkaarsvurdering,
         tx: TransactionalSession,
     ): Vilkaarsvurdering {
-        val vilkaarsvurdering = hentNonNull(behandlingId, tx)
-        vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let { tx.run(it.asExecute) }
-
-        return hentNonNull(behandlingId, tx)
+        vilkaarsvurderingResultatQuery(
+            nyVilkaarsvurdering.id,
+            nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
+            nyVilkaarsvurdering.resultat!!,
+        ).let {
+            tx.run(it.asExecute)
+        }
+        return hentNonNull(nyVilkaarsvurdering.behandlingId, tx)
     }
 
     private fun vilkaarsvurderingResultatQuery(
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurderingId: UUID,
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
     ) = queryOf(
         statement = Queries.LAGRE_VILKAARSVURDERING_RESULTAT,
         paramMap =
             mapOf(
-                "id" to vilkaarsvurdering.id,
+                "id" to vilkaarsvurderingId,
                 "virkningstidspunkt" to virkningstidspunkt,
                 "resultat_utfall" to resultat.utfall.name,
                 "resultat_kommentar" to resultat.kommentar,
@@ -183,7 +180,7 @@ class VilkaarsvurderingRepository(
         return hentNonNull(behandlingId)
     }
 
-    fun lagreVilkaarResultat(
+    fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar,
     ): Vilkaarsvurdering {
@@ -219,11 +216,11 @@ class VilkaarsvurderingRepository(
                 delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
             }.let { hentNonNull(behandlingId) }
 
-    fun slettVilkaarvurdering(id: UUID) =
+    fun slettVilkaarvurdering(vilkaarsvurderingId: UUID) =
         ds.transaction { tx ->
-            queryOf(Queries.SLETT_VILKAARSVURDERING_KILDE, mapOf("vilkaarsvurdering_id" to id))
+            queryOf(Queries.SLETT_VILKAARSVURDERING_KILDE, mapOf("vilkaarsvurdering_id" to vilkaarsvurderingId))
                 .let { tx.run(it.asUpdate) }
-            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("id" to id))
+            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("id" to vilkaarsvurderingId))
                 .let { tx.run(it.asUpdate) }
         } == 1
 

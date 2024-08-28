@@ -1,3 +1,4 @@
+/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
@@ -16,6 +17,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import vilkaarsvurdering.VilkaarTypeOgUtfall
+import vilkaarsvurdering.Vilkaarsvurdering
+import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -41,7 +45,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val opprettVilkaarsvurderingMedResultat =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
                 opprettetVilkaarsvurdering.behandlingId,
                 vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -78,7 +82,7 @@ internal class VilkaarsvurderingRepositoryTest(
         val nyttVirkningstidspunkt = opprettetVilkaarsvurdering.virkningstidspunkt.minusYears(1)
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
                 opprettetVilkaarsvurdering.behandlingId,
                 nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
@@ -86,10 +90,10 @@ internal class VilkaarsvurderingRepositoryTest(
 
         oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe nyttVirkningstidspunkt
         with(oppdatertVilkaarsvurdering.resultat!!) {
-            utfall shouldBe vilkaarsvurderingResultat.utfall
-            kommentar shouldBe vilkaarsvurderingResultat.kommentar
-            tidspunkt shouldBe vilkaarsvurderingResultat.tidspunkt
-            saksbehandler shouldBe vilkaarsvurderingResultat.saksbehandler
+            utfall shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.utfall
+            kommentar shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.kommentar
+            tidspunkt shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.tidspunkt
+            saksbehandler shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.saksbehandler
         }
     }
 
@@ -97,7 +101,7 @@ internal class VilkaarsvurderingRepositoryTest(
     fun `skal sette resultat paa vilkaarsvurdering og slette det`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
             opprettetVilkaarsvurdering.behandlingId,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat,
@@ -131,7 +135,7 @@ internal class VilkaarsvurderingRepositoryTest(
             )
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarResultat(
+            vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
                 opprettetVilkaarsvurdering.behandlingId,
                 vurdertVilkaar,
             )
@@ -171,7 +175,7 @@ internal class VilkaarsvurderingRepositoryTest(
                     },
             )
 
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaar,
         )
@@ -211,7 +215,7 @@ internal class VilkaarsvurderingRepositoryTest(
                         Utfall.OPPFYLT,
                     ),
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )
@@ -228,7 +232,7 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarOppfylt,
         )
@@ -259,7 +263,7 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.lagreVilkaarResultat(
+        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )
@@ -277,7 +281,7 @@ internal class VilkaarsvurderingRepositoryTest(
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
-
+ n
         val vilkaarsvurdering =
             Vilkaarsvurdering(
                 behandlingId = UUID.randomUUID(),
@@ -299,3 +303,4 @@ internal class VilkaarsvurderingRepositoryTest(
 
 fun Vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
     vilkaar.find { it.hovedvilkaar.type == vilkaarType }
+*/

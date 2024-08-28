@@ -61,8 +61,6 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
@@ -154,6 +152,13 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImplVv
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -272,7 +277,6 @@ internal class ApplicationContext(
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
-    val vilkaarsvuderingKlient: VilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
@@ -285,6 +289,8 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
+    val vvGrunnlagKlient: GrunnlagKlientVV = GrunnlagKlientImplVv(config, httpClient()),
+    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao = VilkaarsvurderingKlientDaoImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -583,6 +589,15 @@ internal class ApplicationContext(
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(
+            VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
+            behandlingService,
+            vvGrunnlagKlient,
+            behandlingsStatusService,
+        )
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -595,7 +610,7 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            vilkaarsvurderingKlient = vilkaarsvuderingKlient,
+            vilkaarsvurderingService = vilkaarsvurderingService,
         )
 
     val migreringService =

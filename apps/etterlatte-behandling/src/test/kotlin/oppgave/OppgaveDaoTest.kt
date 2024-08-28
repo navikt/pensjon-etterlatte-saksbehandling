@@ -49,6 +49,7 @@ internal class OppgaveDaoTest(
                 user,
                 DatabaseContextTest(dataSource),
                 mockedSakTilgangDao(),
+                null,
             ),
         )
     }

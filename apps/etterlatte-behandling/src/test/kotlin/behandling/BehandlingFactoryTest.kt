@@ -20,15 +20,12 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klage.KlageService
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -54,6 +51,9 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
@@ -61,6 +61,8 @@ import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -76,13 +78,10 @@ class BehandlingFactoryTest {
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
     private val kommerBarnetTilGodeServiceMock = mockk<KommerBarnetTilGodeService>()
-    private val vilkaarsvurderingKlientMock = mockk<VilkaarsvurderingKlient>()
-    private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private val grunnlagService = mockk<GrunnlagServiceImpl>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>()
-    private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
-    private val klageService = mockk<KlageService>()
     private val aktivitetspliktDao = mockk<AktivitetspliktDao>()
     private val aktivitetspliktKopierService = mockk<AktivitetspliktKopierService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
@@ -125,7 +124,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             mockk(),
-            vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
+            vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
         )
 
@@ -145,7 +144,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             grunnlagService,
-            vilkaarsvurderingKlientMock,
+            vilkaarsvurderingService,
             kommerBarnetTilGodeServiceMock,
         )
         clearAllMocks()
@@ -533,7 +532,16 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
         every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
         every { kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any()) } just Runs
-        coEvery { vilkaarsvurderingKlientMock.kopierVilkaarsvurdering(any(), any(), any()) } just Runs
+        val vv =
+            Vilkaarsvurdering(
+                behandlingId = UUID.randomUUID(),
+                grunnlagVersjon = 1L,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
+                vilkaar =
+                    BarnepensjonVilkaar1967.inngangsvilkaar(),
+            )
+        coEvery { vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any()) } returns
+            VilkaarsvurderingMedBehandlingGrunnlagsversjon(vv, 1L)
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
@@ -578,7 +586,7 @@ class BehandlingFactoryTest {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
         }
         coVerify {
-            vilkaarsvurderingKlientMock.kopierVilkaarsvurdering(any(), any(), any())
+            vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
             grunnlagService.leggInnNyttGrunnlag(any(), any())
         }

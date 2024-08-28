@@ -32,7 +32,7 @@ class DoedshendelseReminderServiceTest {
 
     private val dataSource = mockk<DataSource>()
 
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
 
     @Test
     fun `Skal opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt`() {

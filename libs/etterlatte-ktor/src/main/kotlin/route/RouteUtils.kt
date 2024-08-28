@@ -90,7 +90,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
-) = withParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
+) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
@@ -192,7 +192,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSucces
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
+suspend inline fun PipelineContext<*, ApplicationCall>.withUuidParam(
     param: String,
     onSuccess: (value: UUID) -> Unit,
 ) {

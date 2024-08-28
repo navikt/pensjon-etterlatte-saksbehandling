@@ -9,8 +9,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.notat.NotatMal
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
 
 /**
@@ -29,7 +31,8 @@ class PdfGeneratorKlient(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
-        request: PdfGenRequest,
+        tittel: String,
+        payload: PDFMal,
         mal: NotatMal,
     ): ByteArray {
         logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
@@ -38,7 +41,7 @@ class PdfGeneratorKlient(
             .post("$apiUrl/notat/${mal.navn}") {
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
-                setBody(request)
+                setBody(PdfGenRequest(tittel, payload.toJsonNode()))
             }.body()
     }
 }

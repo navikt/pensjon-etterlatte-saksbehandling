@@ -17,13 +17,12 @@ import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
 import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
-import no.nav.etterlatte.brev.pdfgen.PdfGenRequest
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
@@ -70,13 +69,11 @@ class NyNotatService(
         val notat = hent(id)
 
         return if (notat.kanRedigeres()) {
-            val payload = hentPayload(id)
+            val payload = SlatePDFMal(hentPayload(id))
 
             pdfGeneratorKlient.genererPdf(
-                PdfGenRequest(
-                    tittel = notat.tittel,
-                    payload = payload.toJsonNode(),
-                ),
+                notat.tittel,
+                payload,
                 NotatMal.TOM_MAL,
             )
         } else {

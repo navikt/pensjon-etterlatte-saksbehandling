@@ -17,12 +17,11 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.pdfgen.PdfGenRequest
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -136,7 +135,7 @@ internal class NyNotatServiceTest(
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
         coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
-        coEvery { pdfGeneratorKlientMock.genererPdf(any(), any()) } returns "pdf".toByteArray()
+        coEvery { pdfGeneratorKlientMock.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
 
         val nyttNotat =
             runBlocking {
@@ -146,7 +145,7 @@ internal class NyNotatServiceTest(
                     bruker = saksbehandler,
                 )
             }
-        val payload = nyNotatService.hentPayload(nyttNotat.id)
+        val payload = SlatePDFMal(nyNotatService.hentPayload(nyttNotat.id))
 
         runBlocking { nyNotatService.journalfoer(nyttNotat.id, saksbehandler) }
 
@@ -159,7 +158,7 @@ internal class NyNotatServiceTest(
         coVerify {
             behandlingServiceMock.hentSak(sakId, saksbehandler)
             dokarkivServiceMock.journalfoer(capture(journalpostRequest))
-            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload.toJsonNode()), NotatMal.TOM_MAL)
+            pdfGeneratorKlientMock.genererPdf(nyttNotat.tittel, payload, NotatMal.TOM_MAL)
         }
 
         with(journalpostRequest.captured) {

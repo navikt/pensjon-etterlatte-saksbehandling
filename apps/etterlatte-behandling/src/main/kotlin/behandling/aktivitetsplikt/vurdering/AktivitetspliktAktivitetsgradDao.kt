@@ -230,7 +230,7 @@ data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val fom: LocalDate = LocalDate.now(),
-    val tom: LocalDate?,
+    val tom: LocalDate? =  null,
     val beskrivelse: String,
 )
 

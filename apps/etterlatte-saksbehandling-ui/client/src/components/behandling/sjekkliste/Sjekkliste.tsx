@@ -88,10 +88,13 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
       {sjekkliste && (
         <>
           <BodyLong>
-            Gjennomgå alle punktene og marker de som krever handling.{' '}
-            <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
-              Her finner du rutine til punktene.
-            </Link>
+            Gjennomgå alle punktene og marker de som krever handling.
+            {/* Rutiner for revurdering er ikke laget enda */}
+            {behandling.behandlingType !== IBehandlingsType.REVURDERING && (
+              <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
+                Her finner du rutine til punktene.
+              </Link>
+            )}
           </BodyLong>
 
           {sjekkliste?.sjekklisteItems.map((item) => (

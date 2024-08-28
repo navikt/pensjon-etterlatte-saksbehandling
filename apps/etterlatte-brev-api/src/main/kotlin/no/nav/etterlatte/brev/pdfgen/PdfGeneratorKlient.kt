@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.notat
+package no.nav.etterlatte.brev.pdfgen
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
@@ -8,6 +8,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import org.slf4j.LoggerFactory

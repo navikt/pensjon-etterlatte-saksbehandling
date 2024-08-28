@@ -65,10 +65,10 @@ import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notat.NotatRepository
-import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute

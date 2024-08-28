@@ -17,9 +17,9 @@ import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
-import no.nav.etterlatte.brev.notat.PdfGenRequest
-import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.StrukturertNotat
+import no.nav.etterlatte.brev.pdfgen.PdfGenRequest
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode

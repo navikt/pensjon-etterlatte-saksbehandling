@@ -17,6 +17,8 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.pdfgen.PdfGenRequest
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak

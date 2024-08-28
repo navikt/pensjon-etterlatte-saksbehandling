@@ -13,11 +13,11 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -102,7 +102,7 @@ class JournalfoerInntektsjusteringService(
                             arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
                             naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
                             tidspunkt = inntektsjustering.formatertTidspunkt(),
-                        ).toJsonNode(),
+                        ),
                     mal = "inntektsjustering_nytt_aar_v1",
                 )
             }.let {
@@ -127,7 +127,7 @@ data class ArkiverInntektsjustering(
     val arbeidsinntektUtland: Int,
     val naeringsinntektUtland: Int,
     val tidspunkt: String,
-)
+) : PDFMal
 
 fun Inntektsjustering.formatertTidspunkt(): String {
     fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"

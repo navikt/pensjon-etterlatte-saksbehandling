@@ -129,7 +129,7 @@ class JournalfoerSoeknadService(
 
         return runBlocking {
             retry {
-                pdfgenKlient.genererPdf(soeknad.toJsonNode(), template)
+                pdfgenKlient.genererPdf(soeknad, template)
             }.let {
                 when (it) {
                     is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))

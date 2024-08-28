@@ -23,14 +23,20 @@ class PdfGeneratorKlient(
     suspend fun genererPdf(
         payload: PDFMal,
         mal: String,
+    ) = genererPdf(TextContent(payload.toJsonNode().toPrettyString(), ContentType.Application.Json), mal, mal)
+
+    private suspend fun genererPdf(
+        body: Any,
+        mal: String,
+        sti: String,
     ): ByteArray {
         logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
 
         return klient
-            .post("$apiUrl/$mal") {
+            .post("$apiUrl/$sti") {
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
-                setBody(TextContent(payload.toJsonNode().toPrettyString(), ContentType.Application.Json))
+                setBody(body)
             }.body()
     }
 }

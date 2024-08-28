@@ -24,6 +24,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrevdataFacade(
@@ -31,6 +33,8 @@ class BrevdataFacade(
     private val grunnlagService: GrunnlagService,
     private val behandlingService: BehandlingService,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(BrevdataFacade::class.java)
+
     suspend fun hentGenerellBrevData(
         sakId: SakId,
         behandlingId: UUID?,
@@ -135,7 +139,13 @@ class BrevdataFacade(
                             klage =
                                 if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                                     val klageId = UUID.fromString(relatertKlageId)
-                                    behandlingService.hentKlage(klageId, bruker)
+                                    val klage = behandlingService.hentKlage(klageId, bruker)
+                                    logger.info(
+                                        "Hentet klage med id=$klageId fra behandling for revurdering " +
+                                            "omgjøring etter klage i sak ${sak.id}, og fikk klage med status=" +
+                                            "${klage.status} fra behandling",
+                                    )
+                                    klage
                                 } else {
                                     null
                                 },

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
+import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ interface VilkaarsvurderingKlientDao {
     suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
-    ): Boolean
+    ): MigrertYrkesskadefordel
 
     suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
 
@@ -79,7 +80,7 @@ class VilkaarsvurderingKlientDaoImpl(
     override suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
-    ): Boolean =
+    ): MigrertYrkesskadefordel =
         downstreamResourceClient
             .get(
                 resource =

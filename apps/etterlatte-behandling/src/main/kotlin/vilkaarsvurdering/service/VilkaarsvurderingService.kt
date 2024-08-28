@@ -48,7 +48,7 @@ class VilkaarsvurderingService(
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 
     fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
-        val hentBehandling = behandlingService.hentBehandling(behandlingId)!!
+        val hentBehandling = inTransaction { behandlingService.hentBehandling(behandlingId)!! }
         return vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(hentBehandling.id, hentBehandling.sak.id)
     }
 
@@ -252,7 +252,7 @@ class VilkaarsvurderingService(
                 BehandlingType.REVURDERING -> {
                     if (kopierVedRevurdering) {
                         logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
-                        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(behandling.sak)!!
+                        val sisteIverksatteBehandling = inTransaction { behandlingService.hentSisteIverksatte(behandling.sak)!! }
                         VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                             kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo).vilkaarsvurdering,
                             grunnlag.metadata.versjon,

@@ -103,7 +103,6 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 )
                             }
                             Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                // TODO: hva med inntektsår?
                                 opprettOmstillingsstoenadInntektsjustering()
                             }
                             else -> ManueltBrevData()

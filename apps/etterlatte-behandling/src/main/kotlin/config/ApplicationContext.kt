@@ -50,7 +50,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientDownstream
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -263,7 +263,7 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val grunnlagKlientDownstream: GrunnlagKlient = GrunnlagKlientDownstream(config, httpClient()),
+    val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
@@ -335,14 +335,14 @@ internal class ApplicationContext(
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
 
-    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientDownstream)
+    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
-            grunnlagKlient = grunnlagKlientDownstream,
+            grunnlagKlient = grunnlagKlientImpl,
             behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
@@ -354,7 +354,7 @@ internal class ApplicationContext(
             generellbehandlingDao,
             oppgaveService,
             behandlingService,
-            grunnlagKlientDownstream,
+            grunnlagKlientImpl,
             hendelseDao,
             saksbehandlerInfoDao,
         )
@@ -419,7 +419,7 @@ internal class ApplicationContext(
             aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
             behandlingService = behandlingService,
-            grunnlagKlient = grunnlagKlientDownstream,
+            grunnlagKlient = grunnlagKlientImpl,
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
@@ -446,7 +446,7 @@ internal class ApplicationContext(
             axsysKlient,
             navAnsattKlient,
             skjermingKlient,
-            grunnlagKlientDownstream,
+            grunnlagKlientImpl,
             pdlTjenesterKlient,
             klageKlient,
             tilbakekrevingKlient,
@@ -472,7 +472,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdltjenesterKlient = pdlTjenesterKlient,
-            grunnlagKlient = grunnlagKlientDownstream,
+            grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
             brukerService = enhetService,
             doedshendelseService = doedshendelseService,
@@ -580,7 +580,7 @@ internal class ApplicationContext(
         VilkaarsvurderingService(
             VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
             behandlingService,
-            grunnlagKlientDownstream,
+            grunnlagKlientImpl,
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)

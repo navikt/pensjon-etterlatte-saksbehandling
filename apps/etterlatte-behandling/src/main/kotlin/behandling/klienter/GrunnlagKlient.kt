@@ -5,8 +5,6 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.get
-import io.ktor.client.request.post
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -99,7 +97,7 @@ class GrunnlagKlientException(
     override val cause: Throwable,
 ) : Exception(message, cause)
 
-class GrunnlagKlientDownstream(
+class GrunnlagKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : GrunnlagKlient {

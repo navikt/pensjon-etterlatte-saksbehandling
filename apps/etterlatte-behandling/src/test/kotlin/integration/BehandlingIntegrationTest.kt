@@ -98,7 +98,7 @@ abstract class BehandlingIntegrationTest {
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientDownstream = GrunnlagKlientTest(),
+                grunnlagKlientImpl = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),

@@ -35,7 +35,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel/${SAKID_CALL_PARAMETER}") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel/{$SAKID_CALL_PARAMETER}") {
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(sakId)
             call.respond(MigrertYrkesskadefordel(result))

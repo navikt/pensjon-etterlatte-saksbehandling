@@ -176,14 +176,6 @@ private fun skjermingHttpClient(config: Config) =
         azureAppScope = config.getString("skjerming.azure.scope"),
     )
 
-private fun grunnlagHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("grunnlag.azure.scope"),
-    )
-
 private fun navAnsattHttpClient(config: Config) =
     httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),

@@ -46,7 +46,7 @@ class PdfGeneratorKlient(
     }
 }
 
-data class PdfGenRequest(
+private data class PdfGenRequest(
     val tittel: String,
     val payload: JsonNode,
 )

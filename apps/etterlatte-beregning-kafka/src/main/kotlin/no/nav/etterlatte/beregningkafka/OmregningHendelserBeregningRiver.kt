@@ -68,7 +68,7 @@ internal class OmregningHendelserBeregningRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         runBlocking {
-            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
+            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = beregning.beregning
             sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
@@ -81,7 +81,6 @@ internal class OmregningHendelserBeregningRiver(
         sakType: SakType,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
-        dato: LocalDate,
     ): BeregningOgAvkorting {
         val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)

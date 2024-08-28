@@ -23,7 +23,7 @@ class VilkaarsvurderingRepository(
     fun hentMigrertYrkesskadefordel(
         behandlingId: UUID,
         sakId: Long,
-    ): Boolean = runBlocking { vilkaarsvurderingKlientDaoImpl.erMigrertYrkesskadefordel(behandlingId, sakId) }
+    ): Boolean = runBlocking { vilkaarsvurderingKlientDaoImpl.erMigrertYrkesskadefordel(behandlingId, sakId).migrertYrkesskadefordel }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
         runBlocking {

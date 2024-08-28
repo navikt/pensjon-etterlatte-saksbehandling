@@ -19,7 +19,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
-import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
@@ -99,8 +100,8 @@ class JournalfoerInntektsjusteringService(
                             arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                             naeringsinntekt = inntektsjustering.naeringsinntekt,
                             arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
-                            naeringsinntektUtland = inntektsjustering.naeringsinntekt,
-                            tidspunkt = inntektsjustering.tidspunkt,
+                            naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
+                            tidspunkt = inntektsjustering.formatertTidspunkt(),
                         ).toJsonNode(),
                     template = "inntektsjustering_nytt_aar_v1",
                 )
@@ -125,5 +126,12 @@ data class ArkiverInntektsjustering(
     val naeringsinntekt: Int,
     val arbeidsinntektUtland: Int,
     val naeringsinntektUtland: Int,
-    val tidspunkt: Instant,
+    val tidspunkt: String,
 )
+
+fun Inntektsjustering.formatertTidspunkt(): String {
+    fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"
+    return with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
+        "${t(dayOfMonth)}.${t(monthValue)}.$year ${t(hour)}:${t(minute)}:${t(second)}"
+    }
+}

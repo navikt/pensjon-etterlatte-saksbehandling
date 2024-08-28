@@ -5,13 +5,14 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.RapidEvents.KJOERING
+import rapidsandrivers.kjoering
 import java.time.Duration
 
 class FinnSakerTilReguleringRiver(
@@ -32,7 +33,7 @@ class FinnSakerTilReguleringRiver(
         context: MessageContext,
     ) {
         logger.info("Finner saker til regulering for dato ${packet.dato}")
-        val kjoering = packet[KJOERING].asText()
+        val kjoering = packet.kjoering
 
         kjoerIBatch(
             logger = logger,

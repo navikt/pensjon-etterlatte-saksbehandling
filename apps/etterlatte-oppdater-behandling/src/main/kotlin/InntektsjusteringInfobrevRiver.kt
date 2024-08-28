@@ -2,27 +2,33 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.EKSKLUDERTE_SAKER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
-import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.sakId
-import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.regulering.kjoerIBatch
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.InntektsjusteringHendelseType
+import rapidsandrivers.RapidEvents.ANTALL
+import rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import rapidsandrivers.RapidEvents.KJOERING
+import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
+import rapidsandrivers.antall
+import rapidsandrivers.ekskluderteSaker
+import rapidsandrivers.kjoering
+import rapidsandrivers.saker
 
 internal class InntektsjusteringInfobrevRiver(
     rapidsConnection: RapidsConnection,
-    val behandlingService: BehandlingService,
+    private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -39,11 +45,18 @@ internal class InntektsjusteringInfobrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val kjoering = packet[KJOERING].asText()
-        val antall = packet[ANTALL].asInt()
-        val sakType = SakType.OMSTILLINGSSTOENAD
+        if (!featureToggleService.isEnabled(InntektsjusterinFeatureToggle.START_INFOBREV_INNTEKTSJUSTERING, false)) {
+            logger.info("Utsending av informasjonsbrev er deaktivert ved funksjonsbryter. Avbryter forespørsel.")
+            return
+        }
 
-        logger.info("Starter å sende infobrev for inntektsjustering: $kjoering")
+        val kjoering = packet.kjoering
+        val antall = packet.antall
+
+        val sakType = SakType.OMSTILLINGSSTOENAD
+        // TODO: må vi filtrere på mer? ta bort saker som opphøres innværende år?
+
+        logger.info("$kjoering: Starter ")
         kjoerIBatch(
             logger = logger,
             antall = antall,
@@ -63,7 +76,7 @@ internal class InntektsjusteringInfobrevRiver(
             },
         )
 
-        logger.info("Avslutter: $kjoering")
+        logger.info("$kjoering: Ferdig")
     }
 
     private fun journalfoerOgDistribuer(
@@ -72,15 +85,21 @@ internal class InntektsjusteringInfobrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("$kjoering: Journaliserer og sender infobrev for sak ${sak.id}")
-//        behandlingService.lagreKjoering(sak.id, KjoeringStatus.JOURNALFORT, kjoering)
-//        logger.debug("Lagrer kjøring starta for sak ${sak.id}")
-//        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
-//        logger.debug("Ferdig lagra kjøring starta for sak ${sak.id}")
-
+        logger.info("$kjoering: Journalfører og distribuerer infobrev for sak ${sak.id}")
+        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
         packet.setEventNameForHendelseType(InntektsjusteringHendelseType.SEND_INFOBREV)
         packet.sakId = sak.id
         packet[BREVMAL_RIVER_KEY] = Brevkoder.OMS_INNTEKTSJUSTERING
         context.publish(packet.toJson())
+        behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT, kjoering)
     }
+}
+
+enum class InntektsjusterinFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    START_INFOBREV_INNTEKTSJUSTERING("start-infobrev-inntektsjustering"),
+    ;
+
+    override fun key() = key
 }

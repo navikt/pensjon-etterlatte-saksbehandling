@@ -1,5 +1,4 @@
-package no.nav.etterlatte.rivers
-
+import no.nav.etterlatte.InntektsjusteringInfobrevRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

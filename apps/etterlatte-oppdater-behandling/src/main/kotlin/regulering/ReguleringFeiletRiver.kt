@@ -6,13 +6,14 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.RapidEvents.KJOERING
+import rapidsandrivers.kjoering
 
 internal class ReguleringFeiletRiver(
     rapidsConnection: RapidsConnection,
@@ -34,7 +35,7 @@ internal class ReguleringFeiletRiver(
     ) {
         logger.info("Regulering har feilet for sak ${packet.sakId}")
         behandlingService.lagreKjoering(
-            kjoering = packet[KJOERING].asText(),
+            kjoering = packet.kjoering,
             sakId = packet.sakId,
             status = KjoeringStatus.FEILA,
         )

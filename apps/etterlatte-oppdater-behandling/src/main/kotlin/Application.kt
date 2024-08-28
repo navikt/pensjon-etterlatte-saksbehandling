@@ -33,5 +33,5 @@ private fun settOppRivers(
     OpprettBrevRiver(rapidsConnection, behandlingservice, featureToggleService)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
-    InntektsjusteringInfobrevRiver(rapidsConnection, behandlingservice)
+    InntektsjusteringInfobrevRiver(rapidsConnection, behandlingservice, featureToggleService)
 }

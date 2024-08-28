@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.route.logger
 import java.time.YearMonth
 import java.util.UUID
 
@@ -351,6 +352,7 @@ class BehandlingServiceImpl(
                     ),
                 )
             }
+            logger.debug("$kjoering: kjoeringStatus for sak {} er oppdatert til: {}", sakId, status)
         }
     }
 

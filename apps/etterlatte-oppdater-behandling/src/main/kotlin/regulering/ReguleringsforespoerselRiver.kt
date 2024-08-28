@@ -13,22 +13,24 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.EKSKLUDERTE_SAKER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
 import no.nav.etterlatte.rapidsandrivers.dato
-import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.sakId
-import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.RapidEvents.ANTALL
+import rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import rapidsandrivers.RapidEvents.KJOERING
+import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
+import rapidsandrivers.antall
+import rapidsandrivers.ekskluderteSaker
+import rapidsandrivers.kjoering
+import rapidsandrivers.saker
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -61,8 +63,8 @@ internal class ReguleringsforespoerselRiver(
             return
         }
 
-        val kjoering = packet[KJOERING].asText()
-        val antall = packet[ANTALL].asInt()
+        val kjoering = packet.kjoering
+        val antall = packet.antall
         val spesifikkeSaker = packet.saker
         val ekskluderteSaker = packet.ekskluderteSaker
         val sakType = packet.optionalSakType()

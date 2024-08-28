@@ -3,12 +3,13 @@ package no.nav.etterlatte.tidshendelser.regulering
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.JobbType
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.RapidEvents
+import rapidsandrivers.tilSeparertString
 import java.time.LocalDate
 import java.util.UUID
 
@@ -49,7 +50,7 @@ class ReguleringService(
                     mapOf(
                         ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
                         ReguleringEvents.DATO to konfigurasjon.dato.toString(),
-                        ReguleringEvents.KJOERING to kjoering(konfigurasjon.dato),
+                        RapidEvents.KJOERING to kjoering(konfigurasjon.dato),
                     ),
                 ).toJson(),
         )
@@ -63,9 +64,9 @@ fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 ReguleringEvents.DATO to konfigurasjon.dato.toString(),
-                ReguleringEvents.KJOERING to kjoering(konfigurasjon.dato),
-                ReguleringEvents.ANTALL to konfigurasjon.antall,
-                ReguleringEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),
-                ReguleringEvents.EKSKLUDERTE_SAKER to konfigurasjon.ekskluderteSaker.tilSeparertString(),
+                RapidEvents.KJOERING to kjoering(konfigurasjon.dato),
+                RapidEvents.ANTALL to konfigurasjon.antall,
+                RapidEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),
+                RapidEvents.EKSKLUDERTE_SAKER to konfigurasjon.ekskluderteSaker.tilSeparertString(),
             ),
         ).toJson()

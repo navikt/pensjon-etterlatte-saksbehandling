@@ -10,12 +10,12 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.RapidEvents
 import java.time.LocalDate
 
 internal class ReguleringFeiletRiverTest {
@@ -28,8 +28,8 @@ internal class ReguleringFeiletRiverTest {
                 DATO_KEY to foersteMai2023,
                 KONTEKST_KEY to Kontekst.REGULERING,
                 SAK_ID_KEY to 83L,
-                ReguleringEvents.KJOERING to "Regulering2023",
-                ReguleringEvents.ANTALL to Int.MAX_VALUE,
+                RapidEvents.KJOERING to "Regulering2023",
+                RapidEvents.ANTALL to Int.MAX_VALUE,
             ),
         )
 

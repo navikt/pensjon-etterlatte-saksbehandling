@@ -13,7 +13,6 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -21,6 +20,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.RapidEvents.KJOERING
+import rapidsandrivers.kjoering
 import java.math.BigDecimal
 
 internal class VedtakAttestertRiver(
@@ -54,7 +55,7 @@ internal class VedtakAttestertRiver(
         logger.info("Sak $sakId er ferdig regulert, oppdaterer status")
         val request =
             LagreKjoeringRequest(
-                kjoering = packet[KJOERING].asText(),
+                kjoering = packet.kjoering,
                 status = KjoeringStatus.FERDIGSTILT,
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),

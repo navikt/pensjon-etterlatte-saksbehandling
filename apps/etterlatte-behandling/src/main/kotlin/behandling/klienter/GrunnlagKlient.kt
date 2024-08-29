@@ -81,11 +81,13 @@ interface GrunnlagKlient : Pingable {
     suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun laasTilGrunnlagIBehandling(
@@ -250,6 +252,7 @@ class GrunnlagKlientImpl(
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(
@@ -259,7 +262,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/sak/$sakId/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -327,6 +330,7 @@ class GrunnlagKlientImpl(
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(
@@ -336,7 +340,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/grunnlag/sak/$sakId/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },

@@ -1,6 +1,6 @@
 UPDATE aktivitetsplikt_unntak
 SET fom = subquery.opprettet_date,
-    beskrivelse = beskrivelse || ' - FOM ble automatisk satt av Gjenny -'
+    beskrivelse = beskrivelse || ' - Fra-dato ble automatisk satt av Gjenny -'
 FROM (
          SELECT CAST(opprettet::jsonb ->>'tidspunkt' AS DATE) AS opprettet_date, id
          FROM aktivitetsplikt_unntak

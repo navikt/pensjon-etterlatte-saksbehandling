@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -42,7 +43,8 @@ data class TilbakekrevingBrevDTO(
                 brukerNavn = soekerNavn,
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
                 varselVedlagt = tilbakekreving.vurdering?.forhaandsvarsel != null,
-                datoVarselEllerVedtak = requireNotNull(tilbakekreving.vurdering?.forhaandsvarselDato),
+                datoVarselEllerVedtak =
+                    tilbakekreving.vurdering?.forhaandsvarselDato ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
                 datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
@@ -135,3 +137,9 @@ data class TilbakekrevingBeloeperData(
 class BrevDataTilbakerevingHarManglerException(
     message: String,
 ) : RuntimeException(message)
+
+class TilbakeKrevingManglerForhaandsvarselDatoException :
+    UgyldigForespoerselException(
+        code = "TILBAKEKREVING_MANGLER_VURDERING_FORHÅNDSVARSELSDATO",
+        detail = "Kan ikke generere pdf uten vurdering forhaandsvarselDato av tilbakekreving",
+    )

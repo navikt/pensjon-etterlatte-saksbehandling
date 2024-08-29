@@ -68,6 +68,7 @@ interface GrunnlagKlient : Pingable {
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>?
@@ -291,6 +292,7 @@ class GrunnlagKlientImpl(
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(
@@ -300,7 +302,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/oppdater-grunnlag",
                     ),
                 postBody = request.toJson(),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },

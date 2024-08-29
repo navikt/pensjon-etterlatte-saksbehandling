@@ -31,6 +31,7 @@ interface GrunnlagService {
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun leggTilNyeOpplysninger(
@@ -81,10 +82,12 @@ class GrunnlagServiceImpl(
         behandlingId: UUID,
         sakId: SakId,
         sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         grunnlagKlient.oppdaterGrunnlag(
             behandlingId,
             OppdaterGrunnlagRequest(sakId, sakType),
+            brukerTokenInfo,
         )
     }
 

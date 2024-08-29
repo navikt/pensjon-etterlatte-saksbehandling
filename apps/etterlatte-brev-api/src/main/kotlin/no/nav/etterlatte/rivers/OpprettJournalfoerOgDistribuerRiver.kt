@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
@@ -14,6 +15,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAtt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -61,8 +63,8 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-            rapidsConnection.svarSuksess(packet)
+            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+            rapidsConnection.svarSuksess(packet, brevId)
         }
     }
 
@@ -134,11 +136,14 @@ class OpprettJournalfoerOgDistribuerRiver(
         return brevID
     }
 
-    private fun RapidsConnection.svarSuksess(packet: JsonMessage) {
+    private fun RapidsConnection.svarSuksess(
+        packet: JsonMessage,
+        brevID: BrevID,
+    ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-        publish(
-            packet.toJson(),
-        )
+        packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+        packet.brevId = brevID
+        publish(packet.toJson())
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

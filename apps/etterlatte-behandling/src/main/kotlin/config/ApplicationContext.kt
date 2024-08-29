@@ -623,8 +623,8 @@ internal class ApplicationContext(
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(10, ChronoUnit.MINUTES),
+            Duration.of(3, ChronoUnit.SECONDS).toMillis(),
+            periode = Duration.of(10, ChronoUnit.SECONDS),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }

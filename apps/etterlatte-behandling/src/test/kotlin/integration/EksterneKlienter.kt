@@ -157,6 +157,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         // NO-OP
     }

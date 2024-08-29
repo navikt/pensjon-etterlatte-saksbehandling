@@ -60,7 +60,7 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<BehandlingKlient>(),
                 grunnlagKlient,
                 TrygdetidBeregningService,
-                mockk<PesysKlient>()
+                mockk<PesysKlient>(),
             )
     }
 

@@ -7,13 +7,17 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.roundingModeInntekt
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -21,6 +25,8 @@ import java.util.UUID
 class BeregningService(
     private val beregningKlient: BeregningKlient,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(BeregningService::class.java)
+
     suspend fun hentGrunnbeloep(bruker: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(bruker)
 
     internal suspend fun hentBeregning(
@@ -45,6 +51,28 @@ class BeregningService(
                 code = "UTBETALINGSINFO_MANGLER",
                 detail = "Utbetalingsinfo er nødvendig, men mangler",
             )
+
+    private fun finnBeregningsmetodeIGrunnlag(
+        beregningsGrunnlag: BeregningsGrunnlagFellesDto?,
+        it: no.nav.etterlatte.libs.common.beregning.Beregningsperiode,
+    ): BeregningsMetode {
+        if (beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.isNotEmpty() == true) {
+            // Vi har flere avdøde som kan ha flere forskjellige beregningsmetoder.
+            // Dette betyr at vi må slå opp for å finne hva som er anvendt for perioden
+            val trygdetidAnvendtIdent = it.trygdetidForIdent
+            val aktuellMetode =
+                beregningsGrunnlag.beregningsMetodeFlereAvdoede.find { it.data.avdoed == trygdetidAnvendtIdent }
+
+            return aktuellMetode?.data?.beregningsMetode?.beregningsMetode ?: throw InternfeilException(
+                "Kunne ikke hente ut beregningsmetoden for beregningsperiode ${it.datoFOM}-${it.datoTOM ?: ""}, " +
+                    "siden trygdetid for identen ikke ble funnet igjen i grunnlaget",
+            )
+        }
+
+        // ved manuelt overstyrt beregning har vi ikke grunnlag
+        return beregningsGrunnlag?.beregningsMetode?.beregningsMetode
+            ?: requireNotNull(it.beregningsMetode)
+    }
 
     suspend fun finnUtbetalingsinfoNullable(
         behandlingId: UUID,
@@ -71,10 +99,8 @@ class BeregningService(
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag =
-                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-                            ?: requireNotNull(it.beregningsMetode),
-                    // ved manuelt overstyrt beregning har vi ikke grunnlag
+                    beregningsMetodeFraGrunnlag = finnBeregningsmetodeIGrunnlag(beregningsGrunnlag, it),
+                    avdoedeForeldre = it.avdodeForeldre,
                 )
             }
 
@@ -97,7 +123,15 @@ class BeregningService(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo =
-        checkNotNull(finnAvkortingsinfoNullable(behandlingId, sakType, virkningstidspunkt, vedtakType, brukerTokenInfo)) {
+        checkNotNull(
+            finnAvkortingsinfoNullable(
+                behandlingId,
+                sakType,
+                virkningstidspunkt,
+                vedtakType,
+                brukerTokenInfo,
+            ),
+        ) {
             "Avkortingsinfo er nødvendig, men mangler"
         }
 
@@ -122,7 +156,11 @@ class BeregningService(
                     // (vises i brev) maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
                     inntekt =
                         Kroner(
-                            BigDecimal(it.aarsinntekt - it.fratrekkInnAar).setScale(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt).toInt(),
+                            BigDecimal(it.aarsinntekt - it.fratrekkInnAar)
+                                .setScale(
+                                    ANTALL_DESIMALER_INNTENKT,
+                                    roundingModeInntekt,
+                                ).toInt(),
                         ),
                     aarsinntekt = Kroner(it.aarsinntekt),
                     fratrekkInnAar = Kroner(it.fratrekkInnAar),

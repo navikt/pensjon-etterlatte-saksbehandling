@@ -11,6 +11,7 @@ class AvstemmingsdataSender(
     private val queue: String,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun sendGrensesnittavstemming(avstemmingsdata: Avstemmingsdata): String {
         logger.info("Sender avstemmingsdata til Oppdrag")
         val xml = GrensesnittavstemmingsdataJaxb.toXml(avstemmingsdata)

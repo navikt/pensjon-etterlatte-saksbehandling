@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -87,7 +88,7 @@ internal class InntektsjusteringInfobrevRiver(
     ) {
         logger.info("$kjoering: Journalfører og distribuerer infobrev for sak ${sak.id}")
         behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
-        packet.setEventNameForHendelseType(InntektsjusteringHendelseType.SEND_INFOBREV)
+        packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
         packet.sakId = sak.id
         packet[BREVMAL_RIVER_KEY] = Brevkoder.OMS_INNTEKTSJUSTERING
         context.publish(packet.toJson())

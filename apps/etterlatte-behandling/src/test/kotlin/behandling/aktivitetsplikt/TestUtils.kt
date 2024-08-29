@@ -50,6 +50,7 @@ fun aktivitetsgrad(
     oppgaveId: UUID? = null,
     aktivitetsgrad: AktivitetspliktAktivitetsgradType = AktivitetspliktAktivitetsgradType.AKTIVITET_100,
     fom: LocalDate = LocalDate.now(),
+    tom: LocalDate = LocalDate.now(),
     opprettet: Grunnlagsopplysning.Saksbehandler =
         Grunnlagsopplysning.Saksbehandler(
             ident = "Z123456",
@@ -69,6 +70,7 @@ fun aktivitetsgrad(
         oppgaveId = oppgaveId,
         aktivitetsgrad = aktivitetsgrad,
         fom = fom,
+        tom = tom,
         opprettet = opprettet,
         endret = endret,
         beskrivelse = beskrivelse,

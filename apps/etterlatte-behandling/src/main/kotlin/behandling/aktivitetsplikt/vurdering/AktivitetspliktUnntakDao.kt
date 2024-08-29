@@ -39,7 +39,7 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, unntak.unntak.name)
-            stmt.setDate(6, unntak.fom?.let { tom -> Date.valueOf(tom) })
+            stmt.setDate(6, unntak.fom?.let { fom -> Date.valueOf(fom) })
             stmt.setDate(7, unntak.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(8, kilde.toJson())
             stmt.setString(9, kilde.toJson())

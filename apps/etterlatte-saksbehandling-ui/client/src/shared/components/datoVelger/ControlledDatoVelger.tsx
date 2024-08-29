@@ -54,8 +54,9 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   } as UseDatepickerOptions)
 
   const handleBlur = () => {
-    if (selectedDay && !field.value) {
+    if ((selectedDay && !field.value) || (!selectedDay && !required)) {
       setSelected(undefined)
+      if (!required) field.onChange('')
     } else if (selectedDay && !isEqual(new Date(field.value), selectedDay)) {
       setSelected(new Date(field.value))
     } else if (field.value && !selectedDay && inputProps.value?.toString().length === 0) {

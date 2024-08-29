@@ -419,6 +419,7 @@ class AktivitetspliktServiceTest {
                         oppgaveId = null,
                         aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                         fom = LocalDate.now(),
+                        tom = null,
                         opprettet = kilde,
                         endret = kilde,
                         beskrivelse = "Beskrivelse",

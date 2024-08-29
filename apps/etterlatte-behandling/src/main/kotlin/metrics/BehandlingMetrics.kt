@@ -1,16 +1,16 @@
 package no.nav.etterlatte.metrics
 
 import io.micrometer.core.instrument.Gauge
-import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.jobs.MetrikkUthenter
+import no.nav.etterlatte.libs.ktor.Metrikker
 import org.slf4j.LoggerFactory
 
 class BehandlingMetrics(
     private val oppgaveMetrikkerDao: OppgaveMetrikkerDao,
     private val behandlingerMetrikkerDao: BehandlingMetrikkerDao,
     private val gjenopprettingDao: GjenopprettingMetrikkerDao,
-    private val registry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+    private val registry: PrometheusMeterRegistry = Metrikker.registrySaksbehandling,
 ) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

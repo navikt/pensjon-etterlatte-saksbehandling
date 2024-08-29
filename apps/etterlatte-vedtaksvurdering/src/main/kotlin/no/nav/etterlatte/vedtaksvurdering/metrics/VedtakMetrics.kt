@@ -1,14 +1,14 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics
 
 import io.micrometer.core.instrument.Gauge
-import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.jobs.MetrikkUthenter
+import no.nav.etterlatte.libs.ktor.Metrikker
 import org.slf4j.LoggerFactory
 
 class VedtakMetrics(
     private val vedtakMetrikkerDao: VedtakMetrikkerDao,
-    private val registry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+    private val registry: PrometheusMeterRegistry = Metrikker.registrySaksbehandling,
 ) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -20,7 +20,7 @@ class VedtakMetrics(
 
     private fun tell(it: VedtakAntall) {
         Gauge
-            .builder("etterlatte_vedtak_loepende", { it.antall.toDouble() })
+            .builder("etterlatte_vedtak_loepende") { it.antall.toDouble() }
             .description("Løpende vedtak for etterlatte ytelser")
             .tag("saktype", it.sakType.name)
             .register(registry)

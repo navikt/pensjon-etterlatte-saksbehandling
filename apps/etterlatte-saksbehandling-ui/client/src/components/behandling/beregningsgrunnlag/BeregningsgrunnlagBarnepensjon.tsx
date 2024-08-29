@@ -54,9 +54,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
   useEffect(() => {
     hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
-        dispatch(
-          oppdaterBeregningsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
-        )
+        dispatch(oppdaterBeregningsGrunnlag(result))
       }
       hentTrygdetiderRequest(behandling.id)
     })
@@ -99,7 +97,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     const grunnlag = {
       ...behandling.beregningsGrunnlag,
       beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag,
       beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
     }
@@ -108,7 +106,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag,
       },
-      () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
+      (result) => dispatch(oppdaterBeregningsGrunnlag(result))
     )
   }
 
@@ -116,7 +114,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     const grunnlag = {
       ...behandling.beregningsGrunnlag,
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag,
       beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
@@ -128,7 +126,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag,
       },
-      () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
+      (result) => dispatch(oppdaterBeregningsGrunnlag(result))
     )
   }
 
@@ -152,7 +150,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                       redigerbar={redigerbar}
                       oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
                       eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
-                      lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                      lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
                     />
                   )}
 
@@ -165,7 +163,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                     behandling={behandling}
                     sakType={SakType.BARNEPENSJON}
                     beregningsgrunnlag={behandling.beregningsGrunnlag}
-                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag}
                   />
                   {skalViseSoeskenjustering && (
                     <Soeskenjustering

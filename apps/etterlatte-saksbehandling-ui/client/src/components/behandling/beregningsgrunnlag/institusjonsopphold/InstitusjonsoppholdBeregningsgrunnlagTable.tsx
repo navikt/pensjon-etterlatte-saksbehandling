@@ -15,9 +15,9 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
-import { oppdaterBeregningsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
 interface PeriodeRedigeringModus {
@@ -50,34 +50,24 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
 
   const dispatch = useAppDispatch()
 
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
-  const [hentBeregningsgrunnlagOMSResult, hentBeregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
+  const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
   const slettPeriode = (index: number) => {
     if (institusjonsopphold) {
       const perioderKopi = [...institusjonsopphold]
       perioderKopi.splice(index, 1)
-      if (sakType === SakType.OMSTILLINGSSTOENAD) {
-        lagreBeregningsGrunnlagOMSRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag: {
-              beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-              institusjonsopphold: perioderKopi,
-            },
+
+      lagreBeregningsGrunnlagRequest(
+        {
+          behandlingId: behandling.id,
+          grunnlag: {
+            beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+            institusjonsopphold: perioderKopi,
           },
-          () => {
-            hentBeregningsgrunnlagOMSRequest(behandling.id, (result) => {
-              if (result)
-                dispatch(
-                  oppdaterBeregningsGrunnlagOMS({
-                    ...result,
-                    institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
-                  })
-                )
-            })
-          }
-        )
-      }
+        },
+        (result) => {
+          dispatch(oppdaterBeregningsGrunnlag(result))
+        }
+      )
     }
   }
 
@@ -156,9 +146,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
                       variant="secondary"
                       size="small"
                       icon={<TrashIcon aria-hidden />}
-                      loading={
-                        isPending(lagreBeregningsGrunnlagOMSResult) || isPending(hentBeregningsgrunnlagOMSResult)
-                      }
+                      loading={isPending(lagreBeregningsGrunnlagResult)}
                       onClick={() => slettPeriode(index)}
                     >
                       Slett

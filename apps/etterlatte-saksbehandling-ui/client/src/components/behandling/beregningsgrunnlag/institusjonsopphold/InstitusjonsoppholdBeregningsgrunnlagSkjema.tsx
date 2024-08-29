@@ -16,9 +16,9 @@ import { useForm } from 'react-hook-form'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { validerStringNumber } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlag, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { SakType } from '~shared/types/sak'
-import { oppdaterBeregningsGrunnlag, oppdaterBeregningsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -49,8 +49,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
   paaAvbryt,
   paaLagre,
 }: Props) => {
-  const [lagreBeregningsGrunnlagBPResult, lagreBeregningsGrunnlagBPRequest] = useApiCall(lagreBeregningsGrunnlag)
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
+  const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
   const dispatch = useAppDispatch()
 
@@ -79,86 +78,33 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
       tom: institusjonsoppholdPeriode.tom && konverterTilSisteDagIMaaneden(institusjonsoppholdPeriode.tom),
     }
 
-    if (eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined) {
-      const grunnlag = {
-        beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-        institusjonsopphold: replacePeriodePaaIndex(
-          formatertInstitusjonsoppholdPeriode,
-          institusjonsopphold,
-          indexTilEksisterendePeriode
-        ),
-      }
-      if (sakType === SakType.OMSTILLINGSSTOENAD) {
-        lagreBeregningsGrunnlagOMSRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag,
-          },
-          () => {
-            dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
-            paaLagre()
+    const grunnlag =
+      eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined
+        ? {
+            beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+            institusjonsopphold: replacePeriodePaaIndex(
+              formatertInstitusjonsoppholdPeriode,
+              institusjonsopphold,
+              indexTilEksisterendePeriode
+            ),
           }
-        )
-      } else if (sakType === SakType.BARNEPENSJON) {
-        const beregningsgrunnlagBP = beregningsgrunnlag as BeregningsGrunnlagDto
-        lagreBeregningsGrunnlagBPRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag: {
-              ...beregningsgrunnlagBP,
-              institusjonsopphold: grunnlag.institusjonsopphold,
-            },
-          },
-          () => {
-            dispatch(
-              oppdaterBeregningsGrunnlag({ ...beregningsgrunnlagBP, institusjonsopphold: grunnlag.institusjonsopphold })
-            )
-            paaLagre()
+        : {
+            beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+            institusjonsopphold: !!institusjonsopphold?.length
+              ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
+              : [formatertInstitusjonsoppholdPeriode],
           }
-        )
+
+    lagreBeregningsGrunnlagRequest(
+      {
+        behandlingId: behandling.id,
+        grunnlag,
+      },
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        paaLagre()
       }
-    } else {
-      const grunnlag = {
-        beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-        institusjonsopphold: !!institusjonsopphold?.length
-          ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
-          : [formatertInstitusjonsoppholdPeriode],
-      }
-      if (sakType === SakType.OMSTILLINGSSTOENAD) {
-        lagreBeregningsGrunnlagOMSRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag,
-          },
-          () => {
-            dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
-            paaLagre()
-          }
-        )
-      } else if (sakType === SakType.BARNEPENSJON) {
-        const beregningsgrunnlagBP = beregningsgrunnlag as BeregningsGrunnlagDto
-        lagreBeregningsGrunnlagBPRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag: {
-              ...beregningsgrunnlagBP,
-              beregningsMetode: grunnlag.beregningsMetode,
-              institusjonsopphold: grunnlag.institusjonsopphold,
-            },
-          },
-          () => {
-            dispatch(
-              oppdaterBeregningsGrunnlag({
-                ...beregningsgrunnlagBP,
-                beregningsMetode: grunnlag.beregningsMetode,
-                institusjonsopphold: grunnlag.institusjonsopphold,
-              })
-            )
-            paaLagre()
-          }
-        )
-      }
-    }
+    )
   }
 
   return (
@@ -202,11 +148,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
           <Textarea {...register('data.begrunnelse')} label="Begrunnelse (valgfritt)" />
         </Box>
         <HStack gap="4">
-          <Button
-            size="small"
-            icon={<FloppydiskIcon aria-hidden />}
-            loading={isPending(lagreBeregningsGrunnlagOMSResult) || isPending(lagreBeregningsGrunnlagBPResult)}
-          >
+          <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(lagreBeregningsGrunnlagResult)}>
             Lagre
           </Button>
           <Button variant="secondary" type="button" size="small" icon={<XMarkIcon aria-hidden />} onClick={paaAvbryt}>

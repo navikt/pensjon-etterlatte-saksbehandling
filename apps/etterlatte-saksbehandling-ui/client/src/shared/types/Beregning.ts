@@ -84,13 +84,6 @@ export interface BeregningsGrunnlagDto {
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
 }
 
-export interface BeregningsGrunnlagOMSDto {
-  behandlingId: string
-  kilde: KildeSaksbehandler
-  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-}
-
 export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
 
 export interface SoeskenMedIBeregning {
@@ -118,9 +111,7 @@ export interface BeregningsGrunnlagOMSPostDto {
 
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
-export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
 export type BeregningsmetodeFlereAvdoedeDTO = PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
-export type BeregningsmetodeFlereAvdoedeData = PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey

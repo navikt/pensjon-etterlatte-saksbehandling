@@ -5,7 +5,19 @@ import {
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { BeregningsGrunnlagPostDto, BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
-import { BodyShort, Box, Button, Heading, HStack, Radio, ReadMore, Table, Textarea, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Radio,
+  ReadMore,
+  Table,
+  Tag,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { format, startOfDay, startOfMonth } from 'date-fns'
 import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
@@ -25,9 +37,15 @@ interface Props {
   behandling: IBehandlingReducer
   trygdetid: ITrygdetid
   redigerbar: boolean
+  erEnesteJuridiskeForelder: boolean
 }
 
-export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar }: Props) => {
+export const BeregningsMetodeRadForAvdoed = ({
+  behandling,
+  trygdetid,
+  redigerbar,
+  erEnesteJuridiskeForelder,
+}: Props) => {
   const dispatch = useAppDispatch()
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
@@ -71,7 +89,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
     return undefined
   }
 
-  function lagre(grunnlag: BeregningsGrunnlagPostDto, onSuccess?: (grunnlag: BeregningsGrunnlagPostDto) => void) {
+  const lagre = (grunnlag: BeregningsGrunnlagPostDto, onSuccess?: (grunnlag: BeregningsGrunnlagPostDto) => void) => {
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
@@ -85,23 +103,48 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
     )
   }
 
-  function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
+  const metodeForAvdoed = (
+    formdata: BeregningsmetodeForAvdoedForm
+  ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> => {
+    return {
+      fom: formdata.fom,
+      tom: formdata.tom,
+      data: formdata.data,
+    }
+  }
+
+  const dummyMetodeKunEnJuridisk = (formdata: BeregningsmetodeForAvdoedForm) => {
+    return erEnesteJuridiskeForelder
+      ? {
+          fom: formdata.fom,
+          tom: formdata.datoTilKunEnJuridiskForelder,
+          data: { beregningsMetode: { beregningsMetode: BeregningsMetode.NASJONAL }, avdoed: '' },
+        }
+      : null
+  }
+
+  const oppdaterBeregningsMetodeForAvdoed = (formdata: BeregningsmetodeForAvdoedForm) => {
+    const metoder = [metodeForAvdoed(formdata), dummyMetodeKunEnJuridisk(formdata)].filter((metode) => !!metode)
+    const identer = metoder.map((metode) => metode.data.avdoed)
+
+    const oppdaterteBeregningsmetoder = !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
+      ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
+          .filter((metode) => !identer.includes(metode.data.avdoed))
+          .concat(mapListeTilDto(metoder))
+      : mapListeTilDto(metoder)
+
     lagre({
       ...behandling?.beregningsGrunnlag,
-      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [], //TODO : unødvendig defaulting?
       institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
       beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },
-      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
-        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
-            .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
-            .concat(mapListeTilDto([nyMetode]))
-        : mapListeTilDto([nyMetode]),
+      beregningsMetodeFlereAvdoede: oppdaterteBeregningsmetoder,
     })
   }
 
-  function slettBeregningsMetodeForAvdoed() {
+  const slettBeregningsMetodeForAvdoed = () => {
     lagre(
       {
         ...behandling?.beregningsGrunnlag,
@@ -123,9 +166,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
   const navn = mapNavn(trygdetid.ident)
   const beregningsMetodeForAvdoed = finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
 
-  const { register, control, getValues, handleSubmit, reset } = useForm<
-    PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>
-  >({
+  const { register, control, getValues, handleSubmit, reset } = useForm<BeregningsmetodeForAvdoedForm>({
     defaultValues: beregningsMetodeForAvdoed
       ? {
           ...beregningsMetodeForAvdoed,
@@ -157,83 +198,86 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       key={trygdetid.ident}
       content={
         redigerbar ? (
-          <form onSubmit={handleSubmit(oppdaterBeregningsMetodeForAvdoed)}>
-            <VStack gap="4">
-              <ControlledRadioGruppe
-                name="data.beregningsMetode.beregningsMetode"
-                control={control}
-                legend="Trygdetid i beregning"
-                errorVedTomInput="Du må velge en metode"
-                radios={
-                  <>
-                    <Radio value={BeregningsMetode.NASJONAL}>Nasjonal beregning (folketrygdberegning)</Radio>
-                    <Radio value={BeregningsMetode.PRORATA}>
-                      Prorata (EØS/avtaleland, der rettighet er oppfylt ved sammenlegging)
-                    </Radio>
-                    <Radio value={BeregningsMetode.BEST}>
-                      Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter
-                      nasjonale regler)
-                    </Radio>
-                  </>
-                }
-              />
-              <Heading size="xsmall" level="4">
-                Gyldig for beregning
-              </Heading>
-              <BodyShort>
-                Disse datoene brukes til å regne ut satsen for barnepensjon ut ifra om det er en eller to forelder død.
-              </BodyShort>
-              <HStack gap="4">
-                <ControlledMaanedVelger
-                  name="fom"
-                  label="Fra og med"
-                  description="Måned etter dødsfall"
+          <>
+            <form onSubmit={handleSubmit(oppdaterBeregningsMetodeForAvdoed)}>
+              <VStack gap="4">
+                <ControlledRadioGruppe
+                  name="data.beregningsMetode.beregningsMetode"
                   control={control}
-                  required
-                  validate={validerFom}
+                  legend="Trygdetid i beregning"
+                  errorVedTomInput="Du må velge en metode"
+                  radios={
+                    <>
+                      <Radio value={BeregningsMetode.NASJONAL}>Nasjonal beregning (folketrygdberegning)</Radio>
+                      <Radio value={BeregningsMetode.PRORATA}>
+                        Prorata (EØS/avtaleland, der rettighet er oppfylt ved sammenlegging)
+                      </Radio>
+                      <Radio value={BeregningsMetode.BEST}>
+                        Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter
+                        nasjonale regler)
+                      </Radio>
+                    </>
+                  }
                 />
-                <VStack>
+                <Heading size="xsmall" level="4">
+                  Gyldig for beregning
+                </Heading>
+                <BodyShort>
+                  Disse datoene brukes til å regne ut satsen for barnepensjon ut ifra om det er en eller to forelder
+                  død.
+                </BodyShort>
+                <HStack gap="4">
                   <ControlledMaanedVelger
-                    name="tom"
-                    label="Til og med (valgfritt)"
-                    description="Siste måneden med foreldrerett"
+                    name="fom"
+                    label="Fra og med"
+                    description="Måned etter dødsfall"
                     control={control}
+                    required
+                    validate={validerFom}
                   />
-                  <ReadMore header="Når skal du oppgi til og med dato">
-                    <Box maxWidth="30rem">
-                      Beregningen gjelder for perioden der den avdøde regnes som forelder for barnet. Hvis barnet har
-                      blitt adoptert skal datoen “til og med” oppgis. Velg forelderen med dårligst trygdetid hvis det
-                      kun er én adoptivforelder.
-                    </Box>
-                  </ReadMore>
-                </VStack>
-              </HStack>
-              <Box width="15rem">
-                <Textarea {...register('data.beregningsMetode.begrunnelse')} label="Begrunnelse (valgfritt)" />
-              </Box>
-              <HStack gap="4">
-                <Button
-                  size="small"
-                  icon={<FloppydiskIcon aria-hidden />}
-                  loading={isPending(lagreBeregningsgrunnlagResult)}
-                >
-                  Lagre
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="small"
-                  icon={<XMarkIcon aria-hidden />}
-                  onClick={() => {
-                    reset()
-                    setRedigerModus(false)
-                  }}
-                >
-                  Avbryt
-                </Button>
-              </HStack>
-            </VStack>
-          </form>
+                  <VStack>
+                    <ControlledMaanedVelger
+                      name="tom"
+                      label="Til og med (valgfritt)"
+                      description="Siste måneden med foreldrerett"
+                      control={control}
+                    />
+                    <ReadMore header="Når skal du oppgi til og med dato">
+                      <Box maxWidth="30rem">
+                        Beregningen gjelder for perioden der den avdøde regnes som forelder for barnet. Hvis barnet har
+                        blitt adoptert skal datoen “til og med” oppgis. Velg forelderen med dårligst trygdetid hvis det
+                        kun er én adoptivforelder.
+                      </Box>
+                    </ReadMore>
+                  </VStack>
+                </HStack>
+                <Box width="15rem">
+                  <Textarea {...register('data.beregningsMetode.begrunnelse')} label="Begrunnelse (valgfritt)" />
+                </Box>
+                <HStack gap="4">
+                  <Button
+                    size="small"
+                    icon={<FloppydiskIcon aria-hidden />}
+                    loading={isPending(lagreBeregningsgrunnlagResult)}
+                  >
+                    Lagre
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="small"
+                    icon={<XMarkIcon aria-hidden />}
+                    onClick={() => {
+                      reset()
+                      setRedigerModus(false)
+                    }}
+                  >
+                    Avbryt
+                  </Button>
+                </HStack>
+              </VStack>
+            </form>
+          </>
         ) : (
           <>
             <Heading size="small" level="4">
@@ -244,7 +288,14 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
         )
       }
     >
-      <Table.DataCell>{navn}</Table.DataCell>
+      <Table.DataCell>
+        {navn}{' '}
+        {erEnesteJuridiskeForelder && (
+          <Tag variant="alt1" size="small">
+            Kun en juridisk
+          </Tag>
+        )}
+      </Table.DataCell>
       <Table.DataCell>
         {beregningsMetodeForAvdoed?.data.beregningsMetode.beregningsMetode
           ? formaterEnumTilLesbarString(beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode)
@@ -287,4 +338,11 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       </Table.DataCell>
     </Table.ExpandableRow>
   )
+}
+
+interface BeregningsmetodeForAvdoedForm {
+  fom: Date
+  tom?: Date
+  data: BeregningsmetodeForAvdoed
+  datoTilKunEnJuridiskForelder?: Date
 }

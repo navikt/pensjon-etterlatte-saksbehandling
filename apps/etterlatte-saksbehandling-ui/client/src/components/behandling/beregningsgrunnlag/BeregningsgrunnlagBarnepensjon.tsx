@@ -1,15 +1,15 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { behandlingErRedigerbar } from '../felles/utils'
+import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   oppdaterBehandlingsstatus,
-  oppdaterBeregningsGrunnlag,
   oppdaterBeregning,
+  oppdaterBeregningsGrunnlag,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -20,7 +20,7 @@ import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -131,6 +131,16 @@ const BeregningsgrunnlagBarnepensjon = () => {
       () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
     )
   }
+  const harKunEnJuridiskForelder = personopplysninger?.annenForelder?.vurdering == 'KUN_EN_REGISTRERT_JURIDISK_FORELDER'
+
+  const tidligsteAvdoede: IPdlPerson = requireNotNull(
+    personopplysninger?.avdoede
+      .map((it) => it.opplysning)
+      .reduce((previous, current) => {
+        return current.doedsdato!! < previous.doedsdato!! ? current : previous
+      }) || null,
+    'Mangler avdøde for beregningsgrunnlag'
+  )
 
   return (
     <>
@@ -142,40 +152,47 @@ const BeregningsgrunnlagBarnepensjon = () => {
             mapResult(hentTrygdetiderResult, {
               pending: <Spinner label="Henter trygdetider..." />,
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
-              success: (trygdetider) => (
-                <>
-                  {trygdetider.length > 1 && (
-                    <BeregningsgrunnlagFlereAvdoede redigerbar={redigerbar} trygdetider={trygdetider} />
-                  )}
-                  {trygdetider.length <= 1 && (
-                    <BeregningsMetodeBrukt
+              success: (trygdetider) => {
+                return (
+                  <>
+                    {(trygdetider.length > 1 || harKunEnJuridiskForelder) && (
+                      <BeregningsgrunnlagFlereAvdoede
+                        redigerbar={redigerbar}
+                        trygdetider={trygdetider}
+                        tidligsteAvdoede={tidligsteAvdoede}
+                        kunEnJuridiskForelder={harKunEnJuridiskForelder}
+                      />
+                    )}
+                    {trygdetider.length <= 1 && (
+                      <BeregningsMetodeBrukt
+                        redigerbar={redigerbar}
+                        oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
+                        eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
+                        lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                      />
+                    )}
+
+                    <Box maxWidth="70rem">
+                      <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
+                    </Box>
+
+                    <InstitusjonsoppholdBeregningsgrunnlag
                       redigerbar={redigerbar}
-                      oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
-                      eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
-                      lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                    />
-                  )}
-
-                  <Box maxWidth="70rem">
-                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
-                  </Box>
-
-                  <InstitusjonsoppholdBeregningsgrunnlag
-                    redigerbar={redigerbar}
-                    behandling={behandling}
-                    sakType={SakType.BARNEPENSJON}
-                    beregningsgrunnlag={behandling.beregningsGrunnlag}
-                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
-                  />
-                  {skalViseSoeskenjustering && (
-                    <Soeskenjustering
                       behandling={behandling}
-                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
-                      setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                      sakType={SakType.BARNEPENSJON}
+                      beregningsgrunnlag={behandling.beregningsGrunnlag}
+                      institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
                     />
-                  )}
-                </>
-              ),
+                    {skalViseSoeskenjustering && (
+                      <Soeskenjustering
+                        behandling={behandling}
+                        onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
+                        setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                      />
+                    )}
+                  </>
+                )
+              },
             }),
         })}
       </>

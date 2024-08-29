@@ -172,6 +172,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         // NO-OP
     }
@@ -179,6 +180,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         // NO-OP
     }

@@ -18,6 +18,7 @@ interface GrunnlagService {
     suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun leggInnNyttGrunnlag(
@@ -41,6 +42,7 @@ interface GrunnlagService {
     suspend fun leggTilNyeOpplysningerBareSak(
         sakId: SakId,
         opplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun laasTilGrunnlagIBehandling(
@@ -60,9 +62,10 @@ class GrunnlagServiceImpl(
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         val grunnlagsbehov = grunnlagsbehovSak(sak, persongalleri)
-        grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov)
+        grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov, brukerTokenInfo)
     }
 
     override suspend fun leggInnNyttGrunnlag(
@@ -94,7 +97,8 @@ class GrunnlagServiceImpl(
     override suspend fun leggTilNyeOpplysningerBareSak(
         sakId: SakId,
         opplysninger: NyeSaksopplysninger,
-    ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger, brukerTokenInfo)
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri =
         grunnlagKlient

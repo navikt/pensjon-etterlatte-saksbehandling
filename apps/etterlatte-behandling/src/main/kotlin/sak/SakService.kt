@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -194,7 +195,7 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident)) }
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
@@ -202,6 +203,7 @@ class SakServiceImpl(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.opprettGrunnlag,
             )
         }
         return sak

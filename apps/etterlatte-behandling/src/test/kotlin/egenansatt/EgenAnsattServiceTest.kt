@@ -83,8 +83,8 @@ internal class EgenAnsattServiceTest(
         val norg2Klient = mockk<Norg2Klient>()
         val grunnlagservice =
             mockk<GrunnlagService> {
-                coEvery { leggInnNyttGrunnlagSak(any(), any()) } just runs
-                coEvery { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+                coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
+                coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
             }
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()

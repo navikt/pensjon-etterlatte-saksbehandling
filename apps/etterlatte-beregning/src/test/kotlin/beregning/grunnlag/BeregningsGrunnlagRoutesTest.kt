@@ -107,7 +107,7 @@ internal class BeregningsGrunnlagRoutesTest {
             }
 
             val response =
-                client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -174,7 +174,7 @@ internal class BeregningsGrunnlagRoutesTest {
             }
 
             val response =
-                client.get("/api/beregning/beregningsgrunnlag/$idRevurdering/barnepensjon") {
+                client.get("/api/beregning/beregningsgrunnlag/$idRevurdering") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -210,7 +210,7 @@ internal class BeregningsGrunnlagRoutesTest {
             }
 
             val response =
-                client.get("/api/beregning/beregningsgrunnlag/$id/barnepensjon") {
+                client.get("/api/beregning/beregningsgrunnlag/$id") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -231,7 +231,7 @@ internal class BeregningsGrunnlagRoutesTest {
             }
 
             client
-                .get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                .get("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
@@ -251,7 +251,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 }
 
             client
-                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(
@@ -270,7 +270,7 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal opprettere`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBeregningsGrunnlag(any()) } returns null
+        every { repository.finnBeregningsGrunnlag(any()) } returns mockk(relaxed = true)
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
@@ -310,7 +310,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 }
 
             client
-                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(
@@ -320,7 +320,7 @@ internal class BeregningsGrunnlagRoutesTest {
                         ),
                     )
                 }.let {
-                    it.status shouldBe HttpStatusCode.NoContent
+                    it.status shouldBe HttpStatusCode.OK
                 }
         }
     }
@@ -380,7 +380,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     ),
                 )
             client
-                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(

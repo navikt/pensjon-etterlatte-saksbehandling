@@ -47,7 +47,7 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
+    ): BeregningsGrunnlag? =
         when {
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -112,9 +112,11 @@ class BeregningsGrunnlagService(
                                     ?: emptyList(),
                         ),
                     )
+
+                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 
-            else -> false
+            else -> null
         }
 
     private suspend fun validerSoeskenMedIBeregning(

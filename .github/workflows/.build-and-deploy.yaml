@@ -5,19 +5,16 @@ on:
     outputs:
       image:
         description: "Docker image url"
-        value: ${{ jobs.build-and-publish.outputs.image }}
+        value: ${{ jobs.publish.outputs.image }}
 
 jobs:
-  build-and-publish:
-    name: Build & publish
+  build:
+    name: Build
     runs-on: ubuntu-latest-8-cores
     timeout-minutes: 10
     permissions:
       contents: write
       id-token: write
-    outputs:
-      image: ${{ steps.docker-build-push.outputs.image }}
-      digest: ${{ steps.docker-build-push.outputs.digest }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,7 +34,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :apps:${{ github.workflow }}:build --configuration-cache
-
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest-8-cores
+    needs: build
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+      digest: ${{ steps.docker-build-push.outputs.digest }}
+    steps:
       - name: Build and publish docker image
         uses: nais/docker-build-push@v0
         id: docker-build-push
@@ -55,7 +63,7 @@ jobs:
   license-check:
     name: License check
     runs-on: ubuntu-latest-8-cores
-    needs: build-and-publish
+    needs: build
     timeout-minutes: 10
     permissions:
       contents: read
@@ -77,7 +85,7 @@ jobs:
   salsa:
     name: Generate SBOM, attest and sign image
     runs-on: ubuntu-latest
-    needs: build-and-publish
+    needs: publish
     permissions:
       id-token: write
     steps:
@@ -90,9 +98,9 @@ jobs:
           team: etterlatte
       - name: Lag image-referanse med digest
         run: |
-          IMAGE_WITH_TAG="${{ needs.build-and-publish.outputs.image }}"
+          IMAGE_WITH_TAG="${{ needs.publish.outputs.image }}"
           IMAGE="${IMAGE_WITH_TAG%%:*}"
-          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
+          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.publish.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
         uses: nais/attest-sign@v1
@@ -101,7 +109,7 @@ jobs:
   deploy-to-dev-gcp:
     name: dev-gcp
     runs-on: ubuntu-latest
-    needs: build-and-publish
+    needs: publish
     permissions:
       contents: read
       id-token: write
@@ -112,12 +120,12 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
-          VAR: image=${{ needs.build-and-publish.outputs.image }}
+          VAR: image=${{ needs.publish.outputs.image }}
 
   deploy-to-prod-gcp:
     name: prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: [build-and-publish, license-check, deploy-to-dev-gcp]
+    needs: [publish, license-check, deploy-to-dev-gcp]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -134,4 +142,4 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/prod.yaml
-          VAR: image=${{ needs.build-and-publish.outputs.image }}
+          VAR: image=${{ needs.publish.outputs.image }}

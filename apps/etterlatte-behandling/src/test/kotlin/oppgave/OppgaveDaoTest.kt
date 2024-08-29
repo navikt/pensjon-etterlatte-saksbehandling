@@ -262,6 +262,16 @@ internal class OppgaveDaoTest(
     }
 
     @Test
+    fun `kan endre enhet på oppgave`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enheter.PORSGRUNN.enhetNr)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(Enheter.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
+    }
+
+    @Test
     fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)

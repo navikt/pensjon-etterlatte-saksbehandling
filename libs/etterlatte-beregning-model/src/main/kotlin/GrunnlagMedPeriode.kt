@@ -55,6 +55,13 @@ fun <T> List<GrunnlagMedPeriode<T>>.kombinerOverlappendePerioder(): List<Grunnla
     }
 }
 
+class IngenGrunnlagEtterVirkException(
+    virkFom: LocalDate,
+) : UgyldigForespoerselException(
+        code = "BEREGNINGSGRUNNLAG_MANGLER_ETTER_VIRK",
+        detail = "Har ikke grunnlag etter virk: $virkFom",
+    )
+
 class UgyldigPeriodeForGrunnlag(
     fom: LocalDate,
     tom: LocalDate?,
@@ -109,11 +116,11 @@ object PeriodisertBeregningGrunnlag {
 
     fun <T> lagKomplettPeriodisertGrunnlag(
         perioder: List<GrunnlagMedPeriode<T>>,
-        fom: LocalDate,
+        virkFom: LocalDate,
         tom: LocalDate?,
     ): PeriodisertGrunnlag<T> {
         val grunnlag = Grunnlag(opplysninger = perioder)
-        val harGrunnlagForHelePerioden = harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)
+        val harGrunnlagForHelePerioden = harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, virkFom, tom)
         if (!harGrunnlagForHelePerioden.harGrunnlagForHelePerioden()) {
             throw PeriodiseringAvGrunnlagFeil.PerioderErIkkeKomplett(harGrunnlagForHelePerioden)
         }
@@ -152,14 +159,20 @@ object PeriodisertBeregningGrunnlag {
 
     private fun harGrunnlagForHelePerioden(
         sortertePerioder: List<GrunnlagMedPeriode<*>>,
-        fom: LocalDate,
+        virkFom: LocalDate,
         tom: LocalDate?,
     ): GrunnlagForHelePerioden {
+        val grunnlagsperioderEtterVirkningstidspunkt =
+            try {
+                sortertePerioder.takeWhile { it.fom <= virkFom }.last()
+            } catch (e: NoSuchElementException) {
+                throw IngenGrunnlagEtterVirkException(virkFom)
+            }
         val perioder =
-            listOf(sortertePerioder.takeWhile { it.fom <= fom }.last()) + sortertePerioder.dropWhile { it.fom <= fom }
+            listOf(grunnlagsperioderEtterVirkningstidspunkt) + sortertePerioder.dropWhile { it.fom <= virkFom }
         val ingenHullInnad = ingenHullInnadIPerioder(perioder)
         val hoeyesteTom = perioder.last().tom
-        val harGrunnlagIStarten = perioder.first().fom <= fom
+        val harGrunnlagIStarten = perioder.first().fom <= virkFom
 
         return GrunnlagForHelePerioden(ingenHullInnad, harGrunnlagIStarten, VarerUtPerioden(tom, hoeyesteTom))
     }

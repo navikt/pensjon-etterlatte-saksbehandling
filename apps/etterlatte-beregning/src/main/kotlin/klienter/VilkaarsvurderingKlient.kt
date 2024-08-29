@@ -27,7 +27,7 @@ class VilkaarsvurderingKlientException(
     override val cause: Throwable,
 ) : Exception(message, cause)
 
-class VilkaarsvurderingKlientImpl(
+class BehandlingVilkaarsvurderingKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : VilkaarsvurderingKlient {
@@ -35,8 +35,8 @@ class VilkaarsvurderingKlientImpl(
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("vilkaarsvurdering.client.id")
-    private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
 
     override suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,

@@ -2,6 +2,7 @@ package no.nav.etterlatte.testdata.automatisk
 
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -16,7 +17,7 @@ class VedtaksvurderingService(
     private val clientId: String,
 ) {
     suspend fun fattVedtak(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): VedtakOgRapid =
@@ -33,7 +34,7 @@ class VedtaksvurderingService(
         }
 
     suspend fun attesterOgIverksettVedtak(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): VedtakOgRapid =

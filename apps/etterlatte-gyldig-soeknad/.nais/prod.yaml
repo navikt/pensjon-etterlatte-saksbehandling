@@ -57,7 +57,7 @@ spec:
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
     - name: PDFGEN_URL
-      value: http://ey-pdfgen/api/v1/genpdf/eypdfgen
+      value: http://ey-pdfgen/api/v1/genpdf
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

@@ -3,8 +3,6 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,26 +18,14 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshendelse
 
-enum class DoedshendelseFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
-    ;
-
-    override fun key(): String = key
-}
-
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun settHendelseTilFerdigOgOppdaterBrevId(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) =
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
-
-    fun kanSendeBrevOgOppretteOppgave() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")

@@ -74,8 +74,6 @@ spec:
   env:
     - name: BREV_API_URL
       value: http://etterlatte-brev-api
-    - name: VILKAARSVURDERING_API_URL
-      value: http://etterlatte-vilkaarsvurdering
     - name: BEHANDLING_API_URL
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
@@ -92,8 +90,6 @@ spec:
       value: http://etterlatte-utbetaling
     - name: BREV_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
-    - name: VILKAARSVURDERING_API_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
     - name: BEHANDLING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: VEDTAK_API_SCOPE
@@ -138,7 +134,6 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
     inbound:

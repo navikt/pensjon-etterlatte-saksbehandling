@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.tilbakekreving.klienter.TilbakekrevingskomponentenKlient
@@ -12,6 +13,6 @@ class TilbakekrevingService(
 
     fun hentKravgrunnlag(
         kravgrunnlagId: Long,
-        sakId: Long,
+        sakId: SakId,
     ): Kravgrunnlag = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, kravgrunnlagId)
 }

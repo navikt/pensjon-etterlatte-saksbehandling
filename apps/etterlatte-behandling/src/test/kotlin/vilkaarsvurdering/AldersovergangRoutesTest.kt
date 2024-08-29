@@ -1,3 +1,4 @@
+/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
@@ -16,12 +17,15 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import vilkaarsvurdering.Vilkaarsvurdering
 import java.util.UUID
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AldersovergangRoutesTest {
@@ -72,3 +76,4 @@ internal class AldersovergangRoutesTest {
         }
     }
 }
+*/

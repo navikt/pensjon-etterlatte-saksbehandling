@@ -2,6 +2,7 @@ package no.nav.etterlatte.testdata.automatisk
 
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -14,7 +15,7 @@ class BrevService(
     private val clientId: String,
 ) {
     suspend fun opprettOgDistribuerVedtaksbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) {
@@ -25,7 +26,7 @@ class BrevService(
 
     private suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Brev =
         klient

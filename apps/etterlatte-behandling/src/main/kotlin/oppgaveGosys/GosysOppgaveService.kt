@@ -3,7 +3,6 @@ package no.nav.etterlatte.oppgaveGosys
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -44,7 +44,7 @@ interface GosysOppgaveService {
 
     suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern
 
@@ -196,7 +196,7 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern {
         logger.info("Starter flytting av gosys-oppgave (id=$oppgaveId) til Gjenny")
@@ -267,7 +267,8 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave =
         gosysOppgaveKlient
-            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo).run { inTransaction { tilGosysOppgave() } }
+            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
+            .run { inTransaction { tilGosysOppgave() } }
 
     override suspend fun feilregistrer(
         oppgaveId: String,

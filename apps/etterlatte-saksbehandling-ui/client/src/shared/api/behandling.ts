@@ -105,20 +105,20 @@ export const lagreViderefoertOpphoer = async ({
   skalViderefoere,
   behandlingId,
   begrunnelse,
-  vilkaar,
+  vilkaarType,
   kravdato,
   opphoerstidspunkt,
 }: {
   skalViderefoere: JaNei | undefined
   behandlingId: string
   begrunnelse: string
-  vilkaar: string | undefined
+  vilkaarType: string | undefined
   kravdato: string | null | undefined
   opphoerstidspunkt: Date | null
 }): Promise<ApiResponse<ViderefoertOpphoer>> => {
   return apiClient.post(`/behandling/${behandlingId}/viderefoert-opphoer`, {
     skalViderefoere: skalViderefoere,
-    vilkaar: vilkaar,
+    vilkaarType: vilkaarType,
     begrunnelse: begrunnelse,
     kravdato: kravdato,
     dato: opphoerstidspunkt,

@@ -30,6 +30,12 @@ class ManglerVirkningstidspunktBP :
         detail = "Mangler virkningstidspunkt for barnepensjon.",
     )
 
+class ManglerForrigeGrunnlag :
+    UgyldigForespoerselException(
+        code = "MANGLER_FORRIGE_GRUNNLAG",
+        detail = "Mangler forrige grunnlag for revurdering",
+    )
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
@@ -174,14 +180,14 @@ class BeregningsGrunnlagService(
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
-            )
+            ) ?: throw ManglerForrigeGrunnlag()
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk =
             if (revurdering.sakType == SakType.BARNEPENSJON) {
                 erGrunnlagLiktFoerEnDato(
                     beregningsGrunnlag.soeskenMedIBeregning,
-                    forrigeGrunnlag!!.soeskenMedIBeregning,
+                    forrigeGrunnlag.soeskenMedIBeregning,
                     revurderingVirk,
                 )
             } else {
@@ -191,7 +197,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+                forrigeGrunnlag.institusjonsoppholdBeregningsgrunnlag,
                 revurderingVirk,
             )
 

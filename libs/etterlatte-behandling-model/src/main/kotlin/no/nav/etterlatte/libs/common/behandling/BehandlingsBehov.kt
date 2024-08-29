@@ -2,9 +2,10 @@ package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.sak.SakId
 
 data class BehandlingsBehov(
-    val sakId: Long,
+    val sakId: SakId,
     val persongalleri: Persongalleri,
     val mottattDato: String,
 )

@@ -152,47 +152,45 @@ const BeregningsgrunnlagBarnepensjon = () => {
             mapResult(hentTrygdetiderResult, {
               pending: <Spinner label="Henter trygdetider..." />,
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
-              success: (trygdetider) => {
-                return (
-                  <>
-                    {(trygdetider.length > 1 || harKunEnJuridiskForelder) && (
-                      <BeregningsgrunnlagFlereAvdoede
-                        redigerbar={redigerbar}
-                        trygdetider={trygdetider}
-                        tidligsteAvdoede={tidligsteAvdoede}
-                        kunEnJuridiskForelder={harKunEnJuridiskForelder}
-                      />
-                    )}
-                    {trygdetider.length <= 1 && (
-                      <BeregningsMetodeBrukt
-                        redigerbar={redigerbar}
-                        oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
-                        eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
-                        lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                      />
-                    )}
-
-                    <Box maxWidth="70rem">
-                      <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
-                    </Box>
-
-                    <InstitusjonsoppholdBeregningsgrunnlag
+              success: (trygdetider) => (
+                <>
+                  {(trygdetider.length > 1 || harKunEnJuridiskForelder) && (
+                    <BeregningsgrunnlagFlereAvdoede
                       redigerbar={redigerbar}
-                      behandling={behandling}
-                      sakType={SakType.BARNEPENSJON}
-                      beregningsgrunnlag={behandling.beregningsGrunnlag}
-                      institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+                      trygdetider={trygdetider}
+                      tidligsteAvdoede={tidligsteAvdoede}
+                      kunEnJuridiskForelder={harKunEnJuridiskForelder}
                     />
-                    {skalViseSoeskenjustering && (
-                      <Soeskenjustering
-                        behandling={behandling}
-                        onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
-                        setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
-                      />
-                    )}
-                  </>
-                )
-              },
+                  )}
+                  {trygdetider.length <= 1 && (
+                    <BeregningsMetodeBrukt
+                      redigerbar={redigerbar}
+                      oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
+                      eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
+                      lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                    />
+                  )}
+
+                  <Box maxWidth="70rem">
+                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
+                  </Box>
+
+                  <InstitusjonsoppholdBeregningsgrunnlag
+                    redigerbar={redigerbar}
+                    behandling={behandling}
+                    sakType={SakType.BARNEPENSJON}
+                    beregningsgrunnlag={behandling.beregningsGrunnlag}
+                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+                  />
+                  {skalViseSoeskenjustering && (
+                    <Soeskenjustering
+                      behandling={behandling}
+                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
+                      setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                    />
+                  )}
+                </>
+              ),
             }),
         })}
       </>

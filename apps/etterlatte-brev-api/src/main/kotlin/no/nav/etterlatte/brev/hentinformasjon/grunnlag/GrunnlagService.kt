@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.hentVerger
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -29,7 +30,7 @@ class GrunnlagService(
 ) {
     suspend fun hentGrunnlag(
         vedtakType: VedtakType?,
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ) = when (vedtakType) {
@@ -53,7 +54,7 @@ class GrunnlagService(
     )
 
     suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
     ) = klient.hentGrunnlagForSak(sakId, bruker)
 

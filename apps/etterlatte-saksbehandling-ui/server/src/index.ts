@@ -62,12 +62,6 @@ app.use(authenticateUser) // Alle ruter etter denne er authenticated
 app.use('/api/github', githubRouter)
 
 app.use(
-  '/api/vilkaarsvurdering',
-  tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
-  proxy(ApiConfig.vilkaarsvurdering.url)
-)
-
-app.use(
   [
     '/api/behandling',
     '/api/personer',
@@ -85,6 +79,7 @@ app.use(
     '/api/bosattutland',
     '/api/kodeverk',
     '/api/krr',
+    '/api/vilkaarsvurdering',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

@@ -240,7 +240,7 @@ internal fun Route.behandlingRoutes(
                             behandlingId = behandlingId,
                             dato = body.dato,
                             begrunnelse = body.begrunnelse,
-                            vilkaar = body.vilkaar,
+                            vilkaar = body.vilkaarType,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
                             aktiv = true,
@@ -402,7 +402,7 @@ data class ViderefoertOpphoerRequest(
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: VilkaarType?,
+    val vilkaarType: VilkaarType?,
 ) {
     val dato: YearMonth? = _dato?.tilYearMonth()
 }

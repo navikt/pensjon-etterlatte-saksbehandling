@@ -492,13 +492,12 @@ internal class ApplicationContext(
                     pesysKlient = pesysKlient,
                     behandlingService = behandlingService,
                 ),
-            featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
-            pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
+            pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
 

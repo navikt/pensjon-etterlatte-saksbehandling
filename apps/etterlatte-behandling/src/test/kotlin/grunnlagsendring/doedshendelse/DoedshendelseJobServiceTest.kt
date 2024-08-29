@@ -93,7 +93,6 @@ class DoedshendelseJobServiceTest {
         DoedshendelseJobService(
             doedshendelseDao = dao,
             doedshendelseKontrollpunktService = kontrollpunktService,
-            featureToggleService = toggle,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = femDagerGammel,

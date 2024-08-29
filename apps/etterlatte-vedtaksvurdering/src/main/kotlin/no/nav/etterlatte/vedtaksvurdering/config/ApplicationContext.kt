@@ -109,8 +109,8 @@ class ApplicationContext {
         MetrikkerJob(
             VedtakMetrics(VedtakMetrikkerDao.using(dataSource)),
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.SECONDS).toMillis(),
-            periode = Duration.of(10, ChronoUnit.SECONDS),
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }

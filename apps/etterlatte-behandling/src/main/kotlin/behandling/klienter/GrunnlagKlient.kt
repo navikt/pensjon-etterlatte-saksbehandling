@@ -320,7 +320,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },

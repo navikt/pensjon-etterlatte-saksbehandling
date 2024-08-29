@@ -307,7 +307,7 @@ class GrunnlagKlientImpl(
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(

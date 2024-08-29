@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class VilkaarsvurderingService(
-    private val klient: VilkaarsvurderingKlient,
+    private val klient: BehandlingVilkaarsvurderingKlient,
 ) {
     suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,

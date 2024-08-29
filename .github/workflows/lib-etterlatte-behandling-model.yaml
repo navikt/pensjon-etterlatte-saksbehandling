@@ -8,6 +8,7 @@ on:
     paths:
       - libs/etterlatte-behandling-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

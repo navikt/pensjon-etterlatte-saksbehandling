@@ -84,7 +84,7 @@ class SjekklisteIntegrationTest(
 
         opprettet.id shouldBe behandling.id
         opprettet.versjon shouldBe 1
-        opprettet.sjekklisteItems.map { it.beskrivelse } shouldContainExactlyInAnyOrder defaultFoerstegangsbehandlingItemsOms
+        opprettet.sjekklisteItems.map { it.beskrivelse } shouldContainExactlyInAnyOrder sjekklisteItemsFoerstegangsbehandlingOMS
 
         opprettet.sjekklisteItems shouldHaveAtLeastSize 12
         opprettet.sjekklisteItems.forEach {

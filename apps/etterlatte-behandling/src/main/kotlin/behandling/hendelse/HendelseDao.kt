@@ -6,6 +6,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -70,7 +71,7 @@ class HendelseDao(
 
     fun behandlingHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         saksbehandler: String,
         status: BehandlingStatus,
     ) = lagreHendelse(
@@ -89,7 +90,7 @@ class HendelseDao(
 
     fun klageHendelse(
         klageId: UUID,
-        sakId: Long,
+        sakId: SakId,
         hendelse: KlageHendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -111,7 +112,7 @@ class HendelseDao(
 
     fun generellBehandlingHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         hendelse: GenerellBehandlingHendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -133,7 +134,7 @@ class HendelseDao(
 
     fun tilbakekrevingHendelse(
         tilbakekrevingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         vedtakId: Long?,
         hendelse: TilbakekrevingHendelseType,
         inntruffet: Tidspunkt,
@@ -156,7 +157,7 @@ class HendelseDao(
 
     fun vedtakHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         vedtakId: Long,
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
@@ -179,7 +180,7 @@ class HendelseDao(
 
     fun opppdatertGrunnlagHendelse(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         saksbehandler: String?,
     ) = lagreHendelse(
         UlagretHendelse(
@@ -195,7 +196,7 @@ class HendelseDao(
         ),
     )
 
-    fun hentHendelserISak(sakId: Long): List<LagretHendelse> =
+    fun hentHendelserISak(sakId: SakId): List<LagretHendelse> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

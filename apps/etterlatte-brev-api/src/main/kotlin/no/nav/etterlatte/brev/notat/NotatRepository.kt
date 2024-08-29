@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -28,7 +29,7 @@ class NotatRepository(
             )
         }!!
 
-    fun hentForSak(sakId: Long): List<Notat> =
+    fun hentForSak(sakId: SakId): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
                 queryOf(

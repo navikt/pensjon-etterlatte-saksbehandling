@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -22,7 +23,7 @@ import java.util.UUID
 
 data class OpprettVedtak(
     val soeker: Folkeregisteridentifikator,
-    val sakId: Long,
+    val sakId: SakId,
     val sakType: SakType,
     val behandlingId: UUID,
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -33,7 +34,7 @@ data class OpprettVedtak(
 data class Vedtak(
     val id: Long,
     val soeker: Folkeregisteridentifikator,
-    val sakId: Long,
+    val sakId: SakId,
     val sakType: SakType,
     /** kan være ID-en til en behandling, klage eller tilbakekreving */
     val behandlingId: UUID,

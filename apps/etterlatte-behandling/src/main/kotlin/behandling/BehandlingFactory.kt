@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -36,6 +35,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -44,6 +44,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -59,7 +60,7 @@ class BehandlingFactory(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -168,7 +169,7 @@ class BehandlingFactory(
     }
 
     fun opprettBehandling(
-        sakId: Long,
+        sakId: SakId,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
@@ -233,7 +234,7 @@ class BehandlingFactory(
     }
 
     fun opprettOmgjoeringAvslag(
-        sakId: Long,
+        sakId: SakId,
         saksbehandler: Saksbehandler,
         skalKopiere: Boolean,
     ): Behandling {
@@ -301,8 +302,9 @@ class BehandlingFactory(
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
                 // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-                vilkaarsvurderingKlient.kopierVilkaarsvurdering(
-                    kopierTilBehandling = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
                     brukerTokenInfo = saksbehandler,
                 )
@@ -343,7 +345,7 @@ class BehandlingFactory(
         }
     }
 
-    internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
+    internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.hentBehandlingerForSak(sak.id)
@@ -422,7 +424,7 @@ sealed class AvslagOmgjoering {
         )
 
     class FoerstegangsbehandlingFeilStatus(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ) : UgyldigForespoerselException(
             "FOERSTEGANGSBEHANDLING_UGYLDIG_STATUS",

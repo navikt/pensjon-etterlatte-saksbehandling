@@ -3,12 +3,13 @@ package no.nav.etterlatte.institusjonsopphold
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 
 data class InstitusjonsoppholdService(
     private val institusjonsoppholdDao: InstitusjonsoppholdDao,
 ) {
     fun leggInnInstitusjonsoppholdBegrunnelse(
-        sakId: Long,
+        sakId: SakId,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
         institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse,
     ) {

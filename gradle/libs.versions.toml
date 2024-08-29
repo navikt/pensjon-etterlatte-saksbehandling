@@ -61,7 +61,7 @@ ktor2-serverresources = { module = "io.ktor:ktor-server-resources", version.ref 
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 ktor2-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.08.23-15.19.ce97af4c83c8" }
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.08.27-09.45.a87ec0a08b8f" }
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.13" }

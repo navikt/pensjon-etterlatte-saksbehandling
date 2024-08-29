@@ -106,7 +106,7 @@ class OpphoerIntegrationTest : BehandlingIntegrationTest() {
                             _dato = opphoersdato.toString(),
                             skalViderefoere = JaNei.JA,
                             begrunnelse = "Lorem",
-                            vilkaar = VilkaarType.BP_FORMAAL,
+                            vilkaarType = VilkaarType.BP_FORMAAL,
                         ),
                     )
                 }.let {

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -28,7 +29,7 @@ private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.Reg
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: SakId = 1,
     behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
@@ -51,7 +52,7 @@ fun behandling(
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: SakId = 1,
     ident: String =
         GrunnlagTestData()
             .avdoede

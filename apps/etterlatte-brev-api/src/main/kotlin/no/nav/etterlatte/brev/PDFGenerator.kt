@@ -18,7 +18,9 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -30,6 +32,7 @@ class PDFGenerator(
     private val brevbakerService: BrevbakerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
 
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
@@ -41,6 +44,7 @@ class PDFGenerator(
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
         if (!brev.mottaker.erGyldig()) {
+            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
         }
 

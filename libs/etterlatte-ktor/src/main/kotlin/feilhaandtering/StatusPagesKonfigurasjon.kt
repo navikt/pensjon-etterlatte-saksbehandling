@@ -135,7 +135,7 @@ class StatusPagesKonfigurasjon(
             )
         } else {
             this.error(
-                internfeil.cause?.message ?: "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
+                internfeil.message ?: internfeil.cause?.message ?: "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
                 internfeil.cause ?: internfeil,
             )
         }

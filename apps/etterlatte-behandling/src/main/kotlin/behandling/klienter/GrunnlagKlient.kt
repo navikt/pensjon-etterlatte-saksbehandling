@@ -339,7 +339,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/grunnlag/sak/$sakId/nye-opplysninger",
+                        url = "$resourceApiUrl/grunnlag/sak/$sakId/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
                 brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,

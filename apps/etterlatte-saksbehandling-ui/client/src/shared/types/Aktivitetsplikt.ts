@@ -1,4 +1,5 @@
-import { KildeSaksbehandler } from '~shared/types/kilde'
+import {KildeSaksbehandler} from '~shared/types/kilde'
+import {JaNei} from '~shared/types/ISvar'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string
@@ -108,13 +109,34 @@ export interface IOpprettAktivitetspliktAktivitetsgrad {
   id: string | undefined
   aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
+  tom?: string
   beskrivelse: string
 }
 
 export interface IOpprettAktivitetspliktUnntak {
   id: string | undefined
   unntak: AktivitetspliktUnntakType
-  fom?: string
+  fom: string
   tom?: string
   beskrivelse: string
+}
+
+export interface AktivitetspliktVurderingValues {
+  aktivitetsplikt: JaNei | null
+  aktivitetsgrad: AktivitetspliktVurderingType | ''
+  unntak: JaNei | null
+  midlertidigUnntak: AktivitetspliktUnntakType | ''
+  fom?: Date | null
+  tom?: Date | null
+  beskrivelse: string
+}
+
+export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
+  aktivitetsplikt: null,
+  aktivitetsgrad: '',
+  unntak: null,
+  midlertidigUnntak: '',
+  fom: undefined,
+  tom: undefined,
+  beskrivelse: '',
 }

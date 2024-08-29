@@ -1,17 +1,17 @@
-import express, { Request, Response } from 'express'
+import express, {Request, Response} from 'express'
 import path from 'path'
-import { ApiConfig, appConf, ClientConfig } from './config/config'
-import { authenticateUser } from './middleware/auth'
-import { logger } from './monitoring/logger'
-import { tokenMiddleware } from './middleware/getOboToken'
-import { proxy } from './middleware/proxy'
-import { loggerRouter } from './routers/loggerRouter'
+import {ApiConfig, appConf, ClientConfig} from './config/config'
+import {authenticateUser} from './middleware/auth'
+import {logger} from './monitoring/logger'
+import {tokenMiddleware} from './middleware/getOboToken'
+import {proxy} from './middleware/proxy'
+import {loggerRouter} from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { githubRouter } from './routers/githubRouter'
-import { unleashRouter } from './routers/unleashRouter'
-import { requestLoggerMiddleware } from './middleware/logging'
-import { createProxyMiddleware } from 'http-proxy-middleware'
-import { selftestRouter } from './routers/selftestRouter'
+import {githubRouter} from './routers/githubRouter'
+import {unleashRouter} from './routers/unleashRouter'
+import {requestLoggerMiddleware} from './middleware/logging'
+import {createProxyMiddleware} from 'http-proxy-middleware'
+import {selftestRouter} from './routers/selftestRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -62,12 +62,6 @@ app.use(authenticateUser) // Alle ruter etter denne er authenticated
 app.use('/api/github', githubRouter)
 
 app.use(
-  '/api/vilkaarsvurdering',
-  tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
-  proxy(ApiConfig.vilkaarsvurdering.url)
-)
-
-app.use(
   [
     '/api/behandling',
     '/api/personer',
@@ -85,6 +79,7 @@ app.use(
     '/api/bosattutland',
     '/api/kodeverk',
     '/api/krr',
+    '/api/vilkaarsvurdering',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

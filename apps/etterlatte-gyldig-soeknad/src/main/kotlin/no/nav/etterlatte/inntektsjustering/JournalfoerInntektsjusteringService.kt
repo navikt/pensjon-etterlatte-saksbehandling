@@ -16,9 +16,11 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
-import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
@@ -59,7 +61,7 @@ class JournalfoerInntektsjusteringService(
 
     private fun opprettDokument(
         tittel: String,
-        sakId: Long,
+        sakId: SakId,
         inntektsjustering: Inntektsjustering,
     ): JournalpostDokument {
         try {
@@ -82,7 +84,7 @@ class JournalfoerInntektsjusteringService(
     ): String = "etterlatte:${sakType.name.lowercase()}:inntektsjustering:$id"
 
     private fun opprettArkivPdf(
-        sakId: Long,
+        sakId: SakId,
         inntektsjustering: Inntektsjustering,
     ): DokumentVariant.ArkivPDF {
         logger.info("Oppretter arkiv PDF for inntektsjustering med id ${inntektsjustering.id}")
@@ -98,8 +100,8 @@ class JournalfoerInntektsjusteringService(
                             arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                             naeringsinntekt = inntektsjustering.naeringsinntekt,
                             arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
-                            naeringsinntektUtland = inntektsjustering.naeringsinntekt,
-                            tidspunkt = inntektsjustering.tidspunkt,
+                            naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
+                            tidspunkt = inntektsjustering.formatertTidspunkt(),
                         ).toJsonNode(),
                     template = "inntektsjustering_nytt_aar_v1",
                 )
@@ -124,5 +126,12 @@ data class ArkiverInntektsjustering(
     val naeringsinntekt: Int,
     val arbeidsinntektUtland: Int,
     val naeringsinntektUtland: Int,
-    val tidspunkt: Instant,
+    val tidspunkt: String,
 )
+
+fun Inntektsjustering.formatertTidspunkt(): String {
+    fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"
+    return with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
+        "${t(dayOfMonth)}.${t(monthValue)}.$year ${t(hour)}:${t(minute)}:${t(second)}"
+    }
+}

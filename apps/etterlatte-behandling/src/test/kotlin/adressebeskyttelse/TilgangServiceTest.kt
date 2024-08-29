@@ -2,7 +2,6 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import behandling.tilbakekreving.kravgrunnlag
 import behandling.tilbakekreving.tilbakekrevingVurdering
-import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
@@ -166,7 +165,6 @@ internal class TilgangServiceTest(
     fun `Skal sjekke tilganger til tilbakekreving med tilbakekrevingId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", azureAdStrengtFortroligClaim).build()
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(

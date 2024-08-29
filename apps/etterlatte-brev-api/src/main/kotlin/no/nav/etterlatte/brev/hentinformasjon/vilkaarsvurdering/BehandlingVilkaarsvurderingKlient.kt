@@ -21,16 +21,16 @@ class VilkaarsvurderingKlientException(
     override val cause: Throwable,
 ) : Exception(message, cause)
 
-class VilkaarsvurderingKlient(
+class BehandlingVilkaarsvurderingKlient(
     config: Config,
     httpClient: HttpClient,
 ) {
-    private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlient::class.java)
+    private val logger = LoggerFactory.getLogger(BehandlingVilkaarsvurderingKlient::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("vilkaarsvurdering.client.id")
-    private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,

@@ -1,19 +1,16 @@
-import React, { useEffect } from 'react'
-import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
-import { HospitalIcon } from '@navikt/aksel-icons'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGrunnlagsendringshendelserInstitusjonsoppholdForSak } from '~shared/api/behandling'
-import { mapResult } from '~shared/api/apiUtils'
+import React, {useEffect} from 'react'
+import {Heading, HStack, Table, VStack} from '@navikt/ds-react'
+import {HospitalIcon} from '@navikt/aksel-icons'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import {hentGrunnlagsendringshendelserInstitusjonsoppholdForSak} from '~shared/api/behandling'
+import {mapResult} from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
-import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
-import { institusjonstype } from '~shared/types/Institusjonsopphold'
-import { SakType } from '~shared/types/sak'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreBP } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar} from '~components/person/typer'
+import {formaterDato, formaterDatoMedFallback} from '~utils/formatering/dato'
+import {institusjonstype} from '~shared/types/Institusjonsopphold'
 
-export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
+export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   const [institusjonsHendelserResult, institusjonsHendelserRequest] = useApiCall(
     hentGrunnlagsendringshendelserInstitusjonsoppholdForSak
   )
@@ -31,8 +28,6 @@ export const InstitusjonsoppholdHendelser = ({ sakId, sakType }: { sakId: number
         </Heading>
       </HStack>
       <VStack gap="2">
-        {sakType === SakType.BARNEPENSJON && <InstitusjonsoppholdBeregningsgrunnlagReadMoreBP />}
-        {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         {mapResult(institusjonsHendelserResult, {
           pending: <Spinner label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,

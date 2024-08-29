@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -53,9 +54,9 @@ class GrunnlagsendringshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentGyldigeHendelserForSak(sakId: Long) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
+    fun hentGyldigeHendelserForSak(sakId: SakId) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
 
-    fun hentAlleHendelserForSak(sakId: Long): List<Grunnlagsendringshendelse> {
+    fun hentAlleHendelserForSak(sakId: SakId): List<Grunnlagsendringshendelse> {
         logger.info("Henter alle relevante hendelser for sak $sakId")
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
@@ -64,7 +65,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSakAvType(
-        sakId: Long,
+        sakId: SakId,
         type: GrunnlagsendringsType,
     ) = inTransaction {
         logger.info("Henter alle relevante hendelser for sak $sakId")
@@ -158,7 +159,7 @@ class GrunnlagsendringshendelseService(
                 ),
         )
 
-    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> =
+    fun opprettEndretGrunnbeloepHendelse(sakId: SakId): List<Grunnlagsendringshendelse> =
         inTransaction {
             opprettHendelseAvTypeForSak(
                 sakId,
@@ -330,7 +331,7 @@ class GrunnlagsendringshendelseService(
     }
 
     private fun opprettHendelseAvTypeForSak(
-        sakId: Long,
+        sakId: SakId,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val hendelseId = UUID.randomUUID()
@@ -444,7 +445,7 @@ class GrunnlagsendringshendelseService(
     }
 
     internal fun erDuplikatHendelse(
-        sakId: Long,
+        sakId: SakId,
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {

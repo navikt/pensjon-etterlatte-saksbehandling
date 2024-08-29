@@ -1,50 +1,46 @@
-import { Alert, Button, Heading, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending } from '@reduxjs/toolkit'
-import { isFailure, isSuccess, mapFailure } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { useForm } from 'react-hook-form'
 import {
-  AktivitetspliktUnntakType,
-  AktivitetspliktVurderingType,
-  IAktivitetspliktVurdering,
-  tekstAktivitetspliktUnntakType,
-  tekstAktivitetspliktVurderingType,
+    Alert,
+    BodyLong,
+    Button,
+    Heading,
+    HStack,
+    Label,
+    Radio,
+    ReadMore,
+    Select,
+    Textarea,
+    VStack,
+} from '@navikt/ds-react'
+import React, {useEffect, useState} from 'react'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import {isPending} from '@reduxjs/toolkit'
+import {isFailure, isSuccess, mapFailure} from '~shared/api/apiUtils'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {useForm} from 'react-hook-form'
+import {
+    AktivitetspliktUnntakType,
+    AktivitetspliktVurderingType,
+    AktivitetspliktVurderingValues,
+    AktivitetspliktVurderingValuesDefault,
+    IAktivitetspliktVurdering,
+    tekstAktivitetspliktUnntakType,
+    tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
 import {
-  hentAktivitspliktVurderingForBehandling,
-  opprettAktivitspliktAktivitetsgradForBehandling,
-  opprettAktivitspliktUnntakForBehandling,
+    hentAktivitspliktVurderingForBehandling,
+    opprettAktivitspliktAktivitetsgradForBehandling,
+    opprettAktivitspliktUnntakForBehandling,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {ControlledRadioGruppe} from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import {ControlledDatoVelger} from '~shared/components/datoVelger/ControlledDatoVelger'
+import {IDetaljertBehandling} from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
-import { Toast } from '~shared/alerts/Toast'
-import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { JaNei } from '~shared/types/ISvar'
-
-interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: JaNei | null
-  aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: JaNei | null
-  midlertidigUnntak: AktivitetspliktUnntakType | ''
-  sluttdato?: Date | null
-  beskrivelse: string
-}
-
-const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
-  aktivitetsplikt: null,
-  aktivitetsgrad: '',
-  unntak: null,
-  midlertidigUnntak: '',
-  sluttdato: undefined,
-  beskrivelse: '',
-}
+import {Toast} from '~shared/alerts/Toast'
+import {AktivitetspliktVurderingVisning} from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
+import {useInnloggetSaksbehandler} from '~components/behandling/useInnloggetSaksbehandler'
+import {behandlingErRedigerbar} from '~components/behandling/felles/utils'
+import {JaNei} from '~shared/types/ISvar'
 
 export const AktivitetspliktVurdering = ({
   behandling,
@@ -91,8 +87,8 @@ export const AktivitetspliktVurdering = ({
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
-            tom:
-              data.sluttdato && data.aktivitetsplikt === JaNei.JA ? new Date(data.sluttdato).toISOString() : undefined,
+            fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
+            tom: data.tom && data.aktivitetsplikt === JaNei.JA ? new Date(data.tom).toISOString() : undefined,
           },
         },
         () => {
@@ -112,7 +108,8 @@ export const AktivitetspliktVurdering = ({
             id: vurdering?.aktivitet ? vurdering.aktivitet.id : undefined,
             aktivitetsgrad: data.aktivitetsgrad as AktivitetspliktVurderingType,
             beskrivelse: data.beskrivelse,
-            fom: new Date().toISOString(),
+            fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
+            tom: data.tom ? new Date(data.tom).toISOString() : undefined,
           },
         },
         () => {
@@ -149,7 +146,8 @@ export const AktivitetspliktVurdering = ({
           aktivitetsgrad: vurdering.aktivitet.aktivitetsgrad,
           unntak: JaNei.NEI,
           midlertidigUnntak: '',
-          sluttdato: undefined,
+          fom: vurdering.aktivitet.fom ? new Date(vurdering.aktivitet.fom) : undefined,
+          tom: vurdering.aktivitet.tom ? new Date(vurdering.aktivitet.tom) : undefined,
           beskrivelse: vurdering.aktivitet.beskrivelse,
         })
       }
@@ -160,7 +158,8 @@ export const AktivitetspliktVurdering = ({
             aktivitetsgrad: '',
             unntak: null,
             midlertidigUnntak: '',
-            sluttdato: undefined,
+            fom: undefined,
+            tom: undefined,
             beskrivelse: vurdering.unntak.beskrivelse,
           })
         } else {
@@ -169,7 +168,8 @@ export const AktivitetspliktVurdering = ({
             aktivitetsgrad: '',
             unntak: JaNei.JA,
             midlertidigUnntak: vurdering.unntak.unntak,
-            sluttdato: vurdering.unntak.tom ? new Date(vurdering.unntak.tom) : undefined,
+            fom: vurdering.unntak.fom ? new Date(vurdering.unntak.fom) : undefined,
+            tom: vurdering.unntak.tom ? new Date(vurdering.unntak.tom) : undefined,
             beskrivelse: vurdering.unntak.beskrivelse,
           })
         }
@@ -255,31 +255,41 @@ export const AktivitetspliktVurdering = ({
                     Lag oppfølgingsoppgave i Gosys med frist utfra angitt sluttdato for unntaksperiode, eller sett en
                     passende frist.
                   </Alert>
-
-                  <ControlledDatoVelger
-                    name="sluttdato"
-                    label="Angi sluttdato for unntaksperiode"
-                    description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
-                    control={control}
-                    required={false}
-                  />
+                  <div>
+                    <Label>Unntaksperiode</Label>
+                    <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
+                  </div>
+                  <HStack gap="4">
+                    <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
+                    <ControlledDatoVelger name="tom" label="Angi sluttdato" control={control} required={false} />
+                  </HStack>
                 </>
               )}
               {harUnntak === JaNei.NEI && (
-                <Select
-                  label="Hva er brukers aktivitetsgrad?"
-                  {...register('aktivitetsgrad', {
-                    required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                  })}
-                  error={errors.aktivitetsgrad?.message}
-                >
-                  <option value="">Velg hvilken grad</option>
-                  {Object.values(AktivitetspliktVurderingType).map((type) => (
-                    <option key={type} value={type}>
-                      {tekstAktivitetspliktVurderingType[type]}
-                    </option>
-                  ))}
-                </Select>
+                <>
+                  <Select
+                    label="Hva er brukers aktivitetsgrad?"
+                    {...register('aktivitetsgrad', {
+                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                    })}
+                    error={errors.aktivitetsgrad?.message}
+                  >
+                    <option value="">Velg hvilken grad</option>
+                    {Object.values(AktivitetspliktVurderingType).map((type) => (
+                      <option key={type} value={type}>
+                        {tekstAktivitetspliktVurderingType[type]}
+                      </option>
+                    ))}
+                  </Select>
+                  <div>
+                    <Label>Aktivitetsgradsperiode</Label>
+                    <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
+                  </div>
+                  <HStack gap="4">
+                    <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
+                    <ControlledDatoVelger name="tom" label="Angi sluttdato" control={control} required={false} />
+                  </HStack>
+                </>
               )}
             </>
           )}

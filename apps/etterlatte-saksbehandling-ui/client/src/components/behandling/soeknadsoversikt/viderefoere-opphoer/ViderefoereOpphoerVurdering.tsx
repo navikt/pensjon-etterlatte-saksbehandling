@@ -1,37 +1,37 @@
-import { IBehandlingStatus, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
-import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
+import {IBehandlingStatus, ViderefoertOpphoer} from '~shared/types/IDetaljertBehandling'
+import {VurderingsboksWrapper} from '~components/vurderingsboks/VurderingsboksWrapper'
 import {
-  BodyShort,
-  Box,
-  Heading,
-  Label,
-  MonthPicker,
-  Radio,
-  RadioGroup,
-  Stack,
-  UNSAFE_Combobox,
-  useMonthpicker,
-  VStack,
+    BodyShort,
+    Box,
+    Heading,
+    Label,
+    MonthPicker,
+    Radio,
+    RadioGroup,
+    Stack,
+    UNSAFE_Combobox,
+    useMonthpicker,
+    VStack,
 } from '@navikt/ds-react'
-import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
-import { useAppDispatch } from '~store/Store'
-import React, { useEffect, useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import {SoeknadsoversiktTextArea} from '../SoeknadsoversiktTextArea'
+import {useAppDispatch} from '~store/Store'
+import React, {useEffect, useState} from 'react'
+import {useApiCall} from '~shared/hooks/useApiCall'
 import {
-  oppdaterBehandlingsstatus,
-  oppdaterViderefoertOpphoer,
-  resetViderefoertOpphoer,
+    oppdaterBehandlingsstatus,
+    oppdaterViderefoertOpphoer,
+    resetViderefoertOpphoer,
 } from '~store/reducers/BehandlingReducer'
-import { lagreViderefoertOpphoer, slettViderefoertOpphoer } from '~shared/api/behandling'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { hentVilkaartyper, Vilkaartyper } from '~shared/api/vilkaarsvurdering'
-import { formaterDato } from '~utils/formatering/dato'
-import { addMonths } from 'date-fns'
-import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
+import {lagreViderefoertOpphoer, slettViderefoertOpphoer} from '~shared/api/behandling'
+import {isFailureHandler} from '~shared/api/IsFailureHandler'
+import {hentVilkaartyper, Vilkaartyper} from '~shared/api/vilkaarsvurdering'
+import {formaterDato} from '~utils/formatering/dato'
+import {addMonths} from 'date-fns'
+import {UseMonthPickerOptions} from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
+import {JaNei, JaNeiRec} from '~shared/types/ISvar'
+import {isSuccess, mapResult} from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
+import {ApiErrorAlert, ApiWarningAlert} from '~ErrorBoundary'
 
 export const ViderefoereOpphoerVurdering = ({
   virkningstidspunkt,
@@ -87,9 +87,9 @@ export const ViderefoereOpphoerVurdering = ({
     setVilkaarError(valider())
 
     if (skalViderefoere !== undefined && !vilkaarError && isSuccess(vilkaartyperResult)) {
-      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name || '' : undefined
+      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name : undefined
       return setViderefoertOpphoer(
-        { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
+        { skalViderefoere, behandlingId, begrunnelse, vilkaarType: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
           dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))

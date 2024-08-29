@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
@@ -42,10 +41,7 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
             "Aktivitet id er ikke i path params",
         )
 
-internal fun Route.aktivitetspliktRoutes(
-    aktivitetspliktService: AktivitetspliktService,
-    featureToggleService: FeatureToggleService,
-) {
+internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: AktivitetspliktService) {
     val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {

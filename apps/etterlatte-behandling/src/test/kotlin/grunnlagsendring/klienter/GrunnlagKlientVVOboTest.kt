@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GrunnlagKlientOboTest {
+internal class GrunnlagKlientVVOboTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val config: Config = mockk(relaxed = true)

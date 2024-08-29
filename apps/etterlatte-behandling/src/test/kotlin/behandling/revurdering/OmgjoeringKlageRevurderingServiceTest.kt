@@ -259,7 +259,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             hendelseDao = applicationContext.hendelseDao,
             behandlingHendelser = applicationContext.behandlingsHendelser,
             migreringKlient = mockk(),
-            vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+            vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         )
 }

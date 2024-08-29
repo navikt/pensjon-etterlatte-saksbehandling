@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -53,7 +54,7 @@ data class BrevDataFerdigstillingRequest(
     val systemkilde: Vedtaksloesning,
     val soekerUnder18: Boolean?,
     val soekerNavn: String,
-    val sakId: Long,
+    val sakId: SakId,
     val virkningstidspunkt: YearMonth?,
     val vedtakType: VedtakType?,
     val revurderingsaarsak: Revurderingaarsak?,
@@ -253,7 +254,7 @@ class BrevDataMapperFerdigstillingVedtak(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         sakType: SakType,
-        sakId: Long,
+        sakId: SakId,
         utlandstilknytningType: UtlandstilknytningType?,
         revurderingaarsak: Revurderingaarsak?,
         erForeldreloes: Boolean,
@@ -434,7 +435,7 @@ class BrevDataMapperFerdigstillingVedtak(
         revurderingaarsak: Revurderingaarsak?,
         avdoede: List<Avdoed>,
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         sakType: SakType,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,

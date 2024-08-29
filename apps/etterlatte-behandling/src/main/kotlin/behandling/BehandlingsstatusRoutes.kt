@@ -23,6 +23,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
     route("/behandlinger/{$BEHANDLINGID_CALL_PARAMETER}") {
         get("/opprett") {
+            // TODO: kan slettes
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
                 inTransaction {
@@ -31,6 +32,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             }
         }
         post("/opprett") {
+            // TODO: kan slettes
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             kunSkrivetilgang {
                 haandterStatusEndring(call) {

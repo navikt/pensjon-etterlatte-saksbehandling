@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -30,7 +31,8 @@ class BehandlingKlientException(
 class BehandlingKlient(
     config: Config,
     httpClient: HttpClient,
-) : BehandlingTilgangsSjekk, PersonTilgangsSjekk {
+) : BehandlingTilgangsSjekk,
+    PersonTilgangsSjekk {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
@@ -48,7 +50,7 @@ class BehandlingKlient(
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
         skrivetilgang: Boolean,
-        bruker: Saksbehandler
+        bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilPerson(foedselsnummer, skrivetilgang, bruker)
 
     suspend fun kanOppdatereTrygdetid(
@@ -70,7 +72,7 @@ class BehandlingKlient(
     }
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")

@@ -1,37 +1,37 @@
 import styled from 'styled-components'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { SidebarPanel } from '~shared/components/Sidebar'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekkliste'
+import React, {useContext, useEffect, useMemo, useState} from 'react'
+import {SidebarPanel} from '~shared/components/Sidebar'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import {IBehandlingReducer} from '~store/reducers/BehandlingReducer'
+import {oppdaterSjekkliste, oppdaterSjekklisteItem} from '~shared/api/sjekkliste'
 import {
-  Alert,
-  BodyLong,
-  BodyShort,
-  Button,
-  Checkbox,
-  ConfirmationPanel,
-  Heading,
-  Link,
-  Textarea,
-  TextField,
-  VStack,
+    Alert,
+    BodyLong,
+    BodyShort,
+    Button,
+    Checkbox,
+    ConfirmationPanel,
+    Heading,
+    Link,
+    Textarea,
+    TextField,
+    VStack,
 } from '@navikt/ds-react'
-import { ConfigContext } from '~clientConfig'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { ISjekklisteItem } from '~shared/types/Sjekkliste'
+import {ConfigContext} from '~clientConfig'
+import {behandlingErRedigerbar} from '~components/behandling/felles/utils'
+import {ISjekklisteItem} from '~shared/types/Sjekkliste'
 import debounce from 'lodash/debounce'
-import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
-import { useAppDispatch } from '~store/Store'
-import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
-import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { SakType } from '~shared/types/sak'
-import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import {useSjekkliste, useSjekklisteValideringsfeil} from '~components/behandling/sjekkliste/useSjekkliste'
+import {useAppDispatch} from '~store/Store'
+import {updateSjekkliste, updateSjekklisteItem} from '~store/reducers/SjekklisteReducer'
+import {ExternalLinkIcon, PencilIcon} from '@navikt/aksel-icons'
+import {IBehandlingStatus, IBehandlingsType} from '~shared/types/IDetaljertBehandling'
+import {SakType} from '~shared/types/sak'
+import {useSelectorOppgaveUnderBehandling} from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import {usePersonopplysninger} from '~components/person/usePersonopplysninger'
 
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import {isFailureHandler} from '~shared/api/IsFailureHandler'
+import {useInnloggetSaksbehandler} from '../useInnloggetSaksbehandler'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -88,10 +88,13 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
       {sjekkliste && (
         <>
           <BodyLong>
-            Gjennomgå alle punktene og marker de som krever handling.{' '}
-            <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
-              Her finner du rutine til punktene.
-            </Link>
+            Gjennomgå alle punktene og marker de som krever handling.
+            {/* Rutiner for revurdering er ikke laget enda */}
+            {behandling.behandlingType !== IBehandlingsType.REVURDERING && (
+              <Link href={erBarnepensjon ? rutinerBP : rutinerOMS} target="_blank">
+                Her finner du rutine til punktene.
+              </Link>
+            )}
           </BodyLong>
 
           {sjekkliste?.sjekklisteItems.map((item) => (
@@ -140,30 +143,15 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               readOnly={!redigerbar}
             />
 
-            <TextField
-              label="Kontonummer registrert"
-              name="KontonummerRegistrert"
-              value={sjekkliste.kontonrRegistrert || ''}
-              onChange={(e) => {
-                const oppdatert = {
-                  ...sjekkliste,
-                  kontonrRegistrert: e.currentTarget.value,
-                }
-                dispatch(updateSjekkliste(oppdatert))
-                fireOpppdater(oppdatert)
-              }}
-              readOnly={!redigerbar}
-            />
-
-            {behandling.sakType == SakType.BARNEPENSJON && (
+            {behandling.behandlingType !== IBehandlingsType.REVURDERING && (
               <TextField
-                label="Ønsket skattetrekk"
-                name="OnsketSkattetrekk"
-                value={sjekkliste.onsketSkattetrekk || ''}
+                label="Kontonummer registrert"
+                name="KontonummerRegistrert"
+                value={sjekkliste.kontonrRegistrert || ''}
                 onChange={(e) => {
                   const oppdatert = {
                     ...sjekkliste,
-                    onsketSkattetrekk: e.target.value,
+                    kontonrRegistrert: e.currentTarget.value,
                   }
                   dispatch(updateSjekkliste(oppdatert))
                   fireOpppdater(oppdatert)
@@ -171,6 +159,24 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
                 readOnly={!redigerbar}
               />
             )}
+
+            {behandling.sakType == SakType.BARNEPENSJON &&
+              behandling.behandlingType !== IBehandlingsType.REVURDERING && (
+                <TextField
+                  label="Ønsket skattetrekk"
+                  name="OnsketSkattetrekk"
+                  value={sjekkliste.onsketSkattetrekk || ''}
+                  onChange={(e) => {
+                    const oppdatert = {
+                      ...sjekkliste,
+                      onsketSkattetrekk: e.target.value,
+                    }
+                    dispatch(updateSjekkliste(oppdatert))
+                    fireOpppdater(oppdatert)
+                  }}
+                  readOnly={!redigerbar}
+                />
+              )}
 
             {redigerbar && (
               <ConfirmationPanel

@@ -313,7 +313,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
                 migreringKlient = mockk(),
-                vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+                vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             )
 
@@ -965,7 +965,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             hendelseDao = applicationContext.hendelseDao,
             behandlingHendelser = applicationContext.behandlingsHendelser,
             migreringKlient = mockk(),
-            vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+            vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         )
 }

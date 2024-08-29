@@ -46,7 +46,7 @@ class DoedshendelseJobServiceTest {
         }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
     private val sakService =
         mockk<SakService> {
             every { finnEllerOpprettSakMedGrunnlag(any(), any()) } returns

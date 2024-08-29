@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -27,7 +28,7 @@ internal class VarselbrevService(
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
     suspend fun opprettVarselbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {

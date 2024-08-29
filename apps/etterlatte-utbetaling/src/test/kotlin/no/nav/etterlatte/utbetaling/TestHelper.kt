@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -20,7 +21,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjo
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Periode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.PeriodeForUtbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingForKonsistensavstemming
@@ -130,7 +130,9 @@ fun oppdragMedFeiletKvittering(
 
 fun utbetalingKonsistensavstemming(
     id: UUID = UUID.randomUUID(),
-    sakId: SakId = SakId(1),
+    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
+        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+            .SakId(1),
     sakType: Saktype? = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
@@ -177,7 +179,9 @@ fun utbetalingKonsistensavstemming(
 
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
-    sakId: SakId = SakId(1),
+    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
+        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+            .SakId(1),
     sakType: Saktype? = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
@@ -227,7 +231,9 @@ fun utbetaling(
 
 fun utbetalingslinje(
     utbetalingId: UUID = UUID.randomUUID(),
-    sakId: SakId = SakId(1),
+    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
+        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+            .SakId(1),
     utbetalingslinjeId: Long = 1,
     type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
     erstatter: Long? = null,
@@ -261,7 +267,9 @@ fun utbetalingMedOpphoer() =
             listOf(
                 utbetalingslinje(
                     utbetalingId = UUID.randomUUID(),
-                    sakId = SakId(1),
+                    sakId =
+                        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+                            .SakId(1),
                     utbetalingslinjeId = 1,
                     type = Utbetalingslinjetype.OPPHOER,
                     beloep = null,
@@ -293,12 +301,14 @@ fun mockKonsistensavstemming(
 )
 
 fun oppdragForKonsistensavstemming(
-    sakId: Long = 1,
+    sakId: SakId = 1,
     sakType: Saktype = Saktype.BARNEPENSJON,
     fnr: String = "123456",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>,
 ) = OppdragForKonsistensavstemming(
-    sakId = SakId(sakId),
+    sakId =
+        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+            .SakId(sakId),
     sakType = sakType,
     fnr = Foedselsnummer(fnr),
     utbetalingslinjer = oppdragslinjeForKonsistensavstemming,

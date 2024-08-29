@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -74,7 +75,7 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
@@ -344,13 +345,13 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
-        sakId: Long,
+        sakId: SakId,
     ) {
         val erSkjermet =
             runBlocking {

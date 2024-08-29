@@ -48,7 +48,7 @@ class GrunnlagsendringsHendelseFilterTest {
                     this::class.java.simpleName
             }
         val databasekontekst = mockk<DatabaseContext>()
-        Kontekst.set(Context(systembruker, databasekontekst, mockedSakTilgangDao()))
+        Kontekst.set(Context(systembruker, databasekontekst, mockedSakTilgangDao(), null))
     }
 
     @AfterEach

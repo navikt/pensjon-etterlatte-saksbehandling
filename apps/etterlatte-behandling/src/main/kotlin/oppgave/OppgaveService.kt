@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakLesDao
@@ -421,7 +422,7 @@ class OppgaveService(
         }
     }
 
-    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: SakId) {
         for (oppgaveIntern in hentOppgaverForSak(sakId)) {
             if (oppgaveIntern.saksbehandler != null &&
                 oppgaveIntern.erUnderBehandling()
@@ -432,7 +433,7 @@ class OppgaveService(
     }
 
     private fun endreEnhetForOppgaverTilknyttetSak(
-        sakId: Long,
+        sakId: SakId,
         enhetsID: String,
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
@@ -441,7 +442,7 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
@@ -496,7 +497,7 @@ class OppgaveService(
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         merknad: String? = null,
     ): OppgaveIntern {
@@ -549,7 +550,7 @@ class OppgaveService(
 
     fun opprettOppgave(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,

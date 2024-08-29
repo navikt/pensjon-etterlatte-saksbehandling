@@ -79,10 +79,6 @@ spec:
   env:
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_URL
@@ -105,7 +101,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-grunnlag
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid

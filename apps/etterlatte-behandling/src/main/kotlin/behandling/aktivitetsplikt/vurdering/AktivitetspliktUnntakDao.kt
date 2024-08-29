@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -20,7 +21,7 @@ class AktivitetspliktUnntakDao(
 ) {
     fun opprettUnntak(
         unntak: LagreAktivitetspliktUnntak,
-        sakId: Long,
+        sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
@@ -38,7 +39,7 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, unntak.unntak.name)
-            stmt.setDate(6, unntak.fom?.let { tom -> Date.valueOf(tom) })
+            stmt.setDate(6, unntak.fom?.let { fom -> Date.valueOf(fom) })
             stmt.setDate(7, unntak.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(8, kilde.toJson())
             stmt.setString(9, kilde.toJson())
@@ -110,7 +111,7 @@ class AktivitetspliktUnntakDao(
             }
         }
 
-    fun hentNyesteUnntak(sakId: Long): List<AktivitetspliktUnntak> =
+    fun hentNyesteUnntak(sakId: SakId): List<AktivitetspliktUnntak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -194,7 +195,7 @@ class AktivitetspliktUnntakDao(
 
 data class AktivitetspliktUnntak(
     val id: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val unntak: AktivitetspliktUnntakType,

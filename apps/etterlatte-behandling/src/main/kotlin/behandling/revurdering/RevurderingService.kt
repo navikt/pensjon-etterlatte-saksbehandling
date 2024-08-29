@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -208,9 +209,10 @@ class RevurderingService(
                                         "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
                                             "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
                                     },
+                                    HardkodaSystembruker.opprettGrunnlag,
                                 )
                             }
-                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) }
+                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri, HardkodaSystembruker.opprettGrunnlag) }
                     }
                 },
                 sendMeldingForHendelse = {

@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -156,7 +157,11 @@ class BehandlingFactory(
             opplysninger.add(lagOpplysning(Opplysningstype.UFOERE, kilde, request.ufoere.toJsonNode()))
         }
 
-        grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
+        grunnlagService.leggTilNyeOpplysninger(
+            behandling.id,
+            NyeSaksopplysninger(sak.id, opplysninger),
+            HardkodaSystembruker.opprettGrunnlag,
+        )
 
         if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             coroutineScope {
@@ -207,7 +212,7 @@ class BehandlingFactory(
                     prosessType,
                 )
                     ?: return null
-            runBlocking { grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri) }
+            runBlocking { grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri, HardkodaSystembruker.opprettGrunnlag) }
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
@@ -297,7 +302,13 @@ class BehandlingFactory(
 
         val persongalleri =
             runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
-        runBlocking { grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlag(
+                behandlingerForOmgjoering.nyFoerstegangsbehandling,
+                persongalleri,
+                HardkodaSystembruker.opprettGrunnlag,
+            )
+        }
 
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {

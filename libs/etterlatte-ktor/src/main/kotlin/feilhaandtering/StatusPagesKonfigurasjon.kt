@@ -136,7 +136,7 @@ class StatusPagesKonfigurasjon(
             )
         } else if (internfeil is UkjentInternfeilException) {
             this.error(
-                internfeil.message ?: internfeil.cause.message ?: internfeil.detail,
+                internfeil.cause.message ?: internfeil.detail,
                 internfeil.cause,
             )
         } else {

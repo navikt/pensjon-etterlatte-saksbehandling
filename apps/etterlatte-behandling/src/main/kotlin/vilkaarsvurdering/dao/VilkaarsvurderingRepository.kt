@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering.dao
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -22,7 +23,7 @@ class VilkaarsvurderingRepository(
     // TODO: trenger å gjøre behandlingKlient.hentBehandling(behandlingId, bruker).sak, o.l.
     fun hentMigrertYrkesskadefordel(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
     ): Boolean = runBlocking { vilkaarsvurderingKlientDaoImpl.erMigrertYrkesskadefordel(behandlingId, sakId).migrertYrkesskadefordel }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =

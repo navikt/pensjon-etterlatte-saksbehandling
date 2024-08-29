@@ -460,7 +460,7 @@ class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {
 
     override suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
     ): MigrertYrkesskadefordel {
         TODO("Not yet implemented")
     }

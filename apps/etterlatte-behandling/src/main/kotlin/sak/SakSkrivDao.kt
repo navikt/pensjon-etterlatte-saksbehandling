@@ -4,6 +4,7 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -23,7 +24,7 @@ class SakSkrivDao(
     }
 
     fun oppdaterAdresseBeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
         sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterAdresseBeskyttelse") { connection ->

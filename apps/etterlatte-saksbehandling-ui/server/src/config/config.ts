@@ -90,10 +90,6 @@ export interface ApiConfig {
 
 const API_CONFIG_FROM_ENV = (): ApiConfig => {
   return {
-    vilkaarsvurdering: {
-      url: requireEnvValue('VILKAARSVURDERING_API_URL'),
-      scope: requireEnvValue('VILKAARSVURDERING_API_SCOPE'),
-    },
     behandling: {
       url: requireEnvValue('BEHANDLING_API_URL'),
       scope: requireEnvValue('BEHANDLING_API_SCOPE'),

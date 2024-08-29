@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
@@ -36,7 +37,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class MaksEnAktivOppgavePaaBehandling(
-    sakId: Long,
+    sakId: SakId,
 ) : UgyldigForespoerselException(
         code = "MAKS_EN_AKTIV_OPPGAVE_PAA_BEHANDLING",
         detail = "Sak $sakId har allerede en oppgave under behandling",
@@ -50,7 +51,7 @@ class RevurderingaarsakIkkeStoettet(
     )
 
 class RevurderingManglerIverksattBehandling(
-    sakId: Long,
+    sakId: SakId,
 ) : UgyldigForespoerselException(
         code = "REVURDERING_MANGLER_IVERKSATT_BEHANDLING",
         detail = "Sak $sakId kan ikke revurderes uten en iverksatt behandling",
@@ -90,7 +91,7 @@ class RevurderingService(
     fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)
 
     fun hentRevurderingsinfoForSakMedAarsak(
-        sakId: Long,
+        sakId: SakId,
         revurderingAarsak: Revurderingaarsak,
     ): List<RevurderingsinfoMedIdOgOpprettetDato> {
         val hentAlleRevurderingerISakMedAarsak =
@@ -107,7 +108,7 @@ class RevurderingService(
             }
     }
 
-    fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
+    fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: SakId) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         if (oppgaverForSak
                 .filter {
@@ -140,7 +141,7 @@ class RevurderingService(
     }
 
     internal fun opprettRevurdering(
-        sakId: Long,
+        sakId: SakId,
         persongalleri: Persongalleri,
         forrigeBehandling: UUID?,
         mottattDato: String?,

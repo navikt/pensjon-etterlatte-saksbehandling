@@ -109,7 +109,7 @@ class AktivitetspliktServiceTest {
         fun `Skal opprette en aktivitet`() {
             every { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) } returns 1
 
-            service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+            service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
             coVerify { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) }
             coVerify(exactly = 0) { aktivitetspliktDao.oppdaterAktivitet(any(), any(), any()) }
@@ -120,7 +120,7 @@ class AktivitetspliktServiceTest {
             val aktivitet = aktivitet.copy(id = UUID.randomUUID())
             every { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) } returns 1
 
-            service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+            service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
             coVerify { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) }
             coVerify(exactly = 0) { aktivitetspliktDao.opprettAktivitet(any(), any(), any()) }
@@ -131,7 +131,7 @@ class AktivitetspliktServiceTest {
             val aktivitet = aktivitet.copy(sakId = 2)
 
             assertThrows<SakidTilhoererIkkeBehandlingException> {
-                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
             }
         }
 
@@ -140,7 +140,7 @@ class AktivitetspliktServiceTest {
             val aktivitet = aktivitet.copy(tom = LocalDate.now().minusYears(1))
 
             assertThrows<TomErFoerFomException> {
-                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
             }
         }
 
@@ -153,7 +153,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
             assertThrows<BehandlingKanIkkeEndres> {
-                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
             }
         }
     }
@@ -170,7 +170,7 @@ class AktivitetspliktServiceTest {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
 
-            service.slettAktivitet(behandling.id, aktivitetId, brukerTokenInfo)
+            service.slettAktivitet(aktivitetId, brukerTokenInfo, behandling.id)
 
             coVerify { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) }
         }
@@ -183,7 +183,7 @@ class AktivitetspliktServiceTest {
                 }
 
             assertThrows<BehandlingKanIkkeEndres> {
-                service.slettAktivitet(behandling.id, aktivitetId, brukerTokenInfo)
+                service.slettAktivitet(aktivitetId, brukerTokenInfo, behandling.id)
             }
         }
     }

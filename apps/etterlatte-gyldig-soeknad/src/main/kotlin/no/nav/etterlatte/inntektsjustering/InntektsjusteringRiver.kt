@@ -1,7 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.inntektsjustering
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -27,7 +28,6 @@ internal class InntektsjusteringRiver(
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {
-            validate { it.requireKey(InntektsjusteringInnsendt.inntektsaar) }
             validate { it.requireKey(InntektsjusteringInnsendt.fnrBruker) }
             validate { it.requireKey(InntektsjusteringInnsendt.inntektsjusteringInnhold) }
         }
@@ -47,14 +47,7 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            val inntektsaar = packet[InntektsjusteringInnsendt.inntektsaar].textValue()
-
-            val journalpostResponse =
-                journalfoerInntektsjusteringService.opprettJournalpost(
-                    sak,
-                    inntektsaar,
-                    inntektsjustering,
-                )
+            val journalpostResponse = journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)
 
             if (journalpostResponse == null) {
                 logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
@@ -81,5 +74,5 @@ internal class InntektsjusteringRiver(
     }
 
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =
-        this[InntektsjusteringInnsendt.inntektsjusteringInnhold].let { objectMapper.treeToValue<Inntektsjustering>(it) }
+        objectMapper.readValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue())
 }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.testdata
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
@@ -31,7 +32,7 @@ class Behandler(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun behandle(
-        sakId: Long,
+        sakId: SakId,
         behandling: UUID,
         behandlingssteg: Behandlingssteg,
         packet: JsonMessage,

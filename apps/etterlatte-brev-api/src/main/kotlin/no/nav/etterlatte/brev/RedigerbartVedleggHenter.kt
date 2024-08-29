@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
@@ -33,7 +34,7 @@ class RedigerbartVedleggHenter(
         behandlingId: UUID?,
         revurderingaarsak: Revurderingaarsak?,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        sakId: Long,
+        sakId: SakId,
         forenkletVedtak: ForenkletVedtak?,
         enhet: String,
         spraak: Spraak,

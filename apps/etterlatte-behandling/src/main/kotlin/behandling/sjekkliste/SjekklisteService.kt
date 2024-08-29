@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -43,11 +44,15 @@ class SjekklisteService(
 
         val sjekklisteItems =
             when (behandling.sak.sakType) {
-                SakType.BARNEPENSJON -> defaultSjekklisteItemsBP
+                SakType.BARNEPENSJON ->
+                    when (behandling.type) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> skjekklisteItemsFoerstegangsbehandlingBP
+                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingBP
+                    }
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> defaultFoerstegangsbehandlingItemsOms
-                        BehandlingType.REVURDERING -> defaultSjekklisteItemsOMS
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
+                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingOMS
                     }
                 }
             }
@@ -98,7 +103,8 @@ class SjekklisteService(
 
     private fun kanEndres(behandling: Behandling): Boolean =
         BehandlingStatus.underBehandling().contains(behandling.status) &&
-            behandling is Foerstegangsbehandling
+            behandling is Foerstegangsbehandling ||
+            behandling is Revurdering
 
     private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean =
         Kontekst.get().AppUser.name() ==

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
@@ -22,7 +23,7 @@ interface KlageDao {
 
     fun hentKlage(id: UUID): Klage?
 
-    fun hentKlagerISak(sakId: Long): List<Klage>
+    fun hentKlagerISak(sakId: SakId): List<Klage>
 
     fun oppdaterKabalStatus(
         klageId: UUID,
@@ -85,7 +86,7 @@ class KlageDaoImpl(
             }
         }
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> =
+    override fun hentKlagerISak(sakId: SakId): List<Klage> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

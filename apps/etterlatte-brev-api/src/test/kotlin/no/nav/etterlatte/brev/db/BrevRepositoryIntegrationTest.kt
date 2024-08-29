@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterEach
@@ -432,7 +433,7 @@ internal class BrevRepositoryIntegrationTest(
     }
 
     private fun ulagretBrev(
-        sakId: Long = Random.nextLong(),
+        sakId: SakId = Random.nextLong(),
         behandlingId: UUID? = null,
         innhold: BrevInnhold? = null,
         innhold_vedlegg: List<BrevInnholdVedlegg>? = null,

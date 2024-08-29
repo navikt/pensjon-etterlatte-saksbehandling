@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -280,7 +281,7 @@ class VedtaksvurderingRepository(
     ): Vedtak = requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(
-        sakId: Long,
+        sakId: SakId,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """

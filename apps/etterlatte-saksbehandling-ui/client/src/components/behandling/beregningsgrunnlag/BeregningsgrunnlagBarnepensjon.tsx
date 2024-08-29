@@ -157,7 +157,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                   )}
 
                   <Box maxWidth="70rem">
-                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
+                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
                   </Box>
 
                   <InstitusjonsoppholdBeregningsgrunnlag

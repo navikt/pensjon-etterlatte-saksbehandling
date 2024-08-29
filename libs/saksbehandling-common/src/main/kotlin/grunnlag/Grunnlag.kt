@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 
 class Grunnlag(
     val soeker: Grunnlagsdata<JsonNode>,
@@ -68,6 +69,6 @@ fun Grunnlag.folkMedRolle(rolle: PersonRolle): List<String> {
 }
 
 data class Metadata(
-    val sakId: Long,
+    val sakId: SakId,
     val versjon: Long,
 )

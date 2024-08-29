@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest internal constructor(
@@ -23,7 +24,7 @@ data class BrevbakerRequest internal constructor(
             brevData: BrevData,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
-            sakId: Long,
+            sakId: SakId,
             spraak: Spraak,
             sakType: SakType,
         ): BrevbakerRequest =

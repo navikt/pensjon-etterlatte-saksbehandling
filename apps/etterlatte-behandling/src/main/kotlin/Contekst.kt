@@ -23,6 +23,7 @@ class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst,
     val sakTilgangDao: SakTilgangDao,
+    val brukerTokenInfo: BrukerTokenInfo?, // BUrde være en context for route og en for jobber feks
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller = this.AppUser as SaksbehandlerMedEnheterOgRoller
 }

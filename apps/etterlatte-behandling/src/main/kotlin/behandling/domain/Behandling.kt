@@ -105,7 +105,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av utlandstilknyting.",
         )
 
-    open fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer): Behandling =
+    open fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere videreført opphør på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
@@ -228,6 +228,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         kilde = kilde,
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
+        relatertBehandlingId = relatertBehandlingId,
     )
 
 fun Behandling.toBehandlingSammendrag() =

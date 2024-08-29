@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
@@ -840,6 +841,7 @@ internal class VedtakBehandlingServiceTest(
                 kilde = Vedtaksloesning.GJENNY,
                 sendeBrev = false,
                 opphoerFraOgMed = null,
+                relatertBehandlingId = null,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1681,7 +1683,7 @@ internal class VedtakBehandlingServiceTest(
         saktype: SakType = SakType.BARNEPENSJON,
         revurderingAarsak: Revurderingaarsak? = null,
         revurderingInfo: RevurderingInfo? = null,
-        sakId: Long = 1L,
+        sakId: SakId = 1L,
         opphoerFom: YearMonth? = null,
     ): DetaljertBehandling =
         DetaljertBehandling(
@@ -1710,6 +1712,7 @@ internal class VedtakBehandlingServiceTest(
             kilde = Vedtaksloesning.GJENNY,
             sendeBrev = true,
             opphoerFraOgMed = opphoerFom,
+            relatertBehandlingId = null,
         )
 
     private companion object {

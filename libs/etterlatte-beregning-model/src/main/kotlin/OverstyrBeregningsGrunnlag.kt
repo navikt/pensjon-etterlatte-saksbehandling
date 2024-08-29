@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 import java.util.UUID
 
@@ -15,7 +16,7 @@ data class OverstyrBeregningGrunnlagDao(
     val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,
     val prorataBroekNevner: Long?,
-    val sakId: Long,
+    val sakId: SakId,
     val beskrivelse: String,
     val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,

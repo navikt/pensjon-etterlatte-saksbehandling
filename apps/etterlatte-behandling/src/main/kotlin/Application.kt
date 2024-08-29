@@ -36,6 +36,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kodeverk.kodeverk
+import no.nav.etterlatte.krr.krrRoute
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -51,6 +52,8 @@ import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
+import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
 import javax.sql.DataSource
 
@@ -127,6 +130,7 @@ private fun Route.attachContekst(
                     ),
                 databasecontxt = DatabaseContext(ds),
                 sakTilgangDao = context.sakTilgangDao,
+                brukerTokenInfo = brukerTokenInfo,
             )
 
         withContext(
@@ -170,7 +174,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,
-        featureToggleService = applicationContext.featureToggleService,
     )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
@@ -214,6 +217,9 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
 
     tilgangRoutes(applicationContext.tilgangService)
     kodeverk(applicationContext.kodeverkService)
+    krrRoute(applicationContext.tilgangService, applicationContext.krrKlient)
+    vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+    aldersovergang(applicationContext.aldersovergangService)
 }
 
 private fun Route.settOppTilganger(

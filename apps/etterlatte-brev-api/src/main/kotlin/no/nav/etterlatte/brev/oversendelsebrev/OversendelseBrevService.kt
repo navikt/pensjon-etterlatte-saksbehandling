@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
@@ -57,7 +58,7 @@ interface OversendelseBrevService {
 
     fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
 
@@ -198,7 +199,7 @@ class OversendelseBrevServiceImpl(
 
     override fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brev = brevRepository.hentBrev(brevId)
@@ -319,7 +320,7 @@ data class OversendelseBrevFerdigstillingData(
 
 class MismatchSakOgBrevException(
     brevId: BrevID,
-    sakId: Long,
+    sakId: SakId,
 ) : UgyldigForespoerselException(
         code = "SAKID_MATCHER_IKKE",
         detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",

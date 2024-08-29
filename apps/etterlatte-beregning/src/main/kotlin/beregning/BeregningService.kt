@@ -162,12 +162,6 @@ class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :
         detail = "Behandlingen kan ikke endre overstyrt beregning da den har feil status",
     )
 
-class KanIkkeDeaktivereOverstyrtBeregningGrunnetIverksatteBehandlinger :
-    UgyldigForespoerselException(
-        code = "IVERKSATTE_BEHANDLINGER_MED_OVERSTYRT",
-        detail = "Behandlingen kan ikke deaktivere overstyrt beregning da den har iverksatte behandlinger som er overstyrt",
-    )
-
 class TrygdetidMangler(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(

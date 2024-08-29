@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.Brevbakerkode
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
@@ -8,21 +9,22 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest internal constructor(
-    val kode: EtterlatteBrevKode,
+    val kode: Brevbakerkode,
     val letterData: Any,
     val felles: Felles,
     val language: LanguageCode,
 ) {
     companion object {
         fun fra(
-            brevKode: EtterlatteBrevKode,
+            brevKode: Brevbakerkode,
             brevData: BrevData,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
-            sakId: Long,
+            sakId: SakId,
             spraak: Spraak,
             sakType: SakType,
         ): BrevbakerRequest =
@@ -45,7 +47,7 @@ data class BrevbakerRequest internal constructor(
             )
 
         private fun finnVergesNavn(
-            brevKode: EtterlatteBrevKode,
+            brevKode: Brevbakerkode,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,
         ): String? {
@@ -70,7 +72,7 @@ data class BrevbakerRequest internal constructor(
             return soekerOgEventuellVerge.verge != null || skalHaForelderVerge
         }
 
-        private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =
+        private fun erMigrering(brevKode: Brevbakerkode): Boolean =
             brevKode in
                 listOf(
                     EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,

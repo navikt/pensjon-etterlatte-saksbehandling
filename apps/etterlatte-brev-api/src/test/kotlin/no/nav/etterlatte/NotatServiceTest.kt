@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -152,7 +153,7 @@ class NotatServiceTest(
     }
 }
 
-private fun klageForInnstilling(sakId: Long): Klage =
+private fun klageForInnstilling(sakId: SakId): Klage =
     Klage
         .ny(
             sak =

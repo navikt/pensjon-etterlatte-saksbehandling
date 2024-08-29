@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -29,7 +30,7 @@ class GrunnlagKlient(
     private val baseUrl = config.getString("grunnlag.resource.url")
 
     internal suspend fun hentGrunnlagForSak(
-        sakid: Long,
+        sakid: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
         try {

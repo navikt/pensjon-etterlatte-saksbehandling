@@ -16,6 +16,9 @@ import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -32,6 +35,7 @@ class VedtaksbrevService(
     private val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
 
     fun hentBrev(id: BrevID): Brev {
         logger.info("Henter brev (id=$id)")
@@ -46,7 +50,7 @@ class VedtaksbrevService(
     }
 
     suspend fun opprettVedtaksbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
@@ -94,6 +98,7 @@ class VedtaksbrevService(
         } else if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
         } else if (!brev.mottaker.erGyldig()) {
+            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
         }
 
@@ -123,7 +128,7 @@ class VedtaksbrevService(
     }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -236,7 +241,7 @@ class UgyldigMottakerKanIkkeFerdigstilles(
     id: BrevID,
 ) : UgyldigForespoerselException(
         code = "UGYLDIG_MOTTAKER_BREV",
-        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
+        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id",
         meta =
             mapOf(
                 "id" to id,

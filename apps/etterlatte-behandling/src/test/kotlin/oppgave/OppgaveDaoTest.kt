@@ -49,6 +49,7 @@ internal class OppgaveDaoTest(
                 user,
                 DatabaseContextTest(dataSource),
                 mockedSakTilgangDao(),
+                null,
             ),
         )
     }
@@ -259,6 +260,16 @@ internal class OppgaveDaoTest(
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveNy.id, "merknad", Status.PAA_VENT)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
         assertEquals(Status.PAA_VENT, hentetOppgave?.status)
+    }
+
+    @Test
+    fun `kan endre enhet på oppgave`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enheter.PORSGRUNN.enhetNr)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(Enheter.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
     }
 
     @Test

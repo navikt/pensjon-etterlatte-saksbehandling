@@ -20,6 +20,7 @@ data class DetaljertBehandling(
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
+    val relatertBehandlingId: String?,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =

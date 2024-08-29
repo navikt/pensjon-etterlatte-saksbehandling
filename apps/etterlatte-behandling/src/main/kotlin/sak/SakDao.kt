@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
@@ -53,7 +54,7 @@ class SakDao(
     }
 
     fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: SakId,
         flyktning: Flyktning,
     ) {
         connectionAutoclosing.hentConnection {
@@ -87,7 +88,7 @@ class SakDao(
         }
 
     fun oppdaterAdresseBeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
         connectionAutoclosing.hentConnection { connection ->

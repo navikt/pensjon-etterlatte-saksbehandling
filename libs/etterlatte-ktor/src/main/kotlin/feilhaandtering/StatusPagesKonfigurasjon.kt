@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UkjentInternfeilException
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
@@ -52,7 +53,7 @@ class StatusPagesKonfigurasjon(
                 }
 
                 else -> {
-                    val mappetFeil = InternfeilException("En feil har skjedd.", cause)
+                    val mappetFeil = UkjentInternfeilException("En feil har skjedd.", cause)
                     call.application.log.loggInternfeilException(mappetFeil, call)
                     call.respond(mappetFeil)
                 }
@@ -133,11 +134,13 @@ class StatusPagesKonfigurasjon(
             this.error(
                 "En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.",
             )
-        } else {
+        } else if (internfeil is UkjentInternfeilException) {
             this.error(
-                internfeil.cause?.message ?: "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
-                internfeil.cause ?: internfeil,
+                internfeil.cause.message ?: internfeil.detail,
+                internfeil.cause,
             )
+        } else {
+            this.error(internfeil.detail, internfeil)
         }
     }
 
@@ -146,14 +149,21 @@ class StatusPagesKonfigurasjon(
         call: ApplicationCall,
     ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.info("En feil har oppstått ved deserialisering. Requestobjektet var {}", escape(hentRequestobjekt(call)), internfeil)
+            sikkerLogg.info(
+                "En feil har oppstått ved deserialisering. Requestobjektet var {}",
+                escape(hentRequestobjekt(call)),
+                internfeil,
+            )
             this.info(
                 "En feil har oppstått ved deserialisering i et endepunkt. Se sikkerlogg for mer detaljer. " +
                     "Feilen fikk status ${internfeil.status} til frontend.",
             )
         }
 
-        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil.cause ?: internfeil)
+        this.info(
+            "En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}",
+            internfeil.cause ?: internfeil,
+        )
     }
 
     private suspend fun ApplicationCall.respond(feil: ForespoerselException) {

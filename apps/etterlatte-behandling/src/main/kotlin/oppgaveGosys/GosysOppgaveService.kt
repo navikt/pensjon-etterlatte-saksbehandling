@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -43,7 +44,7 @@ interface GosysOppgaveService {
 
     suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern
 
@@ -195,7 +196,7 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern {
         logger.info("Starter flytting av gosys-oppgave (id=$oppgaveId) til Gjenny")

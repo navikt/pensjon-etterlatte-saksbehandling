@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
-import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingMotBehandling
 import java.util.UUID
 
 interface VilkaarsvurderingService {
@@ -41,7 +41,7 @@ class VilkaarsvurderingServiceImpl(
     ) = runBlocking {
         vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/kopier") {
             contentType(ContentType.Application.Json)
-            setBody(OpprettVilkaarsvurderingFraBehandling(behandlingViOmregnerFra))
+            setBody(OpprettVilkaarsvurderingMotBehandling(behandlingViOmregnerFra))
         }
     }
 

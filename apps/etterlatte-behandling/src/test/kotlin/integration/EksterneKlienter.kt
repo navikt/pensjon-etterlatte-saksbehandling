@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -33,12 +32,18 @@ import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkResponse
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -47,6 +52,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -56,11 +62,15 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -68,6 +78,9 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import java.time.LocalDate
 import java.util.UUID
 
@@ -100,15 +113,96 @@ class GrunnlagKlientTest : GrunnlagKlient {
                 ),
         )
 
+    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? =
+        Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+            meta = emptyMap<String, String>().toObjectNode(),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            opplysning =
+                Persongalleri(
+                    "soeker",
+                    "innsender",
+                    listOf("soesken"),
+                    listOf("avdoed"),
+                    listOf("gjenlevende"),
+                ),
+        )
+
     override suspend fun hentGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+    ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag() // evt Grunnlag.empty()
 
     override suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    override suspend fun hentAlleSakIder(fnr: String): Set<Long> = setOf(1L)
+
+    override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
+        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER)))
+
+    override suspend fun leggInnNyttGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        request: OppdaterGrunnlagRequest,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun lagreNyeSaksopplysninger(
+        behandlingId: UUID,
+        saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun lagreNyeSaksopplysningerBareSak(
+        sakId: SakId,
+        saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun leggInnNyttGrunnlagSak(
+        sakId: SakId,
+        opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo?,
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun laasTilGrunnlagIBehandling(
+        id: UUID,
+        forrigeBehandling: UUID,
+    ) {
+        // NO-OP
+    }
+
+    override val serviceName: String
+        get() = TODO("Not yet implemented")
+    override val beskrivelse: String
+        get() = TODO("Not yet implemented")
+    override val endpoint: String
+        get() = TODO("Not yet implemented")
+
+    override suspend fun ping(konsument: String?): PingResult {
+        TODO("Not yet implemented")
+    }
 }
 
 class BeregningKlientTest : BeregningKlient {
@@ -181,7 +275,7 @@ class VedtakKlientTest : VedtakKlient {
         }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
@@ -197,7 +291,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
 
     override suspend fun hentKravgrunnlag(
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: Long,
+        sakId: SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
         TODO("Not yet implemented")
@@ -223,38 +317,38 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId++)
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
     override suspend fun ferdigstillOversendelseBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
     override suspend fun journalfoerBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto = JournalpostIdDto(UUID.randomUUID().toString())
 
     override suspend fun distribuerBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto = BestillingsIdDto(UUID.randomUUID().toString())
 
     override suspend fun hentBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
@@ -438,23 +532,61 @@ class AxsysKlientTest : AxsysKlient {
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
-class VilkaarsvurderingTest : VilkaarsvurderingKlient {
-    override suspend fun kopierVilkaarsvurdering(
-        kopierTilBehandling: UUID,
-        kopierFraBehandling: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {
+    override suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? {
+        TODO("Not yet implemented")
     }
 
-    override val serviceName: String
-        get() = "Vilkårsvurderinglient"
-    override val beskrivelse: String
-        get() = "Snakker med vilkårsvurdering"
-    override val endpoint: String
-        get() = "vilkårsvurdering"
+    override suspend fun erMigrertYrkesskadefordel(
+        behandlingId: UUID,
+        sakId: Long,
+    ): MigrertYrkesskadefordel {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lagreVilkaarsvurderingResultatvanlig(
+        behandlingId: UUID,
+        vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ): StatusOppdatertDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vilkaarId: UUID,
+    ): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering {
+        TODO("Not yet implemented")
+    }
 }
 
 class KodeverkKlientTest : KodeverkKlient {

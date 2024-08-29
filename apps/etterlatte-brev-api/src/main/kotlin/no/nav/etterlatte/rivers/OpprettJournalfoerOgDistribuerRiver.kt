@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevID
@@ -16,6 +15,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAtt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
@@ -68,7 +68,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
-        sakId: Long,
+        sakId: SakId,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
         packet: JsonMessage,
@@ -85,17 +85,17 @@ class OpprettJournalfoerOgDistribuerRiver(
                         brevKodeMapping = { brevKode },
                         brevtype = brevKode.brevtype,
                     ) {
-                        when (brevKode.redigering) {
-                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> {
+                        when (brevKode) {
+                            Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
                                 opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                             }
-                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                            Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
                             }
-                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> {
+                            Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettOmstillingsstoenadInformasjonDoedsfall(
                                     sakId,
@@ -133,7 +133,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private fun RapidsConnection.svarSuksess(
-        sakId: Long,
+        sakId: SakId,
         brevID: BrevID,
         brevkode: Brevkoder,
     ) {
@@ -154,7 +154,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
-        sakId: Long,
+        sakId: SakId,
         borIutland: Boolean,
         erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
@@ -164,7 +164,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-        sakId: Long,
+        sakId: SakId,
         borIutland: Boolean,
     ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
         borIutland,
@@ -172,14 +172,14 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
-        sakId: Long,
+        sakId: SakId,
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
         borIutland,
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: Long): List<Avdoed> =
+    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
 }
 

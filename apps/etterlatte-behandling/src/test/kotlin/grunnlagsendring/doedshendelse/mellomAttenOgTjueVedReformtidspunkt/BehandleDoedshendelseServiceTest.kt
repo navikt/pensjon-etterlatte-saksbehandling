@@ -14,7 +14,6 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
@@ -198,7 +197,7 @@ class BehandleDoedshendelseServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
+        every { toggle.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             emptyList()
         every { doedshendelserProducer.sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(any(), any(), any()) } just runs

@@ -26,9 +26,11 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -74,12 +76,12 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
     fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: SakId,
         flyktning: Flyktning,
     )
 
@@ -110,7 +112,7 @@ class SakServiceImpl(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun oppdaterFlyktning(
-        sakId: Long,
+        sakId: SakId,
         flyktning: Flyktning,
     ) {
         dao.oppdaterFlyktning(sakId, flyktning)
@@ -193,7 +195,7 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident)) }
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
@@ -201,6 +203,7 @@ class SakServiceImpl(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.opprettGrunnlag,
             )
         }
         return sak
@@ -355,13 +358,13 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
-        sakId: Long,
+        sakId: SakId,
     ) {
         val erSkjermet =
             runBlocking {

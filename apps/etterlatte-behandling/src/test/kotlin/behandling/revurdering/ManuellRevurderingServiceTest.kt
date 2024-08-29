@@ -151,7 +151,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         coVerify {
             grunnlagService.hentPersongalleri(any())
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
         }
         verify {
             oppgaveService.opprettOppgave(
@@ -276,7 +276,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
             coVerify {
                 grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(any(), any())
+                grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -313,7 +313,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
                 migreringKlient = mockk(),
-                vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+                vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             )
 
@@ -378,8 +378,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
             coVerify {
                 grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any())
-                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id)
+                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any(), any())
+                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id, any())
             }
             verify {
                 oppgaveService.hentOppgaverForSak(sak.id)
@@ -473,7 +473,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
             grunnlagService.hentPersongalleri(any())
         }
         verify {
@@ -965,7 +965,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             hendelseDao = applicationContext.hendelseDao,
             behandlingHendelser = applicationContext.behandlingsHendelser,
             migreringKlient = mockk(),
-            vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+            vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         )
 }

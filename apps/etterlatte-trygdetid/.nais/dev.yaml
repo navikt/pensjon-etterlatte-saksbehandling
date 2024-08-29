@@ -76,6 +76,10 @@ spec:
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-grunnlag
+    - name: PEN_URL
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi
+    - name: PEN_CLIENT_ID
+      value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -97,3 +101,4 @@ spec:
         - application: etterlatte-grunnlag
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-pen-q2.dev-fss-pub.nais.io

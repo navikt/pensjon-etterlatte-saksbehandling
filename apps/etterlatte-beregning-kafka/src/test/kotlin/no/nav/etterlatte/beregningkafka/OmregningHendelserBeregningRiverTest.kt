@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -45,7 +44,6 @@ class OmregningHendelserBeregningRiverTest {
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -69,7 +67,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -95,7 +92,6 @@ class OmregningHendelserBeregningRiverTest {
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -119,7 +115,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -144,7 +139,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
 
             assertNotNull(resultat)

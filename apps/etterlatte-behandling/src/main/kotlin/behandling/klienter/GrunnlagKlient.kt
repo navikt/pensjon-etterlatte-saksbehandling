@@ -293,7 +293,7 @@ class GrunnlagKlientImpl(
                         clientId = clientId,
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/oppdater-grunnlag",
                     ),
-                postBody = "",
+                postBody = request.toJson(),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
@@ -312,7 +312,7 @@ class GrunnlagKlientImpl(
                         clientId = clientId,
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/nye-opplysninger",
                     ),
-                postBody = "",
+                postBody = saksopplysninger.toJson(),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
@@ -331,7 +331,7 @@ class GrunnlagKlientImpl(
                         clientId = clientId,
                         url = "$resourceApiUrl/grunnlag/grunnlag/sak/$sakId/nye-opplysninger",
                     ),
-                postBody = "",
+                postBody = saksopplysninger.toJson(),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },

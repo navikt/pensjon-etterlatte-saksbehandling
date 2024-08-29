@@ -62,6 +62,7 @@ interface GrunnlagKlient : Pingable {
     suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun oppdaterGrunnlag(
@@ -74,6 +75,7 @@ interface GrunnlagKlient : Pingable {
     suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
     suspend fun lagreNyeSaksopplysningerBareSak(
@@ -228,6 +230,7 @@ class GrunnlagKlientImpl(
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(
@@ -237,7 +240,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -304,6 +307,7 @@ class GrunnlagKlientImpl(
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
+        brukerTokenInfo: BrukerTokenInfo?,
     ) {
         downstreamResourceClient
             .post(

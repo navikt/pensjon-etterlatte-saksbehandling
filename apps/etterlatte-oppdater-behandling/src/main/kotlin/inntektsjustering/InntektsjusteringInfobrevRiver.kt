@@ -10,22 +10,22 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
+import no.nav.etterlatte.rapidsandrivers.antall
+import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
+import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.regulering.kjoerIBatch
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.InntektsjusteringHendelseType
-import rapidsandrivers.RapidEvents.ANTALL
-import rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
-import rapidsandrivers.RapidEvents.KJOERING
-import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
-import rapidsandrivers.antall
-import rapidsandrivers.ekskluderteSaker
-import rapidsandrivers.kjoering
-import rapidsandrivers.saker
 
 internal class InntektsjusteringInfobrevRiver(
     rapidsConnection: RapidsConnection,
@@ -73,7 +73,8 @@ internal class InntektsjusteringInfobrevRiver(
             },
             haandterSaker = { sakerSomSkalInformeres ->
                 sakerSomSkalInformeres.saker.forEach {
-                    journalfoerOgDistribuer(it, kjoering, packet, context)
+                    // TODO: sjekk på inntekt
+                    opprettBrev(it, kjoering, packet, context)
                 }
             },
         )
@@ -81,13 +82,13 @@ internal class InntektsjusteringInfobrevRiver(
         logger.info("$kjoering: Ferdig")
     }
 
-    private fun journalfoerOgDistribuer(
+    private fun opprettBrev(
         sak: Sak,
         kjoering: String,
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("$kjoering: Journalfører og distribuerer infobrev for sak ${sak.id}")
+        logger.info("$kjoering: Klar til å opprette, journalføre og distribuere brev for sakId ${sak.id}")
         behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
 
         packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)

@@ -17,6 +17,9 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
@@ -26,9 +29,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import rapidsandrivers.RapidEvents.ANTALL
-import rapidsandrivers.RapidEvents.KJOERING
-import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import java.time.LocalDate
 import java.util.UUID
 

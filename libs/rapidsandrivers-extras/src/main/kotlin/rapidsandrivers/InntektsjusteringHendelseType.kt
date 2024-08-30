@@ -1,4 +1,4 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 

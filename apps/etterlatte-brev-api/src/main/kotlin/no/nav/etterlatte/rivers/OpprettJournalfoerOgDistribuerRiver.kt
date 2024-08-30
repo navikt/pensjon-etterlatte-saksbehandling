@@ -63,8 +63,9 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-            rapidsConnection.svarSuksess(packet, brevId)
+            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            context.publish(packet.toJson())
         }
     }
 
@@ -104,7 +105,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 )
                             }
                             Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                opprettOmstillingsstoenadInntektsjustering()
+                                OmstillingsstoenadInntektsjustering.fra()
                             }
                             else -> ManueltBrevData()
                         }
@@ -136,16 +137,6 @@ class OpprettJournalfoerOgDistribuerRiver(
         return brevID
     }
 
-    private fun RapidsConnection.svarSuksess(
-        packet: JsonMessage,
-        brevID: BrevID,
-    ) {
-        logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-        packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-        packet.brevId = brevID
-        publish(packet.toJson())
-    }
-
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
         sakId: SakId,
         borIutland: Boolean,
@@ -171,8 +162,6 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland,
         hentAvdoede(sakId),
     )
-
-    private fun opprettOmstillingsstoenadInntektsjustering() = OmstillingsstoenadInntektsjustering.fra()
 
     private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> =
         grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede

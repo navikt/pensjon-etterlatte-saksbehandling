@@ -10,7 +10,6 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.brevId
-import no.nav.etterlatte.rapidsandrivers.brevKode
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,6 +34,7 @@ internal class OppdaterInntektsjusteringBrevDistribuert(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BREV_KODE) }
             validate { it.interestedIn(KJOERING) }
+            validate { it.demandValue(BREV_KODE, Brevkoder.OMS_INNTEKTSJUSTERING.name) }
         }
     }
 
@@ -44,15 +44,12 @@ internal class OppdaterInntektsjusteringBrevDistribuert(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val brevkode = packet.brevKode
-        if (brevkode == Brevkoder.OMS_INNTEKTSJUSTERING.name) {
-            logger.info("Oppdaterer brev distribuert for inntektsjustering ${packet.sakId}, ${packet.brevId}")
-            try {
-                behandlingService.lagreKjoering(packet.sakId, KjoeringStatus.FERDIGSTILT, packet.kjoering)
-            } catch (e: Exception) {
-                logger.error("Kunne ikke oppdatere distribuert brev for sak ${packet.sakId} brevid: ${packet.brevId}")
-                throw OppdaterInntektsjusteringException("Kan ikke oppdatere brev distribuert for ${packet.sakId}", e)
-            }
+        logger.info("Oppdaterer brev distribuert for inntektsjustering ${packet.sakId}, ${packet.brevId}")
+        try {
+            behandlingService.lagreKjoering(packet.sakId, KjoeringStatus.FERDIGSTILT, packet.kjoering)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke oppdatere distribuert brev for sak ${packet.sakId} brevid: ${packet.brevId}", e)
+            throw OppdaterInntektsjusteringException("Kan ikke oppdatere brev distribuert for ${packet.sakId}", e)
         }
     }
 }

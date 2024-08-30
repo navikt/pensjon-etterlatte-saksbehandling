@@ -43,7 +43,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.ktor.route.logger
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
@@ -124,6 +124,8 @@ class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
     private val url: String,
 ) : BehandlingService {
+    private val logger = LoggerFactory.getLogger(BehandlingServiceImpl::class.java)
+
     override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
         runBlocking {
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {

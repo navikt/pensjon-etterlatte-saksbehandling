@@ -8,14 +8,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
-import rapidsandrivers.InntektsjusteringHendelseType
-import rapidsandrivers.RapidEvents.ANTALL
-import rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
-import rapidsandrivers.RapidEvents.KJOERING
-import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 
 class InntektsjusteringInfobrevRiver {
     private val kjoering = "infobrev-inntektsjustering-2025"

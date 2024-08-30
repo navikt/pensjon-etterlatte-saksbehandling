@@ -1,10 +1,10 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
-import rapidsandrivers.RapidEvents.ANTALL
-import rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
-import rapidsandrivers.RapidEvents.KJOERING
-import rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 
 object RapidEvents {
     const val KJOERING = "kjoering"

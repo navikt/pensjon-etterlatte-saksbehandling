@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.BadRequestException
 import no.nav.etterlatte.ExternalUser
 import no.nav.etterlatte.Kontekst
@@ -11,7 +10,6 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -438,7 +436,6 @@ class OppgaveService(
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
         oppgaverForSak.forEach {
-            oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
@@ -703,16 +700,6 @@ class FristTilbakeITid(
 ) : UgyldigForespoerselException(
         code = "FRIST_TILBAKE_I_TID",
         detail = "Frist kan ikke settes tilbake i tid",
-        meta = mapOf("oppgaveId" to oppgaveId),
-    )
-
-class OppgaveAlleredeTildeltSaksbehandler(
-    oppgaveId: UUID,
-    saksbehandler: String?,
-) : ForespoerselException(
-        status = HttpStatusCode.Conflict.value,
-        code = "OPPGAVE_ALLEREDE_TILDELT_SAKSBEHANDLER",
-        detail = "Oppgaven er allerede tildelt saksbehandler $saksbehandler",
         meta = mapOf("oppgaveId" to oppgaveId),
     )
 

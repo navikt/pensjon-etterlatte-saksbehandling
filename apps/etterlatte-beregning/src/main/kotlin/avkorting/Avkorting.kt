@@ -5,7 +5,6 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
@@ -95,23 +94,27 @@ data class Avkorting(
 
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        behandlingstype: BehandlingType,
+        innvilgelse: Boolean,
         virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
-    ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, true, bruker, opphoerFom).beregnAvkortingForstegangs(
-            beregning,
-            sanksjoner,
-        )
-    } else {
-        // TODO parameter innvilgelse vil ikke være tilstrekkelig når vi skal revurdere for å endre første virk..
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, false, bruker, opphoerFom).beregnAvkortingRevurdering(
-            beregning,
-            sanksjoner,
-        )
+    ): Avkorting {
+        val oppdatertMedNyInntekt =
+            oppdaterMedInntektsgrunnlag(
+                nyttGrunnlag,
+                virkningstidspunkt,
+                innvilgelse,
+                bruker,
+                opphoerFom,
+            )
+        return if (innvilgelse) {
+            // TODO denne kan fjernes?
+            oppdatertMedNyInntekt.beregnAvkortingForstegangs(beregning, sanksjoner)
+        } else {
+            oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
+        }
     }
 
     fun oppdaterMedInntektsgrunnlag(
@@ -121,7 +124,6 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
     ): Avkorting {
-        // TODO kreve at det er inneværende år?
         val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(virkningstidspunkt, innvilgelse)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
@@ -388,6 +390,9 @@ data class Avkorting(
         innvilgelse: Boolean,
     ): Aarsoppgjoer {
         val funnet = aarsoppgjoer.find { it.aar == virkningstidspunkt.year }
+
+        // TODO valider at nyt år krever virk 1.1
+
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
             aar = virkningstidspunkt.year,

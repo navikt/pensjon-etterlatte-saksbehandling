@@ -47,10 +47,12 @@ class AvkortingService(
 
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
-            val nyAvkorting = kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+            val nyAvkorting =
+                kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
-            val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
+            val reberegnetAvkorting =
+                reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
@@ -87,7 +89,7 @@ class AvkortingService(
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 avkortingGrunnlagLagre,
-                behandling.behandlingType,
+                behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
                     code = "MANGLER_VIRK",
                     detail = "Behandling mangler virkningstidspunkt",

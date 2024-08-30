@@ -15,6 +15,8 @@ object AvkortingValider {
     ) {
         skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(behandling, avkorting)
         skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(avkorting, nyInntekt, behandling)
+
+        // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
     }
 
     private fun skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(

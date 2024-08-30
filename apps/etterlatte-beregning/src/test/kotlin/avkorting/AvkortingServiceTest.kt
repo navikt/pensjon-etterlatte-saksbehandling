@@ -387,7 +387,7 @@ internal class AvkortingServiceTest {
                 sanksjonService.hentSanksjon(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    behandling.behandlingType,
+                    true,
                     behandling.virkningstidspunkt!!.dato,
                     bruker,
                     beregning,
@@ -447,7 +447,7 @@ internal class AvkortingServiceTest {
                 sanksjonService.hentSanksjon(revurderingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    revurdering.behandlingType,
+                    false,
                     revurdering.virkningstidspunkt!!.dato,
                     bruker,
                     beregning,

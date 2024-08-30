@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.UkjentInternfeilException
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
@@ -53,7 +52,7 @@ class StatusPagesKonfigurasjon(
                 }
 
                 else -> {
-                    val mappetFeil = UkjentInternfeilException("En feil har skjedd.", cause)
+                    val mappetFeil = UkjentInternfeilException("En feil har skjedd: ${cause::class.java.canonicalName}", cause)
                     call.application.log.loggInternfeilException(mappetFeil, call)
                     call.respond(mappetFeil)
                 }
@@ -191,3 +190,8 @@ class StatusPagesKonfigurasjon(
         return requestobjekt
     }
 }
+
+private class UkjentInternfeilException(
+    override val detail: String,
+    override val cause: Throwable,
+) : InternfeilException(detail, cause)

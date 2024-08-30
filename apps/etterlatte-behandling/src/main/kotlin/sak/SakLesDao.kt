@@ -76,7 +76,7 @@ class SakLesDao(
                     ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
                     ${if (sakType == null) "" else " AND s.saktype = ?"}
-                    ${if (loependeFom == null) "" else " AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id AND b.opphoer_fom >= ?)"}
+                    ${if (loependeFom == null) "" else " AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id AND b.opphoer_fom > ?)"}
                     ORDER BY id ASC
                     LIMIT $antall
                         """.trimMargin(),

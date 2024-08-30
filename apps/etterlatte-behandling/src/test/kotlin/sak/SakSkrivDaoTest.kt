@@ -261,6 +261,19 @@ internal class SakSkrivDaoTest(
 
             saker.size shouldBe 1
             saker shouldContain sak3
+
+            val sakerNegative =
+                sakLesDao.hentSaker(
+                    "",
+                    4,
+                    emptyList(),
+                    emptyList(),
+                )
+
+            sakerNegative.size shouldBe 3
+            sakerNegative shouldContain sak1
+            sakerNegative shouldContain sak2
+            sakerNegative shouldContain sak3
         }
 
         @Test

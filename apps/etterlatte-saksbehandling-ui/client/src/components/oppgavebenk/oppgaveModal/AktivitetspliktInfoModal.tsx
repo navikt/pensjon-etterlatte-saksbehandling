@@ -1,47 +1,47 @@
 import {
-    Alert,
-    BodyLong,
-    Button,
-    Heading,
-    HStack,
-    Label,
-    Modal,
-    Radio,
-    ReadMore,
-    Select,
-    Textarea,
-    VStack,
+  Alert,
+  BodyLong,
+  Button,
+  Heading,
+  HStack,
+  Label,
+  Modal,
+  Radio,
+  ReadMore,
+  Select,
+  Textarea,
+  VStack,
 } from '@navikt/ds-react'
-import React, {useEffect, useState} from 'react'
-import {ferdigstillOppgave, hentOppgave} from '~shared/api/oppgaver'
-import {useApiCall} from '~shared/hooks/useApiCall'
-import {isPending} from '@reduxjs/toolkit'
-import {isSuccess, mapFailure} from '~shared/api/apiUtils'
-import {ApiErrorAlert} from '~ErrorBoundary'
-import {OppgaveDTO, Oppgavestatus} from '~shared/types/oppgave'
-import {useForm} from 'react-hook-form'
+import React, { useEffect, useState } from 'react'
+import { ferdigstillOppgave, hentOppgave } from '~shared/api/oppgaver'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { isPending } from '@reduxjs/toolkit'
+import { isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { useForm } from 'react-hook-form'
 import {
-    AktivitetspliktUnntakType,
-    AktivitetspliktVurderingType,
-    AktivitetspliktVurderingValues,
-    AktivitetspliktVurderingValuesDefault,
-    IAktivitetspliktVurdering,
-    tekstAktivitetspliktUnntakType,
-    tekstAktivitetspliktVurderingType,
+  AktivitetspliktUnntakType,
+  AktivitetspliktVurderingType,
+  AktivitetspliktVurderingValues,
+  AktivitetspliktVurderingValuesDefault,
+  IAktivitetspliktVurdering,
+  tekstAktivitetspliktUnntakType,
+  tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
 import {
-    hentAktivitspliktVurderingForOppgave,
-    opprettAktivitspliktAktivitetsgrad,
-    opprettAktivitspliktUnntak,
+  hentAktivitspliktVurderingForOppgave,
+  opprettAktivitspliktAktivitetsgrad,
+  opprettAktivitspliktUnntak,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import {Toast} from '~shared/alerts/Toast'
-import {ControlledRadioGruppe} from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import {ControlledDatoVelger} from '~shared/components/datoVelger/ControlledDatoVelger'
-import {JaNei} from '~shared/types/ISvar'
-import {PersonButtonLink} from '~components/person/lenker/PersonButtonLink'
-import {PersonOversiktFane} from '~components/person/Person'
-import {AktivitetspliktVurderingVisning} from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
+import { Toast } from '~shared/alerts/Toast'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { JaNei } from '~shared/types/ISvar'
+import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
+import { PersonOversiktFane } from '~components/person/Person'
+import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 
 export const AktivitetspliktInfoModal = ({
   oppgave,

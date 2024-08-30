@@ -1,37 +1,37 @@
 import styled from 'styled-components'
-import React, {useContext, useEffect, useMemo, useState} from 'react'
-import {SidebarPanel} from '~shared/components/Sidebar'
-import {useApiCall} from '~shared/hooks/useApiCall'
-import {IBehandlingReducer} from '~store/reducers/BehandlingReducer'
-import {oppdaterSjekkliste, oppdaterSjekklisteItem} from '~shared/api/sjekkliste'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
+import { SidebarPanel } from '~shared/components/Sidebar'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekkliste'
 import {
-    Alert,
-    BodyLong,
-    BodyShort,
-    Button,
-    Checkbox,
-    ConfirmationPanel,
-    Heading,
-    Link,
-    Textarea,
-    TextField,
-    VStack,
+  Alert,
+  BodyLong,
+  BodyShort,
+  Button,
+  Checkbox,
+  ConfirmationPanel,
+  Heading,
+  Link,
+  Textarea,
+  TextField,
+  VStack,
 } from '@navikt/ds-react'
-import {ConfigContext} from '~clientConfig'
-import {behandlingErRedigerbar} from '~components/behandling/felles/utils'
-import {ISjekklisteItem} from '~shared/types/Sjekkliste'
+import { ConfigContext } from '~clientConfig'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import debounce from 'lodash/debounce'
-import {useSjekkliste, useSjekklisteValideringsfeil} from '~components/behandling/sjekkliste/useSjekkliste'
-import {useAppDispatch} from '~store/Store'
-import {updateSjekkliste, updateSjekklisteItem} from '~store/reducers/SjekklisteReducer'
-import {ExternalLinkIcon, PencilIcon} from '@navikt/aksel-icons'
-import {IBehandlingStatus, IBehandlingsType} from '~shared/types/IDetaljertBehandling'
-import {SakType} from '~shared/types/sak'
-import {useSelectorOppgaveUnderBehandling} from '~store/selectors/useSelectorOppgaveUnderBehandling'
-import {usePersonopplysninger} from '~components/person/usePersonopplysninger'
+import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useAppDispatch } from '~store/Store'
+import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
+import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { SakType } from '~shared/types/sak'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-import {isFailureHandler} from '~shared/api/IsFailureHandler'
-import {useInnloggetSaksbehandler} from '../useInnloggetSaksbehandler'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()

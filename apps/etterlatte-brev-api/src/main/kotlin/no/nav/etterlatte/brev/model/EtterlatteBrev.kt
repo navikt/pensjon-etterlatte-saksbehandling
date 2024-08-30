@@ -223,17 +223,17 @@ class ManglerAvdoedBruktTilTrygdetid :
 class FantIkkeIdentTilTrygdetidBlantAvdoede :
     UgyldigForespoerselException(
         code = "FANT_IKKE_TRYGDETID_IDENT_BLANT_AVDOEDE",
-        detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak",
+        detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak.",
     )
 
 class OverstyrtTrygdetidManglerAvdoed :
     UgyldigForespoerselException(
         code = "OVERSTYRT_TRYGDETID_MANGLER_AVDOED",
-        detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
+        detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid.",
     )
 
 class IngenStoetteForUkjentAvdoed :
     UgyldigForespoerselException(
         code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
-        detail = "Brevløsningen støtter ikke ukjent avdød",
+        detail = "Brevløsningen støtter ikke ukjent avdød.",
     )

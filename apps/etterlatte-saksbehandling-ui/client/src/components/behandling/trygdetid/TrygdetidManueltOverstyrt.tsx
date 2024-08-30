@@ -13,15 +13,18 @@ import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,
   trygdetidId,
+  behandling,
   ident,
   beregnetTrygdetid,
   oppdaterTrygdetid,
 }: {
   behandlingId: string
+  behandling: IDetaljertBehandling
   trygdetidId: string
   ident: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
@@ -66,8 +69,12 @@ export const TrygdetidManueltOverstyrt = ({
     opprettOverstyrtTrygdetid({ behandlingId, overskriv: true }, () => window.location.reload())
   }
 
+  const erManueltOpprettLoependePesys = (): boolean => {
+    return !!behandling.id && behandling.kilde === Vedtaksloesning.PESYS && !!behandling.revurderingsaarsak
+  }
+
   const identErIGrunnlag = personopplysninger?.avdoede?.find((person) => person.opplysning.foedselsnummer === ident)
-  if (!identErIGrunnlag) {
+  if (!identErIGrunnlag && !erManueltOpprettLoependePesys) {
     return (
       <>
         {ident === 'UKJENT_AVDOED' ? (

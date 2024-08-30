@@ -94,6 +94,8 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         grunnbeloep,
                         beregningsperioder,
                         trygdetid,
+                        false,
+                        true,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 erBosattUtlandet =

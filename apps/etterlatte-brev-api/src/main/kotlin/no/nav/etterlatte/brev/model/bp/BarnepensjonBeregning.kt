@@ -28,10 +28,11 @@ internal fun barnepensjonBeregning(
     beregningsperioder: List<BarnepensjonBeregningsperiode>,
     trygdetid: List<TrygdetidDto>,
     erForeldreloes: Boolean = false,
+    erMigreringUkjentForelder: Boolean = false,
 ): BarnepensjonBeregning {
     val sisteBeregningsperiode = utbetalingsinfo.beregningsperioder.maxBy { periode -> periode.datoFOM }
     val mappedeTrygdetider =
-        mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder)
+        mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder, erMigreringUkjentForelder)
     val forskjelligTrygdetid =
         finnForskjelligTrygdetid(
             mappedeTrygdetider,
@@ -78,6 +79,7 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
                     )
                 }
             }.associateBy { it.ident }
+    // TODO: DETTE GÅR IKKE BRA MED MIGRERING
     if (anvendteTrygdetiderIdenter.isEmpty()) {
         throw ManglerAvdoedBruktTilTrygdetid()
     }

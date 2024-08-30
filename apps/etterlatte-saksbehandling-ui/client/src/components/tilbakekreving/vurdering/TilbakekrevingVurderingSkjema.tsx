@@ -106,11 +106,6 @@ export function TilbakekrevingVurderingSkjema({
   const beloepIBehold = () =>
     watch().beloepBehold ? watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD : false
 
-  const skalHaForhaandsvarsel = () =>
-    watch().forhaandsvarsel
-      ? [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(watch().forhaandsvarsel!)
-      : false
-
   const rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt = () =>
     watch().rettsligGrunnlag
       ? [
@@ -150,15 +145,14 @@ export function TilbakekrevingVurderingSkjema({
             }
           />
 
-          {skalHaForhaandsvarsel() && (
-            <ControlledDatoVelger
-              name="forhaandsvarselDato"
-              label="Forhåndsvarsel dato"
-              control={control}
-              readOnly={!redigerbar}
-              shouldUnregister={true}
-            />
-          )}
+          <ControlledDatoVelger
+            name="forhaandsvarselDato"
+            label="Forhåndsvarseldato / vedtaksdato"
+            description="Angi forhåndsvarseldato, eller vedtaksdato dersom forhåndsvarsel ikke ble sendt ut."
+            control={control}
+            readOnly={!redigerbar}
+            shouldUnregister={true}
+          />
 
           <Textarea
             {...register('beskrivelse')}

@@ -251,7 +251,7 @@ internal class SakSkrivDaoTest(
             )
 
             val saker =
-                sakRepo.hentSaker(
+                sakLesDao.hentSaker(
                     "",
                     4,
                     emptyList(),

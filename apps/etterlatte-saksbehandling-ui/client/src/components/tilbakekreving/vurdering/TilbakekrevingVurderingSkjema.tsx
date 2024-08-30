@@ -108,7 +108,11 @@ export function TilbakekrevingVurderingSkjema({
 
   const skalHaForhaandsvarsel = () =>
     watch().forhaandsvarsel
-      ? [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(watch().forhaandsvarsel!)
+      ? [
+          TilbakekrevingVarsel.MED_I_ENDRINGSBREV,
+          TilbakekrevingVarsel.EGET_BREV,
+          TilbakekrevingVarsel.AAPENBART_UNOEDVENDIG, // saksbehandler setter vedtaksdato i disse tilfellene
+        ].includes(watch().forhaandsvarsel!)
       : false
 
   const rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt = () =>
@@ -153,7 +157,7 @@ export function TilbakekrevingVurderingSkjema({
           {skalHaForhaandsvarsel() && (
             <ControlledDatoVelger
               name="forhaandsvarselDato"
-              label="Forhåndsvarsel dato"
+              label="Forhåndsvarsel dato / vedtaksdato"
               control={control}
               readOnly={!redigerbar}
               shouldUnregister={true}

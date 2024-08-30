@@ -104,7 +104,7 @@ class BeregningsGrunnlagService(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
+                            institusjonsopphold =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
                             beregningsMetodeFlereAvdoede =
@@ -173,7 +173,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag.institusjonsoppholdBeregningsgrunnlag,
+                forrigeGrunnlag.institusjonsopphold,
                 revurderingVirk,
             )
 

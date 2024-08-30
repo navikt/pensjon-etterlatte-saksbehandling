@@ -8,8 +8,8 @@ import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBereg
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   oppdaterBehandlingsstatus,
-  oppdaterBeregningsGrunnlag,
   oppdaterBeregning,
+  oppdaterBeregningsGrunnlag,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -21,7 +21,12 @@ import Soeskenjustering, {
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import { Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsMetodeBeregningsgrunnlag,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -94,37 +99,29 @@ const BeregningsgrunnlagBarnepensjon = () => {
   }
 
   const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => {
-    const grunnlag = {
-      ...behandling.beregningsGrunnlag,
-      beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag,
-      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
-      soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
+      beregningsMetode: beregningsMetode,
     }
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
       (result) => dispatch(oppdaterBeregningsGrunnlag(result))
     )
   }
 
   const oppdaterSoeskenJustering = (soeskenGrunnlag: Soeskengrunnlag) => {
-    const grunnlag = {
-      ...behandling.beregningsGrunnlag,
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag,
-      beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
-      beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
     }
 
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
       (result) => dispatch(oppdaterBeregningsGrunnlag(result))
     )
@@ -163,7 +160,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                     behandling={behandling}
                     sakType={SakType.BARNEPENSJON}
                     beregningsgrunnlag={behandling.beregningsGrunnlag}
-                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag}
+                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
                   />
                   {skalViseSoeskenjustering && (
                     <Soeskenjustering

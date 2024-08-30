@@ -55,7 +55,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
   /* For å håndtere første aktivering og deaktivering av overstyrt beregning */
   useEffect(() => {
-    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && overstyrtBeregning)
+    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && !!overstyrtBeregning)
   }, [overstyrtBeregning])
 
   return (

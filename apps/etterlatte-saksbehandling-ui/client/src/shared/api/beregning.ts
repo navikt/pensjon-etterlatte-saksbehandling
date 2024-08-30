@@ -2,8 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   Beregning,
   BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSPostDto,
-  BeregningsGrunnlagPostDto,
+  LagreBeregningsGrunnlagDto,
   OverstyrBeregning,
   OverstyrBeregningGrunnlagPostDTO,
 } from '~shared/types/Beregning'
@@ -19,7 +18,7 @@ export const opprettEllerEndreBeregning = async (behandlingId: string): Promise<
 
 export const lagreBeregningsGrunnlag = async (args: {
   behandlingId: string
-  grunnlag: BeregningsGrunnlagPostDto | BeregningsGrunnlagOMSPostDto
+  grunnlag: LagreBeregningsGrunnlagDto | undefined
 }): Promise<ApiResponse<BeregningsGrunnlagDto>> => {
   return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingId}`, { ...args.grunnlag })
 }

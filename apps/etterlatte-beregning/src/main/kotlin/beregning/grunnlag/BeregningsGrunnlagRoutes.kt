@@ -61,7 +61,11 @@ fun Route.beregningsGrunnlag(
                         behandlingId,
                         brukerTokenInfo,
                     )
-                call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
+                if (grunnlag != null) {
+                    call.respond(HttpStatusCode.OK, grunnlag)
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
             }
         }
 

@@ -1,14 +1,13 @@
 import React from 'react'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import {
-  BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSPostDto,
-  BeregningsMetode,
   InstitusjonsoppholdGrunnlagDTO,
   InstitusjonsoppholdIBeregning,
+  LagreBeregningsGrunnlagDto,
   ReduksjonBP,
   ReduksjonKey,
   ReduksjonOMS,
+  toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
 import { Box, Button, HelpText, HStack, Select, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -21,17 +20,16 @@ import { SakType } from '~shared/types/sak'
 import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initalInstitusjonsoppholdPeriode,
   konverterTilSisteDagIMaaneden,
   replacePeriodePaaIndex,
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
-  behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
   eksisterendePeriode?: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>
   indexTilEksisterendePeriode?: number
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
@@ -40,15 +38,17 @@ interface Props {
 }
 
 export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
-  behandling,
   sakType,
-  beregningsgrunnlag,
   indexTilEksisterendePeriode,
   eksisterendePeriode,
   institusjonsopphold,
   paaAvbryt,
   paaLagre,
 }: Props) => {
+  const behandling = useBehandling()
+  if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
+
+  const beregningsgrunnlag = behandling?.beregningsGrunnlag
   const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
 
   const dispatch = useAppDispatch()
@@ -62,7 +62,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
   } = useForm<PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>>({
     defaultValues: eksisterendePeriode
       ? eksisterendePeriode
-      : initalInstitusjonsoppholdPeriode(behandling, institusjonsopphold?.[institusjonsopphold?.length - 1]),
+      : initalInstitusjonsoppholdPeriode(behandling!!, institusjonsopphold?.[institusjonsopphold?.length - 1]),
   })
 
   const validerReduksjon = (reduksjon: ReduksjonKey): string | undefined => {
@@ -78,10 +78,10 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
       tom: institusjonsoppholdPeriode.tom && konverterTilSisteDagIMaaneden(institusjonsoppholdPeriode.tom),
     }
 
-    const grunnlag =
+    const grunnlag: LagreBeregningsGrunnlagDto =
       eksisterendePeriode && institusjonsopphold && indexTilEksisterendePeriode !== undefined
         ? {
-            beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+            ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
             institusjonsopphold: replacePeriodePaaIndex(
               formatertInstitusjonsoppholdPeriode,
               institusjonsopphold,
@@ -89,7 +89,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
             ),
           }
         : {
-            beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
+            ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
             institusjonsopphold: !!institusjonsopphold?.length
               ? [...institusjonsopphold, formatertInstitusjonsoppholdPeriode]
               : [formatertInstitusjonsoppholdPeriode],
@@ -98,7 +98,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
     lagreBeregningsGrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
       (result) => {
         dispatch(oppdaterBeregningsGrunnlag(result))

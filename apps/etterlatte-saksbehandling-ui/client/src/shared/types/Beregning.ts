@@ -78,10 +78,26 @@ export interface OverstyrBeregningsperiode {
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
-  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
+}
+
+export interface LagreBeregningsGrunnlagDto {
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+  soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto | undefined
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag | undefined
+  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
+}
+
+export function toLagreBeregningsGrunnlagDto(beregningsgrunnlag?: BeregningsGrunnlagDto): LagreBeregningsGrunnlagDto {
+  return {
+    institusjonsopphold: beregningsgrunnlag?.institusjonsopphold,
+    soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning,
+    beregningsMetode: beregningsgrunnlag?.beregningsMetode,
+    beregningsMetodeFlereAvdoede: beregningsgrunnlag?.beregningsMetodeFlereAvdoede,
+  }
 }
 
 export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
@@ -95,18 +111,6 @@ export type OverstyrBeregningGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<Over
 
 export interface OverstyrBeregningGrunnlagPostDTO {
   perioder: OverstyrBeregningGrunnlagDTO
-}
-
-export interface BeregningsGrunnlagPostDto {
-  soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
-  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
-}
-
-export interface BeregningsGrunnlagOMSPostDto {
-  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
 }
 
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]

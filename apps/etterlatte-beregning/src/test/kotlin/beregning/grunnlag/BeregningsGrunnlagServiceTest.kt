@@ -241,7 +241,7 @@ internal class BeregningsGrunnlagServiceTest {
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
@@ -316,7 +316,7 @@ internal class BeregningsGrunnlagServiceTest {
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
@@ -436,7 +436,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = behandlingsId,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -934,7 +934,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+            institusjonsopphold = institusjonsoppholdBeregningsgrunnlag,
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
 

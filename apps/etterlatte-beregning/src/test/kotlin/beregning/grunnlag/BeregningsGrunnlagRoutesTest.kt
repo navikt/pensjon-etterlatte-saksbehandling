@@ -164,7 +164,7 @@ internal class BeregningsGrunnlagRoutesTest {
                         tidspunkt = Tidspunkt.now(),
                     ),
                 soeskenMedIBeregning = listOf(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
             )
 
@@ -200,7 +200,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingId = id,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
 
@@ -407,7 +407,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -441,7 +441,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -500,7 +500,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnBeregningsGrunnlag(nye) } returns
@@ -508,7 +508,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingId = nye,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.lagreBeregningsGrunnlag(any()) } returns true

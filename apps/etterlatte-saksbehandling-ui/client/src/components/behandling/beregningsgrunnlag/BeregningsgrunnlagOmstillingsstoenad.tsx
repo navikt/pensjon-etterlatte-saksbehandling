@@ -13,7 +13,13 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
-import { Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsGrunnlagDto,
+  BeregningsMetodeBeregningsgrunnlag,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -61,17 +67,16 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
 
   const oppdaterBeregningsMetode = (
     beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
+    beregningsgrunnlag: BeregningsGrunnlagDto | undefined
   ) => {
-    const grunnlag = {
-      ...beregningsgrunnlag,
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
       beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag,
     }
     lagreBeregningsGrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
       (result) => {
         dispatch(oppdaterBeregningsGrunnlag(result))
@@ -99,22 +104,20 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
                 oppdaterBeregningsMetode={(beregningsMetode) =>
-                  oppdaterBeregningsMetode(beregningsMetode, behandling.beregningsGrunnlag!!)
+                  oppdaterBeregningsMetode(beregningsMetode, behandling?.beregningsGrunnlag)
                 }
                 eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
-
               <Box maxWidth="70rem">
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
               </Box>
-
               <InstitusjonsoppholdBeregningsgrunnlag
                 redigerbar={redigerbar}
                 behandling={behandling}
                 sakType={SakType.OMSTILLINGSSTOENAD}
                 beregningsgrunnlag={behandling.beregningsGrunnlag}
-                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag}
+                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
               />
             </>
           ),

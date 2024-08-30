@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.omregning.OmregningDao
@@ -63,6 +64,7 @@ internal class SakSkrivDaoTest(
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
+        Kontekst.set(null)
     }
 
     @AfterEach

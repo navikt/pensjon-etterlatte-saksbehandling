@@ -805,7 +805,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal endre status til ny ved endring av enhet`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
             referanse = UUID.randomUUID().toString(),
             sakId = opprettetSak.id,

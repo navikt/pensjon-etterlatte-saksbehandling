@@ -174,7 +174,7 @@ class AktivitetspliktService(
         aktivitet: LagreAktivitetspliktAktivitet,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID? = null,
-        sakId: Long? = null,
+        sakId: SakId? = null,
     ) {
         if (aktivitet.tom != null && aktivitet.tom < aktivitet.fom) {
             throw TomErFoerFomException()
@@ -215,7 +215,7 @@ class AktivitetspliktService(
         aktivitetId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID? = null,
-        sakId: Long? = null,
+        sakId: SakId? = null,
     ) {
         if (behandlingId != null) {
             val behandling =

@@ -285,7 +285,7 @@ class BeregnBarnepensjonService(
         beregningsGrunnlag: BeregningsGrunnlag,
         trygdetider: List<TrygdetidDto>,
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
-        fom: LocalDate,
+        virkFom: LocalDate,
         tom: LocalDate?,
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull =
@@ -298,7 +298,7 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Søsken i kullet",
                         )
                     },
-                    fom,
+                    virkFom,
                     tom,
                 )
             } else {
@@ -312,7 +312,7 @@ class BeregnBarnepensjonService(
                             AnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
                                 trygdetider,
                                 beregningsGrunnlag,
-                                fom,
+                                virkFom,
                             ),
                         kilde = beregningsGrunnlag.kilde,
                         beskrivelse = "Konstant anvendt trygdetider",
@@ -327,7 +327,7 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Anvendte trygdetider",
                         )
                     },
-                    fom,
+                    virkFom,
                     tom,
                 )
             },

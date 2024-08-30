@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
@@ -25,7 +26,7 @@ interface VilkaarsvurderingKlientDao {
 
     suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
     ): MigrertYrkesskadefordel
 
     suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
@@ -79,7 +80,7 @@ class VilkaarsvurderingKlientDaoImpl(
 
     override suspend fun erMigrertYrkesskadefordel(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
     ): MigrertYrkesskadefordel =
         downstreamResourceClient
             .get(

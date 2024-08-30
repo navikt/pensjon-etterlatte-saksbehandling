@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
@@ -47,7 +46,6 @@ import java.util.UUID
 class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
     private val doedshendelseKontrollpunktService: DoedshendelseKontrollpunktService,
-    private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,

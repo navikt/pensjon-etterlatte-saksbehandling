@@ -42,7 +42,7 @@ class SaksbehandlerServiceImplTest(
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
         service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient)
-        nyKontekstMedBrukerOgDatabase(user, dataSource)
+        nyKontekstMedBrukerOgDatabase(user.also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
     @AfterEach

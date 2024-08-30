@@ -11,6 +11,7 @@ class OppdragSender(
     private val replyQueue: String,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun sendOppdrag(
         oppdrag: Oppdrag,
         prioritet: Prioritet = Prioritet.NORMAL,

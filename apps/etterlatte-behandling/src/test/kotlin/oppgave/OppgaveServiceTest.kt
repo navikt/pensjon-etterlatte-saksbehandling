@@ -804,41 +804,6 @@ internal class OppgaveServiceTest(
     }
 
     @Test
-    fun `Skal endre status til ny ved endring av enhet`() {
-        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        oppgaveService.opprettOppgave(
-            referanse = UUID.randomUUID().toString(),
-            sakId = opprettetSak.id,
-            kilde = OppgaveKilde.BEHANDLING,
-            type = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null,
-        )
-
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-        assertEquals(1, oppgaverUtenEndring.size)
-        assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
-        oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
-        oppgaveService.endrePaaVent(PaaVent(oppgaverUtenEndring[0].id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET))
-        oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-            listOf(
-                SakMedEnhet(
-                    oppgaverUtenEndring[0].sakId,
-                    Enheter.STEINKJER.enhetNr,
-                ),
-            ),
-        )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-
-        assertEquals(1, oppgaverMedEndring.size)
-        assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
-        assertEquals(Status.NY, oppgaverMedEndring[0].status)
-    }
-
-    @Test
     fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
         val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(

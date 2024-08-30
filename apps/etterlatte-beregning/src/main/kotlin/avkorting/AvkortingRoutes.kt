@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -52,7 +53,7 @@ fun Route.avkorting(
                     avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
-                        avkortingGrunnlag,
+                        AvkortingGrunnlagRequest(avkortingGrunnlag),
                     )
                 call.respond(avkorting)
             }

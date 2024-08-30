@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.AfterEach
@@ -376,7 +377,11 @@ internal class AvkortingServiceTest {
             every { lagretAvkorting.toDto(any()) } returns avkortingDto
 
             runBlocking {
-                service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, endretGrunnlag) shouldBe avkortingDto
+                service.beregnAvkortingMedNyttGrunnlag(
+                    behandlingId,
+                    bruker,
+                    AvkortingGrunnlagRequest(endretGrunnlag),
+                ) shouldBe avkortingDto
             }
 
             coVerify(exactly = 1) {
@@ -436,7 +441,11 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
-                service.beregnAvkortingMedNyttGrunnlag(revurderingId, bruker, endretGrunnlag) shouldBe avkortingDto
+                service.beregnAvkortingMedNyttGrunnlag(
+                    revurderingId,
+                    bruker,
+                    AvkortingGrunnlagRequest(endretGrunnlag),
+                ) shouldBe avkortingDto
             }
 
             coVerify(exactly = 1) {
@@ -472,7 +481,11 @@ internal class AvkortingServiceTest {
 
             runBlocking {
                 assertThrows<Exception> {
-                    service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, avkortinggrunnlagLagre())
+                    service.beregnAvkortingMedNyttGrunnlag(
+                        behandlingId,
+                        bruker,
+                        AvkortingGrunnlagRequest(avkortinggrunnlagLagre()),
+                    )
                 }
             }
 

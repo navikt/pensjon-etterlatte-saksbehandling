@@ -80,6 +80,11 @@ data class AvkortingGrunnlagKildeDto(
     val ident: String,
 )
 
+data class AvkortingGrunnlagRequest(
+    val innevaerendeAar: AvkortingGrunnlagLagreDto,
+    val nesteAar: AvkortingGrunnlagLagreDto? = null,
+)
+
 data class AvkortetYtelseDto(
     val id: UUID? = null,
     val fom: YearMonth,

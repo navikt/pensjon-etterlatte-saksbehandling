@@ -148,9 +148,9 @@ class AvkortingRoutesTest {
                     behandlingsId,
                     any(),
                     withArg {
-                        it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
-                        it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
-                        it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
+                        it.innevaerendeAar.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
+                        it.innevaerendeAar.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
+                        it.innevaerendeAar.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                     },
                 )
             }

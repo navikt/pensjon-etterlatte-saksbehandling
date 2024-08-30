@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -73,7 +73,7 @@ class AvkortingService(
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        avkortingGrunnlagLagre: AvkortingGrunnlagLagreDto,
+        request: AvkortingGrunnlagRequest,
     ): AvkortingDto {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
@@ -81,14 +81,15 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInntekt(avkortingGrunnlagLagre, avkorting, behandling)
+        validerInntekt(request.innevaerendeAar, avkorting, behandling)
+        request.nesteAar?.let { validerInntekt(it, avkorting, behandling) }
 
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
-        val beregnetAvkorting =
+        var beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
-                avkortingGrunnlagLagre,
+                request.innevaerendeAar,
                 behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
                     code = "MANGLER_VIRK",
@@ -99,6 +100,22 @@ class AvkortingService(
                 sanksjoner,
                 behandling.opphoerFraOgMed,
             )
+        if (request.nesteAar != null) {
+            // TODO unittest
+            beregnetAvkorting =
+                beregnetAvkorting.beregnAvkortingMedNyttGrunnlag(
+                    request.nesteAar!!,
+                    behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
+                        code = "MANGLER_VIRK",
+                        detail = "Behandling mangler virkningstidspunkt",
+                    ),
+                    brukerTokenInfo,
+                    beregning,
+                    sanksjoner,
+                    behandling.opphoerFraOgMed,
+                )
+        }
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
         val lagretAvkorting =

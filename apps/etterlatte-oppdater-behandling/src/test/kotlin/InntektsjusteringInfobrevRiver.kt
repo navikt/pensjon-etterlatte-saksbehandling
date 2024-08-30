@@ -12,13 +12,16 @@ import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 class InntektsjusteringInfobrevRiver {
     private val kjoering = "infobrev-inntektsjustering-2025"
+    private val loependeFom = YearMonth.of(2024, 1)
 
     @Test
     fun `kan ta imot infobrevmelding og kalle paa behandling`() {
@@ -35,10 +38,10 @@ class InntektsjusteringInfobrevRiver {
 
         val inspector =
             TestRapid().apply { InntektsjusteringInfobrevRiver(this, behandlingServiceMock, featureToggleService) }
-        inspector.sendTestMessage(genererInfobrevMelding())
+        inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
 
         verify(exactly = 1) {
-            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD)
+            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
             // TODO: verify journalfoerOgDistribuer
         }
     }
@@ -59,13 +62,13 @@ class InntektsjusteringInfobrevRiver {
         val inspector =
             TestRapid().apply { InntektsjusteringInfobrevRiver(this, behandlingServiceMock, featureToggleService) }
 
-        inspector.sendTestMessage(genererInfobrevMelding())
+        inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
         verify(exactly = 0) {
-            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD)
+            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
         }
     }
 
-    private fun genererInfobrevMelding() =
+    private fun genererInfobrevMelding(loependeFom: YearMonth) =
         JsonMessage
             .newMessage(
                 mapOf(
@@ -74,6 +77,7 @@ class InntektsjusteringInfobrevRiver {
                     ANTALL to 12000,
                     SPESIFIKKE_SAKER to listOf<Long>(),
                     EKSKLUDERTE_SAKER to listOf(Long),
+                    LOEPENDE_FOM to loependeFom,
                 ),
             ).toJson()
 }

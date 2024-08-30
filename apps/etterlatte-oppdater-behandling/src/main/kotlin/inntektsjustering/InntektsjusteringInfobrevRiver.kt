@@ -40,9 +40,9 @@ internal class InntektsjusteringInfobrevRiver(
         initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.SEND_INFOBREV) {
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
+            validate { it.requireKey(LOEPENDE_FOM) }
             validate { it.interestedIn(SPESIFIKKE_SAKER) }
             validate { it.interestedIn(EKSKLUDERTE_SAKER) }
-            validate { it.interestedIn(LOEPENDE_FOM) }
         }
     }
 
@@ -60,7 +60,7 @@ internal class InntektsjusteringInfobrevRiver(
 
         val antall = packet.antall
         val sakType = SakType.OMSTILLINGSSTOENAD
-        val loependeFom = packet.loependeFom.takeIf { true }
+        val loependeFom = packet.loependeFom
 
         kjoerIBatch(
             logger = logger,

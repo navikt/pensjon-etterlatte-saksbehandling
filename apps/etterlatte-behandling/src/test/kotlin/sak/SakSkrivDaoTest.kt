@@ -226,7 +226,7 @@ internal class SakSkrivDaoTest(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = sak1.id,
                     prosesstype = Prosesstype.MANUELL,
-                    opphoerFraOgMed = YearMonth.of(2024, 12),
+                    opphoerFraOgMed = YearMonth.of(2024, 1),
                 ),
             )
 
@@ -236,7 +236,7 @@ internal class SakSkrivDaoTest(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = sak2.id,
                     prosesstype = Prosesstype.MANUELL,
-                    opphoerFraOgMed = YearMonth.of(2025, 1),
+                    opphoerFraOgMed = YearMonth.of(2024, 12),
                 ),
             )
 
@@ -246,7 +246,7 @@ internal class SakSkrivDaoTest(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = sak3.id,
                     prosesstype = Prosesstype.MANUELL,
-                    opphoerFraOgMed = YearMonth.of(2026, 1),
+                    opphoerFraOgMed = YearMonth.of(2025, 1),
                 ),
             )
 
@@ -259,8 +259,7 @@ internal class SakSkrivDaoTest(
                     loependeFom = YearMonth.of(2024, 12),
                 )
 
-            saker.size shouldBe 2
-            saker shouldContain sak2
+            saker.size shouldBe 1
             saker shouldContain sak3
         }
 

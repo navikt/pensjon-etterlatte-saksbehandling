@@ -35,6 +35,7 @@ import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/be
 import { SakType } from '~shared/types/sak'
 import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
@@ -131,7 +132,8 @@ const BeregningsgrunnlagBarnepensjon = () => {
       () => dispatch(oppdaterBeregningsGrunnlag(grunnlag))
     )
   }
-  const harKunEnJuridiskForelder = personopplysninger?.annenForelder?.vurdering == 'KUN_EN_REGISTRERT_JURIDISK_FORELDER'
+  const harKunEnJuridiskForelder =
+    personopplysninger?.annenForelder?.vurdering == AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   const tidligsteAvdoede: IPdlPerson = requireNotNull(
     personopplysninger?.avdoede

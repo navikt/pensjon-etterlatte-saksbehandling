@@ -9,7 +9,7 @@ import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/fa
 import { Result } from '~shared/api/apiUtils'
 
 import { ILand } from '~utils/kodeverk'
-import { AnnenForelderBoks } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelder'
+import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelderSkjema'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export interface PropsFamilieforhold {
@@ -56,7 +56,7 @@ export const FamilieforholdBarnepensjon = ({
           />
         ))}
         {enJuridiskForelderEnabled && alleAvdoede.length == 1 && alleGjenlevende.length == 0 && (
-          <AnnenForelderBoks behandlingId={behandlingId} personopplysninger={personopplysninger} />
+          <AnnenForelderSkjema behandlingId={behandlingId} personopplysninger={personopplysninger} />
         )}
       </FamilieforholdVoksne>
       <Soeskenliste familieforhold={familieforhold} soekerFnr={soeker.opplysning.foedselsnummer} />

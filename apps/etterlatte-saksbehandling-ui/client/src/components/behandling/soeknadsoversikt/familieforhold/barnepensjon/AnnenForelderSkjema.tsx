@@ -2,7 +2,7 @@ import { FloppydiskIcon, PencilIcon, PersonIcon } from '@navikt/aksel-icons'
 import { BodyShort, Button, Heading, Radio, Textarea } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
-import { AnnenForelder, Personopplysninger } from '~shared/types/grunnlag'
+import { AnnenForelder, Personopplysninger, teksterAnnenForelderVurdering } from '~shared/types/grunnlag'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
@@ -31,7 +31,7 @@ type Props = {
   personopplysninger: Personopplysninger
 }
 
-export const AnnenForelderBoks = ({ behandlingId, personopplysninger }: Props) => {
+export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props) => {
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
   const [redigerStatus, redigerAnnenForelderRequest] = useApiCall(redigerAnnenForelder)
 
@@ -99,16 +99,13 @@ export const AnnenForelderBoks = ({ behandlingId, personopplysninger }: Props) =
               errorVedTomInput="Du må velge et svar"
               legend=""
               hideLegend={true}
-              radios={
-                <>
-                  <Radio size="small" value="KUN_EN_REGISTRERT_JURIDISK_FORELDER">
-                    {formaterEnumTilLesbarString('KUN_EN_REGISTRERT_JURIDISK_FORELDER')}
+              radios={Object.entries(teksterAnnenForelderVurdering).map(([verdi, tekst]) => {
+                return (
+                  <Radio key={verdi} value={verdi}>
+                    {tekst}
                   </Radio>
-                  <Radio size="small" value="UKJENT_FORELDER_IKKE_NORSK_FNR">
-                    {formaterEnumTilLesbarString('UKJENT_FORELDER_IKKE_NORSK_FNR')}
-                  </Radio>
-                </>
-              }
+                )
+              })}
             />
             <Textarea
               {...register('begrunnelse', {

@@ -64,6 +64,12 @@ export interface AnnenForelder {
 
 export enum AnnenForelderVurdering {
   KUN_EN_REGISTRERT_JURIDISK_FORELDER = 'KUN_EN_REGISTRERT_JURIDISK_FORELDER',
-  UKJENT_FORELDER_IKKE_NORSK_FNR = 'UKJENT_FORELDER_IKKE_NORSK_FNR',
-  IKKE_SAMSVAR_MED_PDL = 'IKKE_SAMSVAR_MED_PDL',
+  FORELDER_UTEN_IDENT_I_FREG = 'FORELDER_UTEN_IDENT_I_FREG',
+  AVDOED_FORELDER_UTEN_IDENT_I_FREG = 'AVDOED_FORELDER_UTEN_IDENT_I_FREG',
 }
+
+export const teksterAnnenForelderVurdering: Record<AnnenForelderVurdering, string> = {
+  KUN_EN_REGISTRERT_JURIDISK_FORELDER: 'Kun én registrert juridisk forelder',
+  FORELDER_UTEN_IDENT_I_FREG: 'Forelder uten ident i FREG',
+  AVDOED_FORELDER_UTEN_IDENT_I_FREG: 'Avdød forelder uten ident i FREG',
+} as const

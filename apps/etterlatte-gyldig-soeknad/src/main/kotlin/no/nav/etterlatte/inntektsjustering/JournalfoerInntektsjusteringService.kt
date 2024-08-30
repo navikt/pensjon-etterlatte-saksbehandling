@@ -120,7 +120,7 @@ class JournalfoerInntektsjusteringService(
 
 data class ArkiverInntektsjustering(
     val id: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val aar: Int,
     val arbeidsinntekt: Int,
     val naeringsinntekt: Int,

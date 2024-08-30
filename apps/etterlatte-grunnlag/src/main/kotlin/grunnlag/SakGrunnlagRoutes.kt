@@ -41,7 +41,7 @@ fun Route.sakGrunnlagRoute(
             }
         }
 
-        post("oppdater-grunnlag") {
+        post("/oppdater-grunnlag") {
             withSakId(behandlingKlient, skrivetilgang = true) {
                 val request = call.receive<OppdaterGrunnlagRequest>()
                 grunnlagService.oppdaterGrunnlagForSak(request)

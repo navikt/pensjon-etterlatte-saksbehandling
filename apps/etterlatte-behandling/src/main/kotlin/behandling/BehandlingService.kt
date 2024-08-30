@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
@@ -861,6 +862,7 @@ internal class BehandlingServiceImpl(
                         grunnlagService.leggTilNyeOpplysninger(
                             behandlingId,
                             NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                            HardkodaSystembruker.opprettGrunnlag,
                         )
                     }
 

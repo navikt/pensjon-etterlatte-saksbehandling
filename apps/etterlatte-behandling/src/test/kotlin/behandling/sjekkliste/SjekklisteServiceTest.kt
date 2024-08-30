@@ -25,7 +25,7 @@ class SjekklisteServiceTest {
 
     @BeforeEach
     fun setup() {
-        nyKontekstMedBruker(user)
+        nyKontekstMedBruker(user.also { every { it.name() } returns this::class.java.simpleName })
     }
 
     @Test

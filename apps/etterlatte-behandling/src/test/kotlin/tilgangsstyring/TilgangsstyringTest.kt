@@ -275,7 +275,8 @@ class TilgangsstyringTest {
             val client =
                 runServer(mockOAuth2Server) {
                     intercept(ApplicationCallPipeline.Call) {
-                        val context = lagContext(user, sakTilgangDao = sakTilgangDao)
+                        val context =
+                            lagContext(user.also { every { it.name() } returns this::class.java.simpleName }, sakTilgangDao = sakTilgangDao)
 
                         withContext(
                             Dispatchers.Default +

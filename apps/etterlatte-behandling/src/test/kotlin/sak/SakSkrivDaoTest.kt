@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.omregning.OmregningDao
@@ -17,10 +18,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -39,10 +38,11 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SakDaoTest(
+internal class SakSkrivDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakLesDao: SakLesDao
     private lateinit var tilgangService: TilgangService
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
@@ -54,7 +54,9 @@ internal class SakDaoTest(
 
     @BeforeAll
     fun beforeAll() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
+        sakLesDao = SakLesDao(connectionAutoclosing)
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
@@ -63,6 +65,7 @@ internal class SakDaoTest(
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
+        Kontekst.set(null)
     }
 
     @AfterEach
@@ -150,21 +153,10 @@ internal class SakDaoTest(
     }
 
     @Test
-    fun `kan lagre og hente flyktning`() {
-        val flyktning = Flyktning(true, LocalDate.of(2024, 1, 1), "Migrert", Grunnlagsopplysning.Pesys.create())
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-
-        sakRepo.oppdaterFlyktning(opprettSak.id, flyktning)
-        val oppdatertFlyktning = sakRepo.finnFlyktningForSak(opprettSak.id)
-
-        Assertions.assertEquals(flyktning, oppdatertFlyktning)
-    }
-
-    @Test
     fun `Returnerer null dersom flyktning ikke finnes`() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-        Assertions.assertEquals(sakRepo.finnFlyktningForSak(opprettSak.id), null)
+        Assertions.assertEquals(sakLesDao.finnFlyktningForSak(opprettSak.id), null)
     }
 
     @Test
@@ -175,10 +167,10 @@ internal class SakDaoTest(
         val alleSaker = listOf(sak1, sak2, sak3)
 
         val alleIder = alleSaker.map { it.id }
-        val hentetAlleSaker = sakRepo.hentSakerMedIder(alleIder)
-        val hentetKunSak1 = sakRepo.hentSakerMedIder(listOf(sak1.id))
-        val hentingIngenSaker = sakRepo.hentSakerMedIder(emptyList())
-        val hentingUkjentSak = sakRepo.hentSakerMedIder(listOf(alleIder.sum()))
+        val hentetAlleSaker = sakLesDao.hentSakerMedIder(alleIder)
+        val hentetKunSak1 = sakLesDao.hentSakerMedIder(listOf(sak1.id))
+        val hentingIngenSaker = sakLesDao.hentSakerMedIder(emptyList())
+        val hentingUkjentSak = sakLesDao.hentSakerMedIder(listOf(alleIder.sum()))
 
         Assertions.assertEquals(alleSaker, hentetAlleSaker)
         Assertions.assertEquals(listOf(sak1), hentetKunSak1)
@@ -190,13 +182,13 @@ internal class SakDaoTest(
     fun `Skal kunne oppdatere enhet`() {
         val fnr = "fnr"
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val funnetSaker = sakRepo.finnSaker(fnr)
+        val funnetSaker = sakLesDao.finnSaker(fnr)
         Assertions.assertEquals(1, funnetSaker.size)
         Assertions.assertEquals(sak.id, funnetSaker[0].id)
         sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).also {
             Assertions.assertNotNull(it)
         }
-        val funnetSakermed2saker = sakRepo.finnSaker(fnr)
+        val funnetSakermed2saker = sakLesDao.finnSaker(fnr)
         Assertions.assertEquals(2, funnetSakermed2saker.size)
 
         val sakerMedNyEnhet =
@@ -206,7 +198,7 @@ internal class SakDaoTest(
 
         sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
 
-        val sakerMedEgenAnsattEnhet = sakRepo.finnSaker(fnr)
+        val sakerMedEgenAnsattEnhet = sakLesDao.finnSaker(fnr)
         sakerMedEgenAnsattEnhet.forEach {
             Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, it.enhet)
         }
@@ -220,7 +212,7 @@ internal class SakDaoTest(
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id), emptyList())
+            val saker = sakLesDao.hentSaker("", 2, listOf(sak2.id, sak3.id), emptyList())
 
             saker.size shouldBe 2
             saker.forEach { it.id shouldNotBe sak1.id }
@@ -279,7 +271,7 @@ internal class SakDaoTest(
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
+            val saker = sakLesDao.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
 
             saker.size shouldBe 2
             saker shouldContain sak3
@@ -293,7 +285,7 @@ internal class SakDaoTest(
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
             val saker =
-                sakRepo.hentSaker(
+                sakLesDao.hentSaker(
                     "",
                     4,
                     spesifikkeSaker = listOf(sak1.id, sak3.id),
@@ -310,7 +302,7 @@ internal class SakDaoTest(
             sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 3, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("", 3, emptyList(), emptyList())
 
             saker.size shouldBe 3
         }
@@ -321,7 +313,7 @@ internal class SakDaoTest(
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 1, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("K1", 1, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -333,7 +325,7 @@ internal class SakDaoTest(
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 1
         }
@@ -345,7 +337,7 @@ internal class SakDaoTest(
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -359,7 +351,7 @@ internal class SakDaoTest(
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -370,7 +362,7 @@ internal class SakDaoTest(
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
+            val saker = sakLesDao.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -382,15 +374,15 @@ internal class SakDaoTest(
             sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
 
-            sakRepo
+            sakLesDao
                 .hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
                 .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
 
-            sakRepo
+            sakLesDao
                 .hentSaker("", 100, emptyList(), emptyList(), SakType.OMSTILLINGSSTOENAD)
                 .map { it.ident } shouldBe listOf("fnr4")
 
-            val saker = sakRepo.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)
+            val saker = sakLesDao.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)
             saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
             saker.size shouldBe 2
         }

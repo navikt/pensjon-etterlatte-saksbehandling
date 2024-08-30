@@ -48,7 +48,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {
             val sak =
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
             val behandling =
                 applicationContext.behandlingFactory

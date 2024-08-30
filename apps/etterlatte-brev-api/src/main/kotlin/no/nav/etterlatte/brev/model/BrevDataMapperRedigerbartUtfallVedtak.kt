@@ -203,6 +203,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             BarnepensjonForeldreloesRedigerbar.fra(
                 etterbetaling.await(),
                 utbetalingsinfo = utbetalingsinfo.await(),
+                avdoede = avdoede,
                 systemkilde,
                 loependeIPesys,
             )

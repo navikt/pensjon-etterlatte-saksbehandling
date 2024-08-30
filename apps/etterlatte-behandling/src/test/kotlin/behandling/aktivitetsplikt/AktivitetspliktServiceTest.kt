@@ -77,7 +77,7 @@ class AktivitetspliktServiceTest {
             oppgaveService,
             featureToggleService,
         )
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
             every { ident() } returns "Z999999"
@@ -419,6 +419,7 @@ class AktivitetspliktServiceTest {
                         oppgaveId = null,
                         aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                         fom = LocalDate.now(),
+                        tom = null,
                         opprettet = kilde,
                         endret = kilde,
                         beskrivelse = "Beskrivelse",

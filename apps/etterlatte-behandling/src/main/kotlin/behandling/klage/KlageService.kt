@@ -45,7 +45,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
@@ -125,7 +125,7 @@ class ManglerSaksbehandlerException(
 
 class KlageServiceImpl(
     private val klageDao: KlageDao,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,

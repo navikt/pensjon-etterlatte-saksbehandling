@@ -244,7 +244,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
-        coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
+        coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
     }
 
     @Test
@@ -301,7 +301,7 @@ class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
@@ -330,7 +330,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
     }
 
     @Test
@@ -390,7 +390,7 @@ class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
@@ -438,7 +438,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
             oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
@@ -546,7 +546,7 @@ class BehandlingFactoryTest {
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } just runs
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
         every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
@@ -588,7 +588,7 @@ class BehandlingFactoryTest {
         coVerify {
             vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
-            grunnlagService.leggInnNyttGrunnlag(any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }
     }
 
@@ -612,7 +612,7 @@ class BehandlingFactoryTest {
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } just runs
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
         every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
@@ -651,7 +651,7 @@ class BehandlingFactoryTest {
         }
         coVerify {
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
-            grunnlagService.leggInnNyttGrunnlag(any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }
     }
 
@@ -712,7 +712,7 @@ class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
@@ -799,7 +799,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
@@ -867,7 +867,7 @@ class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
@@ -955,7 +955,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
@@ -1054,8 +1054,8 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
         coVerify {
-            grunnlagService.leggInnNyttGrunnlag(any(), any())
-            grunnlagService.leggTilNyeOpplysninger(any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
+            grunnlagService.leggTilNyeOpplysninger(any(), any(), any())
         }
     }
 

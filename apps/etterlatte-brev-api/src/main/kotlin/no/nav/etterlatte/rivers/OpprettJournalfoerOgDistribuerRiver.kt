@@ -105,7 +105,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 )
                             }
                             Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                OmstillingsstoenadInntektsjustering.fra()
+                                OmstillingsstoenadInntektsjustering()
                             }
                             else -> ManueltBrevData()
                         }

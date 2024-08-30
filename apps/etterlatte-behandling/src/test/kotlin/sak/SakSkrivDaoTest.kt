@@ -226,7 +226,7 @@ internal class SakSkrivDaoTest(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = sak1.id,
                     prosesstype = Prosesstype.MANUELL,
-                    opphoerFraOgMed = YearMonth.of(2024, 1),
+                    opphoerFraOgMed = YearMonth.of(2024, 12),
                 ),
             )
 

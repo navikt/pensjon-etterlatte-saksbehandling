@@ -50,7 +50,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -104,7 +104,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtid
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseJob
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.next
@@ -157,8 +156,6 @@ import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
-import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImplVv
-import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -179,14 +176,6 @@ private fun skjermingHttpClient(config: Config) =
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
         azureAppScope = config.getString("skjerming.azure.scope"),
-    )
-
-private fun grunnlagHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("grunnlag.azure.scope"),
     )
 
 private fun navAnsattHttpClient(config: Config) =
@@ -267,7 +256,6 @@ internal class ApplicationContext(
             brukerIdent = { finnBrukerIdent() },
         ),
     val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
-    val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
@@ -277,7 +265,7 @@ internal class ApplicationContext(
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
+    val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
@@ -291,7 +279,6 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val vvGrunnlagKlient: GrunnlagKlientVV = GrunnlagKlientImplVv(config, httpClient()),
     val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao = VilkaarsvurderingKlientDaoImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -338,7 +325,6 @@ internal class ApplicationContext(
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
-    val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
@@ -353,14 +339,14 @@ internal class ApplicationContext(
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
-    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
+    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
-            grunnlagKlient = grunnlagKlientObo,
+            grunnlagKlient = grunnlagKlientImpl,
             behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
@@ -372,7 +358,7 @@ internal class ApplicationContext(
             generellbehandlingDao,
             oppgaveService,
             behandlingService,
-            grunnlagKlientObo,
+            grunnlagKlientImpl,
             hendelseDao,
             saksbehandlerInfoDao,
         )
@@ -437,7 +423,7 @@ internal class ApplicationContext(
             aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
             behandlingService = behandlingService,
-            grunnlagKlient = grunnlagKlientObo,
+            grunnlagKlient = grunnlagKlientImpl,
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
@@ -464,7 +450,7 @@ internal class ApplicationContext(
             axsysKlient,
             navAnsattKlient,
             skjermingKlient,
-            grunnlagKlient,
+            grunnlagKlientImpl,
             pdlTjenesterKlient,
             klageKlient,
             tilbakekrevingKlient,
@@ -491,7 +477,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdltjenesterKlient = pdlTjenesterKlient,
-            grunnlagKlient = grunnlagKlient,
+            grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
             brukerService = enhetService,
             doedshendelseService = doedshendelseService,
@@ -511,13 +497,12 @@ internal class ApplicationContext(
                     pesysKlient = pesysKlient,
                     behandlingService = behandlingService,
                 ),
-            featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
-            pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
+            pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
 
@@ -599,7 +584,7 @@ internal class ApplicationContext(
         VilkaarsvurderingService(
             VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
             behandlingService,
-            vvGrunnlagKlient,
+            grunnlagKlientImpl,
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)

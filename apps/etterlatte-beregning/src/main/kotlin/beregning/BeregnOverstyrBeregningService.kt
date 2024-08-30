@@ -125,7 +125,7 @@ class BeregnOverstyrBeregningService(
                             beskrivelse = "Overstyr beregning grunnlag",
                         )
                     },
-                fom = fom,
+                virkFom = fom,
                 tom = null,
             ),
     )

@@ -126,10 +126,20 @@ data class TrygdetidsperioderPesys(
     val alderspensjon: TrygdetidsPeriodeListe?,
 )
 
-fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder () =
+fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder() =
     TrygdetidsperioderPesys(
-        ufoeretrygd = TrygdetidsPeriodeListe(trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map { it.tilTrygdetidsPeriode() }),
-        alderspensjon = TrygdetidsPeriodeListe(trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map { it.tilTrygdetidsPeriode() })
+        ufoeretrygd =
+            TrygdetidsPeriodeListe(
+                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                    it.tilTrygdetidsPeriode()
+                },
+            ),
+        alderspensjon =
+            TrygdetidsPeriodeListe(
+                trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                    it.tilTrygdetidsPeriode()
+                },
+            ),
     )
 
 data class TrygdetidsPeriodeListe(
@@ -154,7 +164,7 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = Grunnlagsopplysning.Pesys(Tidspunkt.now())
+        kilde = Grunnlagsopplysning.Pesys(Tidspunkt.now()),
     )
 
 fun toNorskLocalDate(instant: Instant): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
@@ -164,7 +174,7 @@ class TrygdetidServiceImpl(
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
-    private val pesysKlient: PesysKlient
+    private val pesysKlient: PesysKlient,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -172,7 +182,10 @@ class TrygdetidServiceImpl(
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
 
-    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(fnr: String, brukerTokenInfo: BrukerTokenInfo) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
+    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
+        fnr: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
 
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,

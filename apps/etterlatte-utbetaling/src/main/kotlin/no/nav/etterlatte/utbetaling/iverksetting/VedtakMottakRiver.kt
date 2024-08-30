@@ -34,6 +34,7 @@ class VedtakMottakRiver(
     private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {

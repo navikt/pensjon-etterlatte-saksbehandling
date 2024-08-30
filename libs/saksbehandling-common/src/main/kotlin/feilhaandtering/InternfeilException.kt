@@ -19,3 +19,8 @@ open class InternfeilException(
             meta = null,
         )
 }
+
+class UkjentInternfeilException(
+    override val detail: String,
+    override val cause: Throwable,
+) : InternfeilException(detail, cause)

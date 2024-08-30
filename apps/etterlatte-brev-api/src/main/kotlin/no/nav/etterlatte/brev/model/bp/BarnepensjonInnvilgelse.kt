@@ -70,6 +70,7 @@ data class BarnepensjonInnvilgelse(
 data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
     val avdoed: Avdoed,
+    val senereAvdoed: Avdoed?,
     val sisteBeregningsperiodeDatoFom: LocalDate,
     val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
@@ -86,23 +87,21 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
         ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
+                    BarnepensjonBeregningsperiode.fra(it)
                 }
+
+            val foersteAvdoed =
+                avdoede.minByOrNull { it.doedsdato }
+                    ?: throw UgyldigForespoerselException(
+                        code = "AVDOED_MED_DOEDSDATO_MANGLER",
+                        detail = "Ingen avdød med dødsdato",
+                    )
+            val senereAvdoed = avdoede.find { it.fnr != foersteAvdoed.fnr }
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed =
-                    avdoede.minByOrNull { it.doedsdato }
-                        ?: throw UgyldigForespoerselException(
-                            code = "AVDOED_MED_DOEDSDATO_MANGLER",
-                            detail = "Ingen avdød med dødsdato",
-                        ),
+                avdoed = foersteAvdoed,
+                senereAvdoed = senereAvdoed,
                 sisteBeregningsperiodeDatoFom =
                     beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
                         ?: throw UgyldigForespoerselException(

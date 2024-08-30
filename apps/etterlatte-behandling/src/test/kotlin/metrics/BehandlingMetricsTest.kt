@@ -1,9 +1,10 @@
 package no.nav.etterlatte.metrics
 
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
-import io.prometheus.client.CollectorRegistry
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -38,7 +39,7 @@ internal class BehandlingMetricsTest(
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var behandlingMetrics: BehandlingMetrics
 
-    private val testreg = CollectorRegistry(true)
+    private val testreg = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     @BeforeAll
     fun beforeAll() {
@@ -61,97 +62,51 @@ internal class BehandlingMetricsTest(
     }
 
     @Test
-    fun `Metrikker for behandlinger skal ha labels i riktig rekkefoelge`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.first().labelNames shouldContainExactly
-            listOf(
-                "saktype",
-                "behandlingstype",
-                "status",
-                "revurdering_aarsak",
-                "kilde",
-                "automatiskMigrering",
-            )
-    }
-
-    @Test
     fun `Henter riktig antall totalt`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
+        val metrikker = metrikker("etterlatte_behandlinger")
         metrikker.size shouldBe 5
     }
 
     @Test
     fun `Henter riktig antall for saktype`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[0] == SakType.BARNEPENSJON.name }.size shouldBe 4
-        metrikker.filter { it.labelValues[0] == SakType.OMSTILLINGSSTOENAD.name }.size shouldBe 1
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "saktype", SakType.BARNEPENSJON.name) shouldBe 4
+        hentVerdi(metrikker, "saktype", SakType.OMSTILLINGSSTOENAD.name) shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for behandlingstyper`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[1] == BehandlingType.FØRSTEGANGSBEHANDLING.name }.size shouldBe 4
-        metrikker.filter { it.labelValues[1] == BehandlingType.REVURDERING.name }.size shouldBe 1
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "behandlingstype", BehandlingType.FØRSTEGANGSBEHANDLING.name) shouldBe 4
+        hentVerdi(metrikker, "behandlingstype", BehandlingType.REVURDERING.name) shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for status`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[2] == BehandlingStatus.IVERKSATT.name }.size shouldBe 2
-        metrikker.filter { it.labelValues[2] == BehandlingStatus.OPPRETTET.name }.size shouldBe 3
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "status", BehandlingStatus.IVERKSATT.name) shouldBe 2
+        hentVerdi(metrikker, "status", BehandlingStatus.OPPRETTET.name) shouldBe 3
     }
 
     @Test
     fun `Henter riktig antall for revuderingsaarsak`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[3] == "null" }.size shouldBe 4 // Førstegangsbehandling
-        metrikker.filter { it.labelValues[3] == Revurderingaarsak.REGULERING.name }.size shouldBe 1
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "revurdering_aarsak", "null") shouldBe 4
+        hentVerdi(metrikker, "revurdering_aarsak", Revurderingaarsak.REGULERING.name) shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for kilde`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[4] == Vedtaksloesning.GJENNY.name }.size shouldBe 3
-        metrikker.filter { it.labelValues[4] == Vedtaksloesning.PESYS.name }.size shouldBe 2
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "kilde", Vedtaksloesning.GJENNY.name) shouldBe 3
+        hentVerdi(metrikker, "kilde", Vedtaksloesning.PESYS.name) shouldBe 2
     }
 
     @Test
     fun `Henter riktig antall for automatiskMigrert`() {
-        val metrikker =
-            behandlingMetrics.behandlinger
-                .collect()
-                .first()
-                .samples
-        metrikker.filter { it.labelValues[5] == "true" }.size shouldBe 1
-        metrikker.filter { it.labelValues[5] == "false" }.size shouldBe 4
+        val metrikker = metrikker("etterlatte_behandlinger")
+        hentVerdi(metrikker, "automatiskMigrering", "true") shouldBe 1
+        hentVerdi(metrikker, "automatiskMigrering", "false") shouldBe 4
     }
 
     private fun opprettBehandlinger() {
@@ -217,4 +172,16 @@ internal class BehandlingMetricsTest(
             )
         }
     }
+
+    private fun hentVerdi(
+        metrikker: Collection<Gauge>,
+        tag: String,
+        verdi: String,
+    ) = metrikker
+        .filter {
+            it.id.getTag(tag) == verdi
+        }.sumOf { it.value() }
+        .toInt()
+
+    private fun metrikker(metrikk: String) = testreg.get(metrikk).gauges()
 }

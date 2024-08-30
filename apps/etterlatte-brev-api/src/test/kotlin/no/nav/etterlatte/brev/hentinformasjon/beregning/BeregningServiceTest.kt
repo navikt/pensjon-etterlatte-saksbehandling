@@ -115,6 +115,7 @@ class BeregningServiceTest {
                 mockk {
                     every { beregningsMetode } returns BeregningsMetode.BEST
                 }
+            every { beregningsMetodeFlereAvdoede } returns emptyList()
         }
 
     private companion object {

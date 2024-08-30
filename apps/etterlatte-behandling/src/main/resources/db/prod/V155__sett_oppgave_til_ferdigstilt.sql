@@ -1,0 +1,1 @@
+UPDATE oppgave SET status = 'FERDIGSTILT' where id = '5cbe7890-dc4d-4f6f-8822-2e0597f2770b';

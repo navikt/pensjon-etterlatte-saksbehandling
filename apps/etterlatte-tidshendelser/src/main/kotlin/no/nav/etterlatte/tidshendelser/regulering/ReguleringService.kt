@@ -1,15 +1,15 @@
 package no.nav.etterlatte.tidshendelser.regulering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.RapidEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.JobbType
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.RapidEvents
-import rapidsandrivers.tilSeparertString
 import java.time.LocalDate
 import java.util.UUID
 

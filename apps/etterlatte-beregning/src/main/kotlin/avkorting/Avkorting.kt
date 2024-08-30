@@ -8,11 +8,13 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -391,7 +393,9 @@ data class Avkorting(
     ): Aarsoppgjoer {
         val funnet = aarsoppgjoer.find { it.aar == virkningstidspunkt.year }
 
-        // TODO valider at nyt år krever virk 1.1
+        if (funnet == null && !innvilgelse && virkningstidspunkt.month != Month.JANUARY) {
+            throw NyttAarMaaStarteIJanuar()
+        }
 
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
@@ -606,3 +610,9 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
 
     return eksisterendeAvrundetPerioder + nyYtelseFoerAvkorting
 }
+
+class NyttAarMaaStarteIJanuar :
+    IkkeTillattException(
+        code = "NYTT_AAR_MA_STARTE_I_JANUER",
+        detail = "Et nytt år må startes med et virkningstidspunkt januar.",
+    )

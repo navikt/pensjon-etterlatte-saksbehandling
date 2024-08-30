@@ -261,8 +261,24 @@ internal class AvkortingTest {
                                 ),
                             inntektsavkorting =
                                 listOf(
-                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
-                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2024, 1),
+                                                    tom = null,
+                                                ),
+                                        ),
+                                    ),
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2024, 2),
+                                                    tom = null,
+                                                ),
+                                        ),
+                                    ),
                                 ),
                         ),
                     ),
@@ -434,7 +450,7 @@ internal class AvkortingTest {
             @Test
             fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
                 val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
-                val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
+                val virkningstidspunkt = YearMonth.of(2025, Month.JANUARY)
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
@@ -484,6 +500,21 @@ internal class AvkortingTest {
                     }
                 }
             }
+
+            @Test
+            fun `Ny inntekt for et aarsoppgjoer som ikke finnes maa gjelde fra januer`() {
+                val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
+                val virkningstidspunkt = YearMonth.of(2025, Month.FEBRUARY)
+
+                assertThrows<NyttAarMaaStarteIJanuar> {
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag,
+                        virkningstidspunkt,
+                        innvilgelse = false,
+                        bruker,
+                    )
+                }
+            }
         }
     }
 
@@ -527,8 +558,24 @@ internal class AvkortingTest {
             assertThrows<IllegalStateException> {
                 val inntektsavkorting =
                     listOf(
-                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
-                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
+                        Inntektsavkorting(
+                            avkortinggrunnlag(
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.of(2024, 2),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
+                        Inntektsavkorting(
+                            avkortinggrunnlag(
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.of(2024, 1),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
                     )
                 Avkorting(
                     listOf(

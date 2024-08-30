@@ -1,4 +1,7 @@
+
 import io.kotest.matchers.shouldBe
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.TidshendelsePacket
 import no.nav.etterlatte.TidshendelseService
 import no.nav.etterlatte.libs.common.toJson
@@ -21,6 +24,7 @@ class TidshendelsePacketTest {
                     TIDSHENDELSE_TYPE_KEY to TidshendelseService.TidshendelserJobbType.AO_BP21,
                 ).toJson(),
                 MessageProblems(""),
+                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 
@@ -57,6 +61,7 @@ class TidshendelsePacketTest {
                     "ao_id" to "min_id",
                 ).toJson(),
                 MessageProblems(""),
+                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 

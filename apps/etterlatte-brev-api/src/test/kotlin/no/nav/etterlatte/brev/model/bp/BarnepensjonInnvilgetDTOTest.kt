@@ -191,12 +191,5 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
         })
 
-    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
-        BarnepensjonBeregningsperiode(
-            datoFOM = datoFOM,
-            datoTOM = datoTOM,
-            grunnbeloep = grunnbeloep,
-            antallBarn = 1,
-            utbetaltBeloep = utbetaltBeloep,
-        )
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() = BarnepensjonBeregningsperiode.fra(this)
 }

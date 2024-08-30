@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import java.util.UUID
 
@@ -70,32 +69,26 @@ fun Route.behandlingGrunnlagRoute(
         }
 
         post("/laas-til-behandling/{behandlingIdLaasesTil}") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
-                    grunnlagService.laasTilVersjonForBehandling(skalLaasesId = behandlingId, idLaasesTil = idSomLaasesTil)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
+                grunnlagService.laasTilVersjonForBehandling(skalLaasesId = behandlingId, idLaasesTil = idSomLaasesTil)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
         post("/opprett-grunnlag") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
         post("oppdater-grunnlag") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val request = call.receive<OppdaterGrunnlagRequest>()
-                    grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

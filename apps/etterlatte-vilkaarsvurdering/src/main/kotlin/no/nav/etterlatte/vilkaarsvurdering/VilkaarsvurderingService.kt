@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -12,7 +13,7 @@ class VilkaarsvurderingService(
 ) {
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
 
-    fun erMigrertYrkesskadefordel(sakId: Long): Boolean = vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(sakId = sakId)
+    fun erMigrertYrkesskadefordel(sakId: SakId): Boolean = vilkaarsvurderingRepository.hentMigrertYrkesskadefordel(sakId = sakId)
 
     fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean =
         vilkaarsvurderingRepository

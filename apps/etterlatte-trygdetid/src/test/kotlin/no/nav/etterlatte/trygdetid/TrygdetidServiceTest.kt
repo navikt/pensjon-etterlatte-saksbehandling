@@ -63,7 +63,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient,
             grunnlagKlient,
             beregningService,
-            mockk<PesysKlient>()
+            mockk<PesysKlient>(),
         )
 
     @BeforeEach

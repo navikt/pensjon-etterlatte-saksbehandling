@@ -14,6 +14,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -21,10 +22,10 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -83,7 +84,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @BeforeEach
     fun before() {
-        nyKontekstMedBruker(mockk())
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
 
         grunnlagsendringshendelseService =
             spyk(

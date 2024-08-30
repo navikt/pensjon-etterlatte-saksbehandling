@@ -134,7 +134,7 @@ class AktivitetspliktDao(
     }
 
     fun opprettAktivitetForSak(
-        sakId: Long,
+        sakId: SakId,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
     ) = connectionAutoclosing.hentConnection {
@@ -186,7 +186,7 @@ class AktivitetspliktDao(
     }
 
     fun oppdaterAktivitetForSak(
-        sakId: Long,
+        sakId: SakId,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
     ) = connectionAutoclosing.hentConnection {
@@ -232,7 +232,7 @@ class AktivitetspliktDao(
 
     fun slettAktivitetForSak(
         aktivitetId: UUID,
-        sakId: Long,
+        sakId: SakId,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val stmt =

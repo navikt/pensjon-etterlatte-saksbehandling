@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,7 +27,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.VilkaartypePair
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
-import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientVV
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
@@ -40,7 +40,7 @@ class VirkningstidspunktIkkeSattException(
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingService: BehandlingService,
-    private val grunnlagKlient: GrunnlagKlientVV,
+    private val grunnlagKlient: GrunnlagKlient,
     private val behandlingStatus: BehandlingStatusService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -223,6 +224,52 @@ internal class SakDaoTest(
 
             saker.size shouldBe 2
             saker.forEach { it.id shouldNotBe sak1.id }
+        }
+
+        @Test
+        fun `Skal hente alle saker som er loepende fra og med dato`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    sakId = sak1.id,
+                    prosesstype = Prosesstype.MANUELL,
+                    opphoerFraOgMed = YearMonth.of(2024, 1),
+                ),
+            )
+
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    sakId = sak2.id,
+                    prosesstype = Prosesstype.MANUELL,
+                    opphoerFraOgMed = YearMonth.of(2025, 1),
+                ),
+            )
+
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    sakId = sak3.id,
+                    prosesstype = Prosesstype.MANUELL,
+                    opphoerFraOgMed = YearMonth.of(2026, 1),
+                ),
+            )
+
+            val saker =
+                sakRepo.hentSaker(
+                    "",
+                    4,
+                    emptyList(),
+                    emptyList(),
+                    loependeFom = YearMonth.of(2024, 12),
+                )
+
+            saker.size shouldBe 2
+            saker shouldContain sak2
+            saker shouldContain sak3
         }
 
         @Test

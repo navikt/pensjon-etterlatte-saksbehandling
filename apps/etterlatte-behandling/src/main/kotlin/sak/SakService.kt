@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 interface SakService {
     fun hentSaker(
@@ -41,6 +42,7 @@ interface SakService {
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): List<Sak>
 
     fun finnSaker(ident: String): List<Sak>
@@ -145,9 +147,10 @@ class SakServiceImpl(
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType?,
+        loependeFom: YearMonth?,
     ): List<Sak> =
         dao
-            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
+            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }

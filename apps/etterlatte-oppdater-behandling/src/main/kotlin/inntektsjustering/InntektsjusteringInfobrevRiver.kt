@@ -15,10 +15,12 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.antall
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
+import no.nav.etterlatte.rapidsandrivers.loependeFom
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.regulering.kjoerIBatch
@@ -40,6 +42,7 @@ internal class InntektsjusteringInfobrevRiver(
             validate { it.requireKey(ANTALL) }
             validate { it.interestedIn(SPESIFIKKE_SAKER) }
             validate { it.interestedIn(EKSKLUDERTE_SAKER) }
+            validate { it.interestedIn(LOEPENDE_FOM) }
         }
     }
 
@@ -53,12 +56,12 @@ internal class InntektsjusteringInfobrevRiver(
         }
 
         val kjoering = packet.kjoering
-        val antall = packet.antall
-
-        val sakType = SakType.OMSTILLINGSSTOENAD
-        // TODO: må vi filtrere på mer? ta bort saker som opphøres innværende år?
-
         logger.info("$kjoering: Starter ")
+
+        val antall = packet.antall
+        val sakType = SakType.OMSTILLINGSSTOENAD
+        val loependeFom = packet.loependeFom.takeIf { true }
+
         kjoerIBatch(
             logger = logger,
             antall = antall,
@@ -69,11 +72,13 @@ internal class InntektsjusteringInfobrevRiver(
                     packet.saker,
                     packet.ekskluderteSaker,
                     sakType,
+                    loependeFom,
                 )
             },
             haandterSaker = { sakerSomSkalInformeres ->
                 sakerSomSkalInformeres.saker.forEach {
                     // TODO: sjekk på inntekt
+
                     opprettBrev(it, kjoering, packet, context)
                 }
             },

@@ -72,6 +72,7 @@ interface BehandlingService {
         spesifikkeSaker: List<Long> = listOf(),
         ekskluderteSaker: List<Long> = listOf(),
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -230,12 +231,13 @@ class BehandlingServiceImpl(
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType?,
+        loependeFom: YearMonth?,
     ): Saker =
         runBlocking {
             behandlingKlient
                 .post("$url/saker/$kjoering/$antall") {
                     contentType(ContentType.Application.Json)
-                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
+                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
                 }.body()
         }
 

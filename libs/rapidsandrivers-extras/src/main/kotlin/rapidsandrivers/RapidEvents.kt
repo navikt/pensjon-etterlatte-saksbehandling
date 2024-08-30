@@ -3,15 +3,24 @@ package no.nav.etterlatte.rapidsandrivers
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.YearMonth
 
 object RapidEvents {
     const val KJOERING = "kjoering"
     const val ANTALL = "antall"
     const val SPESIFIKKE_SAKER = "spesifikke_saker"
     const val EKSKLUDERTE_SAKER = "ekskluderte_saker"
+    const val LOEPENDE_FOM = "loepende_fom"
 }
+
+var JsonMessage.loependeFom: YearMonth
+    get() = YearMonth.parse(this[LOEPENDE_FOM].asText())
+    set(value) {
+        this[LOEPENDE_FOM] = value.toString()
+    }
 
 var JsonMessage.antall: Int
     get() = this[ANTALL].asInt()

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
+import java.time.YearMonth
 
 data class SakMedUtlandstilknytning(
     val ident: String,
@@ -111,33 +112,35 @@ class SakDao(
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): List<Sak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
-                        """SELECT id, sakType, fnr, enhet from sak s 
-                    where
+                        """SELECT id, sakType, fnr, enhet q sak s 
+                    WHERE
                     (
                     -- ikke kjørt i det hele tatt
-                    not exists (
-                        select 1 from omregningskjoering k where k.sak_id=s.id 
-                        and k.kjoering='$kjoering' 
-                        and k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
+                    NOT EXISTS (
+                        SELECT 1 FROM omregningskjoering k WHERE k.sak_id=s.id 
+                        AND k.kjoering='$kjoering' 
+                        AND k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
                     )
-                    or exists(
+                    OR EXISTS(
                         -- nyeste kjøring har feila
-                        select 1 from omregningskjoering k
-                            where k.sak_id=s.id 
-                            and k.kjoering='$kjoering' 
-                            and k.status = '${KjoeringStatus.FEILA.name}'
-                            and k.tidspunkt > (select max(o.tidspunkt) from omregningskjoering o where o.sak_id=k.sak_id and o.kjoering=k.kjoering and o.status != '${KjoeringStatus.FEILA.name}')
-                        )
-                        )
-                    ${if (spesifikkeSaker.isEmpty()) "" else " and id = any(?)"}
-                    ${if (ekskluderteSaker.isEmpty()) "" else " and NOT(id = any(?))"}
-                    ${if (sakType == null) "" else " and s.saktype = ?"}
-                    ORDER by id ASC
+                        SELECT 1 FROM omregningskjoering k
+                            WHERE k.sak_id=s.id 
+                            AND k.kjoering='$kjoering' 
+                            AND k.status = '${KjoeringStatus.FEILA.name}'
+                            AND k.tidspunkt > (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering AND o.status != '${KjoeringStatus.FEILA.name}')
+                    )
+                    )
+                    ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
+                    ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
+                    ${if (sakType == null) "" else " AND s.saktype = ?"}
+                    ${if (loependeFom == null) "" else " AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id AND b.opphoer_fom >= ?)"}
+                    ORDER BY id ASC
                     LIMIT $antall
                         """.trimMargin(),
                     )
@@ -152,6 +155,10 @@ class SakDao(
                 }
                 if (sakType != null) {
                     statement.setString(paramIndex, sakType.name)
+                    paramIndex += 1
+                }
+                if (loependeFom != null) {
+                    statement.setString(paramIndex, loependeFom.toString())
                     paramIndex += 1
                 }
 

@@ -1,46 +1,46 @@
 import {
-  Alert,
-  BodyLong,
-  Button,
-  Heading,
-  HStack,
-  Label,
-  Radio,
-  ReadMore,
-  Select,
-  Textarea,
-  VStack,
+    Alert,
+    BodyLong,
+    Button,
+    Heading,
+    HStack,
+    Label,
+    Radio,
+    ReadMore,
+    Select,
+    Textarea,
+    VStack,
 } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending } from '@reduxjs/toolkit'
-import { isFailure, isSuccess, mapFailure } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { useForm } from 'react-hook-form'
+import React, {useEffect, useState} from 'react'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import {isPending} from '@reduxjs/toolkit'
+import {isFailure, isSuccess, mapFailure} from '~shared/api/apiUtils'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {useForm} from 'react-hook-form'
 import {
-  AktivitetspliktUnntakType,
-  AktivitetspliktVurderingType,
-  AktivitetspliktVurderingValues,
-  AktivitetspliktVurderingValuesDefault,
-  IAktivitetspliktVurdering,
-  tekstAktivitetspliktUnntakType,
-  tekstAktivitetspliktVurderingType,
+    AktivitetspliktUnntakType,
+    AktivitetspliktVurderingType,
+    AktivitetspliktVurderingValues,
+    AktivitetspliktVurderingValuesDefault,
+    IAktivitetspliktVurdering,
+    tekstAktivitetspliktUnntakType,
+    tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
 import {
-  hentAktivitspliktVurderingForBehandling,
-  opprettAktivitspliktAktivitetsgradForBehandling,
-  opprettAktivitspliktUnntakForBehandling,
+    hentAktivitspliktVurderingForBehandling,
+    opprettAktivitspliktAktivitetsgradForBehandling,
+    opprettAktivitspliktUnntakForBehandling,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {ControlledRadioGruppe} from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import {ControlledDatoVelger} from '~shared/components/datoVelger/ControlledDatoVelger'
+import {IDetaljertBehandling} from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
-import { Toast } from '~shared/alerts/Toast'
-import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { JaNei } from '~shared/types/ISvar'
+import {Toast} from '~shared/alerts/Toast'
+import {AktivitetspliktVurderingVisning} from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
+import {useInnloggetSaksbehandler} from '~components/behandling/useInnloggetSaksbehandler'
+import {behandlingErRedigerbar} from '~components/behandling/felles/utils'
+import {JaNei} from '~shared/types/ISvar'
 
 export const AktivitetspliktVurdering = ({
   behandling,

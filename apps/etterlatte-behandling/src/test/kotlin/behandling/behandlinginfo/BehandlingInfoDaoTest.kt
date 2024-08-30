@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -20,7 +21,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,14 +38,14 @@ internal class BehandlingInfoDaoTest(
     val dataSource: DataSource,
 ) {
     private lateinit var behandlingDao: BehandlingDao
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var dao: BehandlingInfoDao
 
     private lateinit var behandlingId: UUID
 
     @BeforeAll
     fun setup() {
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         behandlingDao =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
@@ -159,7 +161,7 @@ internal class BehandlingInfoDaoTest(
         )
 
     private fun opprettSakForTest() =
-        sakDao.opprettSak(
+        sakSkrivDao.opprettSak(
             fnr = "12345678910",
             type = SakType.BARNEPENSJON,
             enhet = "1234",

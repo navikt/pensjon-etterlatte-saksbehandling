@@ -1,5 +1,5 @@
-import { KildeSaksbehandler } from '~shared/types/kilde'
-import { JaNei } from '~shared/types/ISvar'
+import {KildeSaksbehandler} from '~shared/types/kilde'
+import {JaNei} from '~shared/types/ISvar'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string

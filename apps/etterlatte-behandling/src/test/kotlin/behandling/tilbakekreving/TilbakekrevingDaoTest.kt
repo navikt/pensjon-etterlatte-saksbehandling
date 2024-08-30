@@ -4,15 +4,18 @@ import behandling.tilbakekreving.kravgrunnlag
 import behandling.tilbakekreving.tilbakekrevingVurdering
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.User
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,17 +28,17 @@ import javax.sql.DataSource
 class TilbakekrevingDaoTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
 
     private lateinit var sak: Sak
 
     @BeforeAll
     fun setup() {
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
 
-        nyKontekstMedBrukerOgDatabase(mockk(), dataSource)
+        nyKontekstMedBrukerOgDatabase(mockk<User>().also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
     @BeforeEach
@@ -45,7 +48,7 @@ class TilbakekrevingDaoTest(
             it.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""").executeUpdate()
             it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
         }
-        sak = sakDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
+        sak = sakSkrivDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
     }
 
     @Test

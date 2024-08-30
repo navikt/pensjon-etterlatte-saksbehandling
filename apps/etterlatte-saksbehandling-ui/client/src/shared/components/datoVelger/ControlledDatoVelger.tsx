@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react'
-import { DatePicker, useDatepicker } from '@navikt/ds-react'
-import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
-import { Control, FieldValues, Path, useController } from 'react-hook-form'
-import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
-import { isEqual } from 'date-fns'
+import React, {ReactNode} from 'react'
+import {DatePicker, useDatepicker} from '@navikt/ds-react'
+import {UseDatepickerOptions} from '@navikt/ds-react/esm/date/hooks/useDatepicker'
+import {Control, FieldValues, Path, useController} from 'react-hook-form'
+import {formatDateToLocaleDateOrEmptyString} from '~shared/components/datoVelger/datoVelgerUtils'
+import {isEqual} from 'date-fns'
 
 export const ControlledDatoVelger = <T extends FieldValues>({
   name,

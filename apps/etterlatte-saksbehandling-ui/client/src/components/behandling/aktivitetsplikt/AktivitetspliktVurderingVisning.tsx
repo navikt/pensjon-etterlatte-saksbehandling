@@ -1,12 +1,12 @@
-import { BodyShort, Button, Detail, HStack, Label, VStack } from '@navikt/ds-react'
+import {BodyShort, Button, Detail, HStack, Label, VStack} from '@navikt/ds-react'
 import React from 'react'
 import {
-  IAktivitetspliktVurdering,
-  tekstAktivitetspliktUnntakType,
-  tekstAktivitetspliktVurderingType,
+    IAktivitetspliktVurdering,
+    tekstAktivitetspliktUnntakType,
+    tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
-import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { PencilIcon } from '@navikt/aksel-icons'
+import {formaterDato, formaterDatoMedFallback} from '~utils/formatering/dato'
+import {PencilIcon} from '@navikt/aksel-icons'
 
 export const AktivitetspliktVurderingVisning = ({
   vurdering,

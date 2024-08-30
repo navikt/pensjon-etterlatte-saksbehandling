@@ -1,25 +1,27 @@
 import {
-  IBoddEllerArbeidetUtlandet,
-  IDetaljertBehandling,
-  IGyldighetResultat,
-  IKommerBarnetTilgode,
-  IUtlandstilknytning,
-  NyBehandlingRequest,
-  ViderefoertOpphoer,
-  Virkningstidspunkt,
+    IBoddEllerArbeidetUtlandet,
+    IDetaljertBehandling,
+    IGyldighetResultat,
+    IKommerBarnetTilgode,
+    IUtlandstilknytning,
+    NyBehandlingRequest,
+    ViderefoertOpphoer,
+    Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { apiClient, ApiResponse } from './apiClient'
-import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
-import { FoersteVirk, ISak } from '~shared/types/sak'
-import { format } from 'date-fns'
-import { DatoFormat } from '~utils/formatering/dato'
-import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { RedigertFamilieforhold } from '~shared/types/grunnlag'
-import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
-import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
-import { JaNei } from '~shared/types/ISvar'
+import {apiClient, ApiResponse} from './apiClient'
+import {Grunnlagsendringshendelse, GrunnlagsendringsListe} from '~components/person/typer'
+import {FoersteVirk, ISak} from '~shared/types/sak'
+import {format} from 'date-fns'
+import {DatoFormat} from '~utils/formatering/dato'
+import {BrevutfallOgEtterbetaling} from '~components/behandling/brevutfall/Brevutfall'
+import {RedigertFamilieforhold} from '~shared/types/grunnlag'
+import {ISendBrev} from '~components/behandling/brevutfall/SkalSendeBrev'
+import {
+    InstitusjonsoppholdBegrunnelse
+} from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
+import {JaNei} from '~shared/types/ISvar'
 
-import { ILand } from '~utils/kodeverk'
+import {ILand} from '~utils/kodeverk'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number

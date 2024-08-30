@@ -96,7 +96,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -139,7 +139,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -281,6 +281,7 @@ internal class BehandlingRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { name() } returns this::class.java.simpleName
             }
 
         testApplication {

@@ -143,9 +143,11 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.person.krr.KrrKlientImpl
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
@@ -300,7 +302,9 @@ internal class ApplicationContext(
     val vedtaksbehandlingDao = VedtaksbehandlingDao(autoClosingDatabase)
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
-    val sakDao = SakDao(autoClosingDatabase)
+    val sakLesDao = SakLesDao(autoClosingDatabase)
+    val sakendringerDao = SakendringerDao(autoClosingDatabase) { sakLesDao.hentSak(it) }
+    val sakSkrivDao = SakSkrivDao(sakendringerDao)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,
@@ -333,7 +337,7 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =
@@ -370,7 +374,7 @@ internal class ApplicationContext(
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             behandlingService = behandlingService,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
@@ -455,7 +459,8 @@ internal class ApplicationContext(
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
-            sakDao,
+            sakSkrivDao,
+            sakLesDao,
             skjermingKlient,
             enhetService,
             grunnlagsService,
@@ -560,7 +565,7 @@ internal class ApplicationContext(
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             hendelseDao = hendelseDao,
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,

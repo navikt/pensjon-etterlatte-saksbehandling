@@ -1,18 +1,28 @@
-import React, { useState } from 'react'
-import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
-import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
-import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
+import React, {useState} from 'react'
+import {Box, Button, Heading, HStack, VStack} from '@navikt/ds-react'
+import {HospitalIcon, PlusIcon} from '@navikt/aksel-icons'
 import {
-  BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSPostDto,
-  InstitusjonsoppholdGrunnlagDTO,
+    HvaSkalRegistreresReadMore
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
+import {
+    InstitusjonsoppholdBeregningsgrunnlagTable
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
+import {
+    BeregningsGrunnlagDto,
+    BeregningsGrunnlagOMSPostDto,
+    InstitusjonsoppholdGrunnlagDTO,
 } from '~shared/types/Beregning'
-import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
-import { SakType } from '~shared/types/sak'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreBP } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
-import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
+import {
+    InstitusjonsoppholdBeregningsgrunnlagSkjema
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
+import {SakType} from '~shared/types/sak'
+import {IDetaljertBehandling} from '~shared/types/IDetaljertBehandling'
+import {
+    InstitusjonsoppholdBeregningsgrunnlagReadMoreBP
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
+import {
+    InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
 
 interface Props {
   redigerbar: boolean

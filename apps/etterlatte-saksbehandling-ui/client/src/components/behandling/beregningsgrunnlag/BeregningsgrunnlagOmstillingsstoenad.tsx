@@ -1,34 +1,34 @@
-import { Box, Button } from '@navikt/ds-react'
-import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { behandlingErRedigerbar } from '../felles/utils'
-import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch } from '~store/Store'
+import {Box, Button} from '@navikt/ds-react'
+import {BehandlingHandlingKnapper} from '../handlinger/BehandlingHandlingKnapper'
+import {useBehandlingRoutes} from '../BehandlingRoutes'
+import {behandlingErRedigerbar} from '../felles/utils'
+import {NesteOgTilbake} from '../handlinger/NesteOgTilbake'
+import {useAppDispatch} from '~store/Store'
+import {hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS, opprettEllerEndreBeregning,} from '~shared/api/beregning'
+import {useApiCall} from '~shared/hooks/useApiCall'
 import {
-  hentBeregningsGrunnlagOMS,
-  lagreBeregningsGrunnlagOMS,
-  opprettEllerEndreBeregning,
-} from '~shared/api/beregning'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  IBehandlingReducer,
-  oppdaterBehandlingsstatus,
-  oppdaterBeregningsGrunnlagOMS,
-  oppdaterBeregning,
+    IBehandlingReducer,
+    oppdaterBehandlingsstatus,
+    oppdaterBeregning,
+    oppdaterBeregningsGrunnlagOMS,
 } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import React, { useEffect, useState } from 'react'
-import { Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {IBehandlingStatus} from '~shared/types/IDetaljertBehandling'
+import React, {useEffect, useState} from 'react'
+import {Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag} from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
-import { handlinger } from '~components/behandling/handlinger/typer'
-import { isPending, mapResult } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
-import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
-import { SakType } from '~shared/types/sak'
+import {handlinger} from '~components/behandling/handlinger/typer'
+import {isPending, mapResult} from '~shared/api/apiUtils'
+import {isFailureHandler} from '~shared/api/IsFailureHandler'
+import {useInnloggetSaksbehandler} from '../useInnloggetSaksbehandler'
+import {BeregningsMetodeBrukt} from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {
+    InstitusjonsoppholdBeregningsgrunnlag
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
+import {
+    InstitusjonsoppholdHendelser
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
+import {SakType} from '~shared/types/sak'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props

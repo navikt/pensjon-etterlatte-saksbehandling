@@ -1,40 +1,46 @@
-import { Box, Button } from '@navikt/ds-react'
-import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { behandlingErRedigerbar } from '../felles/utils'
-import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch } from '~store/Store'
-import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import {Box, Button} from '@navikt/ds-react'
+import {BehandlingHandlingKnapper} from '../handlinger/BehandlingHandlingKnapper'
+import {useBehandlingRoutes} from '../BehandlingRoutes'
+import {behandlingErRedigerbar} from '../felles/utils'
+import {NesteOgTilbake} from '../handlinger/NesteOgTilbake'
+import {useAppDispatch} from '~store/Store'
+import {hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning} from '~shared/api/beregning'
+import {useApiCall} from '~shared/hooks/useApiCall'
 import {
-  oppdaterBehandlingsstatus,
-  oppdaterBeregningsGrunnlag,
-  oppdaterBeregning,
-  resetBeregning,
+    oppdaterBehandlingsstatus,
+    oppdaterBeregning,
+    oppdaterBeregningsGrunnlag,
+    resetBeregning,
 } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import React, { useEffect, useState } from 'react'
+import {IBehandlingStatus} from '~shared/types/IDetaljertBehandling'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {mapListeTilDto} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import React, {useEffect, useState} from 'react'
 import Soeskenjustering, {
-  Soeskengrunnlag,
+    Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import { Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
-import { handlinger } from '~components/behandling/handlinger/typer'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { isPending, mapResult } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { hentTrygdetider } from '~shared/api/trygdetid'
-import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
-import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
-import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
-import { SakType } from '~shared/types/sak'
-import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
-import { useBehandling } from '~components/behandling/useBehandling'
+import {hentLevendeSoeskenFraAvdoedeForSoeker} from '~shared/types/Person'
+import {Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag} from '~shared/types/Beregning'
+import {handlinger} from '~components/behandling/handlinger/typer'
+import {usePersonopplysninger} from '~components/person/usePersonopplysninger'
+import {isPending, mapResult} from '~shared/api/apiUtils'
+import {isFailureHandler} from '~shared/api/IsFailureHandler'
+import {behandlingGjelderBarnepensjonPaaNyttRegelverk} from '~components/behandling/vilkaarsvurdering/utils'
+import {useInnloggetSaksbehandler} from '../useInnloggetSaksbehandler'
+import {hentTrygdetider} from '~shared/api/trygdetid'
+import {BeregningsMetodeBrukt} from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
+import {
+    InstitusjonsoppholdHendelser
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
+import {
+    InstitusjonsoppholdBeregningsgrunnlag
+} from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
+import {SakType} from '~shared/types/sak'
+import {
+    BeregningsgrunnlagFlereAvdoede
+} from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
+import {useBehandling} from '~components/behandling/useBehandling'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()

@@ -22,6 +22,8 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -135,7 +137,20 @@ class AvkortingRoutesTest {
         testApplication {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
-                    setBody(avkorting.avkortingGrunnlag[0].toJson())
+                    val request =
+                        avkorting.avkortingGrunnlag[0].let {
+                            AvkortingGrunnlagRequest(
+                                AvkortingGrunnlagLagreDto(
+                                    id = it.id,
+                                    aarsinntekt = it.aarsinntekt,
+                                    fratrekkInnAar = it.fratrekkInnAar,
+                                    inntektUtland = it.inntektUtland,
+                                    fratrekkInnAarUtland = it.fratrekkInnAarUtland,
+                                    spesifikasjon = it.spesifikasjon,
+                                ),
+                            )
+                        }
+                    setBody(request.toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }

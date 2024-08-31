@@ -139,20 +139,19 @@ export const BeregningsMetodeRadForAvdoed = ({
   const oppdaterBeregningsMetodeForAvdoed = (formdata: BeregningsmetodeForAvdoedForm) => {
     const metoder = [formdataToMetode(formdata), dummyMetodeKunEnJuridisk(formdata)].filter((metode) => !!metode)
     const identer = metoder.map((metode) => metode.data.avdoed)
+    const beregningsGrunnlag = behandling!!.beregningsGrunnlag!!
 
-    const oppdaterteBeregningsmetoder = !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
-      ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
+    const oppdaterteBeregningsmetoder = !!beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length
+      ? beregningsGrunnlag.beregningsMetodeFlereAvdoede
           .filter((metode) => !identer.includes(metode.data.avdoed))
           .concat(mapListeTilDto(metoder))
       : mapListeTilDto(metoder)
 
     lagre({
-      ...behandling?.beregningsGrunnlag,
-      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
-      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
+      ...beregningsGrunnlag,
+      soeskenMedIBeregning: beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      institusjonsopphold: beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: beregningsGrunnlag?.beregningsMetode,
       beregningsMetodeFlereAvdoede: oppdaterteBeregningsmetoder,
     })
   }
@@ -161,17 +160,14 @@ export const BeregningsMetodeRadForAvdoed = ({
     const skalSlettes = erEnesteJuridiskeForelder
       ? [trygdetid.ident, AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER]
       : [trygdetid.ident]
+    const beregningsGrunnlag = behandling!!.beregningsGrunnlag!!
     lagre({
-      ...behandling?.beregningsGrunnlag,
-      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
-      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
-      beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
-        ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede.filter(
-            (metode) => !skalSlettes.includes(metode.data.avdoed)
-          )
+      ...beregningsGrunnlag,
+      soeskenMedIBeregning: beregningsGrunnlag.soeskenMedIBeregning ?? [],
+      institusjonsopphold: beregningsGrunnlag.institusjonsopphold ?? [],
+      beregningsMetode: beregningsGrunnlag.beregningsMetode,
+      beregningsMetodeFlereAvdoede: !!beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length
+        ? beregningsGrunnlag.beregningsMetodeFlereAvdoede.filter((metode) => !skalSlettes.includes(metode.data.avdoed))
         : [],
     })
   }
@@ -179,19 +175,8 @@ export const BeregningsMetodeRadForAvdoed = ({
   const beregningsMetodeForAvdoed: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined =
     finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
 
-  const formData = () =>
-    beregningsMetodeForAvdoed
-      ? {
-          ...beregningsMetodeForAvdoed,
-          data: {
-            ...beregningsMetodeForAvdoed?.data,
-          },
-          datoTilKunEnJuridiskForelder: undefined,
-        }
-      : beregningsmetodeFormdataForAvdoed()
-
   const { register, control, getValues, handleSubmit, reset } = useForm<BeregningsmetodeForAvdoedForm>({
-    defaultValues: formData(),
+    defaultValues: beregningsmetodeFormdataForAvdoed(),
   })
 
   useEffect(() => {

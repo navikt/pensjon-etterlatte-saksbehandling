@@ -17,7 +17,6 @@ import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
-import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -25,7 +24,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
-import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -932,16 +930,8 @@ internal class BeregningsGrunnlagServiceTest {
                         soeskenMedIBeregning = emptyList(),
                         institusjonsopphold = emptyList(),
                         beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
-                        beregningsMetodeFlereAvdoede =
-                            listOf(
-                                GrunnlagMedPeriode(
-                                    BeregningsmetodeForAvdoed(
-                                        KUN_EN_REGISTRERT_JURIDISK_FORELDER.name,
-                                        BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
-                                    ),
-                                    LocalDate.now().minusYears(1),
-                                ),
-                            ),
+                        beregningsMetodeFlereAvdoede = emptyList(),
+                        kunEnJuridiskForelder = listOf(GrunnlagMedPeriode(fom = LocalDate.now(), data = true)),
                     ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )

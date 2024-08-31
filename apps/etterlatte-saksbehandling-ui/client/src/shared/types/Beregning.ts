@@ -82,6 +82,7 @@ export interface BeregningsGrunnlagDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO | undefined
 }
 
 export interface BeregningsGrunnlagOMSDto {
@@ -109,6 +110,7 @@ export interface BeregningsGrunnlagPostDto {
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO | undefined
 }
 
 export interface BeregningsGrunnlagOMSPostDto {
@@ -120,6 +122,7 @@ export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<S
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
 export type BeregningsmetodeFlereAvdoedeDTO = PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
+export type KunEnJuridiskForelderDTO = PeriodisertBeregningsgrunnlagDto<Boolean>[]
 export type BeregningsmetodeFlereAvdoedeData = PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>[]
 
 export interface InstitusjonsoppholdIBeregning {

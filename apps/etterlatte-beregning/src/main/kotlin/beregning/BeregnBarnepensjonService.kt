@@ -229,6 +229,11 @@ class BeregnBarnepensjonService(
                                 samletTeoretiskTrygdetid = trygdetidForAvdoed?.samletTrygdetidTeoretisk,
                                 broek = trygdetidForAvdoed?.prorataBroek,
                                 avdodeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
+                                kunEnJuridiskForelder =
+                                    beregningsgrunnlag.kunEnJuridiskForelder
+                                        .finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                             )
@@ -342,6 +347,17 @@ class BeregnBarnepensjonService(
                         )
                     },
             ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+        kunEnJuridiskForelder =
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                beregningsGrunnlag.kunEnJuridiskForelder.mapVerdier
+                    { kunEnJuridiskForelder ->
+                        FaktumNode(
+                            verdi = kunEnJuridiskForelder,
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Kun en juridisk forelder",
+                        )
+                    },
+            ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en juridisk forelder") },
     )
 }
 

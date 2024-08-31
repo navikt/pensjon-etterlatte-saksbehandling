@@ -18,7 +18,7 @@ import {
   Textarea,
   VStack,
 } from '@navikt/ds-react'
-import { format, startOfDay, startOfMonth } from 'date-fns'
+import { addDays, format, startOfDay, startOfMonth } from 'date-fns'
 import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -66,9 +66,6 @@ export const BeregningsMetodeRadForAvdoed = ({
     return `${formaterNavn(opplysning)} (${fnr})`
   }
 
-  const datoTilKunEnJuridiskForelder = () =>
-    finnPeriodisertBeregningsmetodeForAvdoed(AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER)?.tom
-
   const defaultFormdata = () => ({
     fom: new Date(),
     tom: undefined,
@@ -79,7 +76,9 @@ export const BeregningsMetodeRadForAvdoed = ({
       },
       avdoed: trygdetid.ident,
     },
-    datoTilKunEnJuridiskForelder: datoTilKunEnJuridiskForelder(),
+    datoTilKunEnJuridiskForelder: behandling?.beregningsGrunnlag?.kunEnJuridiskForelder
+      ? mapListeFraDto(behandling!!.beregningsGrunnlag!!.kunEnJuridiskForelder!!)[0].tom!!
+      : undefined,
   })
 
   const beregningsmetodeFormdataForAvdoed = (): BeregningsmetodeForAvdoedForm => {
@@ -93,7 +92,9 @@ export const BeregningsMetodeRadForAvdoed = ({
             beregningsMetode: beregningsMetodeForAvdoed.data.beregningsMetode,
             avdoed: trygdetid.ident,
           },
-          datoTilKunEnJuridiskForelder: datoTilKunEnJuridiskForelder(),
+          datoTilKunEnJuridiskForelder: behandling?.beregningsGrunnlag?.kunEnJuridiskForelder
+            ? mapListeFraDto(behandling.beregningsGrunnlag.kunEnJuridiskForelder)[0].tom
+            : undefined,
         }
       : defaultFormdata()
   }
@@ -123,29 +124,15 @@ export const BeregningsMetodeRadForAvdoed = ({
     )
   }
 
-  const dummyMetodeKunEnJuridisk = (formdata: BeregningsmetodeForAvdoedForm) => {
-    return erEnesteJuridiskeForelder
-      ? {
-          fom: formdata.fom,
-          tom: formdata.datoTilKunEnJuridiskForelder,
-          data: {
-            beregningsMetode: { beregningsMetode: BeregningsMetode.NASJONAL },
-            avdoed: AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER,
-          },
-        }
-      : null
-  }
-
   const oppdaterBeregningsMetodeForAvdoed = (formdata: BeregningsmetodeForAvdoedForm) => {
-    const metoder = [formdataToMetode(formdata), dummyMetodeKunEnJuridisk(formdata)].filter((metode) => !!metode)
-    const identer = metoder.map((metode) => metode.data.avdoed)
+    const metode = formdataToMetode(formdata)
     const beregningsGrunnlag = behandling!!.beregningsGrunnlag!!
 
     const oppdaterteBeregningsmetoder = !!beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length
       ? beregningsGrunnlag.beregningsMetodeFlereAvdoede
-          .filter((metode) => !identer.includes(metode.data.avdoed))
-          .concat(mapListeTilDto(metoder))
-      : mapListeTilDto(metoder)
+          .filter((metode) => trygdetid.ident == metode.data.avdoed)
+          .concat(mapListeTilDto([metode]))
+      : mapListeTilDto([metode])
 
     lagre({
       ...beregningsGrunnlag,
@@ -153,6 +140,10 @@ export const BeregningsMetodeRadForAvdoed = ({
       institusjonsopphold: beregningsGrunnlag?.institusjonsopphold ?? [],
       beregningsMetode: beregningsGrunnlag?.beregningsMetode,
       beregningsMetodeFlereAvdoede: oppdaterteBeregningsmetoder,
+      kunEnJuridiskForelder: mapListeTilDto([
+        { fom: metode.fom, tom: formdata.datoTilKunEnJuridiskForelder, data: true },
+        { fom: addDays(formdata.datoTilKunEnJuridiskForelder!!, 1), tom: undefined, data: false },
+      ]),
     })
   }
 
@@ -197,8 +188,7 @@ export const BeregningsMetodeRadForAvdoed = ({
   }
 
   function tagForKunEnJuridiskForelder() {
-    const ident: AnnenForelderVurdering = AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
-    const datoTomKunEnJuridiskForelder = finnPeriodisertBeregningsmetodeForAvdoed(ident)?.tom
+    const datoTomKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.[0].tom
 
     return datoTomKunEnJuridiskForelder
       ? `Kun én juridisk forelder til og med ${formaterDato(datoTomKunEnJuridiskForelder)}`

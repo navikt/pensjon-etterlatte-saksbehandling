@@ -15,10 +15,11 @@ class PeriodisertBarnepensjonGrunnlagTest {
     private val soeskenKull = mockk<PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>>()
     private val avdoedesTrygdetid = mockk<PeriodisertGrunnlag<FaktumNode<List<AnvendtTrygdetid>>>>()
     private val institusjonsopphold = mockk<PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>>()
+    private val kunEnJuridiskForelder = mockk<PeriodisertGrunnlag<FaktumNode<Boolean>>>()
 
     @BeforeEach
     fun setUp() {
-        listOf(soeskenKull, avdoedesTrygdetid, institusjonsopphold).forEach { grunnlag ->
+        listOf(soeskenKull, avdoedesTrygdetid, institusjonsopphold, kunEnJuridiskForelder).forEach { grunnlag ->
             every {
                 grunnlag.finnAlleKnekkpunkter()
             } returns emptySet()
@@ -41,6 +42,7 @@ class PeriodisertBarnepensjonGrunnlagTest {
                 soeskenKull = soeskenKull,
                 avdoedesTrygdetid = avdoedesTrygdetid,
                 institusjonsopphold = institusjonsopphold,
+                kunEnJuridiskForelder = kunEnJuridiskForelder,
             )
         barnepensjonGrunnlag.finnAlleKnekkpunkter() shouldContainExactly
             setOf(

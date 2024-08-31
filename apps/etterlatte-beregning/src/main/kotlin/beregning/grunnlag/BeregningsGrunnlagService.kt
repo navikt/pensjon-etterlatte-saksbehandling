@@ -119,6 +119,7 @@ class BeregningsGrunnlagService(
                             beregningsMetodeFlereAvdoede =
                                 beregningsGrunnlag.beregningsMetodeFlereAvdoede
                                     ?: emptyList(),
+                            kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
                         ),
                     )
             }
@@ -131,16 +132,11 @@ class BeregningsGrunnlagService(
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         grunnlag: Grunnlag,
     ) {
-        val annenForelder = grunnlag.hentAnnenForelder()
-        val harBeregningsmetodeForKunEnJuridisk =
-            beregningsGrunnlag.beregningsMetodeFlereAvdoede?.any {
-                it.data.avdoed == KUN_EN_REGISTRERT_JURIDISK_FORELDER.name
-            }
-                ?: false
+        val harBeregningsgrunnlagMedKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder.isNotEmpty()
         val persongalleriHarKunEnJuridiskForelder =
-            annenForelder?.vurdering == KUN_EN_REGISTRERT_JURIDISK_FORELDER
+            grunnlag.hentAnnenForelder()?.vurdering == KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
-        if (harBeregningsmetodeForKunEnJuridisk && !persongalleriHarKunEnJuridiskForelder) {
+        if (harBeregningsgrunnlagMedKunEnJuridisk && !persongalleriHarKunEnJuridiskForelder) {
             throw BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(behandlingId = behandlingId)
         }
     }

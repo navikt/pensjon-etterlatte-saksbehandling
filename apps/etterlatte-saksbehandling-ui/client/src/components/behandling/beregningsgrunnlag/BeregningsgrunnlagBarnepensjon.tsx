@@ -103,6 +103,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
       beregningsMetodeFlereAvdoede: behandling.beregningsGrunnlag?.beregningsMetodeFlereAvdoede,
       soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+      kunEnJuridiskForelder: behandling.beregningsGrunnlag?.kunEnJuridiskForelder ?? [],
     }
     lagreBeregningsgrunnlagRequest(
       {
@@ -122,6 +123,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
         beregningsMetode: BeregningsMetode.NASJONAL,
       },
+      kunEnJuridiskForelder: behandling.beregningsGrunnlag?.kunEnJuridiskForelder ?? [],
     }
 
     lagreBeregningsgrunnlagRequest(

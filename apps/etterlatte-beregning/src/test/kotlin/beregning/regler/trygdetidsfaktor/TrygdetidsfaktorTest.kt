@@ -126,6 +126,7 @@ internal class TrygdetidsfaktorTest {
                     "trygdetid",
                 ),
             institusjonsopphold = FaktumNode(null, kilde, "institusjonsopphold"),
+            kunEnJuridiskForelder = FaktumNode(false, kilde, "kunEnJuridiskForelder"),
         )
 
         @JvmStatic

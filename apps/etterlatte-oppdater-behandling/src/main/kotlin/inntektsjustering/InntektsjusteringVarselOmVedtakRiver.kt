@@ -29,7 +29,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class InntektsjusteringInfobrevRiver(
+internal class InntektsjusteringVarselOmVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,

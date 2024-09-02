@@ -3,7 +3,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.inntektsjustering.InntektsjusteringInfobrevRiver
+import no.nav.etterlatte.inntektsjustering.InntektsjusteringVarselOmVedtakRiver
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -19,7 +19,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class InntektsjusteringInfobrevRiver {
+class InntektsjusteringVarselOmVedtakRiver {
     private val kjoering = "infobrev-inntektsjustering-2025"
     private val loependeFom = YearMonth.of(2024, 1)
 
@@ -37,7 +37,7 @@ class InntektsjusteringInfobrevRiver {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringInfobrevRiver(this, behandlingServiceMock, featureToggleService) }
+            TestRapid().apply { InntektsjusteringVarselOmVedtakRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
 
         verify(exactly = 1) {
@@ -60,7 +60,7 @@ class InntektsjusteringInfobrevRiver {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringInfobrevRiver(this, behandlingServiceMock, featureToggleService) }
+            TestRapid().apply { InntektsjusteringVarselOmVedtakRiver(this, behandlingServiceMock, featureToggleService) }
 
         inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
         verify(exactly = 0) {

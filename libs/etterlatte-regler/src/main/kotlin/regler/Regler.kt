@@ -1,14 +1,26 @@
 package no.nav.etterlatte.libs.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import java.time.LocalDate
+
+class TildatoMaaVaereSenereEnnFradato(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate? = null,
+) : ForespoerselException(
+        status = 500,
+        code = "TILDATO_MINDRE_ENN_FRADATO",
+        detail = "Tildato ($tilDato) må være større eller lik fradato ($fraDato)",
+    )
 
 data class RegelPeriode(
     val fraDato: LocalDate,
     val tilDato: LocalDate? = null,
 ) {
     init {
-        check(tilDato == null || tilDato >= fraDato) { "Tildato ($tilDato) må være større eller lik fradato ($fraDato)" }
+        if (tilDato == null || tilDato >= fraDato) {
+            throw TildatoMaaVaereSenereEnnFradato(fraDato, tilDato)
+        }
     }
 }
 

@@ -18,7 +18,7 @@ data class RegelPeriode(
     val tilDato: LocalDate? = null,
 ) {
     init {
-        if (tilDato == null || tilDato >= fraDato) {
+        if (!(tilDato == null || tilDato >= fraDato)) {
             throw TildatoMaaVaereSenereEnnFradato(fraDato, tilDato)
         }
     }

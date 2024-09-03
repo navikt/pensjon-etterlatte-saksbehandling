@@ -166,27 +166,22 @@ class AktivitetspliktDao(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
+    ) = connectionAutoclosing.oppdater(
+        """
                         UPDATE aktivitetsplikt_aktivitet
                         SET aktivitet_type = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?
                         WHERE id = ? AND behandling_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setString(1, aktivitet.type.name)
-            stmt.setDate(2, Date.valueOf(aktivitet.fom))
-            stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(4, kilde.toJson())
-            stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
-            stmt.setObject(7, behandlingId)
-
-            stmt.executeUpdate()
-        }
-    }
+                    """,
+        listOf(
+            SQLParameter(Parametertype.STRING, aktivitet.type.name),
+            SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
+            SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            SQLParameter(Parametertype.STRING, kilde.toJson()),
+            SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
+            SQLParameter(Parametertype.OBJECT, requireNotNull(aktivitet.id)),
+            SQLParameter(Parametertype.OBJECT, behandlingId),
+        ),
+    )
 
     fun oppdaterAktivitetForSak(
         sakId: SakId,
@@ -211,40 +206,18 @@ class AktivitetspliktDao(
     fun slettAktivitet(
         aktivitetId: UUID,
         behandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                        DELETE FROM aktivitetsplikt_aktivitet
-                        WHERE id = ? AND behandling_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, aktivitetId)
-            stmt.setObject(2, behandlingId)
-
-            stmt.executeUpdate()
-        }
-    }
+    ) = connectionAutoclosing.oppdater(
+        """DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND behandling_id = ?""",
+        listOf(SQLParameter(Parametertype.OBJECT, aktivitetId), SQLParameter(Parametertype.OBJECT, behandlingId)),
+    )
 
     fun slettAktivitetForSak(
         aktivitetId: UUID,
         sakId: SakId,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                        DELETE FROM aktivitetsplikt_aktivitet
-                        WHERE id = ? AND sak_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, aktivitetId)
-            stmt.setObject(2, sakId)
-
-            stmt.executeUpdate()
-        }
-    }
+    ) = connectionAutoclosing.oppdater(
+        "DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND sak_id = ?",
+        listOf(SQLParameter(Parametertype.OBJECT, aktivitetId), SQLParameter(Parametertype.OBJECT, sakId)),
+    )
 
     fun kopierAktiviteter(
         forrigeBehandlingId: UUID,

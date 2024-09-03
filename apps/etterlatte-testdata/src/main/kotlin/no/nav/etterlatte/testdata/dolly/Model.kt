@@ -64,7 +64,6 @@ data class DollyPersonResponse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class DollyPerson(
     val doedsfall: List<Doedsfall>,
-    val foedsel: List<Foedsel>,
     val navn: List<Navn>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val sivilstand: List<Sivilstand>,
@@ -83,12 +82,6 @@ data class Sivilstand(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Doedsfall(
     val doedsdato: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Foedsel(
-    val foedselsdato: String,
-    val foedselsaar: Int,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

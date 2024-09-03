@@ -8,13 +8,11 @@ import javax.sql.DataSource
 abstract class ConnectionAutoclosing {
     abstract fun <T> hentConnection(block: (connection: Connection) -> T): T
 
-    internal fun manglerKontekst(): Boolean {
-        val kontekst = Kontekst.get()
-        return when (kontekst) {
+    internal fun manglerKontekst() =
+        when (Kontekst.get()) {
             null -> true
             else -> false
         }
-    }
 }
 
 class ConnectionAutoclosingImpl(

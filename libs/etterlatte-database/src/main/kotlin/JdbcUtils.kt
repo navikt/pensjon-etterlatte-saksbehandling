@@ -71,11 +71,12 @@ fun <T> ConnectionAutoclosing.hent(
 fun ConnectionAutoclosing.opprett(
     statement: String,
     params: List<SQLParameter>,
+    require: (Int) -> Unit = {},
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate().also { require(it == 1) }
+        stmt.executeUpdate().also { require(it) }
     }
 }
 
@@ -117,11 +118,12 @@ fun <T> ConnectionAutoclosing.oppdaterOgReturner(
 fun ConnectionAutoclosing.slett(
     statement: String,
     params: List<SQLParameter>,
+    require: (Int) -> Unit = {},
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate()
+        stmt.executeUpdate().also { require(it) }
     }
 }
 

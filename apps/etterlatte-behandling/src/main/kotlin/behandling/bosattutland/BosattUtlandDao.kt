@@ -29,6 +29,7 @@ class BosattUtlandDao(
                 SQLJsonb(bosattUtland.mottatteSeder),
                 SQLJsonb(bosattUtland.sendteSeder),
             ),
+            { require(it == 1) },
         )
 
     fun hentBosattUtland(behandlingId: UUID): BosattUtland? =

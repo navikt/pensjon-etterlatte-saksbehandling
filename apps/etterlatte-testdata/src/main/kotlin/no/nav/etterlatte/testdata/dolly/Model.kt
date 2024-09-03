@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.dolly
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Bruker(
@@ -63,14 +62,8 @@ data class DollyPersonResponse(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class FoedselsdatoDTO(
-    val foedselsdato: LocalDate,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class DollyPerson(
     val doedsfall: List<Doedsfall>,
-    val foedselsdato: FoedselsdatoDTO,
     val navn: List<Navn>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val sivilstand: List<Sivilstand>,

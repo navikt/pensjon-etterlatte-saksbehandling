@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.Parametertype
 import no.nav.etterlatte.libs.database.SQLParameter
 import no.nav.etterlatte.libs.database.oppdater
+import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
@@ -58,22 +59,17 @@ class AktivitetspliktDao(
         behandlingId: UUID,
         nyOppfolging: OpprettAktivitetspliktOppfolging,
         navIdent: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
+    ) = connectionAutoclosing.opprett(
+        """
             |INSERT INTO aktivitetsplikt_oppfolging(behandling_id, aktivitet, opprettet_av) 
             |VALUES (?, ?, ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, behandlingId)
-            stmt.setString(2, nyOppfolging.aktivitet)
-            stmt.setString(3, navIdent)
-
-            stmt.executeUpdate()
-        }
-    }
+                    """,
+        listOf(
+            SQLParameter(Parametertype.OBJECT, behandlingId),
+            SQLParameter(Parametertype.STRING, nyOppfolging.aktivitet),
+            SQLParameter(Parametertype.STRING, navIdent),
+        ),
+    )
 
     fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
         connectionAutoclosing.hentConnection {
@@ -113,28 +109,23 @@ class AktivitetspliktDao(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
+    ) = connectionAutoclosing.opprett(
+        """
                         INSERT INTO aktivitetsplikt_aktivitet(id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, UUID.randomUUID())
-            stmt.setLong(2, aktivitet.sakId)
-            stmt.setObject(3, behandlingId)
-            stmt.setString(4, aktivitet.type.name)
-            stmt.setDate(5, Date.valueOf(aktivitet.fom))
-            stmt.setDate(6, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(7, kilde.toJson())
-            stmt.setString(8, kilde.toJson())
-            stmt.setString(9, aktivitet.beskrivelse)
-
-            stmt.executeUpdate()
-        }
-    }
+                    """,
+        listOf(
+            SQLParameter(Parametertype.OBJECT, UUID.randomUUID()),
+            SQLParameter(Parametertype.LONG, aktivitet.sakId),
+            SQLParameter(Parametertype.OBJECT, behandlingId),
+            SQLParameter(Parametertype.STRING, aktivitet.type.name),
+            SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
+            SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            SQLParameter(Parametertype.STRING, kilde.toJson()),
+            SQLParameter(Parametertype.STRING, kilde.toJson()),
+            SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
+        ),
+    )
 
     fun opprettAktivitetForSak(
         sakId: SakId,
@@ -222,21 +213,13 @@ class AktivitetspliktDao(
     fun kopierAktiviteter(
         forrigeBehandlingId: UUID,
         nyBehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
+    ) = connectionAutoclosing.opprett(
+        """
                         INSERT INTO aktivitetsplikt_aktivitet (id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse)
                         (SELECT gen_random_uuid(), sak_id, ?, aktivitet_type, fom, tom, opprettet, endret, beskrivelse FROM aktivitetsplikt_aktivitet WHERE behandling_id = ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, nyBehandlingId)
-            stmt.setObject(2, forrigeBehandlingId)
-
-            stmt.executeUpdate()
-        }
-    }
+                    """,
+        listOf(SQLParameter(Parametertype.OBJECT, nyBehandlingId), SQLParameter(Parametertype.OBJECT, forrigeBehandlingId)),
+    )
 
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitet(

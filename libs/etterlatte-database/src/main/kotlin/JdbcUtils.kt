@@ -100,7 +100,6 @@ fun ConnectionAutoclosing.slett(
 }
 
 abstract class SQLParameter(
-    val type: Parametertype,
     open val verdi: Any?,
 ) {
     abstract fun settParameter(
@@ -111,7 +110,7 @@ abstract class SQLParameter(
 
 data class SQLString(
     override val verdi: String?,
-) : SQLParameter(Parametertype.STRING, verdi) {
+) : SQLParameter(verdi) {
     override fun settParameter(
         index: Int,
         stmt: PreparedStatement,
@@ -120,7 +119,7 @@ data class SQLString(
 
 data class SQLInt(
     override val verdi: Int,
-) : SQLParameter(Parametertype.INT, verdi) {
+) : SQLParameter(verdi) {
     override fun settParameter(
         index: Int,
         stmt: PreparedStatement,
@@ -129,7 +128,7 @@ data class SQLInt(
 
 data class SQLLong(
     override val verdi: Long,
-) : SQLParameter(Parametertype.LONG, verdi) {
+) : SQLParameter(verdi) {
     override fun settParameter(
         index: Int,
         stmt: PreparedStatement,
@@ -138,7 +137,7 @@ data class SQLLong(
 
 data class SQLDate(
     override val verdi: Date?,
-) : SQLParameter(Parametertype.DATE, verdi) {
+) : SQLParameter(verdi) {
     override fun settParameter(
         index: Int,
         stmt: PreparedStatement,
@@ -147,17 +146,9 @@ data class SQLDate(
 
 data class SQLObject(
     override val verdi: Any?,
-) : SQLParameter(Parametertype.OBJECT, verdi) {
+) : SQLParameter(verdi) {
     override fun settParameter(
         index: Int,
         stmt: PreparedStatement,
     ) = stmt.setObject(index, verdi)
-}
-
-enum class Parametertype {
-    STRING,
-    INT,
-    LONG,
-    DATE,
-    OBJECT,
 }

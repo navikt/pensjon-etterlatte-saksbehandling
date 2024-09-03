@@ -53,12 +53,11 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
     return this
 }
 
-fun oppdater(
+fun ConnectionAutoclosing.oppdater(
     statement: String,
-    params: List<SQLParameter<Any>>,
-    connection: ConnectionAutoclosing,
+    params: List<SQLParameter>,
 ) {
-    connection.hentConnection {
+    hentConnection {
         with(it) {
             val stmt = prepareStatement(statement.trimMargin())
             params.forEach { param -> settParameter(param, stmt) }
@@ -67,21 +66,27 @@ fun oppdater(
     }
 }
 
-private fun <T> settParameter(
-    param: SQLParameter<T>,
+private fun settParameter(
+    param: SQLParameter,
     stmt: PreparedStatement,
-) {
-    when (param.type) {
-        String::class.java -> stmt.setString(param.index, param.verdi as String?)
-        Int::class.java -> stmt.setInt(param.index, param.verdi as Int)
-        Long::class.java -> stmt.setLong(param.index, param.verdi as Long)
-        Date::class.java -> stmt.setDate(param.index, param.verdi as Date?)
-        else -> stmt.setObject(param.index, param.verdi)
-    }
+) = when (param.type) {
+    Parametertype.STRING -> stmt.setString(param.index, param.verdi as String?)
+    Parametertype.INT -> stmt.setInt(param.index, param.verdi as Int)
+    Parametertype.LONG -> stmt.setLong(param.index, param.verdi as Long)
+    Parametertype.DATE -> stmt.setDate(param.index, param.verdi as Date?)
+    else -> stmt.setObject(param.index, param.verdi)
 }
 
-data class SQLParameter<T>(
+data class SQLParameter(
     val index: Int,
-    val type: Class<T>,
-    val verdi: Any,
+    val type: Parametertype,
+    val verdi: Any?,
 )
+
+enum class Parametertype {
+    STRING,
+    INT,
+    LONG,
+    DATE,
+    OBJECT,
+}

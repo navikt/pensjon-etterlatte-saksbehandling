@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.SQLString
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
+import no.nav.etterlatte.libs.database.slett
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
@@ -194,7 +195,7 @@ class AktivitetspliktDao(
     fun slettAktivitet(
         aktivitetId: UUID,
         behandlingId: UUID,
-    ) = connectionAutoclosing.oppdater(
+    ) = connectionAutoclosing.slett(
         """DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND behandling_id = ?""",
         listOf(SQLObject(aktivitetId), SQLObject(behandlingId)),
     )
@@ -202,7 +203,7 @@ class AktivitetspliktDao(
     fun slettAktivitetForSak(
         aktivitetId: UUID,
         sakId: SakId,
-    ) = connectionAutoclosing.oppdater(
+    ) = connectionAutoclosing.slett(
         "DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND sak_id = ?",
         listOf(SQLObject(aktivitetId), SQLObject(sakId)),
     )

@@ -75,6 +75,17 @@ fun ConnectionAutoclosing.oppdater(
     }
 }
 
+fun ConnectionAutoclosing.slett(
+    statement: String,
+    params: List<SQLParameter>,
+) = hentConnection {
+    with(it) {
+        val stmt = prepareStatement(statement.trimMargin())
+        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        stmt.executeUpdate()
+    }
+}
+
 private fun settParameter(
     index: Int,
     param: SQLParameter,

@@ -96,7 +96,7 @@ test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = 
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.4" }
-openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.2.0" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.3.1" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

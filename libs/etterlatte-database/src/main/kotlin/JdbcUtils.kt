@@ -73,7 +73,7 @@ fun ConnectionAutoclosing.opprett(
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate()
+        stmt.executeUpdate().also { require(it == 1) }
     }
 }
 

@@ -182,7 +182,7 @@ class BeregningsgrunnlagMangler(
         code = "BEREGNINGSGRUNNLAG_MANGLER",
         detail =
             "Behandling med id: $behandlingId mangler beregningsgrunnlag, " +
-                "sett trygdetid metode i beregningen eller legg til institusjonsopphold ovenfor.",
+                "sett trygdetid metode i beregningen ovenfor.",
     )
 
 class AnvendtGrunnbeloepIkkeFunnet :

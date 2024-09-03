@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.slett
-import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -43,7 +42,7 @@ class AktivitetspliktDao(
                 |LIMIT 1
                         """,
                 listOf(SQLObject(behandlingId)),
-            ).toList {
+            ) {
                 AktivitetspliktOppfolging(
                     behandlingId = getUUID("behandling_id"),
                     aktivitet = getString("aktivitet"),
@@ -77,7 +76,7 @@ class AktivitetspliktDao(
                         WHERE behandling_id = ?
                         """,
                 listOf(SQLObject(behandlingId)),
-            ).toList { toAktivitet() }
+            ) { toAktivitet() }
 
     fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
         connectionAutoclosing
@@ -88,7 +87,7 @@ class AktivitetspliktDao(
                         WHERE sak_id = ?
                         """,
                 listOf(SQLObject(sakId)),
-            ).toList { toAktivitet() }
+            ) { toAktivitet() }
 
     fun opprettAktivitet(
         behandlingId: UUID,

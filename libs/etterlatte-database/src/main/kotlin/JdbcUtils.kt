@@ -87,10 +87,30 @@ private fun settParameter(
     else -> stmt.setObject(index, param.verdi)
 }
 
-data class SQLParameter(
+abstract class SQLParameter(
     val type: Parametertype,
-    val verdi: Any?,
+    open val verdi: Any?,
 )
+
+data class SQLString(
+    override val verdi: String?,
+) : SQLParameter(Parametertype.STRING, verdi)
+
+data class SQLInt(
+    override val verdi: Int,
+) : SQLParameter(Parametertype.INT, verdi)
+
+data class SQLLong(
+    override val verdi: Long,
+) : SQLParameter(Parametertype.LONG, verdi)
+
+data class SQLDate(
+    override val verdi: Date?,
+) : SQLParameter(Parametertype.DATE, verdi)
+
+data class SQLObject(
+    override val verdi: Any?,
+) : SQLParameter(Parametertype.OBJECT, verdi)
 
 enum class Parametertype {
     STRING,

@@ -11,8 +11,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.ConnectionAutoclosing
-import no.nav.etterlatte.libs.database.Parametertype
-import no.nav.etterlatte.libs.database.SQLParameter
+import no.nav.etterlatte.libs.database.SQLDate
+import no.nav.etterlatte.libs.database.SQLLong
+import no.nav.etterlatte.libs.database.SQLObject
+import no.nav.etterlatte.libs.database.SQLString
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.toList
@@ -65,9 +67,9 @@ class AktivitetspliktDao(
             |VALUES (?, ?, ?)
                     """,
         listOf(
-            SQLParameter(Parametertype.OBJECT, behandlingId),
-            SQLParameter(Parametertype.STRING, nyOppfolging.aktivitet),
-            SQLParameter(Parametertype.STRING, navIdent),
+            SQLObject(behandlingId),
+            SQLString(nyOppfolging.aktivitet),
+            SQLString(navIdent),
         ),
     )
 
@@ -115,15 +117,15 @@ class AktivitetspliktDao(
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
         listOf(
-            SQLParameter(Parametertype.OBJECT, UUID.randomUUID()),
-            SQLParameter(Parametertype.LONG, aktivitet.sakId),
-            SQLParameter(Parametertype.OBJECT, behandlingId),
-            SQLParameter(Parametertype.STRING, aktivitet.type.name),
-            SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
-            SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-            SQLParameter(Parametertype.STRING, kilde.toJson()),
-            SQLParameter(Parametertype.STRING, kilde.toJson()),
-            SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
+            SQLObject(UUID.randomUUID()),
+            SQLLong(aktivitet.sakId),
+            SQLObject(behandlingId),
+            SQLString(aktivitet.type.name),
+            SQLDate(Date.valueOf(aktivitet.fom)),
+            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            SQLString(kilde.toJson()),
+            SQLString(kilde.toJson()),
+            SQLString(aktivitet.beskrivelse),
         ),
     )
 
@@ -164,13 +166,13 @@ class AktivitetspliktDao(
                         WHERE id = ? AND behandling_id = ?
                     """,
         listOf(
-            SQLParameter(Parametertype.STRING, aktivitet.type.name),
-            SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
-            SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-            SQLParameter(Parametertype.STRING, kilde.toJson()),
-            SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
-            SQLParameter(Parametertype.OBJECT, requireNotNull(aktivitet.id)),
-            SQLParameter(Parametertype.OBJECT, behandlingId),
+            SQLString(aktivitet.type.name),
+            SQLDate(Date.valueOf(aktivitet.fom)),
+            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            SQLString(kilde.toJson()),
+            SQLString(aktivitet.beskrivelse),
+            SQLObject(requireNotNull(aktivitet.id)),
+            SQLObject(behandlingId),
         ),
     )
 
@@ -184,13 +186,13 @@ class AktivitetspliktDao(
                         WHERE id = ? AND sak_id = ?""",
         params =
             listOf(
-                SQLParameter(Parametertype.STRING, aktivitet.type.name),
-                SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
-                SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-                SQLParameter(Parametertype.STRING, kilde.toJson()),
-                SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
-                SQLParameter(Parametertype.OBJECT, requireNotNull(aktivitet.id)),
-                SQLParameter(Parametertype.OBJECT, sakId),
+                SQLString(aktivitet.type.name),
+                SQLDate(Date.valueOf(aktivitet.fom)),
+                SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+                SQLString(kilde.toJson()),
+                SQLString(aktivitet.beskrivelse),
+                SQLObject(requireNotNull(aktivitet.id)),
+                SQLObject(sakId),
             ),
     )
 
@@ -199,7 +201,7 @@ class AktivitetspliktDao(
         behandlingId: UUID,
     ) = connectionAutoclosing.oppdater(
         """DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND behandling_id = ?""",
-        listOf(SQLParameter(Parametertype.OBJECT, aktivitetId), SQLParameter(Parametertype.OBJECT, behandlingId)),
+        listOf(SQLObject(aktivitetId), SQLObject(behandlingId)),
     )
 
     fun slettAktivitetForSak(
@@ -207,7 +209,7 @@ class AktivitetspliktDao(
         sakId: SakId,
     ) = connectionAutoclosing.oppdater(
         "DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND sak_id = ?",
-        listOf(SQLParameter(Parametertype.OBJECT, aktivitetId), SQLParameter(Parametertype.OBJECT, sakId)),
+        listOf(SQLObject(aktivitetId), SQLObject(sakId)),
     )
 
     fun kopierAktiviteter(
@@ -218,7 +220,7 @@ class AktivitetspliktDao(
                         INSERT INTO aktivitetsplikt_aktivitet (id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse)
                         (SELECT gen_random_uuid(), sak_id, ?, aktivitet_type, fom, tom, opprettet, endret, beskrivelse FROM aktivitetsplikt_aktivitet WHERE behandling_id = ?)
                     """,
-        listOf(SQLParameter(Parametertype.OBJECT, nyBehandlingId), SQLParameter(Parametertype.OBJECT, forrigeBehandlingId)),
+        listOf(SQLObject(nyBehandlingId), SQLObject(forrigeBehandlingId)),
     )
 
     private fun ResultSet.toAktivitet() =

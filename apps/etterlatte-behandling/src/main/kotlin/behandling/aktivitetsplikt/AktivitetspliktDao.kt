@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.database.SQLDate
 import no.nav.etterlatte.libs.database.SQLLong
 import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.SQLString
+import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.slett
@@ -28,11 +29,9 @@ class AktivitetspliktDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
+        connectionAutoclosing
+            .hent(
+                """
                 |SELECT id, 
                 | behandling_id,
                 | aktivitet,
@@ -42,21 +41,16 @@ class AktivitetspliktDao(
                 |WHERE behandling_id = ?
                 |ORDER BY id DESC
                 |LIMIT 1
-                        """.trimMargin(),
-                    )
-                stmt.setObject(1, behandlingId)
-                stmt
-                    .executeQuery()
-                    .toList {
-                        AktivitetspliktOppfolging(
-                            behandlingId = getUUID("behandling_id"),
-                            aktivitet = getString("aktivitet"),
-                            opprettet = getTidspunkt("opprettet"),
-                            opprettetAv = getString("opprettet_av"),
-                        )
-                    }.firstOrNull()
-            }
-        }
+                        """,
+                listOf(SQLObject(behandlingId)),
+            ).toList {
+                AktivitetspliktOppfolging(
+                    behandlingId = getUUID("behandling_id"),
+                    aktivitet = getString("aktivitet"),
+                    opprettet = getTidspunkt("opprettet"),
+                    opprettetAv = getString("opprettet_av"),
+                )
+            }.firstOrNull()
 
     fun lagre(
         behandlingId: UUID,
@@ -75,38 +69,26 @@ class AktivitetspliktDao(
     )
 
     fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
+        connectionAutoclosing
+            .hent(
+                """
                         SELECT id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitet
                         WHERE behandling_id = ?
-                        """.trimMargin(),
-                    )
-                stmt.setObject(1, behandlingId)
-
-                stmt.executeQuery().toList { toAktivitet() }
-            }
-        }
+                        """,
+                listOf(SQLObject(behandlingId)),
+            ).toList { toAktivitet() }
 
     fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
+        connectionAutoclosing
+            .hent(
+                """
                         SELECT id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitet
                         WHERE sak_id = ?
-                        """.trimMargin(),
-                    )
-                stmt.setObject(1, sakId)
-
-                stmt.executeQuery().toList { toAktivitet() }
-            }
-        }
+                        """,
+                listOf(SQLObject(sakId)),
+            ).toList { toAktivitet() }
 
     fun opprettAktivitet(
         behandlingId: UUID,

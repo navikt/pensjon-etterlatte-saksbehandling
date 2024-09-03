@@ -53,6 +53,17 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
     return this
 }
 
+fun ConnectionAutoclosing.hent(
+    statement: String,
+    params: List<SQLParameter>,
+) = hentConnection {
+    with(it) {
+        val stmt = prepareStatement(statement.trimMargin())
+        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        stmt.executeQuery()
+    }
+}
+
 fun ConnectionAutoclosing.opprett(
     statement: String,
     params: List<SQLParameter>,

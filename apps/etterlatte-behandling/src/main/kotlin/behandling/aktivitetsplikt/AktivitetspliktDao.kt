@@ -11,6 +11,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.Parametertype
+import no.nav.etterlatte.libs.database.SQLParameter
+import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
@@ -189,27 +192,21 @@ class AktivitetspliktDao(
         sakId: SakId,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                        UPDATE aktivitetsplikt_aktivitet
+    ) = connectionAutoclosing.oppdater(
+        statement = """UPDATE aktivitetsplikt_aktivitet
                         SET aktivitet_type = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?
-                        WHERE id = ? AND sak_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setString(1, aktivitet.type.name)
-            stmt.setDate(2, Date.valueOf(aktivitet.fom))
-            stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(4, kilde.toJson())
-            stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
-            stmt.setObject(7, sakId)
-
-            stmt.executeUpdate()
-        }
-    }
+                        WHERE id = ? AND sak_id = ?""",
+        params =
+            listOf(
+                SQLParameter(1, Parametertype.STRING, aktivitet.type.name),
+                SQLParameter(2, Parametertype.DATE, Date.valueOf(aktivitet.fom)),
+                SQLParameter(3, Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+                SQLParameter(4, Parametertype.STRING, kilde.toJson()),
+                SQLParameter(5, Parametertype.STRING, aktivitet.beskrivelse),
+                SQLParameter(6, Parametertype.OBJECT, requireNotNull(aktivitet.id)),
+                SQLParameter(7, Parametertype.OBJECT, sakId),
+            ),
+    )
 
     fun slettAktivitet(
         aktivitetId: UUID,

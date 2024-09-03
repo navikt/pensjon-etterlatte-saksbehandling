@@ -22,6 +22,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetsp
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -81,20 +83,31 @@ class AktivitetspliktService(
         behandlingId: UUID?,
     ): AktivitetspliktDto {
         val faktiskBehandlingId = behandlingId ?: behandlingService.hentSisteIverksatte(sakId)!!.id
+
         val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
         val avdoedDoedsdato =
-            requireNotNull(
-                grunnlag
-                    .hentAvdoede()
-                    .singleOrNull()
-                    ?.hentDoedsdato()
-                    ?.verdi,
-            ) {
-                "Kunne ikke hente ut avdødes dødsdato for behandling med id=$faktiskBehandlingId"
-            }
+            grunnlag
+                .hentAvdoede()
+                .singleOrNull()
+                ?.hentDoedsdato()
+                ?.verdi
 
-        val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
-        val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
+        if (avdoedDoedsdato == null) {
+            val aktuellBehandling = behandlingService.hentBehandling(faktiskBehandlingId)
+            if (aktuellBehandling?.status in BehandlingStatus.iverksattEllerAttestert()) {
+                throw InternfeilException(
+                    "Mangler avdødes dødsdato i en behandling som er iverksatt/attestert, " +
+                        "med sakId=$sakId. Dette gjør at vi ikke får hentet ut riktig aktivitetsplikt for saken " +
+                        "og de vil kunne mangle fra statistikken. Årsaken til at vi ikke har en dødsdato og " +
+                        "dermed ikke får riktig? statistikk bør sees på, og en sending av dto for denne saken " +
+                        "til statistikk bør vurderes",
+                )
+            } else {
+                throw ManglerDoedsdatoUnderBehandlingException(sakId)
+            }
+        }
+
+        val aktiviteter = hentAktiviteter(faktiskBehandlingId)
 
         val sisteVurdering = hentVurderingForSak(sakId)
 
@@ -523,6 +536,9 @@ class AktivitetspliktService(
         try {
             val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
+        } catch (e: ManglerDoedsdatoUnderBehandlingException) {
+            // Dette er ikke kritisk og vi vil bare logge en advarsel
+            logger.warn(e.detail, e)
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke sende hendelse til statistikk om oppdatert aktivitetsplikt, for sak $sakId. " +
@@ -533,6 +549,14 @@ class AktivitetspliktService(
         }
     }
 }
+
+class ManglerDoedsdatoUnderBehandlingException(
+    sakId: SakId,
+) : UgyldigForespoerselException(
+        "MANGLER_DOEDSDATO_SAK",
+        "Mangler dødsdato avdød i sak $sakId. Dette er en sak under behandling, så statistikk skal " +
+            "plukke opp aktiviteten i vedtaket hvis det blir innvilgelse.",
+    )
 
 /**
  * Henter det nyeste bildet på hva som er vurderingen av aktivitetsgrad og unntak fra aktivitet på sak.

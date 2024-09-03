@@ -74,14 +74,17 @@ class StatistikkService(
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
                     ->
-                        stoenadRepository.lagreStoenadsrad(
-                            vedtakTilStoenadsrad(
-                                vedtak,
-                                tekniskTid,
-                                sakRad!!.kilde,
-                                sakRad.pesysId,
-                            ),
-                        )
+                        stoenadRepository
+                            .lagreStoenadsrad(
+                                vedtakTilStoenadsrad(
+                                    vedtak,
+                                    tekniskTid,
+                                    sakRad!!.kilde,
+                                    sakRad.pesysId,
+                                ),
+                            ).also {
+                                hentSisteAktivitetspliktDto(vedtak)
+                            }
 
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVVIST_KLAGE,
@@ -91,6 +94,22 @@ class StatistikkService(
             return sakRad to stoenadRad
         }
         return sakRad to null
+    }
+
+    private fun hentSisteAktivitetspliktDto(vedtak: VedtakDto) {
+        try {
+            if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                val aktivitetspliktDto =
+                    runBlocking { behandlingKlient.hentAktivitetspliktDto(vedtak.sak.id, vedtak.behandlingId) }
+                aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke hente og oppdatere aktivitetspliktstatusen for OMS-sak med id=${vedtak.sak.id}" +
+                    "Dette betyr at vi ikke kjenner til den oppdaterte aktivitetspliktstatusen for saken," +
+                    "og trenger å følges opp for å få de riktig med i statistikken.",
+            )
+        }
     }
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {

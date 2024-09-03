@@ -105,7 +105,7 @@ abstract class SQLParameter(
     abstract fun settParameter(
         index: Int,
         stmt: PreparedStatement,
-    )
+    ): Any?
 }
 
 data class SQLString(
@@ -151,4 +151,13 @@ data class SQLObject(
         index: Int,
         stmt: PreparedStatement,
     ) = stmt.setObject(index, verdi)
+}
+
+data class SQLJsonb(
+    override val verdi: Any?,
+) : SQLParameter(verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setJsonb(index, verdi)
 }

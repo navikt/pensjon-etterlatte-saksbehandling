@@ -61,7 +61,7 @@ fun <T> ConnectionAutoclosing.hent(
     hentConnection {
         with(it) {
             val stmt = prepareStatement(statement.trimMargin())
-            params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
+            params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
             stmt.executeQuery()
         }.toList { konverterer(it) }
     }
@@ -72,7 +72,7 @@ fun ConnectionAutoclosing.opprett(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
+        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
         stmt.executeUpdate()
     }
 }
@@ -83,7 +83,7 @@ fun ConnectionAutoclosing.oppdater(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
+        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
         stmt.executeUpdate()
     }
 }
@@ -94,47 +94,65 @@ fun ConnectionAutoclosing.slett(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
+        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
         stmt.executeUpdate()
     }
-}
-
-private fun settParameter(
-    index: Int,
-    param: SQLParameter,
-    stmt: PreparedStatement,
-) = when (param.type) {
-    Parametertype.STRING -> stmt.setString(index, param.verdi as String?)
-    Parametertype.INT -> stmt.setInt(index, param.verdi as Int)
-    Parametertype.LONG -> stmt.setLong(index, param.verdi as Long)
-    Parametertype.DATE -> stmt.setDate(index, param.verdi as Date?)
-    else -> stmt.setObject(index, param.verdi)
 }
 
 abstract class SQLParameter(
     val type: Parametertype,
     open val verdi: Any?,
-)
+) {
+    abstract fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    )
+}
 
 data class SQLString(
     override val verdi: String?,
-) : SQLParameter(Parametertype.STRING, verdi)
+) : SQLParameter(Parametertype.STRING, verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setString(index, verdi)
+}
 
 data class SQLInt(
     override val verdi: Int,
-) : SQLParameter(Parametertype.INT, verdi)
+) : SQLParameter(Parametertype.INT, verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setInt(index, verdi)
+}
 
 data class SQLLong(
     override val verdi: Long,
-) : SQLParameter(Parametertype.LONG, verdi)
+) : SQLParameter(Parametertype.LONG, verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setLong(index, verdi)
+}
 
 data class SQLDate(
     override val verdi: Date?,
-) : SQLParameter(Parametertype.DATE, verdi)
+) : SQLParameter(Parametertype.DATE, verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setDate(index, verdi)
+}
 
 data class SQLObject(
     override val verdi: Any?,
-) : SQLParameter(Parametertype.OBJECT, verdi)
+) : SQLParameter(Parametertype.OBJECT, verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setObject(index, verdi)
+}
 
 enum class Parametertype {
     STRING,

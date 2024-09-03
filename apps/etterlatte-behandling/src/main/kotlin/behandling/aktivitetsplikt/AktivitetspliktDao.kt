@@ -133,27 +133,22 @@ class AktivitetspliktDao(
         sakId: SakId,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
+    ) = connectionAutoclosing.opprett(
+        """
                         INSERT INTO aktivitetsplikt_aktivitet(id, sak_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, UUID.randomUUID())
-            stmt.setLong(2, sakId)
-            stmt.setString(3, aktivitet.type.name)
-            stmt.setDate(4, Date.valueOf(aktivitet.fom))
-            stmt.setDate(5, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(6, kilde.toJson())
-            stmt.setString(7, kilde.toJson())
-            stmt.setString(8, aktivitet.beskrivelse)
-
-            stmt.executeUpdate()
-        }
-    }
+                    """,
+        listOf(
+            SQLObject(UUID.randomUUID()),
+            SQLLong(sakId),
+            SQLString(aktivitet.type.name),
+            SQLDate(Date.valueOf(aktivitet.fom)),
+            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            SQLString(kilde.toJson()),
+            SQLString(kilde.toJson()),
+            SQLString(aktivitet.beskrivelse),
+        ),
+    )
 
     fun oppdaterAktivitet(
         behandlingId: UUID,

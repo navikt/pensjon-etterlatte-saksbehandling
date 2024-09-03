@@ -55,7 +55,7 @@ fun Route.beregningsGrunnlag(
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter beregningdsgrunnlag for behandling $behandlingId")
+                logger.info("Henter beregningsgrunnlag for behandling $behandlingId")
                 val grunnlag =
                     beregningsGrunnlagService.hentBeregningsGrunnlag(
                         behandlingId,

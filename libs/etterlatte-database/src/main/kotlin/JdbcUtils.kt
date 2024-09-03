@@ -1,6 +1,8 @@
 package no.nav.etterlatte.libs.database
 
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import org.postgresql.util.PGobject
 import java.sql.Date
 import java.sql.PreparedStatement
@@ -160,4 +162,13 @@ data class SQLJsonb(
         index: Int,
         stmt: PreparedStatement,
     ) = stmt.setJsonb(index, verdi)
+}
+
+data class SQLTidspunkt(
+    override val verdi: Tidspunkt?,
+) : SQLParameter(verdi) {
+    override fun settParameter(
+        index: Int,
+        stmt: PreparedStatement,
+    ) = stmt.setTidspunkt(index, verdi)
 }

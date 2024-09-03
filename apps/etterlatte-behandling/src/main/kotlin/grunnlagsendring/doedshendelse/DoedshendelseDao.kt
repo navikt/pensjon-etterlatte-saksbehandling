@@ -4,11 +4,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID

@@ -2,12 +2,11 @@ package no.nav.etterlatte.common
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.databaseContext
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import java.sql.Connection
 import javax.sql.DataSource
 
-abstract class ConnectionAutoclosing {
-    abstract fun <T> hentConnection(block: (connection: Connection) -> T): T
-
+abstract class ConnectionAutoclosingBehandling : ConnectionAutoclosing {
     internal fun manglerKontekst() =
         when (Kontekst.get()) {
             null -> true
@@ -17,7 +16,7 @@ abstract class ConnectionAutoclosing {
 
 class ConnectionAutoclosingImpl(
     val dataSource: DataSource,
-) : ConnectionAutoclosing() {
+) : ConnectionAutoclosingBehandling() {
     override fun <T> hentConnection(block: (connection: Connection) -> T): T =
         if (manglerKontekst()) {
             dataSource.connection.use {

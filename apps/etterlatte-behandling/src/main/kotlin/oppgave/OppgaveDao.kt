@@ -1,7 +1,6 @@
 package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -17,6 +16,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory

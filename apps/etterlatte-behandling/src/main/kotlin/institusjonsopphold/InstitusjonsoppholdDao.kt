@@ -1,11 +1,11 @@
 package no.nav.etterlatte.institusjonsopphold
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.util.UUID
 

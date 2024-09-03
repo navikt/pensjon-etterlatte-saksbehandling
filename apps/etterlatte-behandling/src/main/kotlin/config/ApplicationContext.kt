@@ -79,7 +79,6 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
-import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -122,6 +121,7 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.database.ConnectionAutoclosingImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH

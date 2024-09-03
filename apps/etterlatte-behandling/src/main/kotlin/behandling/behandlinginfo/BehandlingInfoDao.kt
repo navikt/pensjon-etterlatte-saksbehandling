@@ -1,10 +1,10 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.ResultSet

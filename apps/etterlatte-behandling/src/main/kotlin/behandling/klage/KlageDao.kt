@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.klage
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList

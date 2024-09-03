@@ -3,7 +3,6 @@ package no.nav.etterlatte.oppgave
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet

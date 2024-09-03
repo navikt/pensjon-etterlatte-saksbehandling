@@ -3,7 +3,7 @@ package no.nav.etterlatte.saksbehandler
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull

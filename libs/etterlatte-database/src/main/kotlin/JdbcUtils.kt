@@ -60,25 +60,25 @@ fun ConnectionAutoclosing.oppdater(
     hentConnection {
         with(it) {
             val stmt = prepareStatement(statement.trimMargin())
-            params.forEach { param -> settParameter(param, stmt) }
+            params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
             stmt.executeUpdate()
         }
     }
 }
 
 private fun settParameter(
+    index: Int,
     param: SQLParameter,
     stmt: PreparedStatement,
 ) = when (param.type) {
-    Parametertype.STRING -> stmt.setString(param.index, param.verdi as String?)
-    Parametertype.INT -> stmt.setInt(param.index, param.verdi as Int)
-    Parametertype.LONG -> stmt.setLong(param.index, param.verdi as Long)
-    Parametertype.DATE -> stmt.setDate(param.index, param.verdi as Date?)
-    else -> stmt.setObject(param.index, param.verdi)
+    Parametertype.STRING -> stmt.setString(index, param.verdi as String?)
+    Parametertype.INT -> stmt.setInt(index, param.verdi as Int)
+    Parametertype.LONG -> stmt.setLong(index, param.verdi as Long)
+    Parametertype.DATE -> stmt.setDate(index, param.verdi as Date?)
+    else -> stmt.setObject(index, param.verdi)
 }
 
 data class SQLParameter(
-    val index: Int,
     val type: Parametertype,
     val verdi: Any?,
 )

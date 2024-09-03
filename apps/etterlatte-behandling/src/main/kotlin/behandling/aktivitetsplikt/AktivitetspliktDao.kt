@@ -198,13 +198,13 @@ class AktivitetspliktDao(
                         WHERE id = ? AND sak_id = ?""",
         params =
             listOf(
-                SQLParameter(1, Parametertype.STRING, aktivitet.type.name),
-                SQLParameter(2, Parametertype.DATE, Date.valueOf(aktivitet.fom)),
-                SQLParameter(3, Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-                SQLParameter(4, Parametertype.STRING, kilde.toJson()),
-                SQLParameter(5, Parametertype.STRING, aktivitet.beskrivelse),
-                SQLParameter(6, Parametertype.OBJECT, requireNotNull(aktivitet.id)),
-                SQLParameter(7, Parametertype.OBJECT, sakId),
+                SQLParameter(Parametertype.STRING, aktivitet.type.name),
+                SQLParameter(Parametertype.DATE, Date.valueOf(aktivitet.fom)),
+                SQLParameter(Parametertype.DATE, aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+                SQLParameter(Parametertype.STRING, kilde.toJson()),
+                SQLParameter(Parametertype.STRING, aktivitet.beskrivelse),
+                SQLParameter(Parametertype.OBJECT, requireNotNull(aktivitet.id)),
+                SQLParameter(Parametertype.OBJECT, sakId),
             ),
     )
 

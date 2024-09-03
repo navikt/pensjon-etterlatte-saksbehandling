@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.database
 
 import no.nav.etterlatte.libs.common.objectMapper
 import org.postgresql.util.PGobject
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
@@ -51,3 +52,36 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
     this.setObject(parameterIndex, jsonObject)
     return this
 }
+
+fun oppdater(
+    statement: String,
+    params: List<SQLParameter<Any>>,
+    connection: ConnectionAutoclosing,
+) {
+    connection.hentConnection {
+        with(it) {
+            val stmt = prepareStatement(statement.trimMargin())
+            params.forEach { param -> settParameter(param, stmt) }
+            stmt.executeUpdate()
+        }
+    }
+}
+
+private fun <T> settParameter(
+    param: SQLParameter<T>,
+    stmt: PreparedStatement,
+) {
+    when (param.type) {
+        String::class.java -> stmt.setString(param.index, param.verdi as String?)
+        Int::class.java -> stmt.setInt(param.index, param.verdi as Int)
+        Long::class.java -> stmt.setLong(param.index, param.verdi as Long)
+        Date::class.java -> stmt.setDate(param.index, param.verdi as Date?)
+        else -> stmt.setObject(param.index, param.verdi)
+    }
+}
+
+data class SQLParameter<T>(
+    val index: Int,
+    val type: Class<T>,
+    val verdi: Any,
+)

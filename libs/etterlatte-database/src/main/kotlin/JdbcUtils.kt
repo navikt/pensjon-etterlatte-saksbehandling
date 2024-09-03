@@ -58,6 +58,26 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
 fun <T> ConnectionAutoclosing.hent(
     statement: String,
     params: List<SQLParameter>,
+    single: Boolean = true,
+    konverterer: (ResultSet.(Any?) -> T),
+): T? =
+    hentConnection {
+        with(it) {
+            val stmt = prepareStatement(statement.trimMargin())
+            params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+            stmt.executeQuery()
+        }.let {
+            if (single) {
+                it.singleOrNull { konverterer(it) }
+            } else {
+                it.firstOrNull { konverterer(it) }
+            }
+        }
+    }
+
+fun <T> ConnectionAutoclosing.hentListe(
+    statement: String,
+    params: List<SQLParameter>,
     konverterer: (ResultSet.(Any?) -> T),
 ): List<T> =
     hentConnection {

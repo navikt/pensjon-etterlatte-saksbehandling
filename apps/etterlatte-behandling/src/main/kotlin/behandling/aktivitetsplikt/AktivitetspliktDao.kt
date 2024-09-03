@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.database.SQLLong
 import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.SQLString
 import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.slett
@@ -42,6 +43,7 @@ class AktivitetspliktDao(
                 |LIMIT 1
                         """,
                 listOf(SQLObject(behandlingId)),
+                single = false,
             ) {
                 AktivitetspliktOppfolging(
                     behandlingId = getUUID("behandling_id"),
@@ -49,7 +51,7 @@ class AktivitetspliktDao(
                     opprettet = getTidspunkt("opprettet"),
                     opprettetAv = getString("opprettet_av"),
                 )
-            }.firstOrNull()
+            }
 
     fun lagre(
         behandlingId: UUID,
@@ -69,7 +71,7 @@ class AktivitetspliktDao(
 
     fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
         connectionAutoclosing
-            .hent(
+            .hentListe(
                 """
                         SELECT id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitet
@@ -80,7 +82,7 @@ class AktivitetspliktDao(
 
     fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
         connectionAutoclosing
-            .hent(
+            .hentListe(
                 """
                         SELECT id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitet

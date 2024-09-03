@@ -38,7 +38,6 @@ class BosattUtlandDao(
                 "SELECT behandlingid, rinanummer, mottattSeder, sendteSeder from bosattutland where behandlingid = ?",
                 listOf(SQLObject(behandlingId)),
             ) { toBosattUtland() }
-            .singleOrNull()
 
     private fun ResultSet.toBosattUtland(): BosattUtland =
         BosattUtland(

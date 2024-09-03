@@ -46,7 +46,7 @@ class BehandlingInfoDao(
                 listOf(SQLObject(behandlingId)),
             ) {
                 toBrevutfall()
-            }.singleOrNull()
+            }
 
     fun lagreEtterbetaling(etterbetaling: Etterbetaling): Etterbetaling =
         connectionAutoclosing
@@ -85,7 +85,7 @@ class BehandlingInfoDao(
                 listOf(SQLObject(behandlingId)),
             ) {
                 toEtterbetaling()
-            }.singleOrNull()
+            }
 
     private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
 

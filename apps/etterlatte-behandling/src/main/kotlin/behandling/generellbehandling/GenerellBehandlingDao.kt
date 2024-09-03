@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.SQLString
 import no.nav.etterlatte.libs.database.SQLTidspunkt
 import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdaterOgReturner
 import no.nav.etterlatte.libs.database.opprettOgReturner
 import java.sql.ResultSet
@@ -67,10 +68,9 @@ class GenerellBehandlingDao(
                         """,
                 listOf(SQLObject(id)),
             ) { toGenerellBehandling() }
-            .singleOrNull()
 
     fun hentGenerellBehandlingForSak(sakId: SakId): List<GenerellBehandling> =
-        connectionAutoclosing.hent(
+        connectionAutoclosing.hentListe(
             """
                         SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         FROM generellbehandling
@@ -89,7 +89,6 @@ class GenerellBehandlingDao(
                         """,
                 listOf(SQLObject(tilknyttetBehandlingId)),
             ) { toGenerellBehandling() }
-            .singleOrNull()
 
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling =
         GenerellBehandling(

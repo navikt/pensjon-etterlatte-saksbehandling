@@ -46,6 +46,12 @@ var JsonMessage.brevId: Long
         this[BREV_ID_KEY] = name
     }
 
+var JsonMessage.brevKode: String
+    get() = this[BREV_KODE].asText()
+    set(name) {
+        this[BREV_KODE] = name
+    }
+
 var JsonMessage.dato: LocalDate
     get() = this[DATO_KEY].asLocalDate()
     set(name) {

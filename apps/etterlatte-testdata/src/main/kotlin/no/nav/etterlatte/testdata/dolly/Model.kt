@@ -85,12 +85,6 @@ data class Doedsfall(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Foedsel(
-    val foedselsdato: String,
-    val foedselsaar: Int,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Navn(
     val fornavn: String,
     val etternavn: String,

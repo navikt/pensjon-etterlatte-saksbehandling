@@ -56,13 +56,11 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
 fun ConnectionAutoclosing.oppdater(
     statement: String,
     params: List<SQLParameter>,
-) {
-    hentConnection {
-        with(it) {
-            val stmt = prepareStatement(statement.trimMargin())
-            params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
-            stmt.executeUpdate()
-        }
+) = hentConnection {
+    with(it) {
+        val stmt = prepareStatement(statement.trimMargin())
+        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        stmt.executeUpdate()
     }
 }
 

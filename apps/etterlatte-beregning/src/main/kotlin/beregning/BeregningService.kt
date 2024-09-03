@@ -180,7 +180,9 @@ class BeregningsgrunnlagMangler(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BEREGNINGSGRUNNLAG_MANGLER",
-        detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
+        detail =
+            "Behandling med id: $behandlingId mangler beregningsgrunnlag, " +
+                "sett trygdetid metode i beregningen eller legg til institusjonsopphold ovenfor.",
     )
 
 class AnvendtGrunnbeloepIkkeFunnet :

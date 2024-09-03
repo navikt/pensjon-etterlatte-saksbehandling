@@ -333,7 +333,7 @@ class BeregnBarnepensjonService(
             },
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier
+                beregningsGrunnlag.institusjonsopphold.mapVerdier
                     { institusjonsopphold ->
                         FaktumNode(
                             verdi = institusjonsopphold,

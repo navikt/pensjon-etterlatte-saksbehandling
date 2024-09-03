@@ -47,7 +47,7 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
+    ): BeregningsGrunnlag? =
         when {
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -104,7 +104,7 @@ class BeregningsGrunnlagService(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
+                            institusjonsopphold =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
                             beregningsMetodeFlereAvdoede =
@@ -112,9 +112,11 @@ class BeregningsGrunnlagService(
                                     ?: emptyList(),
                         ),
                     )
+
+                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 
-            else -> false
+            else -> null
         }
 
     private suspend fun validerSoeskenMedIBeregning(
@@ -171,7 +173,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag.institusjonsoppholdBeregningsgrunnlag,
+                forrigeGrunnlag.institusjonsopphold,
                 revurderingVirk,
             )
 

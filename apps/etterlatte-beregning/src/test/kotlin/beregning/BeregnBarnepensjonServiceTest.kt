@@ -741,7 +741,7 @@ internal class BeregnBarnepensjonServiceTest {
                         },
                 ),
             ),
-        institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+        institusjonsopphold = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
         beregningsMetodeFlereAvdoede = avdoedeBeregningmetode,
     )
@@ -766,7 +766,7 @@ internal class BeregnBarnepensjonServiceTest {
                         },
                 )
             },
-        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        institusjonsopphold = defaultInstitusjonsopphold(),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         beregningsMetodeFlereAvdoede = defaultAvdoedeBeregningmetode(),
     )

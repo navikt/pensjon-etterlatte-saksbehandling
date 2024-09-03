@@ -59,7 +59,7 @@ fun ConnectionAutoclosing.hent(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
         stmt.executeQuery()
     }
 }
@@ -70,7 +70,7 @@ fun ConnectionAutoclosing.opprett(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
         stmt.executeUpdate()
     }
 }
@@ -81,7 +81,7 @@ fun ConnectionAutoclosing.oppdater(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
         stmt.executeUpdate()
     }
 }
@@ -92,7 +92,7 @@ fun ConnectionAutoclosing.slett(
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> settParameter(index, param, stmt) }
+        params.forEachIndexed { index, param -> settParameter(index + 1, param, stmt) }
         stmt.executeUpdate()
     }
 }

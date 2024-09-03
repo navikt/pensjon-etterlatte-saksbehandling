@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import io.mockk.mockk
-import no.nav.etterlatte.libs.database.ConnectionAutoclosingBehandling
+import no.nav.etterlatte.common.ConnectionAutoclosingBehandling
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import java.sql.Connection
 import javax.sql.DataSource

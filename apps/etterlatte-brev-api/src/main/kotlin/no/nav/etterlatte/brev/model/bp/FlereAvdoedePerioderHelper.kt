@@ -4,9 +4,6 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import java.time.LocalDate
-
-val BP_NYTT_REGELVERK = LocalDate.of(2024, 1, 1)
 
 fun finnEventuellForskjelligAvdoedPeriode(
     avdoede: List<Avdoed>,
@@ -15,7 +12,7 @@ fun finnEventuellForskjelligAvdoedPeriode(
     val foerstePeriode = utbetalingsinfo.beregningsperioder.minBy { it.datoFOM }
     val sistePeriode = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }
     val foerstePeriodeAvdoede =
-        if (foerstePeriode.datoFOM < BP_NYTT_REGELVERK) {
+        if (foerstePeriode.datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
             listOfNotNull(foerstePeriode.trygdetidForIdent)
         } else {
             foerstePeriode.avdoedeForeldre

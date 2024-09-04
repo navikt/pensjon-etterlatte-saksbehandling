@@ -24,11 +24,11 @@ class BosattUtlandDao(
                             DO UPDATE SET rinanummer = excluded.rinanummer,
                             mottattSeder = excluded.mottattSeder, sendteSeder = excluded.sendteSeder
                         """,
-            listOf(
-                SQLObject(bosattUtland.behandlingId),
-                SQLObject(bosattUtland.rinanummer),
-                SQLJsonb(bosattUtland.mottatteSeder),
-                SQLJsonb(bosattUtland.sendteSeder),
+            mapOf(
+                1 to SQLObject(bosattUtland.behandlingId),
+                2 to SQLObject(bosattUtland.rinanummer),
+                3 to SQLJsonb(bosattUtland.mottatteSeder),
+                4 to SQLJsonb(bosattUtland.sendteSeder),
             ),
             ForventaResultat.RADER,
         )
@@ -37,7 +37,7 @@ class BosattUtlandDao(
         connectionAutoclosing
             .hent(
                 "SELECT behandlingid, rinanummer, mottattSeder, sendteSeder from bosattutland where behandlingid = ?",
-                listOf(SQLObject(behandlingId)),
+                mapOf(1 to SQLObject(behandlingId)),
             ) { toBosattUtland() }
 
     private fun ResultSet.toBosattUtland(): BosattUtland =

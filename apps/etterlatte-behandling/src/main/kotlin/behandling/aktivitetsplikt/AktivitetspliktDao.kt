@@ -43,7 +43,7 @@ class AktivitetspliktDao(
                 |ORDER BY id DESC
                 |LIMIT 1
                         """,
-                listOf(SQLObject(behandlingId)),
+                mapOf(1 to SQLObject(behandlingId)),
                 modus = Uthentingsmodus.FIRST_OR_NULL,
             ) {
                 AktivitetspliktOppfolging(
@@ -63,10 +63,10 @@ class AktivitetspliktDao(
             |INSERT INTO aktivitetsplikt_oppfolging(behandling_id, aktivitet, opprettet_av) 
             |VALUES (?, ?, ?)
                     """,
-        listOf(
-            SQLObject(behandlingId),
-            SQLString(nyOppfolging.aktivitet),
-            SQLString(navIdent),
+        mapOf(
+            1 to SQLObject(behandlingId),
+            2 to SQLString(nyOppfolging.aktivitet),
+            3 to SQLString(navIdent),
         ),
     )
 
@@ -78,7 +78,7 @@ class AktivitetspliktDao(
                         FROM aktivitetsplikt_aktivitet
                         WHERE behandling_id = ?
                         """,
-                listOf(SQLObject(behandlingId)),
+                mapOf(1 to SQLObject(behandlingId)),
             ) { toAktivitet() }
 
     fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
@@ -89,7 +89,7 @@ class AktivitetspliktDao(
                         FROM aktivitetsplikt_aktivitet
                         WHERE sak_id = ?
                         """,
-                listOf(SQLObject(sakId)),
+                mapOf(1 to SQLObject(sakId)),
             ) { toAktivitet() }
 
     fun opprettAktivitet(
@@ -101,16 +101,16 @@ class AktivitetspliktDao(
                         INSERT INTO aktivitetsplikt_aktivitet(id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-        listOf(
-            SQLObject(UUID.randomUUID()),
-            SQLLong(aktivitet.sakId),
-            SQLObject(behandlingId),
-            SQLString(aktivitet.type.name),
-            SQLDate(Date.valueOf(aktivitet.fom)),
-            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-            SQLString(kilde.toJson()),
-            SQLString(kilde.toJson()),
-            SQLString(aktivitet.beskrivelse),
+        mapOf(
+            1 to SQLObject(UUID.randomUUID()),
+            2 to SQLLong(aktivitet.sakId),
+            3 to SQLObject(behandlingId),
+            4 to SQLString(aktivitet.type.name),
+            5 to SQLDate(Date.valueOf(aktivitet.fom)),
+            6 to SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            7 to SQLString(kilde.toJson()),
+            8 to SQLString(kilde.toJson()),
+            9 to SQLString(aktivitet.beskrivelse),
         ),
     )
 
@@ -123,15 +123,15 @@ class AktivitetspliktDao(
                         INSERT INTO aktivitetsplikt_aktivitet(id, sak_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-        listOf(
-            SQLObject(UUID.randomUUID()),
-            SQLLong(sakId),
-            SQLString(aktivitet.type.name),
-            SQLDate(Date.valueOf(aktivitet.fom)),
-            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-            SQLString(kilde.toJson()),
-            SQLString(kilde.toJson()),
-            SQLString(aktivitet.beskrivelse),
+        mapOf(
+            1 to SQLObject(UUID.randomUUID()),
+            2 to SQLLong(sakId),
+            3 to SQLString(aktivitet.type.name),
+            4 to SQLDate(Date.valueOf(aktivitet.fom)),
+            5 to SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            6 to SQLString(kilde.toJson()),
+            7 to SQLString(kilde.toJson()),
+            8 to SQLString(aktivitet.beskrivelse),
         ),
     )
 
@@ -145,14 +145,14 @@ class AktivitetspliktDao(
                         SET aktivitet_type = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?
                         WHERE id = ? AND behandling_id = ?
                     """,
-        listOf(
-            SQLString(aktivitet.type.name),
-            SQLDate(Date.valueOf(aktivitet.fom)),
-            SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-            SQLString(kilde.toJson()),
-            SQLString(aktivitet.beskrivelse),
-            SQLObject(requireNotNull(aktivitet.id)),
-            SQLObject(behandlingId),
+        mapOf(
+            1 to SQLString(aktivitet.type.name),
+            2 to SQLDate(Date.valueOf(aktivitet.fom)),
+            3 to SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+            4 to SQLString(kilde.toJson()),
+            5 to SQLString(aktivitet.beskrivelse),
+            6 to SQLObject(requireNotNull(aktivitet.id)),
+            7 to SQLObject(behandlingId),
         ),
     )
 
@@ -165,14 +165,14 @@ class AktivitetspliktDao(
                         SET aktivitet_type = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?
                         WHERE id = ? AND sak_id = ?""",
         params =
-            listOf(
-                SQLString(aktivitet.type.name),
-                SQLDate(Date.valueOf(aktivitet.fom)),
-                SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
-                SQLString(kilde.toJson()),
-                SQLString(aktivitet.beskrivelse),
-                SQLObject(requireNotNull(aktivitet.id)),
-                SQLObject(sakId),
+            mapOf(
+                1 to SQLString(aktivitet.type.name),
+                2 to SQLDate(Date.valueOf(aktivitet.fom)),
+                3 to SQLDate(aktivitet.tom?.let { tom -> Date.valueOf(tom) }),
+                4 to SQLString(kilde.toJson()),
+                5 to SQLString(aktivitet.beskrivelse),
+                6 to SQLObject(requireNotNull(aktivitet.id)),
+                7 to SQLObject(sakId),
             ),
     )
 
@@ -181,7 +181,7 @@ class AktivitetspliktDao(
         behandlingId: UUID,
     ) = connectionAutoclosing.slett(
         """DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND behandling_id = ?""",
-        listOf(SQLObject(aktivitetId), SQLObject(behandlingId)),
+        mapOf(1 to SQLObject(aktivitetId), 2 to SQLObject(behandlingId)),
     )
 
     fun slettAktivitetForSak(
@@ -189,7 +189,7 @@ class AktivitetspliktDao(
         sakId: SakId,
     ) = connectionAutoclosing.slett(
         "DELETE FROM aktivitetsplikt_aktivitet WHERE id = ? AND sak_id = ?",
-        listOf(SQLObject(aktivitetId), SQLObject(sakId)),
+        mapOf(1 to SQLObject(aktivitetId), 2 to SQLObject(sakId)),
     )
 
     fun kopierAktiviteter(
@@ -200,7 +200,7 @@ class AktivitetspliktDao(
                         INSERT INTO aktivitetsplikt_aktivitet (id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse)
                         (SELECT gen_random_uuid(), sak_id, ?, aktivitet_type, fom, tom, opprettet, endret, beskrivelse FROM aktivitetsplikt_aktivitet WHERE behandling_id = ?)
                     """,
-        listOf(SQLObject(nyBehandlingId), SQLObject(forrigeBehandlingId)),
+        mapOf(1 to SQLObject(nyBehandlingId), 2 to SQLObject(forrigeBehandlingId)),
     )
 
     private fun ResultSet.toAktivitet() =

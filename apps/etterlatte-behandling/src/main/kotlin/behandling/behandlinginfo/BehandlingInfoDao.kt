@@ -26,9 +26,9 @@ class BehandlingInfoDao(
                     ON CONFLICT (behandling_id) DO 
                     UPDATE SET brevutfall = excluded.brevutfall
                     """,
-                listOf(
-                    SQLObject(brevutfall.behandlingId),
-                    SQLJsonb(brevutfall),
+                mapOf(
+                    1 to SQLObject(brevutfall.behandlingId),
+                    2 to SQLJsonb(brevutfall),
                 ),
                 ForventaResultat.RADER,
             ).let {
@@ -44,7 +44,7 @@ class BehandlingInfoDao(
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
-                listOf(SQLObject(behandlingId)),
+                mapOf(1 to SQLObject(behandlingId)),
             ) {
                 toBrevutfall()
             }
@@ -58,7 +58,7 @@ class BehandlingInfoDao(
                     ON CONFLICT (behandling_id) DO 
                     UPDATE SET etterbetaling = excluded.etterbetaling
                     """,
-                listOf(SQLObject(etterbetaling.behandlingId), SQLJsonb(etterbetaling)),
+                mapOf(1 to SQLObject(etterbetaling.behandlingId), 2 to SQLJsonb(etterbetaling)),
                 ForventaResultat.RADER,
             ).let {
                 hentEtterbetaling(etterbetaling.behandlingId)
@@ -71,7 +71,7 @@ class BehandlingInfoDao(
                     UPDATE behandling_info SET etterbetaling = ?
                     WHERE behandling_id = ?
                     """,
-            listOf(SQLJsonb(null), SQLObject(behandlingId)),
+            mapOf(1 to SQLJsonb(null), 2 to SQLObject(behandlingId)),
             ForventaResultat.RADER,
         )
 
@@ -83,7 +83,7 @@ class BehandlingInfoDao(
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
-                listOf(SQLObject(behandlingId)),
+                mapOf(1 to SQLObject(behandlingId)),
             ) {
                 toEtterbetaling()
             }

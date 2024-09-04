@@ -29,14 +29,14 @@ class GenerellBehandlingDao(
                         VALUES(?::UUID, ?, ?, ?, ?, ?, ?)
                         RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         """,
-            listOf(
-                SQLObject(generellBehandling.id),
-                SQLJsonb(generellBehandling.innhold),
-                SQLLong(generellBehandling.sakId),
-                SQLTidspunkt(generellBehandling.opprettet),
-                SQLString(generellBehandling.type.name),
-                SQLObject(generellBehandling.tilknyttetBehandling),
-                SQLString(generellBehandling.status.name),
+            mapOf(
+                1 to SQLObject(generellBehandling.id),
+                2 to SQLJsonb(generellBehandling.innhold),
+                3 to SQLLong(generellBehandling.sakId),
+                4 to SQLTidspunkt(generellBehandling.opprettet),
+                5 to SQLString(generellBehandling.type.name),
+                6 to SQLObject(generellBehandling.tilknyttetBehandling),
+                7 to SQLString(generellBehandling.status.name),
             ),
         ) { toGenerellBehandling() }
 
@@ -48,13 +48,13 @@ class GenerellBehandlingDao(
                         where id = ?
                         RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         """,
-            listOf(
-                SQLJsonb(generellBehandling.innhold),
-                SQLString(generellBehandling.status.name),
-                SQLJsonb(generellBehandling.behandler),
-                SQLJsonb(generellBehandling.attestant),
-                SQLString(generellBehandling.returnertKommenar),
-                SQLObject(generellBehandling.id),
+            mapOf(
+                1 to SQLJsonb(generellBehandling.innhold),
+                2 to SQLString(generellBehandling.status.name),
+                3 to SQLJsonb(generellBehandling.behandler),
+                4 to SQLJsonb(generellBehandling.attestant),
+                5 to SQLString(generellBehandling.returnertKommenar),
+                6 to SQLObject(generellBehandling.id),
             ),
         ) { toGenerellBehandling() }
 
@@ -66,7 +66,7 @@ class GenerellBehandlingDao(
                         FROM generellbehandling
                         WHERE id = ?
                         """,
-                listOf(SQLObject(id)),
+                mapOf(1 to SQLObject(id)),
             ) { toGenerellBehandling() }
 
     fun hentGenerellBehandlingForSak(sakId: SakId): List<GenerellBehandling> =
@@ -76,7 +76,7 @@ class GenerellBehandlingDao(
                         FROM generellbehandling
                         WHERE sak_id = ?
                         """,
-            listOf(SQLLong(sakId)),
+            mapOf(1 to SQLLong(sakId)),
         ) { toGenerellBehandling() }
 
     fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
@@ -87,7 +87,7 @@ class GenerellBehandlingDao(
                         FROM generellbehandling
                         WHERE tilknyttet_behandling = ?::uuid
                         """,
-                listOf(SQLObject(tilknyttetBehandlingId)),
+                mapOf(1 to SQLObject(tilknyttetBehandlingId)),
             ) { toGenerellBehandling() }
 
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling =

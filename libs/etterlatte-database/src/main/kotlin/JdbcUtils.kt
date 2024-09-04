@@ -57,86 +57,86 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
 
 fun <T> ConnectionAutoclosing.hent(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     modus: Uthentingsmodus = Uthentingsmodus.SINGLE_OR_NULL,
     konverterer: (ResultSet.(Any?) -> T),
 ): T? =
     hentConnection {
         with(it) {
             val stmt = prepareStatement(statement.trimMargin())
-            params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+            params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
             stmt.executeQuery()
         }.let { modus.haandterUthenting(it, konverterer) }
     }
 
 fun <T> ConnectionAutoclosing.hentListe(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     konverterer: (ResultSet.(Any?) -> T),
 ): List<T> =
     hentConnection {
         with(it) {
             val stmt = prepareStatement(statement.trimMargin())
-            params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+            params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
             stmt.executeQuery()
         }.toList { konverterer(it) }
     }
 
 fun ConnectionAutoclosing.opprett(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     forventaResultat: ForventaResultat = ForventaResultat.IKKE_KJENT,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+        params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
         stmt.executeUpdate().also { forventaResultat.haandhevKrav(it) }
     }
 }
 
 fun <T> ConnectionAutoclosing.opprettOgReturner(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     konverterer: ResultSet.(Any?) -> T,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+        params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
         stmt.executeQuery().single { konverterer(it) }
     }
 }
 
 fun ConnectionAutoclosing.oppdater(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+        params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
         stmt.executeUpdate()
     }
 }
 
 fun <T> ConnectionAutoclosing.oppdaterOgReturner(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     konverterer: ResultSet.(Any?) -> T,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+        params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
         stmt.executeQuery().single { konverterer(it) }
     }
 }
 
 fun ConnectionAutoclosing.slett(
     statement: String,
-    params: List<SQLParameter>,
+    params: Map<Int, SQLParameter>,
     forventaResultat: ForventaResultat = ForventaResultat.IKKE_KJENT,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
-        params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
+        params.entries.forEach { entry -> entry.value.settParameter(entry.key, stmt) }
         stmt.executeUpdate().also { forventaResultat.haandhevKrav(it) }
     }
 }

@@ -36,9 +36,8 @@ class BeregningService(
 
     suspend fun hentBeregningsGrunnlag(
         behandlingId: UUID,
-        sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
+    ) = beregningKlient.hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
@@ -81,7 +80,7 @@ class BeregningService(
         sakType: SakType,
     ): Utbetalingsinfo? {
         val beregning = hentBeregning(behandlingId, brukerTokenInfo) ?: return null
-        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
+        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -145,7 +144,7 @@ class BeregningService(
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
         val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
-        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
+        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
             ytelseMedGrunnlag.perioder.map {

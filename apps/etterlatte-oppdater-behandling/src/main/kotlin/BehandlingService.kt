@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
@@ -71,6 +72,7 @@ interface BehandlingService {
         spesifikkeSaker: List<Long> = listOf(),
         ekskluderteSaker: List<Long> = listOf(),
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -123,6 +125,8 @@ class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
     private val url: String,
 ) : BehandlingService {
+    private val logger = LoggerFactory.getLogger(BehandlingServiceImpl::class.java)
+
     override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
         runBlocking {
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
@@ -227,12 +231,13 @@ class BehandlingServiceImpl(
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType?,
+        loependeFom: YearMonth?,
     ): Saker =
         runBlocking {
             behandlingKlient
                 .post("$url/saker/$kjoering/$antall") {
                     contentType(ContentType.Application.Json)
-                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
+                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
                 }.body()
         }
 
@@ -352,6 +357,7 @@ class BehandlingServiceImpl(
                     ),
                 )
             }
+            logger.debug("$kjoering: kjoeringStatus for sak {} er oppdatert til: {}", sakId, status)
         }
     }
 

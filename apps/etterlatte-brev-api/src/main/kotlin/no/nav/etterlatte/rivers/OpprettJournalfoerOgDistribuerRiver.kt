@@ -13,18 +13,19 @@ import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
-import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.brevId
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -62,8 +63,9 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-            rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
+            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            context.publish(packet.toJson())
         }
     }
 
@@ -102,6 +104,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                                     borIutland,
                                 )
                             }
+                            Brevkoder.OMS_INNTEKTSJUSTERING -> {
+                                OmstillingsstoenadInntektsjustering()
+                            }
                             else -> ManueltBrevData()
                         }
                     }
@@ -130,27 +135,6 @@ class OpprettJournalfoerOgDistribuerRiver(
             brukerTokenInfo,
         )
         return brevID
-    }
-
-    private fun RapidsConnection.svarSuksess(
-        sakId: SakId,
-        brevID: BrevID,
-        brevkode: Brevkoder,
-    ) {
-        logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-
-        publish(
-            sakId.toString(),
-            JsonMessage
-                .newMessage(
-                    BrevHendelseType.DISTRIBUERT.lagEventnameForType(),
-                    mapOf(
-                        BREV_ID_KEY to brevID,
-                        SAK_ID_KEY to sakId,
-                        BREV_KODE to brevkode.name,
-                    ),
-                ).toJson(),
-        )
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

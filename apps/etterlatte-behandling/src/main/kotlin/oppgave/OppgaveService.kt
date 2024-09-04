@@ -438,7 +438,9 @@ class OppgaveService(
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
         oppgaverForSak.forEach {
-            oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+            if (it.erUnderBehandling()) {
+                oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+            }
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }

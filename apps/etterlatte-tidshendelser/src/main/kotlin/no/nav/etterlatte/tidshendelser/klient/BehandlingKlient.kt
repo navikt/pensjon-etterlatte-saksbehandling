@@ -30,6 +30,7 @@ class BehandlingKlient(
                             spesifikkeSaker = sakIder,
                             ekskluderteSaker = emptyList(),
                             sakType = null,
+                            loependeFom = null,
                         ),
                     )
                 }.body<SakerDto>()

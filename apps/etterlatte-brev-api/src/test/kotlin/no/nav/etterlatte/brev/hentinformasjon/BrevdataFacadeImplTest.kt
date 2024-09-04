@@ -94,7 +94,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { grunnlagService.hentGrunnlag(any(), any(), BRUKERTOKEN, BEHANDLING_ID) } returns grunnlag
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
+        coEvery { beregningService.hentBeregningsGrunnlag(any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns emptyList()
 
         val generellBrevData =

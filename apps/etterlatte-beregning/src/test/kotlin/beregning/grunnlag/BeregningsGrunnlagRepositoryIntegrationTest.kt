@@ -93,7 +93,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
     }
 
@@ -127,7 +127,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
         assertNotNull(result)
 
-        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
     }
 
@@ -207,7 +207,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals("Z654321", result?.kilde?.ident)
         assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }
@@ -263,7 +263,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
         assertNotNull(result)
 
-        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals("Z654321", result?.kilde?.ident)
         assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }

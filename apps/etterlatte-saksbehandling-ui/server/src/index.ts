@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import path from 'path'
 import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
@@ -12,6 +12,7 @@ import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { selftestRouter } from './routers/selftestRouter'
+import { randomUUID } from 'crypto'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -30,6 +31,11 @@ app.use(['/health/isAlive', '/health/isReady'], (_: Request, res: Response) => {
 app.get('/metrics', async (_: Request, res: Response) => {
   res.set('Content-Type', prometheus.register.contentType)
   res.end(await prometheus.register.metrics())
+})
+
+app.get('/api*', (req: Request, _: Response, next: NextFunction) => {
+  req.headers['X-Correlation-ID'] = randomUUID()
+  next()
 })
 
 app.use('/api/logg', loggerRouter)

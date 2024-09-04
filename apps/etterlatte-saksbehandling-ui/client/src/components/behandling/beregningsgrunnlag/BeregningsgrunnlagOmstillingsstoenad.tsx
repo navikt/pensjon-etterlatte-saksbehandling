@@ -4,21 +4,22 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
-import {
-  hentBeregningsGrunnlagOMS,
-  lagreBeregningsGrunnlagOMS,
-  opprettEllerEndreBeregning,
-} from '~shared/api/beregning'
+import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterBeregningsGrunnlagOMS,
   oppdaterBeregning,
+  oppdaterBeregningsGrunnlag,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
-import { Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsGrunnlagDto,
+  BeregningsMetodeBeregningsgrunnlag,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -29,25 +30,29 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { SakType } from '~shared/types/sak'
+import { useBehandling } from '~components/behandling/useBehandling'
 
-const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
+const BeregningsgrunnlagOmstillingsstoenad = () => {
+  const behandling = useBehandling()
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
+
+  const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
+  const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
+  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
+
+  if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const [beregningsgrunnlagOMSResult, beregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
-  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
   const onSubmit = () => {
-    if (!behandling.beregningsGrunnlagOMS?.beregningsMetode) {
+    if (!behandling.beregningsGrunnlag?.beregningsMetode) {
       setVisManglendeBeregningsgrunnlag(true)
       return
     }
@@ -62,34 +67,28 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
 
   const oppdaterBeregningsMetode = (
     beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
+    beregningsgrunnlag: BeregningsGrunnlagDto | undefined
   ) => {
-    const grunnlag = {
-      ...beregningsgrunnlag,
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
       beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
     }
-    lagreBeregningsGrunnlagOMSRequest(
+    lagreBeregningsGrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
-      () => {
-        dispatch(oppdaterBeregningsGrunnlagOMS(grunnlag))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
         setVisManglendeBeregningsgrunnlag(false)
       }
     )
   }
 
   useEffect(() => {
-    beregningsgrunnlagOMSRequest(behandling.id, (result) => {
+    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
-        dispatch(
-          oppdaterBeregningsGrunnlagOMS({
-            ...result,
-            institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
-          })
-        )
+        dispatch(oppdaterBeregningsGrunnlag(result))
       }
     })
   }, [])
@@ -97,7 +96,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   return (
     <>
       <>
-        {mapResult(beregningsgrunnlagOMSResult, {
+        {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: (beregningsgrunnlag) => (
@@ -105,22 +104,20 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
                 oppdaterBeregningsMetode={(beregningsMetode) =>
-                  oppdaterBeregningsMetode(beregningsMetode, beregningsgrunnlag)
+                  oppdaterBeregningsMetode(beregningsMetode, behandling?.beregningsGrunnlag)
                 }
                 eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
-                lagreBeregrningsGrunnlagResult={lagreBeregningsGrunnlagOMSResult}
+                lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
-
               <Box maxWidth="70rem">
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
               </Box>
-
               <InstitusjonsoppholdBeregningsgrunnlag
                 redigerbar={redigerbar}
                 behandling={behandling}
                 sakType={SakType.OMSTILLINGSSTOENAD}
-                beregningsgrunnlag={behandling.beregningsGrunnlagOMS}
-                institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
+                beregningsgrunnlag={behandling.beregningsGrunnlag}
+                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
               />
             </>
           ),
@@ -140,7 +137,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             <Button
               variant="primary"
               onClick={onSubmit}
-              loading={isPending(lagreBeregningsGrunnlagOMSResult) || isPending(opprettEllerEndreBeregningResult)}
+              loading={isPending(lagreBeregningsGrunnlagResult) || isPending(opprettEllerEndreBeregningResult)}
             >
               {handlinger.NESTE.navn}
             </Button>

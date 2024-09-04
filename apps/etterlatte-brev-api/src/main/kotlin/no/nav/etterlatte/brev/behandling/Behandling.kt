@@ -18,7 +18,7 @@ data class GenerellBrevData(
     val revurderingsaarsak: Revurderingaarsak? = null,
 )
 
-// TODO På tide å fjerne?
+// KAN IKKE FJERNES FØR VI HAR EKSPLISITT AVKLART AT ALLE MANUELLE BEHANDLINGER ER FERDIGE
 // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
 fun loependeIPesys(
     systemkilde: Vedtaksloesning,

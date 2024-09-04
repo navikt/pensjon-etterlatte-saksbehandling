@@ -76,15 +76,25 @@ class GrunnlagService(
                 grunnlag.soeker.hentFoedselsnummer()?.verdi,
             )
         return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident!!
-            val vergenavn =
-                adresseService
-                    .hentMottakerAdresse(sakType, vergeFnr.value)
-                    .navn
-            Vergemaal(
-                vergenavn,
-                vergeFnr,
-            )
+            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident
+            if (vergeFnr == null) {
+                logger.error(
+                    "Vi genererer et brev til en person som har verge uten ident. Det er verdt å følge " +
+                        "opp saken ekstra, for å sikre at det ikke blir noe feil her (koble på fag). saken har " +
+                        "id=${grunnlag.metadata.sakId}. Denne loggmeldingen kan nok fjernes etter at løpet her" +
+                        " er kvalitetssikret.",
+                )
+                UkjentVergemaal()
+            } else {
+                val vergenavn =
+                    adresseService
+                        .hentMottakerAdresse(sakType, vergeFnr.value)
+                        .navn
+                Vergemaal(
+                    vergenavn,
+                    vergeFnr,
+                )
+            }
         } else if (verger.size > 1) {
             logger.info(
                 "Fant flere verger for bruker med fnr ${grunnlag.soeker.hentFoedselsnummer()?.verdi} i " +

@@ -44,7 +44,7 @@ class BeregningsGrunnlagRepository(
                                 "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
                                 "institusjonsopphold" to
                                     objectMapper.writeValueAsString(
-                                        beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag,
+                                        beregningsGrunnlag.institusjonsopphold,
                                     ),
                                 "beregningsmetode" to
                                     objectMapper.writeValueAsString(
@@ -244,7 +244,7 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
             this.stringOrNull("soesken_med_i_beregning_perioder")?.let {
                 objectMapper.readValue(it)
             } ?: emptyList(),
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             this.stringOrNull("institusjonsopphold")?.let {
                 objectMapper.readValue(
                     it,

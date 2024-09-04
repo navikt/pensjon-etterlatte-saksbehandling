@@ -24,6 +24,10 @@ class InntektsjusteringVarselOmVedtakRiver {
     private val loependeFom = YearMonth.of(2024, 1)
 
     @Test
+    fun `skal ha varsel om vedtak`() {
+    }
+
+    @Test
     fun `kan ta imot infobrevmelding og kalle paa behandling`() {
         val featureToggleService =
             mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }

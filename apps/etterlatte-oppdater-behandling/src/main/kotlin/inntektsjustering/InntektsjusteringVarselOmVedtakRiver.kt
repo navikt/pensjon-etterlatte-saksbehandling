@@ -1,12 +1,12 @@
 package no.nav.etterlatte.inntektsjustering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.behandling.BehandlingSammendrag
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -99,16 +99,16 @@ internal class InntektsjusteringVarselOmVedtakRiver(
         logger.info("$kjoering: Ferdig")
     }
 
-    private fun skalHaVarselOmVedtak(
+    fun skalHaVarselOmVedtak(
         behandlinger: List<BehandlingSammendrag>,
         loependeFom: YearMonth,
     ): Boolean =
-        behandlinger.any { behandling ->
-            behandling.status == BehandlingStatus.IVERKSATT &&
-                behandling.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
+        behandlinger.any {
+            it.status == BehandlingStatus.IVERKSATT &&
+                it.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
                 !(
-                    behandling.virkningstidspunkt?.dato?.year == loependeFom.year &&
-                        behandling.virkningstidspunkt?.dato?.monthValue == 1
+                    it.virkningstidspunkt?.dato?.year == loependeFom.year &&
+                        it.virkningstidspunkt?.dato?.monthValue == 1
                 )
         }
 

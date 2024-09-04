@@ -1,8 +1,7 @@
-package no.nav.etterlatte.sak
+package no.nav.etterlatte.libs.common.sak
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.sak.Sak
 
 data class SakMedUtlandstilknytning(
     val ident: String,

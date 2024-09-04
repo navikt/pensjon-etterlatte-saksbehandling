@@ -11,11 +11,16 @@ fun finnEventuellForskjelligAvdoedPeriode(
 ): ForskjelligAvdoedPeriode? {
     val foerstePeriode = utbetalingsinfo.beregningsperioder.minBy { it.datoFOM }
     val sistePeriode = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }
-
-    if (foerstePeriode.avdoedeForeldre?.toSet() == sistePeriode.avdoedeForeldre?.toSet()) {
+    val foerstePeriodeAvdoede =
+        if (foerstePeriode.datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
+            listOfNotNull(foerstePeriode.trygdetidForIdent)
+        } else {
+            foerstePeriode.avdoedeForeldre
+        }
+    if (foerstePeriodeAvdoede?.toSet() == sistePeriode.avdoedeForeldre?.toSet()) {
         return null
     }
-    val foersteAvdoedIdent = foerstePeriode.avdoedeForeldre?.singleOrNull()
+    val foersteAvdoedIdent = foerstePeriodeAvdoede?.singleOrNull()
     val foersteAvdoed = avdoede.find { it.fnr.value == foersteAvdoedIdent }
 
     checkNotNull(foersteAvdoed) {

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.database.SQLDate
 import no.nav.etterlatte.libs.database.SQLLong
 import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.SQLString
+import no.nav.etterlatte.libs.database.Uthentingsmodus
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
@@ -43,7 +44,7 @@ class AktivitetspliktDao(
                 |LIMIT 1
                         """,
                 listOf(SQLObject(behandlingId)),
-                single = false,
+                modus = Uthentingsmodus.FIRST_OR_NULL,
             ) {
                 AktivitetspliktOppfolging(
                     behandlingId = getUUID("behandling_id"),

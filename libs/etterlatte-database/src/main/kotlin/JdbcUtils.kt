@@ -58,7 +58,7 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
 fun <T> ConnectionAutoclosing.hent(
     statement: String,
     params: List<SQLParameter>,
-    single: Boolean = true,
+    modus: Uthentingsmodus = Uthentingsmodus.SINGLE_OR_NULL,
     konverterer: (ResultSet.(Any?) -> T),
 ): T? =
     hentConnection {
@@ -66,14 +66,17 @@ fun <T> ConnectionAutoclosing.hent(
             val stmt = prepareStatement(statement.trimMargin())
             params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
             stmt.executeQuery()
-        }.let {
-            if (single) {
-                it.singleOrNull { konverterer(it) }
-            } else {
-                it.firstOrNull { konverterer(it) }
-            }
-        }
+        }.let { haandterUthenting(modus, it, konverterer) }
     }
+
+private fun <T> haandterUthenting(
+    modus: Uthentingsmodus,
+    it: ResultSet,
+    konverterer: ResultSet.(Any?) -> T,
+) = when (modus) {
+    Uthentingsmodus.SINGLE_OR_NULL -> it.singleOrNull { konverterer(it) }
+    Uthentingsmodus.FIRST_OR_NULL -> it.firstOrNull { konverterer(it) }
+}
 
 fun <T> ConnectionAutoclosing.hentListe(
     statement: String,
@@ -217,4 +220,9 @@ data class SQLTidspunkt(
         index: Int,
         stmt: PreparedStatement,
     ) = stmt.setTidspunkt(index, verdi)
+}
+
+enum class Uthentingsmodus {
+    SINGLE_OR_NULL,
+    FIRST_OR_NULL,
 }

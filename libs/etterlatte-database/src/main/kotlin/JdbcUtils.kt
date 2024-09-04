@@ -66,17 +66,8 @@ fun <T> ConnectionAutoclosing.hent(
             val stmt = prepareStatement(statement.trimMargin())
             params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
             stmt.executeQuery()
-        }.let { haandterUthenting(modus, it, konverterer) }
+        }.let { modus.haandterUthenting(it, konverterer) }
     }
-
-private fun <T> haandterUthenting(
-    modus: Uthentingsmodus,
-    it: ResultSet,
-    konverterer: ResultSet.(Any?) -> T,
-) = when (modus) {
-    Uthentingsmodus.SINGLE_OR_NULL -> it.singleOrNull { konverterer(it) }
-    Uthentingsmodus.FIRST_OR_NULL -> it.firstOrNull { konverterer(it) }
-}
 
 fun <T> ConnectionAutoclosing.hentListe(
     statement: String,
@@ -99,7 +90,7 @@ fun ConnectionAutoclosing.opprett(
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate().also { haandterRequire(forventaResultat, it) }
+        stmt.executeUpdate().also { forventaResultat.haandhevKrav(it) }
     }
 }
 
@@ -146,17 +137,8 @@ fun ConnectionAutoclosing.slett(
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate().also { haandterRequire(forventaResultat, it) }
+        stmt.executeUpdate().also { forventaResultat.haandhevKrav(it) }
     }
-}
-
-private fun haandterRequire(
-    krav: ForventaResultat,
-    verdi: Int,
-) = when (krav) {
-    ForventaResultat.RADER -> require(verdi == 1)
-    ForventaResultat.INGEN_RADER -> require(verdi == 0)
-    ForventaResultat.IKKE_KJENT -> {}
 }
 
 abstract class SQLParameter(
@@ -234,6 +216,16 @@ data class SQLTidspunkt(
 enum class Uthentingsmodus {
     SINGLE_OR_NULL,
     FIRST_OR_NULL,
+    ;
+
+    internal fun <T> haandterUthenting(
+        it: ResultSet,
+        konverterer: ResultSet.(Any?) -> T,
+    ): T? =
+        when (this) {
+            SINGLE_OR_NULL -> it.singleOrNull { konverterer(it) }
+            FIRST_OR_NULL -> it.firstOrNull { konverterer(it) }
+        }
 }
 
 /* Frå PreparedStatement-dokumentasjonen:
@@ -241,8 +233,10 @@ Returns:
 either (1) the row count for SQL Data Manipulation Language (DML) statements
 or (2) 0 for SQL statements that return nothing
  */
-enum class ForventaResultat {
-    RADER,
-    INGEN_RADER,
-    IKKE_KJENT,
+enum class ForventaResultat(
+    val haandhevKrav: (verdi: Int) -> Unit,
+) {
+    RADER({ require(it == 1) }),
+    INGEN_RADER({ require(it == 0) }),
+    IKKE_KJENT({}),
 }

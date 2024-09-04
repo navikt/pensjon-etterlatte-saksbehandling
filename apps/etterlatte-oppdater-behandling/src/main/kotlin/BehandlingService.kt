@@ -11,6 +11,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
@@ -101,6 +102,8 @@ interface BehandlingService {
     ): Sak
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
+
+    fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger
 
     fun opprettOppgave(
         sakId: SakId,
@@ -262,6 +265,15 @@ class BehandlingServiceImpl(
     override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
         runBlocking {
             behandlingKlient.get("$url/behandlinger/$behandlingId").body()
+        }
+
+    override fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger =
+        runBlocking {
+            behandlingKlient
+                .post("$url/personer/behandlingerforsak") {
+                    contentType(ContentType.Application.Json)
+                    setBody(foedselsNummerDTO)
+                }.body<SakMedBehandlinger>()
         }
 
     override fun opprettOppgave(

@@ -28,4 +28,5 @@ enum class KjoeringStatus {
     FEILA,
     IKKE_LOEPENDE,
     FERDIGSTILT,
+    FERDIGSTILT_UTEN_BREV,
 }

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ForventaResultat
 import no.nav.etterlatte.libs.database.SQLJsonb
 import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.hent
@@ -29,7 +30,7 @@ class BehandlingInfoDao(
                     SQLObject(brevutfall.behandlingId),
                     SQLJsonb(brevutfall),
                 ),
-                { require(it == 1) },
+                ForventaResultat.RADER,
             ).let {
                 hentBrevutfall(brevutfall.behandlingId)
                     ?: throw InternfeilException("Feilet under lagring av brevutfall")
@@ -58,7 +59,7 @@ class BehandlingInfoDao(
                     UPDATE SET etterbetaling = excluded.etterbetaling
                     """,
                 listOf(SQLObject(etterbetaling.behandlingId), SQLJsonb(etterbetaling)),
-                { require(it == 1) },
+                ForventaResultat.RADER,
             ).let {
                 hentEtterbetaling(etterbetaling.behandlingId)
                     ?: throw InternfeilException("Feilet under lagring av etterbetaling")
@@ -71,7 +72,7 @@ class BehandlingInfoDao(
                     WHERE behandling_id = ?
                     """,
             listOf(SQLJsonb(null), SQLObject(behandlingId)),
-            { require(it == 1) },
+            ForventaResultat.RADER,
         )
 
     fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? =

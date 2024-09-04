@@ -94,12 +94,12 @@ fun <T> ConnectionAutoclosing.hentListe(
 fun ConnectionAutoclosing.opprett(
     statement: String,
     params: List<SQLParameter>,
-    require: (Int) -> Unit = {},
+    forventaResultat: ForventaResultat = ForventaResultat.IKKE_KJENT,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate().also { require(it) }
+        stmt.executeUpdate().also { haandterRequire(forventaResultat, it) }
     }
 }
 
@@ -141,13 +141,22 @@ fun <T> ConnectionAutoclosing.oppdaterOgReturner(
 fun ConnectionAutoclosing.slett(
     statement: String,
     params: List<SQLParameter>,
-    require: (Int) -> Unit = {},
+    forventaResultat: ForventaResultat = ForventaResultat.IKKE_KJENT,
 ) = hentConnection {
     with(it) {
         val stmt = prepareStatement(statement.trimMargin())
         params.forEachIndexed { index, param -> param.settParameter(index + 1, stmt) }
-        stmt.executeUpdate().also { require(it) }
+        stmt.executeUpdate().also { haandterRequire(forventaResultat, it) }
     }
+}
+
+private fun haandterRequire(
+    krav: ForventaResultat,
+    verdi: Int,
+) = when (krav) {
+    ForventaResultat.RADER -> require(verdi == 1)
+    ForventaResultat.INGEN_RADER -> require(verdi == 0)
+    ForventaResultat.IKKE_KJENT -> {}
 }
 
 abstract class SQLParameter(
@@ -225,4 +234,15 @@ data class SQLTidspunkt(
 enum class Uthentingsmodus {
     SINGLE_OR_NULL,
     FIRST_OR_NULL,
+}
+
+/* Frå PreparedStatement-dokumentasjonen:
+Returns:
+either (1) the row count for SQL Data Manipulation Language (DML) statements
+or (2) 0 for SQL statements that return nothing
+ */
+enum class ForventaResultat {
+    RADER,
+    INGEN_RADER,
+    IKKE_KJENT,
 }

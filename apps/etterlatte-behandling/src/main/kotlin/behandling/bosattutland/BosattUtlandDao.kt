@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.database.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ForventaResultat
 import no.nav.etterlatte.libs.database.SQLJsonb
 import no.nav.etterlatte.libs.database.SQLObject
 import no.nav.etterlatte.libs.database.hent
@@ -29,7 +30,7 @@ class BosattUtlandDao(
                 SQLJsonb(bosattUtland.mottatteSeder),
                 SQLJsonb(bosattUtland.sendteSeder),
             ),
-            { require(it == 1) },
+            ForventaResultat.RADER,
         )
 
     fun hentBosattUtland(behandlingId: UUID): BosattUtland? =

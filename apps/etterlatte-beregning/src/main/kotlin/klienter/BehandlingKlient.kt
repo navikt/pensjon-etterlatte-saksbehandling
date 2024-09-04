@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
@@ -39,6 +40,12 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     ): SisteIverksatteBehandling
 
     suspend fun kanBeregnes(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        commit: Boolean,
+    ): Boolean
+
+    suspend fun statusTrygdetidOppdatert(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean,
@@ -181,6 +188,32 @@ class BehandlingKlientImpl(
             success = { true },
             failure = {
                 logger.info("Behandling med id $behandlingId kan ikke beregnes, commit=$commit")
+                false
+            },
+        )
+    }
+
+    override suspend fun statusTrygdetidOppdatert(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        commit: Boolean,
+    ): Boolean {
+        logger.info("Sjekker om behandling med behandlingId=$behandlingId kan sette status ${BehandlingStatus.TRYGDETID_OPPDATERT}")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
+
+        val response =
+            when (commit) {
+                false -> downstreamResourceClient.get(resource, brukerTokenInfo)
+                true -> downstreamResourceClient.post(resource, brukerTokenInfo, "{}")
+            }
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info(
+                    "Behandling med behandlingId=$behandlingId kan ikke settes " +
+                        "status ${BehandlingStatus.TRYGDETID_OPPDATERT}, commit=$commit",
+                )
                 false
             },
         )

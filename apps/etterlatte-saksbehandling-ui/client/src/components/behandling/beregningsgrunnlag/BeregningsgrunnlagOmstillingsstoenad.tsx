@@ -80,6 +80,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
       },
       (result) => {
         dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         setVisManglendeBeregningsgrunnlag(false)
       }
     )

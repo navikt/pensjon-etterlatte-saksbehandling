@@ -17,7 +17,11 @@ import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { IBehandlingReducer, oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  oppdaterBeregningsGrunnlag,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { formaterNavn } from '~shared/types/Person'
@@ -26,6 +30,7 @@ import { ITrygdetid } from '~shared/api/trygdetid'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   behandling: IBehandlingReducer
@@ -85,6 +90,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       },
       (result) => {
         dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         setRedigerModus(false)
         !!onSuccess && onSuccess(result)
       }

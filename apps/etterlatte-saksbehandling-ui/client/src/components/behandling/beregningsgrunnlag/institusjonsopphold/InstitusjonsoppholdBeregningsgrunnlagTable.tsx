@@ -16,8 +16,13 @@ import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
-import { IBehandlingReducer, oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  oppdaterBeregningsGrunnlag,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface PeriodeRedigeringModus {
   redigerPeriode: boolean
@@ -67,6 +72,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
         },
         (result) => {
           dispatch(oppdaterBeregningsGrunnlag(result))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         }
       )
     }

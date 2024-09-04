@@ -269,7 +269,7 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal opprettere`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { repository.finnBeregningsGrunnlag(any()) } returns mockk(relaxed = true)
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -328,7 +328,7 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal returnere conflict fra opprettelse `() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { repository.finnBeregningsGrunnlag(any()) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns false
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

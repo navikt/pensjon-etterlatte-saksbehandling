@@ -5,11 +5,13 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -51,8 +53,15 @@ class BeregningsGrunnlagService(
         when {
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
+
                 if (behandling.sakType == SakType.BARNEPENSJON) {
-                    validerSoeskenMedIBeregning(behandlingId, beregningsGrunnlag, brukerTokenInfo)
+                    validerSoeskenMedIBeregning(
+                        behandlingId,
+                        beregningsGrunnlag,
+                        grunnlag,
+                    )
+                    sjekkKunEnJuridiskTillatt(behandlingId, beregningsGrunnlag, grunnlag)
                 }
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
@@ -110,6 +119,7 @@ class BeregningsGrunnlagService(
                             beregningsMetodeFlereAvdoede =
                                 beregningsGrunnlag.beregningsMetodeFlereAvdoede
                                     ?: emptyList(),
+                            kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
                         ),
                     )
 
@@ -119,13 +129,25 @@ class BeregningsGrunnlagService(
             else -> null
         }
 
+    private fun sjekkKunEnJuridiskTillatt(
+        behandlingId: UUID,
+        beregningsGrunnlag: LagreBeregningsGrunnlag,
+        grunnlag: Grunnlag,
+    ) {
+        val harBeregningsgrunnlagMedKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder.isNotEmpty()
+        val persongalleriHarKunEnJuridiskForelder =
+            grunnlag.hentAnnenForelder()?.vurdering == KUN_EN_REGISTRERT_JURIDISK_FORELDER
+
+        if (harBeregningsgrunnlagMedKunEnJuridisk && !persongalleriHarKunEnJuridiskForelder) {
+            throw BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(behandlingId = behandlingId)
+        }
+    }
+
     private suspend fun validerSoeskenMedIBeregning(
         behandlingId: UUID,
         barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
-        brukerTokenInfo: BrukerTokenInfo,
+        grunnlag: Grunnlag,
     ) {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
-
         val soeskensFoedselsnummere =
             barnepensjonBeregningsGrunnlag.soeskenMedIBeregning
                 .flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
@@ -392,5 +414,13 @@ class BPBeregningsgrunnlagSoeskenMarkertDoedException(
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_SOESKEN_MARKERT_DOED",
         detail = "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
+
+class BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_IKKE_VALGT",
+        detail = "Barnepensjon beregningsgrunnlag har dato for kun en juridisk forelder, men ikke persongalleriet",
         meta = mapOf("behandlingId" to behandlingId),
     )

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -27,6 +28,12 @@ class Grunnlag(
     fun hentPotensiellGjenlevende(): Grunnlagsdata<JsonNode>? = hentFamiliemedlemNullable(PersonRolle.GJENLEVENDE)
 
     fun hentAvdoede(): List<Grunnlagsdata<JsonNode>> = hentFamiliemedlemmer(PersonRolle.AVDOED)
+
+    fun hentAnnenForelder(): AnnenForelder? =
+        this.sak
+            .hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
+            ?.verdi
+            ?.annenForelder
 
     @Deprecated(
         "Denne er ikke safe med tanke på endringer i persongalleri / feil i gammelt grunnlag",

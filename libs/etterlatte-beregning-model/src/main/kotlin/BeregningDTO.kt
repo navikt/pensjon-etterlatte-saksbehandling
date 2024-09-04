@@ -38,6 +38,7 @@ data class Beregningsperiode(
     val avdodeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
+    val kunEnJuridiskForelder: Boolean? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
 

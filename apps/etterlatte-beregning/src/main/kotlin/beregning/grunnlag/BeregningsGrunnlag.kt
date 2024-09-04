@@ -14,4 +14,5 @@ data class BeregningsGrunnlag(
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
     val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
+    val kunEnJuridiskForelder: List<GrunnlagMedPeriode<Boolean>> = emptyList(),
 )

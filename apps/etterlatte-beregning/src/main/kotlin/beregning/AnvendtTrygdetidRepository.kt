@@ -16,7 +16,7 @@ class AnvendtTrygdetidRepository(
         tx.oppdater(
             query =
                 """insert into anvendt_trygdetid (behandling_id, foer_kombinering, etter_kombinering) 
-                    values(:behandling_id, :foer_kombinering::jsonb, :etter_kombinering::jsonb)
+                    values(:behandling_id::uuid, :foer_kombinering::jsonb, :etter_kombinering::jsonb)
                 """.trimMargin(),
             params =
                 mapOf(

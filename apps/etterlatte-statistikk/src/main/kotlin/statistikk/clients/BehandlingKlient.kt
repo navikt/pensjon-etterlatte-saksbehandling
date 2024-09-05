@@ -47,7 +47,7 @@ class BehandlingKlientImpl(
     ): AktivitetspliktDto =
         try {
             behandlingHttpClient
-                .get("$behandlingUrl/sak/$sakId/aktivitetsplikt/statistikk/$behandlingId")
+                .get("$behandlingUrl/api/sak/$sakId/aktivitetsplikt/statistikk/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente aktivitetspliktDto for sak $sakId fra Behandling", e)

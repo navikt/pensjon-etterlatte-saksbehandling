@@ -1,7 +1,8 @@
 import ca.cutterslade.gradle.analyze.AnalyzeDependenciesTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    kotlin("jvm") version "2.0.20"
     `kotlin-dsl`
     alias(libs.plugins.cutterslade.analyze) apply true
 }
@@ -15,13 +16,6 @@ repositories {
         // name = "JCenter Gradle Plugins",
         url = "https://dl.bintray.com/gradle/gradle-plugins",
     )
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
-        credentials {
-            username = "token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
 }
 
 dependencies {
@@ -34,9 +28,10 @@ tasks {
     withType<Wrapper> {
         gradleVersion = "8.10"
     }
-
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_21

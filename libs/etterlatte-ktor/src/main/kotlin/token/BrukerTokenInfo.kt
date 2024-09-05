@@ -56,11 +56,13 @@ sealed class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
+@ConsistentCopyVisibility
 data class VanligSystembruker internal constructor(
     override val ident: String,
     override val jwtTokenClaims: JwtTokenClaims? = null,
 ) : Systembruker(ident, jwtTokenClaims)
 
+@ConsistentCopyVisibility
 data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
@@ -88,6 +90,7 @@ data class HardkodaSystembruker private constructor(
     }
 }
 
+@ConsistentCopyVisibility
 data class Saksbehandler internal constructor(
     val accessToken: String,
     val ident: String,

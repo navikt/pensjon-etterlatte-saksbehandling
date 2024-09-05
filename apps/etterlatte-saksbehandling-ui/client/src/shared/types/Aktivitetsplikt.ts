@@ -136,7 +136,7 @@ export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValu
   aktivitetsgrad: '',
   unntak: null,
   midlertidigUnntak: '',
-  fom: undefined,
+  fom: new Date(),
   tom: undefined,
   beskrivelse: '',
 }

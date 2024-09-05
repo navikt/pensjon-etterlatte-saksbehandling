@@ -52,7 +52,14 @@ dependencies {
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
+    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.navfelles.mockoauth2server)
 
     testFixturesImplementation(libs.navfelles.mockoauth2server)
     testFixturesImplementation(libs.ktor2.servertests)
+    testFixturesImplementation(libs.navfelles.tokenvalidationktor2)
+    testFixturesImplementation(libs.ktor2.jackson)
+    testFixturesImplementation(libs.ktor2.servercontentnegotiation)
+    testFixturesImplementation(libs.ktor2.clientcontentnegotiation)
+    testFixturesImplementation(project(":libs:saksbehandling-common"))
 }

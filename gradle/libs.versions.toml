@@ -1,6 +1,5 @@
 [plugins]
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
-cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.10.0" }
 versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 

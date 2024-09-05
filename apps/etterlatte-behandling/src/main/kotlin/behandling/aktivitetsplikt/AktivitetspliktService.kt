@@ -82,7 +82,12 @@ class AktivitetspliktService(
         bruker: BrukerTokenInfo,
         behandlingId: UUID?,
     ): AktivitetspliktDto {
-        val faktiskBehandlingId = behandlingId ?: behandlingService.hentSisteIverksatte(sakId)!!.id
+        val faktiskBehandlingId =
+            behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id ?: throw InternfeilException(
+                "Kunne ikke hente ut aktivitetspliktDto for sakId=$sakId, siden vi ikke mottok behandlingId " +
+                    "aktivitetspliktvurderingen er knyttet til, og det ligger heller ingen iverksatte " +
+                    "behandlinger i saken.",
+            )
 
         val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
         val avdoedDoedsdato =

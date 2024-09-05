@@ -6,6 +6,7 @@ fun Map<String, String>.requireEnvValue(key: String) =
         else -> value
     }
 
+@ConsistentCopyVisibility
 data class Miljoevariabler private constructor(
     val props: Map<String, String>,
 ) {

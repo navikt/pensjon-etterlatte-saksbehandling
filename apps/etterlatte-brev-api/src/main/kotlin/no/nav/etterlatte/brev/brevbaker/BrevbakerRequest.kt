@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.pensjon.brevbaker.api.model.Felles
 
+@ConsistentCopyVisibility
 data class BrevbakerRequest internal constructor(
     val kode: Brevbakerkode,
     val letterData: Any,

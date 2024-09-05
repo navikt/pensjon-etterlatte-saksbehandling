@@ -81,7 +81,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
             }
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
-        begegningsmetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
+        beregningsMetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
             GrunnlagMedPeriode(
                 data =
                     trygdetider

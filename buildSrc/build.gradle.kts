@@ -14,7 +14,6 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }
 

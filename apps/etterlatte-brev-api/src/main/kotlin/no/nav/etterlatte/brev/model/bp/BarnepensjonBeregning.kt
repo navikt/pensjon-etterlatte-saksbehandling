@@ -103,7 +103,17 @@ fun finnForskjelligTrygdetid(
     // Vi må sende med forskjellig trygdetid hvis trygdetidsgrunnlaget varierer over perioder
     val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.minBy { it.datoFOM }
     val sisteBeregningsperiode = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }
-    if (foersteBeregningsperiode.avdoedeForeldre?.toSet() == sisteBeregningsperiode.avdoedeForeldre?.toSet()) {
+
+    // For beregninger gjort på gammelt regelverk har vi kun en avdød, og den er ikke fylt inn
+    // i "avdoedeForeldre" siden flere avdøde foreldre-regelen kjører kun på nytt regelverk
+    val avdoedeForeldreFoerstePeriode =
+        if (foersteBeregningsperiode.datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
+            listOfNotNull(foersteBeregningsperiode.trygdetidForIdent)
+        } else {
+            foersteBeregningsperiode.avdoedeForeldre
+        }
+
+    if (avdoedeForeldreFoerstePeriode?.toSet() == sisteBeregningsperiode.avdoedeForeldre?.toSet()) {
         // Vi har det samme trygdetidsgrunnlaget over alle periodene
         return null
     }

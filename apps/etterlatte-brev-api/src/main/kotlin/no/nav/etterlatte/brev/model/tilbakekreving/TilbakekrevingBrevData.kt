@@ -4,9 +4,11 @@ import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -16,7 +18,7 @@ data class TilbakekrevingBrevDTO(
     val bosattUtland: Boolean,
     val brukerNavn: String,
     val doedsbo: Boolean,
-    val varselVedlagt: Boolean,
+    val varsel: TilbakekrevingVarsel,
     val datoVarselEllerVedtak: LocalDate,
     val datoTilsvarBruker: LocalDate?,
     val tilbakekreving: TilbakekrevingData,
@@ -41,8 +43,9 @@ data class TilbakekrevingBrevDTO(
                 bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerNavn = soekerNavn,
                 doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
-                varselVedlagt = tilbakekreving.vurdering?.forhaandsvarsel != null,
-                datoVarselEllerVedtak = requireNotNull(tilbakekreving.vurdering?.forhaandsvarselDato),
+                varsel = tilbakekreving.vurdering?.forhaandsvarsel ?: throw TilbakeKrevingManglerVarsel(),
+                datoVarselEllerVedtak =
+                    tilbakekreving.vurdering?.forhaandsvarselDato ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
                 datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
@@ -135,3 +138,15 @@ data class TilbakekrevingBeloeperData(
 class BrevDataTilbakerevingHarManglerException(
     message: String,
 ) : RuntimeException(message)
+
+class TilbakeKrevingManglerForhaandsvarselDatoException :
+    UgyldigForespoerselException(
+        code = "TILBAKEKREVING_MANGLER_VURDERING_FORHÅNDSVARSELSDATO",
+        detail = "Kan ikke generere pdf uten vurdering forhaandsvarselDato av tilbakekreving",
+    )
+
+class TilbakeKrevingManglerVarsel :
+    UgyldigForespoerselException(
+        code = "TILBAKEKREVING_MANGLER_VURDERING_VARSEL",
+        detail = "Kan ikke generere pdf uten at varsel er satt under vurdering",
+    )

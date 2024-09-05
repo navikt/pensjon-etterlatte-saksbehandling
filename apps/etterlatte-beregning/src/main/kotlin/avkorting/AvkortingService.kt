@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
@@ -22,7 +23,7 @@ class AvkortingService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
 ) {
-    private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun hentAvkorting(
         behandlingId: UUID,
@@ -133,7 +134,7 @@ class AvkortingService(
 
     private suspend fun kopierOgReberegnAvkorting(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
@@ -143,7 +144,7 @@ class AvkortingService(
 
     private suspend fun reberegnOgLagreAvkorting(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
@@ -176,7 +177,7 @@ class AvkortingService(
     }
 
     private suspend fun hentAvkortingForrigeBehandling(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id

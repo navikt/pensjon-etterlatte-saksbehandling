@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -27,6 +28,7 @@ fun mottakerFraAdresse(
             landkode = regoppslag.adresse.landkode,
             land = regoppslag.adresse.land,
         ),
+    tvingSentralPrint = false,
 )
 
 fun tomMottaker(fnr: Folkeregisteridentifikator) =
@@ -84,7 +86,7 @@ enum class BrevVedleggKey {
 }
 
 data class OpprettNyttBrev(
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,

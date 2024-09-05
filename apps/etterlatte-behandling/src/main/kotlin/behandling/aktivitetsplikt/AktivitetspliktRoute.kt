@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
@@ -42,10 +41,7 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
             "Aktivitet id er ikke i path params",
         )
 
-internal fun Route.aktivitetspliktRoutes(
-    aktivitetspliktService: AktivitetspliktService,
-    featureToggleService: FeatureToggleService,
-) {
+internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: AktivitetspliktService) {
     val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
@@ -87,7 +83,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                     val aktiviteter =
                         inTransaction {
-                            aktivitetspliktService.upsertAktivitet(behandlingId, aktivitet, brukerTokenInfo)
+                            aktivitetspliktService.upsertAktivitet(aktivitet, brukerTokenInfo, behandlingId)
                             aktivitetspliktService.hentAktiviteter(behandlingId)
                         }
                     call.respond(aktiviteter)
@@ -101,7 +97,7 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val aktiviteter =
                             inTransaction {
-                                aktivitetspliktService.slettAktivitet(behandlingId, aktivitetId, brukerTokenInfo)
+                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, behandlingId)
                                 aktivitetspliktService.hentAktiviteter(behandlingId)
                             }
 
@@ -112,50 +108,98 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt/vurdering") {
-        get {
-            kunSaksbehandler {
-                logger.info("Henter aktivitetsvurdering for sak $sakId")
-                val dto =
-                    inTransaction {
-                        runBlocking {
-                            aktivitetspliktService.hentVurderingForSak(
-                                sakId = sakId,
+    route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {
+        route("aktivitet") {
+            get {
+                kunSaksbehandler {
+                    logger.info("Henter aktiviteter for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentAktiviteter(
+                                    sakId = sakId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer aktivitet for sakId=$sakId")
+                    val aktivitet = call.receive<LagreAktivitetspliktAktivitet>()
+
+                    val aktiviteter =
+                        inTransaction {
+                            aktivitetspliktService.upsertAktivitet(aktivitet, brukerTokenInfo, sakId = sakId)
+                            aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                        }
+                    call.respond(aktiviteter)
+                }
+            }
+
+            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
+                delete {
+                    kunSkrivetilgang {
+                        logger.info("Sletter aktivitet $aktivitetId for sakId $sakId")
+
+                        val aktiviteter =
+                            inTransaction {
+                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                            }
+
+                        call.respond(aktiviteter)
+                    }
+                }
+            }
+        }
+
+        route("vurdering") {
+            get {
+                kunSaksbehandler {
+                    logger.info("Henter aktivitetsvurdering for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentVurderingForSak(
+                                    sakId = sakId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+        }
+
+        route("revurdering") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
+                    val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
+                                request,
+                                brukerTokenInfo,
                             )
                         }
-                    }
-                call.respond(dto)
+                    call.respond(opprettet)
+                }
             }
         }
-    }
 
-    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/revurdering") {
-        post {
-            kunSystembruker {
-                logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
-                val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
-                val opprettet =
-                    inTransaction {
-                        aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
-                            request,
-                            brukerTokenInfo,
-                        )
-                    }
-                call.respond(opprettet)
-            }
-        }
-    }
-
-    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/varigUnntak") {
-        post {
-            kunSystembruker {
-                logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
-                val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
-                val opprettet =
-                    inTransaction {
-                        aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
-                    }
-                call.respond(opprettet)
+        route("varigUnntak") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
+                        }
+                    call.respond(opprettet)
+                }
             }
         }
     }

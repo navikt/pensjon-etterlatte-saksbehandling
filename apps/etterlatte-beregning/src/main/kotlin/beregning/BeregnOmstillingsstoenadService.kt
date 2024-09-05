@@ -248,7 +248,7 @@ class BeregnOmstillingsstoenadService(
                 ),
             institusjonsopphold =
                 PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                    beregningsgrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
+                    beregningsgrunnlag.institusjonsopphold.mapVerdier { institusjonsopphold ->
                         FaktumNode(
                             verdi = institusjonsopphold,
                             kilde = beregningsgrunnlag.kilde,

@@ -23,8 +23,8 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -61,11 +61,10 @@ internal class BehandlingRoutesTest {
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
-    private val featureToggleService = DummyFeatureToggleService()
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -97,7 +96,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -140,7 +139,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -282,6 +281,7 @@ internal class BehandlingRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { name() } returns this::class.java.simpleName
             }
 
         testApplication {
@@ -293,7 +293,6 @@ internal class BehandlingRoutesTest {
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         behandlingFactory,
-                        featureToggleService,
                     )
                 }
             block(client)

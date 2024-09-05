@@ -79,6 +79,10 @@ spec:
     max: 4
     min: 2
   env:
+    - name: KODEVERK_URL
+      value: "http://kodeverk-api.team-rocket/api/v1/kodeverk"
+    - name: KODEVERK_CLIENT_ID
+      value: prod-gcp.team-rocket.kodeverk-api
     - name: JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
       value: "07-18"
     - name: JOBB_SAKSBEHANDLER_OPENING_HOURS
@@ -175,6 +179,8 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: kodeverk-api
+          namespace: team-rocket
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
@@ -199,6 +205,7 @@ spec:
         - host: axsys.prod-fss-pub.nais.io
     inbound:
       rules:
+        - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui

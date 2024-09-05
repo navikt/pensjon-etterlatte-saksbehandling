@@ -14,6 +14,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-grunnlag
+        tier: db-f1-micro
         databases:
           - name: grunnlag
             envVarPrefix: DB

@@ -1,12 +1,13 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentVedtak(vedtakId: Long): Vedtak? {
         logger.info("Henter vedtak med id=$vedtakId")
@@ -18,5 +19,5 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    fun hentVedtakISak(sakId: Long): List<Vedtak> = repository.hentVedtakForSak(sakId)
+    fun hentVedtakISak(sakId: SakId): List<Vedtak> = repository.hentVedtakForSak(sakId)
 }

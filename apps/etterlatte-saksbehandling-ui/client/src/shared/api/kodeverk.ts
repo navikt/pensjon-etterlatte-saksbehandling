@@ -1,8 +1,8 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 
-export interface RsKode {
-  navn: string
+export interface Beskrivelse {
   term: string
+  tekst: string
 }
 
-export const hentKodeverkArkivtemaer = (): Promise<ApiResponse<RsKode[]>> => apiClient.get('/kodeverk/Arkivtemaer')
+export const hentKodeverkArkivtemaer = (): Promise<ApiResponse<Beskrivelse[]>> => apiClient.get('/kodeverk/arkivtemaer')

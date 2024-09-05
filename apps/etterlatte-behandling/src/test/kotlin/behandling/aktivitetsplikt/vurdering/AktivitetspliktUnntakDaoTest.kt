@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -25,7 +26,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -39,7 +41,7 @@ class AktivitetspliktUnntakDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktUnntakDao(ConnectionAutoclosingTest(ds))
-    private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
     private val behandlingDao =
         BehandlingDao(
@@ -52,7 +54,7 @@ class AktivitetspliktUnntakDaoTest(
     fun `skal lagre ned og hente opp et nytt unntak for oppgave`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val unntak =
             LagreAktivitetspliktUnntak(
@@ -79,7 +81,7 @@ class AktivitetspliktUnntakDaoTest(
 
     @Test
     fun `Skal hente alle seneste unntak for sak, selv om det ligger flere unntak i behandling`() {
-        val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(1000, ChronoUnit.SECONDS))
         val kilde3 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().plus(2, ChronoUnit.DAYS))
@@ -153,7 +155,7 @@ class AktivitetspliktUnntakDaoTest(
     @Test
     fun `skal lagre ned og hente opp et nytt unntak for behandling`() {
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -188,7 +190,7 @@ class AktivitetspliktUnntakDaoTest(
         @Test
         fun `Oppdatere unntak`() {
             val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-            val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
             val opprettBehandling =
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -231,7 +233,7 @@ class AktivitetspliktUnntakDaoTest(
     @Nested
     inner class SlettAktivitet {
         private val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        private val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         private val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -282,7 +284,7 @@ class AktivitetspliktUnntakDaoTest(
 
     @Nested
     inner class KopierUnntak {
-        private val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
 
         private val lagreUnntak =
             LagreAktivitetspliktUnntak(

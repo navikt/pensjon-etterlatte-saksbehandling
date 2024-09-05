@@ -4,13 +4,15 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,16 +25,16 @@ class AktivitetspliktDaoTest(
     ds: DataSource,
 ) {
     private val dao = AktivitetspliktDao(ConnectionAutoclosingTest(ds))
-    private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
 
     @Test
     fun `skal hente aktiviteter for behandling`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivtet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+        val nyAktivtet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
         dao.opprettAktivitet(behandlingId, nyAktivtet, kilde)
         dao.opprettAktivitet(UUID.randomUUID(), nyAktivtet, kilde)
 
-        val aktiviteter = dao.hentAktiviteter(behandlingId)
+        val aktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
 
         aktiviteter.size shouldBe 1
     }
@@ -40,14 +42,13 @@ class AktivitetspliktDaoTest(
     @Test
     fun `skal opprette ny aktivetet`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+        val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
 
         dao.opprettAktivitet(behandlingId, nyAktivitet, kilde) shouldBe 1
 
-        val hentAktiviteter = dao.hentAktiviteter(behandlingId)
+        val hentAktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
         hentAktiviteter.first().asClue { aktivitet ->
             aktivitet.sakId shouldBe nyAktivitet.sakId
-            aktivitet.behandlingId shouldBe behandlingId
             aktivitet.type shouldBe nyAktivitet.type
             aktivitet.fom shouldBe nyAktivitet.fom
             aktivitet.tom shouldBe nyAktivitet.tom
@@ -62,9 +63,9 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal oppdatere eksisterende aktivitet`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val gammelAktivitet = dao.hentAktiviteter(behandlingId).first()
+            val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
                     id = gammelAktivitet.id,
@@ -79,12 +80,11 @@ class AktivitetspliktDaoTest(
                 kilde.copy("Z1111111"),
             ) shouldBe 1
 
-            val aktiviteter = dao.hentAktiviteter(behandlingId)
+            val aktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
             aktiviteter shouldHaveSize 1
             aktiviteter.first().asClue { oppdatertAktivitet ->
                 oppdatertAktivitet.id shouldBe gammelAktivitet.id
                 oppdatertAktivitet.sakId shouldBe gammelAktivitet.sakId
-                oppdatertAktivitet.behandlingId shouldBe gammelAktivitet.behandlingId
                 oppdatertAktivitet.type shouldBe oppdaterAktivitet.type
                 oppdatertAktivitet.fom shouldBe oppdaterAktivitet.fom
                 oppdatertAktivitet.tom shouldBe oppdaterAktivitet.tom
@@ -97,9 +97,9 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal ikke oppdatere eksisterende aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val gammelAktivitet = dao.hentAktiviteter(behandlingId).first()
+            val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
                     id = gammelAktivitet.id,
@@ -121,25 +121,25 @@ class AktivitetspliktDaoTest(
         @Test
         fun `skal slette aktivitet`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+            val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
             dao.slettAktivitet(aktivitet.id, behandlingId)
 
-            dao.hentAktiviteter(behandlingId) shouldHaveSize 0
+            dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 0
         }
 
         @Test
         fun `skal ikke slette aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+            val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
             dao.slettAktivitet(aktivitet.id, UUID.randomUUID())
 
-            dao.hentAktiviteter(behandlingId) shouldHaveSize 1
+            dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 1
         }
     }
 
@@ -149,20 +149,19 @@ class AktivitetspliktDaoTest(
         fun `skal kopiere aktiviteter fra tidligere behandling`() {
             val forrigeBehandling = UUID.randomUUID()
             val nyBehandling = UUID.randomUUID()
-            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
             dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
-            dao.hentAktiviteter(forrigeBehandling) shouldHaveSize 3
-            dao.hentAktiviteter(nyBehandling) shouldHaveSize 0
+            dao.hentAktiviteterForBehandling(forrigeBehandling) shouldHaveSize 3
+            dao.hentAktiviteterForBehandling(nyBehandling) shouldHaveSize 0
 
             dao.kopierAktiviteter(forrigeBehandling, nyBehandling) shouldBe 3
 
-            dao.hentAktiviteter(nyBehandling).asClue {
+            dao.hentAktiviteterForBehandling(nyBehandling).asClue {
                 it shouldHaveSize 3
                 it.forEach { aktivitet ->
                     aktivitet.sakId shouldBe nyAktivitet.sakId
-                    aktivitet.behandlingId shouldBe nyBehandling
                     aktivitet.type shouldBe nyAktivitet.type
                     aktivitet.fom shouldBe nyAktivitet.fom
                     aktivitet.tom shouldBe nyAktivitet.tom

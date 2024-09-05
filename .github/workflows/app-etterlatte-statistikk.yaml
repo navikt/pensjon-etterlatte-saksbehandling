@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

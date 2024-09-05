@@ -33,7 +33,7 @@ class BeregningKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : BeregningKlient {
-    private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)

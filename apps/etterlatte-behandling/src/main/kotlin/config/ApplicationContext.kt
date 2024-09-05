@@ -50,7 +50,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -61,8 +61,6 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
@@ -106,7 +104,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtid
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt.OpprettDoedshendelseJob
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.next
@@ -115,6 +112,9 @@ import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
@@ -143,14 +143,21 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.person.krr.KrrKlientImpl
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -169,14 +176,6 @@ private fun skjermingHttpClient(config: Config) =
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
         azureAppScope = config.getString("skjerming.azure.scope"),
-    )
-
-private fun grunnlagHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("grunnlag.azure.scope"),
     )
 
 private fun navAnsattHttpClient(config: Config) =
@@ -247,7 +246,7 @@ internal class ApplicationContext(
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_RAPID_TOPIC))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         },
@@ -257,30 +256,30 @@ internal class ApplicationContext(
             brukerIdent = { finnBrukerIdent() },
         ),
     val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
-    val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
-            env.getValue(NAVANSATT_URL),
+            env.requireEnvValue(NAVANSATT_URL),
         ).also {
             it.asyncPing()
         },
-    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue(NORG2_URL)),
+    val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.requireEnvValue(NORG2_URL)),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
+    val grunnlagKlientImpl: GrunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
     val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
-    val vilkaarsvuderingKlient: VilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue(ETTERLATTE_TILBAKEKREVING_URL)),
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL)),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
+    val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
+    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao = VilkaarsvurderingKlientDaoImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -303,7 +302,9 @@ internal class ApplicationContext(
     val vedtaksbehandlingDao = VedtaksbehandlingDao(autoClosingDatabase)
     val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
-    val sakDao = SakDao(autoClosingDatabase)
+    val sakLesDao = SakLesDao(autoClosingDatabase)
+    val sakendringerDao = SakendringerDao(autoClosingDatabase) { sakLesDao.hentSak(it) }
+    val sakSkrivDao = SakSkrivDao(sakendringerDao)
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,
@@ -323,29 +324,29 @@ internal class ApplicationContext(
     val opprettDoedshendelseDao = OpprettDoedshendelseDao(autoClosingDatabase)
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue(SKJERMING_URL))
-    val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.get(ELECTOR_PATH), leaderElectionHttpClient)
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
-    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue(ETTERLATTE_KLAGE_API_URL))
-    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue(ETTERLATTE_MIGRERING_URL))
+    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
+    val migreringKlient = MigreringKlient(migreringHttpClient, env.requireEnvValue(ETTERLATTE_MIGRERING_URL))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
+    val kodeverkService = KodeverkService(kodeverkKlient)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser)
 
-    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
+    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlientImpl)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
-            grunnlagKlient = grunnlagKlientObo,
+            grunnlagKlient = grunnlagKlientImpl,
             behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
@@ -357,7 +358,7 @@ internal class ApplicationContext(
             generellbehandlingDao,
             oppgaveService,
             behandlingService,
-            grunnlagKlientObo,
+            grunnlagKlientImpl,
             hendelseDao,
             saksbehandlerInfoDao,
         )
@@ -373,7 +374,7 @@ internal class ApplicationContext(
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             behandlingService = behandlingService,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
@@ -422,7 +423,7 @@ internal class ApplicationContext(
             aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
             behandlingService = behandlingService,
-            grunnlagKlient = grunnlagKlientObo,
+            grunnlagKlient = grunnlagKlientImpl,
             automatiskRevurderingService = automatiskRevurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
@@ -449,7 +450,7 @@ internal class ApplicationContext(
             axsysKlient,
             navAnsattKlient,
             skjermingKlient,
-            grunnlagKlient,
+            grunnlagKlientImpl,
             pdlTjenesterKlient,
             klageKlient,
             tilbakekrevingKlient,
@@ -458,14 +459,15 @@ internal class ApplicationContext(
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
-            sakDao,
+            sakSkrivDao,
+            sakLesDao,
             skjermingKlient,
             enhetService,
             grunnlagsService,
             krrKlient,
             pdlTjenesterKlient,
         )
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
     val opprettDoedshendelseService = OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
@@ -475,7 +477,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdltjenesterKlient = pdlTjenesterKlient,
-            grunnlagKlient = grunnlagKlient,
+            grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
             brukerService = enhetService,
             doedshendelseService = doedshendelseService,
@@ -495,13 +497,12 @@ internal class ApplicationContext(
                     pesysKlient = pesysKlient,
                     behandlingService = behandlingService,
                 ),
-            featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
-            pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
+            pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
 
@@ -564,7 +565,7 @@ internal class ApplicationContext(
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
-            sakDao = sakDao,
+            sakDao = sakLesDao,
             hendelseDao = hendelseDao,
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,
@@ -578,6 +579,15 @@ internal class ApplicationContext(
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(
+            VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
+            behandlingService,
+            grunnlagKlientImpl,
+            behandlingsStatusService,
+        )
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -590,7 +600,7 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            vilkaarsvurderingKlient = vilkaarsvuderingKlient,
+            vilkaarsvurderingService = vilkaarsvurderingService,
         )
 
     val migreringService =

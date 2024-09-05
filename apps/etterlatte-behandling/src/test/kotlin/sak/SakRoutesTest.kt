@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -55,7 +56,7 @@ internal class SakRoutesTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -213,7 +214,7 @@ internal class SakRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
         every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
 

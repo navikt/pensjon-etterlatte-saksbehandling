@@ -24,6 +24,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -55,23 +56,23 @@ class RestModuleTest {
     private val sakTilgangsSjekkMock = mockk<SakTilgangsSjekk>()
     private val personTilgangsSjekkMock = mockk<PersonTilgangsSjekk>()
 
-    private val server = MockOAuth2Server()
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val mockOAuth2Server = MockOAuth2Server()
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun afterAll() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
     fun `skal sette opp to endepunkter med autentisering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 route1()
                 route2()
             }
@@ -98,7 +99,7 @@ class RestModuleTest {
         coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 tilgangTestRoute()
             }.also { setReady() }
 
@@ -141,7 +142,7 @@ class RestModuleTest {
     @Test
     fun `skal kunne lese og skrive json payload`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 route1()
             }
 
@@ -164,7 +165,7 @@ class RestModuleTest {
     @Test
     fun `skal returnere internal server error og logge dersom noe feiler`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 route1()
             }
 
@@ -180,7 +181,7 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 route1()
             }.also { setReady() }
 
@@ -221,7 +222,7 @@ class RestModuleTest {
     @Test
     fun `metrics test`() {
         testApplication {
-            runServer(server, withMetrics = true) {
+            runServer(mockOAuth2Server, withMetrics = true) {
                 route1()
             }
 
@@ -238,7 +239,7 @@ class RestModuleTest {
     fun `statuspages håndterer kjente og ukjente exceptions`() {
         testApplication {
             val client =
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     routesMedForskjelligeFeil()
                 }
 

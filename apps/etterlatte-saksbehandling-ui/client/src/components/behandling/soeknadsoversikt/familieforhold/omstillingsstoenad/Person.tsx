@@ -8,10 +8,10 @@ import { IPdlPerson } from '~shared/types/Person'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 import { Result } from '~shared/api/apiUtils'
-import { ILand } from '~shared/api/trygdetid'
 import { formaterFnr } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { ILand } from '~utils/kodeverk'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;

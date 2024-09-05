@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erForeldreloes
 import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
-import no.nav.etterlatte.brev.behandling.somTittel
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -18,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -28,7 +28,7 @@ class InnholdTilRedigerbartBrevHenter(
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
     internal suspend fun hentInnData(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
@@ -51,13 +51,6 @@ class InnholdTilRedigerbartBrevHenter(
             )
 
         val kode = brevKodeMapping(brevkodeRequest)
-        val tittel =
-            kode.ferdigstilling.tittel ?: (
-                generellBrevData.forenkletVedtak
-                    ?.type
-                    ?.somTittel()
-                    ?.let { "Vedtak om $it" } ?: "Tittel mangler"
-            )
         return coroutineScope {
             val brevDataRedigerbarRequest =
                 BrevDataRedigerbarRequest(
@@ -102,7 +95,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.redigering.brevtype,
+                        kode.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,
@@ -120,7 +113,7 @@ class InnholdTilRedigerbartBrevHenter(
                 sakType = generellBrevData.sak.sakType,
                 enhet = generellBrevData.sak.enhet,
                 personerISak = generellBrevData.personerISak,
-                innhold = BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
+                innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
                 brevkode = kode,
             )

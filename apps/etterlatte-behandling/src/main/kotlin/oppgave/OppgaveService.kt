@@ -24,16 +24,17 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
@@ -421,7 +422,7 @@ class OppgaveService(
         }
     }
 
-    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: SakId) {
         for (oppgaveIntern in hentOppgaverForSak(sakId)) {
             if (oppgaveIntern.saksbehandler != null &&
                 oppgaveIntern.erUnderBehandling()
@@ -432,16 +433,19 @@ class OppgaveService(
     }
 
     private fun endreEnhetForOppgaverTilknyttetSak(
-        sakId: Long,
+        sakId: SakId,
         enhetsID: String,
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
         oppgaverForSak.forEach {
+            if (it.erUnderBehandling()) {
+                oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+            }
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
@@ -496,7 +500,7 @@ class OppgaveService(
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         merknad: String? = null,
     ): OppgaveIntern {
@@ -549,7 +553,7 @@ class OppgaveService(
 
     fun opprettOppgave(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,
@@ -584,14 +588,25 @@ class OppgaveService(
      * Skal kun brukes til:
      *  - automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
      *  - journalposter som avbrytes/annuleres
+     *  - automatisk avbrudd når kravgrunnlag i tilbakekreving er nullet ut
+     *  - automatisk avbrudd når kravgrunnlag i tilbakekreving er endret
      */
-    fun avbrytAapneOppgaverMedReferanse(referanse: String) {
+    fun avbrytAapneOppgaverMedReferanse(
+        referanse: String,
+        merknad: String? = null,
+    ) {
         logger.info("Avbryter åpne oppgaver med referanse=$referanse")
 
         oppgaveDao
             .hentOppgaverForReferanse(referanse)
             .filterNot(OppgaveIntern::erAvsluttet)
-            .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
+            .forEach {
+                if (merknad != null) {
+                    oppgaveDao.oppdaterStatusOgMerknad(it.id, merknad, Status.AVBRUTT)
+                } else {
+                    oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+                }
+            }
     }
 
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =

@@ -13,11 +13,11 @@ import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
 import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
 import { Innflytting } from '~components/person/personopplysninger/Innflytting'
-import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import styled from 'styled-components'
+import { hentAlleLand } from '~shared/api/behandling'
 
 export const Personopplysninger = ({
   sakResult,
@@ -69,7 +69,7 @@ export const Personopplysninger = ({
                       {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                         <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
                       )}
-                      <AvdoedesBarn avdoede={avdoede} />
+                      <AvdoedesBarn sakType={sak.sakType} avdoede={avdoede} />
                       {mapSuccess(landListeResult, (landListe) => (
                         <>
                           <Statsborgerskap

@@ -16,6 +16,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -36,19 +37,19 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvkortingRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val avkortingService = mockk<AvkortingService>()
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
     fun afterAll() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -59,7 +60,7 @@ class AvkortingRoutesTest {
             val response =
                 client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.NoContent
@@ -136,7 +137,7 @@ class AvkortingRoutesTest {
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     setBody(avkorting.avkortingGrunnlag[0].toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.OK
@@ -158,7 +159,7 @@ class AvkortingRoutesTest {
 
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 avkorting(avkortingService, behandlingKlient)
             }
             block(this)

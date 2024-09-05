@@ -73,14 +73,18 @@ data class HardkodaSystembruker private constructor(
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+        val oppgave = HardkodaSystembruker(Systembrukere.OPPGAVE)
+        val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
     }
 
     enum class Systembrukere(
         val appName: String,
     ) {
+        OPPRETT_GRUNNLAG("opprettgrunnlag"),
         RIVER("river"),
         DOEDSHENDELSE("doedshendelse"),
         TESTDATA("testdata"),
+        OPPGAVE("oppgave"),
     }
 }
 

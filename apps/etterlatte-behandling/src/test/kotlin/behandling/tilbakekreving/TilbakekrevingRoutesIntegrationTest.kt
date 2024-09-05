@@ -276,11 +276,13 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             client.putAndAssertOk(
                 "/tilbakekreving/${tilbakekreving.sak.id}/avbryt",
                 systemBruker,
+                AvbrytRequest("merknad"),
             )
 
             inTransaction {
                 val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
                 oppgave.status shouldBe Status.AVBRUTT
+                oppgave.merknad shouldBe "merknad"
             }
 
             val avbruttTilbakekreving = tilbakekrevingService.hentTilbakekreving(tilbakekreving.id)

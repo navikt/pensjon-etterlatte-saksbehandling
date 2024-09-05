@@ -21,6 +21,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.lagContext
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -66,7 +67,7 @@ class TilgangsstyringTest {
         @BeforeAll
         @JvmStatic
         fun before() {
-            mockOAuth2Server.start(1234)
+            mockOAuth2Server.startRandomPort()
         }
 
         @AfterAll
@@ -274,7 +275,8 @@ class TilgangsstyringTest {
             val client =
                 runServer(mockOAuth2Server) {
                     intercept(ApplicationCallPipeline.Call) {
-                        val context = lagContext(user, sakTilgangDao = sakTilgangDao)
+                        val context =
+                            lagContext(user.also { every { it.name() } returns this::class.java.simpleName }, sakTilgangDao = sakTilgangDao)
 
                         withContext(
                             Dispatchers.Default +

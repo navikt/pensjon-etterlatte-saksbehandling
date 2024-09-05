@@ -58,7 +58,13 @@ internal fun Route.sakSystemRoutes(
                 val spesifikkeSaker = request.spesifikkeSaker
                 val ekskluderteSaker = request.ekskluderteSaker
                 val sakstype = request.sakType
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakstype) }))
+                val loependeFom = request.loependeFom
+
+                call.respond(
+                    Saker(
+                        inTransaction { sakService.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakstype, loependeFom) },
+                    ),
+                )
             }
         }
 

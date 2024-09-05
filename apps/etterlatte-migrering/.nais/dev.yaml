@@ -33,6 +33,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-migrering
+        tier: db-f1-micro
         databases:
           - name: migrering
             envVarPrefix: DB

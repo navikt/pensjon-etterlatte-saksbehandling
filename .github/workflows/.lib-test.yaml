@@ -21,4 +21,4 @@ jobs:
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :libs:${{ github.workflow }}:test :libs:${{ github.workflow }}:build
+        run: ./gradlew :libs:${{ github.workflow }}:test :libs:${{ github.workflow }}:build --configuration-cache

@@ -14,11 +14,13 @@ import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -40,16 +42,16 @@ import javax.sql.DataSource
 class AldersovergangTest(
     private val dataSource: DataSource,
 ) {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -73,7 +75,7 @@ class AldersovergangTest(
                 createHttpClient(AldersovergangService(AldersovergangDao(dataSource))).get("api/grunnlag/aldersovergang/2020-01") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -121,12 +123,12 @@ class AldersovergangTest(
         this.get(url) {
             headers {
                 append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
             }
         }
 
     private fun OpplysningDao.leggTilOpplysning(
-        sakId: Long,
+        sakId: SakId,
         opplysningTypeSoeker: Opplysningstype,
         node: TextNode,
         fnr: Folkeregisteridentifikator,
@@ -144,7 +146,7 @@ class AldersovergangTest(
     )
 
     private fun ApplicationTestBuilder.createHttpClient(service: AldersovergangService): HttpClient =
-        runServer(server, "api/grunnlag") {
+        runServer(mockOAuth2Server, "api/grunnlag") {
             aldersovergangRoutes(service)
         }
 }

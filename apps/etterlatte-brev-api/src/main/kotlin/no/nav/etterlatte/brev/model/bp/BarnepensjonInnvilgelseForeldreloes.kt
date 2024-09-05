@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
@@ -88,15 +89,19 @@ data class BarnepensjonForeldreloesRedigerbar(
     val harUtbetaling: Boolean,
     val erGjenoppretting: Boolean,
     val vedtattIPesys: Boolean,
+    val forskjelligAvdoedPeriode: ForskjelligAvdoedPeriode?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             etterbetaling: EtterbetalingDTO?,
             utbetalingsinfo: Utbetalingsinfo,
+            avdoede: List<Avdoed>,
             vedtaksloesning: Vedtaksloesning,
             loependeIPesys: Boolean,
         ): BarnepensjonForeldreloesRedigerbar {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+
+            val forskjelligAvdoedPeriode = finnEventuellForskjelligAvdoedPeriode(avdoede, utbetalingsinfo)
 
             return BarnepensjonForeldreloesRedigerbar(
                 virkningsdato = utbetalingsinfo.virkningsdato,
@@ -117,6 +122,7 @@ data class BarnepensjonForeldreloesRedigerbar(
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 erGjenoppretting = vedtaksloesning == Vedtaksloesning.GJENOPPRETTA,
                 vedtattIPesys = loependeIPesys,
+                forskjelligAvdoedPeriode = forskjelligAvdoedPeriode,
             )
         }
     }

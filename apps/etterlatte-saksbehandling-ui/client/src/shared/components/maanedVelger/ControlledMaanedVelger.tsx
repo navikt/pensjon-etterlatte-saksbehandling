@@ -8,6 +8,7 @@ import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelg
 interface Props<T extends FieldValues> {
   name: Path<T>
   label: string
+  description?: string
   control: Control<T>
   fromDate?: Date
   toDate?: Date
@@ -18,6 +19,7 @@ interface Props<T extends FieldValues> {
 export const ControlledMaanedVelger = <T extends FieldValues>({
   name,
   label,
+  description,
   control,
   fromDate,
   toDate,
@@ -62,7 +64,13 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
 
   return (
     <MonthPicker {...monthpickerProps}>
-      <MonthPicker.Input {...inputProps} id={field.name} label={label} error={error?.message} />
+      <MonthPicker.Input
+        {...inputProps}
+        id={field.name}
+        label={label}
+        description={description}
+        error={error?.message}
+      />
     </MonthPicker>
   )
 }

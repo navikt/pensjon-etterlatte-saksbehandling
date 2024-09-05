@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

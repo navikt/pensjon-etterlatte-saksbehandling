@@ -352,7 +352,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { tidspunkt } returns Tidspunkt.now()
             every { type } returns ""
         },
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),

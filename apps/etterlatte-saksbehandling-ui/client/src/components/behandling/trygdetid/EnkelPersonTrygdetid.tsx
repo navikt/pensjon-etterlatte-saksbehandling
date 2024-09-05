@@ -1,12 +1,6 @@
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
-import {
-  ILand,
-  ITrygdetid,
-  ITrygdetidGrunnlagType,
-  overstyrTrygdetid,
-  setTrygdetidYrkesskade,
-} from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlagType, overstyrTrygdetid, setTrygdetidYrkesskade } from '~shared/api/trygdetid'
 import { OverstyrtTrygdetid } from '~components/behandling/trygdetid/OverstyrtTrygdetid'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -22,6 +16,7 @@ import { TrygdetidPerioder } from '~components/behandling/trygdetid/trygdetidPer
 import { VStack } from '@navikt/ds-react'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
+import { ILand } from '~utils/kodeverk'
 
 interface Props {
   redigerbar: boolean

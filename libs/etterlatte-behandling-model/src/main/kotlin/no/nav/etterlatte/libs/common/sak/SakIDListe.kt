@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.sak
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import java.time.YearMonth
 import java.util.UUID
 
 data class SakIDListe(
@@ -14,11 +15,12 @@ data class SakIDListe(
 
 data class BehandlingOgSak(
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
 )
 
 data class HentSakerRequest(
     val spesifikkeSaker: List<Long>,
     val ekskluderteSaker: List<Long>,
     val sakType: SakType?,
+    val loependeFom: YearMonth?,
 )

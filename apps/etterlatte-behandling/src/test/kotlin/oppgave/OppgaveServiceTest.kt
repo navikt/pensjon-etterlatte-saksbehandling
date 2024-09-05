@@ -35,7 +35,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -56,13 +58,14 @@ import javax.sql.DataSource
 internal class OppgaveServiceTest(
     val dataSource: DataSource,
 ) {
-    private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+    private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelseDao, hendelser)
+    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, hendelseDao, hendelser)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private val azureGroupToGroupIDMap =
@@ -115,7 +118,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal kunne tildele oppgave uten saksbehandler`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -136,7 +139,7 @@ internal class OppgaveServiceTest(
         val systemBruker = mockk<SystemUser> { every { name() } returns "name" }
         nyKontekstMedBruker(systemBruker)
 
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -164,7 +167,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal tildele attesteringsoppgave hvis rolle attestering finnes`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -197,7 +200,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal ikke tildele attesteringsoppgave hvis rolle saksbehandler`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -240,7 +243,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal ikke kunne tildele en lukket oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -258,7 +261,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `avbrytAapneOppgaverMedReferanse setter alle åpne oppgaver for behandling til avbrutt`() {
-        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsId = UUID.randomUUID().toString()
         val oppgaveBehandling =
             oppgaveService.opprettOppgave(
@@ -287,7 +290,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `avbrytAapneOppgaverMedReferanse endrer ikke avsluttede oppgaver eller oppgaver til andre behandlinger`() {
-        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         val annenBehandlingId = UUID.randomUUID().toString()
         val saksbehandler = simpleSaksbehandler()
@@ -335,7 +338,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal kunne bytte oppgave med saksbehandler`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -353,7 +356,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal ikke kunne bytte saksbehandler på lukket oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -383,7 +386,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal kunne fjerne saksbehandler fra oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -403,7 +406,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `fjerning av saksbehandling ppå oppgave hvor sb mangler bare ignoreres`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -422,7 +425,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal ikke kunne fjerne saksbehandler på en lukket oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -444,7 +447,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `kan redigere frist`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -469,7 +472,7 @@ internal class OppgaveServiceTest(
     fun `Kan ikke sette oppgave på vente om man mangler årsak`() {
         every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), any()) } returns Unit
 
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 UUID.randomUUID().toString(),
@@ -490,7 +493,7 @@ internal class OppgaveServiceTest(
         every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), any()) } returns Unit
         every { hendelser.sendMeldingForHendelseAvVent(any(), any()) } returns Unit
 
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 UUID.randomUUID().toString(),
@@ -526,7 +529,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `kan ikke redigere frist tilbake i tid`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -550,7 +553,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `kan ikke redigere frist på en lukket oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -578,7 +581,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Kan sende til attestering`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -608,7 +611,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Kan underkjenne behandling - oppgave`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -636,7 +639,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Kan ikke lukke oppgave hvis man ikke eier oppgaven under behandling`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -660,7 +663,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal ikke kunne attestere vedtak hvis ingen oppgaver er under behandling altså tildelt en saksbehandler`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         oppgaveService.opprettOppgave(
             referanse,
@@ -692,7 +695,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal ikke kunne attestere vedtak hvis det finnes flere oppgaver under behandling for behandlingen`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val oppgaveEn =
             oppgaveService.opprettOppgave(
@@ -735,7 +738,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal kun få saker som ikke er adressebeskyttet tilbake hvis saksbehandler ikke har spesialroller`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -745,7 +748,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
             "referanse",
             adressebeskyttetSak.id,
@@ -754,7 +757,7 @@ internal class OppgaveServiceTest(
             null,
         )
 
-        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
@@ -769,7 +772,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal kunne endre enhet for oppgaver tilknyttet sak`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
             referanse = "referanse",
             sakId = opprettetSak.id,
@@ -801,8 +804,79 @@ internal class OppgaveServiceTest(
     }
 
     @Test
+    fun `Endre enhet skal ikke endre status på oppgave hvis den ikke er under behandling`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        oppgaveService.opprettOppgave(
+            referanse = UUID.randomUUID().toString(),
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null,
+        )
+
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaverUtenEndring.size)
+        val oppgaveUtenEndring = oppgaverUtenEndring.first()
+        assertEquals(Enheter.AALESUND.enhetNr, oppgaveUtenEndring.enhet)
+        oppgaveService.tildelSaksbehandler(oppgaveUtenEndring.id, saksbehandlerMedRoller.saksbehandler.ident())
+        oppgaveService.oppdaterStatusOgMerknad(oppgaveUtenEndring.id, "settes til ferdigstilt", Status.FERDIGSTILT)
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(
+            listOf(
+                SakMedEnhet(
+                    oppgaveUtenEndring.sakId,
+                    Enheter.STEINKJER.enhetNr,
+                ),
+            ),
+        )
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+
+        assertEquals(1, oppgaverMedEndring.size)
+        assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring.first().enhet)
+        assertEquals(Status.FERDIGSTILT, oppgaverMedEndring.first().status)
+    }
+
+    @Test
+    fun `Skal endre status til ny ved endring av enhet`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        oppgaveService.opprettOppgave(
+            referanse = UUID.randomUUID().toString(),
+            sakId = opprettetSak.id,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null,
+        )
+
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaverUtenEndring.size)
+        assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
+        oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
+        oppgaveService.endrePaaVent(PaaVent(oppgaverUtenEndring[0].id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET))
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(
+            listOf(
+                SakMedEnhet(
+                    oppgaverUtenEndring[0].sakId,
+                    Enheter.STEINKJER.enhetNr,
+                ),
+            ),
+        )
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+
+        assertEquals(1, oppgaverMedEndring.size)
+        assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
+        assertEquals(Status.NY, oppgaverMedEndring[0].status)
+    }
+
+    @Test
     fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveService.opprettOppgave(
             "referanse",
             opprettetSak.id,
@@ -811,7 +885,7 @@ internal class OppgaveServiceTest(
             null,
         )
 
-        val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val adressebeskyttetOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -821,7 +895,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
@@ -835,7 +909,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `saksbehandler med attestant rolle skal få attestant oppgaver`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -870,7 +944,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal tracke at en tildeling av saksbehandler blir lagret med oppgaveendringer`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettOppgave(
                 "referanse",
@@ -899,7 +973,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal ferdigstille en oppgave hivs det finnes kun en som er under behandling`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
         val oppgave =
             oppgaveService.opprettOppgave(
@@ -919,7 +993,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Kan ikke ferdigstille oppgave under behandling om man ikke eier den`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
         val oppgave =
             oppgaveService.opprettOppgave(
@@ -943,7 +1017,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal lukke nye ikke ferdige eller feilregistrerte oppgaver hvis ny søknad kommer inn`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
         val oppgaveSomSkalBliAvbrutt =
             oppgaveService.opprettOppgave(
@@ -967,7 +1041,7 @@ internal class OppgaveServiceTest(
     fun `Skal filtrere bort oppgaver med annen enhet`() {
         nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
-        val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val aalesundSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
         val oppgaveAalesund =
             oppgaveService.opprettOppgave(
@@ -980,7 +1054,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerid = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
 
-        val saksteinskjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
+        val saksteinskjer = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
         val behrefsteinkjer = UUID.randomUUID().toString()
         val oppgavesteinskjer =
             oppgaveService.opprettOppgave(
@@ -1006,7 +1080,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `kan hente saksbehandler på en oppgave tilknyttet behandling som er under arbeid`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         val nyOppgave =
             oppgaveService.opprettOppgave(
@@ -1027,7 +1101,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `kan hente saksbehandler på en oppgave fra revurdering`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val revurderingId = UUID.randomUUID().toString()
 
         val nyOppgave =
@@ -1049,7 +1123,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal kunne hente saksbehandler på oppgave for behandling selvom den er ferdigstilt med attestering`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         val foerstegangsbehandling =
             oppgaveService.opprettOppgave(
@@ -1075,7 +1149,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Får null saksbehandler ved henting på behandling hvis saksbehandler ikke satt`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
         oppgaveService.opprettOppgave(
             behandlingId,
@@ -1092,7 +1166,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal kunne endre kilde og sette referanse paa tildelt oppgave som ikke er ferdigstilt`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 "dummy",
@@ -1119,7 +1193,7 @@ internal class OppgaveServiceTest(
         val attestant = simpleAttestant()
 
         val behandlingId = UUID.randomUUID().toString()
-        val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 referanse = behandlingId,
@@ -1158,7 +1232,7 @@ internal class OppgaveServiceTest(
     @Test
     fun `kan oppdatere status uten aa ha tildelt`() {
         val behandlingId = UUID.randomUUID().toString()
-        val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 referanse = behandlingId,
@@ -1173,7 +1247,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal hente forrige status naar kun en statusendring er utfoert`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 UUID.randomUUID().toString(),
@@ -1192,7 +1266,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `skal hente forrige status hvis flere statusendringer er gjort`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettOppgave(
                 UUID.randomUUID().toString(),

@@ -41,6 +41,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -90,7 +91,7 @@ class BrevRepository(
             it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
-    fun hentBrevForSak(sakId: Long): List<Brev> =
+    fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) {
             it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
         }
@@ -169,6 +170,7 @@ class BrevRepository(
                         "poststed" to mottaker.adresse.poststed,
                         "landkode" to mottaker.adresse.landkode,
                         "land" to mottaker.adresse.land,
+                        "tving_sentral_print" to mottaker.tvingSentralPrint,
                     ),
                 ).asUpdate,
             ).also { require(it == 1) }
@@ -434,6 +436,7 @@ class BrevRepository(
                             landkode = row.string("landkode"),
                             land = row.string("land"),
                         ),
+                    tvingSentralPrint = row.boolean("tving_sentral_print"),
                 ),
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
             journalpostId = row.stringOrNull("journalpost_id"),
@@ -551,7 +554,8 @@ class BrevRepository(
                 postnummer = :postnummer,
                 poststed = :poststed,
                 landkode = :landkode,
-                land = :land
+                land = :land,
+                tving_sentral_print = :tving_sentral_print
             WHERE brev_id = :brev_id
         """
 

@@ -22,7 +22,7 @@ class VedtakTilbakekrevingService(
     private val rapidService: VedtaksvurderingRapidService,
     private val behandlingKlient: BehandlingKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakTilbakekrevingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettEllerOppdaterVedtak(tilbakekrevingVedtakData: TilbakekrevingVedtakDto): Long {
         logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")

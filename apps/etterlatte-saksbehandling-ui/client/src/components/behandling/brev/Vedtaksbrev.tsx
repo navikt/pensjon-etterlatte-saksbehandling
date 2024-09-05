@@ -11,12 +11,7 @@ import {
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
-import {
-  IBehandlingStatus,
-  IBehandlingsType,
-  IDetaljertBehandling,
-  Vedtaksloesning,
-} from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
@@ -137,20 +132,15 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const kanSendeTilAttestering = (): boolean => {
-    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-    if (erForestegangsbehandling) {
-      const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
-      if (!sjekklisteErBekreftet) {
-        const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
-        if (!fant) {
-          dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
-        }
-        dispatch(visSjekkliste())
+    const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
+    if (!sjekklisteErBekreftet) {
+      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+      if (!fant) {
+        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
       }
-      return sjekklisteErBekreftet
-    } else {
-      return true
+      dispatch(visSjekkliste())
     }
+    return sjekklisteErBekreftet
   }
 
   return (

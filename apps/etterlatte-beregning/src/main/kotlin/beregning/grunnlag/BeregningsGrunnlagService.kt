@@ -28,6 +28,12 @@ class ManglerVirkningstidspunktBP :
         detail = "Mangler virkningstidspunkt for barnepensjon.",
     )
 
+class ManglerForrigeGrunnlag :
+    UgyldigForespoerselException(
+        code = "MANGLER_FORRIGE_GRUNNLAG",
+        detail = "Mangler forrige grunnlag for revurdering",
+    )
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
@@ -41,7 +47,7 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
+    ): BeregningsGrunnlag? =
         when {
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -98,15 +104,19 @@ class BeregningsGrunnlagService(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
+                            institusjonsopphold =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
-                            begegningsmetodeFlereAvdoede = beregningsGrunnlag.begegningsmetodeFlereAvdoede ?: emptyList(),
+                            beregningsMetodeFlereAvdoede =
+                                beregningsGrunnlag.beregningsMetodeFlereAvdoede
+                                    ?: emptyList(),
                         ),
                     )
+
+                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 
-            else -> false
+            else -> null
         }
 
     private suspend fun validerSoeskenMedIBeregning(
@@ -146,14 +156,14 @@ class BeregningsGrunnlagService(
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
-            )
+            ) ?: throw ManglerForrigeGrunnlag()
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk =
             if (revurdering.sakType == SakType.BARNEPENSJON) {
                 erGrunnlagLiktFoerEnDato(
                     beregningsGrunnlag.soeskenMedIBeregning,
-                    forrigeGrunnlag!!.soeskenMedIBeregning,
+                    forrigeGrunnlag.soeskenMedIBeregning,
                     revurderingVirk,
                 )
             } else {
@@ -163,7 +173,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag,
+                forrigeGrunnlag.institusjonsopphold,
                 revurderingVirk,
             )
 
@@ -323,7 +333,8 @@ class BeregningsGrunnlagService(
                 val nyePerioder = mutableListOf<OverstyrBeregningGrunnlagDao>()
                 grunnlag.forEach {
                     val erFoerRegulering = it.datoTOM != null && it.datoTOM!! < reguleringsmaaned
-                    val erOverRegulering = it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
+                    val erOverRegulering =
+                        it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
 
                     if (erFoerRegulering) {
                         nyePerioder.add(it)
@@ -331,7 +342,12 @@ class BeregningsGrunnlagService(
                         val forrigeMaaned = reguleringsmaaned.minusMonths(1)
                         val eksisterende =
                             it.copy(
-                                datoTOM = LocalDate.of(reguleringsmaaned.year, forrigeMaaned.month, forrigeMaaned.lengthOfMonth()),
+                                datoTOM =
+                                    LocalDate.of(
+                                        reguleringsmaaned.year,
+                                        forrigeMaaned.month,
+                                        forrigeMaaned.lengthOfMonth(),
+                                    ),
                             )
                         val nyPeriode =
                             tilpassOverstyrtBeregningsgrunnlagForRegulering(

@@ -16,6 +16,7 @@ import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.module
@@ -31,11 +32,11 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingsstatusRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
 
         val azureAdGroupIds =
             mapOf(
@@ -54,7 +55,7 @@ internal class BehandlingsstatusRoutesTest {
     @AfterAll
     fun after() {
         applicationContext.close()
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -65,7 +66,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            runServerWithModule(server) {
+            runServerWithModule(mockOAuth2Server) {
                 module(applicationContext)
             }
 
@@ -91,7 +92,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            runServerWithModule(server) {
+            runServerWithModule(mockOAuth2Server) {
                 module(applicationContext)
             }
 
@@ -117,7 +118,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            runServerWithModule(server) {
+            runServerWithModule(mockOAuth2Server) {
                 module(applicationContext)
             }
 
@@ -145,7 +146,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            runServerWithModule(server) {
+            runServerWithModule(mockOAuth2Server) {
                 module(applicationContext)
             }
 
@@ -159,10 +160,10 @@ internal class BehandlingsstatusRoutesTest {
         }
     }
 
-    private val tokenSaksbehandler: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
+    private val tokenSaksbehandler: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 
     private val tokenAttestant: String by lazy {
-        server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
+        mockOAuth2Server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
     }
 
     private companion object {

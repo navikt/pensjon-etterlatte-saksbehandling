@@ -12,7 +12,6 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -27,6 +26,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -36,8 +36,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -236,17 +235,17 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            val lagret =
+            val beregningsGrunnlag =
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertFalse(lagret)
+            assertNotNull(beregningsGrunnlag)
         }
 
         coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
@@ -311,17 +310,17 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            val lagret =
+            val beregningsGrunnlag =
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertTrue(lagret)
+            assertNotNull(beregningsGrunnlag)
         }
 
         coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
@@ -437,7 +436,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = behandlingsId,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -913,7 +912,7 @@ internal class BeregningsGrunnlagServiceTest {
         type: SakType,
         uuid: UUID,
         behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        sakId: Long = 1L,
+        sakId: SakId = 1L,
         virkningstidspunktdato: YearMonth = REFORM_TIDSPUNKT_BP,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
@@ -935,7 +934,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+            institusjonsopphold = institusjonsoppholdBeregningsgrunnlag,
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
 

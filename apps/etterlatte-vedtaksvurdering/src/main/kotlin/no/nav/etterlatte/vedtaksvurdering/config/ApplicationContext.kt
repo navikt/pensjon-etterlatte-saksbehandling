@@ -34,10 +34,10 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.config.VedtakKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingVilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
-import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService
@@ -77,7 +77,7 @@ class ApplicationContext {
         VedtakBehandlingService(
             repository = repository,
             beregningKlient = beregningKlient,
-            vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
+            vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
@@ -117,7 +117,7 @@ class ApplicationContext {
 
     private val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_RAPID_TOPIC))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         }
@@ -131,7 +131,7 @@ class ApplicationContext {
 
     private val vedtakshendelserProdusent: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
         } else {
             object : KafkaProdusent<String, String> {
                 override fun publiser(

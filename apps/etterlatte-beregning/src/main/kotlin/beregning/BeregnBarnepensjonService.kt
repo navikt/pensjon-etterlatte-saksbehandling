@@ -280,7 +280,7 @@ class BeregnBarnepensjonService(
         beregningsGrunnlag: BeregningsGrunnlag,
         trygdetider: List<TrygdetidDto>,
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
-        fom: LocalDate,
+        virkFom: LocalDate,
         tom: LocalDate?,
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull =
@@ -293,7 +293,7 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Søsken i kullet",
                         )
                     },
-                    fom,
+                    virkFom,
                     tom,
                 )
             } else {
@@ -308,7 +308,7 @@ class BeregnBarnepensjonService(
                                 .finnKonstantTrygdetidPerioder(
                                     trygdetider,
                                     beregningsGrunnlag,
-                                    fom,
+                                    virkFom,
                                 ).also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(beregningsGrunnlag.behandlingId, it) }
                                 .anvendt
                                 .first()
@@ -326,13 +326,13 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Anvendte trygdetider",
                         )
                     },
-                    fom,
+                    virkFom,
                     tom,
                 )
             },
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier
+                beregningsGrunnlag.institusjonsopphold.mapVerdier
                     { institusjonsopphold ->
                         FaktumNode(
                             verdi = institusjonsopphold,

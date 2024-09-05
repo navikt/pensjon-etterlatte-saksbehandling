@@ -59,7 +59,7 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.BehandlingVilkaarsvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
@@ -131,7 +131,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
@@ -249,7 +249,7 @@ class ApplicationBuilder {
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
+    private val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 

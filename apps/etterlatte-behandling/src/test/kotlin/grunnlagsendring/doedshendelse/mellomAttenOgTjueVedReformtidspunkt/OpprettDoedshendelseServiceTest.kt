@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
@@ -56,7 +57,7 @@ class OpprettDoedshendelseServiceTest {
 
     @BeforeEach
     fun beforeAll() {
-        nyKontekstMedBruker(mockk())
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
 
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()

@@ -11,12 +11,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
@@ -38,6 +40,7 @@ class SimuleringOsKlient(
     private val objectMapper: ObjectMapper,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogg = sikkerlogger()
 
     private val url = config.getString("etterlatteproxy.url")
 
@@ -54,9 +57,10 @@ class SimuleringOsKlient(
                 )
             }
         if (!response.status.isSuccess()) {
+            sikkerlogg.error("Simulering mot oppdrag feilet med status ${response.status}: ${response.bodyAsText()}")
             throw SimuleringOsKlientException(
                 response.status,
-                "Simulering mot Oppdrag feilet",
+                "Simulering mot Oppdrag feilet. Se hele feilen i sikkerlogg",
             )
         } else {
             return response.body<String>().let {

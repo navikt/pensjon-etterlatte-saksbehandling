@@ -1,90 +1,81 @@
 package no.nav.etterlatte.metrics
 
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Gauge
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.jobs.MetrikkUthenter
+import no.nav.etterlatte.libs.ktor.Metrikker
 import org.slf4j.LoggerFactory
 
 class BehandlingMetrics(
     private val oppgaveMetrikkerDao: OppgaveMetrikkerDao,
     private val behandlingerMetrikkerDao: BehandlingMetrikkerDao,
     private val gjenopprettingDao: GjenopprettingMetrikkerDao,
-    private val registry: CollectorRegistry = CollectorRegistry.defaultRegistry,
+    private val registry: PrometheusMeterRegistry = Metrikker.registrySaksbehandling,
 ) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    val oppgaver by lazy {
-        Gauge
-            .build("etterlatte_oppgaver", "Antall oppgaver")
-            .labelNames("status", "enhet", "saktype")
-            .register(registry)
-    }
-
-    val saksbehandler by lazy {
-        Gauge
-            .build("etterlatte_oppgaver_saksbehandler", "Antall saksbehandlere per enhet")
-            .labelNames("enhet")
-            .register(registry)
-    }
-
-    val behandlinger by lazy {
-        Gauge
-            .build("etterlatte_behandlinger", "Antall behandlinger")
-            .labelNames("saktype", "behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering")
-            .register(registry)
-    }
-
-    val gjenopprettinger by lazy {
-        Gauge
-            .build("etterlatte_gjenopprettinger", "Antall gjenopprettinger")
-            .labelNames("automatisk", "status", "type", "enhet")
-            .register(registry)
-    }
-
-    val avbruttGrunnetSoeknad by lazy {
-        Gauge
-            .build("etterlatte_gjenopprettinger_soeknad", "Antall gjenopprettinger avbrutt på grunn av søknad")
-            .register(registry)
-    }
-
-    val iverksattUtenOpphoerOver20 by lazy {
-        Gauge
-            .build("etterlatte_gjenopprettinger_over_20", "Alle iverksatte saker med søker over 20 uten opphør")
-            .register(registry)
-    }
 
     override fun run() {
         logger.info("Samler metrikker med ${this::class.simpleName}")
 
-        oppgaveMetrikkerDao.hentOppgaveAntall().forEach {
-            oppgaver.labels(it.status.name, it.enhet, it.saktype.name).set(it.antall.toDouble())
-        }
-        oppgaveMetrikkerDao.hentDistinkteSaksbehandlere().forEach {
-            saksbehandler.labels(it.enhet).set(it.antall.toDouble())
-        }
-
-        behandlingerMetrikkerDao.hent().forEach {
-            behandlinger
-                .labels(
-                    it.saktype.name,
-                    it.behandlingstype.name,
-                    it.status.name,
-                    it.revurderingsaarsak?.name ?: "null",
-                    it.kilde.name,
-                    it.automatiskMigrering,
-                ).set(it.antall.toDouble())
-        }
-
-        gjenopprettingDao.gjenopprettinger().forEach {
-            gjenopprettinger.labels(it.automatisk, it.status.name, it.type, it.enhet).set(it.antall.toDouble())
-        }
-
-        gjenopprettingDao.avbruttGrunnetSoeknad().forEach {
-            avbruttGrunnetSoeknad.labels().set(it.toDouble())
-        }
-
-        gjenopprettingDao.over20().let {
-            iverksattUtenOpphoerOver20.labels().set(it.size.toDouble())
-        }
+        oppgaveMetrikkerDao.hentOppgaveAntall().forEach { tellOppgaver(it) }
+        oppgaveMetrikkerDao.hentDistinkteSaksbehandlere().forEach { tellSaksbehandlere(it) }
+        behandlingerMetrikkerDao.hent().forEach { tellBehandlinger(it) }
+        gjenopprettingDao.gjenopprettinger().forEach { tellGjenopprettinger(it) }
+        gjenopprettingDao.avbruttGrunnetSoeknad().forEach { tellAvbruttGrunnetSoeknad(it) }
+        tellGjenopprettingerOver20(gjenopprettingDao.over20())
     }
+
+    private fun tellOppgaver(it: OppgaveAntall) =
+        Gauge
+            .builder("etterlatte oppgaver") { it.antall.toDouble() }
+            .description("Antall oppgaver")
+            .tag("status", it.status.name)
+            .tag("enhet", it.enhet)
+            .tag("saktype", it.saktype.name)
+            .register(registry)
+
+    private fun tellSaksbehandlere(it: SaksbehandlerAntall) {
+        Gauge
+            .builder("etterlatte_oppgaver_saksbehandler") { it.antall.toDouble() }
+            .description("Antall saksbehandlere per enhet")
+            .tag("enhet", it.enhet)
+            .register(registry)
+    }
+
+    private fun tellBehandlinger(it: BehandlingAntall) {
+        Gauge
+            .builder("etterlatte_behandlinger") { it.antall.toDouble() }
+            .description("Antall behandlinger")
+            .tag("saktype", it.saktype.name)
+            .tag("behandlingstype", it.behandlingstype.name)
+            .tag("status", it.status.name)
+            .tag("revurdering_aarsak", it.revurderingsaarsak?.name ?: "null")
+            .tag("kilde", it.kilde.name)
+            .tag("automatiskMigrering", it.automatiskMigrering)
+            .register(registry)
+    }
+
+    private fun tellGjenopprettinger(it: Behandlinger) {
+        Gauge
+            .builder("etterlatte_gjenopprettinger") { it.antall.toDouble() }
+            .description("Antall gjenopprettinger")
+            .tag("automatisk", it.automatisk)
+            .tag("status", it.status.name)
+            .tag("type", it.type)
+            .tag("enhet", it.enhet)
+            .register(registry)
+    }
+
+    private fun tellAvbruttGrunnetSoeknad(it: Int) {
+        Gauge
+            .builder("etterlatte_gjenopprettinger_soeknad") { it.toDouble() }
+            .description("Antall gjenopprettinger avbrutt på grunn av søknad")
+            .register(registry)
+    }
+
+    private fun tellGjenopprettingerOver20(it: List<String>): Gauge =
+        Gauge
+            .builder("etterlatte_gjenopprettinger_over_20") { it.size.toDouble() }
+            .description("Alle iverksatte saker med søker over 20 uten opphør")
+            .register(registry)
 }

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -31,7 +32,7 @@ internal class NySoeknadRiver(
     private val behandlingKlient: BehandlingClient,
     private val journalfoerSoeknadService: JournalfoerSoeknadService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(NySoeknadRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
@@ -118,7 +119,7 @@ internal class NySoeknadRiver(
         }
 
     private fun JsonMessage.oppdaterMed(
-        sakId: Long?,
+        sakId: SakId?,
         journalpostResponse: OpprettJournalpostResponse,
     ): JsonMessage =
         this.apply {

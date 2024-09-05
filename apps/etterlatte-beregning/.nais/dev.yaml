@@ -60,6 +60,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-beregning
+        tier: db-f1-micro
         databases:
           - name: beregning
             envVarPrefix: DB
@@ -69,10 +70,6 @@ spec:
   env:
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_URL
@@ -95,7 +92,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-grunnlag
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid

@@ -7,7 +7,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
@@ -20,6 +19,8 @@ import { formaterDato } from '~utils/formatering/dato'
 
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand, sorterLand } from '~utils/kodeverk'
 
 export default function SluttbehandlingUtland({
   sakId,

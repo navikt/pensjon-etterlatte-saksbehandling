@@ -19,6 +19,8 @@ import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 import { JaNei } from '~shared/types/ISvar'
 
+import { ILand } from '~utils/kodeverk'
+
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
 ): Promise<ApiResponse<GrunnlagsendringsListe>> => {
@@ -103,20 +105,20 @@ export const lagreViderefoertOpphoer = async ({
   skalViderefoere,
   behandlingId,
   begrunnelse,
-  vilkaar,
+  vilkaarType,
   kravdato,
   opphoerstidspunkt,
 }: {
   skalViderefoere: JaNei | undefined
   behandlingId: string
   begrunnelse: string
-  vilkaar: string | undefined
+  vilkaarType: string | undefined
   kravdato: string | null | undefined
   opphoerstidspunkt: Date | null
 }): Promise<ApiResponse<ViderefoertOpphoer>> => {
   return apiClient.post(`/behandling/${behandlingId}/viderefoert-opphoer`, {
     skalViderefoere: skalViderefoere,
-    vilkaar: vilkaar,
+    vilkaarType: vilkaarType,
     begrunnelse: begrunnelse,
     kravdato: kravdato,
     dato: opphoerstidspunkt,
@@ -193,3 +195,4 @@ export const hentBrevutfallOgEtterbetalingApi = async (
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path

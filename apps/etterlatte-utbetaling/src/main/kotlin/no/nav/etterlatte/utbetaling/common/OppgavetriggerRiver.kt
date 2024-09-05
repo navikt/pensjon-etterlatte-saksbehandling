@@ -25,6 +25,8 @@ class OppgavetriggerRiver(
     private val utbetalingService: UtbetalingService,
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
 ) : ListenerMedLogging() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         initialiserRiver(rapidsConnection, OekonomiHendelserType.OKONOMI_VEDTAK_OPPGAVE) {
             validate { it.interestedIn("oppgave") }
@@ -57,9 +59,5 @@ class OppgavetriggerRiver(
         } catch (e: Exception) {
             logger.info("Kunne ikke utfoere oppgave ${oppgave.oppgavetype.name}", e)
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(OppgavetriggerRiver::class.java)
     }
 }

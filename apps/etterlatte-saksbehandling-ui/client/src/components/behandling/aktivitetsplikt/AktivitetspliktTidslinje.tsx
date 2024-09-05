@@ -1,6 +1,11 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
 import { Alert, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
-import { hentAktiviteter, slettAktivitet } from '~shared/api/aktivitetsplikt'
+import {
+  hentAktiviteterForBehandling,
+  hentAktiviteterForSak,
+  slettAktivitet,
+  slettAktivitetForSak,
+} from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
@@ -13,10 +18,16 @@ import styled from 'styled-components'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
-export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandling; doedsdato: Date }) => {
-  const { behandling, doedsdato } = props
-  const [hentet, hent] = useApiCall(hentAktiviteter)
+export const AktivitetspliktTidslinje = (props: {
+  behandling?: IDetaljertBehandling
+  doedsdato: Date
+  sakId?: number
+}) => {
+  const { behandling, doedsdato, sakId } = props
+  const [hentet, hent] = useApiCall(hentAktiviteterForBehandling)
+  const [hentetForSak, hentForSak] = useApiCall(hentAktiviteterForSak)
   const [slettet, slett] = useApiCall(slettAktivitet)
+  const [slettetForSak, slettForSak] = useApiCall(slettAktivitetForSak)
   const seksMndEtterDoedsfall = addMonths(doedsdato, 6)
   const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
 
@@ -26,9 +37,15 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
 
   useEffect(() => {
-    hent({ behandlingId: behandling.id }, (aktiviteter) => {
-      oppdaterAktiviteter(aktiviteter)
-    })
+    if (behandling) {
+      hent({ behandlingId: behandling.id }, (aktiviteter) => {
+        oppdaterAktiviteter(aktiviteter)
+      })
+    } else if (sakId) {
+      hentForSak({ sakId: sakId }, (aktiviteter) => {
+        oppdaterAktiviteter(aktiviteter)
+      })
+    }
   }, [])
 
   const oppdaterAktiviteter = (aktiviteter: IAktivitet[]) => {
@@ -37,9 +54,15 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   }
 
   const fjernAktivitet = (aktivitetId: string) => {
-    slett({ behandlingId: behandling.id, aktivitetId: aktivitetId }, (aktiviteter) => {
-      oppdaterAktiviteter(aktiviteter)
-    })
+    if (behandling) {
+      slett({ behandlingId: behandling.id, aktivitetId: aktivitetId }, (aktiviteter) => {
+        oppdaterAktiviteter(aktiviteter)
+      })
+    } else if (sakId) {
+      slettForSak({ sakId: sakId, aktivitetId: aktivitetId }, (aktiviteter) => {
+        oppdaterAktiviteter(aktiviteter)
+      })
+    }
   }
 
   return (
@@ -94,7 +117,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
                         {aktivitet.endret.ident}
                       </i>
                     </p>
-                    {isPending(slettet) ? (
+                    {isPending(slettet) || isPending(slettetForSak) ? (
                       <Spinner variant="neutral" label="Sletter" margin="1em" />
                     ) : (
                       <>
@@ -119,6 +142,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
           behandling={behandling}
           oppdaterAktiviteter={oppdaterAktiviteter}
           redigerAktivitet={rediger}
+          sakId={sakId}
         />
 
         {aktiviteter.length > 0 && (
@@ -137,7 +161,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
-        apiResult: hentet,
+        apiResult: hentet || hentetForSak,
       })}
     </VStack>
   )

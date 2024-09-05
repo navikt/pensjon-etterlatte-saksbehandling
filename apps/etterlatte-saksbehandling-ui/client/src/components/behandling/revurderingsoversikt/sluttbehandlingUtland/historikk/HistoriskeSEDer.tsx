@@ -6,9 +6,9 @@ import {
 import React, { useState } from 'react'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { formaterDato } from '~utils/formatering/dato'
-import { ILand } from '~shared/api/trygdetid'
 import { Accordion } from '@navikt/ds-react'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
+import { ILand } from '~utils/kodeverk'
 
 function erSluttbehandling(revurderingsinfo: RevurderingInfo): revurderingsinfo is SluttbehandlingUtlandInfo {
   return revurderingsinfo.type === Revurderingaarsak.SLUTTBEHANDLING_UTLAND

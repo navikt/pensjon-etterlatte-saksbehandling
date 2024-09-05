@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rapidsandrivers
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
@@ -27,7 +28,7 @@ const val BOR_I_UTLAND_KEY = "bor_i_utland"
 const val ER_OVER_18_AAR = "er_over_18_aar"
 const val KONTEKST_KEY = "kontekst"
 
-var JsonMessage.sakId: Long
+var JsonMessage.sakId: SakId
     get() = this[SAK_ID_KEY].asLong()
     set(name) {
         this[SAK_ID_KEY] = name
@@ -43,6 +44,12 @@ var JsonMessage.brevId: Long
     get() = this[BREV_ID_KEY].asLong()
     set(name) {
         this[BREV_ID_KEY] = name
+    }
+
+var JsonMessage.brevKode: String
+    get() = this[BREV_KODE].asText()
+    set(name) {
+        this[BREV_KODE] = name
     }
 
 var JsonMessage.dato: LocalDate

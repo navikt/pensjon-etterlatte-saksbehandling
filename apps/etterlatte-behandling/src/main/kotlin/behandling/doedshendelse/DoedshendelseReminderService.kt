@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -33,12 +32,10 @@ class DoedshendelseReminderService(
     }
 
     private fun run() {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)) {
-            val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
-            val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
-            toMaanedGamlehendelser.forEach {
-                inTransaction { lagOppgaveOmIkkeSoekt(it) }
-            }
+        val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
+        val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
+        toMaanedGamlehendelser.forEach {
+            inTransaction { lagOppgaveOmIkkeSoekt(it) }
         }
     }
 

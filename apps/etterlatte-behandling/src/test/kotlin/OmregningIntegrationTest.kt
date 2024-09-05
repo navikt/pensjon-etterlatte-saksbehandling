@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -42,12 +43,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    private var sakId: Long = 0L
+    private var sakId: SakId = 0L
 
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {
             val sak =
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
             val behandling =
                 applicationContext.behandlingFactory

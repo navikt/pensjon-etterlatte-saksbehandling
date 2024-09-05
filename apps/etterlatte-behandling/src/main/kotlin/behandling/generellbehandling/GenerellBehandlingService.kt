@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -147,7 +148,7 @@ class GenerellBehandlingService(
         }
 
         val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(saksbehandler.ident)
-        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
+        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
         val merknad =
             "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}."
 
@@ -155,7 +156,7 @@ class GenerellBehandlingService(
             referanse = generellBehandling.id.toString(),
             type = OppgaveType.KRAVPAKKE_UTLAND,
             merknad = merknad,
-            frist = trettiDagerFremITid,
+            frist = toDagerFremITid,
         )
 
         oppdaterBehandling(
@@ -323,13 +324,13 @@ class GenerellBehandlingService(
 
     fun hentBehandlingMedId(id: UUID): GenerellBehandling? = generellBehandlingDao.hentGenerellBehandlingMedId(id)
 
-    fun hentBehandlingerForSak(sakId: Long): List<GenerellBehandling> = generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
+    fun hentBehandlingerForSak(sakId: SakId): List<GenerellBehandling> = generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
 
     private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
         generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
 
     suspend fun hentKravpakkeForSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): KravPakkeMedAvdoed {
         val (kravpakke, forstegangsbehandlingMedKravpakke) =

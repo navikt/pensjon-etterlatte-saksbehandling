@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.Period
@@ -21,7 +23,7 @@ import java.util.UUID.randomUUID
 data class Trygdetid(
     val id: UUID = randomUUID(),
     val ident: String,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),

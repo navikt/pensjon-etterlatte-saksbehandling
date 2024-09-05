@@ -13,15 +13,17 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.EKSKLUDERTE_SAKER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
+import no.nav.etterlatte.rapidsandrivers.antall
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
+import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
@@ -35,7 +37,7 @@ internal class ReguleringsforespoerselRiver(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
-    private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.REGULERING_STARTA) {
@@ -61,8 +63,8 @@ internal class ReguleringsforespoerselRiver(
             return
         }
 
-        val kjoering = packet[KJOERING].asText()
-        val antall = packet[ANTALL].asInt()
+        val kjoering = packet.kjoering
+        val antall = packet.antall
         val spesifikkeSaker = packet.saker
         val ekskluderteSaker = packet.ekskluderteSaker
         val sakType = packet.optionalSakType()

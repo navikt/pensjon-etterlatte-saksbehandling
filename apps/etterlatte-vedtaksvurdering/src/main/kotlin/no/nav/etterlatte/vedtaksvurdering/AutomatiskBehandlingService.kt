@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -12,11 +13,11 @@ class AutomatiskBehandlingService(
     val service: VedtakBehandlingService,
     val behandlingKlient: BehandlingKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(AutomatiskBehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun vedtakStegvis(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
         kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid =
@@ -37,7 +38,7 @@ class AutomatiskBehandlingService(
 
     private suspend fun opprettOgFattVedtak(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")

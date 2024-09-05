@@ -301,7 +301,9 @@ class BehandlingStatusServiceImpl(
 
     private fun haandterFeilutbetaling(behandling: Behandling) {
         val brevutfall = behandlingInfoDao.hentBrevutfall(behandling.id)
-        if (brevutfall?.feilutbetaling?.valg in listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK)) {
+        if (brevutfall?.feilutbetaling?.valg in
+            listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK, FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES)
+        ) {
             logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
 
             val oppgaveFraBehandlingMedFeilutbetaling =

@@ -15,13 +15,6 @@ repositories {
         // name = "JCenter Gradle Plugins",
         url = "https://dl.bintray.com/gradle/gradle-plugins",
     )
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
-        credentials {
-            username = "token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
 }
 
 dependencies {

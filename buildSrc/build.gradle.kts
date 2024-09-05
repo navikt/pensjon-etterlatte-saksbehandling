@@ -1,5 +1,5 @@
 import ca.cutterslade.gradle.analyze.AnalyzeDependenciesTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
@@ -34,9 +34,10 @@ tasks {
     withType<Wrapper> {
         gradleVersion = "8.10"
     }
-
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_21

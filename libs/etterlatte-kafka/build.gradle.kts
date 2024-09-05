@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.libs")
+    kotlin("jvm")
     id("java-library")
     id("java-test-fixtures")
 }

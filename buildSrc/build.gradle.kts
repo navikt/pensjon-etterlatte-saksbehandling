@@ -10,10 +10,6 @@ version = "unspecified"
 
 repositories {
     gradlePluginPortal()
-    maven(
-        // name = "JCenter Gradle Plugins",
-        url = "https://dl.bintray.com/gradle/gradle-plugins",
-    )
 }
 
 dependencies {

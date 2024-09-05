@@ -2,6 +2,7 @@ import ca.cutterslade.gradle.analyze.AnalyzeDependenciesTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    kotlin("jvm") version "2.0.20"
     `kotlin-dsl`
     alias(libs.plugins.cutterslade.analyze) apply true
 }

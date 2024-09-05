@@ -67,6 +67,10 @@ internal class BeregnBarnepensjonServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val anvendtTrygdetidRepository =
+        mockk<AnvendtTrygdetidRepository>().also {
+            every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
+        }
     private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
 
     private fun beregnBarnepensjonService() =
@@ -75,6 +79,7 @@ internal class BeregnBarnepensjonServiceTest {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
+            anvendtTrygdetidRepository = anvendtTrygdetidRepository,
         )
 
     @Test

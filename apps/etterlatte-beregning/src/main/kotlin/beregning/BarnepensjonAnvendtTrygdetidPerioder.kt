@@ -37,7 +37,7 @@ object BarnepensjonAnvendtTrygdetidPerioder {
         if (trygdetider.size != 1) {
             throw UgyldigForespoerselException(
                 code = "FEIL_ANTALL_TRYGDETIDER",
-                detail = "Fant flere trygdetider - men fikk bare en beregningsgrunnlag",
+                detail = "Fant flere trygdetider - men fikk bare ett beregningsgrunnlag",
             )
         }
 

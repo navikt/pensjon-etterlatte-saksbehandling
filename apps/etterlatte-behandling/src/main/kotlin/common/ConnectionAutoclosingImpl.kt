@@ -1,5 +1,6 @@
 package no.nav.etterlatte.common
 
+import kotliquery.Session
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.databaseContext
 import java.sql.Connection
@@ -15,6 +16,8 @@ abstract class ConnectionAutoclosing {
             else -> false
         }
     }
+
+    abstract fun hentKotliquerySession(): Session
 }
 
 class ConnectionAutoclosingImpl(
@@ -27,5 +30,10 @@ class ConnectionAutoclosingImpl(
             }
         } else {
             block(databaseContext().activeTx())
+        }
+
+    override fun hentKotliquerySession(): Session =
+        hentConnection { connection: Connection ->
+            Session(kotliquery.Connection(connection))
         }
 }

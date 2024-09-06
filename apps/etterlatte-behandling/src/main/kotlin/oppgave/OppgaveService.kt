@@ -417,8 +417,8 @@ class OppgaveService(
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
-            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
             fjernSaksbehandlerFraOppgaveVedFlytt(it.id)
+            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
         }
     }
 

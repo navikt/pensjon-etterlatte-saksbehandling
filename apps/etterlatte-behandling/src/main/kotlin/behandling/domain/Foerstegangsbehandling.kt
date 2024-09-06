@@ -73,8 +73,10 @@ data class Foerstegangsbehandling(
 
     override fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt()) {
-            logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha vurdert gyldig framsatt, " +
+                    "virkningstidspunkt og kommer bruker til gode for å settes til fattet vedtak",
+            )
         }
 
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
@@ -115,8 +117,10 @@ data class Foerstegangsbehandling(
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha vurdert gyldig framsatt, " +
+                    "virkningstidspunkt og kommer bruker til gode for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -155,7 +159,10 @@ data class Foerstegangsbehandling(
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+        hvisTilstandEr(
+            listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING),
+            BehandlingStatus.SAMORDNET,
+        ) {
             endreTilStatus(it)
         }
 

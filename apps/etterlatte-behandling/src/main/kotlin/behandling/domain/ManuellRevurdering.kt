@@ -82,8 +82,10 @@ data class ManuellRevurdering(
 
     override fun tilVilkaarsvurdert(): Revurdering {
         if (!erFyltUt()) {
-            logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til vilkårsvurdert",
+            )
         }
 
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
@@ -127,8 +129,10 @@ data class ManuellRevurdering(
      */
     fun tilFattetVedtakUtvidet(): Revurdering {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -146,8 +150,10 @@ data class ManuellRevurdering(
 
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -183,7 +189,10 @@ data class ManuellRevurdering(
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+        hvisTilstandEr(
+            listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING),
+            BehandlingStatus.SAMORDNET,
+        ) {
             endreTilStatus(it)
         }
 

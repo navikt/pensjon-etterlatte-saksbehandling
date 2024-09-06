@@ -80,7 +80,7 @@ internal class BehandlingTest {
                 .tilBeregnet()
                 .tilFattetVedtak()
 
-        assertThrows<TilstandException.UgyldigTilstand> {
+        assertThrows<TilstandException.KanIkkeRedigere> {
             behandlingTilAttestering.oppdaterVirkningstidspunkt(virkningstidspunkt)
         }
     }
@@ -99,7 +99,7 @@ internal class BehandlingTest {
                 .tilIverksatt()
 
         assertThrows<TilstandException.UgyldigTilstand> { iverksattBehandling.tilReturnert() }
-        assertThrows<TilstandException.UgyldigTilstand> {
+        assertThrows<TilstandException.KanIkkeRedigere> {
             iverksattBehandling.oppdaterVirkningstidspunkt(
                 virkningstidspunkt,
             )

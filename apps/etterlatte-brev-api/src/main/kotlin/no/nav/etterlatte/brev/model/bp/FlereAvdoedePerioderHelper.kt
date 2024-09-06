@@ -1,35 +1,22 @@
 package no.nav.etterlatte.brev.model.bp
 
-import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 
 class BeregningForskjelligeAvdoedeFoersteOgSistePeriode(
     message: String,
-) : ForespoerselException(
-        status = HttpStatusCode.InternalServerError.value,
-        code = "BEREGNING_FORSKJELLIG_AVDOED_FOERSTE_OG_SISTE_PERIODE",
-        detail = message,
-    )
+) : InternfeilException(detail = message)
 
 class BeregningForskjelligeAvdoedeFoersteOgSistePeriodeMenAvdoedFantesIkkeISistePeriode(
     message: String,
-) : ForespoerselException(
-        status = HttpStatusCode.InternalServerError.value,
-        code = "BEREGNING_FORSKJELLIG_AVDOED_FOERSTE_OG_SISTE_PERIODE_IKKE_I_SISTE_PERIODE",
-        detail = message,
-    )
+) : InternfeilException(detail = message)
 
 class BeregningFoerstePeriodeManglerAvdoedNummerto(
     message: String,
-) : ForespoerselException(
-        status = HttpStatusCode.InternalServerError.value,
-        code = "BEREGNING_FOERSTEPERIODE_MANGLER_AVDOED_2",
-        detail = message,
-    )
+) : InternfeilException(detail = message)
 
 fun finnEventuellForskjelligAvdoedPeriode(
     avdoede: List<Avdoed>,

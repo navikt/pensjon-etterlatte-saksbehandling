@@ -51,7 +51,6 @@ internal class AvkortingServiceTest {
     fun beforeEach() {
         clearAllMocks()
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
-        coEvery { featureToggle.isEnabled(any(), any()) } returns true
     }
 
     @AfterEach
@@ -389,7 +388,6 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
-                featureToggle.isEnabled(any(), any())
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, behandling)
@@ -454,7 +452,6 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
-                featureToggle.isEnabled(any(), any())
                 behandlingKlient.avkort(revurderingId, bruker, false)
                 behandlingKlient.hentBehandling(revurderingId, bruker)
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, revurdering)

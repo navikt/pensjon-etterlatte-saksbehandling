@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 class AvkortingService(
@@ -100,14 +101,17 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
+        val virkningstidspunkt =
+            behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
+                code = "MANGLER_VIRK",
+                detail = "Behandling mangler virkningstidspunkt",
+            )
+
         var beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 request.innevaerendeAar,
                 behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
-                    code = "MANGLER_VIRK",
-                    detail = "Behandling mangler virkningstidspunkt",
-                ),
+                virkningstidspunkt,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
@@ -119,11 +123,8 @@ class AvkortingService(
             beregnetAvkorting =
                 beregnetAvkorting.beregnAvkortingMedNyttGrunnlag(
                     request.nesteAar!!,
-                    behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
-                    behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
-                        code = "MANGLER_VIRK",
-                        detail = "Behandling mangler virkningstidspunkt",
-                    ),
+                    false,
+                    YearMonth.of(virkningstidspunkt.year.plus(1), 1),
                     brukerTokenInfo,
                     beregning,
                     sanksjoner,

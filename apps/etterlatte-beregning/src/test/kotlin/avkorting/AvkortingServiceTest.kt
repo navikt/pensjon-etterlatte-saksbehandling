@@ -14,6 +14,7 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -36,18 +37,21 @@ internal class AvkortingServiceTest {
     private val avkortingRepository: AvkortingRepository = mockk()
     private val beregningService: BeregningService = mockk()
     private val sanksjonService: SanksjonService = mockk()
+    private val featureToggle: FeatureToggleService = mockk()
     private val service =
         AvkortingService(
             behandlingKlient,
             avkortingRepository,
             beregningService,
             sanksjonService,
+            featureToggle,
         )
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+        coEvery { featureToggle.isEnabled(any(), any()) } returns true
     }
 
     @AfterEach
@@ -385,6 +389,7 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
+                featureToggle.isEnabled(any(), any())
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, behandling)
@@ -449,6 +454,7 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
+                featureToggle.isEnabled(any(), any())
                 behandlingKlient.avkort(revurderingId, bruker, false)
                 behandlingKlient.hentBehandling(revurderingId, bruker)
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, revurdering)

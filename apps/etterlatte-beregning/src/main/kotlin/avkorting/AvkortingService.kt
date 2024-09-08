@@ -2,6 +2,8 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -11,6 +13,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -22,6 +25,7 @@ class AvkortingService(
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -78,6 +82,15 @@ class AvkortingService(
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
+        if (request.nesteAar != null &&
+            !featureToggleService.isEnabled(
+                ReguleringFeatureToggle.AARSINNTEKT_FOR_TO_AAR,
+                false,
+            )
+        ) {
+            throw AvkortingStoetterIkkeToInnektsaar()
+        }
+
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
@@ -100,6 +113,7 @@ class AvkortingService(
                 sanksjoner,
                 behandling.opphoerFraOgMed,
             )
+
         if (request.nesteAar != null) {
             // TODO unittest
             beregnetAvkorting =
@@ -238,3 +252,18 @@ class AvkortingBehandlingFeilStatus(
         code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
         detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
     )
+
+class AvkortingStoetterIkkeToInnektsaar :
+    UgyldigForespoerselException(
+        code = "AVKORTING_STOETTER_IKKE_TO_INNTEKTSAAR",
+        detail = "Årsinntekt for to ulike år støttes ikke enda.",
+    )
+
+enum class ReguleringFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    AARSINNTEKT_FOR_TO_AAR("oms-aarsinntekt-for-to-aar"),
+    ;
+
+    override fun key() = key
+}

@@ -65,8 +65,7 @@ val harToAvdodeForeldre2024 =
         beskrivelse = "Finner om barnet har to avdøde foreldre",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HAR-TO-AVDOEDE"),
     ) benytter avdodeForeldre2024 med { avdoedeForeldre ->
-        avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } &&
-            avdoedeForeldre.size >= 2
+        avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } && avdoedeForeldre.size >= 2
     }
 
 val kunEnJuridiskForelder2024: Regel<BarnepensjonGrunnlag, Boolean> =
@@ -173,7 +172,7 @@ val barnepensjonSatsRegel2024 =
     RegelMeta(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET", versjon = "2"),
     ) benytter skalHaForeldreloesSats2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
             skalHaForeldreloesSats,
             beloepEnAvdoedForelder,

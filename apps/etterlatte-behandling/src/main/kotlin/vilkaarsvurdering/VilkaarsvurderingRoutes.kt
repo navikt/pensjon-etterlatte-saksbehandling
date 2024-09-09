@@ -91,10 +91,10 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         behandlingGrunnlagsversjon,
                     ),
                 )
-            } catch (e: VirkningstidspunktIkkeSattException) {
+            } catch (_: VirkningstidspunktIkkeSattException) {
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
-            } catch (e: BehandlingstilstandException) {
+            } catch (_: BehandlingstilstandException) {
                 logger.error(
                     "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
                         "Statussjekk for behandling feilet",
@@ -217,7 +217,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             try {
                 vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
-            } catch (e: BehandlingstilstandException) {
+            } catch (_: BehandlingstilstandException) {
                 logger.error(
                     "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
                         "Statussjekk feilet for behandling feilet",

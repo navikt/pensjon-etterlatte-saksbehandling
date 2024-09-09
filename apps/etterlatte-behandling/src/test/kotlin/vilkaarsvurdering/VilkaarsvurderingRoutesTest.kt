@@ -80,7 +80,7 @@ internal class VilkaarsvurderingRoutesTest(
         val dbExtension = DatabaseExtension()
 
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = simpleSaksbehandler()
+        val sbBrukertokenInfo = simpleSaksbehandler()
     }
 
     private val mockOAuth2Server = MockOAuth2Server()
@@ -90,7 +90,7 @@ internal class VilkaarsvurderingRoutesTest(
     private val nyGrunnlagVersjon: Long = 4378
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    val saksbehandler = mockSaksbehandler("User")
+    private val saksbehandler = mockSaksbehandler("User")
 
     @BeforeAll
     fun beforeAll() {
@@ -113,8 +113,8 @@ internal class VilkaarsvurderingRoutesTest(
     @BeforeEach
     fun beforeEach() {
         coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
-        coEvery { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
+        every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
+        every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlagMock
     }
@@ -805,8 +805,8 @@ internal class VilkaarsvurderingRoutesTest(
             }
 
             runBlocking {
-                vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, oboToken)
-                vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, oboToken, vilkaarsvurderingResultat())
+                vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
+                vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, sbBrukertokenInfo, vilkaarsvurderingResultat())
             }
 
             val response =
@@ -830,7 +830,7 @@ internal class VilkaarsvurderingRoutesTest(
         vilkaarsvurderingService: VilkaarsvurderingService,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         runBlocking {
-            vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, oboToken)
+            vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
         }
 
     private fun detaljertBehandling() =

@@ -140,46 +140,6 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingForstegangs(
-        beregning: Beregning,
-        sanksjoner: List<Sanksjon>,
-    ): Avkorting {
-        val aarsoppgjoer = aarsoppgjoer.first()
-        val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
-        val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
-
-        val avkortingsperioder =
-            AvkortingRegelkjoring.beregnInntektsavkorting(
-                periode = grunnlag.periode,
-                avkortingGrunnlag = grunnlag,
-                aarsoppgjoer.forventaInnvilgaMaaneder,
-            )
-
-        val avkortetYtelseAar =
-            AvkortingRegelkjoring.beregnAvkortetYtelse(
-                periode = grunnlag.periode,
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortingsperioder,
-                type = AARSOPPGJOER,
-                sanksjoner = sanksjoner,
-            )
-
-        val oppdatertAarsoppgjoer =
-            aarsoppgjoer.copy(
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                inntektsavkorting =
-                    aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                        inntektsavkorting.copy(
-                            avkortingsperioder = avkortingsperioder,
-                        )
-                    },
-                avkortetYtelseAar = avkortetYtelseAar,
-            )
-        return this.copy(
-            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
-        )
-    }
-
     fun beregnAvkortingRevurdering(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,

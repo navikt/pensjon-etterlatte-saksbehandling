@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 import java.util.UUID
 
 class AvkortingService(
@@ -80,23 +79,14 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
         request: AvkortingGrunnlagRequest,
     ): AvkortingDto {
+        val lagreGrunnlag = request.innevaerendeAar
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
-
-        if (request.nesteAar != null &&
-            !featureToggleService.isEnabled(
-                ReguleringFeatureToggle.AARSINNTEKT_FOR_TO_AAR,
-                false,
-            )
-        ) {
-            throw AvkortingStoetterIkkeToInnektsaar()
-        }
 
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInntekt(request.innevaerendeAar, avkorting, behandling)
-        request.nesteAar?.let { validerInntekt(it, avkorting, behandling) }
+        validerInntekt(lagreGrunnlag, avkorting, behandling)
 
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
@@ -109,28 +99,14 @@ class AvkortingService(
 
         var beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
-                request.innevaerendeAar,
-                behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING,
+                lagreGrunnlag,
+                // lagreGrunnlag.fom,
                 virkningstidspunkt,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
                 behandling.opphoerFraOgMed,
             )
-
-        if (request.nesteAar != null) {
-            // TODO unittest
-            beregnetAvkorting =
-                beregnetAvkorting.beregnAvkortingMedNyttGrunnlag(
-                    request.nesteAar!!,
-                    false,
-                    YearMonth.of(virkningstidspunkt.year.plus(1), 1),
-                    brukerTokenInfo,
-                    beregning,
-                    sanksjoner,
-                    behandling.opphoerFraOgMed,
-                )
-        }
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
         val lagretAvkorting =

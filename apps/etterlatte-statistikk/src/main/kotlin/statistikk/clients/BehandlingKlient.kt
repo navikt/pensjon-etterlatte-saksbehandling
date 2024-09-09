@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import java.util.UUID
 
 interface BehandlingKlient {
@@ -21,6 +22,8 @@ interface BehandlingKlient {
         sakId: SakId,
         behandlingId: UUID,
     ): AktivitetspliktDto
+
+    suspend fun hentGraderingForSak(sakId: SakId): SakMedGraderingOgSkjermet
 }
 
 class BehandlingKlientImpl(
@@ -51,6 +54,15 @@ class BehandlingKlientImpl(
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente aktivitetspliktDto for sak $sakId fra Behandling", e)
+        }
+
+    override suspend fun hentGraderingForSak(sakId: SakId): SakMedGraderingOgSkjermet =
+        try {
+            behandlingHttpClient
+                .get("$behandlingUrl/sak/$sakId/gradering")
+                .body()
+        } catch (e: Exception) {
+            throw KunneIkkeHenteFraBehandling("Kunne ikke hente gradering for sak $sakId fra Behandling", e)
         }
 }
 

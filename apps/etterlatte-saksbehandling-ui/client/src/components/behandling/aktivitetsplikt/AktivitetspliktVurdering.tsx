@@ -259,10 +259,6 @@ export const AktivitetspliktVurdering = ({
                     <Label>Unntaksperiode</Label>
                     <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
                   </div>
-                  <HStack gap="4">
-                    <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
-                    <ControlledDatoVelger name="tom" label="Angi sluttdato" control={control} required={false} />
-                  </HStack>
                 </>
               )}
               {harUnntak === JaNei.NEI && (
@@ -285,6 +281,10 @@ export const AktivitetspliktVurdering = ({
                     <Label>Aktivitetsgradsperiode</Label>
                     <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
                   </div>
+                </>
+              )}
+              {harUnntak && (
+                <>
                   <HStack gap="4">
                     <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
                     <ControlledDatoVelger name="tom" label="Angi sluttdato" control={control} required={false} />

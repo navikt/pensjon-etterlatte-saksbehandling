@@ -19,9 +19,10 @@ export enum NotatRedigeringFane {
 
 interface RedigerbartNotatProps {
   notat: Notat
+  minifyRedigerKnapp?: boolean
 }
 
-export const NotatRedigeringModal = ({ notat }: RedigerbartNotatProps) => {
+export const NotatRedigeringModal = ({ notat, minifyRedigerKnapp }: RedigerbartNotatProps) => {
   const [fane, setFane] = useState<string>(NotatRedigeringFane.REDIGER)
 
   const [isOpen, setIsOpen] = useState(false)
@@ -59,7 +60,7 @@ export const NotatRedigeringModal = ({ notat }: RedigerbartNotatProps) => {
   return (
     <>
       <Button variant="secondary" onClick={open} size="small" icon={<PencilIcon />}>
-        Rediger
+        {!minifyRedigerKnapp && 'Rediger'}
       </Button>
 
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">

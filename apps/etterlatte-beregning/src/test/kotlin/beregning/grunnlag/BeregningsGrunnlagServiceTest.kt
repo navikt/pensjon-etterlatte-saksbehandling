@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -65,6 +66,12 @@ internal class BeregningsGrunnlagServiceTest {
             grunnlagKlient,
         )
 
+    @BeforeEach
+    fun beforeEach() {
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+    }
+
     @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
@@ -78,7 +85,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                 ),
             )
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
@@ -112,7 +119,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                 ),
             )
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
@@ -159,7 +166,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -336,7 +343,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
@@ -371,7 +378,7 @@ internal class BeregningsGrunnlagServiceTest {
         val overstyrBeregningGrunnlagDao = mockk<OverstyrBeregningGrunnlagDao>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
             beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
@@ -409,7 +416,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns null
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
@@ -430,7 +437,7 @@ internal class BeregningsGrunnlagServiceTest {
         val omregningsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns
             BeregningsGrunnlag(
                 behandlingId = behandlingsId,
@@ -456,7 +463,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -487,7 +494,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -531,7 +538,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

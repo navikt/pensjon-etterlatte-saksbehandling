@@ -8,10 +8,10 @@ import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreOverstyrBeregningGrunnlag } from '~shared/api/beregning'
-import { oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { isPending } from '~shared/api/apiUtils'
 import { OverstyrBeregningsgrunnlagPeriodeSkjema } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrBeregningsgrunnlagPeriodeSkjema'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 interface PeriodeRedigeringModus {
   redigerPeriode: boolean
@@ -50,7 +50,10 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
             perioder: perioderKopi,
           },
         },
-        (result) => dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+        (result) => {
+          dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+        }
       )
     }
   }

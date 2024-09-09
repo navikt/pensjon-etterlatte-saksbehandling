@@ -6,6 +6,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -51,7 +52,7 @@ class BeregningsGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag? =
         when {
-            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
 
@@ -316,28 +317,32 @@ class BeregningsGrunnlagService(
 
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
-            behandlingId,
-            data.perioder.map {
-                OverstyrBeregningGrunnlagDao(
-                    id = UUID.randomUUID(),
-                    behandlingId = behandlingId,
-                    datoFOM = it.fom,
-                    datoTOM = it.tom,
-                    utbetaltBeloep = it.data.utbetaltBeloep,
-                    trygdetid = it.data.trygdetid,
-                    trygdetidForIdent = it.data.trygdetidForIdent,
-                    prorataBroekTeller = it.data.prorataBroekTeller,
-                    prorataBroekNevner = it.data.prorataBroekNevner,
-                    sakId = behandling.sak,
-                    beskrivelse = it.data.beskrivelse,
-                    aarsak = it.data.aarsak,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                )
-            },
-        )
-
-        return hentOverstyrBeregningGrunnlag(behandlingId)
+        if (behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)) {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+                data.perioder.map {
+                    OverstyrBeregningGrunnlagDao(
+                        id = UUID.randomUUID(),
+                        behandlingId = behandlingId,
+                        datoFOM = it.fom,
+                        datoTOM = it.tom,
+                        utbetaltBeloep = it.data.utbetaltBeloep,
+                        trygdetid = it.data.trygdetid,
+                        trygdetidForIdent = it.data.trygdetidForIdent,
+                        prorataBroekTeller = it.data.prorataBroekTeller,
+                        prorataBroekNevner = it.data.prorataBroekNevner,
+                        sakId = behandling.sak,
+                        beskrivelse = it.data.beskrivelse,
+                        aarsak = it.data.aarsak,
+                        kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    )
+                },
+            )
+            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+            return hentOverstyrBeregningGrunnlag(behandlingId)
+        } else {
+            throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status)
+        }
     }
 
     fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
@@ -401,6 +406,15 @@ class BeregningsGrunnlagService(
         }
     }
 }
+
+class OverstyrtBeregningFeilBehandlingStatusException(
+    behandlingId: UUID,
+    behandlingStatus: BehandlingStatus,
+) : UgyldigForespoerselException(
+        code = "OVERSTYRT_BEREGNING_FEIL_BEHANDLINGSSTATUS",
+        detail = "Kunne ikke lagre overstyrt beregningsgrunnlag fordi behandlingen er i feil status",
+        meta = mapOf("behandlingId" to behandlingId, "behandlingStatus" to behandlingStatus),
+    )
 
 class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
     behandlingId: UUID,

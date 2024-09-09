@@ -232,6 +232,8 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
 
@@ -261,7 +263,8 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
         every { beregningRepository.deaktiverOverstyrtBeregning(any()) } just runs
@@ -296,6 +299,8 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(any()) } returns
             OverstyrBeregning(
                 behandling.sak,

@@ -97,6 +97,15 @@ fun Route.notatRoute(
             }
         }
 
+        route("/referanse/{referanse}") {
+            get {
+                val referanse = checkNotNull(call.parameters["referanse"])
+
+                val notater = nyNotatService.hentForReferanse(referanse)
+                call.respond(notater)
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
@@ -107,11 +116,13 @@ fun Route.notatRoute(
 
             post {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+                    val referanse = call.request.queryParameters["referanse"]
                     val mal = NotatMal.valueOf(call.request.queryParameters["mal"]!!)
 
                     val notat =
                         nyNotatService.opprett(
                             sakId = sakId,
+                            referanse = referanse,
                             mal = mal,
                             bruker = brukerTokenInfo,
                         )

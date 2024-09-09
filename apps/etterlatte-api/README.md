@@ -1,12 +1,17 @@
-# Samordning-vedtak
-Samordning-vedtak er en app som tilbyr konsumering av etterlatte sine data utad
+# Etterlatte API
+
+App som tilbyr endepunkter til eksterne tjenester. 
+
+
+
+---
+# samordning-vedtak-api
 
 Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.
 
 
 ## Autentisering
 
-For eksterne
 Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
 
 For interne må det legges inn i yaml filene slik som beskrevet her https://docs.nais.io/auth/entra-id/
@@ -128,7 +133,7 @@ Les [README](../../README.md) på rot i prosjektet.
 
 ## Bygg og deploy
 
-Appen bygges og deployes automatisk ved commits til `apps/etterlatte-samordning-vedtak/**`.
+Appen bygges og deployes automatisk ved commits til `apps/etterlatte-api/**`.
 
 - Deployes både til dev og prod automatisk ved merge til main.
 - For å trigge manuell deploy (miljø kan velges) kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`

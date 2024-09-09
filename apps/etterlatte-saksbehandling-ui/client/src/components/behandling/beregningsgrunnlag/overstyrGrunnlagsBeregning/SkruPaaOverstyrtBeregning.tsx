@@ -7,6 +7,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { useAppDispatch } from '~store/Store'
 
 export const SkruPaaOverstyrtBeregning = ({
   behandlingId,
@@ -21,6 +24,7 @@ export const SkruPaaOverstyrtBeregning = ({
   const [aarsakError, setAarsakError] = useState<string>('')
 
   const [opprettOverstyrBeregningResult, opprettOverstyrBeregningRequest] = useApiCall(opprettOverstyrBeregning)
+  const dispatch = useAppDispatch()
 
   const overstyrBeregning = () => {
     if (!!aarsak) {
@@ -32,7 +36,10 @@ export const SkruPaaOverstyrtBeregning = ({
           kategori: aarsak,
         },
         (result) => {
-          if (result) setOverstyrt(result)
+          if (result) {
+            setOverstyrt(result)
+            dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+          }
         }
       )
     } else setAarsakError('Du må velge en årsak')

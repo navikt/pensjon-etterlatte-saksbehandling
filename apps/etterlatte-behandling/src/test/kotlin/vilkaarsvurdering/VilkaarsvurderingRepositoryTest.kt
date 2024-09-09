@@ -1,25 +1,28 @@
-/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -27,11 +30,33 @@ import javax.sql.DataSource
 internal class VilkaarsvurderingRepositoryTest(
     ds: DataSource,
 ) {
-    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
+    companion object {
+        val vilkaarsvurdering =
+            Vilkaarsvurdering(
+                behandlingId = UUID.randomUUID(),
+                grunnlagVersjon = 1L,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
+                vilkaar =
+                    BarnepensjonVilkaar1967.inngangsvilkaar(),
+            )
+
+        val vilkaarsvurderingResultat =
+            VilkaarsvurderingResultat(
+                utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                kommentar = "Alt ser bra ut",
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                saksbehandler = "saksbehandler1",
+            )
+
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+    }
+
+    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository())
 
     @AfterEach
     fun afterEach() {
-        dbExtension.resetDb()
+        dbExtension.resetDb() // TODO: misbruk?
     }
 
     @Test
@@ -46,18 +71,21 @@ internal class VilkaarsvurderingRepositoryTest(
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val opprettVilkaarsvurderingMedResultat =
             vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
-                opprettetVilkaarsvurdering.behandlingId,
                 vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
+                opprettetVilkaarsvurdering,
             )
 
+        val nyVilkaarsvurdering =
+            opprettVilkaarsvurderingMedResultat.copy(
+                behandlingId = UUID.randomUUID(),
+                id = UUID.randomUUID(),
+                vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
+            )
+        vilkaarsvurderingRepository.opprettVilkaarsvurdering(nyVilkaarsvurdering)
         val revurdertVilkaarsvurdering =
             vilkaarsvurderingRepository.kopierVilkaarsvurdering(
-                opprettVilkaarsvurderingMedResultat.copy(
-                    behandlingId = UUID.randomUUID(),
-                    id = UUID.randomUUID(),
-                    vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
-                ),
+                nyVilkaarsvurdering,
                 opprettetVilkaarsvurdering.id,
             )
 
@@ -83,17 +111,17 @@ internal class VilkaarsvurderingRepositoryTest(
 
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
-                opprettetVilkaarsvurdering.behandlingId,
                 nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
+                opprettetVilkaarsvurdering,
             )
 
         oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe nyttVirkningstidspunkt
         with(oppdatertVilkaarsvurdering.resultat!!) {
-            utfall shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.utfall
-            kommentar shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.kommentar
-            tidspunkt shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.tidspunkt
-            saksbehandler shouldBe no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryTest.vilkaarsvurderingResultat.saksbehandler
+            utfall shouldBe vilkaarsvurderingResultat.utfall
+            kommentar shouldBe vilkaarsvurderingResultat.kommentar
+            tidspunkt shouldBe vilkaarsvurderingResultat.tidspunkt
+            saksbehandler shouldBe vilkaarsvurderingResultat.saksbehandler
         }
     }
 
@@ -102,9 +130,9 @@ internal class VilkaarsvurderingRepositoryTest(
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
         vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
-            opprettetVilkaarsvurdering.behandlingId,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat,
+            opprettetVilkaarsvurdering,
         )
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId)
@@ -277,30 +305,7 @@ internal class VilkaarsvurderingRepositoryTest(
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
         resultatVilkaar.unntaksvilkaar.forEach { it.resultat shouldBe Utfall.IKKE_OPPFYLT }
     }
-
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
- n
-        val vilkaarsvurdering =
-            Vilkaarsvurdering(
-                behandlingId = UUID.randomUUID(),
-                grunnlagVersjon = 1L,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
-                vilkaar =
-                    BarnepensjonVilkaar1967.inngangsvilkaar(),
-            )
-
-        val vilkaarsvurderingResultat =
-            VilkaarsvurderingResultat(
-                utfall = VilkaarsvurderingUtfall.OPPFYLT,
-                kommentar = "Alt ser bra ut",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1",
-            )
-    }
 }
 
 fun Vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
     vilkaar.find { it.hovedvilkaar.type == vilkaarType }
-*/

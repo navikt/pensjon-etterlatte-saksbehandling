@@ -171,6 +171,9 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     HttpStatusCode.PreconditionFailed,
                     "Kan ikke endre vurdering av vilkår på en vilkårsvurdering som har et resultat.",
                 )
+            } catch (e: Exception) {
+                logger.error(e.message)
+                call.respond(HttpStatusCode.InternalServerError)
             }
         }
 

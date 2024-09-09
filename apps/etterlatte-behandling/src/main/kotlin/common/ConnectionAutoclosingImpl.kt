@@ -17,7 +17,7 @@ abstract class ConnectionAutoclosing {
         }
     }
 
-    abstract fun hentKotliquerySession(): Session
+    abstract fun <T> hentKotliquerySession(block: (session: Session) -> T): T
 }
 
 class ConnectionAutoclosingImpl(
@@ -32,8 +32,8 @@ class ConnectionAutoclosingImpl(
             block(databaseContext().activeTx())
         }
 
-    override fun hentKotliquerySession(): Session =
+    override fun <T> hentKotliquerySession(block: (session: Session) -> T): T =
         hentConnection { connection: Connection ->
-            Session(kotliquery.Connection(connection))
+            block(Session(kotliquery.Connection(connection)))
         }
 }

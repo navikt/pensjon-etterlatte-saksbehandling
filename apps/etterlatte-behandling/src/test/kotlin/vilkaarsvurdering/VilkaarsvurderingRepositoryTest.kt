@@ -31,6 +31,9 @@ internal class VilkaarsvurderingRepositoryTest(
     ds: DataSource,
 ) {
     companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         val vilkaarsvurdering =
             Vilkaarsvurdering(
                 behandlingId = UUID.randomUUID(),
@@ -47,16 +50,13 @@ internal class VilkaarsvurderingRepositoryTest(
                 tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1",
             )
-
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
     }
 
     private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository())
 
     @AfterEach
     fun afterEach() {
-        dbExtension.resetDb() // TODO: misbruk?
+        dbExtension.resetDb()
     }
 
     @Test

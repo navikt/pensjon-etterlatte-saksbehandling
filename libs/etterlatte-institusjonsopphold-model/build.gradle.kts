@@ -1,3 +1,3 @@
 plugins {
-    id("etterlatte.libs")
+    kotlin("jvm")
 }

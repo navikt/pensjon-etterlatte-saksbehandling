@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-api
+  name: etterlatte-samordning-vedtak
   namespace: etterlatte
   labels:
     team: etterlatte

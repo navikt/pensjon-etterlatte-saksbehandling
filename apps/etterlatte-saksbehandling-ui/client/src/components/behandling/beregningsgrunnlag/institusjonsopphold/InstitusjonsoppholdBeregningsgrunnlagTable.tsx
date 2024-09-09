@@ -1,24 +1,28 @@
 import React, { useState } from 'react'
 import {
   BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSPostDto,
-  BeregningsMetode,
   InstitusjonsoppholdIBeregning,
+  LagreBeregningsGrunnlagDto,
   ReduksjonBP,
   ReduksjonOMS,
+  toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, HStack, Label, Table } from '@navikt/ds-react'
 import { PeriodisertBeregningsgrunnlagDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBeregningsGrunnlagOMS, lagreBeregningsGrunnlagOMS } from '~shared/api/beregning'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { isPending } from '~shared/api/apiUtils'
-import { oppdaterBeregningsGrunnlagOMS } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  oppdaterBeregningsGrunnlag,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface PeriodeRedigeringModus {
   redigerPeriode: boolean
@@ -33,9 +37,9 @@ const defaultPeriodeRedigeringModus: PeriodeRedigeringModus = {
 }
 
 interface Props {
-  behandling: IDetaljertBehandling
+  behandling: IBehandlingReducer
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
+  beregningsgrunnlag?: BeregningsGrunnlagDto
   institusjonsopphold: PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[] | undefined
 }
 
@@ -50,34 +54,27 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
 
   const dispatch = useAppDispatch()
 
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
-  const [hentBeregningsgrunnlagOMSResult, hentBeregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
+  const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
   const slettPeriode = (index: number) => {
     if (institusjonsopphold) {
       const perioderKopi = [...institusjonsopphold]
       perioderKopi.splice(index, 1)
-      if (sakType === SakType.OMSTILLINGSSTOENAD) {
-        lagreBeregningsGrunnlagOMSRequest(
-          {
-            behandlingId: behandling.id,
-            grunnlag: {
-              beregningsMetode: beregningsgrunnlag?.beregningsMetode ?? { beregningsMetode: BeregningsMetode.NASJONAL },
-              institusjonsopphold: perioderKopi,
-            },
-          },
-          () => {
-            hentBeregningsgrunnlagOMSRequest(behandling.id, (result) => {
-              if (result)
-                dispatch(
-                  oppdaterBeregningsGrunnlagOMS({
-                    ...result,
-                    institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
-                  })
-                )
-            })
-          }
-        )
+
+      const grunnlag: LagreBeregningsGrunnlagDto = {
+        ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
+        institusjonsopphold: perioderKopi,
       }
+
+      lagreBeregningsGrunnlagRequest(
+        {
+          behandlingId: behandling.id,
+          grunnlag: grunnlag,
+        },
+        (result) => {
+          dispatch(oppdaterBeregningsGrunnlag(result))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+        }
+      )
     }
   }
 
@@ -115,7 +112,6 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
                     </Box>
                   ) : (
                     <InstitusjonsoppholdBeregningsgrunnlagSkjema
-                      behandling={behandling}
                       sakType={sakType}
                       eksisterendePeriode={opphold}
                       institusjonsopphold={institusjonsopphold}
@@ -156,9 +152,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
                       variant="secondary"
                       size="small"
                       icon={<TrashIcon aria-hidden />}
-                      loading={
-                        isPending(lagreBeregningsGrunnlagOMSResult) || isPending(hentBeregningsgrunnlagOMSResult)
-                      }
+                      loading={isPending(lagreBeregningsGrunnlagResult)}
                       onClick={() => slettPeriode(index)}
                     >
                       Slett

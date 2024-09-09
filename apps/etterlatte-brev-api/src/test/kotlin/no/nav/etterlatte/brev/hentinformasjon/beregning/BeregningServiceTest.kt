@@ -25,7 +25,7 @@ class BeregningServiceTest {
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
+        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any()) } returns opprettBeregningsgrunnlag()
 
         val utbetalingsinfo =
             runBlocking {
@@ -42,14 +42,14 @@ class BeregningServiceTest {
 
         coVerify(exactly = 1) {
             service.hentBeregning(BEHANDLING_ID, any())
-            service.hentBeregningsGrunnlag(BEHANDLING_ID, any(), any())
+            service.hentBeregningsGrunnlag(BEHANDLING_ID, any())
         }
     }
 
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
-        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
+        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any()) } returns opprettBeregningsgrunnlag()
 
         val utbetalingsinfo =
             runBlocking {
@@ -61,7 +61,7 @@ class BeregningServiceTest {
 
         coVerify(exactly = 1) {
             service.hentBeregning(any(), any())
-            service.hentBeregningsGrunnlag(any(), any(), any())
+            service.hentBeregningsGrunnlag(any(), any())
         }
     }
 
@@ -115,6 +115,7 @@ class BeregningServiceTest {
                 mockk {
                     every { beregningsMetode } returns BeregningsMetode.BEST
                 }
+            every { beregningsMetodeFlereAvdoede } returns emptyList()
         }
 
     private companion object {

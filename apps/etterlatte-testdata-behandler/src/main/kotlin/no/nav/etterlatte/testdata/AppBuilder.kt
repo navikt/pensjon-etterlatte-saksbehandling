@@ -30,11 +30,11 @@ class AppBuilder {
         )
 
     fun lagBehandler(): Behandler {
-        val vilkaarsvurderingService =
+        val behandlingVilkaarsvurderingService =
             VilkaarsvurderingService(
-                settOppHttpClient("vilkaarsvurdering"),
-                "http://etterlatte-vilkaarsvurdering",
-                config.getString("vilkaarsvurdering.client.id"),
+                settOppHttpClient("behandling"),
+                "http://etterlatte-behandling",
+                config.getString("behandling.client.id"),
             )
         val grunnlagService =
             GrunnlagService(
@@ -88,7 +88,7 @@ class AppBuilder {
             behandlingService = behandlingService,
             trygdetidService = trygdetidService,
             vedtaksvurderingService = vedtaksvurderingService,
-            vilkaarsvurderingService = vilkaarsvurderingService,
+            vilkaarsvurderingService = behandlingVilkaarsvurderingService,
         )
     }
 }

@@ -80,7 +80,7 @@ enum class Revurderingaarsak(
     OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
-    REVURDERE_ETTER_OPPHOER(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false),
+    REVURDERE_ETTER_OPPHOER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),

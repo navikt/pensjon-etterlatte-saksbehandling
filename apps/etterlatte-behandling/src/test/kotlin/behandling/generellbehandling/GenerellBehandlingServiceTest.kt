@@ -45,7 +45,9 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -71,7 +73,8 @@ internal class GenerellBehandlingServiceTest(
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
     private lateinit var oppgaveService: OppgaveService
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakLesDao: SakLesDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
@@ -85,7 +88,8 @@ internal class GenerellBehandlingServiceTest(
     fun beforeAll() {
         dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
         hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
             BehandlingDao(
@@ -96,7 +100,7 @@ internal class GenerellBehandlingServiceTest(
         oppgaveService =
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
-                sakRepo,
+                sakLesDao,
                 hendelseDao,
                 hendelser,
             )

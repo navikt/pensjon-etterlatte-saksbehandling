@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregnOverstyrBeregningService
@@ -16,10 +17,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.klienter.BehandlingVilkaarsvurderingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
-import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -46,7 +47,7 @@ class ApplicationContext {
             properties = featureToggleProperties(config),
         )
 
-    val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlientImpl(config, httpClient())
     val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
@@ -60,6 +61,7 @@ class ApplicationContext {
         )
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
+    val anvendtTrygdetidRepository = AnvendtTrygdetidRepository(dataSource)
     val beregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
@@ -75,6 +77,7 @@ class ApplicationContext {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
+            anvendtTrygdetidRepository = anvendtTrygdetidRepository,
         )
     val beregnOmstillingsstoenadService =
         BeregnOmstillingsstoenadService(

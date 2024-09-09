@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -68,7 +69,7 @@ class BeregningRepository(
         }
     }
 
-    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? =
+    fun hentOverstyrBeregning(sakId: SakId): OverstyrBeregning? =
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
@@ -103,7 +104,7 @@ class BeregningRepository(
         }
     }
 
-    fun deaktiverOverstyrtBeregning(sakId: Long) {
+    fun deaktiverOverstyrtBeregning(sakId: SakId) {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.updateOverstyrtberegning,

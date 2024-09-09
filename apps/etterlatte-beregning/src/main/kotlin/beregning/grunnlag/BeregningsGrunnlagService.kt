@@ -28,6 +28,12 @@ class ManglerVirkningstidspunktBP :
         detail = "Mangler virkningstidspunkt for barnepensjon.",
     )
 
+class ManglerForrigeGrunnlag :
+    UgyldigForespoerselException(
+        code = "MANGLER_FORRIGE_GRUNNLAG",
+        detail = "Mangler forrige grunnlag for revurdering",
+    )
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
@@ -41,9 +47,9 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
+    ): BeregningsGrunnlag? =
         when {
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 if (behandling.sakType == SakType.BARNEPENSJON) {
                     validerSoeskenMedIBeregning(behandlingId, beregningsGrunnlag, brukerTokenInfo)
@@ -98,7 +104,7 @@ class BeregningsGrunnlagService(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
+                            institusjonsopphold =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
                             beregningsMetodeFlereAvdoede =
@@ -106,9 +112,12 @@ class BeregningsGrunnlagService(
                                     ?: emptyList(),
                         ),
                     )
+
+                behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 
-            else -> false
+            else -> null
         }
 
     private suspend fun validerSoeskenMedIBeregning(
@@ -148,14 +157,14 @@ class BeregningsGrunnlagService(
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
-            )
+            ) ?: throw ManglerForrigeGrunnlag()
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk =
             if (revurdering.sakType == SakType.BARNEPENSJON) {
                 erGrunnlagLiktFoerEnDato(
                     beregningsGrunnlag.soeskenMedIBeregning,
-                    forrigeGrunnlag!!.soeskenMedIBeregning,
+                    forrigeGrunnlag.soeskenMedIBeregning,
                     revurderingVirk,
                 )
             } else {
@@ -165,7 +174,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+                forrigeGrunnlag.institusjonsopphold,
                 revurderingVirk,
             )
 

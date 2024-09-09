@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -28,7 +29,7 @@ class NotatRepository(
             )
         }!!
 
-    fun hentForSak(sakId: Long): List<Notat> =
+    fun hentForSak(sakId: SakId): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
                 queryOf(
@@ -39,14 +40,14 @@ class NotatRepository(
             )
         }
 
-    fun hentForReferanse(referanse: String): Notat? =
+    fun hentForReferanse(referanse: String): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
                 queryOf(
                     "SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE referanse = ?",
                     referanse,
                 ).map(tilNotat)
-                    .asSingle,
+                    .asList,
             )
         }
 

@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -38,10 +39,16 @@ class NyNotatService(
 
     fun hent(id: NotatID): Notat = notatRepository.hent(id)
 
-    fun hentForSak(sakId: Long): List<Notat> {
+    fun hentForSak(sakId: SakId): List<Notat> {
         logger.info("Henter notater for sak $sakId")
 
         return notatRepository.hentForSak(sakId)
+    }
+
+    fun hentForReferanse(referanse: String): List<Notat> {
+        logger.info("Henter notat for referanse $referanse")
+
+        return notatRepository.hentForReferanse(referanse)
     }
 
     fun hentPayload(id: NotatID): Slate = notatRepository.hentPayload(id)
@@ -77,18 +84,22 @@ class NyNotatService(
     }
 
     suspend fun opprett(
-        sakId: Long,
+        sakId: SakId,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
+        referanse: String? = null,
         params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = behandlingService.hentSak(sakId, bruker)
 
+        logger.info("Oppretter notat for sak $sakId og referanse '$referanse'")
+
         val id =
             notatRepository.opprett(
                 NyttNotat(
                     sakId = sak.id,
+                    referanse = referanse,
                     tittel = tittel,
                     payload =
                         when (mal) {

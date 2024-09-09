@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.StatistikkDatabaseExtension
 import no.nav.etterlatte.statistikk.database.AktivitetsgradPeriode
@@ -255,7 +256,7 @@ class AktivitetspliktServiceIntegrationTest(
 }
 
 fun aktivitetspliktDto(
-    sakId: Long = 1L,
+    sakId: SakId = 1L,
     avdoedDoedsmaaned: YearMonth = YearMonth.now().minusMonths(6),
     aktivitetsgrad: List<AktivitetspliktAktivitetsgradDto> = emptyList(),
     unntak: List<UnntakFraAktivitetDto> = emptyList(),

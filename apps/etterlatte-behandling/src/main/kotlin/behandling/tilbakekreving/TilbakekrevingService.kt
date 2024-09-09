@@ -10,6 +10,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -27,14 +28,14 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.PaaVent
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class TilbakekrevingService(
     private val tilbakekrevingDao: TilbakekrevingDao,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
@@ -45,7 +46,7 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentTilbakekrevinger(sakId: Long) =
+    fun hentTilbakekrevinger(sakId: SakId) =
         inTransaction {
             logger.info("Henter tilbakekrevinger sak=$sakId")
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
@@ -110,7 +111,7 @@ class TilbakekrevingService(
         }
 
     fun endreTilbakekrevingOppgaveStatus(
-        sakId: Long,
+        sakId: SakId,
         paaVent: Boolean,
     ) {
         inTransaction {
@@ -133,7 +134,7 @@ class TilbakekrevingService(
     }
 
     fun avbrytTilbakekreving(
-        sakId: Long,
+        sakId: SakId,
         merknad: String,
     ): TilbakekrevingBehandling =
         inTransaction {

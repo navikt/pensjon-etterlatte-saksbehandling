@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -10,290 +9,121 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
-import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withParam
-import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
-import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
-import java.util.UUID
+import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.route.withUuidParam
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 
-fun Route.vilkaarsvurdering(
-    vilkaarsvurderingService: VilkaarsvurderingService,
-    behandlingKlient: BehandlingKlient,
-) {
+fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
         val logger = routeLogger
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+            logger.info("Henter vilkårsvurdering for $behandlingId")
+            val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
-                if (vilkaarsvurdering != null) {
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                        ),
-                    )
-                } else {
-                    logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
-                    call.respond(HttpStatusCode.NoContent)
-                }
+            if (vilkaarsvurdering != null) {
+                call.respond(vilkaarsvurdering)
+            } else {
+                logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
+                call.respond(HttpStatusCode.NoContent)
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId, brukerTokenInfo)
-                call.respond(MigrertYrkesskadefordel(result))
-            }
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel/{$SAKID_CALL_PARAMETER}") {
+            logger.info("Henter vilkårsvurdering for $behandlingId")
+            val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(sakId)
+            call.respond(MigrertYrkesskadefordel(result))
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/rett-uten-tidsbegrensning") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-                val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
-                call.respond(mapOf("rettUtenTidsbegrensning" to result))
-            }
-        }
-
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vilkårtyper for $behandlingId")
-                val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId, brukerTokenInfo)
-                call.respond(VilkaartypeDTO(result))
-            }
+            logger.info("Henter vilkårsvurdering for $behandlingId")
+            val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
+            call.respond(mapOf("rettUtenTidsbegrensning" to result))
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                try {
-                    val kopierVedRevurdering =
-                        call.request.queryParameters["kopierVedRevurdering"]?.let { it.toBoolean() }
-                            ?: true
-
-                    logger.info("Oppretter vilkårsvurdering for $behandlingId")
-                    val (vilkaarsvurdering, behandlingGrunnlagsversjon) =
-                        vilkaarsvurderingService.opprettVilkaarsvurdering(
-                            behandlingId,
-                            brukerTokenInfo,
-                            kopierVedRevurdering,
-                        )
-
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagsversjon,
-                        ),
-                    )
-                } catch (e: VirkningstidspunktIkkeSattException) {
-                    logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
-                    call.respond(HttpStatusCode.PreconditionFailed)
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet",
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                }
-            }
+            val vilkaarsvurdering = call.receive<Vilkaarsvurdering>()
+            call.respond(vilkaarsvurderingService.opprettVilkaarsvurdering(vilkaarsvurdering))
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/kopier") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
+            val kopierbart = call.receive<OpprettVilkaarsvurderingFraBehandling>()
 
-                try {
-                    logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
-                    val (vilkaarsvurdering, behandlingGrunnversjon) =
-                        vilkaarsvurderingService.kopierVilkaarsvurdering(
-                            behandlingId = behandlingId,
-                            kopierFraBehandling = forrigeBehandling,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
+            logger.info("Kopierer vilkårsvurdering for $behandlingId fra ${kopierbart.forrigeBehandling}")
+            val vilkaarsvurdering =
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    nyVilkaarsvurdering = kopierbart.vilkaarsvurdering,
+                    tidligereVilkaarsvurderingId = kopierbart.forrigeBehandling,
+                )
 
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnversjon,
-                        ),
-                    )
-                } catch (e: VirkningstidspunktIkkeSattException) {
-                    logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
-                    call.respond(HttpStatusCode.PreconditionFailed)
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet",
-                        e,
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                } catch (e: NullPointerException) {
-                    logger.error(
-                        "Kunne ikke kopiere vilkårsvurdering fra $forrigeBehandling. Fant ikke vilkårsvurdering",
-                        e,
-                    )
-                    call.respond(HttpStatusCode.NotFound, "Fant ikke vilkårsvurdering")
-                }
-            }
+            call.respond(vilkaarsvurdering)
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
-                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(brukerTokenInfo.ident())
+            val vurdertVilkaarDto = call.receive<OppdaterVurdertVilkaar>()
 
-                logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
-                try {
-                    val vilkaarsvurdering =
-                        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                            behandlingId,
-                            brukerTokenInfo,
-                            vurdertVilkaar,
-                        )
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                        ),
-                    )
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet",
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                } catch (e: VilkaarsvurderingTilstandException) {
-                    logger.error(e.message)
-                    call.respond(
-                        HttpStatusCode.PreconditionFailed,
-                        "Kan ikke endre vurdering av vilkår på en vilkårsvurdering som har et resultat.",
-                    )
-                }
+            logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
+            try {
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(vurdertVilkaarDto)
+                call.respond(vilkaarsvurdering)
+            } catch (e: BehandlingstilstandException) {
+                logger.error(
+                    "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
+                        "Statussjekk for behandling feilet",
+                )
+                call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+            } catch (e: VilkaarsvurderingTilstandException) {
+                logger.error(e.message)
+                call.respond(
+                    HttpStatusCode.PreconditionFailed,
+                    "Kan ikke endre vurdering av vilkår på en vilkårsvurdering som har et resultat.",
+                )
             }
         }
 
-        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val statusOppdatert =
-                    vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
-            }
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status/{grunnlagsVersjon}") {
+            val grunnlagsVersjon = call.parameters["grunnlagsVersjon"]!!.toLong()
+            vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, grunnlagsVersjon)
+            call.respond(HttpStatusCode.OK, StatusOppdatertDto(true))
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                withParam("vilkaarId") { vilkaarId ->
-                    logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
-                    try {
-                        val vilkaarsvurdering =
-                            vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId)
-                        call.respond(
-                            toDto(
-                                vilkaarsvurdering,
-                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                            ),
-                        )
-                    } catch (e: BehandlingstilstandException) {
-                        logger.error(
-                            "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
-                                "Statussjekk for behandling feilet",
-                        )
-                        call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                    } catch (e: VilkaarsvurderingTilstandException) {
-                        logger.error(e.message)
-                        call.respond(
-                            HttpStatusCode.PreconditionFailed,
-                            "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat.",
-                        )
-                    }
-                }
+            withUuidParam("vilkaarId") { vilkaarId ->
+                logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
+                call.respond(vilkaarsvurdering)
             }
         }
 
-        delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                logger.info("Sletter vilkårsvurdering for $behandlingId")
-
-                try {
-                    vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
-                } catch (e: BehandlingstilstandException) {
-                    logger.error(
-                        "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
-                            "Statussjekk feilet for behandling feilet",
-                    )
-                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                }
+        delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarsvurderingId}") {
+            withUuidParam("vilkaarsvurderingId") { vilkaarsvurderingId ->
+                logger.info("Sletter vilkårsvurdering for $behandlingId $vilkaarsvurderingId")
+                vilkaarsvurderingService.slettVilkaarsvurdering(vilkaarsvurderingId)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
         route("/resultat") {
             post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
-                    val vurdertResultat =
-                        vurdertResultatDto.toVilkaarsvurderingResultat(
-                            brukerTokenInfo.ident(),
-                        )
+                val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingDto>()
 
-                    logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                    try {
-                        val (vilkaarsvurdering, behandlingGrunnlagversjon) =
-                            vilkaarsvurderingService.oppdaterTotalVurdering(
-                                behandlingId,
-                                brukerTokenInfo,
-                                vurdertResultat,
-                            )
-                        call.respond(
-                            toDto(
-                                vilkaarsvurdering,
-                                behandlingGrunnlagversjon,
-                            ),
-                        )
-                    } catch (e: BehandlingstilstandException) {
-                        logger.error(
-                            "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
-                                "Statussjekk for behandling feilet",
-                        )
-                        call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                    }
-                }
+                logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterTotalVurdering(vurdertResultatDto)
+                call.respond(vilkaarsvurdering)
             }
 
             delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                    try {
-                        val vilkaarsvurdering =
-                            vilkaarsvurderingService.slettTotalVurdering(
-                                behandlingId,
-                                brukerTokenInfo,
-                            )
-                        call.respond(
-                            toDto(
-                                vilkaarsvurdering,
-                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
-                            ),
-                        )
-                    } catch (e: BehandlingstilstandException) {
-                        logger.error(
-                            "Kunne ikke slette vilkårsvurderingsresultat for behandling $behandlingId. " +
-                                "Statussjekk feilet for behandling feilet",
-                        )
-                        call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                    }
-                }
+                val vilkaarsvurdering = vilkaarsvurderingService.slettVilkaarsvurderingResultat(behandlingId)
+                call.respond(vilkaarsvurdering)
             }
         }
     }
@@ -301,62 +131,4 @@ fun Route.vilkaarsvurdering(
 
 data class StatusOppdatertDto(
     val statusOppdatert: Boolean,
-)
-
-private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
-    VurdertVilkaar(
-        vilkaarId = vilkaarId,
-        hovedvilkaar = hovedvilkaar,
-        unntaksvilkaar = unntaksvilkaar,
-        vurdering =
-            VilkaarVurderingData(
-                kommentar = kommentar,
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = saksbehandler,
-            ),
-    )
-
-private fun VurdertVilkaarsvurderingResultatDto.toVilkaarsvurderingResultat(saksbehandler: String) =
-    VilkaarsvurderingResultat(
-        utfall = resultat,
-        kommentar = kommentar,
-        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-        saksbehandler = saksbehandler,
-    )
-
-data class VurdertVilkaarDto(
-    val vilkaarId: UUID,
-    val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val kommentar: String?,
-)
-
-fun toDto(
-    vilkaarsvurdering: Vilkaarsvurdering,
-    behandlingGrunnlagVersjon: Long?,
-) = VilkaarsvurderingDto(
-    behandlingId = vilkaarsvurdering.behandlingId,
-    virkningstidspunkt = vilkaarsvurdering.virkningstidspunkt,
-    vilkaar = vilkaarsvurdering.vilkaar,
-    resultat = vilkaarsvurdering.resultat,
-    grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
-    behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
-)
-
-private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
-    vilkaarsvurderingService: VilkaarsvurderingService,
-    behandlingId: UUID,
-): Long =
-    vilkaarsvurderingService
-        .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
-        .metadata
-        .versjon
-
-data class VilkaartypeDTO(
-    val typer: List<VilkaartypePair>,
-)
-
-data class VilkaartypePair(
-    val name: String,
-    val tittel: String,
 )

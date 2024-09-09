@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -28,7 +29,7 @@ class Brevoppretter(
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
     suspend fun opprettVedtaksbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
@@ -56,7 +57,7 @@ class Brevoppretter(
     }
 
     suspend fun opprettBrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
@@ -89,7 +90,7 @@ class Brevoppretter(
         }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,

@@ -10,10 +10,11 @@ export const DokumentInfoDetail = ({ dokument }: { dokument: Journalpost }) => {
         {
           [Journalposttype.I]: 'Avsender: ',
           [Journalposttype.U]: 'Mottaker: ',
-          [Journalposttype.N]: 'Notat',
+          [Journalposttype.N]: 'Notat ',
         }[dokument.journalposttype]
       }
-      {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterDato(dokument.datoOpprettet)})
+      {dokument.journalposttype !== Journalposttype.N && (dokument.avsenderMottaker.navn || 'Ukjent')} (
+      {formaterDato(dokument.datoOpprettet)})
     </Detail>
   )
 }

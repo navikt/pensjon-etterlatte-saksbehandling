@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -30,7 +31,7 @@ class BehandlingService(
     private val clientId: String,
 ) {
     suspend fun hentSak(
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
     ): Sak =
         retryOgPakkUt {
@@ -144,7 +145,7 @@ class BehandlingService(
 
     suspend fun tildelSaksbehandler(
         navn: String,
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
     ) {
         val oppgaver: List<OppgaveIntern> =

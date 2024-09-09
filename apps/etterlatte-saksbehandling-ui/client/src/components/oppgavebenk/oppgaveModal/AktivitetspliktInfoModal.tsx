@@ -1,8 +1,7 @@
 import {
+  Alert,
   BodyLong,
-  BodyShort,
   Button,
-  Detail,
   Heading,
   HStack,
   Label,
@@ -24,6 +23,8 @@ import { useForm } from 'react-hook-form'
 import {
   AktivitetspliktUnntakType,
   AktivitetspliktVurderingType,
+  AktivitetspliktVurderingValues,
+  AktivitetspliktVurderingValuesDefault,
   IAktivitetspliktVurdering,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
@@ -34,31 +35,13 @@ import {
   opprettAktivitspliktUnntak,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import { formaterDato } from '~utils/formatering/dato'
 import { Toast } from '~shared/alerts/Toast'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
-
-interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: JaNei | null
-  aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: JaNei | null
-  midlertidigUnntak: AktivitetspliktUnntakType | ''
-  sluttdato?: Date | null
-  beskrivelse: string
-}
-
-const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
-  aktivitetsplikt: null,
-  aktivitetsgrad: '',
-  unntak: null,
-  midlertidigUnntak: '',
-  sluttdato: undefined,
-  beskrivelse: '',
-}
+import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 
 export const AktivitetspliktInfoModal = ({
   oppgave,
@@ -105,8 +88,8 @@ export const AktivitetspliktInfoModal = ({
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
-            tom:
-              data.sluttdato && data.aktivitetsplikt === JaNei.JA ? new Date(data.sluttdato).toISOString() : undefined,
+            fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
+            tom: data.tom && data.aktivitetsplikt === JaNei.JA ? new Date(data.tom).toISOString() : undefined,
           },
         },
         () => {
@@ -125,7 +108,8 @@ export const AktivitetspliktInfoModal = ({
             id: undefined,
             aktivitetsgrad: data.aktivitetsgrad as AktivitetspliktVurderingType,
             beskrivelse: data.beskrivelse,
-            fom: new Date().toISOString(),
+            fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
+            tom: data.tom ? new Date(data.tom).toISOString() : undefined,
           },
         },
         () => {
@@ -243,30 +227,55 @@ export const AktivitetspliktInfoModal = ({
                                 </option>
                               ))}
                           </Select>
-                          <ControlledDatoVelger
-                            name="sluttdato"
-                            label="Angi sluttdato for unntaksperiode"
-                            description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
-                            control={control}
-                            required={false}
-                          />
+                          <Alert variant="warning">
+                            Lag oppfølgingsoppgave i Gosys med frist utfra angitt sluttdato for unntaksperiode, eller
+                            sett en passende frist.
+                          </Alert>
+                          <div>
+                            <Label>Unntaksperiode</Label>
+                            <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
+                          </div>
+                          <HStack gap="4">
+                            <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
+                            <ControlledDatoVelger
+                              name="tom"
+                              label="Angi sluttdato"
+                              control={control}
+                              required={false}
+                            />
+                          </HStack>
                         </>
                       )}
                       {harUnntak === JaNei.NEI && (
-                        <Select
-                          label="Hva er brukers aktivitetsgrad?"
-                          {...register('aktivitetsgrad', {
-                            required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                          })}
-                          error={errors.aktivitetsgrad?.message}
-                        >
-                          <option value="">Velg hvilken grad</option>
-                          {Object.values(AktivitetspliktVurderingType).map((type) => (
-                            <option key={type} value={type}>
-                              {tekstAktivitetspliktVurderingType[type]}
-                            </option>
-                          ))}
-                        </Select>
+                        <>
+                          <Select
+                            label="Hva er brukers aktivitetsgrad?"
+                            {...register('aktivitetsgrad', {
+                              required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                            })}
+                            error={errors.aktivitetsgrad?.message}
+                          >
+                            <option value="">Velg hvilken grad</option>
+                            {Object.values(AktivitetspliktVurderingType).map((type) => (
+                              <option key={type} value={type}>
+                                {tekstAktivitetspliktVurderingType[type]}
+                              </option>
+                            ))}
+                          </Select>
+                          <div>
+                            <Label>Aktivitetsgradsperiode</Label>
+                            <BodyLong>Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig</BodyLong>
+                          </div>
+                          <HStack gap="4">
+                            <ControlledDatoVelger name="fom" label="Angi startdato" control={control} />
+                            <ControlledDatoVelger
+                              name="tom"
+                              label="Angi sluttdato"
+                              control={control}
+                              required={false}
+                            />
+                          </HStack>
+                        </>
                       )}
                     </>
                   )}
@@ -285,43 +294,7 @@ export const AktivitetspliktInfoModal = ({
                   ))}
 
                   {!isPending(hentet) && vurdering && (
-                    <VStack gap="4">
-                      {vurdering.unntak && (
-                        <>
-                          <Label>Unntak</Label>
-                          <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
-
-                          {vurdering.unntak.tom && (
-                            <>
-                              <Label>Sluttdato</Label>
-                              <BodyShort>{vurdering.unntak.tom}</BodyShort>
-                            </>
-                          )}
-
-                          <Label>Vurdering</Label>
-                          <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
-
-                          <Detail>
-                            Vurdering ble utført {formaterDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
-                            {vurdering.unntak.opprettet.ident}
-                          </Detail>
-                        </>
-                      )}
-                      {vurdering.aktivitet && (
-                        <>
-                          <Label>Aktivitetsgrad</Label>
-                          <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
-
-                          <Label>Vurdering</Label>
-                          <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
-
-                          <Detail>
-                            Vurdering ble utført {formaterDato(vurdering.aktivitet.opprettet.tidspunkt)} av
-                            saksbehandler {vurdering.aktivitet.opprettet.ident}
-                          </Detail>
-                        </>
-                      )}
-                    </VStack>
+                    <AktivitetspliktVurderingVisning vurdering={vurdering} visForm={() => {}} erRedigerbar={false} />
                   )}
                 </>
               )}

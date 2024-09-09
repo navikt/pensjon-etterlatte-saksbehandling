@@ -60,7 +60,7 @@ import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -83,7 +83,7 @@ import no.nav.etterlatte.brev.model.Status as BrevStatus
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private lateinit var service: KlageService
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var oppgaveService: OppgaveService
     private lateinit var hendelseDao: HendelseDao
     private lateinit var klageDao: KlageDao
@@ -101,7 +101,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        sakDao = applicationContext.sakDao
+        sakSkrivDao = applicationContext.sakSkrivDao
         service = applicationContext.klageService
         oppgaveService = applicationContext.oppgaveService
         klageDao = applicationContext.klageDao
@@ -530,7 +530,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         )
     }
 
-    private fun oppprettOmsSak() = sakDao.opprettSak(klagerFnr, SakType.OMSTILLINGSSTOENAD, enhet)
+    private fun oppprettOmsSak() = sakSkrivDao.opprettSak(klagerFnr, SakType.OMSTILLINGSSTOENAD, enhet)
 
     private fun opprettKlage(
         sak: Sak,

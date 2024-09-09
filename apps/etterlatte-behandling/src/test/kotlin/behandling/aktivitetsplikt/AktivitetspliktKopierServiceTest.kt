@@ -30,7 +30,7 @@ class AktivitetspliktKopierServiceTest {
             aktivitetspliktAktivitetsgradDao,
             aktivitetspliktUnntakDao,
         )
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
     @BeforeEach
     fun setup() {

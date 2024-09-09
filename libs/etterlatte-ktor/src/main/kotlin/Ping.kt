@@ -10,7 +10,30 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.libs.common.appName
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import org.slf4j.Logger
+
+suspend fun DownstreamResourceClient.ping(
+    pingUrl: String,
+    logger: Logger,
+    serviceName: String,
+    beskrivelse: String,
+    konsument: String? = null,
+): PingResult {
+    val konsumentEndelig = konsument ?: appName() ?: throw RuntimeException("Må ha konsument")
+    return try {
+        this.getUtenToken(
+            url = pingUrl,
+            konsument = konsumentEndelig,
+        )
+        logger.info("$serviceName svarer OK")
+        PingResultUp(serviceName, endpoint = pingUrl, description = beskrivelse)
+    } catch (e: Exception) {
+        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, description = beskrivelse).also {
+            logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
+        }
+    }
+}
 
 suspend fun HttpClient.ping(
     pingUrl: String,

@@ -73,7 +73,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao()))
+        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao(), null))
     }
 
     @AfterAll
@@ -189,7 +189,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak =
             inTransaction {
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =

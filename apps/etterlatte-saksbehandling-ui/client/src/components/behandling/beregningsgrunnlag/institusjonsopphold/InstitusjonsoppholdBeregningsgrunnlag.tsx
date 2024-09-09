@@ -3,20 +3,18 @@ import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
-import {
-  BeregningsGrunnlagDto,
-  BeregningsGrunnlagOMSPostDto,
-  InstitusjonsoppholdGrunnlagDTO,
-} from '~shared/types/Beregning'
+import { BeregningsGrunnlagDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
 import { InstitusjonsoppholdBeregningsgrunnlagSkjema } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagSkjema'
 import { SakType } from '~shared/types/sak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { InstitusjonsoppholdBeregningsgrunnlagReadMoreBP } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreBP'
+import { InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS'
 
 interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
   sakType: SakType
-  beregningsgrunnlag?: BeregningsGrunnlagDto | BeregningsGrunnlagOMSPostDto
+  beregningsgrunnlag?: BeregningsGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
 }
 
@@ -38,7 +36,9 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
           Beregningsgrunnlag for institusjonsopphold
         </Heading>
       </HStack>
-      <VStack gap="2" maxWidth="42.5rem">
+      <VStack maxWidth="42.5rem">
+        {sakType === SakType.BARNEPENSJON && <InstitusjonsoppholdBeregningsgrunnlagReadMoreBP />}
+        {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         <HvaSkalRegistreresReadMore />
       </VStack>
 
@@ -53,9 +53,7 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
 
       {redigerbar && visInstitusjonsoppholdBeregningPeriodeSkjema ? (
         <InstitusjonsoppholdBeregningsgrunnlagSkjema
-          behandling={behandling}
           sakType={sakType}
-          beregningsgrunnlag={beregningsgrunnlag}
           institusjonsopphold={institusjonsopphold}
           paaAvbryt={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
           paaLagre={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}

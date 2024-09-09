@@ -5,7 +5,6 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
@@ -56,20 +55,14 @@ class BeregningKlient(
 
     internal suspend fun hentBeregningsGrunnlag(
         behandlingId: UUID,
-        sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlagFellesDto? {
         try {
             logger.info("Henter beregningsgrunnlag (behandlingId: $behandlingId)")
 
-            val endepunkt =
-                when (sakType) {
-                    SakType.BARNEPENSJON -> "barnepensjon"
-                    SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
-                }
             return downstreamResourceClient
                 .get(
-                    Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/$endepunkt"),
+                    Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
                     success = { resource -> deserialize(resource.response.toString()) },

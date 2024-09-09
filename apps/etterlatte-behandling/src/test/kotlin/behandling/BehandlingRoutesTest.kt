@@ -23,7 +23,6 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -97,7 +96,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -140,7 +139,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -282,6 +281,7 @@ internal class BehandlingRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { name() } returns this::class.java.simpleName
             }
 
         testApplication {

@@ -8,6 +8,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -55,6 +56,10 @@ class ReguleringTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val anvendtTrygdetidRepository =
+        mockk<AnvendtTrygdetidRepository>().also {
+            every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
+        }
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
@@ -65,6 +70,7 @@ class ReguleringTest {
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
+                anvendtTrygdetidRepository = anvendtTrygdetidRepository,
             )
     }
 
@@ -185,7 +191,7 @@ class ReguleringTest {
                         },
                 ),
             ),
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),

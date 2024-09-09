@@ -9,11 +9,14 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -28,7 +31,8 @@ class BehandlingKlientException(
 class BehandlingKlient(
     config: Config,
     httpClient: HttpClient,
-) : BehandlingTilgangsSjekk {
+) : BehandlingTilgangsSjekk,
+    PersonTilgangsSjekk {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
@@ -42,6 +46,12 @@ class BehandlingKlient(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
+
+    override suspend fun harTilgangTilPerson(
+        foedselsnummer: Folkeregisteridentifikator,
+        skrivetilgang: Boolean,
+        bruker: Saksbehandler,
+    ): Boolean = tilgangssjekker.harTilgangTilPerson(foedselsnummer, skrivetilgang, bruker)
 
     suspend fun kanOppdatereTrygdetid(
         behandlingId: UUID,
@@ -62,7 +72,7 @@ class BehandlingKlient(
     }
 
     suspend fun hentSisteIverksatteBehandling(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")

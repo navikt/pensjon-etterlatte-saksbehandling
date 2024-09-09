@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -56,7 +57,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingStatusServiceTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
@@ -78,6 +78,7 @@ internal class BehandlingStatusServiceTest {
 
     @BeforeEach
     fun before() {
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
         nyKontekstMedBruker(user)
     }
 
@@ -413,7 +414,7 @@ internal class BehandlingStatusServiceTest {
 
     private fun oppgave(
         oppgaveId: UUID = UUID.randomUUID(),
-        sakId: Long,
+        sakId: SakId,
         status: Status = Status.UNDER_BEHANDLING,
     ) = OppgaveIntern(
         id = oppgaveId,

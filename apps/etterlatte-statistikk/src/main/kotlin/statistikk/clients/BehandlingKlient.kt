@@ -3,9 +3,11 @@ package no.nav.etterlatte.statistikk.clients
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
 interface BehandlingKlient {
@@ -14,6 +16,11 @@ interface BehandlingKlient {
     suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling
 
     suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning?
+
+    suspend fun hentAktivitetspliktDto(
+        sakId: SakId,
+        behandlingId: UUID,
+    ): AktivitetspliktDto
 }
 
 class BehandlingKlientImpl(
@@ -33,6 +40,18 @@ class BehandlingKlientImpl(
 
     override suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning? =
         hentStatistikkBehandling(behandlingId).utlandstilknytning
+
+    override suspend fun hentAktivitetspliktDto(
+        sakId: SakId,
+        behandlingId: UUID,
+    ): AktivitetspliktDto =
+        try {
+            behandlingHttpClient
+                .get("$behandlingUrl/api/sak/$sakId/aktivitetsplikt/statistikk/$behandlingId")
+                .body()
+        } catch (e: Exception) {
+            throw KunneIkkeHenteFraBehandling("Kunne ikke hente aktivitetspliktDto for sak $sakId fra Behandling", e)
+        }
 }
 
 class KunneIkkeHenteFraBehandling(

@@ -63,7 +63,7 @@ class GosysOppgaveServiceImplTest {
         }
     private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
 
-    private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
     val azureGroupToGroupIDMap =
         mapOf(

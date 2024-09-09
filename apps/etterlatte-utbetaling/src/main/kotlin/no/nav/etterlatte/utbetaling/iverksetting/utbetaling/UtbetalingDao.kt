@@ -8,6 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -29,6 +30,7 @@ class UtbetalingDao(
     private val dataSource: DataSource,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun opprettUtbetaling(utbetaling: Utbetaling) =
         dataSource
             .transaction { tx ->
@@ -287,7 +289,7 @@ class UtbetalingDao(
             }
         }
 
-    fun hentUtbetalinger(sakId: Long): List<Utbetaling> =
+    fun hentUtbetalinger(sakId: SakId): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """

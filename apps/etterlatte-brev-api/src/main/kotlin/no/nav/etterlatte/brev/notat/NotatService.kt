@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.notat.NyttNotat
 import no.nav.etterlatte.brev.notat.PdfGenRequest
 import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.StrukturertNotat
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -42,23 +43,18 @@ class NotatService(
     ): OpprettJournalpostResponse {
         val sak = blankett.klage.sak
 
+        val notater = notatRepository.hentForReferanse(blankett.klage.id.toString())
+
         val notat =
-            notatRepository.hentForReferanse(blankett.klage.id.toString()) ?: run {
-                logger.info("Oppretter nytt notat - ${NotatMal.KLAGE_OVERSENDELSE_BLANKETT.navn}")
-
-                val notatId =
-                    notatRepository.opprett(
-                        NyttNotat(
-                            sakId = sak.id,
-                            referanse = blankett.klage.id.toString(),
-                            tittel = "Klage oversendelsesblankett",
-                            mal = NotatMal.KLAGE_OVERSENDELSE_BLANKETT,
-                            payload = Slate(emptyList()), // Burde vi endre payload til JsonNode ?
-                        ),
-                        bruker,
-                    )
-
-                notatRepository.hent(notatId)
+            if (notater.isEmpty()) {
+                opprettKlageNotat(sak, blankett, bruker)
+            } else if (notater.size > 1) {
+                throw UgyldigForespoerselException(
+                    "FOR_MANGE_NOTATER",
+                    "For mange notater tilknyttet klage: ${blankett.klage.id}",
+                )
+            } else {
+                notater.single()
             }
 
         try {
@@ -84,6 +80,28 @@ class NotatService(
             logger.error("Kunne ikke generere og journalføre notat i sak=${sak.id} på grunn av feil: ", e)
             throw e
         }
+    }
+
+    private fun opprettKlageNotat(
+        sak: Sak,
+        blankett: StrukturertNotat.KlageBlankett,
+        bruker: BrukerTokenInfo,
+    ): Notat {
+        logger.info("Oppretter nytt notat - ${NotatMal.KLAGE_OVERSENDELSE_BLANKETT.navn}")
+
+        val notatId =
+            notatRepository.opprett(
+                NyttNotat(
+                    sakId = sak.id,
+                    referanse = blankett.klage.id.toString(),
+                    tittel = "Klage oversendelsesblankett",
+                    mal = NotatMal.KLAGE_OVERSENDELSE_BLANKETT,
+                    payload = Slate(emptyList()), // Burde vi endre payload til JsonNode ?
+                ),
+                bruker,
+            )
+
+        return notatRepository.hent(notatId)
     }
 
     suspend fun genererPdf(

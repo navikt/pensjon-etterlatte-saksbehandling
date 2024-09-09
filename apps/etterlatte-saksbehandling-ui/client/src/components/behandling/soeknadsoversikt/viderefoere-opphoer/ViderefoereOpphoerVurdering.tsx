@@ -87,9 +87,9 @@ export const ViderefoereOpphoerVurdering = ({
     setVilkaarError(valider())
 
     if (skalViderefoere !== undefined && !vilkaarError && isSuccess(vilkaartyperResult)) {
-      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name || '' : undefined
+      const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name : undefined
       return setViderefoertOpphoer(
-        { skalViderefoere, behandlingId, begrunnelse, vilkaar: vilkaartype, kravdato, opphoerstidspunkt },
+        { skalViderefoere, behandlingId, begrunnelse, vilkaarType: vilkaartype, kravdato, opphoerstidspunkt },
         (viderefoertOpphoer) => {
           dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))

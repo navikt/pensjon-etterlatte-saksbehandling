@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -239,7 +240,7 @@ internal fun Route.behandlingRoutes(
                             behandlingId = behandlingId,
                             dato = body.dato,
                             begrunnelse = body.begrunnelse,
-                            vilkaar = body.vilkaar,
+                            vilkaar = body.vilkaarType,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
                             aktiv = true,
@@ -329,6 +330,14 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        post("/rediger-annen-forelder") {
+            kunSkrivetilgang {
+                val annenForelder = call.receive<AnnenForelder>()
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, annenForelder)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         put("/skal-sende-brev") {
             kunSkrivetilgang {
                 val request = call.receive<SendBrev>()
@@ -393,7 +402,7 @@ data class ViderefoertOpphoerRequest(
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: VilkaarType?,
+    val vilkaarType: VilkaarType?,
 ) {
     val dato: YearMonth? = _dato?.tilYearMonth()
 }

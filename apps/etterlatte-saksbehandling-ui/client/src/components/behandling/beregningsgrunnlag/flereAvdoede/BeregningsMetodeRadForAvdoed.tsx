@@ -4,14 +4,24 @@ import {
   mapListeTilDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { BeregningsGrunnlagPostDto, BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
+import {
+  BeregningsGrunnlagDto,
+  BeregningsMetode,
+  BeregningsmetodeForAvdoed,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Radio, ReadMore, Table, Textarea, VStack } from '@navikt/ds-react'
 import { format, startOfDay, startOfMonth } from 'date-fns'
 import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
-import { IBehandlingReducer, oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  oppdaterBeregningsGrunnlag,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { formaterNavn } from '~shared/types/Person'
@@ -20,6 +30,7 @@ import { ITrygdetid } from '~shared/api/trygdetid'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   behandling: IBehandlingReducer
@@ -71,28 +82,24 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
     return undefined
   }
 
-  function lagre(grunnlag: BeregningsGrunnlagPostDto, onSuccess?: (grunnlag: BeregningsGrunnlagPostDto) => void) {
+  function lagre(grunnlag: LagreBeregningsGrunnlagDto, onSuccess?: (grunnlag: BeregningsGrunnlagDto) => void) {
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
         grunnlag,
       },
-      () => {
-        dispatch(oppdaterBeregningsGrunnlag(grunnlag))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         setRedigerModus(false)
-        !!onSuccess && onSuccess(grunnlag)
+        !!onSuccess && onSuccess(result)
       }
     )
   }
 
   function oppdaterBeregningsMetodeForAvdoed(nyMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) {
     lagre({
-      ...behandling?.beregningsGrunnlag,
-      soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
-      institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
-      beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
+      ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
       beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
         ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
@@ -104,12 +111,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
   function slettBeregningsMetodeForAvdoed() {
     lagre(
       {
-        ...behandling?.beregningsGrunnlag,
-        soeskenMedIBeregning: behandling?.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
-        institusjonsopphold: behandling?.beregningsGrunnlag?.institusjonsopphold ?? [],
-        beregningsMetode: behandling?.beregningsGrunnlag?.beregningsMetode ?? {
-          beregningsMetode: BeregningsMetode.NASJONAL,
-        },
+        ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
         beregningsMetodeFlereAvdoede: !!behandling?.beregningsGrunnlag?.beregningsMetodeFlereAvdoede?.length
           ? behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede.filter(
               (metode) => metode.data.avdoed !== trygdetid.ident

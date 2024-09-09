@@ -89,16 +89,16 @@ abstract class BehandlingIntegrationTest {
                             "grunnlag.resource.url" to "http://localhost",
                             "vedtak.resource.url" to "http://localhost",
                             "krr.url" to "http://localhost",
+                            "azure.app.well.known.url" to "wellKnownUrl",
                         ),
                     ),
                 rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
                 skjermingHttpKlient = skjermingHttpClient(),
-                grunnlagHttpClient = grunnlagHttpClient(),
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientObo = GrunnlagKlientTest(),
+                grunnlagKlientImpl = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
@@ -110,8 +110,8 @@ abstract class BehandlingIntegrationTest {
                 krrKlient = KrrklientTest(),
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
-                vilkaarsvuderingKlient = VilkaarsvurderingTest(),
                 kodeverkKlient = KodeverkKlientTest(),
+                vilkaarsvurderingKlientDaoImpl = VilkaarsvurderingKlientDaoTest(),
             )
     }
 

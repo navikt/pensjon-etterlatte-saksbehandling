@@ -1,6 +1,11 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
 import { Alert, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
-import { hentAktiviteterForBehandling, hentAktiviteterForSak, slettAktivitet } from '~shared/api/aktivitetsplikt'
+import {
+  hentAktiviteterForBehandling,
+  hentAktiviteterForSak,
+  slettAktivitet,
+  slettAktivitetForSak,
+} from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
@@ -22,6 +27,7 @@ export const AktivitetspliktTidslinje = (props: {
   const [hentet, hent] = useApiCall(hentAktiviteterForBehandling)
   const [hentetForSak, hentForSak] = useApiCall(hentAktiviteterForSak)
   const [slettet, slett] = useApiCall(slettAktivitet)
+  const [slettetForSak, slettForSak] = useApiCall(slettAktivitetForSak)
   const seksMndEtterDoedsfall = addMonths(doedsdato, 6)
   const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
 
@@ -50,6 +56,10 @@ export const AktivitetspliktTidslinje = (props: {
   const fjernAktivitet = (aktivitetId: string) => {
     if (behandling) {
       slett({ behandlingId: behandling.id, aktivitetId: aktivitetId }, (aktiviteter) => {
+        oppdaterAktiviteter(aktiviteter)
+      })
+    } else if (sakId) {
+      slettForSak({ sakId: sakId, aktivitetId: aktivitetId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter)
       })
     }
@@ -107,7 +117,7 @@ export const AktivitetspliktTidslinje = (props: {
                         {aktivitet.endret.ident}
                       </i>
                     </p>
-                    {isPending(slettet) ? (
+                    {isPending(slettet) || isPending(slettetForSak) ? (
                       <Spinner variant="neutral" label="Sletter" margin="1em" />
                     ) : (
                       <>
@@ -126,15 +136,14 @@ export const AktivitetspliktTidslinje = (props: {
         </Timeline>
       )}
 
-      <HStack align="center" justify={behandling ? 'space-between' : 'end'}>
-        {behandling && (
-          <NyAktivitet
-            key={rediger?.id}
-            behandling={behandling}
-            oppdaterAktiviteter={oppdaterAktiviteter}
-            redigerAktivitet={rediger}
-          />
-        )}
+      <HStack align="center" justify="space-between">
+        <NyAktivitet
+          key={rediger?.id}
+          behandling={behandling}
+          oppdaterAktiviteter={oppdaterAktiviteter}
+          redigerAktivitet={rediger}
+          sakId={sakId}
+        />
 
         {aktiviteter.length > 0 && (
           <ToggleGroup

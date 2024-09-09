@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.regler.Beregningstall
 
@@ -33,6 +34,8 @@ data class SamletTrygdetidMedBeregningsMetode(
 // Må kun inneholde felter som er felles for BP og OMS
 data class BeregningsGrunnlagFellesDto(
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+    // Ja, denne settes kun for BP og kun i tilfeller der vi har flere avdøde. Men datastrukturen deles av BP og OMS
+    val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
 )
 
 data class BeregningsmetodeForAvdoed(

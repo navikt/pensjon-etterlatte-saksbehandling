@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import { BeregningsGrunnlagDto, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
@@ -17,14 +17,14 @@ interface Props {
   redigerbar: boolean
   oppdaterBeregningsMetode: (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => void
   eksisterendeMetode?: BeregningsMetodeBeregningsgrunnlag
-  lagreBeregrningsGrunnlagResult: Result<void>
+  lagreBeregningsGrunnlagResult: Result<BeregningsGrunnlagDto>
 }
 
 export const BeregningsMetodeBrukt = ({
   redigerbar,
   oppdaterBeregningsMetode,
   eksisterendeMetode,
-  lagreBeregrningsGrunnlagResult,
+  lagreBeregningsGrunnlagResult,
 }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
@@ -83,7 +83,7 @@ export const BeregningsMetodeBrukt = ({
                     variant="secondary"
                     size="small"
                     icon={<TrashIcon aria-hidden />}
-                    loading={isPending(lagreBeregrningsGrunnlagResult)}
+                    loading={isPending(lagreBeregningsGrunnlagResult)}
                     onClick={slettBeregningsMetode}
                   >
                     Slett
@@ -114,7 +114,7 @@ export const BeregningsMetodeBrukt = ({
             </Box>
 
             {isFailureHandler({
-              apiResult: lagreBeregrningsGrunnlagResult,
+              apiResult: lagreBeregningsGrunnlagResult,
               errorMessage: 'Feil i lagring av metode',
             })}
 
@@ -122,7 +122,7 @@ export const BeregningsMetodeBrukt = ({
               <Button
                 size="small"
                 icon={<FloppydiskIcon aria-hidden />}
-                loading={isPending(lagreBeregrningsGrunnlagResult)}
+                loading={isPending(lagreBeregningsGrunnlagResult)}
               >
                 Lagre
               </Button>

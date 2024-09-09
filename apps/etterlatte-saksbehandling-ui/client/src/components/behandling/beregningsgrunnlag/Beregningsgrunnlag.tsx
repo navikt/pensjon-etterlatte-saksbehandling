@@ -55,7 +55,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
   /* For å håndtere første aktivering og deaktivering av overstyrt beregning */
   useEffect(() => {
-    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && overstyrtBeregning)
+    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && !!overstyrtBeregning)
   }, [overstyrtBeregning])
 
   return (
@@ -80,7 +80,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
             {!visOverstyrtBeregningGrunnlag &&
               {
                 [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon />,
-                [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
+                [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad />,
               }[behandling.sakType]}
           </>
         )}{' '}

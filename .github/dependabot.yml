@@ -46,6 +46,7 @@ updates:
           - "no.nav.security:mock-oauth2-server"
           - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
           - "com.github.jk1.dependency-license-report"
+          - "io.github.smiley4:ktor-swagger-ui"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
@@ -114,6 +115,7 @@ updates:
           - "@types/request"
           - "prom-client"
           - "unleash-client"
+          - "license-checker-rseidelsohn"
 
   # =============
   # FRONTEND ROOT

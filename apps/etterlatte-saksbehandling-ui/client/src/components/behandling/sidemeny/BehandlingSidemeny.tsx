@@ -33,6 +33,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -69,6 +70,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
+  const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
   const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: behandling.id })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
@@ -165,7 +167,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
           {soeker?.foedselsnummer && (
             <>
-              <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
+              {skalViseNotater && (
+                <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
+              )}
               <DokumentlisteLiten fnr={soeker.foedselsnummer} />
             </>
           )}

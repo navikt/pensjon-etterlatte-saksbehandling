@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 
 class FlereAvdoedePerioderHelperKtTest {
@@ -25,13 +26,50 @@ class FlereAvdoedePerioderHelperKtTest {
                     every { beregningsperioder } returns
                         listOf(
                             mockk {
-                                every { datoFOM } returns YearMonth.now().minusYears(1).atDay(1)
-                                every { avdoedeForeldre } returns listOf(AVDOED_FOEDSELSNUMMER.value)
+                                every { datoFOM } returns YearMonth.now().minusMonths(1).atDay(1)
+                                every { avdoedeForeldre } returns null
+                                every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
                             },
                         )
                 },
             )
         Assertions.assertNull(test)
+    }
+
+    @Test
+    fun `finnEventuellForskjelligAvdoedPeriode håndterer beregninger på gammelt regelverk riktig med avdøde`() {
+        val avdoedEn =
+            Avdoed(
+                fnr = Foedselsnummer(AVDOED_FOEDSELSNUMMER.value),
+                navn = "Avdød 1",
+                doedsdato = LocalDate.now().minusMonths(6),
+            )
+        val perioder: List<Beregningsperiode> =
+            listOf(
+                beregningsperiode(
+                    datoFOM = YearMonth.of(2023, Month.MAY).atDay(1),
+                    datoTOM = YearMonth.of(2023, Month.DECEMBER).atEndOfMonth(),
+                    // På grunn av regelkjøringen vil ikke beregninger pre 2024 ha med avdøde foreldre
+                    avdoedeForeldre = null,
+                    trygdetidForIdent = avdoedEn.fnr.value,
+                ),
+                beregningsperiode(
+                    datoFOM = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                    datoTOM = null,
+                    avdoedeForeldre = listOf(avdoedEn.fnr.value),
+                    trygdetidForIdent = avdoedEn.fnr.value,
+                ),
+            )
+        val forskjelligAvdoedPeriode =
+            finnEventuellForskjelligAvdoedPeriode(
+                listOf(avdoedEn),
+                mockk {
+                    every {
+                        beregningsperioder
+                    } returns perioder
+                },
+            )
+        Assertions.assertNull(forskjelligAvdoedPeriode)
     }
 
     @Test

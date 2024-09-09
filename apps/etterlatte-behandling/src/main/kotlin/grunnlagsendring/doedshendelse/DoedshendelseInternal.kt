@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 
+@ConsistentCopyVisibility
 data class DoedshendelseInternal internal constructor(
     val id: UUID = UUID.randomUUID(),
     val avdoedFnr: String,

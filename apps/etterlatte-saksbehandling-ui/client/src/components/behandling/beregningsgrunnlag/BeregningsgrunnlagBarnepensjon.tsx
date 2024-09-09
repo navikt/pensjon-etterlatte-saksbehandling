@@ -108,7 +108,10 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag: grunnlag,
       },
-      (result) => dispatch(oppdaterBeregningsGrunnlag(result))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+      }
     )
   }
 
@@ -123,7 +126,10 @@ const BeregningsgrunnlagBarnepensjon = () => {
         behandlingId: behandling.id,
         grunnlag: grunnlag,
       },
-      (result) => dispatch(oppdaterBeregningsGrunnlag(result))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+      }
     )
   }
 

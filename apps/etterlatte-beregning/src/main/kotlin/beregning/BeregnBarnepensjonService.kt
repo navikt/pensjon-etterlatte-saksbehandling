@@ -1,24 +1,20 @@
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.beregning.AnvendtTrygdetidPerioder.finnForAvdoed
+import no.nav.etterlatte.beregning.BarnepensjonAnvendtTrygdetidPerioder.finnForAvdoed
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
-import no.nav.etterlatte.beregning.grunnlag.kombinerOverlappendePerioder
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.avdodeForeldre2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
-import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.TrygdetidGrunnlag
-import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.anvendtTrygdetidRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
-import no.nav.etterlatte.beregning.regler.toSamlet
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -28,12 +24,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -57,6 +49,7 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
+    private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -89,13 +82,15 @@ class BeregnBarnepensjonService(
         }
 
         val anvendtTrygdetider =
-            AnvendtTrygdetidPerioder.finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
+            BarnepensjonAnvendtTrygdetidPerioder
+                .finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
+                .also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(behandling.id, it) }
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
                 beregningsGrunnlag,
                 trygdetidListe,
-                anvendtTrygdetider,
+                anvendtTrygdetider.anvendt,
                 virkningstidspunkt.atDay(1),
                 null,
             )
@@ -292,152 +287,72 @@ class BeregnBarnepensjonService(
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
         virkFom: LocalDate,
         tom: LocalDate?,
-    ): PeriodisertBarnepensjonGrunnlag =
-        PeriodisertBarnepensjonGrunnlag(
-            soeskenKull =
-                if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
-                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                        beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
-                            FaktumNode(
-                                verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
-                                kilde = beregningsGrunnlag.kilde,
-                                beskrivelse = "Søsken i kullet",
-                            )
-                        },
-                        virkFom,
-                        tom,
-                    )
-                } else {
-                    KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
-                },
-            avdoedesTrygdetid =
-                if (anvendtTrygdetider.isEmpty()) {
-                    KonstantGrunnlag(
+    ) = PeriodisertBarnepensjonGrunnlag(
+        soeskenKull =
+            if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
+                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                    beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
                         FaktumNode(
-                            verdi =
-                                AnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
+                            verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Søsken i kullet",
+                        )
+                    },
+                    virkFom,
+                    tom,
+                )
+            } else {
+                KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
+            },
+        avdoedesTrygdetid =
+            if (anvendtTrygdetider.isEmpty()) {
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi =
+                            BarnepensjonAnvendtTrygdetidPerioder
+                                .finnKonstantTrygdetidPerioder(
                                     trygdetider,
                                     beregningsGrunnlag,
                                     virkFom,
-                                ),
-                            kilde = beregningsGrunnlag.kilde,
-                            beskrivelse = "Konstant anvendt trygdetider",
-                        ),
-                    )
-                } else {
-                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                        anvendtTrygdetider.mapVerdier {
-                            FaktumNode(
-                                verdi = it,
-                                kilde = beregningsGrunnlag.kilde,
-                                beskrivelse = "Anvendte trygdetider",
-                            )
-                        },
-                        virkFom,
-                        tom,
-                    )
-                },
-            institusjonsopphold =
-                PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                    beregningsGrunnlag.institusjonsopphold.mapVerdier
-                        { institusjonsopphold ->
-                            FaktumNode(
-                                verdi = institusjonsopphold,
-                                kilde = beregningsGrunnlag.kilde,
-                                beskrivelse = "Institusjonsopphold",
-                            )
-                        },
-                ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
-            kunEnJuridiskForelder =
-                PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                    beregningsGrunnlag.kunEnJuridiskForelder?.let { kunEnJuridiskForelder ->
-                        listOf(kunEnJuridiskForelder).mapVerdier { _ ->
-                            FaktumNode(true, beregningsGrunnlag.kilde, "")
-                        }
-                    } ?: emptyList(),
-                ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },
-        )
-}
-
-object AnvendtTrygdetidPerioder {
-    private val logger = LoggerFactory.getLogger(AnvendtTrygdetidPerioder::class.java)
-
-    fun finnAnvendtTrygdetidPerioder(
-        trygdetider: List<TrygdetidDto>,
-        beregningsGrunnlag: BeregningsGrunnlag,
-    ) = anvendtPerioder(beregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider))
-
-    fun finnKonstantTrygdetidPerioder(
-        trygdetider: List<TrygdetidDto>,
-        beregningsGrunnlag: BeregningsGrunnlag,
-        fom: LocalDate,
-    ): List<AnvendtTrygdetid> {
-        if (trygdetider.size != 1) {
-            throw UgyldigForespoerselException(
-                code = "FEIL_ANTALL_TRYGDETIDER",
-                detail = "Fant flere trygdetider - men fikk bare en beregningsgrunnlag",
-            )
-        }
-
-        return trygdetider.first().toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
-            anvendtPerioder(
-                listOf(
-                    GrunnlagMedPeriode(it, fom, null),
-                ),
-            ).first().data
-        } ?: throw TrygdetidIkkeOpprettet()
-    }
-
-    private fun anvendtPerioder(muligePerioder: List<GrunnlagMedPeriode<SamletTrygdetidMedBeregningsMetode>>) =
-        muligePerioder
-            .map {
-                anvendtTrygdetidRegel.eksekver(
-                    KonstantGrunnlag(
-                        TrygdetidGrunnlag(
-                            FaktumNode(it.data, kilde = "Trygdetid", beskrivelse = "Beregnet trygdetid for avdød"),
-                        ),
+                                ).also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(beregningsGrunnlag.behandlingId, it) }
+                                .anvendt
+                                .first()
+                                .data,
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Konstant anvendt trygdetider",
                     ),
-                    RegelPeriode(it.fom, it.tom),
                 )
-            }.map {
-                when (it) {
-                    is RegelkjoeringResultat.Suksess -> {
-                        val aktueltResultat = it.periodiserteResultater.single()
-                        GrunnlagMedPeriode(
-                            data = aktueltResultat.resultat.verdi,
-                            fom = aktueltResultat.periode.fraDato,
-                            tom = aktueltResultat.periode.tilDato,
+            } else {
+                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                    anvendtTrygdetider.mapVerdier {
+                        FaktumNode(
+                            verdi = it,
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Anvendte trygdetider",
                         )
-                    }
-
-                    is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException(
-                        "Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}",
-                    )
-                }
-            }.kombinerOverlappendePerioder()
-
-    private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
-        beregningsMetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
-            GrunnlagMedPeriode(
-                data =
-                    trygdetider
-                        .finnForAvdoed(
-                            beregningsmetodeForAvdoedPeriode.data.avdoed,
-                        ).toSamlet(
-                            beregningsmetodeForAvdoedPeriode.data.beregningsMetode.beregningsMetode,
-                        ) ?: throw InternfeilException("Kunne ikke samle trygdetid for avdoed").also {
-                        logger.warn("Kunne ikke samle trygdetid for avdoed - se sikkerlogg")
-                        sikkerlogger().warn("Kunne ikke samle trygdetid for avdoed ${beregningsmetodeForAvdoedPeriode.data.avdoed}")
                     },
-                fom = beregningsmetodeForAvdoedPeriode.fom,
-                tom = beregningsmetodeForAvdoedPeriode.tom,
-            )
-        }
-
-    fun List<TrygdetidDto>.finnForAvdoed(avdoed: String) =
-        this.find { it.ident == avdoed }
-            ?: throw InternfeilException("Manglende trygdetid for avdoed").also {
-                logger.warn("Fant ikke trygdetid for avdoed - se sikkerlogg")
-                sikkerlogger().warn("Fant ikke trygdetid for avdoed $avdoed i $this")
-            }
+                    virkFom,
+                    tom,
+                )
+            },
+        institusjonsopphold =
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                beregningsGrunnlag.institusjonsopphold.mapVerdier
+                    { institusjonsopphold ->
+                        FaktumNode(
+                            verdi = institusjonsopphold,
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Institusjonsopphold",
+                        )
+                    },
+            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+        kunEnJuridiskForelder =
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                beregningsGrunnlag.kunEnJuridiskForelder?.let { kunEnJuridiskForelder ->
+                    listOf(kunEnJuridiskForelder).mapVerdier { _ ->
+                        FaktumNode(true, beregningsGrunnlag.kilde, "")
+                    }
+                } ?: emptyList(),
+            ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },
+    )
 }

@@ -155,6 +155,19 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
             }
         }
 
+        route("statistikk/{$BEHANDLINGID_CALL_PARAMETER}") {
+            get {
+                kunSystembruker {
+                    logger.info("Henter aktivitetspliktDto for statistikk")
+                    val dto =
+                        inTransaction {
+                            runBlocking { aktivitetspliktService.hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId) }
+                        }
+                    call.respond(dto)
+                }
+            }
+        }
+
         route("vurdering") {
             get {
                 kunSaksbehandler {

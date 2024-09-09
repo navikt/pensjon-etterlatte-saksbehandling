@@ -51,7 +51,7 @@ class BeregningsGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag? =
         when {
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
 
@@ -123,6 +123,7 @@ class BeregningsGrunnlagService(
                         ),
                     )
 
+                behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
                 beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 

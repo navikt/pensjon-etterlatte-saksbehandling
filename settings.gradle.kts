@@ -1,7 +1,4 @@
 rootProject.name = "pensjon-etterlatte-saksbehandling"
-plugins {
-    kotlin("jvm") version "1.9.23" apply false
-}
 include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",

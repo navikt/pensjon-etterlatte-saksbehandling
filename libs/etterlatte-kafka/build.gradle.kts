@@ -23,4 +23,5 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.kafka)
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
+    testFixturesImplementation(libs.kafka.clients)
 }

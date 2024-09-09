@@ -88,6 +88,10 @@ data class Brev(
 }
 
 enum class BrevProsessType {
+    @Deprecated(
+        "Bruk heller redigerbar. " +
+            "Det er noen brev i databasen som er oppretta med denne, så ikke slett statusen",
+    )
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,

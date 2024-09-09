@@ -33,7 +33,7 @@ class BrevdistribuererTest {
 
     @Test
     fun `Distribusjon fungerer som forventet`() {
-        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
+        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.REDIGERBAR)
         val journalpostId = "1"
 
         every { db.hentBrev(any()) } returns brev
@@ -59,7 +59,7 @@ class BrevdistribuererTest {
 
     @Test
     fun `Distribusjon avbrytes hvis journalpostId mangler`() {
-        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
+        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.REDIGERBAR)
 
         every { db.hentBrev(any()) } returns brev
         every { db.hentJournalpostId(any()) } returns null
@@ -81,7 +81,7 @@ class BrevdistribuererTest {
         names = ["JOURNALFOERT"],
     )
     fun `Distribusjon avbrytes ved feil status`(status: Status) {
-        val brev = opprettBrev(status, BrevProsessType.MANUELL)
+        val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
 
         every { db.hentBrev(any()) } returns brev
 

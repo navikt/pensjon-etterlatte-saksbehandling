@@ -94,7 +94,7 @@ internal class BrevServiceTest {
             every { db.hentBrevForSak(any()) } returns
                 listOf(
                     opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR),
                     opprettBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK),
                 )
 

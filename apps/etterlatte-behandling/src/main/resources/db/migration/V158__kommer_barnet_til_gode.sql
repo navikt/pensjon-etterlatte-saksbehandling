@@ -1,0 +1,1 @@
+ALTER TABLE behandling DROP COLUMN kommer_barnet_tilgode;

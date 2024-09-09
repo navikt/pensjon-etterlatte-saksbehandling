@@ -67,7 +67,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                 ),
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
-        val kunEnJuridiskForelder = GrunnlagMedPeriode(Unit, LocalDate.of(2022, 8, 1), null)
+        val kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, LocalDate.of(2022, 8, 1), null)
 
         repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(

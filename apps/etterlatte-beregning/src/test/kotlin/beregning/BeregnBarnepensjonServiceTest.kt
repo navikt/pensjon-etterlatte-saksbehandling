@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.grunnlag.TomVerdi
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
@@ -716,7 +717,7 @@ internal class BeregnBarnepensjonServiceTest {
             barnepensjonBeregningsGrunnlag(
                 behandlingId = behandling.id,
                 soesken = emptyList(),
-                kunEnJuridiskForelder = GrunnlagMedPeriode(Unit, virk.atDay(1), datoAdopsjon),
+                kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, virk.atDay(1), datoAdopsjon),
             )
         coEvery {
             trygdetidKlient.hentTrygdetid(
@@ -794,7 +795,7 @@ internal class BeregnBarnepensjonServiceTest {
             defaultAvdoedeBeregningmetode(
                 beregningsMetode,
             ),
-        kunEnJuridiskForelder: GrunnlagMedPeriode<Unit>? = null,
+        kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),

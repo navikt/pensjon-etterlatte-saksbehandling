@@ -930,7 +930,7 @@ internal class BeregningsGrunnlagServiceTest {
                         institusjonsopphold = emptyList(),
                         beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
                         beregningsMetodeFlereAvdoede = emptyList(),
-                        kunEnJuridiskForelder = GrunnlagMedPeriode(fom = LocalDate.now(), data = Unit),
+                        kunEnJuridiskForelder = GrunnlagMedPeriode(fom = LocalDate.now(), data = TomVerdi),
                     ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )

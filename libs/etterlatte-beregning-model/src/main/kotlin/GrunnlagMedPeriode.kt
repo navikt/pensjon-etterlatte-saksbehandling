@@ -240,3 +240,8 @@ fun <T> erGrunnlagLiktFoerEnDato(
     // nå skal de være like
     return g1 == g2
 }
+
+/**
+ * Equals fungerer ike som ønsket, da vi kan få forskjellige instanser av Unit, hvor equals-funksjon gir false...
+ */
+data object TomVerdi

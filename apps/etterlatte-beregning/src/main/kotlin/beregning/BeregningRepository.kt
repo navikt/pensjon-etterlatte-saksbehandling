@@ -209,6 +209,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                 },
             regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn),
             kilde = stringOrNull("kilde")?.let { objectMapper.readValue(it) },
+            kunEnJuridiskForelder = boolean("kun_en_juridisk_forelder"),
         )
     }
 
@@ -402,5 +403,5 @@ private data class BeregningsperiodeDAO(
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
-    val kunEnJuridiskForelder: Boolean? = null,
+    val kunEnJuridiskForelder: Boolean = false,
 )

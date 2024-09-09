@@ -45,6 +45,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         commit: Boolean,
     ): Boolean
 
+    suspend fun kanSetteStatusTrygdetidOppdatert(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun statusTrygdetidOppdatert(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -192,6 +197,11 @@ class BehandlingKlientImpl(
             },
         )
     }
+
+    override suspend fun kanSetteStatusTrygdetidOppdatert(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, false)
 
     override suspend fun statusTrygdetidOppdatert(
         behandlingId: UUID,

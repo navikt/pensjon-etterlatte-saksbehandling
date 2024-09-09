@@ -13,9 +13,9 @@ import {
   validerStringNumber,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { isPending } from '~shared/api/apiUtils'
-import { oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterOverstyrBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   initialOverstyrBeregningsgrunnlagPeriode,
   konverterTilSisteDagIMaaneden,
@@ -87,6 +87,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         },
         (result) => {
           dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
           paaLagre()
         }
       )
@@ -102,6 +103,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
         },
         (result) => {
           dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
           paaLagre()
         }
       )

@@ -54,7 +54,7 @@ class BeregningsGrunnlagRepository(
                                 "beregnings_metode_flere_avdoede" to
                                     beregningsGrunnlag.beregningsMetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
                                 "kun_en_juridisk_forelder" to
-                                    beregningsGrunnlag.kunEnJuridiskForelder.takeIf { it.isNotEmpty() }?.somJsonb(),
+                                    beregningsGrunnlag.kunEnJuridiskForelder?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -264,7 +264,7 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
         kunEnJuridiskForelder =
             this.stringOrNull("kun_en_juridisk_forelder")?.let {
                 objectMapper.readValue(it)
-            } ?: emptyList(),
+            },
     )
 
 private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =

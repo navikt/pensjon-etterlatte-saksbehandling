@@ -697,6 +697,7 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `beregne foerstegangsbehandling med en avdoed og kun en juridisk forelder gir foreldreloessats - nytt regelverk`() {
         val virk = YearMonth.of(2024, Month.JANUARY)
+        val datoAdopsjon = YearMonth.of(2024, Month.MARCH).atEndOfMonth()
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -710,7 +711,7 @@ internal class BeregnBarnepensjonServiceTest {
             barnepensjonBeregningsGrunnlag(
                 behandlingId = behandling.id,
                 soesken = emptyList(),
-                kunEnJuridiskForelder = listOf(GrunnlagMedPeriode(true, virk.atDay(1), null)),
+                kunEnJuridiskForelder = GrunnlagMedPeriode(Unit, virk.atDay(1), datoAdopsjon),
             )
         coEvery {
             trygdetidKlient.hentTrygdetid(
@@ -729,9 +730,20 @@ internal class BeregnBarnepensjonServiceTest {
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
-                with(beregningsperioder.first()) {
+                with(beregningsperioder[0]) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.MARCH)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
+                    soeskenFlokk shouldBe emptyList()
+                    trygdetid shouldBe MAKS_TRYGDETID
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                }
+                with(beregningsperioder[1]) {
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
+                    datoFOM shouldBe YearMonth.of(2024, Month.APRIL)
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                     soeskenFlokk shouldBe emptyList()
@@ -775,7 +787,7 @@ internal class BeregnBarnepensjonServiceTest {
             defaultAvdoedeBeregningmetode(
                 beregningsMetode,
             ),
-        kunEnJuridiskForelder: List<GrunnlagMedPeriode<Boolean>> = emptyList(),
+        kunEnJuridiskForelder: GrunnlagMedPeriode<Unit>? = null,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),

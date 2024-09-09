@@ -292,73 +292,71 @@ class BeregnBarnepensjonService(
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
         virkFom: LocalDate,
         tom: LocalDate?,
-    ) = PeriodisertBarnepensjonGrunnlag(
-        soeskenKull =
-            if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
-                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                    beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
+    ): PeriodisertBarnepensjonGrunnlag =
+        PeriodisertBarnepensjonGrunnlag(
+            soeskenKull =
+                if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
+                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                        beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
+                            FaktumNode(
+                                verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                                kilde = beregningsGrunnlag.kilde,
+                                beskrivelse = "Søsken i kullet",
+                            )
+                        },
+                        virkFom,
+                        tom,
+                    )
+                } else {
+                    KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
+                },
+            avdoedesTrygdetid =
+                if (anvendtTrygdetider.isEmpty()) {
+                    KonstantGrunnlag(
                         FaktumNode(
-                            verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                            verdi =
+                                AnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
+                                    trygdetider,
+                                    beregningsGrunnlag,
+                                    virkFom,
+                                ),
                             kilde = beregningsGrunnlag.kilde,
-                            beskrivelse = "Søsken i kullet",
-                        )
-                    },
-                    virkFom,
-                    tom,
-                )
-            } else {
-                KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
-            },
-        avdoedesTrygdetid =
-            if (anvendtTrygdetider.isEmpty()) {
-                KonstantGrunnlag(
-                    FaktumNode(
-                        verdi =
-                            AnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
-                                trygdetider,
-                                beregningsGrunnlag,
-                                virkFom,
-                            ),
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Konstant anvendt trygdetider",
-                    ),
-                )
-            } else {
-                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                    anvendtTrygdetider.mapVerdier {
-                        FaktumNode(
-                            verdi = it,
-                            kilde = beregningsGrunnlag.kilde,
-                            beskrivelse = "Anvendte trygdetider",
-                        )
-                    },
-                    virkFom,
-                    tom,
-                )
-            },
-        institusjonsopphold =
-            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsopphold.mapVerdier
-                    { institusjonsopphold ->
-                        FaktumNode(
-                            verdi = institusjonsopphold,
-                            kilde = beregningsGrunnlag.kilde,
-                            beskrivelse = "Institusjonsopphold",
-                        )
-                    },
-            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
-        kunEnJuridiskForelder =
-            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.kunEnJuridiskForelder.mapVerdier
-                    { kunEnJuridiskForelder ->
-                        FaktumNode(
-                            verdi = kunEnJuridiskForelder,
-                            kilde = beregningsGrunnlag.kilde,
-                            beskrivelse = "Kun en juridisk forelder",
-                        )
-                    },
-            ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en juridisk forelder") },
-    )
+                            beskrivelse = "Konstant anvendt trygdetider",
+                        ),
+                    )
+                } else {
+                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                        anvendtTrygdetider.mapVerdier {
+                            FaktumNode(
+                                verdi = it,
+                                kilde = beregningsGrunnlag.kilde,
+                                beskrivelse = "Anvendte trygdetider",
+                            )
+                        },
+                        virkFom,
+                        tom,
+                    )
+                },
+            institusjonsopphold =
+                PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                    beregningsGrunnlag.institusjonsopphold.mapVerdier
+                        { institusjonsopphold ->
+                            FaktumNode(
+                                verdi = institusjonsopphold,
+                                kilde = beregningsGrunnlag.kilde,
+                                beskrivelse = "Institusjonsopphold",
+                            )
+                        },
+                ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+            kunEnJuridiskForelder =
+                PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                    beregningsGrunnlag.kunEnJuridiskForelder?.let { kunEnJuridiskForelder ->
+                        listOf(kunEnJuridiskForelder).mapVerdier { _ ->
+                            FaktumNode(true, beregningsGrunnlag.kilde, "")
+                        }
+                    } ?: emptyList(),
+                ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },
+        )
 }
 
 object AnvendtTrygdetidPerioder {

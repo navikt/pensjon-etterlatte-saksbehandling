@@ -134,7 +134,7 @@ class BeregningsGrunnlagService(
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         grunnlag: Grunnlag,
     ) {
-        val harBeregningsgrunnlagMedKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder.isNotEmpty()
+        val harBeregningsgrunnlagMedKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder != null
         val persongalleriHarKunEnJuridiskForelder =
             grunnlag.hentAnnenForelder()?.vurdering == KUN_EN_REGISTRERT_JURIDISK_FORELDER
 

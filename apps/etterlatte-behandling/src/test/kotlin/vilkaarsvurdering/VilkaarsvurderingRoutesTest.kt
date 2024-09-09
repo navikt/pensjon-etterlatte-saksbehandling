@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -17,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
@@ -265,6 +265,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -282,7 +283,7 @@ internal class VilkaarsvurderingRoutesTest(
                     kommentar = "Søker oppfyller vilkåret",
                 )
 
-            every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
+            every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
 
             val oppdatertVilkaarsvurderingResponse =
                 client.post("/api/vilkaarsvurdering/$behandlingId") {
@@ -292,7 +293,8 @@ internal class VilkaarsvurderingRoutesTest(
                 }
 
             val oppdatertVilkaarsvurdering =
-                oppdatertVilkaarsvurderingResponse.body<VilkaarsvurderingDto>()
+                objectMapper
+                    .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             val oppdatertVilkaar =
                 oppdatertVilkaarsvurdering.vilkaar.find {
                     it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
@@ -312,6 +314,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -331,11 +334,14 @@ internal class VilkaarsvurderingRoutesTest(
                     kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024}",
                 )
 
-            client.post("/api/vilkaarsvurdering/$behandlingId") {
-                setBody(vurdertVilkaarDto.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            client
+                .post("/api/vilkaarsvurdering/$behandlingId") {
+                    setBody(vurdertVilkaarDto.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.also { response ->
+                    assertEquals(HttpStatusCode.OK, response.status)
+                }
 
             val vurdertVilkaar =
                 vilkaarsvurderingServiceImpl
@@ -398,6 +404,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -456,6 +463,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -465,6 +473,8 @@ internal class VilkaarsvurderingRoutesTest(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
                     kommentar = "Søker oppfyller vurderingen",
                 )
+
+            every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
             val oppdatertVilkaarsvurderingResponse =
                 client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
                     setBody(resultat.toJson())
@@ -501,6 +511,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -510,6 +521,8 @@ internal class VilkaarsvurderingRoutesTest(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
                     kommentar = "Søker oppfyller vurderingen",
                 )
+
+            every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
             client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 setBody(resultat.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -546,6 +559,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `revurdering skal kopiere siste vilkaarsvurdering ved opprettele som default`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -555,6 +569,8 @@ internal class VilkaarsvurderingRoutesTest(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
                     kommentar = "Søker oppfyller vurderingen",
                 )
+
+            every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
             client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 setBody(resultat.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -587,6 +603,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `revurdering skal ikke kopiere siste vilkaarsvurdering naar kopierVedRevurdering er false`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -596,6 +613,8 @@ internal class VilkaarsvurderingRoutesTest(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
                     kommentar = "Søker oppfyller vurderingen",
                 )
+
+            every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
             client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 setBody(resultat.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -626,6 +645,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `Skal slette eksisterende vilkaarsvurdering`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -646,6 +666,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
@@ -656,24 +677,24 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `kan ikke opprette eller committe vilkaarsvurdering hvis statussjekk feiler`() {
-        val behandlingService = mockk<BehandlingService>()
-        val behandlingStatusService = mockk<BehandlingStatusService>()
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingStatusService.settVilkaarsvurdert(any(), any()) } just Runs
-        // coEvery { behandlingService.harTilgangTilBehandling(any(), any(), any()) } returns true
+        val behandlingServiceLocal = mockk<BehandlingService>()
+        val behandlingStatusServiceLocal = mockk<BehandlingStatusService>()
+        coEvery { behandlingServiceLocal.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
+        every { behandlingStatusServiceLocal.settVilkaarsvurdert(any(), any(), true) } throws BehandlingstilstandException()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
                 VilkaarsvurderingRepositoryWrapperDatabase(
                     VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
                 ),
-                this.behandlingService,
+                behandlingServiceLocal,
                 grunnlagKlient,
-                behandlingStatus,
+                behandlingStatusServiceLocal,
             )
 
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -683,7 +704,7 @@ internal class VilkaarsvurderingRoutesTest(
                 }
 
             assertEquals(HttpStatusCode.PreconditionFailed, response.status)
-            coVerify(exactly = 0) { behandlingStatusService.settVilkaarsvurdert(any(), any()) }
+            verify(exactly = 0) { behandlingStatusServiceLocal.settVilkaarsvurdert(any(), any(), false) }
         }
     }
 
@@ -692,21 +713,22 @@ internal class VilkaarsvurderingRoutesTest(
         val behandlingService = mockk<BehandlingService>()
         val behandlingStatusService = mockk<BehandlingStatusService>()
         coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingStatusService.settOpprettet(any(), any()) } just Runs
-        // coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        every { behandlingStatusService.settOpprettet(any(), any(), true) } just Runs
+        every { behandlingStatusService.settOpprettet(any(), any(), false) } throws BehandlingstilstandException()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
                 VilkaarsvurderingRepositoryWrapperDatabase(
                     VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
                 ),
-                this.behandlingService,
+                behandlingService,
                 grunnlagKlient,
-                behandlingStatus,
+                behandlingStatusService,
             )
 
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -714,8 +736,8 @@ internal class VilkaarsvurderingRoutesTest(
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
         }
-        coVerify(exactly = 1) { behandlingStatusService.settOpprettet(any(), any(), false) }
-        coVerify(exactly = 0) { behandlingStatusService.settOpprettet(any(), any(), true) }
+        coVerify(exactly = 1) { behandlingStatusService.settOpprettet(any(), any(), true) }
+        coVerify(exactly = 0) { behandlingStatusService.settOpprettet(any(), any(), false) }
     }
 
     @Test
@@ -731,7 +753,7 @@ internal class VilkaarsvurderingRoutesTest(
                 VilkaarsvurderingRepositoryWrapperDatabase(
                     VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
                 ),
-                this.behandlingService,
+                behandlingService,
                 grunnlagKlient,
                 behandlingStatusService,
             )
@@ -774,10 +796,11 @@ internal class VilkaarsvurderingRoutesTest(
 
     @Test
     fun `skal sjekke gyldighet og oppdatere status hvis den er OPPRETTET`() {
-        coEvery { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
+        coEvery { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
 
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -797,8 +820,8 @@ internal class VilkaarsvurderingRoutesTest(
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(dto.statusOppdatert, true)
 
-            coVerify(exactly = 2) {
-                behandlingStatus.settVilkaarsvurdert(any(), any())
+            coVerify(exactly = 5) {
+                behandlingStatus.settVilkaarsvurdert(any(), any(), any())
             }
         }
     }

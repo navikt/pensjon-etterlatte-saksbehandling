@@ -88,9 +88,8 @@ internal class InntektsjusteringVarselOmVedtakRiver(
                     val sakMedBehandlinger = behandlingService.hentBehandlingerForSak(FoedselsnummerDTO(sak.ident))
                     if (skalHaVarselOmVedtak(sakMedBehandlinger.behandlinger, loependeFom)) {
                         opprettBrev(sak, packet, context)
-                        // ferdigstilles i OppdaterInntektsjusteringBrevDistribuert.kt
                     } else {
-                        behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT_UTEN_BREV, kjoering)
+                        behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT, kjoering)
                     }
                 }
             },
@@ -98,19 +97,6 @@ internal class InntektsjusteringVarselOmVedtakRiver(
 
         logger.info("$kjoering: Ferdig")
     }
-
-    fun skalHaVarselOmVedtak(
-        behandlinger: List<BehandlingSammendrag>,
-        loependeFom: YearMonth,
-    ): Boolean =
-        behandlinger.any {
-            it.status == BehandlingStatus.IVERKSATT &&
-                it.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
-                !(
-                    it.virkningstidspunkt?.dato?.year == loependeFom.year &&
-                        it.virkningstidspunkt?.dato?.monthValue == 1
-                )
-        }
 
     private fun opprettBrev(
         sak: Sak,
@@ -132,3 +118,16 @@ enum class InntektsjusterinFeatureToggle(
 
     override fun key() = key
 }
+
+fun skalHaVarselOmVedtak(
+    behandlinger: List<BehandlingSammendrag>,
+    loependeFom: YearMonth,
+): Boolean =
+    behandlinger.any {
+        it.status == BehandlingStatus.IVERKSATT &&
+            it.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
+            !(
+                it.virkningstidspunkt?.dato?.year == loependeFom.year &&
+                    it.virkningstidspunkt?.dato?.monthValue == 1
+            )
+    }

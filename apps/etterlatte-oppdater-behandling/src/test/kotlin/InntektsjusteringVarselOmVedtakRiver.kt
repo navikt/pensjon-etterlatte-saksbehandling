@@ -1,10 +1,16 @@
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.InntektsjusteringVarselOmVedtakRiver
+import no.nav.etterlatte.inntektsjustering.skalHaVarselOmVedtak
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -25,6 +31,22 @@ class InntektsjusteringVarselOmVedtakRiver {
 
     @Test
     fun `skal ha varsel om vedtak`() {
+        val behandlinger =
+            listOf(
+                genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2023, 1)),
+                genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.ANNEN, YearMonth.of(2024, 1)),
+                genererBehandlingSammendrag(BehandlingStatus.AVBRUTT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)),
+            )
+        val skalHaVarselOmVedtakResult = skalHaVarselOmVedtak(behandlinger, YearMonth.of(2024, 1))
+        skalHaVarselOmVedtakResult shouldBe true
+    }
+
+    @Test
+    fun `skal IKKE ha varsel om vedtak`() {
+        val behandlinger =
+            listOf(genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)))
+        val skalHaVarselOmVedtakResult = skalHaVarselOmVedtak(behandlinger, YearMonth.of(2024, 1))
+        skalHaVarselOmVedtakResult shouldBe false
     }
 
     @Test
@@ -46,7 +68,6 @@ class InntektsjusteringVarselOmVedtakRiver {
 
         verify(exactly = 1) {
             behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
-            // TODO: verify journalfoerOgDistribuer
         }
     }
 
@@ -84,4 +105,18 @@ class InntektsjusteringVarselOmVedtakRiver {
                     LOEPENDE_FOM to loependeFom,
                 ),
             ).toJson()
+
+    private fun genererBehandlingSammendrag(
+        status: BehandlingStatus,
+        aarsak: Revurderingaarsak,
+        virkningstidspunkt: YearMonth,
+    ): BehandlingSammendrag {
+        val virkningstidspunktMock = mockk<Virkningstidspunkt>()
+        every { virkningstidspunktMock.dato } returns virkningstidspunkt
+        val behandlingSammendragMock = mockk<BehandlingSammendrag>()
+        every { behandlingSammendragMock.status } returns status
+        every { behandlingSammendragMock.aarsak } returns aarsak.name
+        every { behandlingSammendragMock.virkningstidspunkt } returns virkningstidspunktMock
+        return behandlingSammendragMock
+    }
 }

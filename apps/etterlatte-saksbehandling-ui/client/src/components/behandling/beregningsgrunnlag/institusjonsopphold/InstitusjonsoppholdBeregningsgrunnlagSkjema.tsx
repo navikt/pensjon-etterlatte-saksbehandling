@@ -17,7 +17,7 @@ import { validerStringNumber } from '~components/person/journalfoeringsoppgave/n
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { SakType } from '~shared/types/sak'
-import { oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterBeregningsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import {
@@ -27,6 +27,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   sakType: SakType
@@ -102,6 +103,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
       },
       (result) => {
         dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         paaLagre()
       }
     )

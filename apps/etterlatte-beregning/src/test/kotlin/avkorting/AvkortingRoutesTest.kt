@@ -147,6 +147,7 @@ class AvkortingRoutesTest {
                                     inntektUtland = it.inntektUtland,
                                     fratrekkInnAarUtland = it.fratrekkInnAarUtland,
                                     spesifikasjon = it.spesifikasjon,
+                                    fom = dato,
                                 ),
                             )
                         }

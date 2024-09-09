@@ -327,13 +327,15 @@ internal class AvkortingTest {
         inner class Foerstegangsbehandling {
             @Test
             fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt`() {
-                val forventetInntekt = avkortinggrunnlagLagre(aarsinntekt = 200000)
-                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
+                val forventetInntekt =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    )
 
                 val opprettaAvkorting =
                     Avkorting().oppdaterMedInntektsgrunnlag(
                         forventetInntekt,
-                        virkningstidspunkt,
                         bruker,
                     )
 
@@ -380,13 +382,16 @@ internal class AvkortingTest {
 
             @Test
             fun `Eksisterer det inntekt med samme id skal eksisterende inntekt oppdateres uten aa legge til nytt`() {
-                val endretInntekt = avkortinggrunnlagLagre(id = andreInntekt.id, aarsinntekt = 200000)
-                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
+                val endretInntekt =
+                    avkortinggrunnlagLagre(
+                        id = andreInntekt.id,
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         endretInntekt,
-                        virkningstidspunkt,
                         bruker,
                     )
 
@@ -410,13 +415,14 @@ internal class AvkortingTest {
 
             @Test
             fun `Eksisterer ikke inntekt skal det legges til og til og med paa periode til siste inntekt skal settes`() {
-                val nyttGrunnlag = avkortinggrunnlagLagre()
-                val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
+                val nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        fom = YearMonth.of(2024, Month.AUGUST),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         nyttGrunnlag,
-                        virkningstidspunkt,
                         bruker,
                     )
 
@@ -446,13 +452,15 @@ internal class AvkortingTest {
 
             @Test
             fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
-                val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
-                val virkningstidspunkt = YearMonth.of(2025, Month.JANUARY)
+                val nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 150000,
+                        fom = YearMonth.of(2025, Month.JANUARY),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         nyttGrunnlag,
-                        virkningstidspunkt,
                         bruker,
                     )
 

@@ -95,34 +95,32 @@ data class Avkorting(
 
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        fom: YearMonth,
         bruker: BrukerTokenInfo,
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
     ): Avkorting {
-        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, fom, bruker, opphoerFom)
+        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom)
         return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        fom: YearMonth,
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
     ): Avkorting {
-        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(fom)
+        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(fom) } +
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom) } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = fom, tom = opphoerFom?.minusMonths(1)),
+                                periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtland = nyttGrunnlag.inntektUtland,

@@ -73,7 +73,7 @@ data class AvkortingGrunnlagLagreDto(
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
-    // val fom: YearMonth,
+    val fom: YearMonth,
 )
 
 data class AvkortingGrunnlagKildeDto(

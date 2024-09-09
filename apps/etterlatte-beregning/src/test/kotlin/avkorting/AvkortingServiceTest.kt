@@ -373,7 +373,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns null
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -390,12 +390,11 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, behandling)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    behandling.virkningstidspunkt!!.dato,
                     bruker,
                     beregning,
                     any(),
@@ -431,7 +430,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(revurderingId) } returns null
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
@@ -453,12 +452,11 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(revurderingId, bruker, false)
                 behandlingKlient.hentBehandling(revurderingId, bruker)
-                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, revurdering)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, false)
                 beregningService.hentBeregningNonnull(revurderingId)
                 sanksjonService.hentSanksjon(revurderingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    revurdering.virkningstidspunkt!!.dato,
                     bruker,
                     beregning,
                     any(),
@@ -485,7 +483,7 @@ internal class AvkortingServiceTest {
                     service.beregnAvkortingMedNyttGrunnlag(
                         behandlingId,
                         bruker,
-                        AvkortingGrunnlagRequest(avkortinggrunnlagLagre()),
+                        AvkortingGrunnlagRequest(avkortinggrunnlagLagre(fom = YearMonth.of(2024, 1))),
                     )
                 }
             }

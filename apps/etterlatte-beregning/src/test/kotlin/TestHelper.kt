@@ -142,6 +142,7 @@ fun avkortinggrunnlagLagre(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
+    fom: YearMonth,
 ) = AvkortingGrunnlagLagreDto(
     id = id,
     aarsinntekt = aarsinntekt,
@@ -149,6 +150,7 @@ fun avkortinggrunnlagLagre(
     inntektUtland = 0,
     fratrekkInnAarUtland = 0,
     spesifikasjon = "Spesifikasjon",
+    fom = fom,
 )
 
 fun inntektAvkortingGrunnlag(

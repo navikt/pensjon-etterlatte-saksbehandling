@@ -1910,8 +1910,8 @@ class BeregnAvkortingTest {
                     avkortinggrunnlagLagre(
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
+                        fom = YearMonth.of(2024, Month.MARCH),
                     ),
-                fom = YearMonth.of(2024, Month.MARCH),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -1939,8 +1939,8 @@ class BeregnAvkortingTest {
                     avkortinggrunnlagLagre(
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
+                        fom = YearMonth.of(2024, Month.MARCH),
                     ),
-                fom = YearMonth.of(2024, Month.MARCH),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -2008,8 +2008,8 @@ class BeregnAvkortingTest {
                         id = UUID.randomUUID(),
                         aarsinntekt = 400000,
                         fratrekkInnAar = 50000,
+                        fom = YearMonth.of(2024, Month.JULY),
                     ),
-                fom = YearMonth.of(2024, Month.JULY),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -2095,8 +2095,8 @@ class BeregnAvkortingTest {
                         id = UUID.randomUUID(),
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
+                        fom = YearMonth.of(2024, Month.SEPTEMBER),
                     ),
-                fom = YearMonth.of(2024, Month.SEPTEMBER),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -2128,8 +2128,8 @@ class BeregnAvkortingTest {
                         id = UUID.randomUUID(),
                         aarsinntekt = 450000,
                         fratrekkInnAar = 50000,
+                        fom = YearMonth.of(2024, Month.SEPTEMBER),
                     ),
-                fom = YearMonth.of(2024, Month.SEPTEMBER),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -2181,8 +2181,8 @@ class BeregnAvkortingTest {
                                     .grunnlag.id,
                             aarsinntekt = 425000,
                             fratrekkInnAar = 50000,
+                            fom = YearMonth.of(2024, Month.SEPTEMBER),
                         ),
-                    fom = YearMonth.of(2024, Month.SEPTEMBER),
                     bruker = bruker,
                     beregning(
                         beregninger =
@@ -2228,8 +2228,8 @@ class BeregnAvkortingTest {
                         id = UUID.randomUUID(),
                         aarsinntekt = 500000,
                         fratrekkInnAar = 0,
+                        fom = YearMonth.of(2025, Month.JANUARY),
                     ),
-                fom = YearMonth.of(2025, Month.JANUARY),
                 bruker = bruker,
                 beregning =
                     beregning(
@@ -2270,8 +2270,8 @@ class BeregnAvkortingTest {
                         id = UUID.randomUUID(),
                         aarsinntekt = 525000,
                         fratrekkInnAar = 0,
+                        fom = YearMonth.of(2026, Month.JANUARY),
                     ),
-                fom = YearMonth.of(2026, Month.JANUARY),
                 bruker = bruker,
                 beregning =
                     beregning(

@@ -1,35 +1,39 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import java.time.Month
+import java.time.YearMonth
 
 object AvkortingValider {
     fun validerInntekt(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
-        behandling: DetaljertBehandling,
+        innvilgelse: Boolean,
     ) {
-        skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(behandling, avkorting)
-        skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(avkorting, nyInntekt, behandling)
+        skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
+            nyInntekt.fom,
+            avkorting,
+        )
+        skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
+            nyInntekt,
+            nyInntekt.fom,
+            innvilgelse,
+        )
 
         // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
     }
 
     private fun skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
-        behandling: DetaljertBehandling,
+        fom: YearMonth,
         avkorting: Avkorting,
     ) {
-        val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val nyligsteInntekt =
             avkorting.aarsoppgjoer
-                .singleOrNull { it.aar == virkningstidspunkt.year }
+                .singleOrNull { it.aar == fom.year }
                 ?.inntektsavkorting
                 ?.lastOrNull()
-        if (nyligsteInntekt != null && nyligsteInntekt.grunnlag.periode.fom > virkningstidspunkt) {
+        if (nyligsteInntekt != null && nyligsteInntekt.grunnlag.periode.fom > fom) {
             throw IkkeTillattException(
                 code = "NY_INNTEKT_KUN_NY_ELLER_NYLIGSTE",
                 detail = "Kan ikke legge til eller endre årsinntekt som er tidligere enn forrige angitte årsinntekt.",
@@ -38,42 +42,32 @@ object AvkortingValider {
     }
 
     private fun skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
-        avkorting: Avkorting,
         nyInntekt: AvkortingGrunnlagLagreDto,
-        behandling: DetaljertBehandling,
+        fom: YearMonth,
+        innvilgelse: Boolean,
     ) {
-        val virkningstidspunkt = behandling.virkningstidspunkt().dato
-
         val fratrekkLagtTil = nyInntekt.fratrekkInnAar > 0 || nyInntekt.fratrekkInnAarUtland > 0
         if (!fratrekkLagtTil) {
             return
         }
 
-        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            if (virkningstidspunkt.month == Month.JANUARY) {
-                throw ErFulltAar()
-            }
-        } else {
-            val nyligsteAarsoppgjoer = avkorting.aarsoppgjoer.maxBy { it.aar }
-            val nyligsteInntekt = nyligsteAarsoppgjoer.inntektsavkorting.lastOrNull()?.grunnlag
-
-            if (nyligsteInntekt != null) {
-                val revurderingINyttAar = nyligsteInntekt.periode.fom.year < virkningstidspunkt.year
-                if (revurderingINyttAar) {
-                    throw ErFulltAar()
-                }
-
-                val revurderingIFulltAar = nyligsteAarsoppgjoer.forventaInnvilgaMaaneder == 12
-                if (revurderingIFulltAar) {
-                    throw ErFulltAar()
-                }
-            }
+        if (!innvilgelse) {
+            throw HarFratrekkInnAarRevurdering()
+        }
+        if (fom.month == Month.JANUARY) {
+            throw HarFratrekkInnAarForFulltAar()
         }
     }
 }
 
-class ErFulltAar :
+class HarFratrekkInnAarForFulltAar :
     IkkeTillattException(
         code = "NY_INNTEKT_FRATREKK_INN_AAR_FULLT_AAR",
         detail = "Kan ikke legge til fratrekk inn år i år med 12 innvilgede måneder.",
+    )
+
+class HarFratrekkInnAarRevurdering :
+    IkkeTillattException(
+        code = "NY_INNTEKT_FRATREKK_INN_AAR_REVURDERING",
+        detail = "Skal kun legge til fratrekk inn år i et innvilgelsesår med mindre enn 12 måneder.",
     )

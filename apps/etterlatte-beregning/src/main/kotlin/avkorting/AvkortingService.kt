@@ -86,22 +86,14 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInntekt(lagreGrunnlag, avkorting, behandling)
+        validerInntekt(lagreGrunnlag, avkorting, behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
-        val virkningstidspunkt =
-            behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
-                code = "MANGLER_VIRK",
-                detail = "Behandling mangler virkningstidspunkt",
-            )
-
         var beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 lagreGrunnlag,
-                // lagreGrunnlag.fom,
-                virkningstidspunkt,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,

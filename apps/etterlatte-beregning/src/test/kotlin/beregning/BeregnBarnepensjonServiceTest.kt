@@ -745,6 +745,7 @@ internal class BeregnBarnepensjonServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                     avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    kunEnJuridiskForelder shouldBe true
                 }
                 with(beregningsperioder[1]) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
@@ -756,6 +757,7 @@ internal class BeregnBarnepensjonServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                     avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    kunEnJuridiskForelder shouldBe false
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
             }

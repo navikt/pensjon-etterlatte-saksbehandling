@@ -40,14 +40,14 @@ class NotatRepository(
             )
         }
 
-    fun hentForReferanse(referanse: String): Notat? =
+    fun hentForReferanse(referanse: String): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
                 queryOf(
                     "SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE referanse = ?",
                     referanse,
                 ).map(tilNotat)
-                    .asSingle,
+                    .asList,
             )
         }
 

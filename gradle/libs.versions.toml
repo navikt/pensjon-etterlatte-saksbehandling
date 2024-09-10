@@ -7,7 +7,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 jackson-version = "2.17.2"
 jupiter-version = "5.11.0"
 ktor2-version = "2.3.12"
-navfelles-token-version = "5.0.3"
+navfelles-token-version = "5.0.5"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.20.1"
 tjenestespesifikasjoner-version = "1.1436e29"
@@ -16,8 +16,8 @@ tjenestespesifikasjoner-version = "1.1436e29"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.17.2" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.17.2" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.17.3" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.17.3" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -59,7 +59,7 @@ etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.7" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.8" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.3" }

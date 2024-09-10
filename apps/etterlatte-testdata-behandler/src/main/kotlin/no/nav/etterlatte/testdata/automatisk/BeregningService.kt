@@ -2,7 +2,6 @@ package no.nav.etterlatte.testdata.automatisk
 
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -29,18 +28,11 @@ class BeregningService(
 
     suspend fun lagreBeregningsgrunnlag(
         behandlingId: UUID,
-        sakType: SakType,
         bruker: BrukerTokenInfo,
     ) = retryOgPakkUt {
-        val sakTypeArg =
-            when (sakType) {
-                // Endepunkt har skriveleif..
-                SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
-                SakType.BARNEPENSJON -> sakType.name.lowercase()
-            }
         klient
             .post(
-                Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/$sakTypeArg"),
+                Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId"),
                 bruker,
                 LagreBeregningsGrunnlag(
                     soeskenMedIBeregning = listOf(),

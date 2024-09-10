@@ -39,7 +39,11 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
 
       <FamilieforholdWrapper>
         {behandling.sakType === SakType.BARNEPENSJON ? (
-          <FamilieforholdBarnepensjon personopplysninger={personopplysninger} landListeResult={landListeResult} />
+          <FamilieforholdBarnepensjon
+            personopplysninger={personopplysninger}
+            landListeResult={landListeResult}
+            behandlingId={behandling.id}
+          />
         ) : (
           <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} landListeResult={landListeResult} />
         )}

@@ -14,7 +14,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formatering/dato'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { AnnenForelder, RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 import { JaNei } from '~shared/types/ISvar'
@@ -196,3 +196,12 @@ export const hentBrevutfallOgEtterbetalingApi = async (
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path
+
+export const redigerAnnenForelder = async (args: {
+  behandlingId: string
+  annenForelder: AnnenForelder
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/rediger-annen-forelder`, {
+    ...args.annenForelder,
+  })
+}

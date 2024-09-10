@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^4.20.0",
     "http-proxy-middleware": "^3.0.0",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.7.0",

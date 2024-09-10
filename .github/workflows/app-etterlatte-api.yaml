@@ -1,4 +1,4 @@
-name: etterlatte-samordning-vedtak
+name: etterlatte-api
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -15,10 +15,10 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-samordning-vedtak/src/**
-      - apps/etterlatte-samordning-vedtak/*.kts
-      - apps/etterlatte-samordning-vedtak/.nais/**
-      - '!apps/etterlatte-samordning-vedtak/**.md'
+      - apps/etterlatte-api/src/**
+      - apps/etterlatte-api/*.kts
+      - apps/etterlatte-api/.nais/**
+      - '!apps/etterlatte-api/**.md'
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
@@ -29,9 +29,9 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-samordning-vedtak/src/**
-      - apps/etterlatte-samordning-vedtak/*.kts
-      - '!apps/etterlatte-samordning-vedtak/**.md'
+      - apps/etterlatte-api/src/**
+      - apps/etterlatte-api/*.kts
+      - '!apps/etterlatte-api/**.md'
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**

@@ -28,7 +28,7 @@ include(
     "apps:etterlatte-tidshendelser",
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
-    "apps:etterlatte-samordning-vedtak",
+    "apps:etterlatte-api",
     "libs:saksbehandling-common",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-behandling-model",

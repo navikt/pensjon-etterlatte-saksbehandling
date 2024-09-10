@@ -20,7 +20,7 @@ class Server(
     applicationContext: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-samordning-vedtak")
+        sikkerLoggOppstartOgAvslutning("etterlatte-api")
     }
 
     private val engine =

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetsplikt
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
+import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -101,6 +102,8 @@ interface BehandlingService {
     ): Sak
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
+
+    fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger
 
     fun opprettOppgave(
         sakId: SakId,
@@ -262,6 +265,15 @@ class BehandlingServiceImpl(
     override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
         runBlocking {
             behandlingKlient.get("$url/behandlinger/$behandlingId").body()
+        }
+
+    override fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger =
+        runBlocking {
+            behandlingKlient
+                .post("$url/personer/behandlingerforsak") {
+                    contentType(ContentType.Application.Json)
+                    setBody(foedselsNummerDTO)
+                }.body()
         }
 
     override fun opprettOppgave(

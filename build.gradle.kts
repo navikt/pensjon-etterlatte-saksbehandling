@@ -1,5 +1,6 @@
 import com.github.jk1.license.render.InventoryReportRenderer
 import com.github.jk1.license.render.JsonReportRenderer
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 setupRepositories()
 setupTestLogging()
@@ -30,6 +31,14 @@ fun Project.setupRepositories() {
                 credentials {
                     username = "token"
                     password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+        sub.tasks {
+            withType<Test> {
+                useJUnitPlatform()
+                testLogging {
+                    events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
                 }
             }
         }

@@ -1,6 +1,5 @@
 [plugins]
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
-cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.10.0" }
 versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
@@ -8,7 +7,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 jackson-version = "2.17.2"
 jupiter-version = "5.11.0"
 ktor2-version = "2.3.12"
-navfelles-token-version = "5.0.3"
+navfelles-token-version = "5.0.5"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.20.1"
 tjenestespesifikasjoner-version = "1.1436e29"
@@ -17,15 +16,14 @@ tjenestespesifikasjoner-version = "1.1436e29"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.17.2" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.17.2" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.17.3" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.17.3" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
 jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-version" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.8.0" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.12.0" }
@@ -39,10 +37,6 @@ ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-ver
 ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
 ktor2-clientloggingjvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor2-version" }
 ktor2-clientauth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor2-version" }
-ktor2-clientjackson = { module = "io.ktor:ktor-client-jackson", version.ref = "ktor2-version" }
-ktor2-clientlogging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor2-version" }
-ktor2-clientciojvm = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor2-version" }
-ktor2-servercore = { module = "io.ktor:ktor-server-core", version.ref = "ktor2-version" }
 ktor2-servercorejvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor2-version" }
 ktor2-doublereceive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor2-version" }
 ktor2-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor2-version" }
@@ -65,7 +59,7 @@ etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.7" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.8" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.3" }
@@ -74,7 +68,7 @@ metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_
 
 messaginghub-pooled-jms = { module = "org.messaginghub:pooled-jms", version = "3.1.6" }
 
-mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.0" }
+mq-jakarta-client = { module = "com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.4.0.5" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024082313161724411773.1db923f4402d" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }

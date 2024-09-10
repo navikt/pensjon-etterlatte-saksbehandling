@@ -1,12 +1,7 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.sak.SakMedUtlandstilknytning
+import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
 import java.time.LocalDateTime
 import java.util.UUID
 

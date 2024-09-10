@@ -125,6 +125,7 @@ fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
+    fratrekkInnAarUtland: Int = 0,
     periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
 ) = AvkortingGrunnlag(
@@ -133,7 +134,7 @@ fun avkortinggrunnlag(
     aarsinntekt = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
     inntektUtland = 0,
-    fratrekkInnAarUtland = 0,
+    fratrekkInnAarUtland = fratrekkInnAarUtland,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
 )

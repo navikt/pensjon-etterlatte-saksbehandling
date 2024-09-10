@@ -22,6 +22,7 @@ object AvkortingValider {
         )
         skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
             nyInntekt,
+            avkorting,
             nyInntekt.fom,
             innvilgelse,
         )
@@ -62,6 +63,7 @@ object AvkortingValider {
 
     private fun skalIkkeLeggeTilFratrekkInnAarHvisDetErEtFulltaar(
         nyInntekt: AvkortingGrunnlagLagreDto,
+        avkorting: Avkorting,
         fom: YearMonth,
         innvilgelse: Boolean,
     ) {
@@ -69,9 +71,21 @@ object AvkortingValider {
         if (!fratrekkLagtTil) {
             return
         }
-
         if (!innvilgelse) {
-            throw HarFratrekkInnAarRevurdering()
+            val nyligsteInntekt =
+                avkorting.aarsoppgjoer
+                    .singleOrNull { it.aar == fom.year }
+                    ?.inntektsavkorting
+                    ?.lastOrNull()
+            if (
+                nyligsteInntekt != null &&
+                (
+                    nyligsteInntekt.grunnlag.fratrekkInnAar != nyInntekt.fratrekkInnAar ||
+                        nyligsteInntekt.grunnlag.fratrekkInnAarUtland != nyInntekt.fratrekkInnAarUtland
+                )
+            ) {
+                throw RevurderingHarEndretFratrekkInnAar() // TODO rename
+            }
         }
         if (fom.month == Month.JANUARY) {
             throw HarFratrekkInnAarForFulltAar()
@@ -91,8 +105,8 @@ class HarFratrekkInnAarForFulltAar :
         detail = "Kan ikke legge til fratrekk inn år i år med 12 innvilgede måneder.",
     )
 
-class HarFratrekkInnAarRevurdering :
+class RevurderingHarEndretFratrekkInnAar :
     IkkeTillattException(
         code = "NY_INNTEKT_FRATREKK_INN_AAR_REVURDERING",
-        detail = "Skal kun legge til fratrekk inn år i et innvilgelsesår med mindre enn 12 måneder.",
+        detail = "Skal ikke endre fratrekk inn år i en revurdering",
     )

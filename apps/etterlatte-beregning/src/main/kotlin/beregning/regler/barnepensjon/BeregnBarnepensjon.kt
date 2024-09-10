@@ -18,6 +18,7 @@ data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<List<AnvendtTrygdetid>>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
+    val kunEnJuridiskForelder: PeriodisertGrunnlag<FaktumNode<Boolean>>,
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         val soeskenkullKnekkpunkter =
@@ -28,7 +29,8 @@ data class PeriodisertBarnepensjonGrunnlag(
 
         return soeskenkullKnekkpunkter +
             avdoedesTrygdetid.finnAlleKnekkpunkter() +
-            institusjonsopphold.finnAlleKnekkpunkter()
+            institusjonsopphold.finnAlleKnekkpunkter() +
+            kunEnJuridiskForelder.finnAlleKnekkpunkter()
     }
 
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag =
@@ -36,6 +38,7 @@ data class PeriodisertBarnepensjonGrunnlag(
             soeskenKull.finnGrunnlagForPeriode(datoIPeriode),
             avdoedesTrygdetid.finnGrunnlagForPeriode(datoIPeriode),
             institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
+            kunEnJuridiskForelder.finnGrunnlagForPeriode(datoIPeriode),
         )
 }
 
@@ -43,6 +46,7 @@ data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
     val avdoedesTrygdetid: FaktumNode<List<AnvendtTrygdetid>>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
+    val kunEnJuridiskForelder: FaktumNode<Boolean>,
 )
 
 @Deprecated("Ikke i bruk lenger")

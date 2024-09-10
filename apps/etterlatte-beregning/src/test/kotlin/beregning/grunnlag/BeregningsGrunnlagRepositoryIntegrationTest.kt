@@ -67,6 +67,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                 ),
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
+        val kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, LocalDate.of(2022, 8, 1), null)
 
         repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
@@ -85,6 +86,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     ),
                 ),
                 soeskenMedIBeregning,
+                kunEnJuridiskForelder,
             ),
         )
 
@@ -95,6 +97,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
         assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
+        assertEquals(kunEnJuridiskForelder, result?.kunEnJuridiskForelder)
     }
 
     @Test

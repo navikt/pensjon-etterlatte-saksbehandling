@@ -52,8 +52,8 @@ val trygdetidBruktRegel =
             nasjonal,
             teoretisk,
         ->
-        val nasjonalBeregning = AnvendtTrygdetid(BeregningsMetode.NASJONAL, nasjonal)
-        val teoretiskBeregning = AnvendtTrygdetid(BeregningsMetode.PRORATA, teoretisk)
+        val nasjonalBeregning = AnvendtTrygdetid(BeregningsMetode.NASJONAL, nasjonal, trygdetid.ident)
+        val teoretiskBeregning = AnvendtTrygdetid(BeregningsMetode.PRORATA, teoretisk, trygdetid.ident)
 
         when (trygdetid.beregningsMetode) {
             BeregningsMetode.NASJONAL -> nasjonalBeregning

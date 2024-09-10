@@ -11,6 +11,11 @@ object AvkortingValider {
         avkorting: Avkorting,
         innvilgelse: Boolean,
     ) {
+        foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
+            nyInntekt,
+            avkorting,
+            innvilgelse,
+        )
         skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
             nyInntekt.fom,
             avkorting,
@@ -22,6 +27,20 @@ object AvkortingValider {
         )
 
         // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
+    }
+
+    private fun foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
+        nyInntekt: AvkortingGrunnlagLagreDto,
+        avkorting: Avkorting,
+        innvilgelse: Boolean,
+    ) {
+        if (!innvilgelse) {
+            if (avkorting.aarsoppgjoer.none { it.aar == nyInntekt.fom.year }) {
+                if (nyInntekt.fom.month != Month.JANUARY) {
+                    throw FoersteRevurderingSenereEnnJanuar()
+                }
+            }
+        }
     }
 
     private fun skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
@@ -59,6 +78,12 @@ object AvkortingValider {
         }
     }
 }
+
+class FoersteRevurderingSenereEnnJanuar :
+    IkkeTillattException(
+        code = "FOERSTE_REVURDERING_I_NYTT_AAR_SENERE_ENN_JANUAR",
+        detail = "Første revurdering i årene etter innvilgelsesår må være fom januar.",
+    )
 
 class HarFratrekkInnAarForFulltAar :
     IkkeTillattException(

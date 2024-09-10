@@ -2,6 +2,7 @@ package avkorting
 
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
+import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarRevurdering
 import no.nav.etterlatte.avkorting.Inntektsavkorting
@@ -17,6 +18,39 @@ import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 class AvkortingValiderTest {
+    @Test
+    fun `Første revurdering i et nytt år må være fom januar`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(
+                            forventaInnvilgaMaaneder = 11,
+                            aar = 2024,
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        assertThrows<FoersteRevurderingSenereEnnJanuar> {
+            val inntektMedFratrekk =
+                AvkortingGrunnlagLagreDto(
+                    aarsinntekt = 100000,
+                    fratrekkInnAar = 0,
+                    fratrekkInnAarUtland = 0,
+                    inntektUtland = 100000,
+                    spesifikasjon = "asdf",
+                    fom = YearMonth.of(2025, 2),
+                )
+            validerInntekt(inntektMedFratrekk, avkorting, false)
+        }
+    }
+
     @Test
     fun `Skal få valideringsfeil hvis ny inntekt gjelder ifra tidligere enn forrige oppgitte`() {
         val avkorting =

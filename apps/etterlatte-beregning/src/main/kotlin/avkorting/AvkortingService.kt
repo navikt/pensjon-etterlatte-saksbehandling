@@ -79,7 +79,7 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
         request: AvkortingGrunnlagRequest,
     ): AvkortingDto {
-        val lagreGrunnlag = request.innevaerendeAar
+        val lagreGrunnlag = request.innevaerendeAar // TODO
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 

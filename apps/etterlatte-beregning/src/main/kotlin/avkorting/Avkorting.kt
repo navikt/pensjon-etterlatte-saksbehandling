@@ -332,7 +332,6 @@ data class Avkorting(
      */
     private fun hentEllerOpprettAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
         val funnet = aarsoppgjoer.find { it.aar == fom.year }
-        // TODO flytt.. throw NyttAarMaaStarteIJanuar()
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
             aar = fom.year,

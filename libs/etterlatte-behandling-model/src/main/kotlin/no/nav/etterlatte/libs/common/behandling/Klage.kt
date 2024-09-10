@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
@@ -131,6 +133,26 @@ data class Klage(
     val innkommendeDokument: InnkommendeKlage?,
     val aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
 ) {
+    fun oppdaterMottattDato(nyDato: LocalDate): Klage {
+        if (!KlageStatus.kanEndres(this.status)) {
+            throw KlageKanIkkeEndres(
+                "Kan ikke oppdatere mottatt dato for klagen med id=$id, " +
+                    "siden klagen har status=$status",
+            )
+        }
+        if (this.innkommendeDokument == null) {
+            throw InternfeilException(
+                "Klagen med id=$id har ikke satt noe innkommende dokument, og da har vi ikke " +
+                    "noen dato å endre på. Klagen burde ikke blitt opprettet uten det innkommende dokumentet.",
+            )
+        }
+        val nyttInnkommendeDokument =
+            this.innkommendeDokument.copy(
+                mottattDato = nyDato,
+            )
+        return this.copy(innkommendeDokument = nyttInnkommendeDokument)
+    }
+
     fun oppdaterFormkrav(
         formkrav: Formkrav,
         saksbehandlerIdent: String,
@@ -751,3 +773,7 @@ data class EkstradataInnstilling(
     val journalpostSoeknad: String?,
     val journalpostVedtak: String?,
 )
+
+class KlageKanIkkeEndres(
+    override val detail: String,
+) : UgyldigForespoerselException(code = "KLAGE_KAN_IKKE_ENDRES", detail = detail)

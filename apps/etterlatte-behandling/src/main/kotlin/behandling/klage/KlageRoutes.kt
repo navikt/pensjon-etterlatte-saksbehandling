@@ -141,6 +141,16 @@ internal fun Route.klageRoutes(
                 }
             }
 
+            put("mottattdato") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OppdaterMottattDatoRequest> {
+                        inTransaction {
+                            klageService.oppdaterMottattDato(klageId, it.parseMottattDato(), saksbehandler)
+                        }
+                    }
+                }
+            }
+
             post("avbryt") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     medBody<AvbrytKlageDto> { avbrytKlageDto ->
@@ -200,6 +210,12 @@ internal fun Route.klageRoutes(
             call.respond(klager)
         }
     }
+}
+
+data class OppdaterMottattDatoRequest(
+    val mottattDato: String,
+) {
+    fun parseMottattDato(): LocalDate = Tidspunkt(OffsetDateTime.parse(mottattDato).toInstant()).toNorskLocalDate()
 }
 
 private fun sjekkStoetterUtfallHvisAvvist(

@@ -144,9 +144,11 @@ internal fun Route.klageRoutes(
             put("mottattdato") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     medBody<OppdaterMottattDatoRequest> {
-                        inTransaction {
-                            klageService.oppdaterMottattDato(klageId, it.parseMottattDato(), saksbehandler)
-                        }
+                        val klage =
+                            inTransaction {
+                                klageService.oppdaterMottattDato(klageId, it.parseMottattDato(), saksbehandler)
+                            }
+                        call.respond(klage)
                     }
                 }
             }

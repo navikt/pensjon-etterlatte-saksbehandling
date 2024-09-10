@@ -53,6 +53,8 @@ class BeregningsGrunnlagRepository(
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
                                 "beregnings_metode_flere_avdoede" to
                                     beregningsGrunnlag.beregningsMetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
+                                "kun_en_juridisk_forelder" to
+                                    beregningsGrunnlag.kunEnJuridiskForelder?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -119,7 +121,8 @@ class BeregningsGrunnlagRepository(
                 institusjonsopphold,
                 beregningsmetode,
                 kilde,
-                beregnings_metode_flere_avdoede
+                beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder
             )
             VALUES (
                 :behandlings_id,
@@ -127,7 +130,8 @@ class BeregningsGrunnlagRepository(
                 :institusjonsopphold,
                 :beregningsmetode,
                 :kilde,
-                :beregnings_metode_flere_avdoede
+                :beregnings_metode_flere_avdoede,
+                :kun_en_juridisk_forelder
             )
             """.trimMargin()
 
@@ -139,7 +143,8 @@ class BeregningsGrunnlagRepository(
                 institusjonsopphold = :institusjonsopphold,
                 beregningsmetode = :beregningsmetode,
                 kilde = :kilde,
-                beregnings_metode_flere_avdoede = :beregnings_metode_flere_avdoede
+                beregnings_metode_flere_avdoede = :beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder = :kun_en_juridisk_forelder
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
@@ -151,7 +156,8 @@ class BeregningsGrunnlagRepository(
                 institusjonsopphold,
                 beregningsmetode,
                 kilde,
-                beregnings_metode_flere_avdoede
+                beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -255,6 +261,10 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
             this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
                 objectMapper.readValue(it)
             } ?: emptyList(),
+        kunEnJuridiskForelder =
+            this.stringOrNull("kun_en_juridisk_forelder")?.let {
+                objectMapper.readValue(it)
+            },
     )
 
 private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =

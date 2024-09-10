@@ -240,3 +240,11 @@ fun <T> erGrunnlagLiktFoerEnDato(
     // nå skal de være like
     return g1 == g2
 }
+
+/**
+ * TomVerdi brukes for å representere at det ikke er noe meningsbærende data i GrunnlagMedPeriode.
+ * I mosetning til Unit som også kan representere "Kun en verdi av denne typen" er TomVerdi et data object,
+ * som betyr at den overstyrer equals/hashcode/toString, og to GrunnlagMedPeriode<TomVerdi> vil være like
+ * hvis datoene er like, i motsetning til to GrunnlagMedPeriode<Unit>.
+ */
+data object TomVerdi

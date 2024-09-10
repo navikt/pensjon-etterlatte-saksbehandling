@@ -202,6 +202,7 @@ internal class BeregningRepositoryTest(
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+                    kunEnJuridiskForelder = true,
                 ),
             ),
         overstyrBeregning = overstyrBeregning,

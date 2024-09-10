@@ -6,10 +6,14 @@ import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
@@ -28,6 +32,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 internal class InntektsjusteringVarselOmVedtakRiver(
     rapidsConnection: RapidsConnection,
@@ -76,10 +81,16 @@ internal class InntektsjusteringVarselOmVedtakRiver(
                 )
             },
             haandterSaker = { sakerSomSkalInformeres ->
-                sakerSomSkalInformeres.saker.forEach {
-                    // TODO: sjekk på inntekt
+                sakerSomSkalInformeres.saker.forEach { sak ->
+                    logger.info("$kjoering: Klar til å opprette, journalføre og distribuere brev om vedtak for sakId ${sak.id}")
+                    behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
 
-                    opprettBrev(it, kjoering, packet, context)
+                    val sakMedBehandlinger = behandlingService.hentBehandlingerForSak(FoedselsnummerDTO(sak.ident))
+                    if (skalHaVarselOmVedtak(sakMedBehandlinger.behandlinger, loependeFom)) {
+                        opprettBrev(sak, packet, context)
+                    } else {
+                        behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT, kjoering)
+                    }
                 }
             },
         )
@@ -89,13 +100,9 @@ internal class InntektsjusteringVarselOmVedtakRiver(
 
     private fun opprettBrev(
         sak: Sak,
-        kjoering: String,
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("$kjoering: Klar til å opprette, journalføre og distribuere brev for sakId ${sak.id}")
-        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
-
         packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
         packet.sakId = sak.id
         packet[BREVMAL_RIVER_KEY] = Brevkoder.OMS_INNTEKTSJUSTERING
@@ -111,3 +118,16 @@ enum class InntektsjusterinFeatureToggle(
 
     override fun key() = key
 }
+
+fun skalHaVarselOmVedtak(
+    behandlinger: List<BehandlingSammendrag>,
+    loependeFom: YearMonth,
+): Boolean =
+    behandlinger.any {
+        it.status == BehandlingStatus.IVERKSATT &&
+            it.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
+            !(
+                it.virkningstidspunkt?.dato?.year == loependeFom.year &&
+                    it.virkningstidspunkt?.dato?.monthValue == 1
+            )
+    }

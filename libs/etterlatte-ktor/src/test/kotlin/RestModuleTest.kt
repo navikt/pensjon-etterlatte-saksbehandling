@@ -260,8 +260,18 @@ class RestModuleTest {
                 }.also {
                     val body = it.body<ExceptionResponse>()
                     assertEquals(NotFound.value, body.status)
-                    assertEquals("NOT_FOUND", body.code)
+                    assertEquals("ROUTE_NOT_CONFIGURED", body.code)
                 }
+            client
+                .get("route_som_ikke_finnes_og_vi/bare/fallbacker/til/ktorhaandtering") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, ContentType.Application.Json)
+                }.also {
+                    val body = it.body<ExceptionResponse>()
+                    assertEquals(NotFound.value, body.status)
+                    assertEquals("ROUTE_NOT_CONFIGURED", body.code)
+                }
+
             client
                 .get("intern/vilkaarlig") {
                     header(HttpHeaders.Authorization, "Bearer $token")

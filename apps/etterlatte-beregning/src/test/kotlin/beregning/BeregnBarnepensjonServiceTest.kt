@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -18,6 +19,7 @@ import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -106,7 +108,7 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBeGreaterThanOrEqual 3
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -117,7 +119,27 @@ internal class BeregnBarnepensjonServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
+                with(beregningsperioder[1]) {
+                    datoFOM shouldBe YearMonth.of(2023, Month.MAY)
+                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_MAI_23
+                    datoTOM shouldBe YearMonth.of(2023, Month.DECEMBER)
+                }
+                with(beregningsperioder[2]) {
+                    datoFOM shouldBe YearMonth.of(2024, Month.JANUARY)
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                }
+
+                // Videre perioder gjenspeiler G-endringer
+                beregningsperioder.drop(3).map { it.datoFOM } shouldContainExactly
+                    GrunnbeloepRepository.historiskeGrunnbeloep
+                        .filter { it.dato > YearMonth.of(2023, Month.DECEMBER) }
+                        .map { it.dato }
+                        .reversed()
+                beregningsperioder.last().datoTOM shouldBe null
+
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+                beregningsperioder.filter { p -> p.datoTOM == null }.size shouldBe 1
             }
         }
     }
@@ -500,17 +522,20 @@ internal class BeregnBarnepensjonServiceTest {
                 datoFOM shouldBe YearMonth.of(2023, 1)
                 datoTOM shouldBe YearMonth.of(2023, 4)
                 avdodeForeldre shouldBe null
+                kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
                 datoTOM shouldBe YearMonth.of(2023, 12)
                 avdodeForeldre shouldBe null
+                kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe forventetUtbetalt
                 avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
+                kunEnJuridiskForelder shouldBe false
             }
         }
     }
@@ -574,6 +599,7 @@ internal class BeregnBarnepensjonServiceTest {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
+                kunEnJuridiskForelder shouldBe false
             }
         }
     }
@@ -918,7 +944,9 @@ internal class BeregnBarnepensjonServiceTest {
         val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val GRUNNBELOEP_MAI_23: Int = 9885
+        const val GRUNNBELOEP_MAI_24: Int = 10336
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
+        const val BP_BELOEP_INGEN_SOESKEN_MAI_23: Int = 3954
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1394
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787

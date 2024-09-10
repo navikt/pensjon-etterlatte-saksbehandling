@@ -18,6 +18,7 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
@@ -90,7 +91,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -100,7 +101,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -110,7 +111,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -120,7 +121,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -130,7 +131,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -140,7 +141,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -169,7 +170,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 

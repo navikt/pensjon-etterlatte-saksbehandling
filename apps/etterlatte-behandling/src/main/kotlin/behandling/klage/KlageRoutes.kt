@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -72,11 +73,9 @@ internal fun Route.klageRoutes(
                 val klage =
                     inTransaction {
                         klageService.hentKlage(klageId)
-                    }
-                when (klage) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(klage)
-                }
+                    } ?: throw GenerellIkkeFunnetException()
+
+                call.respond(klage)
             }
 
             put("formkrav") {

@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -25,10 +26,10 @@ fun Route.behandlingGrunnlagRoute(
     route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(behandlingId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(opplysningsgrunnlag)
-                }
+                val opplysningsgrunnlag =
+                    grunnlagService.hentOpplysningsgrunnlag(behandlingId)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(opplysningsgrunnlag)
             }
         }
 
@@ -42,17 +43,17 @@ fun Route.behandlingGrunnlagRoute(
                 } else if (opplysningstype == Opplysningstype.SOESKEN_I_BEREGNINGEN) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
-                    call.respond(HttpStatusCode.NotFound)
+                    throw GenerellIkkeFunnetException()
                 }
             }
         }
 
         get("revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                when (val historisk = grunnlagService.hentHistoriskForeldreansvar(behandlingId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(historisk)
-                }
+                val historisk =
+                    grunnlagService.hentHistoriskForeldreansvar(behandlingId)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(historisk)
             }
         }
 

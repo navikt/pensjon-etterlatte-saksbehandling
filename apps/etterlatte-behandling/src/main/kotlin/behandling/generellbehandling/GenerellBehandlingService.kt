@@ -229,13 +229,19 @@ class GenerellBehandlingService(
         generellbehandlingId: UUID,
         saksbehandler: Saksbehandler,
         kommentar: Kommentar,
+        sakId: SakId,
     ) {
-        val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
-        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
-        require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
-            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
+        val behandling = hentBehandlingMedId(generellbehandlingId)
+        require(behandling != null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
+        require(behandling.status === GenerellBehandling.Status.FATTET) {
+            "Behandlingen må ha status FATTET, hadde: ${behandling.status}"
         }
-        val behandling = hentetBehandling!!
+        if (sakId != behandling.sakId) {
+            throw SakParameterStemmerIkkeException(
+                "Behandlingen med id $generellbehandlingId" +
+                    " tilhører ikke sak $sakId, som ble sendt inn.",
+            )
+        }
 
         oppgaveService.tilUnderkjent(
             referanse = behandling.id.toString(),
@@ -252,7 +258,7 @@ class GenerellBehandlingService(
         )
         opprettHendelse(
             GenerellBehandlingHendelseType.UNDERKJENT,
-            hentetBehandling,
+            behandling,
             saksbehandler,
             kommentar.begrunnelse,
         )
@@ -298,16 +304,32 @@ class GenerellBehandlingService(
 
     fun avbrytBehandling(
         id: UUID,
+        sakId: SakId,
         saksbehandler: BrukerTokenInfo,
     ) {
         val generellBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(id)
+        if (generellBehandling?.sakId != sakId) {
+            throw SakParameterStemmerIkkeException(
+                "Generell behandling med id=${generellBehandling?.id} tilhører ikke sak med id=$sakId, " +
+                    "som ble sendt inn.",
+            )
+        }
         finnesOgErRedigerbar(generellBehandling)
         generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling!!.copy(status = GenerellBehandling.Status.AVBRUTT))
         oppgaveService.avbrytOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
     }
 
-    fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {
+    fun lagreNyeOpplysninger(
+        generellBehandling: GenerellBehandling,
+        sakId: SakId,
+    ): GenerellBehandling {
         val lagretBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(generellBehandling.id)
+        if (generellBehandling.sakId != sakId) {
+            throw SakParameterStemmerIkkeException(
+                "Generell behandling med id=${generellBehandling.id} tilhører ikke sak med id=$sakId, " +
+                    "som ble sendt inn.",
+            )
+        }
         finnesOgErRedigerbar(lagretBehandling)
         return this.oppdaterBehandling(generellBehandling)
     }

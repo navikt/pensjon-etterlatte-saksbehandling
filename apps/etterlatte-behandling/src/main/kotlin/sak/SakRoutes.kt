@@ -21,6 +21,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -82,8 +83,8 @@ internal fun Route.sakSystemRoutes(
                 val sak =
                     inTransaction {
                         sakService.finnSak(sakId)
-                    }
-                call.respond(sak ?: HttpStatusCode.NotFound)
+                    } ?: throw GenerellIkkeFunnetException()
+                call.respond(sak)
             }
 
             get("/behandlinger/sisteIverksatte") {
@@ -94,9 +95,9 @@ internal fun Route.sakSystemRoutes(
                         behandlingService
                             .hentSisteIverksatte(sakId)
                             ?.let { SisteIverksatteBehandling(it.id) }
-                    }
+                    } ?: GenerellIkkeFunnetException()
 
-                call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
+                call.respond(sisteIverksatteBehandling)
             }
         }
     }
@@ -118,8 +119,8 @@ internal fun Route.sakSystemRoutes(
             val sak =
                 inTransaction { sakService.finnSak(fnr.value, type) }.also {
                     requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak")
-                }
-            call.respond(sak ?: HttpStatusCode.NotFound)
+                } ?: throw GenerellIkkeFunnetException()
+            call.respond(sak)
         }
     }
 }
@@ -154,8 +155,8 @@ internal fun Route.sakWebRoutes(
                 val sak =
                     inTransaction {
                         sakService.finnSak(sakId)
-                    }
-                call.respond(sak ?: HttpStatusCode.NotFound)
+                    } ?: throw GenerellIkkeFunnetException()
+                call.respond(sak)
             }
 
             get("/grunnlagsendringshendelser") {
@@ -213,10 +214,8 @@ internal fun Route.sakWebRoutes(
 
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
-                }
+                val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) } ?: throw GenerellIkkeFunnetException()
+                call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
             }
 
             get("/hendelser") {

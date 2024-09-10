@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.bosattutland
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -9,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
@@ -25,10 +25,10 @@ internal fun Route.bosattUtlandRoutes(bosattUtlandService: BosattUtlandService) 
         }
         get {
             kunSaksbehandler {
-                when (val bosattUtland = inTransaction { bosattUtlandService.hentBosattUtland(behandlingId) }) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(bosattUtland)
-                }
+                val bosattUtland =
+                    inTransaction { bosattUtlandService.hentBosattUtland(behandlingId) }
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(bosattUtland)
             }
         }
     }

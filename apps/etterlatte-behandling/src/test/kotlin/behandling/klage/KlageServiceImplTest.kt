@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageKanIkkeEndres
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
@@ -48,6 +49,7 @@ import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -64,6 +66,7 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -277,6 +280,66 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                         ),
                     saksbehandler = saksbehandler,
                 )
+            }
+        }
+    }
+
+    @Test
+    fun `oppdaterMottattDato går bra hvis klagen er redigerbar`() {
+        val foersteDato = LocalDate.now()
+        val korrigertDato = foersteDato.minusMonths(1)
+
+        val klage =
+            inTransaction {
+                val sak = oppprettOmsSak()
+                service.opprettKlage(sak.id, InnkommendeKlage(foersteDato, "", ""), saksbehandler)
+            }
+        val oppdatertKlage =
+            inTransaction {
+                service.oppdaterMottattDato(klage.id, korrigertDato, saksbehandler)
+            }
+
+        assertEquals(klage.innkommendeDokument?.mottattDato, foersteDato)
+        assertEquals(oppdatertKlage.innkommendeDokument?.mottattDato, korrigertDato)
+    }
+
+    @Test
+    fun `oppdaterMottattDato feiler hvis klagen er avbrutt`() {
+        val foersteDato = LocalDate.now()
+        val korrigertDato = foersteDato.minusMonths(1)
+
+        val klage =
+            inTransaction {
+                val sak = oppprettOmsSak()
+                service.opprettKlage(sak.id, InnkommendeKlage(foersteDato, "", ""), saksbehandler)
+            }
+        inTransaction {
+            val klageOppgave = oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single()
+            oppgaveService.tildelSaksbehandler(klageOppgave.id, saksbehandler.ident)
+            service.avbrytKlage(klage.id, AarsakTilAvbrytelse.ANNET, "", saksbehandler)
+        }
+
+        shouldThrow<KlageKanIkkeEndres> {
+            inTransaction {
+                service.oppdaterMottattDato(klage.id, korrigertDato, saksbehandler)
+            }
+        }
+    }
+
+    @Test
+    fun `oppdaterMottattDato feiler hvis datoen er i framtiden`() {
+        val foersteDato = LocalDate.now()
+        val korrigertDato = foersteDato.plusMonths(1)
+
+        val klage =
+            inTransaction {
+                val sak = oppprettOmsSak()
+                service.opprettKlage(sak.id, InnkommendeKlage(foersteDato, "", ""), saksbehandler)
+            }
+
+        shouldThrow<UgyldigForespoerselException> {
+            inTransaction {
+                service.oppdaterMottattDato(klage.id, korrigertDato, saksbehandler)
             }
         }
     }

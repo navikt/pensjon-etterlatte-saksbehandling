@@ -1,4 +1,4 @@
-import { useKlage } from '~components/klage/useKlage'
+import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
 import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
@@ -19,6 +19,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { RedigerMottattDato } from '~components/klage/sidemeny/RedigerMottattDato'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -27,6 +28,7 @@ export function KlageSidemeny() {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const kanAttestere = !!klage && innloggetSaksbehandler.kanAttestere && klage.status === KlageStatus.FATTET_VEDTAK
+  const erRedigerbar = useKlageRedigerbar()
 
   useEffect(() => {
     if (!klage) return
@@ -80,6 +82,8 @@ export function KlageSidemeny() {
               </Detail>
             </div>
           </HStack>
+
+          {erRedigerbar && <RedigerMottattDato />}
         </VStack>
       </SidebarPanel>
       {kanAttestere && (

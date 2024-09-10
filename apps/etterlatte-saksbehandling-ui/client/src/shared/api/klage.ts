@@ -44,6 +44,14 @@ export function oppdaterInitieltUtfallForKlage(args: {
   })
 }
 
+export function oppdaterMottattDatoForKlage(args: {
+  klageId: string
+  mottattDato: string
+}): Promise<ApiResponse<Klage>> {
+  const { klageId, mottattDato } = args
+  return apiClient.put(`/klage/${klageId}/mottattdato`, { mottattDato })
+}
+
 export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse<Klage>> {
   return apiClient.post(`/klage/${klageId}/ferdigstill`, {})
 }

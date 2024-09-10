@@ -48,7 +48,8 @@ class KlageDaoImpl(
                                 utfall = excluded.utfall,
                                 initielt_utfall = excluded.initielt_utfall,
                                 resultat = excluded.resultat,
-                                aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse
+                                aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse,
+                                innkommende_klage = excluded.innkommende_klage
                         """.trimIndent(),
                     )
                 statement.setObject(1, klage.id)

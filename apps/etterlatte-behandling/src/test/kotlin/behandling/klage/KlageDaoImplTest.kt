@@ -54,9 +54,10 @@ internal class KlageDaoImplTest(
     }
 
     @Test
-    fun `lagreKlage oppdaterer status og formkrav hvis klagen allerede eksisterer`() {
+    fun `lagreKlage oppdaterer status, innkommende klage og formkrav hvis klagen allerede eksisterer`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val klage = Klage.ny(sak, null)
+        val foersteMottattDato = LocalDate.now()
+        val klage = Klage.ny(sak, InnkommendeKlage(foersteMottattDato, "", ""))
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)
@@ -81,10 +82,15 @@ internal class KlageDaoImplTest(
                 Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
             )
 
+        val andreDato = foersteMottattDato.minusMonths(1)
         val oppdatertKlage =
             klage.copy(
                 status = KlageStatus.FORMKRAV_OPPFYLT,
                 formkrav = formkrav,
+                innkommendeDokument =
+                    klage.innkommendeDokument?.copy(
+                        mottattDato = andreDato,
+                    ),
             )
         klageDao.lagreKlage(oppdatertKlage)
 
@@ -92,6 +98,7 @@ internal class KlageDaoImplTest(
 
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, hentetKlage?.status)
         Assertions.assertEquals(formkrav, hentetKlage?.formkrav)
+        Assertions.assertEquals(andreDato, hentetKlage?.innkommendeDokument?.mottattDato)
     }
 
     @Test

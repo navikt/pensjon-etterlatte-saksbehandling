@@ -72,7 +72,7 @@ class Behandler(
             return
         }
         logger.info("Lagrer beregningsgrunnlag")
-        beregningService.lagreBeregningsgrunnlag(behandling, sak.sakType, bruker)
+        beregningService.lagreBeregningsgrunnlag(behandling, bruker)
         logger.info("Lagra beregningsgrunnlag, klar til beregning")
         beregningService.beregn(behandling, bruker)
         logger.info("Beregna behandling $behandling i sak $sakId")

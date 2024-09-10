@@ -3,9 +3,12 @@ package no.nav.etterlatte.behandling.bosattutland
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ForventaResultat
+import no.nav.etterlatte.libs.database.SQLJsonb
+import no.nav.etterlatte.libs.database.SQLObject
+import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.opprett
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -13,37 +16,29 @@ class BosattUtlandDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     fun lagreBosattUtland(bosattUtland: BosattUtland) =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing.opprett(
+            """
                         insert into bosattutland(behandlingid, rinanummer, mottattSeder, sendteSeder)
                             VALUES(?,?,?,?)
                             ON CONFLICT(behandlingid)
                             DO UPDATE SET rinanummer = excluded.rinanummer,
                             mottattSeder = excluded.mottattSeder, sendteSeder = excluded.sendteSeder
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, bosattUtland.behandlingId)
-                statement.setObject(2, bosattUtland.rinanummer)
-                statement.setJsonb(3, bosattUtland.mottatteSeder)
-                statement.setJsonb(4, bosattUtland.sendteSeder)
-                require(statement.executeUpdate() == 1)
-            }
-        }
+                        """,
+            mapOf(
+                1 to SQLObject(bosattUtland.behandlingId),
+                2 to SQLObject(bosattUtland.rinanummer),
+                3 to SQLJsonb(bosattUtland.mottatteSeder),
+                4 to SQLJsonb(bosattUtland.sendteSeder),
+            ),
+            ForventaResultat.RADER,
+        )
 
     fun hentBosattUtland(behandlingId: UUID): BosattUtland? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        "SELECT behandlingid, rinanummer, mottattSeder, sendteSeder from bosattutland where behandlingid = ?",
-                    )
-                statement.setObject(1, behandlingId)
-                statement.executeQuery().singleOrNull { toBosattUtland() }
-            }
-        }
+        connectionAutoclosing
+            .hent(
+                "SELECT behandlingid, rinanummer, mottattSeder, sendteSeder from bosattutland where behandlingid = ?",
+                mapOf(1 to SQLObject(behandlingId)),
+            ) { toBosattUtland() }
 
     private fun ResultSet.toBosattUtland(): BosattUtland =
         BosattUtland(

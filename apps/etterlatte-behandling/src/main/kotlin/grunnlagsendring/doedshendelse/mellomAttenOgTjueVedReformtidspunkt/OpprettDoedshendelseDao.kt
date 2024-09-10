@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.mellom18og20PaaReformtidspunkt
 
-import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.toList
 
 enum class OpprettDoedshendelseStatus {

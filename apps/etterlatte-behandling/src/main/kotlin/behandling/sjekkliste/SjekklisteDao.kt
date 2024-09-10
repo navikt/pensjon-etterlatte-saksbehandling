@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.sjekkliste
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.hendelse.getUUID
-import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID

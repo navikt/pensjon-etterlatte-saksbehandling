@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.single
 import java.sql.ResultSet
 import java.util.UUID

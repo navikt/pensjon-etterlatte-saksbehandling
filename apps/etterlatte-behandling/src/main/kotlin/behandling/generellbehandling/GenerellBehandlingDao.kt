@@ -2,16 +2,20 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.single
-import no.nav.etterlatte.libs.database.singleOrNull
-import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
+import no.nav.etterlatte.libs.database.SQLJsonb
+import no.nav.etterlatte.libs.database.SQLLong
+import no.nav.etterlatte.libs.database.SQLObject
+import no.nav.etterlatte.libs.database.SQLString
+import no.nav.etterlatte.libs.database.SQLTidspunkt
+import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.hentListe
+import no.nav.etterlatte.libs.database.oppdaterOgReturner
+import no.nav.etterlatte.libs.database.opprettOgReturner
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -19,104 +23,72 @@ class GenerellBehandlingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing.opprettOgReturner(
+            """
                         INSERT INTO generellbehandling(id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status)
                         VALUES(?::UUID, ?, ?, ?, ?, ?, ?)
                         RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, generellBehandling.id)
-                statement.setJsonb(2, generellBehandling.innhold)
-                statement.setLong(3, generellBehandling.sakId)
-                statement.setTidspunkt(4, generellBehandling.opprettet)
-                statement.setString(5, generellBehandling.type.name)
-                statement.setObject(6, generellBehandling.tilknyttetBehandling)
-                statement.setString(7, generellBehandling.status.name)
-
-                statement.executeQuery().single { toGenerellBehandling() }
-            }
-        }
+                        """,
+            mapOf(
+                1 to SQLObject(generellBehandling.id),
+                2 to SQLJsonb(generellBehandling.innhold),
+                3 to SQLLong(generellBehandling.sakId),
+                4 to SQLTidspunkt(generellBehandling.opprettet),
+                5 to SQLString(generellBehandling.type.name),
+                6 to SQLObject(generellBehandling.tilknyttetBehandling),
+                7 to SQLString(generellBehandling.status.name),
+            ),
+        ) { toGenerellBehandling() }
 
     fun oppdaterGenerellBehandling(generellBehandling: GenerellBehandling): GenerellBehandling =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing.oppdaterOgReturner(
+            """
                         UPDATE generellbehandling
                         SET innhold = ?, status = ?, behandler = ?, attestant = ?, kommentar = ?
                         where id = ?
                         RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
-                        """.trimIndent(),
-                    )
-                statement.setJsonb(1, generellBehandling.innhold)
-                statement.setString(2, generellBehandling.status.name)
-                statement.setJsonb(3, generellBehandling.behandler)
-                statement.setJsonb(4, generellBehandling.attestant)
-                statement.setString(5, generellBehandling.returnertKommenar)
-                statement.setObject(6, generellBehandling.id)
-                statement.executeQuery().single { toGenerellBehandling() }
-            }
-        }
+                        """,
+            mapOf(
+                1 to SQLJsonb(generellBehandling.innhold),
+                2 to SQLString(generellBehandling.status.name),
+                3 to SQLJsonb(generellBehandling.behandler),
+                4 to SQLJsonb(generellBehandling.attestant),
+                5 to SQLString(generellBehandling.returnertKommenar),
+                6 to SQLObject(generellBehandling.id),
+            ),
+        ) { toGenerellBehandling() }
 
     fun hentGenerellBehandlingMedId(id: UUID): GenerellBehandling? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing
+            .hent(
+                """
                         SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         FROM generellbehandling
                         WHERE id = ?
-                        """.trimIndent(),
-                    )
-                statement.setObject(1, id)
-                statement.executeQuery().singleOrNull {
-                    toGenerellBehandling()
-                }
-            }
-        }
+                        """,
+                mapOf(1 to SQLObject(id)),
+            ) { toGenerellBehandling() }
 
     fun hentGenerellBehandlingForSak(sakId: SakId): List<GenerellBehandling> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing.hentListe(
+            """
                         SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         FROM generellbehandling
                         WHERE sak_id = ?
-                        """.trimIndent(),
-                    )
-                statement.setLong(1, sakId)
-                statement.executeQuery().toList {
-                    toGenerellBehandling()
-                }
-            }
-        }
+                        """,
+            mapOf(1 to SQLLong(sakId)),
+        ) { toGenerellBehandling() }
 
     fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
+        connectionAutoclosing
+            .hent(
+                """
                         SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant, kommentar
                         FROM generellbehandling
                         WHERE tilknyttet_behandling = ?::uuid
-                        """.trimIndent(),
-                    )
-
-                statement.setObject(1, tilknyttetBehandlingId)
-                statement.executeQuery().singleOrNull {
-                    toGenerellBehandling()
-                }
-            }
-        }
+                        """,
+                mapOf(1 to SQLObject(tilknyttetBehandlingId)),
+            ) { toGenerellBehandling() }
 
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling =
         GenerellBehandling(

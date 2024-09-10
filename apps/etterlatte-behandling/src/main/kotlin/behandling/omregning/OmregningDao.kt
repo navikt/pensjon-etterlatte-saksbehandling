@@ -1,8 +1,8 @@
 package no.nav.etterlatte.behandling.omregning
 
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.database.ConnectionAutoclosing
 
 class OmregningDao(
     private val connection: ConnectionAutoclosing,

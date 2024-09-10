@@ -130,6 +130,13 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: eessi-pensjon-journalforing
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+              - les-bp-sak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

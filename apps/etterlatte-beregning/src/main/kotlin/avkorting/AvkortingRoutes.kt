@@ -13,7 +13,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -47,7 +47,7 @@ fun Route.avkorting(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")
-                val request = call.receive<AvkortingGrunnlagRequest>()
+                val request = call.receive<AvkortingGrunnlagLagreDto>()
                 val avkorting =
                     avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,

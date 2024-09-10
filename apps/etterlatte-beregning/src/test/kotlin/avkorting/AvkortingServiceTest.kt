@@ -14,14 +14,12 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.AfterEach
@@ -37,14 +35,12 @@ internal class AvkortingServiceTest {
     private val avkortingRepository: AvkortingRepository = mockk()
     private val beregningService: BeregningService = mockk()
     private val sanksjonService: SanksjonService = mockk()
-    private val featureToggle: FeatureToggleService = mockk()
     private val service =
         AvkortingService(
             behandlingKlient,
             avkortingRepository,
             beregningService,
             sanksjonService,
-            featureToggle,
         )
 
     @BeforeEach
@@ -383,7 +379,7 @@ internal class AvkortingServiceTest {
                 service.beregnAvkortingMedNyttGrunnlag(
                     behandlingId,
                     bruker,
-                    AvkortingGrunnlagRequest(endretGrunnlag),
+                    endretGrunnlag,
                 ) shouldBe avkortingDto
             }
 
@@ -445,7 +441,7 @@ internal class AvkortingServiceTest {
                 service.beregnAvkortingMedNyttGrunnlag(
                     revurderingId,
                     bruker,
-                    AvkortingGrunnlagRequest(endretGrunnlag),
+                    endretGrunnlag,
                 ) shouldBe avkortingDto
             }
 
@@ -483,7 +479,7 @@ internal class AvkortingServiceTest {
                     service.beregnAvkortingMedNyttGrunnlag(
                         behandlingId,
                         bruker,
-                        AvkortingGrunnlagRequest(avkortinggrunnlagLagre(fom = YearMonth.of(2024, 1))),
+                        avkortinggrunnlagLagre(fom = YearMonth.of(2024, 1)),
                     )
                 }
             }

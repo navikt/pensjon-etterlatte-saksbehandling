@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -139,16 +138,14 @@ class AvkortingRoutesTest {
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     val request =
                         avkorting.avkortingGrunnlag[0].let {
-                            AvkortingGrunnlagRequest(
-                                AvkortingGrunnlagLagreDto(
-                                    id = it.id,
-                                    aarsinntekt = it.aarsinntekt,
-                                    fratrekkInnAar = it.fratrekkInnAar,
-                                    inntektUtland = it.inntektUtland,
-                                    fratrekkInnAarUtland = it.fratrekkInnAarUtland,
-                                    spesifikasjon = it.spesifikasjon,
-                                    fom = dato,
-                                ),
+                            AvkortingGrunnlagLagreDto(
+                                id = it.id,
+                                aarsinntekt = it.aarsinntekt,
+                                fratrekkInnAar = it.fratrekkInnAar,
+                                inntektUtland = it.inntektUtland,
+                                fratrekkInnAarUtland = it.fratrekkInnAarUtland,
+                                spesifikasjon = it.spesifikasjon,
+                                fom = dato,
                             )
                         }
                     setBody(request.toJson())
@@ -164,9 +161,9 @@ class AvkortingRoutesTest {
                     behandlingsId,
                     any(),
                     withArg {
-                        it.innevaerendeAar.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
-                        it.innevaerendeAar.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
-                        it.innevaerendeAar.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
+                        it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
+                        it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
+                        it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                     },
                 )
             }

@@ -76,7 +76,7 @@ export const BrevutfallVisning = (props: {
                   <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                 </VStack>
               </HStack>
-              {sakType == SakType.BARNEPENSJON && !!brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav && (
+              {sakType == SakType.BARNEPENSJON && (
                 <>
                   <VStack gap="2">
                     <Label>Er det krav i etterbetalingen?</Label>

@@ -504,23 +504,6 @@ internal class AvkortingTest {
                     }
                 }
             }
-
-            /*
-            TODO må flyttes
-            @Test
-            fun `Ny inntekt for et aarsoppgjoer som ikke finnes maa gjelde fra januer`() {
-                val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
-                val virkningstidspunkt = YearMonth.of(2025, Month.FEBRUARY)
-
-                assertThrows<NyttAarMaaStarteIJanuar> {
-                    avkorting.oppdaterMedInntektsgrunnlag(
-                        nyttGrunnlag,
-                        virkningstidspunkt,
-                        bruker,
-                    )
-                }
-            }
-             */
         }
     }
 

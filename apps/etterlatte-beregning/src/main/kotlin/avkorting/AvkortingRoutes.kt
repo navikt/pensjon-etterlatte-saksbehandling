@@ -47,12 +47,12 @@ fun Route.avkorting(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")
-                val request = call.receive<AvkortingGrunnlagLagreDto>()
+                val avkortingGrunnlag = call.receive<AvkortingGrunnlagLagreDto>()
                 val avkorting =
                     avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
-                        request,
+                        avkortingGrunnlag,
                     )
                 call.respond(avkorting)
             }

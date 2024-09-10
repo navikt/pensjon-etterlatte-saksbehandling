@@ -84,7 +84,7 @@ object AvkortingValider {
                         nyligsteInntekt.grunnlag.fratrekkInnAarUtland != nyInntekt.fratrekkInnAarUtland
                 )
             ) {
-                throw RevurderingHarEndretFratrekkInnAar() // TODO rename
+                throw RevurderingHarEndretFratrekkInnAar()
             }
         }
         if (fom.month == Month.JANUARY) {

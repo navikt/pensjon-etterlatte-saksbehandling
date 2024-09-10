@@ -8,7 +8,6 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -551,9 +550,3 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
 
     return eksisterendeAvrundetPerioder + nyYtelseFoerAvkorting
 }
-
-class NyttAarMaaStarteIJanuar :
-    IkkeTillattException(
-        code = "NYTT_AAR_MA_STARTE_I_JANUER",
-        detail = "Et nytt år må startes med et virkningstidspunkt januar.",
-    )

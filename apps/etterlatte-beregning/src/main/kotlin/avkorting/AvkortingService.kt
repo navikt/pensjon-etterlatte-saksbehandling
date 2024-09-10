@@ -2,7 +2,6 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -12,7 +11,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -88,7 +86,7 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
-        var beregnetAvkorting =
+        val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 lagreGrunnlag,
                 brukerTokenInfo,
@@ -218,18 +216,3 @@ class AvkortingBehandlingFeilStatus(
         code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
         detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
     )
-
-class AvkortingStoetterIkkeToInnektsaar :
-    UgyldigForespoerselException(
-        code = "AVKORTING_STOETTER_IKKE_TO_INNTEKTSAAR",
-        detail = "Årsinntekt for to ulike år støttes ikke enda.",
-    )
-
-enum class ReguleringFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    AARSINNTEKT_FOR_TO_AAR("oms-aarsinntekt-for-to-aar"),
-    ;
-
-    override fun key() = key
-}

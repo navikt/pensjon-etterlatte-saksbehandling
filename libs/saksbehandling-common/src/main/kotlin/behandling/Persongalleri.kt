@@ -61,11 +61,13 @@ data class RedigertFamilieforhold(
 
 data class AnnenForelder(
     val vurdering: AnnenForelderVurdering,
-    val begrunnelse: String,
+    val begrunnelse: String?,
+    val navn: String?,
+    val foedselsdato: LocalDate?,
 ) {
     enum class AnnenForelderVurdering {
         KUN_EN_REGISTRERT_JURIDISK_FORELDER,
-        UKJENT_FORELDER_IKKE_NORSK_FNR,
-        IKKE_SAMSVAR_MED_PDL,
+        FORELDER_UTEN_IDENT_I_PDL,
+        AVDOED_FORELDER_UTEN_IDENT_I_PDL,
     }
 }

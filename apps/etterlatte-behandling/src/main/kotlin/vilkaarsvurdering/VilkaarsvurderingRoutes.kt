@@ -11,6 +11,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
@@ -38,13 +39,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             logger.info("Henter vilkårsvurdering for $behandlingId")
-            val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+            val vilkaarsvurdering = inTransaction { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) }
 
             if (vilkaarsvurdering != null) {
                 call.respond(
                     toDto(
                         vilkaarsvurdering,
-                        behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                        inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                     ),
                 )
             } else {
@@ -55,19 +56,19 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
             logger.info("Henter vilkårsvurdering for $behandlingId")
-            val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId)
+            val result = inTransaction { vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId) }
             call.respond(MigrertYrkesskadefordel(result))
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/rett-uten-tidsbegrensning") {
             logger.info("Henter vilkårsvurdering for $behandlingId")
-            val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
+            val result = inTransaction { vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId) }
             call.respond(mapOf("rettUtenTidsbegrensning" to result))
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/typer") {
             logger.info("Henter vilkårtyper for $behandlingId")
-            val result = vilkaarsvurderingService.hentVilkaartyper(behandlingId)
+            val result = inTransaction { vilkaarsvurderingService.hentVilkaartyper(behandlingId) }
             call.respond(VilkaartypeDTO(result))
         }
 
@@ -79,11 +80,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
                 logger.info("Oppretter vilkårsvurdering for $behandlingId")
                 val (vilkaarsvurdering, behandlingGrunnlagsversjon) =
-                    vilkaarsvurderingService.opprettVilkaarsvurdering(
-                        behandlingId,
-                        brukerTokenInfo,
-                        kopierVedRevurdering,
-                    )
+                    inTransaction {
+                        vilkaarsvurderingService.opprettVilkaarsvurdering(
+                            behandlingId,
+                            brukerTokenInfo,
+                            kopierVedRevurdering,
+                        )
+                    }
 
                 call.respond(
                     toDto(
@@ -110,11 +113,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             try {
                 logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
                 val (vilkaarsvurdering, behandlingGrunnversjon) =
-                    vilkaarsvurderingService.kopierVilkaarsvurdering(
-                        behandlingId = behandlingId,
-                        kopierFraBehandling = forrigeBehandling,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
+                    inTransaction {
+                        vilkaarsvurderingService.kopierVilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            kopierFraBehandling = forrigeBehandling,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
 
                 call.respond(
                     toDto(
@@ -122,7 +127,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         behandlingGrunnversjon,
                     ),
                 )
-            } catch (e: VirkningstidspunktIkkeSattException) {
+            } catch (_: VirkningstidspunktIkkeSattException) {
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
             } catch (e: BehandlingstilstandException) {
@@ -148,15 +153,17 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
             try {
                 val vilkaarsvurdering =
-                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                        behandlingId,
-                        brukerTokenInfo,
-                        vurdertVilkaar,
-                    )
+                    inTransaction {
+                        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
+                            behandlingId,
+                            brukerTokenInfo,
+                            vurdertVilkaar,
+                        )
+                    }
                 call.respond(
                     toDto(
                         vilkaarsvurdering,
-                        behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                        inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                     ),
                 )
             } catch (e: BehandlingstilstandException) {
@@ -179,7 +186,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             val statusOppdatert =
-                vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                inTransaction { vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo) }
             call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
         }
 
@@ -188,14 +195,14 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                 try {
                     val vilkaarsvurdering =
-                        vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId)
+                        inTransaction { vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId) }
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
-                } catch (e: BehandlingstilstandException) {
+                } catch (_: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
                             "Statussjekk for behandling feilet",
@@ -215,7 +222,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             logger.info("Sletter vilkårsvurdering for $behandlingId")
 
             try {
-                vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
+                inTransaction { vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo) }
                 call.respond(HttpStatusCode.OK)
             } catch (_: BehandlingstilstandException) {
                 logger.error(
@@ -237,18 +244,20 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                 try {
                     val (vilkaarsvurdering, behandlingGrunnlagversjon) =
-                        vilkaarsvurderingService.oppdaterTotalVurdering(
-                            behandlingId,
-                            brukerTokenInfo,
-                            vurdertResultat,
-                        )
+                        inTransaction {
+                            vilkaarsvurderingService.oppdaterTotalVurdering(
+                                behandlingId,
+                                brukerTokenInfo,
+                                vurdertResultat,
+                            )
+                        }
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
                             behandlingGrunnlagversjon,
                         ),
                     )
-                } catch (e: BehandlingstilstandException) {
+                } catch (_: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
                             "Statussjekk for behandling feilet",
@@ -261,17 +270,19 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                 try {
                     val vilkaarsvurdering =
-                        vilkaarsvurderingService.slettTotalVurdering(
-                            behandlingId,
-                            brukerTokenInfo,
-                        )
+                        inTransaction {
+                            vilkaarsvurderingService.slettTotalVurdering(
+                                behandlingId,
+                                brukerTokenInfo,
+                            )
+                        }
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
-                } catch (e: BehandlingstilstandException) {
+                } catch (_: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke slette vilkårsvurderingsresultat for behandling $behandlingId. " +
                             "Statussjekk feilet for behandling feilet",
@@ -323,7 +334,7 @@ fun toDto(
     behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
 )
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
+private fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
     vilkaarsvurderingService: VilkaarsvurderingService,
     behandlingId: UUID,
 ): Long =

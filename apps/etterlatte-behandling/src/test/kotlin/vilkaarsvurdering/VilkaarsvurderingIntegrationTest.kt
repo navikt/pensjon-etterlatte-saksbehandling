@@ -13,9 +13,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContextWithDb
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
@@ -23,6 +21,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
@@ -141,10 +140,11 @@ internal class VilkaarsvurderingIntegrationTest(
                 grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
                 generellBehandlingService = applicationContext.generellBehandlingService,
             )
+        // Må bruke ConnectionAutoclosingImpl for å at den skal kaste exception hvis ikke den er wrappet med inTransaction
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
                 VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
+                    VilkaarsvurderingRepository(ConnectionAutoclosingImpl(ds), DelvilkaarRepository()),
                 ),
                 behandlingService,
                 grunnlagKlient,
@@ -320,7 +320,7 @@ internal class VilkaarsvurderingIntegrationTest(
             }
 
             val behandlingId = opprettSakOgBehandling(saksbehandler)
-            runBlocking {
+            inTransaction {
                 vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
                 vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, sbBrukertokenInfo, vilkaarsvurderingResultat())
             }
@@ -366,7 +366,13 @@ internal class VilkaarsvurderingIntegrationTest(
             }
             val behandlingId = opprettSakOgBehandling(saksbehandler)
 
-            val (vilkaarsvurdering) = vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
+            val (vilkaarsvurdering) =
+                inTransaction {
+                    vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
+                        behandlingId,
+                        sbBrukertokenInfo,
+                    )
+                }
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
@@ -386,10 +392,12 @@ internal class VilkaarsvurderingIntegrationTest(
             }
 
             val vurdertVilkaar =
-                vilkaarsvurderingServiceImpl
-                    .hentVilkaarsvurdering(behandlingId)!!
-                    .vilkaar
-                    .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                inTransaction {
+                    vilkaarsvurderingServiceImpl
+                        .hentVilkaarsvurdering(behandlingId)!!
+                        .vilkaar
+                        .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                }
 
             assertNotNull(vurdertVilkaar)
             assertNotNull(vurdertVilkaar.vurdering)
@@ -403,10 +411,12 @@ internal class VilkaarsvurderingIntegrationTest(
                     }
 
             val vurdertVilkaarSlettet =
-                vilkaarsvurderingServiceImpl
-                    .hentVilkaarsvurdering(behandlingId)!!
-                    .vilkaar
-                    .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                inTransaction {
+                    vilkaarsvurderingServiceImpl
+                        .hentVilkaarsvurdering(behandlingId)!!
+                        .vilkaar
+                        .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertNull(vurdertVilkaarSlettet.vurdering)
@@ -427,7 +437,10 @@ internal class VilkaarsvurderingIntegrationTest(
 
             val behandlingId = opprettSakOgBehandling(saksbehandler)
 
-            val (_) = vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
+            val (_) =
+                inTransaction {
+                    vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
+                }
 
             val resultat =
                 VurdertVilkaarsvurderingResultatDto(
@@ -477,7 +490,7 @@ internal class VilkaarsvurderingIntegrationTest(
 
             val behandlingId = opprettSakOgBehandling(saksbehandler)
 
-            val (_) = vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
+            val (_) = inTransaction { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo) }
 
             val response =
                 client.delete("/api/vilkaarsvurdering/$behandlingId") {

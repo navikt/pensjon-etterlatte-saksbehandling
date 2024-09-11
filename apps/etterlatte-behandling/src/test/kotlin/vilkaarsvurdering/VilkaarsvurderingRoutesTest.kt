@@ -24,15 +24,16 @@ import no.nav.etterlatte.attachMockContextWithDb
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -112,7 +113,7 @@ internal class VilkaarsvurderingRoutesTest(
     // TODO: må se på mock strukturen her kontra alle steder man gjør alt dette x**y ganger
     @BeforeEach
     fun beforeEach() {
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingService.hentBehandling(any()) } returns behandling()
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
@@ -135,6 +136,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
             // TODO: om ikke opprett testes andre steder så kan det bli gjort i rest kall her i stedt for service kallet
@@ -173,6 +175,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal hente vilkaarsvurdering med ny versjon på behandlingens grunnlag`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -201,6 +204,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
@@ -242,12 +246,13 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandler, ds)
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
             val nyBehandlingId = UUID.randomUUID()
 
-            coEvery { behandlingService.hentDetaljertBehandling(nyBehandlingId, any()) } returns
-                detaljertBehandling().apply {
+            coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns
+                behandling().apply {
                     every { virkningstidspunkt } returns null
                 }
 
@@ -578,9 +583,9 @@ internal class VilkaarsvurderingRoutesTest(
             }
 
             val revurderingBehandlingId = UUID.randomUUID()
-            coEvery { behandlingService.hentDetaljertBehandling(revurderingBehandlingId, any()) } returns
-                detaljertBehandling().apply {
-                    every { behandlingType } returns BehandlingType.REVURDERING
+            coEvery { behandlingService.hentBehandling(revurderingBehandlingId) } returns
+                behandling().apply {
+                    every { type } returns BehandlingType.REVURDERING
                     every { id } returns revurderingBehandlingId
                 }
 
@@ -622,9 +627,9 @@ internal class VilkaarsvurderingRoutesTest(
             }
 
             val revurderingBehandlingId = UUID.randomUUID()
-            coEvery { behandlingService.hentDetaljertBehandling(revurderingBehandlingId, any()) } returns
-                detaljertBehandling().apply {
-                    every { behandlingType } returns BehandlingType.REVURDERING
+            coEvery { behandlingService.hentBehandling(revurderingBehandlingId) } returns
+                behandling().apply {
+                    every { type } returns BehandlingType.REVURDERING
                     every { id } returns revurderingBehandlingId
                 }
 
@@ -679,7 +684,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `kan ikke opprette eller committe vilkaarsvurdering hvis statussjekk feiler`() {
         val behandlingServiceLocal = mockk<BehandlingService>()
         val behandlingStatusServiceLocal = mockk<BehandlingStatusService>()
-        coEvery { behandlingServiceLocal.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingServiceLocal.hentBehandling(any()) } returns behandling()
         every { behandlingStatusServiceLocal.settVilkaarsvurdert(any(), any(), true) } throws BehandlingstilstandException()
 
         val vilkaarsvurderingServiceImpl =
@@ -712,7 +717,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `skal ikke commite vilkaarsvurdering hvis statussjekk feiler ved sletting av totalvurdering`() {
         val behandlingService = mockk<BehandlingService>()
         val behandlingStatusService = mockk<BehandlingStatusService>()
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingService.hentBehandling(any()) } returns behandling()
         every { behandlingStatusService.settOpprettet(any(), any(), true) } just Runs
         every { behandlingStatusService.settOpprettet(any(), any(), false) } throws BehandlingstilstandException()
 
@@ -744,7 +749,7 @@ internal class VilkaarsvurderingRoutesTest(
     fun `kan ikke endre vilkaarsvurdering hvis statussjekk feiler`() {
         val behandlingService = mockk<BehandlingService>()
         val behandlingStatusService = mockk<BehandlingStatusService>()
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingService.hentBehandling(any()) } returns behandling()
         every { behandlingStatusService.settOpprettet(any(), any()) } just Runs
         every { behandlingStatusService.settVilkaarsvurdert(any(), any(), true) } just Runs
 
@@ -829,20 +834,20 @@ internal class VilkaarsvurderingRoutesTest(
     private fun opprettVilkaarsvurdering(
         vilkaarsvurderingService: VilkaarsvurderingService,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
-        runBlocking {
+        inTransaction {
             vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
         }
 
-    private fun detaljertBehandling() =
-        mockk<DetaljertBehandling>().apply {
+    private fun behandling() =
+        mockk<Behandling>().apply {
             every { id } returns UUID.randomUUID()
-            every { sak } returns 1L
-            every { sakType } returns SakType.BARNEPENSJON
+            every { sak.id } returns 1L
+            every { sak.sakType } returns SakType.BARNEPENSJON
             every { status } returns BehandlingStatus.OPPRETTET
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { soeker } returns "10095512345"
+            every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            // every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns null
+            every { revurderingsaarsak() } returns null
         }
 
     private fun vilkaarsvurderingResultat(utfall: VilkaarsvurderingUtfall = VilkaarsvurderingUtfall.OPPFYLT) =

@@ -34,7 +34,7 @@ class PdfGeneratorKlient(
         tittel: String,
         payload: PDFMal,
         mal: NotatMal,
-    ) = genererPdf(PdfGenRequest(tittel, payload.toJsonNode()), "notat/${mal.navn}", mal.navn)
+    ) = genererPdf(PdfGenRequest(tittel, payload.toJsonNode()), "${mal.sti}/${mal.navn}", mal.navn)
 
     private suspend fun genererPdf(
         body: Any,

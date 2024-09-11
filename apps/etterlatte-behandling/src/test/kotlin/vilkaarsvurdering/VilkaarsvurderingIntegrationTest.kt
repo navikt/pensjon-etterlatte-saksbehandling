@@ -83,7 +83,8 @@ internal class VilkaarsvurderingIntegrationTest(
         mockk<GrunnlagKlient> {
             coEvery { hentPersongalleri(any(), any()) } returns mockPersongalleri()
         }
-    private val saksbehandler = mockSaksbehandler("Saksbehandler01")
+    private val saksbehandlerident = "Saksbehandler01"
+    private val saksbehandler = mockSaksbehandler(saksbehandlerident)
     private val sbBrukertokenInfo = simpleSaksbehandler()
 
     private fun mockPersongalleri() =
@@ -305,7 +306,7 @@ internal class VilkaarsvurderingIntegrationTest(
             assertEquals(vurdertVilkaarDto.hovedvilkaar.type, oppdatertVilkaar?.hovedvilkaar?.type)
             assertEquals(vurdertVilkaarDto.hovedvilkaar.resultat, oppdatertVilkaar?.hovedvilkaar?.resultat)
             assertEquals(vurdertVilkaarDto.kommentar, oppdatertVilkaar?.vurdering?.kommentar)
-            assertEquals("Saksbehandler01", oppdatertVilkaar?.vurdering?.saksbehandler)
+            assertEquals(saksbehandlerident, oppdatertVilkaar?.vurdering?.saksbehandler)
             assertNotNull(oppdatertVilkaar?.vurdering?.tidspunkt)
         }
     }
@@ -448,7 +449,7 @@ internal class VilkaarsvurderingIntegrationTest(
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
             assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
-            assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
+            assertEquals(saksbehandlerident, oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
             assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
 
             val sletteResponse =

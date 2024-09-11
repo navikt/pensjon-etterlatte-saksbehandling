@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
-import { BeregningsGrunnlagDto, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  BeregningsGrunnlagDto,
+  BeregningsMetode,
+  BeregningsMetodeBeregningsgrunnlag,
+  BeregningsMetodeBeregningsgrunnlagForm,
+} from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FloppydiskIcon, PencilIcon, PlusIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
@@ -7,6 +12,7 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 
 const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
   beregningsMetode: null,
@@ -15,34 +21,53 @@ const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
 
 interface Props {
   redigerbar: boolean
-  oppdaterBeregningsMetode: (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => void
+  oppdaterBeregningsgrunnlag: (beregningsmetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => void
   eksisterendeMetode?: BeregningsMetodeBeregningsgrunnlag
   lagreBeregningsGrunnlagResult: Result<BeregningsGrunnlagDto>
+  kunEnJuridiskForelder?: Boolean
+  datoTilKunEnJuridiskForelder?: Date | undefined
 }
 
 export const BeregningsMetodeBrukt = ({
   redigerbar,
-  oppdaterBeregningsMetode,
+  oppdaterBeregningsgrunnlag,
   eksisterendeMetode,
   lagreBeregningsGrunnlagResult,
+  kunEnJuridiskForelder = false,
+  datoTilKunEnJuridiskForelder = undefined,
 }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
 
-  const { register, getValues, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlag>({
-    defaultValues: eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode,
+  function toForm(
+    datoTilKun: Date | undefined,
+    beregningsMetodeBeregningsgrunnlag: BeregningsMetodeBeregningsgrunnlag
+  ): BeregningsMetodeBeregningsgrunnlagForm {
+    return {
+      beregningsMetode: beregningsMetodeBeregningsgrunnlag.beregningsMetode,
+      begrunnelse: beregningsMetodeBeregningsgrunnlag.begrunnelse,
+      datoTilKunEnJuridiskForelder: datoTilKun,
+    }
+  }
+
+  const { register, getValues, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlagForm>({
+    defaultValues: toForm(
+      datoTilKunEnJuridiskForelder,
+      eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode
+    ),
   })
 
   const slettBeregningsMetode = () => {
-    oppdaterBeregningsMetode({
+    oppdaterBeregningsgrunnlag({
       beregningsMetode: BeregningsMetode.NASJONAL,
       begrunnelse: '',
+      datoTilKunEnJuridiskForelder: undefined,
     })
     reset(defaultBeregningMetode)
     setRedigerTrygdetidMetodeBrukt(false)
   }
 
-  const lagreBeregningsMetode = (data: BeregningsMetodeBeregningsgrunnlag) => {
-    oppdaterBeregningsMetode(data)
+  const lagreBeregningsMetode = (beregningsmetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
+    oppdaterBeregningsgrunnlag(beregningsmetodeForm)
     setRedigerTrygdetidMetodeBrukt(false)
   }
 
@@ -52,7 +77,7 @@ export const BeregningsMetodeBrukt = ({
         <HStack gap="2" align="center">
           <TagIcon aria-hidden fontSize="1.5rem" />
           <Heading size="small" level="3">
-            Trygdetid-metode brukt i beregningen
+            Trygdetid i beregning
           </Heading>
         </HStack>
         {!redigerTrydgetidMetodeBrukt && (
@@ -60,7 +85,7 @@ export const BeregningsMetodeBrukt = ({
             <VStack gap="2">
               <Label>
                 {getValues().beregningsMetode !== null
-                  ? `Metode brukt: ${formaterEnumTilLesbarString(getValues().beregningsMetode!)}`
+                  ? `Metode: ${formaterEnumTilLesbarString(getValues().beregningsMetode!)}`
                   : 'Metode ikke satt'}
               </Label>
               {getValues().begrunnelse && <BodyShort>{getValues().begrunnelse}</BodyShort>}
@@ -95,6 +120,14 @@ export const BeregningsMetodeBrukt = ({
         )}
         {redigerbar && redigerTrydgetidMetodeBrukt && (
           <>
+            {kunEnJuridiskForelder && (
+              <ControlledMaanedVelger
+                name="datoTilKunEnJuridiskForelder"
+                label="Til og med dato for kun én juridisk forelder (Valgfritt)"
+                description="Siste måneden med kun én juridisk forelder"
+                control={control}
+              />
+            )}
             <ControlledRadioGruppe
               name="beregningsMetode"
               control={control}

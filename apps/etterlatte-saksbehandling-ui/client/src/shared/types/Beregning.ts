@@ -42,6 +42,12 @@ export interface BeregningsMetodeBeregningsgrunnlag {
   begrunnelse?: string | null
 }
 
+export interface BeregningsMetodeBeregningsgrunnlagForm {
+  beregningsMetode: BeregningsMetode | null
+  begrunnelse?: string | null
+  datoTilKunEnJuridiskForelder?: Date
+}
+
 export interface BeregningsmetodeForAvdoed {
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   avdoed: string
@@ -82,6 +88,7 @@ export interface BeregningsGrunnlagDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO
 }
 
 export interface LagreBeregningsGrunnlagDto {
@@ -89,6 +96,7 @@ export interface LagreBeregningsGrunnlagDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto | undefined
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag | undefined
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO | undefined
 }
 
 export function toLagreBeregningsGrunnlagDto(beregningsgrunnlag?: BeregningsGrunnlagDto): LagreBeregningsGrunnlagDto {
@@ -97,6 +105,7 @@ export function toLagreBeregningsGrunnlagDto(beregningsgrunnlag?: BeregningsGrun
     soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning,
     beregningsMetode: beregningsgrunnlag?.beregningsMetode,
     beregningsMetodeFlereAvdoede: beregningsgrunnlag?.beregningsMetodeFlereAvdoede,
+    kunEnJuridiskForelder: beregningsgrunnlag?.kunEnJuridiskForelder,
   }
 }
 
@@ -116,6 +125,7 @@ export interface OverstyrBeregningGrunnlagPostDTO {
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 export type BeregningsmetodeFlereAvdoedeDTO = PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
+export type KunEnJuridiskForelderDTO = PeriodisertBeregningsgrunnlagDto<any>
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey

@@ -4,13 +4,21 @@ import { TagIcon } from '@navikt/aksel-icons'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BeregningsMetodeRadForAvdoed } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsMetodeRadForAvdoed'
+import { IPdlPerson } from '~shared/types/Person'
 
 interface Props {
   redigerbar: boolean
   trygdetider: ITrygdetid[]
+  tidligsteAvdoede: IPdlPerson
+  kunEnJuridiskForelder: boolean
 }
 
-export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Props) => {
+export const BeregningsgrunnlagFlereAvdoede = ({
+  redigerbar,
+  trygdetider,
+  tidligsteAvdoede,
+  kunEnJuridiskForelder,
+}: Props) => {
   const behandling = useBehandling()
 
   return (
@@ -41,6 +49,7 @@ export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider }: Prop
                 behandling={behandling!!}
                 redigerbar={redigerbar}
                 trygdetid={trygdetid}
+                erEnesteJuridiskeForelder={kunEnJuridiskForelder && tidligsteAvdoede.foedselsnummer === trygdetid.ident}
               />
             ))}
           </Table.Body>

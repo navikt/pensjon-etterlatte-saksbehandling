@@ -15,8 +15,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import {
   Beregning,
-  BeregningsGrunnlagDto,
-  BeregningsMetodeBeregningsgrunnlag,
+  BeregningsMetodeBeregningsgrunnlagForm,
   LagreBeregningsGrunnlagDto,
   toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
@@ -65,13 +64,10 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     })
   }
 
-  const oppdaterBeregningsMetode = (
-    beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagDto | undefined
-  ) => {
+  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
-      ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
-      beregningsMetode,
+      ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
+      beregningsMetode: beregningsMetode,
     }
     lagreBeregningsGrunnlagRequest(
       {
@@ -104,9 +100,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                oppdaterBeregningsMetode={(beregningsMetode) =>
-                  oppdaterBeregningsMetode(beregningsMetode, behandling?.beregningsGrunnlag)
-                }
+                oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />

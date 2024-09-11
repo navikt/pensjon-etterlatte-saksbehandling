@@ -1,7 +1,7 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { behandlingErRedigerbar } from '../felles/utils'
+import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -14,16 +14,19 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import {
+  mapListeTilDto,
+  periodisertBeregningsgrunnlagTilDto,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import {
   Beregning,
-  BeregningsMetodeBeregningsgrunnlag,
+  BeregningsMetodeBeregningsgrunnlagForm,
   LagreBeregningsGrunnlagDto,
   toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
@@ -40,6 +43,7 @@ import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/be
 import { SakType } from '~shared/types/sak'
 import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
@@ -98,9 +102,14 @@ const BeregningsgrunnlagBarnepensjon = () => {
     }
   }
 
-  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => {
+  const oppdaterBeregningsgrunnlag = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
+      kunEnJuridiskForelder: periodisertBeregningsgrunnlagTilDto({
+        data: {},
+        fom: new Date(behandling.virkningstidspunkt!!.dato),
+        tom: beregningsMetode.datoTilKunEnJuridiskForelder,
+      }),
       beregningsMetode: beregningsMetode,
     }
     lagreBeregningsgrunnlagRequest(
@@ -132,6 +141,17 @@ const BeregningsgrunnlagBarnepensjon = () => {
       }
     )
   }
+  const harKunEnJuridiskForelder =
+    personopplysninger?.annenForelder?.vurdering == AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
+
+  const tidligsteAvdoede: IPdlPerson = requireNotNull(
+    personopplysninger?.avdoede
+      .map((it) => it.opplysning)
+      .reduce((previous, current) => {
+        return current.doedsdato!! < previous.doedsdato!! ? current : previous
+      }) || null,
+    'Mangler avdøde for beregningsgrunnlag'
+  )
 
   return (
     <>
@@ -146,14 +166,25 @@ const BeregningsgrunnlagBarnepensjon = () => {
               success: (trygdetider) => (
                 <>
                   {trygdetider.length > 1 && (
-                    <BeregningsgrunnlagFlereAvdoede redigerbar={redigerbar} trygdetider={trygdetider} />
+                    <BeregningsgrunnlagFlereAvdoede
+                      redigerbar={redigerbar}
+                      trygdetider={trygdetider}
+                      tidligsteAvdoede={tidligsteAvdoede}
+                      kunEnJuridiskForelder={harKunEnJuridiskForelder}
+                    />
                   )}
                   {trygdetider.length <= 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}
-                      oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
+                      oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
                       eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
                       lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                      kunEnJuridiskForelder={harKunEnJuridiskForelder}
+                      datoTilKunEnJuridiskForelder={
+                        behandling?.beregningsGrunnlag?.kunEnJuridiskForelder.tom
+                          ? new Date(behandling?.beregningsGrunnlag?.kunEnJuridiskForelder.tom)
+                          : undefined
+                      }
                     />
                   )}
 

@@ -95,7 +95,7 @@ internal fun Route.sakSystemRoutes(
                         behandlingService
                             .hentSisteIverksatte(sakId)
                             ?.let { SisteIverksatteBehandling(it.id) }
-                    } ?: GenerellIkkeFunnetException()
+                    } ?: throw GenerellIkkeFunnetException()
 
                 call.respond(sisteIverksatteBehandling)
             }

@@ -30,6 +30,7 @@ export interface IAvkortingGrunnlagLagre {
   inntektUtland?: number
   fratrekkInnAarUtland?: number
   spesifikasjon: string
+  fom?: string
 }
 
 export interface IAvkortetYtelse {

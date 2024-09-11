@@ -550,7 +550,6 @@ internal class BehandlingServiceImpl(
         galleri.copy(
             avdoed = redigertFamilieforhold.avdoede,
             gjenlevende = redigertFamilieforhold.gjenlevende,
-            annenForelder = redigertFamilieforhold.annenForelder,
         )
     }
 

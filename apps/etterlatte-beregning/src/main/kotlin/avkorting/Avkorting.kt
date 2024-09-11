@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,7 +21,9 @@ data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
 ) {
     init {
-        check(aarsoppgjoer.zipWithNext().all { it.first.aar < it.second.aar })
+        if (!aarsoppgjoer.zipWithNext().all { it.first.aar < it.second.aar }) {
+            throw InternfeilException("Årsoppgjør er i feil rekkefølge.")
+        }
     }
 
     /*
@@ -369,14 +372,14 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        check(ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            "fom for ytelseFoerAvkorting i feil rekkefølge"
+        if (!ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("fom for ytelseFoerAvkorting i feil rekkefølge")
         }
-        check(inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
-            "fom for inntektsavkorting.grunnlag er i feil rekkefølge"
+        if (!inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
+            throw InternfeilException("fom for inntektsavkorting.grunnlag er i feil rekkefølge")
         }
-        check(avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            "fom for avkortetYtelseAar er i feil rekkefølge"
+        if (!avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("fom for avkortetYtelseAar er i feil rekkefølge")
         }
     }
 
@@ -414,8 +417,12 @@ data class Inntektsavkorting(
     val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        check(avkortingsperioder.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
-        check(avkortetYtelseForventetInntekt.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+        if (!avkortingsperioder.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("Avkortingsperioder er i feil rekkefølge.")
+        }
+        if (!avkortetYtelseForventetInntekt.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("AvkortetYtelseForventetInntekt er i feil rekkefølge.")
+        }
     }
 
     fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth) =

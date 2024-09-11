@@ -21,8 +21,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -81,6 +83,14 @@ class StatistikkServiceTest {
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
         val enhet = "1111"
+        coEvery { behandlingKlient.hentGraderingForSak(sakId) } returns
+            SakMedGraderingOgSkjermet(
+                id = sakId,
+                adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
+                erSkjermet = false,
+                enhetNr = enhet,
+            )
+
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             StatistikkBehandling(
                 id = behandlingId,
@@ -171,6 +181,84 @@ class StatistikkServiceTest {
     }
 
     @Test
+    fun `hopper over mapping av statistikk hvis det er en fortrolig sak`() {
+        val behandlingId = UUID.randomUUID()
+        val sakId = 1L
+        val virk = YearMonth.of(2024, Month.MAY)
+        val fattetTidspunkt = Tidspunkt.now()
+
+        every { sakRepo.lagreRad(any()) } returnsArgument 0
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
+            Persongalleri(
+                "12312312312",
+            )
+        val mockBeregning =
+            Beregning(
+                beregningId = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                type = Beregningstype.OMS,
+                beregnetDato = Tidspunkt.now(),
+                beregningsperioder = listOf(),
+            )
+        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
+
+        coEvery { behandlingKlient.hentGraderingForSak(sakId) } returns
+            SakMedGraderingOgSkjermet(
+                id = sakId,
+                adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
+                erSkjermet = false,
+                enhetNr = Enheter.defaultEnhet.enhetNr,
+            )
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
+            StatistikkBehandling(
+                id = behandlingId,
+                sak =
+                    Sak(
+                        id = sakId,
+                        sakType = SakType.BARNEPENSJON,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                        ident = "ident",
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "12312312312",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.FATTET_VEDTAK,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsaarsak = null,
+                revurderingInfo = null,
+                prosesstype = Prosesstype.MANUELL,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                kilde = Vedtaksloesning.GJENNY,
+                utlandstilknytning = null,
+                sistEndret = LocalDateTime.now(),
+                pesysId = null,
+                relatertBehandlingId = null,
+            )
+
+        val (registrertSakRad, registrertStoenadRad) =
+            service.registrerStatistikkForVedtak(
+                vedtak =
+                    vedtak(
+                        sakId = sakId,
+                        sakType = SakType.BARNEPENSJON,
+                        behandlingId = behandlingId,
+                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        virk = virk,
+                    ),
+                vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
+                tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30),
+            )
+        assertNull(registrertStoenadRad)
+    }
+
+    @Test
     fun `mapper vedtakhendelse for omstillingsstoenad`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
@@ -216,6 +304,14 @@ class StatistikkServiceTest {
                 ),
             )
         coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
+
+        coEvery { behandlingKlient.hentGraderingForSak(sakId) } returns
+            SakMedGraderingOgSkjermet(
+                sakId,
+                adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
+                erSkjermet = false,
+                enhetNr = Enheter.defaultEnhet.enhetNr,
+            )
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
         val enhet = "1111"
@@ -346,7 +442,12 @@ class StatistikkServiceTest {
 
         val statistikkMaaned = YearMonth.of(2024, Month.JULY)
         every { stoenadRepository.hentStoenadRaderInnenforMaaned(statistikkMaaned) } returns omsStoenadRad + bpStoenadRad
-        every { mockAktivitetspliktService.mapAktivitetForSaker(capture(brukteOmsIder), statistikkMaaned) } returns emptyMap()
+        every {
+            mockAktivitetspliktService.mapAktivitetForSaker(
+                capture(brukteOmsIder),
+                statistikkMaaned,
+            )
+        } returns emptyMap()
 
         service.produserStoenadStatistikkForMaaned(statistikkMaaned)
 

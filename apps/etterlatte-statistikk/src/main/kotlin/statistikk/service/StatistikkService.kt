@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -67,6 +68,15 @@ class StatistikkService(
             val enhet = vedtak.attestasjon?.attesterendeEnhet
             if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
                 return sakRad to null
+            }
+            val gradering = runBlocking { behandlingKlient.hentGraderingForSak(vedtak.sak.id) }
+            when (gradering.adressebeskyttelseGradering) {
+                AdressebeskyttelseGradering.FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                -> return sakRad to null
+
+                null, AdressebeskyttelseGradering.UGRADERT -> Unit
             }
             val stoenadRad =
                 when (vedtak.type) {

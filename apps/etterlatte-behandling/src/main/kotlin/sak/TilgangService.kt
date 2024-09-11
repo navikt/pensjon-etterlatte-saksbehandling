@@ -3,6 +3,7 @@ package no.nav.etterlatte.sak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
 interface TilgangService {
@@ -41,13 +42,6 @@ interface TilgangService {
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 }
-
-data class SakMedGraderingOgSkjermet(
-    val id: Long,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
-    val erSkjermet: Boolean?,
-    val enhetNr: String?,
-)
 
 data class SakMedGradering(
     val id: Long,

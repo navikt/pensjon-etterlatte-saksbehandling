@@ -59,7 +59,7 @@ class BehandlingKlientImpl(
     override suspend fun hentGraderingForSak(sakId: SakId): SakMedGraderingOgSkjermet =
         try {
             behandlingHttpClient
-                .get("$behandlingUrl/sak/$sakId/gradering")
+                .get("$behandlingUrl/saker/$sakId/gradering")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente gradering for sak $sakId fra Behandling", e)

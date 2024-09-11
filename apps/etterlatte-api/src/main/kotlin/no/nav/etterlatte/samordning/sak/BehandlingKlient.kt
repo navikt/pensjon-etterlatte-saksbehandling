@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -12,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.samordning.vedtak.getMeta
 import org.slf4j.LoggerFactory
@@ -34,6 +36,27 @@ class BehandlingKlient(
                 }.body<List<Long>>()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod en feil i kall til behandling sak for personer")
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> throw BehandlingManglendeTilgang("Behandling: Ikke tilgang")
+                HttpStatusCode.BadRequest -> throw BehandlingUgyldigForespoersel("Behandling: Ugyldig forespørsel")
+                else -> throw e
+            }
+        }
+    }
+
+    suspend fun hentSak(id: Long): Sak? {
+        logger.info("Henter sak med id=$id")
+
+        return try {
+            httpClient.get("$behandlingUrl/sak/$id").body<Sak>()
+        } catch (e: ClientRequestException) {
+            if (e.response.status == HttpStatusCode.NotFound) {
+                logger.info("Ingen sak med id=$id funnet")
+                return null
+            }
+
+            logger.error("Henting av sak med id=$id feilet (status: ${e.response.status})")
+
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> throw BehandlingManglendeTilgang("Behandling: Ikke tilgang")
                 HttpStatusCode.BadRequest -> throw BehandlingUgyldigForespoersel("Behandling: Ugyldig forespørsel")

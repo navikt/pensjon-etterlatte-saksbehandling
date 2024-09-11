@@ -43,7 +43,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
     formState: { errors },
     control,
   } = useForm<AnnenForelder>({
-    defaultValues: { ...personopplysninger?.annenForelder },
+    defaultValues: personopplysninger?.annenForelder,
   })
 
   return (
@@ -135,7 +135,6 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
             {watch().vurdering && teksterAnnenForelderVurdering[watch().vurdering]}
           </Heading>
 
-          {redigerModus && <>{watch}</>}
           {watch().vurdering === AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL && (
             <>
               <TextField {...register('navn')} label="Navn" />

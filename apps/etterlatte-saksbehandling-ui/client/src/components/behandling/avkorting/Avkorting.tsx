@@ -12,15 +12,18 @@ import {
   resetAvkorting,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { Box, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import styled from 'styled-components'
+import { IAvkorting } from '~shared/types/IAvkorting'
 
 export const Avkorting = ({
   behandling,
@@ -32,10 +35,12 @@ export const Avkorting = ({
   resetInntektsavkortingValidering: () => void
 }) => {
   const dispatch = useAppDispatch()
-  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
+
+  const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -63,11 +68,43 @@ export const Avkorting = ({
           pending: <Spinner label="Henter avkorting" />,
           error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
           success: () => (
-            <AvkortingInntekt
-              behandling={behandling}
-              redigerbar={redigerbar}
-              resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-            />
+            <>
+              <InntektInfo>
+                <Heading spacing size="small" level="2">
+                  Inntektsavkorting
+                </Heading>
+                {harInstitusjonsopphold && (
+                  <Alert variant="error">
+                    Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med
+                    inntektsavkorting, bruk manuel overstyring.
+                  </Alert>
+                )}
+                <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
+                <BodyShort spacing>
+                  Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger
+                  et halvt grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert
+                  kalenderår som skal legges til grunn.
+                </BodyShort>
+                <BodyShort>
+                  I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt
+                  fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
+                </BodyShort>
+              </InntektInfo>
+              <AvkortingInntekt
+                behandling={behandling}
+                innevaerendeAar={true}
+                redigerbar={redigerbar}
+                resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+              />
+              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+                <AvkortingInntekt
+                  behandling={behandling}
+                  innevaerendeAar={false}
+                  redigerbar={redigerbar}
+                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                />
+              )}
+            </>
           ),
         })}
 
@@ -79,3 +116,6 @@ export const Avkorting = ({
     </Box>
   )
 }
+const InntektInfo = styled.div`
+  max-width: 70rem;
+`

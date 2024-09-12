@@ -14,12 +14,11 @@ import {
 } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import { IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
-import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -37,21 +36,28 @@ import { lastDayOfMonth } from 'date-fns'
 
 export const AvkortingInntekt = ({
   behandling,
+  innevaerendeAar,
   redigerbar,
   resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
+  innevaerendeAar: boolean
   redigerbar: boolean
   resetInntektsavkortingValidering: () => void
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
-  const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   const dispatch = useAppDispatch()
 
-  const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
+  const virkningstidspunktDate = new Date(virkningstidspunkt(behandling).dato)
+
+  const inntektsAar = innevaerendeAar ? virkningstidspunktDate.getFullYear() : virkningstidspunktDate.getFullYear() + 1
+  const avkortingGrunnlagForAar = (avkorting as IAvkorting).avkortingGrunnlag.filter(
+    (aGrunnlag) => aGrunnlag && new Date(aGrunnlag.fom).getFullYear() === inntektsAar
+  )
+  const avkortingGrunnlag = avkorting == null ? [] : [...avkortingGrunnlagForAar]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
@@ -61,11 +67,14 @@ export const AvkortingInntekt = ({
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () =>
-    avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
+    avkortingGrunnlag.length > 0 && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
   const fulltAar = () => {
+    if (!innevaerendeAar) {
+      return true
+    }
     if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = new Date(virkningstidspunkt(behandling).dato).getMonth() === 0
+      const innvilgelseFraJanuar = virkningstidspunktDate.getMonth() === 0
       return innvilgelseFraJanuar
     } else {
       const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12
@@ -101,6 +110,13 @@ export const AvkortingInntekt = ({
     return avkortingGrunnlag.length > 0 ? [avkortingGrunnlag[0]] : []
   }
 
+  const knappTekst = () => {
+    if (finnesRedigerbartGrunnlag()) {
+      return 'Rediger'
+    }
+    return innevaerendeAar ? 'Legg til' : 'Legg til for neste år'
+  }
+
   const {
     register,
     reset,
@@ -119,7 +135,7 @@ export const AvkortingInntekt = ({
           ...data,
           fratrekkInnAar: data.fratrekkInnAar ?? 0,
           fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: virkningstidspunkt(behandling).dato,
+          fom: innevaerendeAar ? virkningstidspunkt(behandling).dato : `${inntektsAar}-01`,
         },
       },
       (respons) => {
@@ -134,27 +150,9 @@ export const AvkortingInntekt = ({
 
   return (
     <AvkortingInntektWrapper>
-      <Heading spacing size="small" level="2">
-        Inntektsavkorting
-      </Heading>
-      {harInstitusjonsopphold && (
-        <Alert variant="error">
-          Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med
-          inntektsavkorting, bruk manuel overstyring.
-        </Alert>
-      )}
-      <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
-      <BodyShort spacing>
-        Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
-        grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
-        legges til grunn.
-      </BodyShort>
-      <BodyShort>
-        I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt fordeles
-        på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
-      </BodyShort>
       {avkortingGrunnlag.length > 0 && (
         <InntektAvkortingTabell>
+          <Heading size="small">{inntektsAar}</Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.Row>
@@ -348,7 +346,7 @@ export const AvkortingInntekt = ({
                     resetInntektsavkortingValidering()
                   }}
                 >
-                  {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}
+                  {knappTekst()}
                 </Button>
               )}
             </FormKnapper>

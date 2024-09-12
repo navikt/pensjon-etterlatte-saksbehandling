@@ -48,7 +48,7 @@ class AvkortingService(
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
-                kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+                kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
@@ -126,17 +126,18 @@ class AvkortingService(
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+        return kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
     }
 
     private suspend fun kopierOgReberegnAvkorting(
-        behandlingId: UUID,
+        behandling: DetaljertBehandling,
         sakId: SakId,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val kopiertAvkorting = forrigeAvkorting.kopierAvkorting()
-        return reberegnOgLagreAvkorting(behandlingId, sakId, kopiertAvkorting, brukerTokenInfo)
+        val opphoerFraOgMed = behandling.opphoerFraOgMed
+        val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
+        return reberegnOgLagreAvkorting(behandling.id, sakId, kopiertAvkorting, brukerTokenInfo)
     }
 
     private suspend fun reberegnOgLagreAvkorting(

@@ -81,7 +81,7 @@ data class Avkorting(
     /*
      * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
      */
-    fun kopierAvkorting(): Avkorting =
+    fun kopierAvkorting(opphoerFom: YearMonth?): Avkorting =
         Avkorting(
             aarsoppgjoer =
                 aarsoppgjoer.map {
@@ -89,7 +89,17 @@ data class Avkorting(
                         id = UUID.randomUUID(),
                         inntektsavkorting =
                             it.inntektsavkorting.map { inntektsavkorting ->
-                                inntektsavkorting.copy(grunnlag = inntektsavkorting.grunnlag.copy(id = UUID.randomUUID()))
+                                inntektsavkorting.copy(
+                                    grunnlag =
+                                        inntektsavkorting.grunnlag.copy(
+                                            id = UUID.randomUUID(),
+                                            periode =
+                                                inntektsavkorting.grunnlag.periode.copy(
+                                                    fom = inntektsavkorting.grunnlag.periode.fom,
+                                                    tom = opphoerFom?.minusMonths(1),
+                                                ),
+                                        ),
+                                )
                             },
                     )
                 },

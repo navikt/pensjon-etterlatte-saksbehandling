@@ -350,7 +350,7 @@ class BeregnBarnepensjonService(
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
                 beregningsGrunnlag.kunEnJuridiskForelder?.let { kunEnJuridiskForelder ->
                     listOf(kunEnJuridiskForelder).mapVerdier { _ ->
-                        FaktumNode(true, beregningsGrunnlag.kilde, "")
+                        FaktumNode(true, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder")
                     }
                 } ?: emptyList(),
             ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },

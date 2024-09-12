@@ -7,7 +7,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
-import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
+import { GeneriskOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GeneriskOppgaveModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
@@ -63,6 +63,8 @@ export const HandlingerForOppgave = ({
           Se hendelse
         </PersonButtonLink>
       )
+    case Oppgavetype.MANGLER_SOEKNAD:
+      return <GeneriskOppgaveModal heading="Mangler søknad" oppdaterStatus={oppdaterStatus} oppgave={oppgave} />
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
         erInnloggetSaksbehandlerOppgave && (
@@ -136,11 +138,7 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.GENERELL_OPPGAVE:
-      return (
-        oppgave.status !== Oppgavestatus.FERDIGSTILT && (
-          <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-        )
-      )
+      return <GeneriskOppgaveModal heading="Generell oppgave" oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (

@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
@@ -44,15 +43,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-enum class AktivitetToggle(
-    private val key: String,
-) : FeatureToggle {
-    FLERE_PERIODER_VURDERING("flere-perioder-aktivitet-vurdering"),
-    ;
-
-    override fun key(): String = key
-}
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
@@ -283,15 +273,14 @@ class AktivitetspliktService(
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
-            if (!featureToggleService.isEnabled(AktivitetToggle.FLERE_PERIODER_VURDERING, false)) {
-                require(
-                    aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
-                ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
-                val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
-                unntak.forEach {
-                    aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
-                }
+            require(
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
+            ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
+            val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
+            unntak.forEach {
+                aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
             }
+
             aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
                 aktivitetsgrad,
                 sakId,
@@ -350,17 +339,16 @@ class AktivitetspliktService(
         if (unntak.id != null) {
             aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
         } else {
-            if (!featureToggleService.isEnabled(AktivitetToggle.FLERE_PERIODER_VURDERING, false)) {
-                require(
-                    aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
-                ) { "Unntak finnes allerede for behandling $behandlingId" }
+            require(
+                aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
+            ) { "Unntak finnes allerede for behandling $behandlingId" }
 
-                val aktivitetsgrad =
-                    aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
-                aktivitetsgrad.forEach {
-                    aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(it.id, behandlingId)
-                }
+            val aktivitetsgrad =
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+            aktivitetsgrad.forEach {
+                aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(it.id, behandlingId)
             }
+
             aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
 

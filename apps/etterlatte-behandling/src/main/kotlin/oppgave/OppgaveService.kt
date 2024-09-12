@@ -635,6 +635,7 @@ class OppgaveService(
                             true
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
+                        OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         -> {
                             logger.info(

@@ -18,6 +18,7 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
@@ -224,7 +225,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Sa
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
+inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: String? = null,
     onSuccess: () -> Unit,
@@ -235,9 +236,15 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
             application.log.debug("Har skrivetilgang, fortsetter")
             onSuccess()
         }
+
         false -> {
             application.log.debug("Mangler skrivetilgang, avviser forespørselen")
-            call.respond(HttpStatusCode.Forbidden)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.Forbidden.value,
+                code = "MANGLER_SKRIVETILGANG",
+                detail = "Mangler skrivetilgang til enhet $enhetNr",
+            )
         }
     }
 }

@@ -5,10 +5,10 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -21,7 +21,9 @@ data class Avkorting(
     val aarsoppgjoer: List<Aarsoppgjoer> = emptyList(),
 ) {
     init {
-        check(aarsoppgjoer.zipWithNext().all { it.first.aar < it.second.aar })
+        if (!aarsoppgjoer.zipWithNext().all { it.first.aar < it.second.aar }) {
+            throw InternfeilException("Årsoppgjør er i feil rekkefølge.")
+        }
     }
 
     /*
@@ -95,45 +97,32 @@ data class Avkorting(
 
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        behandlingstype: BehandlingType,
-        virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
-    ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, true, bruker, opphoerFom).beregnAvkortingForstegangs(
-            beregning,
-            sanksjoner,
-        )
-    } else {
-        // TODO parameter innvilgelse vil ikke være tilstrekkelig når vi skal revurdere for å endre første virk..
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, false, bruker, opphoerFom).beregnAvkortingRevurdering(
-            beregning,
-            sanksjoner,
-        )
+    ): Avkorting {
+        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom)
+        return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
-        virkningstidspunkt: YearMonth,
-        innvilgelse: Boolean,
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
     ): Avkorting {
-        // TODO kreve at det er inneværende år?
-        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(virkningstidspunkt, innvilgelse)
+        val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(virkningstidspunkt) } +
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom) } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = virkningstidspunkt, tom = opphoerFom?.minusMonths(1)),
+                                periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtland = nyttGrunnlag.inntektUtland,
@@ -150,46 +139,6 @@ data class Avkorting(
             )
         return this.copy(
             aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppjoer),
-        )
-    }
-
-    private fun beregnAvkortingForstegangs(
-        beregning: Beregning,
-        sanksjoner: List<Sanksjon>,
-    ): Avkorting {
-        val aarsoppgjoer = aarsoppgjoer.single()
-        val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
-        val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
-
-        val avkortingsperioder =
-            AvkortingRegelkjoring.beregnInntektsavkorting(
-                periode = grunnlag.periode,
-                avkortingGrunnlag = grunnlag,
-                aarsoppgjoer.forventaInnvilgaMaaneder,
-            )
-
-        val avkortetYtelseAar =
-            AvkortingRegelkjoring.beregnAvkortetYtelse(
-                periode = grunnlag.periode,
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortingsperioder,
-                type = AARSOPPGJOER,
-                sanksjoner = sanksjoner,
-            )
-
-        val oppdatertAarsoppgjoer =
-            aarsoppgjoer.copy(
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                inntektsavkorting =
-                    aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
-                        inntektsavkorting.copy(
-                            avkortingsperioder = avkortingsperioder,
-                        )
-                    },
-                avkortetYtelseAar = avkortetYtelseAar,
-            )
-        return this.copy(
-            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
         )
     }
 
@@ -383,15 +332,12 @@ data class Avkorting(
      * Ved innvilgelse/førstegangsbehandling så skal måneder før virkningsitdspunkt trekkes i fra
      * forventa innvilgede måneder.
      */
-    private fun hentEllerOpprettAarsoppgjoer(
-        virkningstidspunkt: YearMonth,
-        innvilgelse: Boolean,
-    ): Aarsoppgjoer {
-        val funnet = aarsoppgjoer.find { it.aar == virkningstidspunkt.year }
+    private fun hentEllerOpprettAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
+        val funnet = aarsoppgjoer.find { it.aar == fom.year }
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
-            aar = virkningstidspunkt.year,
-            forventaInnvilgaMaaneder = if (innvilgelse) (12 - virkningstidspunkt.monthValue + 1) else 12,
+            aar = fom.year,
+            forventaInnvilgaMaaneder = 12 - fom.monthValue + 1,
         )
     }
 
@@ -426,9 +372,15 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        check(ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
-        check(inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom })
-        check(avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+        if (!ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("fom for ytelseFoerAvkorting i feil rekkefølge")
+        }
+        if (!inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
+            throw InternfeilException("fom for inntektsavkorting.grunnlag er i feil rekkefølge")
+        }
+        if (!avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("fom for avkortetYtelseAar er i feil rekkefølge")
+        }
     }
 
     fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
@@ -465,8 +417,12 @@ data class Inntektsavkorting(
     val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        check(avkortingsperioder.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
-        check(avkortetYtelseForventetInntekt.zipWithNext().all { it.first.periode.fom < it.second.periode.fom })
+        if (!avkortingsperioder.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("Avkortingsperioder er i feil rekkefølge.")
+        }
+        if (!avkortetYtelseForventetInntekt.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+            throw InternfeilException("AvkortetYtelseForventetInntekt er i feil rekkefølge.")
+        }
     }
 
     fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth) =

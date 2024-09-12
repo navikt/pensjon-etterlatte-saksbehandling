@@ -98,6 +98,17 @@ internal fun Route.sakSystemRoutes(
 
                 call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
             }
+
+            get("/gradering") {
+                kunSystembruker { systemBruker ->
+                    logger.info("Henter gradering i sak med id=$sakId")
+                    val gradering =
+                        inTransaction {
+                            sakService.hentGraderingForSak(sakId, systemBruker)
+                        }
+                    call.respond(gradering)
+                }
+            }
         }
     }
 

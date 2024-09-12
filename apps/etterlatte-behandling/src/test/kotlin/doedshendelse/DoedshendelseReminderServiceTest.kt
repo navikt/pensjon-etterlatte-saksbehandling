@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,10 +21,6 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class DoedshendelseReminderServiceTest {
-    private val toggle =
-        mockk<FeatureToggleService> {
-            every { isEnabled(any(), any()) } returns true
-        }
     private val dao = mockk<DoedshendelseDao>()
     private val behandlingService = mockk<BehandlingService>()
     private val oppgaveService = mockk<OppgaveService>()
@@ -60,16 +55,25 @@ class DoedshendelseReminderServiceTest {
 
         val service =
             DoedshendelseReminderService(
-                featureToggleService = toggle,
                 doedshendelseDao = dao,
                 behandlingService = behandlingService,
                 oppgaveService = oppgaveService,
             )
         service.setupKontekstAndRun(kontekst)
 
-        verify { behandlingService.hentBehandlingerForSak(sakId) }
-        verify { oppgaveService.hentOppgaverForSak(sakId) }
-        verify { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            behandlingService.hentBehandlingerForSak(sakId)
+            oppgaveService.hentOppgaverForSak(sakId)
+
+            oppgaveService.opprettOppgave(
+                doedshendelseBP2mndGammel.id.toString(),
+                sakId,
+                OppgaveKilde.DOEDSHENDELSE,
+                OppgaveType.MANGLER_SOEKNAD,
+                any(),
+                any(),
+            )
+        }
     }
 
     @Test
@@ -97,7 +101,6 @@ class DoedshendelseReminderServiceTest {
 
         val service =
             DoedshendelseReminderService(
-                featureToggleService = toggle,
                 doedshendelseDao = dao,
                 behandlingService = behandlingService,
                 oppgaveService = oppgaveService,

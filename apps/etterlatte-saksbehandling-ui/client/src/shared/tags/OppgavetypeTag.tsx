@@ -10,6 +10,8 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
       return <Tag variant="warning">Revurdering</Tag>
     case Oppgavetype.VURDER_KONSEKVENS:
       return <Tag variant="alt1">Hendelse</Tag>
+    case Oppgavetype.MANGLER_SOEKNAD:
+      return <Tag variant="neutral-moderate">Mangler søknad</Tag>
     case Oppgavetype.KRAVPAKKE_UTLAND:
       return <Tag variant="warning-moderate">Kravpakke utland</Tag>
     case Oppgavetype.KLAGE:

@@ -9,13 +9,20 @@ import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/fa
 import { Result } from '~shared/api/apiUtils'
 
 import { ILand } from '~utils/kodeverk'
+import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelderSkjema'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
   landListeResult: Result<ILand[]>
+  behandlingId: string
 }
 
-export const FamilieforholdBarnepensjon = ({ personopplysninger, landListeResult }: PropsFamilieforhold) => {
+export const FamilieforholdBarnepensjon = ({
+  personopplysninger,
+  landListeResult,
+  behandlingId,
+}: PropsFamilieforhold) => {
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }
@@ -23,6 +30,7 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger, landListeResult
   const alleGjenlevende = personopplysninger.gjenlevende
   const alleAvdoede = personopplysninger.avdoede
   const familieforhold: Familieforhold = { avdoede: alleAvdoede, gjenlevende: alleGjenlevende, soeker: soeker }
+  const enJuridiskForelderEnabled = useFeatureEnabledMedDefault('kun-en-registrert-juridisk-forelder', false)
 
   return (
     <>
@@ -47,6 +55,9 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger, landListeResult
             landListeResult={landListeResult}
           />
         ))}
+        {enJuridiskForelderEnabled && alleAvdoede.length == 1 && alleGjenlevende.length == 0 && (
+          <AnnenForelderSkjema behandlingId={behandlingId} personopplysninger={personopplysninger} />
+        )}
       </FamilieforholdVoksne>
       <Soeskenliste familieforhold={familieforhold} soekerFnr={soeker.opplysning.foedselsnummer} />
     </>

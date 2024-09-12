@@ -14,6 +14,7 @@ import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -261,8 +262,24 @@ internal class AvkortingTest {
                                 ),
                             inntektsavkorting =
                                 listOf(
-                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
-                                    Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2024, 1),
+                                                    tom = null,
+                                                ),
+                                        ),
+                                    ),
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2024, 2),
+                                                    tom = null,
+                                                ),
+                                        ),
+                                    ),
                                 ),
                         ),
                     ),
@@ -311,14 +328,15 @@ internal class AvkortingTest {
         inner class Foerstegangsbehandling {
             @Test
             fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt`() {
-                val forventetInntekt = avkortinggrunnlagLagre(aarsinntekt = 200000)
-                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
+                val forventetInntekt =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    )
 
                 val opprettaAvkorting =
                     Avkorting().oppdaterMedInntektsgrunnlag(
                         forventetInntekt,
-                        virkningstidspunkt,
-                        innvilgelse = true,
                         bruker,
                     )
 
@@ -365,14 +383,16 @@ internal class AvkortingTest {
 
             @Test
             fun `Eksisterer det inntekt med samme id skal eksisterende inntekt oppdateres uten aa legge til nytt`() {
-                val endretInntekt = avkortinggrunnlagLagre(id = andreInntekt.id, aarsinntekt = 200000)
-                val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
+                val endretInntekt =
+                    avkortinggrunnlagLagre(
+                        id = andreInntekt.id,
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         endretInntekt,
-                        virkningstidspunkt,
-                        false,
                         bruker,
                     )
 
@@ -396,14 +416,14 @@ internal class AvkortingTest {
 
             @Test
             fun `Eksisterer ikke inntekt skal det legges til og til og med paa periode til siste inntekt skal settes`() {
-                val nyttGrunnlag = avkortinggrunnlagLagre()
-                val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
+                val nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        fom = YearMonth.of(2024, Month.AUGUST),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         nyttGrunnlag,
-                        virkningstidspunkt,
-                        innvilgelse = false,
                         bruker,
                     )
 
@@ -433,14 +453,15 @@ internal class AvkortingTest {
 
             @Test
             fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
-                val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
-                val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
+                val nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 150000,
+                        fom = YearMonth.of(2025, Month.JANUARY),
+                    )
 
                 val oppdatertAvkorting =
                     avkorting.oppdaterMedInntektsgrunnlag(
                         nyttGrunnlag,
-                        virkningstidspunkt,
-                        innvilgelse = false,
                         bruker,
                     )
 
@@ -491,7 +512,7 @@ internal class AvkortingTest {
     inner class SorterePerioder {
         @Test
         fun `Avkorting skal alltid sortere aarsoppgjoer ascending på år`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 Avkorting(
                     listOf(
                         Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
@@ -503,7 +524,7 @@ internal class AvkortingTest {
 
         @Test
         fun `Aarsoppgjoer skal alltid sortere ytelseFoerAvkorting ascending på fom`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 val ytelseFoerAvkorting =
                     listOf(
                         ytelseFoerAvkorting(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
@@ -524,11 +545,27 @@ internal class AvkortingTest {
 
         @Test
         fun `Aarsoppgjoer skal alltid sortere inntektsavkorting ascending på fom`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 val inntektsavkorting =
                     listOf(
-                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null))),
-                        Inntektsavkorting(avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null))),
+                        Inntektsavkorting(
+                            avkortinggrunnlag(
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.of(2024, 2),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
+                        Inntektsavkorting(
+                            avkortinggrunnlag(
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.of(2024, 1),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
                     )
                 Avkorting(
                     listOf(
@@ -545,7 +582,7 @@ internal class AvkortingTest {
 
         @Test
         fun `Aarsoppgjoer skal alltid sortere avkortetYtelseAar ascending på fom`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 val avkortetYtelseAar =
                     listOf(
                         avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
@@ -566,7 +603,7 @@ internal class AvkortingTest {
 
         @Test
         fun `Inntektsavkorting skal alltid sortere avkortingsperioder ascending på fom`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 val avkortingsperioder =
                     listOf(
                         avkortingsperiode(fom = YearMonth.of(2024, 2), tom = null),
@@ -581,7 +618,7 @@ internal class AvkortingTest {
 
         @Test
         fun `Inntektsavkorting skal alltid sortere avkortetYtelseForventetInntekt ascending på fom`() {
-            assertThrows<IllegalStateException> {
+            assertThrows<InternfeilException> {
                 val avkortetYtelseForventetInntekt =
                     listOf(
                         avkortetYtelse(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),

@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class ReguleringFeiletRiver(
+internal class OmregningFeiletRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
 ) : ListenerMedLogging() {
@@ -33,7 +33,7 @@ internal class ReguleringFeiletRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("Regulering har feilet for sak ${packet.sakId}")
+        logger.error("Omregning har feilet for sak ${packet.sakId}")
         behandlingService.lagreKjoering(
             kjoering = packet.kjoering,
             sakId = packet.sakId,

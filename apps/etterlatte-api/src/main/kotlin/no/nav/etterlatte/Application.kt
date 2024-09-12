@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
-import no.nav.etterlatte.samordning.ApplicationContext
 import no.nav.etterlatte.samordning.sak.behandlingSakRoutes
 import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin

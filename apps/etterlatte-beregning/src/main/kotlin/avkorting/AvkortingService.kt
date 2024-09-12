@@ -47,10 +47,12 @@ class AvkortingService(
 
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
-            val nyAvkorting = kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+            val nyAvkorting =
+                kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
-            val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
+            val reberegnetAvkorting =
+                reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
@@ -71,7 +73,7 @@ class AvkortingService(
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        avkortingGrunnlagLagre: AvkortingGrunnlagLagreDto,
+        lagreGrunnlag: AvkortingGrunnlagLagreDto,
     ): AvkortingDto {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
@@ -79,19 +81,14 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        validerInntekt(avkortingGrunnlagLagre, avkorting, behandling)
+        validerInntekt(lagreGrunnlag, avkorting, behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
-                avkortingGrunnlagLagre,
-                behandling.behandlingType,
-                behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
-                    code = "MANGLER_VIRK",
-                    detail = "Behandling mangler virkningstidspunkt",
-                ),
+                lagreGrunnlag,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,

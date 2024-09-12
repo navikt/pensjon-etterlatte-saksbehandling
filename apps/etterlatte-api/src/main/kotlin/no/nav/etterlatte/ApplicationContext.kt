@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning
+package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory

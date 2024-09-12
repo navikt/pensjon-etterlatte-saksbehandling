@@ -190,6 +190,13 @@ spec:
         - application: tokenx-token-generator
           namespace: aura
           cluster: dev-gcp
+        - application: eessi-pensjon-journalforing-q2
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-sak
+              - les-bp-sak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

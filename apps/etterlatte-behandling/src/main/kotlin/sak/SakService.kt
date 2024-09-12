@@ -27,10 +27,12 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -89,6 +91,11 @@ interface SakService {
     fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
 
     fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long>
+
+    fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet
 }
 
 class ManglerTilgangTilEnhet(
@@ -164,6 +171,14 @@ class SakServiceImpl(
         val sakerForAvdoed = avdoedSak.map { it.sakId }
 
         return saker.map { it.id } + sakerForAvdoed
+    }
+
+    override fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet {
+        val sak = lesDao.finnSakMedGraderingOgSkjerming(sakId)
+        return sak
     }
 
     override fun finnSaker(ident: String): List<Sak> = finnSakerForPerson(ident).filterForEnheter()

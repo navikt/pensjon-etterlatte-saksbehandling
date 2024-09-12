@@ -119,6 +119,7 @@ export const AvkortingInntekt = ({
           ...data,
           fratrekkInnAar: data.fratrekkInnAar ?? 0,
           fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
+          fom: virkningstidspunkt(behandling).dato,
         },
       },
       (respons) => {
@@ -254,7 +255,10 @@ export const AvkortingInntekt = ({
                     <TekstFelt
                       {...register('fratrekkInnAar', {
                         required: { value: !fulltAar(), message: 'Må fylles ut' },
-                        max: { value: watch('aarsinntekt') || 0, message: 'Kan ikke være høyere enn årsinntekt' },
+                        max: {
+                          value: watch('aarsinntekt') || 0,
+                          message: 'Kan ikke være høyere enn årsinntekt',
+                        },
                         pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"

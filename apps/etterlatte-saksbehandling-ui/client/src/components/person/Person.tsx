@@ -55,7 +55,6 @@ export const Person = () => {
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
-  const skalViseAktivitet = useFeatureEnabledMedDefault('flere-perioder-aktivitet-vurdering', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -112,7 +111,7 @@ export const Person = () => {
                 icon={<PersonIcon />}
               />
               <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
-              {isOmstillingsstoenad(sakResult) && skalViseAktivitet && (
+              {isOmstillingsstoenad(sakResult) && (
                 <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
               )}
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />

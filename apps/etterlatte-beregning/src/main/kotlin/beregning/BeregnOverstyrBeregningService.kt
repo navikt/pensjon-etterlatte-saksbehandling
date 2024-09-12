@@ -78,6 +78,7 @@ class BeregnOverstyrBeregningService(
                     beregningsGrunnlag = overstyrGrunnlag,
                     virkningstidspunkt = virkningstidspunkt,
                     overstyrBeregning = overstyrBeregning,
+                    opphoerFraOgMed = behandling.opphoerFraOgMed,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -94,6 +95,7 @@ class BeregnOverstyrBeregningService(
                             beregningsGrunnlag = overstyrGrunnlag,
                             virkningstidspunkt = virkningstidspunkt,
                             overstyrBeregning = overstyrBeregning,
+                            opphoerFraOgMed = behandling.opphoerFraOgMed,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
@@ -104,6 +106,7 @@ class BeregnOverstyrBeregningService(
                             beregningsGrunnlag = opprettOverstyrGrunnlagOpphoer(beregningsGrunnlag, virkningstidspunkt.atDay(1)),
                             virkningstidspunkt = virkningstidspunkt,
                             overstyrBeregning = overstyrBeregning,
+                            opphoerFraOgMed = behandling.opphoerFraOgMed,
                         )
                     }
                 }
@@ -164,11 +167,12 @@ class BeregnOverstyrBeregningService(
         beregningsGrunnlag: PeriodisertOverstyrGrunnlag,
         virkningstidspunkt: YearMonth,
         overstyrBeregning: OverstyrBeregning,
+        opphoerFraOgMed: YearMonth?,
     ): Beregning {
         val resultat =
             beregnOverstyrRegel.eksekver(
                 grunnlag = beregningsGrunnlag,
-                periode = RegelPeriode(virkningstidspunkt.atDay(1)),
+                periode = RegelPeriode(virkningstidspunkt.atDay(1), opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth()),
             )
 
         val beregnetDato = Tidspunkt.now()

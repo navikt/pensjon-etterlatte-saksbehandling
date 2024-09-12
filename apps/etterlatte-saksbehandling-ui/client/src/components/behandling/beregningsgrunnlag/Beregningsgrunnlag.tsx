@@ -17,6 +17,9 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { SkruPaaOverstyrtBeregning } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruPaaOverstyrtBeregning'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { formaterNavn } from '~shared/types/Person'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -94,3 +97,24 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 }
 
 export default Beregningsgrunnlag
+
+export const tagForKunEnJuridiskForelder = (behandling: IBehandlingReducer) => {
+  const datoTomKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+
+  return datoTomKunEnJuridiskForelder
+    ? `Kun én juridisk forelder til og med ${formaterDato(datoTomKunEnJuridiskForelder)}`
+    : `Kun én juridisk forelder`
+}
+
+export const mapNavn = (fnr: string, personopplysninger: Personopplysninger | null): string => {
+  if (!personopplysninger) return fnr
+
+  const opplysning = personopplysninger.avdoede.find(
+    (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+  )?.opplysning
+
+  if (!opplysning) {
+    return fnr
+  }
+  return `${formaterNavn(opplysning)} (${fnr})`
+}

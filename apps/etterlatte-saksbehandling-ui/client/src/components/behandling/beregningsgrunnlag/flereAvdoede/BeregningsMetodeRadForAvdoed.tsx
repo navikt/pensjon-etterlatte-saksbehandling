@@ -44,8 +44,8 @@ import { ITrygdetid } from '~shared/api/trygdetid'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
-import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { tagForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 
 interface Props {
   behandling: IBehandlingReducer
@@ -164,14 +164,6 @@ export const BeregningsMetodeRadForAvdoed = ({
 
   const beregningsMetodeForAvdoed: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined =
     finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
-
-  const tagForKunEnJuridiskForelder = () => {
-    const datoTomKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
-
-    return datoTomKunEnJuridiskForelder
-      ? `Kun én juridisk forelder til og med ${formaterDato(datoTomKunEnJuridiskForelder)}`
-      : `Kun én juridisk forelder`
-  }
 
   const { register, control, getValues, handleSubmit, reset } = useForm<BeregningsmetodeForAvdoedForm>({
     defaultValues: beregningsmetodeFormdataForAvdoed(finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)),
@@ -306,7 +298,7 @@ export const BeregningsMetodeRadForAvdoed = ({
         {mapNavn(trygdetid.ident)}{' '}
         {erEnesteJuridiskeForelder && (
           <Tag variant="alt1" size="small">
-            {tagForKunEnJuridiskForelder()}
+            {tagForKunEnJuridiskForelder(behandling)}
           </Tag>
         )}
       </Table.DataCell>

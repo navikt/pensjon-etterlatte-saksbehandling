@@ -30,9 +30,12 @@ import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/be
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { SakType } from '~shared/types/sak'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -96,12 +99,13 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
         {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
-          success: (beregningsgrunnlag) => (
+          success: () => (
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
+                navn={personopplysninger ? mapNavn(personopplysninger!!.avdoede!![0].id, personopplysninger) : ''}
+                behandling={behandling}
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
-                eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
               <Box maxWidth="70rem">

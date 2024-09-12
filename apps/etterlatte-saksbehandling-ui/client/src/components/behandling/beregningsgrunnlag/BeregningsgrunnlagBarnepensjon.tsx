@@ -43,7 +43,7 @@ import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/be
 import { SakType } from '~shared/types/sak'
 import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { AnnenForelderVurdering } from '~shared/types/grunnlag'
+import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
@@ -141,8 +141,6 @@ const BeregningsgrunnlagBarnepensjon = () => {
       }
     )
   }
-  const harKunEnJuridiskForelder =
-    personopplysninger?.annenForelder?.vurdering == AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   const tidligsteAvdoede: IPdlPerson = requireNotNull(
     personopplysninger?.avdoede
@@ -170,19 +168,18 @@ const BeregningsgrunnlagBarnepensjon = () => {
                       redigerbar={redigerbar}
                       trygdetider={trygdetider}
                       tidligsteAvdoede={tidligsteAvdoede}
-                      kunEnJuridiskForelder={harKunEnJuridiskForelder}
                     />
                   )}
-                  {trygdetider.length <= 1 && (
+                  {trygdetider.length == 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}
+                      navn={mapNavn(trygdetider[0].ident, personopplysninger)}
+                      behandling={behandling}
                       oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
-                      eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
                       lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                      kunEnJuridiskForelder={harKunEnJuridiskForelder}
                       datoTilKunEnJuridiskForelder={
-                        behandling?.beregningsGrunnlag?.kunEnJuridiskForelder.tom
-                          ? new Date(behandling?.beregningsGrunnlag?.kunEnJuridiskForelder.tom)
+                        behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+                          ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
                           : undefined
                       }
                     />

@@ -89,6 +89,7 @@ enum class Status {
 
 enum class OppgaveKilde {
     HENDELSE,
+    DOEDSHENDELSE,
     BEHANDLING,
     GENERELL_BEHANDLING,
     EKSTERN,
@@ -109,6 +110,7 @@ enum class OppgaveType {
     OMGJOERING,
     JOURNALFOERING,
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
+    MANGLER_SOEKNAD,
     AKTIVITETSPLIKT,
     AKTIVITETSPLIKT_REVURDERING,
     AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,

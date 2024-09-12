@@ -4,7 +4,6 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -19,7 +18,6 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
 class DoedshendelseReminderService(
-    private val featureToggleService: FeatureToggleService,
     private val doedshendelseDao: DoedshendelseDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
@@ -55,9 +53,9 @@ class DoedshendelseReminderService(
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,
-                    kilde = OppgaveKilde.HENDELSE,
-                    type = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = "${hendelse.beroertFnr} Har ikke søkt om Barnepensjon 2 måneder etter utsendt brev",
+                    kilde = OppgaveKilde.DOEDSHENDELSE,
+                    type = OppgaveType.MANGLER_SOEKNAD,
+                    merknad = "Har ikke søkt om barnepensjon 2 mnd. etter utsendt brev. Sjekk om det må sendes påminnelse.",
                     frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
                 )
             }

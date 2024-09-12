@@ -76,26 +76,32 @@ export const BrevutfallVisning = (props: {
                   <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                 </VStack>
               </HStack>
-              {sakType == SakType.BARNEPENSJON && !!brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav && (
+              {sakType == SakType.BARNEPENSJON && (
                 <>
-                  <VStack gap="2">
-                    <Label>Er det krav i etterbetalingen?</Label>
-                    <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
-                  </VStack>
-                  <VStack gap="2">
-                    <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
-                    <BodyShort>
-                      {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk ? 'Ja' : 'Nei'}
-                    </BodyShort>
-                  </VStack>
-                  <VStack gap="2">
-                    <Label>Hvor mange måneder etterbetales det for?</Label>
-                    <BodyShort>
-                      {etterbetalingPeriodeValgToString(
-                        brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg
-                      )}
-                    </BodyShort>
-                  </VStack>
+                  {brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav && (
+                    <VStack gap="2">
+                      <Label>Er det krav i etterbetalingen?</Label>
+                      <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
+                    </VStack>
+                  )}
+                  {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk && (
+                    <VStack gap="2">
+                      <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+                      <BodyShort>
+                        {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk ? 'Ja' : 'Nei'}
+                      </BodyShort>
+                    </VStack>
+                  )}
+                  {brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg && (
+                    <VStack gap="2">
+                      <Label>Hvor mange måneder etterbetales det for?</Label>
+                      <BodyShort>
+                        {etterbetalingPeriodeValgToString(
+                          brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg
+                        )}
+                      </BodyShort>
+                    </VStack>
+                  )}
                 </>
               )}
             </>

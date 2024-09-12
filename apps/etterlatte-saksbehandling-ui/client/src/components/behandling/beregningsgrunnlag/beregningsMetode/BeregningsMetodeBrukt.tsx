@@ -101,6 +101,7 @@ export const BeregningsMetodeBrukt = ({
           <Table.Body>
             <Table.ExpandableRow
               open={true}
+              expansionDisabled={true}
               key="1"
               content={
                 redigerTrydgetidMetodeBrukt ? (

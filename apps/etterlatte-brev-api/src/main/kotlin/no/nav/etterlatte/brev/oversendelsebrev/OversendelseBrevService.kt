@@ -181,19 +181,16 @@ class OversendelseBrevServiceImpl(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String? =
-                when (verge) {
-                    is Vergemaal -> verge.foedselsnummer.value
-                    is UkjentVergemaal -> null
+            when (verge) {
+                is Vergemaal -> tomMottaker()
+                is UkjentVergemaal -> tomMottaker()
 
-                    else ->
+                else ->
+                    adresseService.hentMottakerAdresse(
+                        sakType,
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
-                            ?: soeker.fnr.value
-                }
-            return if (mottakerFnr != null) {
-                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
-            } else {
-                tomMottaker()
+                            ?: soeker.fnr.value,
+                    )
             }
         }
 

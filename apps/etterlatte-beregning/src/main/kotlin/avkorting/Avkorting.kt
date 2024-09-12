@@ -81,7 +81,7 @@ data class Avkorting(
     /*
      * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
      */
-    fun kopierAvkorting(opphoerFom: YearMonth?): Avkorting =
+    fun kopierAvkorting(opphoerFom: YearMonth? = null): Avkorting =
         Avkorting(
             aarsoppgjoer =
                 aarsoppgjoer.map {
@@ -96,7 +96,9 @@ data class Avkorting(
                                             periode =
                                                 inntektsavkorting.grunnlag.periode.copy(
                                                     fom = inntektsavkorting.grunnlag.periode.fom,
-                                                    tom = opphoerFom?.minusMonths(1),
+                                                    tom =
+                                                        inntektsavkorting.grunnlag.periode.tom
+                                                            ?: opphoerFom?.minusMonths(1),
                                                 ),
                                         ),
                                 )
@@ -126,7 +128,7 @@ data class Avkorting(
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom) } +
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, opphoerFom) } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
@@ -435,22 +437,23 @@ data class Inntektsavkorting(
         }
     }
 
-    fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth) =
-        when (grunnlag.periode.tom) {
-            null ->
-                copy(
-                    grunnlag =
-                        grunnlag.copy(
-                            periode =
-                                Periode(
-                                    fom = grunnlag.periode.fom,
-                                    tom = virkningstidspunkt.minusMonths(1),
-                                ),
+    fun lukkSisteInntektsperiode(
+        virkningstidspunkt: YearMonth,
+        opphoerFom: YearMonth?,
+    ) = if (grunnlag.periode.tom == null || grunnlag.periode.tom == opphoerFom?.minusMonths(1)) {
+        copy(
+            grunnlag =
+                grunnlag.copy(
+                    periode =
+                        Periode(
+                            fom = grunnlag.periode.fom,
+                            tom = virkningstidspunkt.minusMonths(1),
                         ),
-                )
-
-            else -> this
-        }
+                ),
+        )
+    } else {
+        this
+    }
 }
 
 /**

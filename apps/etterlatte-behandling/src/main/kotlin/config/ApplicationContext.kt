@@ -484,8 +484,8 @@ internal class ApplicationContext(
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
         )
 
-    val doedshendelseReminderJob = DoedshendelseReminderService(featureToggleService, doedshendelseDao, behandlingService, oppgaveService)
-    val doedshendelseJobService =
+    private val doedshendelseReminderJob = DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService)
+    private val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
             doedshendelseKontrollpunktService =

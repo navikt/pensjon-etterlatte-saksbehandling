@@ -1,38 +1,20 @@
-import {
-  Alert,
-  BodyShort,
-  Button,
-  Heading,
-  HelpText,
-  HStack,
-  Label,
-  ReadMore,
-  Table,
-  Textarea,
-  TextField,
-  VStack,
-} from '@navikt/ds-react'
+import { Heading, HelpText, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import React, { useState } from 'react'
-import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
+import React, { useEffect, useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { ToolTip } from '~components/behandling/felles/ToolTip'
-
-import { isPending } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
-import { useForm } from 'react-hook-form'
-import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { useAppDispatch, useAppSelector } from '~store/Store'
 import { lastDayOfMonth } from 'date-fns'
+import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
+import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IAvkortingGrunnlagForm } from '~shared/types/IAvkorting'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentAvkortingGrunnlag } from '~shared/api/avkorting'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -45,114 +27,41 @@ export const AvkortingInntekt = ({
   redigerbar: boolean
   resetInntektsavkortingValidering: () => void
 }) => {
-  if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
-  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
-  const dispatch = useAppDispatch()
+  const [, avkortingGrunnlagFormRequest] = useApiCall(hentAvkortingGrunnlag)
+  const [avkortingGrunnlagForm, setAvkortingGrunnlagForm] = useState<IAvkortingGrunnlagForm>(null)
+
+  const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, useInnloggetSaksbehandler().skriveEnheter)
+  const [visHistorikk, setVisHistorikk] = useState(false)
 
   const virkningstidspunktDate = new Date(virkningstidspunkt(behandling).dato)
 
-  const inntektsAar = innevaerendeAar ? virkningstidspunktDate.getFullYear() : virkningstidspunktDate.getFullYear() + 1
-  const avkortingGrunnlagForAar = (avkorting as IAvkorting).avkortingGrunnlag.filter(
-    (aGrunnlag) => aGrunnlag && new Date(aGrunnlag.fom).getFullYear() === inntektsAar
-  )
-  const avkortingGrunnlag = avkorting == null ? [] : [...avkortingGrunnlagForAar]
-  avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
-
-  const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
-
-  const [visForm, setVisForm] = useState(false)
-  const [visHistorikk, setVisHistorikk] = useState(false)
-
-  // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
-  const finnesRedigerbartGrunnlag = () =>
-    avkortingGrunnlag.length > 0 && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
-
-  const fulltAar = () => {
-    if (!innevaerendeAar) {
-      return true
-    }
-    if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = virkningstidspunktDate.getMonth() === 0
-      return innvilgelseFraJanuar
-    } else {
-      const revurderingIFulltAar = avkortingGrunnlag[0].relevanteMaanederInnAar === 12
-
-      const revurderingINyttAar =
-        new Date(avkortingGrunnlag[0].fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
-
-      return revurderingINyttAar || revurderingIFulltAar
-    }
-  }
-
-  const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
-    if (finnesRedigerbartGrunnlag()) {
-      // Returnerer grunnlagsperiode som er opprettet i denne behandlingen
-      return avkortingGrunnlag[0]
-    }
-    if (avkortingGrunnlag.length > 0) {
-      // Setter disabla felter til forventet verdi
-      if (fulltAar()) {
-        return { spesifikasjon: '', fratrekkInnAar: 0, fratrekkInnAarUtland: 0 }
-      }
-      // Preutfyller ny grunnlagsperiode med tidligere verdier
-      const nyeste = avkortingGrunnlag[0]
-      return { ...nyeste, id: undefined, spesifikasjon: '' }
-    }
-    // Første grunnlagsperiode
-    return {
-      spesifikasjon: '',
-    }
-  }
-
-  const aktivtGrunnlag = () => {
-    return avkortingGrunnlag.length > 0 ? [avkortingGrunnlag[0]] : []
-  }
-
-  const knappTekst = () => {
-    if (finnesRedigerbartGrunnlag()) {
-      return 'Rediger'
-    }
-    return innevaerendeAar ? 'Legg til' : 'Legg til for neste år'
-  }
-
-  const {
-    register,
-    reset,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<IAvkortingGrunnlagLagre>({
-    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
-  })
-
-  const onSubmit = (data: IAvkortingGrunnlagLagre) => {
-    requestLagreAvkortingGrunnlag(
+  useEffect(() => {
+    avkortingGrunnlagFormRequest(
       {
         behandlingId: behandling.id,
-        avkortingGrunnlag: {
-          ...data,
-          fratrekkInnAar: data.fratrekkInnAar ?? 0,
-          fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: innevaerendeAar ? virkningstidspunkt(behandling).dato : `${inntektsAar}-01`,
-        },
+        aar: innevaerendeAar ? virkningstidspunktDate.getFullYear() : virkningstidspunktDate.getFullYear() + 1,
       },
-      (respons) => {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
-        const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
-        dispatch(oppdaterAvkorting(respons))
-        setVisForm(false)
+      (data) => {
+        setAvkortingGrunnlagForm(data)
       }
     )
+  }, [])
+
+  const listeVisningAvkortingGrunnlag = () => {
+    if (visHistorikk) {
+      return avkortingGrunnlagForm.fraVirk
+        ? [avkortingGrunnlagForm.fraVirk].concat(avkortingGrunnlagForm.historikk)
+        : avkortingGrunnlagForm.historikk
+    } else {
+      return [avkortingGrunnlagForm.fraVirk ?? avkortingGrunnlagForm.historikk[0]]
+    }
   }
 
   return (
     <AvkortingInntektWrapper>
-      {avkortingGrunnlag.length > 0 && (
+      {avkortingGrunnlagForm && (avkortingGrunnlagForm?.fraVirk || avkortingGrunnlagForm?.historikk.length > 0) && (
         <InntektAvkortingTabell>
-          <Heading size="small">{inntektsAar}</Heading>
+          <Heading size="small">{avkortingGrunnlagForm.aar}</Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.Row>
@@ -179,12 +88,12 @@ export const AvkortingInntekt = ({
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => {
-                const aarsinntekt = inntektsgrunnlag.aarsinntekt ?? 0
-                const fratrekkInnAar = inntektsgrunnlag.fratrekkInnAar ?? 0
+              {listeVisningAvkortingGrunnlag().map((avkortingGrunnlag, index) => {
+                const aarsinntekt = avkortingGrunnlag.aarsinntekt ?? 0
+                const fratrekkInnAar = avkortingGrunnlag.fratrekkInnAar ?? 0
                 const forventetInntekt = aarsinntekt - fratrekkInnAar
-                const inntektutland = inntektsgrunnlag.inntektUtland ?? 0
-                const fratrekkUtland = inntektsgrunnlag.fratrekkInnAarUtland ?? 0
+                const inntektutland = avkortingGrunnlag.inntektUtland ?? 0
+                const fratrekkUtland = avkortingGrunnlag.fratrekkInnAarUtland ?? 0
                 const forventetInntektUtland = inntektutland - fratrekkUtland
                 return (
                   <Table.Row key={index}>
@@ -209,18 +118,18 @@ export const AvkortingInntekt = ({
                     <Table.DataCell key="InntektTotalt">
                       {NOK(forventetInntekt + forventetInntektUtland)}
                     </Table.DataCell>
-                    <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
+                    <Table.DataCell>{avkortingGrunnlag.relevanteMaanederInnAar}</Table.DataCell>
                     <Table.DataCell key="Periode">
-                      {inntektsgrunnlag.fom && formaterDato(inntektsgrunnlag.fom)} -{' '}
-                      {inntektsgrunnlag.tom && formaterDato(lastDayOfMonth(new Date(inntektsgrunnlag.tom)))}
+                      {avkortingGrunnlag.fom && formaterDato(avkortingGrunnlag.fom)} -{' '}
+                      {avkortingGrunnlag.tom && formaterDato(lastDayOfMonth(new Date(avkortingGrunnlag.tom)))}
                     </Table.DataCell>
-                    <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
+                    <Table.DataCell key="InntektSpesifikasjon">{avkortingGrunnlag.spesifikasjon}</Table.DataCell>
                     <Table.DataCell key="InntektKilde">
-                      {inntektsgrunnlag.kilde && (
+                      {avkortingGrunnlag.kilde && (
                         <Info
-                          tekst={inntektsgrunnlag.kilde.ident}
+                          tekst={avkortingGrunnlag.kilde.ident}
                           label=""
-                          undertekst={`saksbehandler: ${formaterDato(inntektsgrunnlag.kilde.tidspunkt)}`}
+                          undertekst={`saksbehandler: ${formaterDato(avkortingGrunnlag.kilde.tidspunkt)}`}
                         />
                       )}
                     </Table.DataCell>
@@ -231,132 +140,18 @@ export const AvkortingInntekt = ({
           </Table>
         </InntektAvkortingTabell>
       )}
-      {avkortingGrunnlag.length > 1 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
-      {erRedigerbar && (
+      {avkortingGrunnlagForm?.historikk.length > 0 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
+
+      {erRedigerbar && avkortingGrunnlagForm && (
         <InntektAvkortingForm>
-          <Rows>
-            {visForm && (
-              <>
-                <FormWrapper>
-                  <HStack gap="2" align="start" wrap={false}>
-                    <TekstFelt
-                      {...register('aarsinntekt', {
-                        pattern: { value: /^\d+$/, message: 'Kun tall' },
-                        required: { value: true, message: 'Må fylles ut' },
-                      })}
-                      label="Forventet årsinntekt Norge"
-                      size="medium"
-                      type="tel"
-                      inputMode="numeric"
-                      error={errors.aarsinntekt?.message}
-                    />
-                    <TekstFelt
-                      {...register('fratrekkInnAar', {
-                        required: { value: !fulltAar(), message: 'Må fylles ut' },
-                        max: {
-                          value: watch('aarsinntekt') || 0,
-                          message: 'Kan ikke være høyere enn årsinntekt',
-                        },
-                        pattern: { value: /^\d+$/, message: 'Kun tall' },
-                      })}
-                      label="Fratrekk inn-år"
-                      size="medium"
-                      type="tel"
-                      inputMode="numeric"
-                      disabled={fulltAar()}
-                      error={errors.fratrekkInnAar?.message}
-                    />
-                    <TekstFelt
-                      {...register('inntektUtland', {
-                        required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /^\d+$/, message: 'Kun tall' },
-                      })}
-                      label="Forventet årsinntekt utland"
-                      size="medium"
-                      type="tel"
-                      inputMode="numeric"
-                      error={errors.inntektUtland?.message}
-                    />
-                    <TekstFelt
-                      {...register('fratrekkInnAarUtland', {
-                        required: { value: !fulltAar(), message: 'Må fylles ut' },
-                        max: {
-                          value: watch('inntektUtland') || 0,
-                          message: 'Kan ikke være høyere enn årsinntekt utland',
-                        },
-                        pattern: { value: /^\d+$/, message: 'Kun tall' },
-                      })}
-                      label="Fratrekk inn-år"
-                      size="medium"
-                      type="tel"
-                      disabled={fulltAar()}
-                      inputMode="numeric"
-                      error={errors.fratrekkInnAarUtland?.message}
-                    />
-                    <VStack gap="4">
-                      <Label>Fra og med dato</Label>
-                      <BodyShort>{formaterDato(virkningstidspunkt(behandling).dato)}</BodyShort>
-                    </VStack>
-                  </HStack>
-                </FormWrapper>
-                <TextAreaWrapper>
-                  <Textarea
-                    {...register('spesifikasjon')}
-                    resize="vertical"
-                    label={
-                      <SpesifikasjonLabel>
-                        <Label>Spesifikasjon av inntekt</Label>
-                        <ReadMore header="Hva regnes som inntekt?">
-                          Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt
-                          med arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                          nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
-                          foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-                        </ReadMore>
-                      </SpesifikasjonLabel>
-                    }
-                  />
-                </TextAreaWrapper>
-              </>
-            )}
-            <FormKnapper>
-              {visForm ? (
-                <>
-                  <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
-                    Lagre
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="tertiary"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setVisForm(false)
-                    }}
-                  >
-                    Avbryt
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="small"
-                  variant="secondary"
-                  icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setVisForm(true)
-                    resetInntektsavkortingValidering()
-                  }}
-                >
-                  {knappTekst()}
-                </Button>
-              )}
-            </FormKnapper>
-          </Rows>
+          <AvkortingInntektForm
+            behandling={behandling}
+            avkortingGrunnlagForm={avkortingGrunnlagForm}
+            innevaerendeAar={innevaerendeAar}
+            resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+          />
         </InntektAvkortingForm>
       )}
-      {isFailureHandler({
-        apiResult: inntektGrunnlagStatus,
-        errorMessage: 'En feil har oppstått',
-      })}
     </AvkortingInntektWrapper>
   )
 }
@@ -372,44 +167,4 @@ const InntektAvkortingTabell = styled.div`
 const InntektAvkortingForm = styled.form`
   display: flex;
   margin: 1em 0 0 0;
-`
-
-const FormWrapper = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-top: 2em;
-  margin-bottom: 2em;
-`
-
-const FormKnapper = styled.div`
-  margin-top: 1rem;
-  margin-right: 1em;
-  gap: 1rem;
-`
-
-const TekstFelt = styled(TextField)`
-  max-width: 11.85em;
-`
-
-const TextAreaWrapper = styled.div`
-  display: grid;
-  align-items: flex-end;
-  margin-top: 1em;
-  margin-bottom: 1em;
-
-  textArea {
-    margin-top: 1em;
-    border-width: 1px;
-    border-radius: 4px 4px 0 4px;
-    width: 47em;
-    height: 98px;
-    text-indent: 4px;
-    resize: none;
-  }
-`
-
-const SpesifikasjonLabel = styled.div``
-
-const Rows = styled.div`
-  flex-direction: column;
 `

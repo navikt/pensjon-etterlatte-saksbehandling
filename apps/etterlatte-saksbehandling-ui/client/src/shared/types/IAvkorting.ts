@@ -24,6 +24,7 @@ export interface IAvkortingGrunnlag {
 }
 
 export interface IAvkortingGrunnlagForm {
+  aar: number
   fraVirk?: IAvkortingGrunnlag
   historikk: IAvkortingGrunnlag[]
 }

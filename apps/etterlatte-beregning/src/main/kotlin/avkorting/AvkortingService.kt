@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 data class AvkortingGrunnlagForm(
+    val aar: Int,
     val fraVirk: AvkortingGrunnlagDto?,
     val historikk: List<AvkortingGrunnlagDto>,
 )
@@ -51,6 +52,7 @@ class AvkortingService(
 
         val fraVirk = avkortingGrunnlag.singleOrNull { it.periode.fom == behandling.virkningstidspunkt().dato }
         return AvkortingGrunnlagForm(
+            aar = aarsoppgjoer.aar,
             fraVirk = fraVirk?.toDto(aarsoppgjoer.forventaInnvilgaMaaneder),
             historikk =
                 avkortingGrunnlag

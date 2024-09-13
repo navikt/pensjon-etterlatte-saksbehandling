@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
 import java.util.UUID
 
 class AvkortingService(
@@ -25,6 +26,7 @@ class AvkortingService(
                 inntektUtland = 0,
                 fratrekkInnAarUtland = 0,
                 spesifikasjon = "kun test",
+                fom = YearMonth.now(),
             ),
         )
     }

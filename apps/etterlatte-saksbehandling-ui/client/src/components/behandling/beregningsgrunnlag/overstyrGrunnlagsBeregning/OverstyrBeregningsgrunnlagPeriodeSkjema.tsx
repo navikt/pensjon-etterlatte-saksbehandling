@@ -23,6 +23,8 @@ import {
   stripWhitespace,
   validerAarsak,
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
+import { JaNei } from '~shared/types/ISvar'
+import { formaterTilISOString } from '~utils/formatering/dato'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -115,7 +117,22 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
       <VStack gap="4">
         <HGrid gap="4" columns="min-content min-content max-content" align="start">
           <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required />
-          <ControlledMaanedVelger name="tom" label="Til og med" control={control} />
+          <ControlledMaanedVelger
+            name="tom"
+            label="Til og med"
+            control={control}
+            validate={(maaned) => {
+              if (behandling.viderefoertOpphoer?.skalViderefoere == JaNei.JA) {
+                if (
+                  !maaned ||
+                  formaterTilISOString(maaned) >= formaterTilISOString(behandling.viderefoertOpphoer?.dato)
+                ) {
+                  return 'Til og med-dato må være før opphør fra og med'
+                }
+              }
+              return undefined
+            }}
+          />
           <Box width="fit-content">
             <TextField
               {...register('data.utbetaltBeloep', {

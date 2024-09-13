@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -17,6 +18,11 @@ import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+data class AvkortingGrunnlagForm(
+    val fraVirk: AvkortingGrunnlagDto?,
+    val historikk: List<AvkortingGrunnlagDto>,
+)
+
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
@@ -24,6 +30,34 @@ class AvkortingService(
     private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun hentAvkortingGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        aar: Int,
+    ): AvkortingGrunnlagForm? {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        val aarsoppgjoer = avkorting?.aarsoppgjoer?.singleOrNull { it.aar == aar }
+        if (aarsoppgjoer == null) {
+            return null
+        }
+
+        val avkortingGrunnlag =
+            aarsoppgjoer.inntektsavkorting
+                .map { it.grunnlag }
+                .sortedBy { it.periode.fom } // TODO test
+
+        val fraVirk = avkortingGrunnlag.singleOrNull { it.periode.fom == behandling.virkningstidspunkt().dato }
+        return AvkortingGrunnlagForm(
+            fraVirk = fraVirk?.toDto(aarsoppgjoer.forventaInnvilgaMaaneder),
+            historikk =
+                avkortingGrunnlag
+                    .filter { it.id != fraVirk?.id }
+                    .map { it.toDto(aarsoppgjoer.forventaInnvilgaMaaneder) },
+        )
+    }
 
     suspend fun hentAvkorting(
         behandlingId: UUID,

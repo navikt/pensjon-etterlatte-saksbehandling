@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -41,6 +42,21 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
                 call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
+            }
+        }
+
+        get("aarsinntekt/{aar}") {
+            withBehandlingId(behandlingKlient) {
+                val aar =
+                    call.parameters["aar"]?.toInt() ?: throw UgyldigForespoerselException(
+                        "MANGLER_AAR_AVKORTING_GRUNNLAG",
+                        "Må oppgi hvilket år det skal hentes avkortingsgrunnlag for",
+                    )
+                logger.info("Henter oppgitte årsinntekter for år $aar for behandling $it")
+                when (val aarsinntekter = avkortingService.hentAvkortingGrunnlag(it, brukerTokenInfo, aar)) {
+                    null -> call.response.status(HttpStatusCode.NoContent)
+                    else -> call.respond(aarsinntekter)
+                }
             }
         }
 

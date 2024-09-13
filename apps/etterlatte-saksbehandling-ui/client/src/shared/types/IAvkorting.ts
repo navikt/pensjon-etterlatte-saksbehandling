@@ -23,6 +23,11 @@ export interface IAvkortingGrunnlag {
   }
 }
 
+export interface IAvkortingGrunnlagForm {
+  fraVirk?: IAvkortingGrunnlag
+  historikk: IAvkortingGrunnlag[]
+}
+
 export interface IAvkortingGrunnlagLagre {
   id?: string
   aarsinntekt?: number

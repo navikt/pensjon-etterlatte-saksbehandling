@@ -95,7 +95,7 @@ export const Avkorting = ({
                 innevaerendeAar={true}
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-              />
+              />{' '}
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
                 <AvkortingInntekt
                   behandling={behandling}

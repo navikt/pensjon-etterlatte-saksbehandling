@@ -5,28 +5,25 @@ import { IAvkortingGrunnlagForm, IAvkortingGrunnlagLagre } from '~shared/types/I
 import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { formaterDato } from '~utils/formatering/dato'
-import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
-import { PencilIcon } from '@navikt/aksel-icons'
 import { isPending } from '@reduxjs/toolkit'
 
 export const AvkortingInntektForm = ({
   behandling,
   innevaerendeAar,
   avkortingGrunnlagForm,
-  resetInntektsavkortingValidering,
+  setVisForm,
 }: {
   behandling: IBehandlingReducer
-  avkortingGrunnlagForm: IAvkortingGrunnlagForm
+  avkortingGrunnlagForm: IAvkortingGrunnlagForm | undefined
   innevaerendeAar: boolean
-  resetInntektsavkortingValidering: () => void
+  setVisForm: (visForm: boolean) => void
 }) => {
   const dispatch = useAppDispatch()
 
-  const [visForm, setVisForm] = useState(false)
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
 
   const virkningstidspunktDate = new Date(virkningstidspunkt(behandling).dato)
@@ -41,7 +38,7 @@ export const AvkortingInntektForm = ({
       const innvilgelseFraJanuar = virkningstidspunktDate.getMonth() === 0
       return innvilgelseFraJanuar
     } else {
-      const siste = avkortingGrunnlagForm.fraVirk ?? avkortingGrunnlagForm.historikk[0]
+      const siste = avkortingGrunnlagForm!.fraVirk ?? avkortingGrunnlagForm!.historikk[0] // TODO
 
       const revurderingIFulltAar = siste.relevanteMaanederInnAar === 12
 
@@ -53,22 +50,12 @@ export const AvkortingInntektForm = ({
   }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
-    if (avkortingGrunnlagForm.fraVirk !== undefined) {
+    if (avkortingGrunnlagForm?.fraVirk !== undefined) {
       return avkortingGrunnlagForm.fraVirk
     }
     return {
       spesifikasjon: '',
-      fratrekkInnAar: 0,
-      fratrekkInnAarUtland: 0,
     }
-  }
-
-  const knappTekst = () => {
-    // TODO fungerer denne fortsatt?
-    if (avkortingGrunnlagForm.fraVirk !== undefined) {
-      return 'Rediger'
-    }
-    return innevaerendeAar ? 'Legg til' : 'Legg til for neste år'
   }
 
   const {
@@ -89,7 +76,7 @@ export const AvkortingInntektForm = ({
           ...data,
           fratrekkInnAar: data.fratrekkInnAar ?? 0,
           fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: innevaerendeAar ? virkningstidspunkt(behandling).dato : `${inntektsAar}-01`,
+          fom: innevaerendeAar ? virkningstidspunkt(behandling).dato : `${inntektsAar}-01`, // TODO forenkle?
         },
       },
       (respons) => {
@@ -106,121 +93,102 @@ export const AvkortingInntektForm = ({
   return (
     <>
       <Rows>
-        {visForm && (
-          <>
-            <FormWrapper>
-              <HStack gap="2" align="start" wrap={false}>
-                <TekstFelt
-                  {...register('aarsinntekt', {
-                    pattern: { value: /^\d+$/, message: 'Kun tall' },
-                    required: { value: true, message: 'Må fylles ut' },
-                  })}
-                  label="Forventet årsinntekt Norge"
-                  size="medium"
-                  type="tel"
-                  inputMode="numeric"
-                  error={errors.aarsinntekt?.message}
-                />
-                <TekstFelt
-                  {...register('fratrekkInnAar', {
-                    required: { value: !fulltAar(), message: 'Må fylles ut' },
-                    max: {
-                      value: watch('aarsinntekt') || 0,
-                      message: 'Kan ikke være høyere enn årsinntekt',
-                    },
-                    pattern: { value: /^\d+$/, message: 'Kun tall' },
-                  })}
-                  label="Fratrekk inn-år"
-                  size="medium"
-                  type="tel"
-                  inputMode="numeric"
-                  disabled={fulltAar()}
-                  error={errors.fratrekkInnAar?.message}
-                />
-                <TekstFelt
-                  {...register('inntektUtland', {
-                    required: { value: true, message: 'Må fylles ut' },
-                    pattern: { value: /^\d+$/, message: 'Kun tall' },
-                  })}
-                  label="Forventet årsinntekt utland"
-                  size="medium"
-                  type="tel"
-                  inputMode="numeric"
-                  error={errors.inntektUtland?.message}
-                />
-                <TekstFelt
-                  {...register('fratrekkInnAarUtland', {
-                    required: { value: !fulltAar(), message: 'Må fylles ut' },
-                    max: {
-                      value: watch('inntektUtland') || 0,
-                      message: 'Kan ikke være høyere enn årsinntekt utland',
-                    },
-                    pattern: { value: /^\d+$/, message: 'Kun tall' },
-                  })}
-                  label="Fratrekk inn-år"
-                  size="medium"
-                  type="tel"
-                  disabled={fulltAar()}
-                  inputMode="numeric"
-                  error={errors.fratrekkInnAarUtland?.message}
-                />
-                <VStack gap="4">
-                  <Label>Fra og med dato</Label>
-                  <BodyShort>{formaterDato(virkningstidspunkt(behandling).dato)}</BodyShort>
-                </VStack>
-              </HStack>
-            </FormWrapper>
-            <TextAreaWrapper>
-              <Textarea
-                {...register('spesifikasjon')}
-                resize="vertical"
-                label={
-                  <SpesifikasjonLabel>
-                    <Label>Spesifikasjon av inntekt</Label>
-                    <ReadMore header="Hva regnes som inntekt?">
-                      Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                      arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
-                      foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-                    </ReadMore>
-                  </SpesifikasjonLabel>
-                }
+        <>
+          <FormWrapper>
+            <HStack gap="2" align="start" wrap={false}>
+              <TekstFelt
+                {...register('aarsinntekt', {
+                  pattern: { value: /^\d+$/, message: 'Kun tall' },
+                  required: { value: true, message: 'Må fylles ut' },
+                })}
+                label="Forventet årsinntekt Norge"
+                size="medium"
+                type="tel"
+                inputMode="numeric"
+                error={errors.aarsinntekt?.message}
               />
-            </TextAreaWrapper>
-          </>
-        )}
-        <FormKnapper>
-          {visForm ? (
-            <>
-              <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
-                Lagre
-              </Button>
-              <Button
-                size="small"
-                variant="tertiary"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setVisForm(false)
-                }}
-              >
-                Avbryt
-              </Button>
-            </>
-          ) : (
+              <TekstFelt
+                {...register('fratrekkInnAar', {
+                  required: { value: !fulltAar(), message: 'Må fylles ut' },
+                  max: {
+                    value: watch('aarsinntekt') || 0,
+                    message: 'Kan ikke være høyere enn årsinntekt',
+                  },
+                  pattern: { value: /^\d+$/, message: 'Kun tall' },
+                })}
+                label="Fratrekk inn-år"
+                size="medium"
+                type="tel"
+                inputMode="numeric"
+                disabled={fulltAar()}
+                error={errors.fratrekkInnAar?.message}
+              />
+              <TekstFelt
+                {...register('inntektUtland', {
+                  required: { value: true, message: 'Må fylles ut' },
+                  pattern: { value: /^\d+$/, message: 'Kun tall' },
+                })}
+                label="Forventet årsinntekt utland"
+                size="medium"
+                type="tel"
+                inputMode="numeric"
+                error={errors.inntektUtland?.message}
+              />
+              <TekstFelt
+                {...register('fratrekkInnAarUtland', {
+                  required: { value: !fulltAar(), message: 'Må fylles ut' },
+                  max: {
+                    value: watch('inntektUtland') || 0,
+                    message: 'Kan ikke være høyere enn årsinntekt utland',
+                  },
+                  pattern: { value: /^\d+$/, message: 'Kun tall' },
+                })}
+                label="Fratrekk inn-år"
+                size="medium"
+                type="tel"
+                disabled={fulltAar()}
+                inputMode="numeric"
+                error={errors.fratrekkInnAarUtland?.message}
+              />
+              <VStack gap="4">
+                <Label>Fra og med dato</Label>
+                <BodyShort>{formaterDato(virkningstidspunkt(behandling).dato)}</BodyShort>
+              </VStack>
+            </HStack>
+          </FormWrapper>
+          <TextAreaWrapper>
+            <Textarea
+              {...register('spesifikasjon')}
+              resize="vertical"
+              label={
+                <SpesifikasjonLabel>
+                  <Label>Spesifikasjon av inntekt</Label>
+                  <ReadMore header="Hva regnes som inntekt?">
+                    Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+                    arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
+                    nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
+                    foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                  </ReadMore>
+                </SpesifikasjonLabel>
+              }
+            />
+          </TextAreaWrapper>
+          <FormKnapper>
+            <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
+              Lagre
+            </Button>
             <Button
               size="small"
-              variant="secondary"
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              variant="tertiary"
               onClick={(e) => {
                 e.preventDefault()
-                setVisForm(true)
-                resetInntektsavkortingValidering()
+                setVisForm(false)
               }}
             >
-              {knappTekst()}
+              Avbryt
             </Button>
-          )}
-        </FormKnapper>
+          </FormKnapper>
+        </>
       </Rows>
       {isFailureHandler({
         apiResult: inntektGrunnlagStatus,

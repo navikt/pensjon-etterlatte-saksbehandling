@@ -1,4 +1,4 @@
-import { Heading, HelpText, Table } from '@navikt/ds-react'
+import { Button, Heading, HelpText, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useEffect, useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
@@ -15,6 +15,7 @@ import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IAvkortingGrunnlagForm } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkortingGrunnlag } from '~shared/api/avkorting'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -31,10 +32,12 @@ export const AvkortingInntekt = ({
   const [avkortingGrunnlagForm, setAvkortingGrunnlagForm] = useState<IAvkortingGrunnlagForm>(null)
 
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, useInnloggetSaksbehandler().skriveEnheter)
+  const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
 
   const virkningstidspunktDate = new Date(virkningstidspunkt(behandling).dato)
 
+  // TODO ikke eget endepunkt..
   useEffect(() => {
     avkortingGrunnlagFormRequest(
       {
@@ -55,6 +58,13 @@ export const AvkortingInntekt = ({
     } else {
       return [avkortingGrunnlagForm.fraVirk ?? avkortingGrunnlagForm.historikk[0]]
     }
+  }
+
+  const knappTekst = () => {
+    if (avkortingGrunnlagForm?.fraVirk !== undefined) {
+      return 'Rediger'
+    }
+    return innevaerendeAar ? 'Legg til' : 'Legg til for neste år'
   }
 
   return (
@@ -141,16 +151,29 @@ export const AvkortingInntekt = ({
         </InntektAvkortingTabell>
       )}
       {avkortingGrunnlagForm?.historikk.length > 0 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
-
-      {erRedigerbar && avkortingGrunnlagForm && (
-        <InntektAvkortingForm>
-          <AvkortingInntektForm
-            behandling={behandling}
-            avkortingGrunnlagForm={avkortingGrunnlagForm}
-            innevaerendeAar={innevaerendeAar}
-            resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-          />
-        </InntektAvkortingForm>
+      {erRedigerbar && visForm && (
+        <AvkortingInntektForm
+          behandling={behandling}
+          avkortingGrunnlagForm={avkortingGrunnlagForm}
+          innevaerendeAar={innevaerendeAar}
+          setVisForm={setVisForm}
+        />
+      )}
+      {!visForm && (
+        <LeggTilRediger>
+          <Button
+            size="small"
+            variant="secondary"
+            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            onClick={(e) => {
+              e.preventDefault()
+              setVisForm(true)
+              resetInntektsavkortingValidering()
+            }}
+          >
+            {knappTekst()}
+          </Button>
+        </LeggTilRediger>
       )}
     </AvkortingInntektWrapper>
   )
@@ -163,8 +186,7 @@ const AvkortingInntektWrapper = styled.div`
 const InntektAvkortingTabell = styled.div`
   margin: 1em 0 1em 0;
 `
-
-const InntektAvkortingForm = styled.form`
-  display: flex;
-  margin: 1em 0 0 0;
+const LeggTilRediger = styled.div`
+  margin-top: 0.75em;
+  flex-direction: column;
 `

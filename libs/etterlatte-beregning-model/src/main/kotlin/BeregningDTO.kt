@@ -47,10 +47,22 @@ data class OverstyrBeregningDTO(
     val kategori: OverstyrtBeregningKategori,
 )
 
-data class AvkortingDto(
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
+data class AvkortingFrontend(
+    val avkortingGrunnlag: List<AvkortingGrunnlagFrontend>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
     val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
+)
+
+data class AvkortingGrunnlagFrontend(
+    val aar: Int,
+    val fraVirk: AvkortingGrunnlagDto?,
+    val historikk: List<AvkortingGrunnlagDto>,
+)
+
+data class AvkortingDto(
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
+    val avkortetYtelse: List<AvkortetYtelseDto>,
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(), // TODO Fjern
 )
 
 data class AvkortingGrunnlagDto(

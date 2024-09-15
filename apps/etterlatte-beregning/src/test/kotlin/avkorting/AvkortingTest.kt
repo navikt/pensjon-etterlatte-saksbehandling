@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -220,13 +221,243 @@ internal class AvkortingTest {
                 it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
             }
         }
+    }
+
+    @Nested
+    inner class AvkortigTilFrontend {
+        val inntektFraMars24 =
+            avkortinggrunnlag(
+                periode =
+                    Periode(
+                        fom = YearMonth.of(2024, Month.MARCH),
+                        tom = YearMonth.of(2024, Month.JULY),
+                    ),
+                aarsinntekt = 300000,
+            )
+        val inntektFraAug24 =
+            avkortinggrunnlag(
+                periode =
+                    Periode(
+                        fom = YearMonth.of(2024, Month.AUGUST),
+                        tom = null,
+                    ),
+                aarsinntekt = 350000,
+            )
+        val inntektFraJan25 =
+            avkortinggrunnlag(
+                periode =
+                    Periode(
+                        fom = YearMonth.of(2025, Month.JANUARY),
+                        tom = null,
+                    ),
+                aarsinntekt = 400000,
+            )
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2024,
+                            forventaInnvilgaMaaneder = 10,
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(grunnlag = inntektFraMars24),
+                                    Inntektsavkorting(grunnlag = inntektFraAug24),
+                                ),
+                            avkortetYtelseAar =
+                                listOf(
+                                    avkortetYtelse(
+                                        periode =
+                                            Periode(
+                                                fom = YearMonth.of(2024, Month.MARCH),
+                                                tom = YearMonth.of(2024, Month.APRIL),
+                                            ),
+                                    ),
+                                    avkortetYtelse(
+                                        periode =
+                                            Periode(
+                                                fom = YearMonth.of(2024, Month.MAY),
+                                                tom = YearMonth.of(2024, Month.JULY),
+                                            ),
+                                    ),
+                                    avkortetYtelse(
+                                        periode = Periode(fom = YearMonth.of(2024, Month.AUGUST), tom = null),
+                                    ),
+                                ),
+                        ),
+                        Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2025,
+                            forventaInnvilgaMaaneder = 12,
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(
+                                        grunnlag = inntektFraJan25,
+                                    ),
+                                ),
+                            avkortetYtelseAar =
+                                listOf(
+                                    avkortetYtelse(
+                                        periode =
+                                            Periode(
+                                                fom = YearMonth.of(2025, Month.JANUARY),
+                                                tom = null,
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        @Test
+        fun `fyller ut avkortingsgrunnlag per årsoppgjør`() {
+            avkorting.toFrontend().asClue {
+                it.avkortingGrunnlag.size shouldBe 2
+                it.avkortingGrunnlag[0].aar shouldBe 2024
+                it.avkortingGrunnlag[1].aar shouldBe 2025
+            }
+        }
+
+        @Test
+        fun `fyller ut alle felter til avkortingsgrunnlag`() {
+            avkorting.toFrontend().avkortingGrunnlag.first().historikk.first().asClue {
+                it.fom shouldBe inntektFraAug24.periode.fom
+                it.tom shouldBe inntektFraAug24.periode.tom
+                it.aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.fratrekkInnAar shouldBe inntektFraAug24.fratrekkInnAar
+                it.inntektUtland shouldBe inntektFraAug24.inntektUtland
+                it.fratrekkInnAarUtland shouldBe inntektFraAug24.fratrekkInnAarUtland
+                it.spesifikasjon shouldBe inntektFraAug24.spesifikasjon
+                it.relevanteMaanederInnAar shouldBe 10
+            }
+        }
+
+        @Test
+        fun `avkortingGrunnlag med fom samme som virk skal legges i eget felt og ikke ligge i historikk`() {
+            avkorting.toFrontend(YearMonth.of(2024, Month.AUGUST)).asClue {
+                it.avkortingGrunnlag.size shouldBe 2
+
+                it.avkortingGrunnlag[0].fraVirk shouldNotBe null
+                it.avkortingGrunnlag[0].fraVirk!!.fom shouldBe inntektFraAug24.periode.fom
+                it.avkortingGrunnlag[0].fraVirk!!.aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.avkortingGrunnlag[0].historikk.size shouldBe 1
+
+                it.avkortingGrunnlag[1].fraVirk shouldBe null
+                it.avkortingGrunnlag[0].historikk.size shouldBe 1
+            }
+        }
+
+        @Test
+        fun `fyller ut historiske avkortingsgrunnlag i rekkefølge nyligste først`() {
+            avkorting.toFrontend(YearMonth.of(2025, Month.FEBRUARY)).asClue {
+                it.avkortingGrunnlag.size shouldBe 2
+
+                it.avkortingGrunnlag[0].historikk.size shouldBe 2
+                it.avkortingGrunnlag[0].historikk[0].fom shouldBe inntektFraAug24.periode.fom
+                it.avkortingGrunnlag[0].historikk[0].aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.avkortingGrunnlag[0].historikk[1].fom shouldBe inntektFraMars24.periode.fom
+                it.avkortingGrunnlag[0].historikk[1].aarsinntekt shouldBe inntektFraMars24.aarsinntekt
+
+                it.avkortingGrunnlag[1].historikk.size shouldBe 1
+                it.avkortingGrunnlag[1].historikk[0].fom shouldBe inntektFraJan25.periode.fom
+                it.avkortingGrunnlag[1].historikk[0].aarsinntekt shouldBe inntektFraJan25.aarsinntekt
+            }
+        }
+
+        @Test
+        fun `fyller ut avkortet ytelse foer virkningstidspunkt ved aa kutte aarsoppgjoer fra virkningstidspunkt`() {
+            avkorting.toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.MAY)).asClue {
+                it.avkortetYtelse.size shouldBe 3
+
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+            }
+        }
+
+        @Test
+        fun `kutter periode fra aarsoppgjoer hvis virkningstidspunkt begynner midt i periode `() {
+            avkorting.toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.APRIL)).asClue {
+                it.avkortetYtelse.size shouldBe 4
+                with(it.avkortetYtelse[0]) {
+                    shouldBeEqualToIgnoringFields(
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto(),
+                        AvkortetYtelseDto::fom,
+                        AvkortetYtelseDto::tom,
+                    )
+                    fom shouldBe YearMonth.of(2024, Month.APRIL)
+                    tom shouldBe YearMonth.of(2024, Month.APRIL)
+                }
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+            }
+
+            avkorting.toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.JUNE)).asClue {
+                it.avkortetYtelse.size shouldBe 3
+                with(it.avkortetYtelse[0]) {
+                    shouldBeEqualToIgnoringFields(
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto(),
+                        AvkortetYtelseDto::fom,
+                        AvkortetYtelseDto::tom,
+                    )
+                    fom shouldBe YearMonth.of(2024, Month.JUNE)
+                    tom shouldBe YearMonth.of(2024, Month.JULY)
+                }
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+            }
+
+            avkorting
+                .toFrontend(fraVirkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER))
+                .asClue {
+                    it.avkortetYtelse.size shouldBe 2
+                    with(it.avkortetYtelse[0]) {
+                        shouldBeEqualToIgnoringFields(
+                            avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto(),
+                            AvkortetYtelseDto::fom,
+                            AvkortetYtelseDto::tom,
+                        )
+                        fom shouldBe YearMonth.of(2024, Month.SEPTEMBER)
+                        tom shouldBe null
+                    }
+                }
+
+            avkorting
+                .toFrontend(fraVirkningstidspunkt = YearMonth.of(2025, Month.JANUARY))
+                .asClue {
+                    it.avkortetYtelse.size shouldBe 1
+                    with(it.avkortetYtelse[0]) {
+                        shouldBeEqualToIgnoringFields(
+                            avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto(),
+                            AvkortetYtelseDto::fom,
+                            AvkortetYtelseDto::tom,
+                        )
+                        fom shouldBe YearMonth.of(2025, Month.JANUARY)
+                        tom shouldBe null
+                    }
+                }
+        }
+
+        @Test
+        fun `fyller ut alle perioder med avkortet ytelse hvis virkningstidspunkt ikke er angitt`() {
+            avkorting.toFrontend(fraVirkningstidspunkt = null).asClue {
+                it.avkortetYtelse.size shouldBe 4
+
+                it.avkortetYtelse[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0].toDto()
+                it.avkortetYtelse[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1].toDto()
+                it.avkortetYtelse[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2].toDto()
+                it.avkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
+            }
+        }
 
         @Test
         fun `fyller ut tidligereAvkortetYtelse`() {
             avkorting
-                .toDto(
+                .toFrontend(
                     fraVirkningstidspunkt = YearMonth.of(2024, Month.MAY),
                     forrigeAvkorting = avkorting,
+                    behandlinStatus = BehandlingStatus.BEREGNET,
                 ).asClue {
                     it.tidligereAvkortetYtelse.size shouldBe 4
 

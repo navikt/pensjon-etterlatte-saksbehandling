@@ -12,7 +12,7 @@ import {
   resetAvkorting,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
@@ -24,6 +24,7 @@ import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetal
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import styled from 'styled-components'
 import { IAvkorting } from '~shared/types/IAvkorting'
+import { aarFraDatoString } from '~utils/formatering/dato'
 
 export const Avkorting = ({
   behandling,
@@ -61,6 +62,12 @@ export const Avkorting = ({
     }
   }, [])
 
+  const avkortingGrunnlagInnevaerendeAar = () => {
+    return avkorting.avkortingGrunnlag.find(
+      (grunnlag) => grunnlag.aar == aarFraDatoString(virkningstidspunkt(behandling).dato)
+    )
+  }
+
   return (
     <Box paddingBlock="8 0">
       <VStack gap="8">
@@ -92,6 +99,7 @@ export const Avkorting = ({
               </InntektInfo>
               <AvkortingInntekt
                 behandling={behandling}
+                avkortingGrunnlagFrontend={avkortingGrunnlagInnevaerendeAar()}
                 innevaerendeAar={true}
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
@@ -99,6 +107,7 @@ export const Avkorting = ({
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
                 <AvkortingInntekt
                   behandling={behandling}
+                  avkortingGrunnlagFrontend={avkorting.avkortingGrunnlag[1]}
                   innevaerendeAar={false}
                   redigerbar={redigerbar}
                   resetInntektsavkortingValidering={resetInntektsavkortingValidering}

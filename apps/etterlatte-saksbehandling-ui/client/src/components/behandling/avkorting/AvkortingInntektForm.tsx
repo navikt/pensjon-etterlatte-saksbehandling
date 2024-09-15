@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 import { BodyShort, Button, HStack, Label, ReadMore, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { IAvkortingGrunnlagForm, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { formaterDato } from '~utils/formatering/dato'
+import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -14,11 +14,11 @@ import { isPending } from '@reduxjs/toolkit'
 export const AvkortingInntektForm = ({
   behandling,
   innevaerendeAar,
-  avkortingGrunnlagForm,
+  avkortingGrunnlagFrontend,
   setVisForm,
 }: {
   behandling: IBehandlingReducer
-  avkortingGrunnlagForm: IAvkortingGrunnlagForm | undefined
+  avkortingGrunnlagFrontend: IAvkortingGrunnlagFrontend | undefined
   innevaerendeAar: boolean
   setVisForm: (visForm: boolean) => void
 }) => {
@@ -26,8 +26,8 @@ export const AvkortingInntektForm = ({
 
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
 
-  const virkningstidspunktDate = new Date(virkningstidspunkt(behandling).dato)
-  const inntektsAar = innevaerendeAar ? virkningstidspunktDate.getFullYear() : virkningstidspunktDate.getFullYear() + 1
+  const virk = virkningstidspunkt(behandling).dato
+  const inntektsAar = innevaerendeAar ? aarFraDatoString(virk) : aarFraDatoString(virk) + 1
 
   const fulltAar = () => {
     // TODO forenkle? unittest? backend?
@@ -35,23 +35,28 @@ export const AvkortingInntektForm = ({
       return true
     }
     if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = virkningstidspunktDate.getMonth() === 0
+      const innvilgelseFraJanuar = maanedFraDatoString(virk) === 0
       return innvilgelseFraJanuar
     } else {
-      const siste = avkortingGrunnlagForm!.fraVirk ?? avkortingGrunnlagForm!.historikk[0] // TODO
+      const siste = avkortingGrunnlagFrontend!.fraVirk ?? avkortingGrunnlagFrontend!.historikk[0] // TODO
 
       const revurderingIFulltAar = siste.relevanteMaanederInnAar === 12
 
-      const revurderingINyttAar =
-        new Date(siste.fom).getFullYear() < new Date(virkningstidspunkt(behandling).dato).getFullYear()
+      const revurderingINyttAar = new Date(siste.fom).getFullYear() < new Date(virk(behandling).dato).getFullYear()
 
       return revurderingINyttAar || revurderingIFulltAar
     }
   }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
-    if (avkortingGrunnlagForm?.fraVirk !== undefined) {
-      return avkortingGrunnlagForm.fraVirk
+    if (avkortingGrunnlagFrontend?.fraVirk != null) {
+      return avkortingGrunnlagFrontend.fraVirk
+    }
+    if (!innevaerendeAar) {
+      const grunnlagNesteAar = avkortingGrunnlagFrontend?.historikk[0]
+      if (grunnlagNesteAar !== undefined) {
+        return grunnlagNesteAar
+      }
     }
     return {
       spesifikasjon: '',
@@ -76,14 +81,13 @@ export const AvkortingInntektForm = ({
           ...data,
           fratrekkInnAar: data.fratrekkInnAar ?? 0,
           fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: innevaerendeAar ? virkningstidspunkt(behandling).dato : `${inntektsAar}-01`, // TODO forenkle?
+          fom: innevaerendeAar ? virk(behandling).dato : `${inntektsAar}-01`, // TODO forenkle?
         },
       },
       (respons) => {
-        // TODO vil dette fungere ?!!
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
+        nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag.fraVirk)
         dispatch(oppdaterAvkorting(respons))
         setVisForm(false)
       }
@@ -152,7 +156,11 @@ export const AvkortingInntektForm = ({
               />
               <VStack gap="4">
                 <Label>Fra og med dato</Label>
-                <BodyShort>{formaterDato(virkningstidspunkt(behandling).dato)}</BodyShort>
+                <BodyShort>
+                  {
+                    formaterDato(virk) // TODO feil for neste år..
+                  }
+                </BodyShort>
               </VStack>
             </HStack>
           </FormWrapper>

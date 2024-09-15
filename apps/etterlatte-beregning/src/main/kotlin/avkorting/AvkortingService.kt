@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -18,12 +18,6 @@ import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-data class AvkortingGrunnlagForm(
-    val aar: Int,
-    val fraVirk: AvkortingGrunnlagDto?,
-    val historikk: List<AvkortingGrunnlagDto>,
-)
-
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
@@ -32,39 +26,10 @@ class AvkortingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentAvkortingGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        aar: Int,
-    ): AvkortingGrunnlagForm? {
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
-        val aarsoppgjoer = avkorting?.aarsoppgjoer?.singleOrNull { it.aar == aar }
-        if (aarsoppgjoer == null) {
-            return null
-        }
-
-        val avkortingGrunnlag =
-            aarsoppgjoer.inntektsavkorting
-                .map { it.grunnlag }
-                .sortedBy { it.periode.fom } // TODO test
-
-        val fraVirk = avkortingGrunnlag.singleOrNull { it.periode.fom == behandling.virkningstidspunkt().dato }
-        return AvkortingGrunnlagForm(
-            aar = aarsoppgjoer.aar,
-            fraVirk = fraVirk?.toDto(aarsoppgjoer.forventaInnvilgaMaaneder),
-            historikk =
-                avkortingGrunnlag
-                    .filter { it.id != fraVirk?.id }
-                    .map { it.toDto(aarsoppgjoer.forventaInnvilgaMaaneder) },
-        )
-    }
-
     suspend fun hentAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto? {
+    ): AvkortingFrontend? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
@@ -110,7 +75,7 @@ class AvkortingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         lagreGrunnlag: AvkortingGrunnlagLagreDto,
-    ): AvkortingDto {
+    ): AvkortingFrontend {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
@@ -200,15 +165,7 @@ class AvkortingService(
         avkorting: Avkorting,
         behandling: DetaljertBehandling,
         forrigeAvkorting: Avkorting? = null,
-    ): AvkortingDto {
-        // Forrige behandling er forrige iverksatte som da vil være seg selv eller nyere hvis status er iverksatte
-        val forrigeBehandling =
-            when (behandling.status) {
-                BehandlingStatus.IVERKSATT -> null
-                else -> forrigeAvkorting
-            }
-        return avkorting.toDto(behandling.virkningstidspunkt().dato, forrigeBehandling)
-    }
+    ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting)
 
     private suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,

@@ -19,8 +19,9 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -82,24 +83,29 @@ class AvkortingRoutesTest {
             )
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
-            AvkortingDto(
+            AvkortingFrontend(
                 avkortingGrunnlag =
                     listOf(
-                        AvkortingGrunnlagDto(
-                            id = avkortingsgrunnlagId,
-                            fom = dato,
-                            tom = dato,
-                            aarsinntekt = 100000,
-                            fratrekkInnAar = 10000,
-                            spesifikasjon = "Spesifikasjon",
-                            inntektUtland = 0,
-                            fratrekkInnAarUtland = 0,
-                            relevanteMaanederInnAar = 12,
-                            kilde =
-                                AvkortingGrunnlagKildeDto(
-                                    tidspunkt = tidspunkt.toString(),
-                                    ident = "Saksbehandler01",
+                        AvkortingGrunnlagFrontend(
+                            aar = 2024,
+                            fraVirk =
+                                AvkortingGrunnlagDto(
+                                    id = avkortingsgrunnlagId,
+                                    fom = dato,
+                                    tom = dato,
+                                    aarsinntekt = 100000,
+                                    fratrekkInnAar = 10000,
+                                    spesifikasjon = "Spesifikasjon",
+                                    inntektUtland = 0,
+                                    fratrekkInnAarUtland = 0,
+                                    relevanteMaanederInnAar = 12,
+                                    kilde =
+                                        AvkortingGrunnlagKildeDto(
+                                            tidspunkt = tidspunkt.toString(),
+                                            ident = "Saksbehandler01",
+                                        ),
                                 ),
+                            historikk = emptyList(),
                         ),
                     ),
                 avkortetYtelse =
@@ -139,12 +145,12 @@ class AvkortingRoutesTest {
                     val request =
                         avkorting.avkortingGrunnlag[0].let {
                             AvkortingGrunnlagLagreDto(
-                                id = it.id,
-                                aarsinntekt = it.aarsinntekt,
-                                fratrekkInnAar = it.fratrekkInnAar,
-                                inntektUtland = it.inntektUtland,
-                                fratrekkInnAarUtland = it.fratrekkInnAarUtland,
-                                spesifikasjon = it.spesifikasjon,
+                                id = it.fraVirk!!.id,
+                                aarsinntekt = it.fraVirk!!.aarsinntekt,
+                                fratrekkInnAar = it.fraVirk!!.fratrekkInnAar,
+                                inntektUtland = it.fraVirk!!.inntektUtland,
+                                fratrekkInnAarUtland = it.fraVirk!!.fratrekkInnAarUtland,
+                                spesifikasjon = it.fraVirk!!.spesifikasjon,
                                 fom = dato,
                             )
                         }
@@ -154,7 +160,7 @@ class AvkortingRoutesTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
+            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontend::class.java)
             result shouldBe avkorting
             coVerify {
                 avkortingService.beregnAvkortingMedNyttGrunnlag(

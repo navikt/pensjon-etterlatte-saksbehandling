@@ -468,6 +468,18 @@ internal class AvkortingTest {
                     it.tidligereAvkortetYtelse[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0].toDto()
                 }
         }
+
+        @Test
+        fun `fyller ikke ut tidligereAvkortetYtelse hvis status iverksatt `() {
+            avkorting
+                .toFrontend(
+                    fraVirkningstidspunkt = YearMonth.of(2024, Month.MAY),
+                    forrigeAvkorting = avkorting,
+                    behandlinStatus = BehandlingStatus.IVERKSATT,
+                ).asClue {
+                    it.tidligereAvkortetYtelse.size shouldBe 0
+                }
+        }
     }
 
     @Nested

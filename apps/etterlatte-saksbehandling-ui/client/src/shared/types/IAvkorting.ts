@@ -1,10 +1,16 @@
 import { SanksjonType } from '~shared/types/sanksjon'
 
 export interface IAvkorting {
-  behandlingId: string
-  avkortingGrunnlag: IAvkortingGrunnlag[]
+  behandlingId: string // TODO ubrukt?
+  avkortingGrunnlag: IAvkortingGrunnlagFrontend[]
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]
+}
+
+export interface IAvkortingGrunnlagFrontend {
+  aar: number
+  fraVirk: IAvkortingGrunnlag | null
+  historikk: IAvkortingGrunnlag[]
 }
 
 export interface IAvkortingGrunnlag {
@@ -21,12 +27,6 @@ export interface IAvkortingGrunnlag {
     tidspunkt: string
     ident: string
   }
-}
-
-export interface IAvkortingGrunnlagForm {
-  aar: number
-  fraVirk?: IAvkortingGrunnlag
-  historikk: IAvkortingGrunnlag[]
 }
 
 export interface IAvkortingGrunnlagLagre {

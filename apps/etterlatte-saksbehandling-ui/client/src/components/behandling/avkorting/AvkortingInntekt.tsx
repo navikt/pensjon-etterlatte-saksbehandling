@@ -32,12 +32,15 @@ export const AvkortingInntekt = ({
   const [visHistorikk, setVisHistorikk] = useState(false)
 
   const listeVisningAvkortingGrunnlag = () => {
+    if (avkortingGrunnlagFrontend === undefined) {
+      return []
+    }
     if (visHistorikk) {
-      return avkortingGrunnlagFrontend?.fraVirk
+      return avkortingGrunnlagFrontend.fraVirk
         ? [avkortingGrunnlagFrontend.fraVirk].concat(avkortingGrunnlagFrontend.historikk)
         : avkortingGrunnlagFrontend.historikk
     } else {
-      return [avkortingGrunnlagFrontend?.fraVirk ?? avkortingGrunnlagFrontend.historikk[0]]
+      return [avkortingGrunnlagFrontend.fraVirk ?? avkortingGrunnlagFrontend.historikk[0]]
     }
   }
 
@@ -51,7 +54,7 @@ export const AvkortingInntekt = ({
   return (
     <AvkortingInntektWrapper>
       {avkortingGrunnlagFrontend &&
-        (avkortingGrunnlagFrontend?.fraVirk || avkortingGrunnlagFrontend?.historikk.length > 0) && (
+        (avkortingGrunnlagFrontend.fraVirk || avkortingGrunnlagFrontend.historikk.length > 0) && (
           <InntektAvkortingTabell>
             <Heading size="small">{avkortingGrunnlagFrontend.aar}</Heading>
             <Table className="table" zebraStripes>
@@ -134,7 +137,7 @@ export const AvkortingInntekt = ({
             </Table>
           </InntektAvkortingTabell>
         )}
-      {innevaerendeAar && avkortingGrunnlagFrontend?.historikk.length > 0 && (
+      {innevaerendeAar && avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0 && (
         <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
       )}
       {erRedigerbar && visForm && (

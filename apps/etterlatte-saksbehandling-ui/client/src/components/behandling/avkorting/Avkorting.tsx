@@ -63,7 +63,7 @@ export const Avkorting = ({
   }, [])
 
   const avkortingGrunnlagInnevaerendeAar = () => {
-    return avkorting.avkortingGrunnlag.find(
+    return avkorting?.avkortingGrunnlag.find(
       (grunnlag) => grunnlag.aar == aarFraDatoString(virkningstidspunkt(behandling).dato)
     )
   }
@@ -107,7 +107,7 @@ export const Avkorting = ({
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
                 <AvkortingInntekt
                   behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting.avkortingGrunnlag[1]}
+                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
                   innevaerendeAar={false}
                   redigerbar={redigerbar}
                   resetInntektsavkortingValidering={resetInntektsavkortingValidering}

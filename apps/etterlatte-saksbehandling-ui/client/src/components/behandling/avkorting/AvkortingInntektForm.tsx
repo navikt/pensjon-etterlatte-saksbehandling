@@ -27,7 +27,7 @@ export const AvkortingInntektForm = ({
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
 
   const virk = virkningstidspunkt(behandling).dato
-  const inntektFom = innevaerendeAar ? `${aarFraDatoString(virk)}` : `${aarFraDatoString(virk) + 1}-01`
+  const inntektFom = innevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
 
   const fulltAar = () => {
     if (!innevaerendeAar) {
@@ -39,8 +39,8 @@ export const AvkortingInntektForm = ({
       return true
     }
 
-    const siste = avkortingGrunnlagFrontend!.fraVirk ?? avkortingGrunnlagFrontend!.historikk[0]
-    return siste.relevanteMaanederInnAar === 12
+    const tidligereAvkortingGrunnlag = avkortingGrunnlagFrontend?.fraVirk ?? avkortingGrunnlagFrontend?.historikk[0]
+    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.relevanteMaanederInnAar === 12 : false
   }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
@@ -82,7 +82,7 @@ export const AvkortingInntektForm = ({
       (respons) => {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag.fraVirk)
+        nyttAvkortingGrunnlag.fraVirk && reset(nyttAvkortingGrunnlag.fraVirk)
         dispatch(oppdaterAvkorting(respons))
         setVisForm(false)
       }

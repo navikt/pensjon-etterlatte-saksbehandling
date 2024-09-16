@@ -193,6 +193,13 @@ class GrunnlagKlientTest : GrunnlagKlient {
         // NO-OP
     }
 
+    override suspend fun hentPersonopplysningerForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        // NO-OP
+    }
+
     override val serviceName: String
         get() = TODO("Not yet implemented")
     override val beskrivelse: String

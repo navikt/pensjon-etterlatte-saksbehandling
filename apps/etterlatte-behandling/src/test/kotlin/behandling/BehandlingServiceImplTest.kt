@@ -18,7 +18,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -43,7 +42,6 @@ import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -392,7 +390,7 @@ internal class BehandlingServiceImplTest {
                 utlandstilknytningType = null,
                 virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
         }
     }
@@ -406,7 +404,7 @@ internal class BehandlingServiceImplTest {
                 utlandstilknytningType = UtlandstilknytningType.BOSATT_UTLAND,
                 virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
         }
     }
@@ -422,7 +420,7 @@ internal class BehandlingServiceImplTest {
                 kravdato = Tidspunkt.parse("2017-02-01T00:00:00Z"),
                 // brukes denne vil ikke virk være innenfor 3 år
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -436,7 +434,7 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = LocalDate.parse("2020-01-01"),
+                doedsdato = listOf(LocalDate.parse("2020-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -450,7 +448,7 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = null,
+                doedsdato = emptyList(),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -464,7 +462,7 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = LocalDate.parse("2020-01-01"),
+                doedsdato = listOf(LocalDate.parse("2020-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
@@ -477,7 +475,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.BARNEPENSJON,
                 virkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -490,7 +488,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -503,7 +501,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.BARNEPENSJON,
                 virkningstidspunkt = Tidspunkt.parse("2016-12-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
@@ -516,7 +514,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
@@ -529,7 +527,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
                 kilde = Vedtaksloesning.PESYS,
             )
 
@@ -655,7 +653,7 @@ internal class BehandlingServiceImplTest {
         virkningstidspunkt: Tidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
         begrunnelse: String = "en begrunnelse",
         soeknadMottatt: LocalDateTime = LocalDateTime.parse("2020-01-15T00:00:00"),
-        doedsdato: LocalDate? = LocalDate.parse("2016-11-30"),
+        doedsdato: List<LocalDate> = listOf(LocalDate.parse("2016-11-30")),
         kravdato: Tidspunkt? = null,
         foersteVirk: YearMonth? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -838,7 +836,7 @@ internal class BehandlingServiceImplTest {
     private fun initFellesMocks(
         sakType: SakType = SakType.BARNEPENSJON,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        doedsdato: LocalDate?,
+        doedsdato: List<LocalDate>,
         soeknadMottatt: LocalDateTime,
         foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
@@ -894,13 +892,13 @@ internal class BehandlingServiceImplTest {
                         },
                     )
             }
-
-        val personopplysning = personOpplysning(doedsdato = doedsdato)
-        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-
-        coEvery {
-            grunnlagKlientMock.finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
-        } returns grunnlagsopplysningMedPersonopplysning
+//
+//        val personopplysning = personOpplysning(doedsdato = doedsdato)
+//        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
+//
+//        coEvery {
+//            grunnlagKlientMock.finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+//        } returns grunnlagsopplysningMedPersonopplysning
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling

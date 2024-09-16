@@ -50,7 +50,7 @@ export const Avkorting = ({
   )
 
   useEffect(() => {
-    if (!avkorting || avkorting.behandlingId !== behandling.id) {
+    if (!avkorting) {
       dispatch(resetAvkorting())
       hentAvkortingRequest(behandling.id, (res) => {
         const avkortingFinnesOgErUnderBehandling = res && redigerbar

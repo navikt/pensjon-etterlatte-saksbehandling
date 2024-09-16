@@ -1,7 +1,6 @@
 import { SanksjonType } from '~shared/types/sanksjon'
 
 export interface IAvkorting {
-  behandlingId: string // TODO ubrukt?
   avkortingGrunnlag: IAvkortingGrunnlagFrontend[]
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]

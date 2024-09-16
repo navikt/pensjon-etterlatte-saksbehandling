@@ -102,7 +102,7 @@ export const Avkorting = ({
               <AvkortingInntekt
                 behandling={behandling}
                 avkortingGrunnlagFrontend={avkortingGrunnlagInnevaerendeAar()}
-                innevaerendeAar={true}
+                erInnevaerendeAar={true}
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
@@ -111,7 +111,7 @@ export const Avkorting = ({
                   <AvkortingInntekt
                     behandling={behandling}
                     avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                    innevaerendeAar={false}
+                    erInnevaerendeAar={false}
                     redigerbar={redigerbar}
                     resetInntektsavkortingValidering={resetInntektsavkortingValidering}
                   />

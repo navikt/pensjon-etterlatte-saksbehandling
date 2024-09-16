@@ -17,13 +17,13 @@ import { PencilIcon } from '@navikt/aksel-icons'
 export const AvkortingInntekt = ({
   behandling,
   avkortingGrunnlagFrontend,
-  innevaerendeAar,
+  erInnevaerendeAar,
   redigerbar,
   resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
   avkortingGrunnlagFrontend: IAvkortingGrunnlagFrontend | undefined
-  innevaerendeAar: boolean
+  erInnevaerendeAar: boolean
   redigerbar: boolean
   resetInntektsavkortingValidering: () => void
 }) => {
@@ -48,7 +48,7 @@ export const AvkortingInntekt = ({
     if (avkortingGrunnlagFrontend?.fraVirk !== undefined) {
       return 'Rediger'
     }
-    return innevaerendeAar ? 'Legg til' : 'Legg til for neste år'
+    return erInnevaerendeAar ? 'Legg til' : 'Legg til for neste år'
   }
 
   return (
@@ -137,14 +137,14 @@ export const AvkortingInntekt = ({
             </Table>
           </InntektAvkortingTabell>
         )}
-      {innevaerendeAar && avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0 && (
+      {erInnevaerendeAar && avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0 && (
         <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
       )}
       {erRedigerbar && visForm && (
         <AvkortingInntektForm
           behandling={behandling}
           avkortingGrunnlagFrontend={avkortingGrunnlagFrontend}
-          innevaerendeAar={innevaerendeAar}
+          erInnevaerendeAar={erInnevaerendeAar}
           setVisForm={setVisForm}
         />
       )}

@@ -13,13 +13,13 @@ import { isPending } from '@reduxjs/toolkit'
 
 export const AvkortingInntektForm = ({
   behandling,
-  innevaerendeAar,
+  erInnevaerendeAar,
   avkortingGrunnlagFrontend,
   setVisForm,
 }: {
   behandling: IBehandlingReducer
   avkortingGrunnlagFrontend: IAvkortingGrunnlagFrontend | undefined
-  innevaerendeAar: boolean
+  erInnevaerendeAar: boolean
   setVisForm: (visForm: boolean) => void
 }) => {
   const dispatch = useAppDispatch()
@@ -27,7 +27,7 @@ export const AvkortingInntektForm = ({
   const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
 
   const virk = virkningstidspunkt(behandling).dato
-  const inntektFom = innevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
+  const inntektFom = erInnevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
 
   /*
    * Utlede om opptjent før innvilgelse er relevant.
@@ -36,7 +36,7 @@ export const AvkortingInntektForm = ({
    * Vi tar ikke stilling til opphør.
    */
   const alleMaanederIAaretErInnvilget = () => {
-    if (!innevaerendeAar) {
+    if (!erInnevaerendeAar) {
       return true
     }
 
@@ -53,7 +53,7 @@ export const AvkortingInntektForm = ({
     if (avkortingGrunnlagFrontend?.fraVirk != null) {
       return avkortingGrunnlagFrontend.fraVirk
     }
-    if (!innevaerendeAar) {
+    if (!erInnevaerendeAar) {
       const grunnlagNesteAar = avkortingGrunnlagFrontend?.historikk[0]
       if (grunnlagNesteAar !== undefined) {
         return grunnlagNesteAar

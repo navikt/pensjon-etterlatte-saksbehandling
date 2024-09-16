@@ -7,5 +7,6 @@ data class BrevutfallDto(
     val behandlingId: UUID?,
     val aldersgruppe: Aldersgruppe?,
     val feilutbetaling: Feilutbetaling?,
+    val frivilligSkattetrekk: Boolean?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )

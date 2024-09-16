@@ -26,6 +26,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val brukerUnder18Aar: Boolean,
+    val frivilligSkattetrekk: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
     val harUtbetaling: Boolean,
@@ -65,6 +66,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         erForeldreloes = true,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =

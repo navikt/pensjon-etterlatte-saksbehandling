@@ -72,9 +72,9 @@ export const BrevutfallSkjema = ({
             ? ISvar.JA
             : ISvar.NEI,
       frivilligSkattetrekk:
-        brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk === undefined
+        brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk === undefined
           ? undefined
-          : brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk
+          : brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk
             ? ISvar.JA
             : ISvar.NEI,
       etterbetalingPeriodeValg: brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg,
@@ -100,6 +100,7 @@ export const BrevutfallSkjema = ({
         feilutbetaling: data.feilutbetalingValg
           ? { valg: data.feilutbetalingValg, kommentar: data.feilutbetalingKommentar }
           : null,
+        frivilligSkattetrekk: data.frivilligSkattetrekk ? data.frivilligSkattetrekk === ISvar.JA : null,
       },
       etterbetaling:
         data.harEtterbetaling === ISvar.JA
@@ -107,7 +108,6 @@ export const BrevutfallSkjema = ({
               datoFom: formatISO(data.datoFom!, { representation: 'date' }),
               datoTom: formatISO(data.datoTom!, { representation: 'date' }),
               inneholderKrav: data.kravIEtterbetaling === ISvar.JA,
-              frivilligSkattetrekk: data.frivilligSkattetrekk === ISvar.JA,
               etterbetalingPeriodeValg: data.etterbetalingPeriodeValg,
             }
           : null,
@@ -213,22 +213,6 @@ export const BrevutfallSkjema = ({
                       }
                     />
                     <ControlledRadioGruppe
-                      name="frivilligSkattetrekk"
-                      control={control}
-                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
-                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={ISvar.JA}>
-                            Ja
-                          </Radio>
-                          <Radio size="small" value={ISvar.NEI}>
-                            Nei
-                          </Radio>
-                        </>
-                      }
-                    />
-                    <ControlledRadioGruppe
                       name="etterbetalingPeriodeValg"
                       control={control}
                       errorVedTomInput="Velg hvor lang etterbetalingsperiode det er"
@@ -244,8 +228,45 @@ export const BrevutfallSkjema = ({
                         </>
                       }
                     />
+                    <ControlledRadioGruppe
+                      name="frivilligSkattetrekk"
+                      control={control}
+                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
+                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                      radios={
+                        <>
+                          <Radio size="small" value={ISvar.JA}>
+                            Ja
+                          </Radio>
+                          <Radio size="small" value={ISvar.NEI}>
+                            Nei
+                          </Radio>
+                        </>
+                      }
+                    />
                   </>
                 )}
+              </HStack>
+            )}
+
+            {watch('harEtterbetaling') == ISvar.NEI && behandling.sakType == SakType.BARNEPENSJON && (
+              <HStack gap="4">
+                <ControlledRadioGruppe
+                  name="frivilligSkattetrekk"
+                  control={control}
+                  errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
+                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                  radios={
+                    <>
+                      <Radio size="small" value={ISvar.JA}>
+                        Ja
+                      </Radio>
+                      <Radio size="small" value={ISvar.NEI}>
+                        Nei
+                      </Radio>
+                    </>
+                  }
+                />
               </HStack>
             )}
           </VStack>

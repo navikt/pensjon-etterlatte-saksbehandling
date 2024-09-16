@@ -442,10 +442,10 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val doedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val foersteDoedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
-        if (doedsdato == null) {
+        if (foersteDoedsdato == null) {
             // Mangler dødsfall når avdød er ukjent
             return true
         }
@@ -465,7 +465,7 @@ internal class BehandlingServiceImpl(
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
-        val virkErEtterDoedsdato = virkningstidspunkt.isAfter(doedsdato)
+        val virkErEtterDoedsdato = virkningstidspunkt.isAfter(foersteDoedsdato)
         val virkErEtterMakstidspunktForSoeknad =
             when (behandling.sak.sakType) {
                 SakType.OMSTILLINGSSTOENAD ->
@@ -512,15 +512,10 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): LocalDate? {
-        return null
-//        return grunnlagKlient
-//            .finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-//            .also {
-//                it?.fnr?.let { fnr ->
-//                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
-//                }
-//            }?.opplysning
-//            ?.doedsdato
+        val personopplysninger = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo)
+        return personopplysninger.avdoede
+            .mapNotNull { it.opplysning.doedsdato }
+            .minOrNull()
     }
 
     override fun hentFoersteVirk(sakId: SakId): YearMonth? {

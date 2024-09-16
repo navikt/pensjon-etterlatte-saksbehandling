@@ -18,6 +18,9 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlag.GenerellKilde
+import no.nav.etterlatte.grunnlag.Personopplysning
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -42,6 +45,7 @@ import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -892,13 +896,25 @@ internal class BehandlingServiceImplTest {
                         },
                     )
             }
-//
-//        val personopplysning = personOpplysning(doedsdato = doedsdato)
-//        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-//
-//        coEvery {
-//            grunnlagKlientMock.finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
-//        } returns grunnlagsopplysningMedPersonopplysning
+
+        coEvery {
+            grunnlagKlientMock.hentPersonopplysningerForBehandling(behandling.id, TOKEN)
+        } returns
+            PersonopplysningerResponse(
+                avdoede =
+                    doedsdato.map { datoDoed ->
+                        Personopplysning(
+                            Opplysningstype.AVDOED_PDL_V1,
+                            UUID.randomUUID(),
+                            GenerellKilde("", Tidspunkt.now(), ""),
+                            personOpplysning(doedsdato = datoDoed),
+                        )
+                    },
+                gjenlevende = emptyList(),
+                innsender = null,
+                soeker = null,
+                annenForelder = null,
+            )
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling

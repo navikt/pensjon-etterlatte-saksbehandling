@@ -1,0 +1,1 @@
+GRANT ALL PRIVILEGES on all tables in schema vilkaarsvurdering to cloudsqliamuser;

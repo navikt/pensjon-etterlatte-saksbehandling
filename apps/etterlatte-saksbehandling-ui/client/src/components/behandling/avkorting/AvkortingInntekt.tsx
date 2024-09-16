@@ -148,7 +148,7 @@ export const AvkortingInntekt = ({
           setVisForm={setVisForm}
         />
       )}
-      {!visForm && (
+      {erRedigerbar && !visForm && (
         <LeggTilRediger>
           <Button
             size="small"

@@ -41,6 +41,9 @@ export const Avkorting = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
+  const toggleAvkortinGrunnlagNesteAar = useFeatureEnabledMedDefault('oms-aarsinntekt-for-to-aar', false)
+  console.log(toggleAvkortinGrunnlagNesteAar)
+
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
   const redigerbar = behandlingErRedigerbar(
@@ -104,15 +107,16 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                <AvkortingInntekt
-                  behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                  innevaerendeAar={false}
-                  redigerbar={redigerbar}
-                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                />
-              )}
+              {toggleAvkortinGrunnlagNesteAar &&
+                behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+                  <AvkortingInntekt
+                    behandling={behandling}
+                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                    innevaerendeAar={false}
+                    redigerbar={redigerbar}
+                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                  />
+                )}
             </>
           ),
         })}

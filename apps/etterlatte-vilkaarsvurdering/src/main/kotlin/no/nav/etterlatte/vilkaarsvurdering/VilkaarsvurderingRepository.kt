@@ -411,7 +411,7 @@ class VilkaarsvurderingRepository(
                    dv.lenke,
                    dv.resultat
             FROM vilkaarsvurdering.vilkaar v
-              JOIN delvilkaar dv on dv.vilkaar_id = v.id
+              JOIN vilkaarsvurdering.delvilkaar dv on dv.vilkaar_id = v.id
             WHERE v.vilkaarsvurdering_id = :vilkaarsvurdering_id
         """
 

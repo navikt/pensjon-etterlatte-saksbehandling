@@ -14,3 +14,6 @@ ALTER TABLE public.vilkaar
 
 ALTER TABLE public.vilkaarsvurdering_kilde
     SET SCHEMA vilkaarsvurdering;
+
+ALTER TABLE public.flyway_schema_history
+    SET SCHEMA vilkaarsvurdering;

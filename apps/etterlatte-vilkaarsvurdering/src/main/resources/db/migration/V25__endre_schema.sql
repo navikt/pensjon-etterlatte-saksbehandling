@@ -1,19 +1,18 @@
-CREATE SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.vilkaarsvurdering
+
+ALTER TABLE vilkaarsvurdering
     SET SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.delvilkaar
+ALTER TABLE delvilkaar
     SET SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.migrert_yrkesskade
+ALTER TABLE migrert_yrkesskade
     SET SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.vilkaar
+ALTER TABLE vilkaar
     SET SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.vilkaarsvurdering_kilde
+ALTER TABLE vilkaarsvurdering_kilde
     SET SCHEMA vilkaarsvurdering;
 
-ALTER TABLE public.flyway_schema_history
-    SET SCHEMA vilkaarsvurdering;
+SET search_path TO vilkaarsvurdering, public;

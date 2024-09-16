@@ -22,7 +22,6 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import styled from 'styled-components'
 import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 
@@ -79,7 +78,7 @@ export const Avkorting = ({
           error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
           success: () => (
             <>
-              <InntektInfo>
+              <VStack maxWidth="70rem">
                 <Heading spacing size="small" level="2">
                   Inntektsavkorting
                 </Heading>
@@ -99,7 +98,7 @@ export const Avkorting = ({
                   I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt
                   fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
                 </BodyShort>
-              </InntektInfo>
+              </VStack>
               <AvkortingInntekt
                 behandling={behandling}
                 avkortingGrunnlagFrontend={avkortingGrunnlagInnevaerendeAar()}
@@ -129,6 +128,3 @@ export const Avkorting = ({
     </Box>
   )
 }
-const InntektInfo = styled.div`
-  max-width: 70rem;
-`

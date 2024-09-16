@@ -24,12 +24,18 @@ export const AvkortingInntektForm = ({
 }) => {
   const dispatch = useAppDispatch()
 
-  const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
+  const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
 
   const virk = virkningstidspunkt(behandling).dato
   const inntektFom = innevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
 
-  const fulltAar = () => {
+  /*
+   * Utlede om opptjent før innvilgelse er relevant.
+   * Hvis alle måneder i året er innvilget er det ikke det.
+   * Det er kun innvilgelsesåret som kan være færre enn 12 måneder.
+   * Vi tar ikke stilling til opphør.
+   */
+  const alleMaanederIAaretErInnvilget = () => {
     if (!innevaerendeAar) {
       return true
     }
@@ -69,7 +75,7 @@ export const AvkortingInntektForm = ({
   })
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
-    requestLagreAvkortingGrunnlag(
+    lagreAvkortingGrunnlagRequest(
       {
         behandlingId: behandling.id,
         avkortingGrunnlag: {
@@ -108,7 +114,7 @@ export const AvkortingInntektForm = ({
               />
               <TekstFelt
                 {...register('fratrekkInnAar', {
-                  required: { value: !fulltAar(), message: 'Må fylles ut' },
+                  required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
                   max: {
                     value: watch('aarsinntekt') || 0,
                     message: 'Kan ikke være høyere enn årsinntekt',
@@ -119,7 +125,7 @@ export const AvkortingInntektForm = ({
                 size="medium"
                 type="tel"
                 inputMode="numeric"
-                disabled={fulltAar()}
+                disabled={alleMaanederIAaretErInnvilget()}
                 error={errors.fratrekkInnAar?.message}
               />
               <TekstFelt
@@ -135,7 +141,7 @@ export const AvkortingInntektForm = ({
               />
               <TekstFelt
                 {...register('fratrekkInnAarUtland', {
-                  required: { value: !fulltAar(), message: 'Må fylles ut' },
+                  required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
                   max: {
                     value: watch('inntektUtland') || 0,
                     message: 'Kan ikke være høyere enn årsinntekt utland',
@@ -145,7 +151,7 @@ export const AvkortingInntektForm = ({
                 label="Fratrekk inn-år"
                 size="medium"
                 type="tel"
-                disabled={fulltAar()}
+                disabled={alleMaanederIAaretErInnvilget()}
                 inputMode="numeric"
                 error={errors.fratrekkInnAarUtland?.message}
               />
@@ -173,7 +179,7 @@ export const AvkortingInntektForm = ({
             />
           </TextAreaWrapper>
           <FormKnapper>
-            <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
+            <Button size="small" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
               Lagre
             </Button>
             <Button
@@ -190,7 +196,7 @@ export const AvkortingInntektForm = ({
         </>
       </Rows>
       {isFailureHandler({
-        apiResult: inntektGrunnlagStatus,
+        apiResult: lagreAvkortingGrunnlagResult,
         errorMessage: 'En feil har oppstått',
       })}
     </>

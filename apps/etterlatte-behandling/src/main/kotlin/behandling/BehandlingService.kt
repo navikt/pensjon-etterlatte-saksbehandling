@@ -442,7 +442,7 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val doedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         if (doedsdato == null) {
@@ -508,18 +508,20 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    private suspend fun hentDoedsdato(
+    private suspend fun hentFoersteDoedsdato(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? =
-        grunnlagKlient
-            .finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-            .also {
-                it?.fnr?.let { fnr ->
-                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
-                }
-            }?.opplysning
-            ?.doedsdato
+    ): LocalDate? {
+        return null
+//        return grunnlagKlient
+//            .finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+//            .also {
+//                it?.fnr?.let { fnr ->
+//                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
+//                }
+//            }?.opplysning
+//            ?.doedsdato
+    }
 
     override fun hentFoersteVirk(sakId: SakId): YearMonth? {
         val behandlinger = hentBehandlingerForSak(sakId)

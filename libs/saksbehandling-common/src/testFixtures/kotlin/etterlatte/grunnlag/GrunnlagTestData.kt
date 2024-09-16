@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.testdata.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -141,5 +142,14 @@ data class GrunnlagTestData(
                 ),
             sak = sak,
             metadata = Metadata(1, 1),
+        )
+
+    fun hentPersonopplysninger(): PersonopplysningerResponse =
+        PersonopplysningerResponse(
+            innsender = TODO(),
+            soeker = TODO(),
+            avdoede = TODO(),
+            gjenlevende = TODO(),
+            annenForelder = TODO(),
         )
 }

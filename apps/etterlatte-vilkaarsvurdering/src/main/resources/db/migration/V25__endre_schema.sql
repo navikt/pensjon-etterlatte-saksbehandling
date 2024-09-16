@@ -1,4 +1,4 @@
-
+CREATE SCHEMA vilkaarsvurdering;
 
 ALTER TABLE vilkaarsvurdering
     SET SCHEMA vilkaarsvurdering;

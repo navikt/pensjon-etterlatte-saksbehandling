@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { BodyShort, Button, HStack, Label, ReadMore, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -27,25 +27,20 @@ export const AvkortingInntektForm = ({
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
 
   const virk = virkningstidspunkt(behandling).dato
-  const inntektsAar = innevaerendeAar ? aarFraDatoString(virk) : aarFraDatoString(virk) + 1
+  const inntektFom = innevaerendeAar ? `${aarFraDatoString(virk)}` : `${aarFraDatoString(virk) + 1}-01`
 
   const fulltAar = () => {
-    // TODO forenkle? unittest? backend?
     if (!innevaerendeAar) {
       return true
     }
-    if (behandling.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      const innvilgelseFraJanuar = maanedFraDatoString(virk) === 0
-      return innvilgelseFraJanuar
-    } else {
-      const siste = avkortingGrunnlagFrontend!.fraVirk ?? avkortingGrunnlagFrontend!.historikk[0] // TODO
 
-      const revurderingIFulltAar = siste.relevanteMaanederInnAar === 12
-
-      const revurderingINyttAar = new Date(siste.fom).getFullYear() < new Date(virk(behandling).dato).getFullYear()
-
-      return revurderingINyttAar || revurderingIFulltAar
+    const fomJanuar = maanedFraDatoString(inntektFom) === 0
+    if (fomJanuar) {
+      return true
     }
+
+    const siste = avkortingGrunnlagFrontend!.fraVirk ?? avkortingGrunnlagFrontend!.historikk[0]
+    return siste.relevanteMaanederInnAar === 12
   }
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
@@ -81,7 +76,7 @@ export const AvkortingInntektForm = ({
           ...data,
           fratrekkInnAar: data.fratrekkInnAar ?? 0,
           fratrekkInnAarUtland: data.fratrekkInnAarUtland ?? 0,
-          fom: innevaerendeAar ? virk(behandling).dato : `${inntektsAar}-01`, // TODO forenkle?
+          fom: inntektFom,
         },
       },
       (respons) => {
@@ -156,11 +151,7 @@ export const AvkortingInntektForm = ({
               />
               <VStack gap="4">
                 <Label>Fra og med dato</Label>
-                <BodyShort>
-                  {
-                    formaterDato(virk) // TODO feil for neste år..
-                  }
-                </BodyShort>
+                <BodyShort>{formaterDato(inntektFom)}</BodyShort>
               </VStack>
             </HStack>
           </FormWrapper>

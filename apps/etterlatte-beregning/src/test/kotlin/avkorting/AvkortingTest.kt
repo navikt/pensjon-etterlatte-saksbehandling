@@ -224,7 +224,7 @@ internal class AvkortingTest {
     }
 
     @Nested
-    inner class AvkortigTilFrontend {
+    inner class AvkortingTilFrontend {
         val inntektFraMars24 =
             avkortinggrunnlag(
                 periode =

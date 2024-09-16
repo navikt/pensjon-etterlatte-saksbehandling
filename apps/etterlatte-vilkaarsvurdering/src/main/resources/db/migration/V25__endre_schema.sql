@@ -14,5 +14,3 @@ ALTER TABLE vilkaar
 
 ALTER TABLE vilkaarsvurdering_kilde
     SET SCHEMA vilkaarsvurdering;
-
-SET search_path TO vilkaarsvurdering, public;

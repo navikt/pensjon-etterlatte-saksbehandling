@@ -211,7 +211,7 @@ class StatistikkService(
             vedtakLoependeFom = vedtakInnhold.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = vedtakInnhold.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
-            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet?.enhetNr ?: statistikkBehandling.enhet.enhetNr,
+            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
             sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             beregning = beregning,
             avkorting = avkorting,
@@ -333,7 +333,7 @@ class StatistikkService(
         registrertTidspunkt = statistikkTilbakekreving.tilbakekreving.opprettet,
         type = "TILBAKEKREVING",
         status = hendelse.name,
-        ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet.enhetNr,
+        ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
         resultat =
             mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
                 statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
@@ -387,7 +387,7 @@ class StatistikkService(
         status = hendelse.name,
         resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
-        ansvarligEnhet = statistikkKlage.klage.sak.enhet.enhetNr,
+        ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter =
             statistikkKlage.klage.formkrav
                 ?.saksbehandler
@@ -468,7 +468,7 @@ class StatistikkService(
                 vedtakLoependeFom = null,
                 vedtakLoependeTom = null,
                 saksbehandler = null,
-                ansvarligEnhet = statistikkBehandling.enhet.enhetNr,
+                ansvarligEnhet = statistikkBehandling.enhet,
                 soeknadFormat = SoeknadFormat.DIGITAL,
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,

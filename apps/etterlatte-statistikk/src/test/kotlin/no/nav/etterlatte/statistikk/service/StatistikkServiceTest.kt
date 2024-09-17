@@ -157,7 +157,7 @@ class StatistikkServiceTest {
             registrertSak.sakUtland shouldBe null
             registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
-            registrertSak.ansvarligEnhet shouldBe Enhet.STEINKJER.enhetNr
+            registrertSak.ansvarligEnhet shouldBe Enhet.STEINKJER
             registrertSak.ansvarligBeslutter shouldBe "Attestant"
             registrertSak.saksbehandler shouldBe "Saksbehandler"
             registrertSak.beregning shouldBe mockBeregning
@@ -393,7 +393,7 @@ class StatistikkServiceTest {
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
         assertNull(registrertStatistikk.ansvarligBeslutter)
-        assertEquals("4808", registrertStatistikk.ansvarligEnhet)
+        assertEquals(Enhet.PORSGRUNN, registrertStatistikk.ansvarligEnhet)
         assertNull(registrertStatistikk.saksbehandler)
     }
 

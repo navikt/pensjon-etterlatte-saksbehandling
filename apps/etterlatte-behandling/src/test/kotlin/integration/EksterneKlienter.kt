@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -413,6 +414,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
@@ -633,6 +635,8 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT
+
+    override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? = PdlIdentifikator.AktoerId("0123456789")
 
     override val serviceName: String
         get() = "Pdl tjenester"

@@ -7,12 +7,15 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -29,6 +32,11 @@ interface GosysOppgaveService {
         tema: String?,
         enhetsnr: String?,
         harTildeling: Boolean?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave>
+
+    suspend fun hentOppgaverForPerson(
+        foedselsnummer: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
 
@@ -80,6 +88,7 @@ class GosysOppgaveServiceImpl(
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
+    private val pdltjeneserKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val cache =
@@ -139,6 +148,7 @@ class GosysOppgaveServiceImpl(
                     .map {
                         async {
                             gosysOppgaveKlient.hentOppgaver(
+                                aktoerId = null,
                                 saksbehandler = saksbehandler,
                                 tema = temaListe,
                                 enhetsnr = it,
@@ -153,6 +163,33 @@ class GosysOppgaveServiceImpl(
         val gosysOppgaver = GosysOppgaver(alleGosysOppgaver.size, alleGosysOppgaver)
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
+
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
+    }
+
+    override suspend fun hentOppgaverForPerson(
+        foedselsnummer: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave> {
+        val aktoerId =
+            pdltjeneserKlient.hentAktoerId(foedselsnummer)?.aktoerId
+                ?: throw IkkeFunnetException("AKTOER_ID_ER_NULL", "Klarte ikke hente aktørid for person")
+
+        val gosysOppgaver =
+            gosysOppgaveKlient.hentOppgaver(
+                aktoerId = aktoerId,
+                saksbehandler = null,
+                tema = emptyList(), // hent alle oppgaver, uavhengig av tema
+                enhetsnr = null,
+                harTildeling = null,
+                brukerTokenInfo = brukerTokenInfo,
+            )
+
+        logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) på person ${foedselsnummer.maskerFnr()}")
 
         return inTransaction {
             gosysOppgaver.oppgaver

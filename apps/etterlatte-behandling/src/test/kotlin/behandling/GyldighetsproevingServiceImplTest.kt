@@ -78,7 +78,7 @@ internal class GyldighetsproevingServiceImplTest {
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -115,7 +115,7 @@ internal class GyldighetsproevingServiceImplTest {
         val behandling =
             Foerstegangsbehandling(
                 id = id,
-                sak = Sak("", SakType.BARNEPENSJON, 1, Enhet.PORSGRUNN.enhetNr),
+                sak = Sak("", SakType.BARNEPENSJON, 1, Enhet.PORSGRUNN),
                 behandlingOpprettet = now,
                 sistEndret = now,
                 status = BehandlingStatus.OPPRETTET,
@@ -193,7 +193,7 @@ internal class GyldighetsproevingServiceImplTest {
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.PORSGRUNN.enhetNr,
+                        enhet = Enhet.PORSGRUNN,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

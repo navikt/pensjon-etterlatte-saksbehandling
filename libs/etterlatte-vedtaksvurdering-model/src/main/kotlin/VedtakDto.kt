@@ -93,13 +93,13 @@ data class Periode(
 
 data class VedtakFattet(
     val ansvarligSaksbehandler: String,
-    val ansvarligEnhet: String,
+    val ansvarligEnhet: Enhet,
     val tidspunkt: Tidspunkt,
 )
 
 data class Attestasjon(
     val attestant: String,
-    val attesterendeEnhet: String,
+    val attesterendeEnhet: Enhet,
     val tidspunkt: Tidspunkt,
 )
 

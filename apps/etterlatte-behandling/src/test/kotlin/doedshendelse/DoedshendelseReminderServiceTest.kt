@@ -43,7 +43,7 @@ class DoedshendelseReminderServiceTest {
         val mockOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "behandling",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
@@ -90,7 +90,7 @@ class DoedshendelseReminderServiceTest {
         val eksisterendeOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "vurder konsekvens",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.MANGLER_SOEKNAD,
                 null,

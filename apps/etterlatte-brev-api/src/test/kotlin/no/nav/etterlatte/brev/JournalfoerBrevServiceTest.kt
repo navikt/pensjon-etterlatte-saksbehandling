@@ -64,7 +64,7 @@ class JournalfoerBrevServiceTest {
     @Test
     fun `Journalfoering fungerer som forventet`() {
         val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.REDIGERBAR)
-        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
+        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enhet.defaultEnhet)
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
@@ -107,7 +107,7 @@ class JournalfoerBrevServiceTest {
                 any(),
                 any(),
             )
-        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enhet.UTLAND.enhetNr)
+        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enhet.UTLAND)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -175,7 +175,7 @@ class JournalfoerBrevServiceTest {
         val behandlingId = UUID.randomUUID()
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
 
-        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enhet.defaultEnhet.enhetNr)
+        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enhet.defaultEnhet)
 
         val forventetBrev =
             Brev(
@@ -206,7 +206,7 @@ class JournalfoerBrevServiceTest {
                 1,
                 VedtakSak("ident", type, forventetBrev.sakId),
                 behandlingId,
-                sak.enhet.let { Enhet.fraEnhetNr(it) },
+                sak.enhet,
                 "EY",
             )
 
@@ -289,7 +289,7 @@ class JournalfoerBrevServiceTest {
             )
         coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
-        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enhet.PORSGRUNN.enhetNr)
+        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enhet.PORSGRUNN)
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)

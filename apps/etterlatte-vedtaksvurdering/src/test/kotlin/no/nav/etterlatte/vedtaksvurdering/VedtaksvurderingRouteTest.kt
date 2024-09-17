@@ -22,6 +22,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -749,7 +750,7 @@ internal class VedtaksvurderingRouteTest {
     private fun klage(): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak("ident", SakType.BARNEPENSJON, 1L, "einheit"),
+            Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.defaultEnhet),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

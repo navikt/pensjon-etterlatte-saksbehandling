@@ -125,13 +125,13 @@ internal class OpprettJournalfoerOgDistribuer {
             vedtakFattet =
                 VedtakFattet(
                     ansvarligSaksbehandler = "Peder Ås",
-                    ansvarligEnhet = Enhet.defaultEnhet.enhetNr,
+                    ansvarligEnhet = Enhet.defaultEnhet,
                     tidspunkt = Tidspunkt.now(),
                 ),
             attestasjon =
                 Attestasjon(
                     attestant = "Lars Holm",
-                    attesterendeEnhet = Enhet.defaultEnhet.enhetNr,
+                    attesterendeEnhet = Enhet.defaultEnhet,
                     tidspunkt = Tidspunkt.now(),
                 ),
             innhold =

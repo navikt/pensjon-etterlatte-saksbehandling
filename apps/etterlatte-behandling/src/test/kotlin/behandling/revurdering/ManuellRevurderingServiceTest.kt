@@ -855,7 +855,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     mockk<BehandlingService>().also {
                         every { it.hentSisteIverksatte(any()) } returns
                             mockk<Behandling>().also {
-                                every { it.sak } returns Sak(sakType = SakType.BARNEPENSJON, id = 1L, enhet = "", ident = "")
+                                every { it.sak } returns
+                                    Sak(sakType = SakType.BARNEPENSJON, id = 1L, enhet = Enhet.defaultEnhet, ident = "")
                                 every { it.opphoerFraOgMed } returns YearMonth.now()
                                 every { it.id } returns UUID.randomUUID()
                                 every { it.utlandstilknytning } returns null

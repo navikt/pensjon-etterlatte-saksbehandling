@@ -99,7 +99,7 @@ interface SakService {
 }
 
 class ManglerTilgangTilEnhet(
-    enheter: List<String>,
+    enheter: List<Enhet>,
 ) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
@@ -268,7 +268,7 @@ class SakServiceImpl(
     ) {
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
-                if (sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                if (sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND) {
                     dao.oppdaterEnheterPaaSaker(
                         listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG_UTLAND)),
                     )
@@ -276,7 +276,7 @@ class SakServiceImpl(
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                if (sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr) {
+                if (sak.enhet != Enhet.STRENGT_FORTROLIG) {
                     dao.oppdaterEnheterPaaSaker(
                         listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG)),
                     )
@@ -348,7 +348,7 @@ class SakServiceImpl(
 
         return when (sak) {
             null -> sjekkEnhetFraNorg(fnr, type, null)
-            else -> sak.enhet.let { Enhet.fraEnhetNr(it) }
+            else -> sak.enhet
         }
     }
 
@@ -406,22 +406,22 @@ class SakServiceImpl(
         }
 
     private fun List<Sak>.filterForEnheter(): List<Sak> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhet>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
             if (!bruker.harRolleStrengtFortrolig()) {
-                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG)
             }
             if (!bruker.harRolleEgenAnsatt()) {
-                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE)
             }
         }
         return filterSakerForEnheter(enheterSomSkalFiltreresBort, this)
     }
 
     private fun filterSakerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhet>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
 }

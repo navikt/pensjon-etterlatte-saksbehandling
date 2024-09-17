@@ -106,7 +106,7 @@ class OversendelseBrevServiceImplTest(
     private fun klage(): Klage =
         Klage(
             behandlingId,
-            Sak("ident", SakType.BARNEPENSJON, sakId, "einheit"),
+            Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,
@@ -121,7 +121,7 @@ class OversendelseBrevServiceImplTest(
 
     private fun brevData() =
         GenerellBrevData(
-            sak = Sak("11057523044", SakType.OMSTILLINGSSTOENAD, sakId, "4808"),
+            sak = Sak("11057523044", SakType.OMSTILLINGSSTOENAD, sakId, Enhet.PORSGRUNN),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),

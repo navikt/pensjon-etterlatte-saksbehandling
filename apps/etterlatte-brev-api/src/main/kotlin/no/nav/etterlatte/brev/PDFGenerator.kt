@@ -89,9 +89,7 @@ class PDFGenerator(
                     avsenderRequest(
                         bruker,
                         generellBrevData.forenkletVedtak,
-                        generellBrevData.sak.enhet.let {
-                            Enhet.fraEnhetNr(it)
-                        },
+                        generellBrevData.sak.enhet,
                     ),
                 )
 

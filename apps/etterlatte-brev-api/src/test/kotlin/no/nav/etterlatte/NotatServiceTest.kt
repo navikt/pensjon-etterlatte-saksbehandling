@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.StrukturertNotat
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
@@ -161,7 +162,7 @@ private fun klageForInnstilling(sakId: SakId): Klage =
                     ident = SOEKER_FOEDSELSNUMMER.value,
                     sakType = SakType.BARNEPENSJON,
                     id = sakId,
-                    enhet = "4808",
+                    enhet = Enhet.PORSGRUNN,
                 ),
             innkommendeDokument = null,
         ).copy(

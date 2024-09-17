@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -260,7 +259,7 @@ class TilbakekrevingService(
                     vedtakKlient.lagreVedtakTilbakekreving(
                         tilbakekrevingBehandling = lagretTilbakekreving,
                         brukerTokenInfo = saksbehandler,
-                        enhet = lagretTilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                        enhet = lagretTilbakekreving.sak.enhet,
                     )
 
                 logger.info("Lagret vedtak med vedtakId $vedtakId for tilbakekreving $tilbakekrevingId")
@@ -333,7 +332,7 @@ class TilbakekrevingService(
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
                     brukerTokenInfo = saksbehandler,
-                    enhet = tilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                    enhet = tilbakekreving.sak.enhet,
                 )
             }
 
@@ -382,7 +381,7 @@ class TilbakekrevingService(
                     vedtakKlient.attesterVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
                         brukerTokenInfo = saksbehandler,
-                        enhet = tilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                        enhet = tilbakekreving.sak.enhet,
                     )
                 }
 

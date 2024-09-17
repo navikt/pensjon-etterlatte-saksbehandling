@@ -89,7 +89,7 @@ class BehandlingFactoryTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
-            Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.AALESUND),
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null,
@@ -164,7 +164,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -261,7 +261,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -347,7 +347,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -551,7 +551,7 @@ class BehandlingFactoryTest {
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -617,7 +617,7 @@ class BehandlingFactoryTest {
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -669,7 +669,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -746,7 +746,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -781,7 +781,7 @@ class BehandlingFactoryTest {
             revurdering(
                 sakId = 1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
             )
 
         val revurderingsBehandling =
@@ -824,7 +824,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -901,7 +901,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enhet.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -937,7 +937,7 @@ class BehandlingFactoryTest {
             revurdering(
                 sakId = 1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
             )
 
         val revurderingsBehandling =
@@ -981,7 +981,7 @@ class BehandlingFactoryTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet)
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -1062,7 +1062,7 @@ class BehandlingFactoryTest {
     private fun sak(
         sakId: SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
-        enhet: String = Enhet.defaultEnhet.enhetNr,
+        enhet: Enhet = Enhet.defaultEnhet,
     ): Sak =
         Sak(
             ident = "Soeker",

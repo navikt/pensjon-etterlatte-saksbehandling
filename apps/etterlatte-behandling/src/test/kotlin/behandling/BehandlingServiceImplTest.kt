@@ -106,9 +106,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                    enhet = Enhet.EGNE_ANSATTE,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -130,9 +130,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -154,9 +154,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -178,9 +178,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                    enhet = Enhet.EGNE_ANSATTE,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -778,9 +778,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enhet.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enhet.PORSGRUNN.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.PORSGRUNN),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -805,7 +805,7 @@ internal class BehandlingServiceImplTest {
             foerstegangsbehandling(
                 id = uuid,
                 sakId = 1,
-                enhet = Enhet.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN,
             )
 
         every { behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs
@@ -831,8 +831,8 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
-        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), Enhet.PORSGRUNN)
+        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enhet.PORSGRUNN)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
@@ -859,7 +859,7 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enhet.PORSGRUNN)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(

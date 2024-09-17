@@ -273,7 +273,7 @@ internal class OppgaveDaoTest(
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enhet.PORSGRUNN)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(Enhet.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
+        assertEquals(Enhet.PORSGRUNN, hentetOppgave?.enhet)
     }
 
     @Test

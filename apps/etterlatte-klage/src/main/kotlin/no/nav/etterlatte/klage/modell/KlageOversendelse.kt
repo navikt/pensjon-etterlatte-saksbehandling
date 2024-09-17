@@ -118,7 +118,7 @@ data class KabalOversendelse(
                 fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = fagsystem),
                 kildeReferanse = klage.id.toString(),
                 hjemler = listOf(innstilling.lovhjemmel.tilHjemmel()),
-                forrigeBehandlendeEnhet = klage.sak.enhet,
+                forrigeBehandlendeEnhet = klage.sak.enhet.enhetNr,
                 tilknyttedeJournalposter =
                     listOfNotNull(
                         KabalJournalpostref(

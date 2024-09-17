@@ -15,6 +15,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -319,7 +320,7 @@ internal class VedtakBehandlingServiceTest(
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = saksbehandler.ident,
-                        ansvarligEnhet = "",
+                        ansvarligEnhet = Enhet.defaultEnhet,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -1306,7 +1307,7 @@ internal class VedtakBehandlingServiceTest(
             val oppretta =
                 repository
                     .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, "0001", Tidspunkt.now())) }
+                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, Enhet.defaultEnhet, Tidspunkt.now())) }
             Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
             val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
             Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)

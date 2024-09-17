@@ -172,7 +172,7 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 ident = doedshendelse.beroertFnr,
                 sakType = SakType.BARNEPENSJON,
                 id = 1L,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
             )
     }
 }

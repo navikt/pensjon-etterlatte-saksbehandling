@@ -92,7 +92,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         it.body()
                     }
             Assertions.assertNotNull(sak.id)
-            Assertions.assertEquals(Enhet.PORSGRUNN.enhetNr, sak.enhet)
+            Assertions.assertEquals(Enhet.PORSGRUNN, sak.enhet)
 
             client
                 .post("egenansatt") {
@@ -123,7 +123,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
-            Assertions.assertEquals(Enhet.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
+            Assertions.assertEquals(Enhet.EGNE_ANSATTE, saketterSkjerming.enhet)
 
             val steinkjer = ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER)
             coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
@@ -155,7 +155,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertEquals(sak.id, sakUtenSkjermingIgjen.id)
-            Assertions.assertEquals(steinkjer.enhetNr.enhetNr, sakUtenSkjermingIgjen.enhet)
+            Assertions.assertEquals(steinkjer.enhetNr, sakUtenSkjermingIgjen.enhet)
         }
     }
 
@@ -195,7 +195,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         it.body()
                     }
             Assertions.assertNotNull(sak.id)
-            Assertions.assertEquals(Enhet.PORSGRUNN.enhetNr, sak.enhet)
+            Assertions.assertEquals(Enhet.PORSGRUNN, sak.enhet)
 
             val behandlingId =
                 client
@@ -262,7 +262,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
-            Assertions.assertEquals(Enhet.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
+            Assertions.assertEquals(Enhet.STRENGT_FORTROLIG, adressebeskyttetUtenSkjerming.enhet)
         }
     }
 }

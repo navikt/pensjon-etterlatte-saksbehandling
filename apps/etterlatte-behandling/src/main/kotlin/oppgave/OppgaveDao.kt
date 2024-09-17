@@ -126,7 +126,7 @@ class OppgaveDaoImpl(
                     )
                 statement.setObject(1, oppgaveIntern.id)
                 statement.setString(2, oppgaveIntern.status.name)
-                statement.setString(3, oppgaveIntern.enhet)
+                statement.setString(3, oppgaveIntern.enhet.enhetNr)
                 statement.setLong(4, oppgaveIntern.sakId)
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
@@ -157,7 +157,7 @@ class OppgaveDaoImpl(
                 oppgaveListe.forEach { oppgaveIntern ->
                     statement.setObject(1, oppgaveIntern.id)
                     statement.setString(2, oppgaveIntern.status.name)
-                    statement.setString(3, oppgaveIntern.enhet)
+                    statement.setString(3, oppgaveIntern.enhet.enhetNr)
                     statement.setLong(4, oppgaveIntern.sakId)
                     statement.setString(5, oppgaveIntern.type.name)
                     statement.setString(6, oppgaveIntern.saksbehandler?.ident)
@@ -644,7 +644,7 @@ class OppgaveDaoImpl(
         OppgaveIntern(
             id = getObject("id") as UUID,
             status = Status.valueOf(getString("status")),
-            enhet = getString("enhet"),
+            enhet = getString("enhet").let { Enhet.fraEnhetNr(it) },
             sakId = getLong("sak_id"),
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),

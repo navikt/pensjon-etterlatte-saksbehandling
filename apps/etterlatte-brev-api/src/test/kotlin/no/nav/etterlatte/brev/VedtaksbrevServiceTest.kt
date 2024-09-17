@@ -148,7 +148,6 @@ internal class VedtaksbrevServiceTest {
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = simpleSaksbehandler()
         private val ATTESTANT = simpleAttestant()
@@ -730,7 +729,7 @@ internal class VedtaksbrevServiceTest {
     ): GenerellBrevData {
         val soeker = "12345612345"
         return GenerellBrevData(
-            sak = Sak(soeker, sakType, SAK_ID, "4808"),
+            sak = Sak(soeker, sakType, SAK_ID, Enhet.PORSGRUNN),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),

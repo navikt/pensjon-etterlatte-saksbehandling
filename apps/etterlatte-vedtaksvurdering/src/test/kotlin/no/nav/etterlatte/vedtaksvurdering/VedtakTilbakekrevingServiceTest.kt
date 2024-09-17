@@ -129,7 +129,7 @@ class VedtakTilbakekrevingServiceTest {
                 dto.tilbakekrevingId,
                 withArg {
                     it.ansvarligSaksbehandler shouldBe saksbehandler.ident
-                    it.ansvarligEnhet shouldBe dto.enhet.enhetNr
+                    it.ansvarligEnhet shouldBe dto.enhet
                 },
             )
         }
@@ -164,7 +164,7 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = "enhet",
+                        ansvarligEnhet = Enhet.defaultEnhet,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -180,13 +180,13 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = Enhet.defaultEnhet.enhetNr,
+                        ansvarligEnhet = Enhet.defaultEnhet,
                         tidspunkt = Tidspunkt.now(),
                     ),
                 attestasjon =
                     Attestasjon(
                         attestant = "annen saksbehandler",
-                        attesterendeEnhet = Enhet.defaultEnhet.enhetNr,
+                        attesterendeEnhet = Enhet.defaultEnhet,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -207,7 +207,7 @@ class VedtakTilbakekrevingServiceTest {
                 attesterDto.tilbakekrevingId,
                 withArg {
                     it.attestant shouldBe saksbehandler.ident
-                    it.attesterendeEnhet shouldBe attesterDto.enhet.enhetNr
+                    it.attesterendeEnhet shouldBe attesterDto.enhet
                 },
             )
         }
@@ -256,7 +256,7 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         saksbehandler.ident,
-                        "enhet",
+                        Enhet.defaultEnhet,
                         Tidspunkt.now().minus(1, ChronoUnit.DAYS),
                     ),
             )

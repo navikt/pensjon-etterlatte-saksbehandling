@@ -213,7 +213,7 @@ class AktivitetspliktServiceTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.NY,
-                    enhet = Enhet.defaultEnhet.enhetNr,
+                    enhet = Enhet.defaultEnhet,
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,
@@ -286,7 +286,7 @@ class AktivitetspliktServiceTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.NY,
-                    enhet = Enhet.defaultEnhet.enhetNr,
+                    enhet = Enhet.defaultEnhet,
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,

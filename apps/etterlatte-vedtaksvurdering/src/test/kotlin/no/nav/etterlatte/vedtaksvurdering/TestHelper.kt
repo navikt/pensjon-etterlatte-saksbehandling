@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,8 +28,8 @@ const val FNR_1 = "28098208560"
 const val FNR_2 = "04417103428"
 const val SAKSBEHANDLER_1 = "saksbehandler1"
 const val SAKSBEHANDLER_2 = "saksbehandler2"
-const val ENHET_1 = "1234"
-const val ENHET_2 = "4321"
+val ENHET_1 = Enhet.STEINKJER
+val ENHET_2 = Enhet.PORSGRUNN
 
 val saksbehandler = simpleSaksbehandler(ident = SAKSBEHANDLER_1)
 val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)

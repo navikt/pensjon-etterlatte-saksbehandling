@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -23,7 +24,7 @@ data class DetaljertBehandlingDto(
     val id: UUID,
     val sakId: SakId,
     val sakType: SakType,
-    val sakEnhetId: String,
+    val sakEnhetId: Enhet,
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,

@@ -202,7 +202,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 ident = doedshendelse.beroertFnr,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 id = 1L,
-                enhet = Enhet.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet,
             )
     }
 }

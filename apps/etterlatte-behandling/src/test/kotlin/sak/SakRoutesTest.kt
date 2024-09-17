@@ -82,14 +82,14 @@ internal class SakRoutesTest {
                 ident = "12345",
                 sakType = SakType.BARNEPENSJON,
                 id = 123455,
-                enhet = "birger",
+                enhet = Enhet.defaultEnhet,
             )
         every { oppgaveService.hentOppgaverForSak(any()) } returns
             listOf(
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
+                    enhet = Enhet.PORSGRUNN,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -104,7 +104,7 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
+                    enhet = Enhet.PORSGRUNN,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
@@ -119,7 +119,7 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.FERDIGSTILT,
-                    enhet = "4808",
+                    enhet = Enhet.PORSGRUNN,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,

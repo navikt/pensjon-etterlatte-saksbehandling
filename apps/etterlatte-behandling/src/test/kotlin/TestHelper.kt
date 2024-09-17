@@ -229,7 +229,7 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enhet.defaultEnhet.enhetNr,
+    enhet: Enhet = Enhet.defaultEnhet,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -268,7 +268,7 @@ fun revurdering(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enhet.defaultEnhet.enhetNr,
+    enhet: Enhet = Enhet.defaultEnhet,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,

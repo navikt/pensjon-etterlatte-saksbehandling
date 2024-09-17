@@ -17,6 +17,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -347,7 +348,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        enhet = "",
+        enhet = Enhet.defaultEnhet,
         sakId = 1,
         kilde = null,
         type = OppgaveType.FOERSTEGANGSBEHANDLING,

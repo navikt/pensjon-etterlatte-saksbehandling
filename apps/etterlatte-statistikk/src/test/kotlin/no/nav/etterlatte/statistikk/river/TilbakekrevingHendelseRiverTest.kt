@@ -115,7 +115,7 @@ internal class TilbakekrevingHendelseRiverTest {
                         TILBAKEKREVING_STATISTIKK_RIVER_KEY to
                             StatistikkTilbakekrevingDto(
                                 UUID.randomUUID(),
-                                tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.defaultEnhet.enhetNr)),
+                                tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.defaultEnhet)),
                                 Tidspunkt.now(),
                                 null,
                             ),

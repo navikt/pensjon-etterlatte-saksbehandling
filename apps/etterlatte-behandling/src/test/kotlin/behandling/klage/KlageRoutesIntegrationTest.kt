@@ -158,7 +158,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     .getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedStrengtFortrolig)
                     .body<Klage>()
             assertEquals(
-                klage.copy(sak = klage.sak.copy(enhet = Enhet.STRENGT_FORTROLIG.enhetNr)),
+                klage.copy(sak = klage.sak.copy(enhet = Enhet.STRENGT_FORTROLIG)),
                 hentetMedTilgang,
             )
         }

@@ -20,7 +20,7 @@ class SakSkrivDao(
             sakType = enumValueOf(getString("sakType")),
             ident = getString("fnr"),
             id = getLong("id"),
-            enhet = getString("enhet"),
+            enhet = getString("enhet").let { Enhet.fraEnhetNr(it) },
         )
     }
 

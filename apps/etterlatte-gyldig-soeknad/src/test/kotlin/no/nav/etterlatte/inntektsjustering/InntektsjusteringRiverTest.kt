@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
@@ -46,7 +47,7 @@ internal class InntektsjusteringRiverTest {
 
     @Test
     fun `Skal journalføre inntektsjustering og opprette oppgave i Gjenny`() {
-        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), Enhet.PORSGRUNN)
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),

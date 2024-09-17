@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -68,7 +67,7 @@ class VedtakTilbakekrevingService(
                 tilbakekrevingVedtakData.tilbakekrevingId,
                 VedtakFattet(
                     ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                    ansvarligEnhet = tilbakekrevingVedtakData.enhet.enhetNr,
+                    ansvarligEnhet = tilbakekrevingVedtakData.enhet,
                     // Blir ikke brukt fordi egen now() brukes i db..
                     tidspunkt = Tidspunkt.now(),
                 ),
@@ -93,7 +92,7 @@ class VedtakTilbakekrevingService(
                 tilbakekrevingId,
                 Attestasjon(
                     attestant = brukerTokenInfo.ident(),
-                    attesterendeEnhet = tilbakekrevingVedtakData.enhet.enhetNr,
+                    attesterendeEnhet = tilbakekrevingVedtakData.enhet,
                     // Blir ikke brukt for egen now() brukes i db.
                     tidspunkt = Tidspunkt.now(),
                 ),
@@ -122,7 +121,7 @@ class VedtakTilbakekrevingService(
             TilbakekrevingVedtakLagretDto(
                 id = attestertVedtak.id,
                 fattetAv = it.ansvarligSaksbehandler,
-                enhet = it.ansvarligEnhet.let { Enhet.fraEnhetNr(it) },
+                enhet = it.ansvarligEnhet,
                 dato = it.tidspunkt.toLocalDate(),
             )
         }

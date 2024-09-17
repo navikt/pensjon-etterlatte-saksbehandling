@@ -109,7 +109,7 @@ internal class OppgaveDaoReguleringTest(
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = status,
-                enhet = "",
+                enhet = Enhet.defaultEnhet,
                 sakId = sakId,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,

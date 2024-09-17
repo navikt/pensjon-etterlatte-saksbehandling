@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -371,7 +372,7 @@ class VedtaksvurderingRepository(
                 params =
                     mapOf(
                         "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
-                        "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
+                        "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet.enhetNr,
                         "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                         "behandlingId" to behandlingId,
                     ),
@@ -396,7 +397,7 @@ class VedtaksvurderingRepository(
                 params =
                     mapOf(
                         "attestant" to attestasjon.attestant,
-                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
+                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet.enhetNr,
                         "vedtakstatus" to VedtakStatus.ATTESTERT.name,
                         "behandlingId" to behandlingId,
                     ),
@@ -489,7 +490,7 @@ class VedtaksvurderingRepository(
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(
                         ansvarligSaksbehandler = string("saksbehandlerid"),
-                        ansvarligEnhet = string("fattetVedtakEnhet"),
+                        ansvarligEnhet = string("fattetVedtakEnhet").let { Enhet.fraEnhetNr(it) },
                         tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
                     )
                 },
@@ -497,7 +498,7 @@ class VedtaksvurderingRepository(
                 stringOrNull("attestant")?.let {
                     Attestasjon(
                         attestant = string("attestant"),
-                        attesterendeEnhet = string("attestertVedtakEnhet"),
+                        attesterendeEnhet = string("attestertVedtakEnhet").let { Enhet.fraEnhetNr(it) },
                         tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
                     )
                 },

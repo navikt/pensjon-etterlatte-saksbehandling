@@ -8,6 +8,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
@@ -55,7 +56,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), Enhet.PORSGRUNN)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -95,7 +96,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), Enhet.PORSGRUNN)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -135,7 +136,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), Enhet.PORSGRUNN)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -157,7 +158,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), Enhet.PORSGRUNN)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()

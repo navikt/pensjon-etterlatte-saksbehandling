@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import org.slf4j.LoggerFactory
 
@@ -59,7 +60,7 @@ class DokarkivKlient(
 data class OpprettJournalpostRequest(
     val tittel: String,
     val tema: String,
-    val journalfoerendeEnhet: String?,
+    val journalfoerendeEnhet: Enhet?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,
     val eksternReferanseId: String,

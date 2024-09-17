@@ -787,7 +787,7 @@ internal class OppgaveServiceTest(
 
         val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         assertEquals(1, oppgaverUtenEndring.size)
-        assertEquals(Enhet.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
+        assertEquals(Enhet.AALESUND, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
@@ -800,7 +800,7 @@ internal class OppgaveServiceTest(
         val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         assertEquals(1, oppgaverMedEndring.size)
-        assertEquals(Enhet.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
+        assertEquals(Enhet.STEINKJER, oppgaverMedEndring[0].enhet)
     }
 
     @Test
@@ -821,7 +821,7 @@ internal class OppgaveServiceTest(
         val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         assertEquals(1, oppgaverUtenEndring.size)
         val oppgaveUtenEndring = oppgaverUtenEndring.first()
-        assertEquals(Enhet.AALESUND.enhetNr, oppgaveUtenEndring.enhet)
+        assertEquals(Enhet.AALESUND, oppgaveUtenEndring.enhet)
         oppgaveService.tildelSaksbehandler(oppgaveUtenEndring.id, saksbehandlerMedRoller.saksbehandler.ident())
         oppgaveService.oppdaterStatusOgMerknad(oppgaveUtenEndring.id, "settes til ferdigstilt", Status.FERDIGSTILT)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
@@ -835,7 +835,7 @@ internal class OppgaveServiceTest(
         val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         assertEquals(1, oppgaverMedEndring.size)
-        assertEquals(Enhet.STEINKJER.enhetNr, oppgaverMedEndring.first().enhet)
+        assertEquals(Enhet.STEINKJER, oppgaverMedEndring.first().enhet)
         assertEquals(Status.FERDIGSTILT, oppgaverMedEndring.first().status)
     }
 
@@ -856,7 +856,7 @@ internal class OppgaveServiceTest(
 
         val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         assertEquals(1, oppgaverUtenEndring.size)
-        assertEquals(Enhet.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
+        assertEquals(Enhet.AALESUND, oppgaverUtenEndring[0].enhet)
         oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
         oppgaveService.endrePaaVent(PaaVent(oppgaverUtenEndring[0].id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET))
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
@@ -870,7 +870,7 @@ internal class OppgaveServiceTest(
         val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         assertEquals(1, oppgaverMedEndring.size)
-        assertEquals(Enhet.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
+        assertEquals(Enhet.STEINKJER, oppgaverMedEndring[0].enhet)
         assertEquals(Status.NY, oppgaverMedEndring[0].status)
     }
 
@@ -1075,7 +1075,7 @@ internal class OppgaveServiceTest(
 
         assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]
-        assertEquals(Enhet.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
+        assertEquals(Enhet.AALESUND, aalesundfunnetOppgave.enhet)
     }
 
     @Test

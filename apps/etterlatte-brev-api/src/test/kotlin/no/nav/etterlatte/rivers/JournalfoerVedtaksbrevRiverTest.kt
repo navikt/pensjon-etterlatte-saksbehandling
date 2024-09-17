@@ -96,7 +96,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         assertEquals(vedtak.id, vedtakActual.vedtakId)
         assertEquals(vedtak.behandlingId, vedtakActual.behandlingId)
-        assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet.enhetNr)
+        assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
@@ -140,8 +140,8 @@ internal class JournalfoerVedtaksbrevRiverTest {
             status = VedtakStatus.ATTESTERT,
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             type = VedtakType.INNVILGELSE,
-            vedtakFattet = VedtakFattet("Z00000", Enhet.defaultEnhet.enhetNr, Tidspunkt.now()),
-            attestasjon = Attestasjon("Z00000", Enhet.defaultEnhet.enhetNr, Tidspunkt.now()),
+            vedtakFattet = VedtakFattet("Z00000", Enhet.defaultEnhet, Tidspunkt.now()),
+            attestasjon = Attestasjon("Z00000", Enhet.defaultEnhet, Tidspunkt.now()),
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),

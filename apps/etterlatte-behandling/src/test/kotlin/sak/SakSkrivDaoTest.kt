@@ -149,7 +149,7 @@ internal class SakSkrivDaoTest(
     fun `kan opprette sak`() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.PORSGRUNN)
 
-        Assertions.assertEquals(Enhet.PORSGRUNN.enhetNr, opprettSak.enhet)
+        Assertions.assertEquals(Enhet.PORSGRUNN, opprettSak.enhet)
     }
 
     @Test
@@ -200,7 +200,7 @@ internal class SakSkrivDaoTest(
 
         val sakerMedEgenAnsattEnhet = sakLesDao.finnSaker(fnr)
         sakerMedEgenAnsattEnhet.forEach {
-            Assertions.assertEquals(Enhet.EGNE_ANSATTE.enhetNr, it.enhet)
+            Assertions.assertEquals(Enhet.EGNE_ANSATTE, it.enhet)
         }
     }
 

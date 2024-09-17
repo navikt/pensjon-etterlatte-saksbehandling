@@ -78,9 +78,9 @@ class BehandlingFactory(
         val sak = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(soeker, request.sakType) }
 
         if (
-            sak.enhet != request.enhet?.enhetNr &&
-            sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr &&
-            sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr
+            sak.enhet != request.enhet &&
+            sak.enhet != Enhet.STRENGT_FORTROLIG &&
+            sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND
         ) {
             request.enhet?.let {
                 inTransaction {

@@ -51,14 +51,14 @@ data class Utbetalingsvedtak(
                     vedtakFattet ?: vedtak.vedtakFattet?.let {
                         VedtakFattet(
                             ansvarligSaksbehandler = it.ansvarligSaksbehandler,
-                            ansvarligEnhet = it.ansvarligEnhet,
+                            ansvarligEnhet = it.ansvarligEnhet.enhetNr,
                         )
                     } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
                 attestasjon =
                     attestasjon ?: vedtak.attestasjon?.let {
                         Attestasjon(
                             attestant = it.attestant,
-                            attesterendeEnhet = it.attesterendeEnhet,
+                            attesterendeEnhet = it.attesterendeEnhet.enhetNr,
                         )
                     } ?: throw Exception("Mangler attestant på vedtak"),
             )

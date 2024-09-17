@@ -83,7 +83,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
             behandlingService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET.enhetNr)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingService.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
@@ -133,7 +133,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
-        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET.enhetNr)
+        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTOKEN, any()) } returns opprettGrunnlag()
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
@@ -196,8 +196,8 @@ internal class BrevdataFacadeImplTest {
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
             every { status } returns VedtakStatus.OPPRETTET
-            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET.enhetNr, Tidspunkt.now())
-            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET.enhetNr, Tidspunkt.now())
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
             every { innhold } returns
                 mockk<VedtakInnholdDto.VedtakBehandlingDto> {
                     every { behandling.id } returns BEHANDLING_ID
@@ -214,8 +214,8 @@ internal class BrevdataFacadeImplTest {
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
             every { status } returns VedtakStatus.OPPRETTET
-            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET.enhetNr, Tidspunkt.now())
-            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET.enhetNr, Tidspunkt.now())
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
             every { innhold } returns
                 mockk<VedtakInnholdDto.VedtakTilbakekrevingDto> {
                     every { tilbakekreving } returns vedtakInnhold.toObjectNode()

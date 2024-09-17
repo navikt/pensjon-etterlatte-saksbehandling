@@ -6,6 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
@@ -161,7 +162,7 @@ class VedtakEtterbetalingTest {
         vedtakFattet =
             VedtakFattet(
                 "Z01",
-                "1234",
+                Enhet.defaultEnhet,
                 Tidspunkt.parse(fattetTidspunkt),
             ),
         utbetalingsperioder =

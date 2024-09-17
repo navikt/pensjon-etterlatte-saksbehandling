@@ -3,6 +3,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.InntektsjusteringVarselOmVedtakRiver
 import no.nav.etterlatte.inntektsjustering.skalHaVarselOmVedtak
@@ -58,7 +59,7 @@ class InntektsjusteringVarselOmVedtakRiver {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, 0, "4808")),
+                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, 0, Enhet.PORSGRUNN)),
                     )
             }
 
@@ -80,7 +81,7 @@ class InntektsjusteringVarselOmVedtakRiver {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, 0, "4808")),
+                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, 0, Enhet.PORSGRUNN)),
                     )
             }
 

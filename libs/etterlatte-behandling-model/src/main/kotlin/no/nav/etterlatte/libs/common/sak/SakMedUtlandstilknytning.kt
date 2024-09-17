@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.sak
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 
@@ -7,7 +8,7 @@ data class SakMedUtlandstilknytning(
     val ident: String,
     val sakType: SakType,
     val id: Long,
-    val enhet: String,
+    val enhet: Enhet,
     val utlandstilknytning: Utlandstilknytning?,
 ) {
     companion object {

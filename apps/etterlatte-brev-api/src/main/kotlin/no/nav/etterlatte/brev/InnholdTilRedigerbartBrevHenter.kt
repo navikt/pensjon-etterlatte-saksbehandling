@@ -85,7 +85,7 @@ class InnholdTilRedigerbartBrevHenter(
                                     opprettAvsenderRequest(
                                         bruker,
                                         generellBrevData.forenkletVedtak,
-                                        generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                                        generellBrevData.sak.enhet,
                                     ),
                                 ),
                             soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
@@ -108,7 +108,7 @@ class InnholdTilRedigerbartBrevHenter(
                         generellBrevData.personerISak.soekerOgEventuellVerge(),
                         generellBrevData.sak.id,
                         generellBrevData.forenkletVedtak,
-                        generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                        generellBrevData.sak.enhet,
                         generellBrevData.spraak,
                     )
                 }
@@ -116,7 +116,7 @@ class InnholdTilRedigerbartBrevHenter(
             OpprettBrevRequest(
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 sakType = generellBrevData.sak.sakType,
-                enhet = generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                enhet = generellBrevData.sak.enhet,
                 personerISak = generellBrevData.personerISak,
                 innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),

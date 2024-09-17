@@ -63,7 +63,7 @@ class JournalfoerSoeknadService(
                 OpprettJournalpostRequest(
                     tittel = tittel,
                     tema = sakType.tema,
-                    journalfoerendeEnhet = Enhet.defaultEnhet.enhetNr,
+                    journalfoerendeEnhet = Enhet.defaultEnhet,
                     avsenderMottaker = null,
                     bruker = null,
                     eksternReferanseId = opprettEksternReferanseId(soeknadId, sakType),

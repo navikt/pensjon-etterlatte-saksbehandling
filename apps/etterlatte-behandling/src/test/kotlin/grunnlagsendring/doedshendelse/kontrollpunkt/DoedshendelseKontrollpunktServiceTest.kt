@@ -143,7 +143,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -185,7 +185,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -261,7 +261,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         val sakIdd = 1L
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enhet.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enhet.defaultEnhet)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -322,7 +322,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 ident = doedshendelseInternalBP.beroertFnr,
                 sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
                 id = 1L,
-                enhet = "0000",
+                enhet = Enhet.defaultEnhet,
             )
         val oppgaveIntern =
             mockk<OppgaveIntern> {

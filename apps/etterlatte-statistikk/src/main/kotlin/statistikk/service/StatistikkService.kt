@@ -66,7 +66,7 @@ class StatistikkService(
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
             val enhet = vedtak.attestasjon?.attesterendeEnhet
-            if (enhet in listOf(Enhet.STRENGT_FORTROLIG.enhetNr, Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
+            if (enhet in listOf(Enhet.STRENGT_FORTROLIG, Enhet.STRENGT_FORTROLIG_UTLAND)) {
                 return sakRad to null
             }
             val gradering = runBlocking { behandlingKlient.hentGraderingForSak(vedtak.sak.id) }
@@ -211,7 +211,7 @@ class StatistikkService(
             vedtakLoependeFom = vedtakInnhold.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = vedtakInnhold.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
-            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
+            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet?.enhetNr ?: statistikkBehandling.enhet.enhetNr,
             sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             beregning = beregning,
             avkorting = avkorting,
@@ -333,7 +333,7 @@ class StatistikkService(
         registrertTidspunkt = statistikkTilbakekreving.tilbakekreving.opprettet,
         type = "TILBAKEKREVING",
         status = hendelse.name,
-        ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
+        ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet.enhetNr,
         resultat =
             mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
                 statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
@@ -387,7 +387,7 @@ class StatistikkService(
         status = hendelse.name,
         resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
-        ansvarligEnhet = statistikkKlage.klage.sak.enhet,
+        ansvarligEnhet = statistikkKlage.klage.sak.enhet.enhetNr,
         ansvarligBeslutter =
             statistikkKlage.klage.formkrav
                 ?.saksbehandler
@@ -468,7 +468,7 @@ class StatistikkService(
                 vedtakLoependeFom = null,
                 vedtakLoependeTom = null,
                 saksbehandler = null,
-                ansvarligEnhet = statistikkBehandling.enhet,
+                ansvarligEnhet = statistikkBehandling.enhet.enhetNr,
                 soeknadFormat = SoeknadFormat.DIGITAL,
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,

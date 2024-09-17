@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -58,13 +59,13 @@ fun vedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -99,7 +100,7 @@ fun ugyldigVedtakTilUtbetaling(
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -160,13 +161,13 @@ fun revurderingVedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -194,13 +195,13 @@ fun opphoersVedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhet.defaultEnhet,
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =

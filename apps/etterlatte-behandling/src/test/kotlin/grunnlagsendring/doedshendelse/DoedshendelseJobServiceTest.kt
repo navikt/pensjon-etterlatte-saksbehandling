@@ -54,7 +54,7 @@ class DoedshendelseJobServiceTest {
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,
                     id = 1L,
-                    enhet = Enhet.AALESUND.enhetNr,
+                    enhet = Enhet.AALESUND,
                 )
         }
     private val femDagerGammel = 5

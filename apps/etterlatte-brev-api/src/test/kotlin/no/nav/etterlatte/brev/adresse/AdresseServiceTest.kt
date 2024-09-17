@@ -72,17 +72,17 @@ internal class AdresseServiceTest {
             .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
 
         val sakId = Random.nextLong()
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet)
 
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet.let { Enhet.fraEnhetNr(it) }))
+                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet))
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
 
         coVerify(exactly = 1) {
-            norg2Mock.hentEnhet(sak.enhet)
+            norg2Mock.hentEnhet(sak.enhet.enhetNr)
             navansattMock.hentSaksbehandlerInfo(zIdent)
         }
     }

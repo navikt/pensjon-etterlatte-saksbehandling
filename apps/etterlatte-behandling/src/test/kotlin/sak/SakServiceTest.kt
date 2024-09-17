@@ -182,7 +182,7 @@ internal class SakServiceTest {
                     id = 1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enhet.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN,
                 ),
             )
 
@@ -208,7 +208,7 @@ internal class SakServiceTest {
                     id = 1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG,
                 ),
             )
 
@@ -234,7 +234,7 @@ internal class SakServiceTest {
                     id = 1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG,
                 ),
             )
 
@@ -256,7 +256,7 @@ internal class SakServiceTest {
                     id = sakId,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.OMSTILLINGSSTOENAD,
-                    enhet = Enhet.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN,
                 ),
             )
 
@@ -346,7 +346,7 @@ internal class SakServiceTest {
                 id = 1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enhet.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
@@ -364,7 +364,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enhet.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN,
             )
 
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
@@ -400,7 +400,7 @@ internal class SakServiceTest {
                 id = 1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enhet.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN,
             )
 
         coEvery {
@@ -427,7 +427,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enhet.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN,
             )
 
         verify(exactly = 1) {
@@ -466,7 +466,7 @@ internal class SakServiceTest {
                 id = 1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                enhet = Enhet.EGNE_ANSATTE,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
@@ -485,7 +485,7 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                enhet = Enhet.EGNE_ANSATTE,
             )
 
         verify(exactly = 1) { sakSkrivDao.markerSakerMedSkjerming(any(), any()) }
@@ -533,7 +533,7 @@ internal class SakServiceTest {
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
                     id = Random.nextLong(),
-                    enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                    enhet = Enhet.EGNE_ANSATTE,
                 ),
             )
 
@@ -555,7 +555,7 @@ internal class SakServiceTest {
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
                 id = Random.nextLong(),
-                enhet = Enhet.EGNE_ANSATTE.enhetNr,
+                enhet = Enhet.EGNE_ANSATTE,
             )
         every { sakLesDao.finnSaker(any()) } returns
             listOf(
@@ -581,7 +581,7 @@ internal class SakServiceTest {
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
                     id = Random.nextLong(),
-                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG,
                 ),
             )
 
@@ -603,7 +603,7 @@ internal class SakServiceTest {
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
                 id = Random.nextLong(),
-                enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
+                enhet = Enhet.STRENGT_FORTROLIG,
             )
         every { sakLesDao.finnSaker(any()) } returns
             listOf(
@@ -628,7 +628,7 @@ internal class SakServiceTest {
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
                 id = Random.nextLong(),
-                enhet = enhet.enhetNr,
+                enhet = enhet,
             )
 
         every { sakLesDao.finnSaker(any()) } returns listOf(sak)

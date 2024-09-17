@@ -808,15 +808,15 @@ internal class BehandlingServiceImpl(
             ?: throw BehandlingNotFoundException(behandlingId)
 
     private fun List<Behandling>.filterForEnheter(): List<Behandling> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhet>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
             if (!bruker.harRolleStrengtFortrolig()) {
-                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG)
             }
             if (!bruker.harRolleEgenAnsatt()) {
-                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE)
             }
         }
 
@@ -824,7 +824,7 @@ internal class BehandlingServiceImpl(
     }
 
     private fun filterBehandlingerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhet>,
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
 

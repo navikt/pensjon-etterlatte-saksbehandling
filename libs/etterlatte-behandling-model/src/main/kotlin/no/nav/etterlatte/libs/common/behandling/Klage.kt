@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -391,7 +392,7 @@ data class KlageBlankettPdfgenDTO(
     val ovesendelseTekst: String,
     val klager: String,
     val klageDato: LocalDate,
-) {
+) : PDFMal {
     val innhold: List<String> = emptyList()
 
     @JsonProperty

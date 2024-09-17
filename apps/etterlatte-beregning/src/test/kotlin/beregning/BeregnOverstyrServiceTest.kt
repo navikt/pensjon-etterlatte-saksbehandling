@@ -389,5 +389,6 @@ internal class BeregnOverstyrServiceTest {
             every { behandlingType } returns type
             every { sakType } returns saksType
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+            every { opphoerFraOgMed } returns null
         }
 }

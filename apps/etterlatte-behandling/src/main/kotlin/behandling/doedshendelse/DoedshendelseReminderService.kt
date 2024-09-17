@@ -49,7 +49,7 @@ class DoedshendelseReminderService(
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
             val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
-            if (oppgaver.none { it.type == OppgaveType.VURDER_KONSEKVENS }) {
+            if (oppgaver.none { it.type == OppgaveType.MANGLER_SOEKNAD }) {
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ReguleringFeiletRiverTest {
+internal class OmregningFeiletRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
 
     private fun genererReguleringMelding() =
@@ -42,7 +42,7 @@ internal class ReguleringFeiletRiverTest {
         val melding = genererReguleringMelding()
         val behandlingService = mockk<BehandlingService>(relaxed = true)
         every { behandlingService.lagreKjoering(capture(sakId), capture(status), capture(kjoering)) } returns Unit
-        val inspector = TestRapid().apply { ReguleringFeiletRiver(this, behandlingService) }
+        val inspector = TestRapid().apply { OmregningFeiletRiver(this, behandlingService) }
 
         inspector.sendTestMessage(melding.toJson())
         val sendteMeldinger = inspector.inspektør.size

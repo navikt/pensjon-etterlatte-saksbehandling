@@ -82,6 +82,12 @@ class BehandlingKlient(
                                 KabalStatus.FERDIGSTILT,
                                 BehandlingResultat.HENLAGT,
                             )
+
+                        BehandlingEventType.BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                            )
                     }
                 } catch (e: Exception) {
                     logger.error("Kunne ikke mappe ut kabalresponsen riktig. Hendelsen er logget til sikkerlogg")

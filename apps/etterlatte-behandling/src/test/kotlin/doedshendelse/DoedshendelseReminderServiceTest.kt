@@ -92,7 +92,7 @@ class DoedshendelseReminderServiceTest {
                 "vurder konsekvens",
                 Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.AALESUND.enhetNr),
                 OppgaveKilde.BEHANDLING,
-                OppgaveType.VURDER_KONSEKVENS,
+                OppgaveType.MANGLER_SOEKNAD,
                 null,
             )
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP2mndGammel)

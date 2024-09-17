@@ -10,7 +10,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.network.sockets.SocketTimeoutException
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import org.slf4j.LoggerFactory
 
 class DistribusjonKlient(
@@ -20,29 +22,38 @@ class DistribusjonKlient(
     private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
     internal suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
-        client
-            .post("$url/distribuerjournalpost") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.let {
-                when (it.status) {
-                    HttpStatusCode.OK -> it.body()
-                    HttpStatusCode.Conflict -> it.body()
-                    else -> {
-                        logger.error("Fikk statuskode ${it.status} fra dokdist: ${it.bodyAsText()}")
+        try {
+            client
+                .post("$url/distribuerjournalpost") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.let {
+                    when (it.status) {
+                        HttpStatusCode.OK -> it.body()
+                        HttpStatusCode.Conflict -> it.body()
+                        else -> {
+                            logger.error("Fikk statuskode ${it.status} fra dokdist: ${it.bodyAsText()}")
 
-                        throw ForespoerselException(
-                            status = it.status.value,
-                            code = "UKJENT_FEIL_DOKDIST",
-                            detail = "Ukjent respons fra dokumentdistribusjon",
-                            meta =
-                                mapOf(
-                                    "journalpostId" to request.journalpostId,
-                                ),
-                            cause = ResponseException(it, "Ukjent feil fra dokdist"),
-                        )
+                            throw ForespoerselException(
+                                status = it.status.value,
+                                code = "UKJENT_FEIL_DOKDIST",
+                                detail = "Ukjent respons fra dokumentdistribusjon",
+                                meta =
+                                    mapOf(
+                                        "journalpostId" to request.journalpostId,
+                                    ),
+                                cause = ResponseException(it, "Ukjent feil fra dokdist"),
+                            )
+                        }
                     }
                 }
-            }
+        } catch (ex: SocketTimeoutException) {
+            logger.warn("Timeout mot dokdist (journalpostId=${request.journalpostId})", ex)
+
+            throw TimeoutForespoerselException(
+                code = "TIMEOUT_DOKDIST",
+                detail = "Kallet mot distribusjonstjenesten tok for lang tid. Prøv igjen.",
+            )
+        }
 }

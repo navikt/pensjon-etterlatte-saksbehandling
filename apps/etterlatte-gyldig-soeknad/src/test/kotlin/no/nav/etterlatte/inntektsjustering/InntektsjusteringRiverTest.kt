@@ -1,6 +1,5 @@
 package no.nav.etterlatte.inntektsjustering
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -18,6 +17,7 @@ import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -80,7 +80,7 @@ internal class InntektsjusteringRiverTest {
         testRapid().apply { sendTestMessage(melding) }.inspektør
 
         val journalRequest = slot<OpprettJournalpostRequest>()
-        val pdfDataSlot = slot<JsonNode>()
+        val pdfDataSlot = slot<PDFMal>()
 
         coVerify(exactly = 1) {
             behandlingKlientMock.finnEllerOpprettSak("123", SakType.OMSTILLINGSSTOENAD)

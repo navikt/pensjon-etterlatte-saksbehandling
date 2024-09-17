@@ -48,7 +48,6 @@ class VedtakSamordningServiceTest {
                         AvkortingDto(
                             avkortingGrunnlag = emptyList(),
                             avkortetYtelse = emptyList(),
-                            tidligereAvkortetYtelse = emptyList(),
                         ),
                     ),
             )
@@ -179,6 +178,5 @@ class VedtakSamordningServiceTest {
                     sanksjon = null,
                 ),
             ),
-        tidligereAvkortetYtelse = emptyList(),
     )
 }

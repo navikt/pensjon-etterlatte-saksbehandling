@@ -89,7 +89,7 @@ internal class OppgaveDaoTest(
 
         val alleOppgavera =
             oppgaveDao.hentOppgaver(
-                listOf(Enhet.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
                 null,
             )
@@ -97,9 +97,7 @@ internal class OppgaveDaoTest(
 
         val oppgaverKunForSaksbehandler =
             oppgaveDao.hentOppgaver(
-                listOf(
-                    Enhet.AALESUND.enhetNr,
-                ),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
                 saksbehandlerIdent,
             )
@@ -109,7 +107,7 @@ internal class OppgaveDaoTest(
 
         val alleOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enhet.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
                 null,
             )
@@ -141,7 +139,7 @@ internal class OppgaveDaoTest(
             ),
         )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), listOf(Status.NY.name))
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND), listOf(Status.NY.name))
         assertEquals(2, hentOppgaver.size)
     }
 
@@ -170,10 +168,10 @@ internal class OppgaveDaoTest(
             ),
         )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), emptyList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND), emptyList())
         assertEquals(3, hentOppgaver.size)
 
-        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), listOf(VISALLE))
+        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND), listOf(VISALLE))
         assertEquals(3, hentOppgaverVisAlle.size)
     }
 
@@ -203,7 +201,7 @@ internal class OppgaveDaoTest(
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enhet.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentOppgaver.size)
@@ -219,7 +217,7 @@ internal class OppgaveDaoTest(
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enhet.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
             )
         assertEquals(3, hentOppgaver.size)
@@ -289,7 +287,7 @@ internal class OppgaveDaoTest(
 
         val hentetOppgave =
             oppgaveDao.hentOppgaver(
-                listOf(Enhet.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND),
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentetOppgave.size)

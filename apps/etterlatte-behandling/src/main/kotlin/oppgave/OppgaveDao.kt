@@ -38,7 +38,7 @@ interface OppgaveDao {
     fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern>
 
     fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhet>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
@@ -240,7 +240,7 @@ class OppgaveDaoImpl(
         }
 
     override fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhet>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> =
@@ -263,7 +263,7 @@ class OppgaveDaoImpl(
 
                 statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
                 statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setArray(3, createArrayOf("text", enheter.toTypedArray()))
+                statement.setArray(3, createArrayOf("text", enheter.map { it.enhetNr }.toTypedArray()))
                 statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
                 statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
                 statement.setBoolean(6, minOppgavelisteIdentFilter == null)

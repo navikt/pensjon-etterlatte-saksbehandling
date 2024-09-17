@@ -114,7 +114,7 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
 
     override fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhet>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)

@@ -51,7 +51,7 @@ class OppgaveService(
         } else {
             oppgaveDao
                 .hentOppgaver(
-                    bruker.enheter(),
+                    bruker.enheter().map { Enhet.fraEnhetNr(it) },
                     oppgaveStatuser,
                     minOppgavelisteIdentFilter,
                 ).sortedByDescending { it.opprettet }

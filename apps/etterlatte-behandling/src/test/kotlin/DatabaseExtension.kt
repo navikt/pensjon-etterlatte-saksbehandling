@@ -9,6 +9,7 @@ package no.nav.etterlatte
     TRUNCATE oppgave CASCADE;
     TRUNCATE tilbakekrevingsperiode CASCADE;
     TRUNCATE tilbakekreving CASCADE;
+    TRUNCATE vilkaarsvurdering.vilkaarsvurdering CASCADE;
     
     ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
     ALTER SEQUENCE sak_id_seq RESTART WITH 1;

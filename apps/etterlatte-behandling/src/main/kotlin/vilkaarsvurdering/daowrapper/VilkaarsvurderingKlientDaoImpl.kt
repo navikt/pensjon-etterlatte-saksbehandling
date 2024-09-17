@@ -17,8 +17,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface VilkaarsvurderingKlientDao {
@@ -66,7 +64,6 @@ class VilkaarsvurderingKlientDaoImpl(
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         downstreamResourceClient

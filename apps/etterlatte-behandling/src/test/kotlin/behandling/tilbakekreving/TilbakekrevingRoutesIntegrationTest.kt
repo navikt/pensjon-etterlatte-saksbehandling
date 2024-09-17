@@ -381,7 +381,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
             block(client)

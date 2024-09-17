@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 
 data class Saksbehandler(
@@ -24,7 +25,7 @@ data class SaksbehandlerEnhet(
 interface SaksbehandlerService {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler
 
-    fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo>
+    fun hentSaksbehandlereForEnhet(enhet: List<Enhet>): Set<SaksbehandlerInfo>
 
     fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet>
 
@@ -69,7 +70,7 @@ class SaksbehandlerServiceImpl(
         }
     }
 
-    override fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo> =
+    override fun hentSaksbehandlereForEnhet(enhet: List<Enhet>): Set<SaksbehandlerInfo> =
         enhet.flatMap { dao.hentSaksbehandlereForEnhet(it) }.toSet()
 
     override fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet> {

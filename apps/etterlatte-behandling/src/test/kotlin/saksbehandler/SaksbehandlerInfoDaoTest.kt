@@ -77,15 +77,15 @@ internal class SaksbehandlerInfoDaoTest(
             sbaalesund.ident to listOf(SaksbehandlerEnhet(Enhet.AALESUND.enhetNr, Enhet.AALESUND.navn)),
         )
 
-        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.AALESUND.enhetNr)
+        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.AALESUND)
         Assertions.assertEquals(1, saksBehandlereMedAalesundEnhet.size)
         Assertions.assertEquals(sbaalesund.ident, saksBehandlereMedAalesundEnhet[0].ident)
 
-        val porsgrunn = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.PORSGRUNN.enhetNr)
+        val porsgrunn = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.PORSGRUNN)
         Assertions.assertEquals(1, porsgrunn.size)
         Assertions.assertEquals(sbporsgrunn.ident, porsgrunn[0].ident)
 
-        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.STEINKJER.enhetNr)
+        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.STEINKJER)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)
     }
 

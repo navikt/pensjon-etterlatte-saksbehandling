@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -29,7 +30,7 @@ class SaksbehandlerInfoDao(
             }
         }
 
-    fun hentSaksbehandlereForEnhet(enhet: String): List<SaksbehandlerInfo> =
+    fun hentSaksbehandlereForEnhet(enhet: Enhet): List<SaksbehandlerInfo> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -39,7 +40,7 @@ class SaksbehandlerInfoDao(
                         select jsonb_array_elements(sbenhetstabell.enheter::JSONB)->>'enhetsNummer' from saksbehandler_info as sbenhetstabell where sbenhetstabell.id = sinfo.id);
                         """.trimIndent(),
                     )
-                statement.setString(1, enhet)
+                statement.setString(1, enhet.enhetNr)
                 statement.executeQuery().toList {
                     SaksbehandlerInfo(
                         getString("id"),

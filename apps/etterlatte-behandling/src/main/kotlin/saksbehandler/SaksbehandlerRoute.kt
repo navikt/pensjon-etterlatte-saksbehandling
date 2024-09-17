@@ -8,13 +8,16 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
-inline val PipelineContext<*, ApplicationCall>.enheter: List<String>
+inline val PipelineContext<*, ApplicationCall>.enheter: List<Enhet>
     get() =
-        call.request.queryParameters["enheter"]?.split(",") ?: emptyList()
+        call.request.queryParameters["enheter"]
+            ?.split(",")
+            ?.map { Enhet.fraEnhetNr(it) } ?: emptyList()
 
 const val IDENT = "ident"
 

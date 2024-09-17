@@ -59,7 +59,7 @@ class DokarkivKlient(
 
     internal suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        journalfoerendeEnhet: String,
+        journalfoerendeEnhet: no.nav.etterlatte.common.Enhet,
     ): Boolean {
         val response =
             client.patch("$url/$journalpostId/ferdigstill") {
@@ -165,7 +165,7 @@ class DokarkivKlient(
 }
 
 data class FerdigstillJournalpostRequest(
-    val journalfoerendeEnhet: String,
+    val journalfoerendeEnhet: no.nav.etterlatte.common.Enhet,
 )
 
 class KunneIkkeFerdigstilleJournalpost(

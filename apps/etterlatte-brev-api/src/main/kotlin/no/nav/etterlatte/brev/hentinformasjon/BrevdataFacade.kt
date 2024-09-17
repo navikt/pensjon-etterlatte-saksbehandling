@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
@@ -130,7 +131,7 @@ class BrevdataFacade(
                             vedtak.id,
                             vedtak.status,
                             vedtak.type,
-                            sak.enhet,
+                            sak.enhet.let { Enhet.fraEnhetNr(it) },
                             saksbehandlerIdent,
                             attestantIdent,
                             vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
@@ -160,7 +161,7 @@ class BrevdataFacade(
                         vedtak.id,
                         vedtak.status,
                         vedtak.type,
-                        sak.enhet,
+                        sak.enhet.let { Enhet.fraEnhetNr(it) },
                         saksbehandlerIdent,
                         attestantIdent,
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
@@ -178,7 +179,7 @@ class BrevdataFacade(
                         vedtak.id,
                         vedtak.status,
                         vedtak.type,
-                        sak.enhet,
+                        sak.enhet.let { Enhet.fraEnhetNr(it) },
                         saksbehandlerIdent,
                         null,
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),

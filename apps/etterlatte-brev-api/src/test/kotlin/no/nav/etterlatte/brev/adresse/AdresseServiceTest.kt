@@ -9,6 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterEach
@@ -56,7 +57,7 @@ internal class AdresseServiceTest {
         faktiskAvsender.attestant shouldBe "att estant"
 
         coVerify(exactly = 1) {
-            norg2Mock.hentEnhet(avsenderRequest.sakenhet)
+            norg2Mock.hentEnhet(avsenderRequest.sakenhet.enhetNr)
             navansattMock.hentSaksbehandlerInfo(avsenderRequest.saksbehandlerIdent)
             navansattMock.hentSaksbehandlerInfo(avsenderRequest.attestantIdent!!)
         }
@@ -71,11 +72,11 @@ internal class AdresseServiceTest {
             .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
 
         val sakId = Random.nextLong()
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "enhet")
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
 
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet))
+                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet.let { Enhet.fraEnhetNr(it) }))
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
@@ -89,7 +90,7 @@ internal class AdresseServiceTest {
     private fun opprettEnhet() =
         Norg2Enhet(
             navn = "NAV Porsgrunn",
-            enhetNr = ANSVARLIG_ENHET,
+            enhetNr = ANSVARLIG_ENHET.enhetNr,
             kontaktinfo =
                 Norg2Kontaktinfo(
                     telefonnummer = "00 11 22 33",
@@ -113,7 +114,7 @@ internal class AdresseServiceTest {
     ) = SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
 
     companion object {
-        private const val ANSVARLIG_ENHET = "1234"
+        private val ANSVARLIG_ENHET = Enhet.AALESUND
         private const val SAKSBEHANDLER = "Z123456"
         private const val ATTESTANT = "Z00002"
     }

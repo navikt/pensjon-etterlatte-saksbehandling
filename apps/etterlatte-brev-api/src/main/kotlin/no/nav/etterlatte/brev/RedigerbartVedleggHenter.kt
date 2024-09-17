@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,7 +37,7 @@ class RedigerbartVedleggHenter(
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
         sakId: SakId,
         forenkletVedtak: ForenkletVedtak?,
-        enhet: String,
+        enhet: Enhet,
         spraak: Spraak,
     ): List<BrevInnholdVedlegg> {
         val vedlegg =

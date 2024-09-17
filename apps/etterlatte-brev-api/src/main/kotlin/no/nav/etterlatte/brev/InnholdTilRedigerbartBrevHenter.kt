@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -81,7 +82,11 @@ class InnholdTilRedigerbartBrevHenter(
                             brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
-                                    opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                    opprettAvsenderRequest(
+                                        bruker,
+                                        generellBrevData.forenkletVedtak,
+                                        generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
+                                    ),
                                 ),
                             soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                             sakId = sakId,
@@ -103,7 +108,7 @@ class InnholdTilRedigerbartBrevHenter(
                         generellBrevData.personerISak.soekerOgEventuellVerge(),
                         generellBrevData.sak.id,
                         generellBrevData.forenkletVedtak,
-                        generellBrevData.sak.enhet,
+                        generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
                         generellBrevData.spraak,
                     )
                 }
@@ -111,7 +116,7 @@ class InnholdTilRedigerbartBrevHenter(
             OpprettBrevRequest(
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 sakType = generellBrevData.sak.sakType,
-                enhet = generellBrevData.sak.enhet,
+                enhet = generellBrevData.sak.enhet.let { Enhet.fraEnhetNr(it) },
                 personerISak = generellBrevData.personerISak,
                 innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
@@ -124,7 +129,7 @@ class InnholdTilRedigerbartBrevHenter(
 internal data class OpprettBrevRequest(
     val soekerFnr: String,
     val sakType: SakType,
-    val enhet: String,
+    val enhet: Enhet,
     val personerISak: PersonerISak,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,

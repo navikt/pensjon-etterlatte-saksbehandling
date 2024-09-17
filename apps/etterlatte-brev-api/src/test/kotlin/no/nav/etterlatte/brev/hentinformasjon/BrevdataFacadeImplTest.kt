@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -82,7 +83,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
             behandlingService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET.enhetNr)
         coEvery {
             behandlingService.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
@@ -132,7 +133,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
-        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery { behandlingService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET.enhetNr)
         coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagService.hentGrunnlag(any(), SAK_ID, BRUKERTOKEN, any()) } returns opprettGrunnlag()
         coEvery { grunnlagService.hentVergeForSak(any(), any(), any()) } returns null
@@ -195,8 +196,8 @@ internal class BrevdataFacadeImplTest {
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
             every { status } returns VedtakStatus.OPPRETTET
-            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
-            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET.enhetNr, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET.enhetNr, Tidspunkt.now())
             every { innhold } returns
                 mockk<VedtakInnholdDto.VedtakBehandlingDto> {
                     every { behandling.id } returns BEHANDLING_ID
@@ -213,8 +214,8 @@ internal class BrevdataFacadeImplTest {
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
             every { status } returns VedtakStatus.OPPRETTET
-            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
-            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET.enhetNr, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET.enhetNr, Tidspunkt.now())
             every { innhold } returns
                 mockk<VedtakInnholdDto.VedtakTilbakekrevingDto> {
                     every { tilbakekreving } returns vedtakInnhold.toObjectNode()
@@ -287,7 +288,7 @@ internal class BrevdataFacadeImplTest {
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val ENHET = "0000"
+        private val ENHET = Enhet.defaultEnhet
         private const val SAKSBEHANDLER_IDENT = "Z1235"
         private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"

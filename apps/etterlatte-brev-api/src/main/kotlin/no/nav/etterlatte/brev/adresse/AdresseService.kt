@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.mottakerFraAdresse
 import no.nav.etterlatte.brev.model.tomMottaker
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -37,7 +38,7 @@ class AdresseService(
 
             val saksbehandlerEnhet =
                 async {
-                    norg2Klient.hentEnhet(request.sakenhet)
+                    norg2Klient.hentEnhet(request.sakenhet.enhetNr)
                 }
 
             val attestantNavn =
@@ -74,6 +75,6 @@ class AdresseService(
 
 data class AvsenderRequest(
     val saksbehandlerIdent: String,
-    val sakenhet: String,
+    val sakenhet: Enhet,
     val attestantIdent: String? = null,
 )

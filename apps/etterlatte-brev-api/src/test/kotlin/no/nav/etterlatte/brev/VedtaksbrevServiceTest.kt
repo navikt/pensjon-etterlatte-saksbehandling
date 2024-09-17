@@ -51,6 +51,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -743,7 +744,7 @@ internal class VedtaksbrevServiceTest {
                     1,
                     vedtakStatus,
                     vedtakType,
-                    PORSGRUNN,
+                    Enhet.PORSGRUNN,
                     SAKSBEHANDLER.ident(),
                     attestantIdent = null,
                     vedtaksdato = null,

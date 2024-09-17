@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -63,7 +64,7 @@ class Brevoppretter(
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevtype: Brevtype,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
-    ): Pair<Brev, String> =
+    ): Pair<Brev, Enhet> =
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
                 sakId,

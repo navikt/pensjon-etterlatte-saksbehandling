@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -67,7 +68,7 @@ class InformasjonsbrevTest(
                         any(),
                         any(),
                     )
-                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, "enhet1")
+                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, Enhet.defaultEnhet)
             }
         val pdfGenerator =
             mockk<PDFGenerator>().also {

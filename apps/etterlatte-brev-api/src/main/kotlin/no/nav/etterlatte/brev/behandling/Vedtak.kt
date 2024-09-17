@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -14,7 +15,7 @@ data class ForenkletVedtak(
     val id: Long,
     val status: VedtakStatus,
     val type: VedtakType,
-    val sakenhet: String,
+    val sakenhet: Enhet,
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,

@@ -54,21 +54,21 @@ data class BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
                     barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                erGjenoppretting = erGjenoppretting,
+                erMigrertYrkesskade = erMigrertYrkesskade,
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 frivilligSkattetrekk =
                     brevutfall.frivilligSkattetrekk
                         ?: throw InternfeilException(
                             "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
                         ),
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                erGjenoppretting = erGjenoppretting,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

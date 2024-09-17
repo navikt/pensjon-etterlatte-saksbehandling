@@ -61,15 +61,6 @@ data class BarnepensjonRevurdering(
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innhold,
-                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
-                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
-                erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     barnepensjonBeregning(
                         innhold,
@@ -80,16 +71,27 @@ data class BarnepensjonRevurdering(
                         trygdetid,
                         erForeldreloes,
                     ),
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
+                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
+                erMigrertYrkesskade = erMigrertYrkesskade,
+                erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                feilutbetaling = feilutbetaling,
                 frivilligSkattetrekk =
                     brevutfall.frivilligSkattetrekk
                         ?: throw InternfeilException(
                             "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
                         ),
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innhold,
+                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(BarnepensjonInnvilgelse.tidspunktNyttRegelverk) ||
@@ -97,8 +99,6 @@ data class BarnepensjonRevurdering(
                                 BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
                             )
                     },
-                feilutbetaling = feilutbetaling,
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

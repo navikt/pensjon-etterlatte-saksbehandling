@@ -165,7 +165,7 @@ class AvkortingService(
         avkorting: Avkorting,
         behandling: DetaljertBehandling,
         forrigeAvkorting: Avkorting? = null,
-    ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting)
+    ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
     private suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,

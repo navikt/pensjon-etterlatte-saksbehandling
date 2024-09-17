@@ -65,7 +65,7 @@ export const AvkortingInntektForm = ({
         return grunnlagNesteAar
       }
     }
-    if (avkortingGrunnlagFrontend.historikk.length > 0) {
+    if (avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0) {
       const nyligste = avkortingGrunnlagFrontend.historikk[0]
       // Preutfyller uten id
       return {

@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -124,13 +125,13 @@ internal class OpprettJournalfoerOgDistribuer {
             vedtakFattet =
                 VedtakFattet(
                     ansvarligSaksbehandler = "Peder Ås",
-                    ansvarligEnhet = "Lillevik",
+                    ansvarligEnhet = Enhet.defaultEnhet.enhetNr,
                     tidspunkt = Tidspunkt.now(),
                 ),
             attestasjon =
                 Attestasjon(
                     attestant = "Lars Holm",
-                    attesterendeEnhet = "Lillevik",
+                    attesterendeEnhet = Enhet.defaultEnhet.enhetNr,
                     tidspunkt = Tidspunkt.now(),
                 ),
             innhold =

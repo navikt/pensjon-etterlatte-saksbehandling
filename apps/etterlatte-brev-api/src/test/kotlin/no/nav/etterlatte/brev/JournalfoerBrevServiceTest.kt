@@ -206,7 +206,7 @@ class JournalfoerBrevServiceTest {
                 1,
                 VedtakSak("ident", type, forventetBrev.sakId),
                 behandlingId,
-                sak.enhet,
+                sak.enhet.let { Enhet.fraEnhetNr(it) },
                 "EY",
             )
 
@@ -371,7 +371,7 @@ class JournalfoerBrevServiceTest {
             vedtakId = 1L,
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             behandlingId = UUID.randomUUID(),
-            ansvarligEnhet = "1234",
+            ansvarligEnhet = Enhet.defaultEnhet,
             saksbehandler = "EY",
         )
 

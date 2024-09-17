@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -226,7 +227,7 @@ data class TilbakekrevingVedtak(
 
 data class FattetVedtak(
     val saksbehandler: String,
-    val enhet: String,
+    val enhet: Enhet,
     val dato: LocalDate,
 )
 

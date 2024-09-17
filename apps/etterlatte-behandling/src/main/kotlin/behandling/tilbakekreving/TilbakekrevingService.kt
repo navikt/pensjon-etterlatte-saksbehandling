@@ -493,7 +493,7 @@ class TilbakekrevingService(
         fattetVedtak =
             FattetVedtak(
                 saksbehandler = vedtak.fattetAv,
-                enhet = vedtak.enhet.enhetNr,
+                enhet = vedtak.enhet,
                 dato = vedtak.dato,
             ),
         aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),

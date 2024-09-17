@@ -44,7 +44,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
         fattetVedtak =
             FattetVedtak(
                 saksbehandler = "Z123456",
-                enhet = "1234",
+                enhet = Enhet.defaultEnhet,
                 dato = LocalDate.now(),
             ),
         perioder =

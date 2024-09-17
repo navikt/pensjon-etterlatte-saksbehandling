@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.simulering
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.system.os.entiteter.beregningskjema.Beregning
@@ -25,7 +26,7 @@ data class SimulertBeregningsperiode(
     val forfall: LocalDate,
     val feilkonto: Boolean,
     val kodeFaggruppe: String,
-    val enhet: String,
+    val enhet: Enhet,
     val konto: String,
     val behandlingskode: String,
     val beloep: BigDecimal,
@@ -64,7 +65,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
                         utbetalesTilId = stn.utbetalesTilId,
                         feilkonto = stn.isFeilkonto,
                         kodeFaggruppe = this.kodeFaggruppe,
-                        enhet = stn.behandlendeEnhet,
+                        enhet = stn.behandlendeEnhet.let { Enhet.fraEnhetNr(it) },
                         konto = det.kontoStreng,
                         behandlingskode = det.behandlingskode,
                         beloep = det.belop,

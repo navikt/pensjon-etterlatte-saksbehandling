@@ -78,7 +78,6 @@ const BeregningsgrunnlagBarnepensjon = () => {
 
   const harKunEnJuridiskForelder =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
-  console.log(`Render: harKunEnJuridiskForelder = ${harKunEnJuridiskForelder}`)
 
   if (behandling.kommerBarnetTilgode == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>

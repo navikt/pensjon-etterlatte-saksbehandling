@@ -365,7 +365,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
         }
 
@@ -396,7 +396,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     @Test
     fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
         coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns
-            tilbakekrevingsvedtak(saksbehandler, enhet.enhetNr)
+            tilbakekrevingsvedtak(saksbehandler, enhet)
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
         coEvery { brevApiKlient.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
@@ -430,10 +430,10 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
-            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet.enhetNr)
+            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
             brevApiKlient.ferdigstillVedtaksbrev(tilbakekreving.id, sak.id, attestant)
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
         }
@@ -497,7 +497,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
             vedtakKlient.underkjennVedtakTilbakekreving(tilbakekreving.id, attestant)
@@ -529,7 +529,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     private fun tilbakekrevingsvedtak(
         saksbehandler: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 1L,

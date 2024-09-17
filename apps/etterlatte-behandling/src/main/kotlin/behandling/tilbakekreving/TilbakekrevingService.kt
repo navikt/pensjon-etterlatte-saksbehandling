@@ -333,7 +333,7 @@ class TilbakekrevingService(
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
                     brukerTokenInfo = saksbehandler,
-                    enhet = tilbakekreving.sak.enhet,
+                    enhet = tilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
                 )
             }
 
@@ -382,7 +382,7 @@ class TilbakekrevingService(
                     vedtakKlient.attesterVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
                         brukerTokenInfo = saksbehandler,
-                        enhet = tilbakekreving.sak.enhet,
+                        enhet = tilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
                     )
                 }
 
@@ -494,7 +494,7 @@ class TilbakekrevingService(
         fattetVedtak =
             FattetVedtak(
                 saksbehandler = vedtak.fattetAv,
-                enhet = vedtak.enhet,
+                enhet = vedtak.enhet.enhetNr,
                 dato = vedtak.dato,
             ),
         aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),

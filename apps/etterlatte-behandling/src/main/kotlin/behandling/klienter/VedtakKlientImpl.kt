@@ -35,13 +35,13 @@ interface VedtakKlient {
     suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long
 
     suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): TilbakekrevingVedtakLagretDto
 
     suspend fun underkjennVedtakTilbakekreving(
@@ -133,7 +133,7 @@ class VedtakKlientImpl(
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long {
         try {
             logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=$tilbakekrevingId til vedtak")
@@ -165,7 +165,7 @@ class VedtakKlientImpl(
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): TilbakekrevingVedtakLagretDto {
         try {
             logger.info("Sender attesteringsinfo for tilbakekreving=$tilbakekrevingId til vedtak")

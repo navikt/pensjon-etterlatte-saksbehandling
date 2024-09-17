@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -115,7 +116,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = Enhet.defaultEnhet,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak()
         every { repo.fattVedtak(any(), any()) } returns vedtak()
@@ -128,7 +129,7 @@ class VedtakTilbakekrevingServiceTest {
                 dto.tilbakekrevingId,
                 withArg {
                     it.ansvarligSaksbehandler shouldBe saksbehandler.ident
-                    it.ansvarligEnhet shouldBe dto.enhet
+                    it.ansvarligEnhet shouldBe dto.enhet.enhetNr
                 },
             )
         }
@@ -139,7 +140,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = Enhet.defaultEnhet,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
 
@@ -154,7 +155,7 @@ class VedtakTilbakekrevingServiceTest {
         val attesterDto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = Enhet.defaultEnhet,
             )
 
         every { repo.hentVedtak(attesterDto.tilbakekrevingId) } returns
@@ -179,13 +180,13 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = "enhet",
+                        ansvarligEnhet = Enhet.defaultEnhet.enhetNr,
                         tidspunkt = Tidspunkt.now(),
                     ),
                 attestasjon =
                     Attestasjon(
                         attestant = "annen saksbehandler",
-                        attesterendeEnhet = "enhet",
+                        attesterendeEnhet = Enhet.defaultEnhet.enhetNr,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -197,7 +198,7 @@ class VedtakTilbakekrevingServiceTest {
         with(vedtakDto) {
             id shouldBe 1L
             fattetAv shouldBe "saksbehandler"
-            enhet shouldBe "enhet"
+            enhet shouldBe Enhet.PORSGRUNN
             dato shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
         }
         verify { repo.hentVedtak(attesterDto.tilbakekrevingId) }
@@ -206,7 +207,7 @@ class VedtakTilbakekrevingServiceTest {
                 attesterDto.tilbakekrevingId,
                 withArg {
                     it.attestant shouldBe saksbehandler.ident
-                    it.attesterendeEnhet shouldBe attesterDto.enhet
+                    it.attesterendeEnhet shouldBe attesterDto.enhet.enhetNr
                 },
             )
         }
@@ -232,7 +233,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = Enhet.defaultEnhet,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
@@ -247,7 +248,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = Enhet.defaultEnhet,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns
             vedtak(

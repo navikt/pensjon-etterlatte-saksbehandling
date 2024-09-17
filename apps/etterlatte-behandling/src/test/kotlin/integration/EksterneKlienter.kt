@@ -230,18 +230,18 @@ class VedtakKlientTest : VedtakKlient {
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long = 123L
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 123L,
             fattetAv = "saksbehandler",
-            enhet = "enhet",
+            enhet = Enhet.defaultEnhet,
             dato = LocalDate.now(),
         )
 

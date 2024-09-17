@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.vedtak
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -159,12 +160,12 @@ data class TilbakekrevingVedtakDto(
 
 data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val enhet: String,
+    val enhet: Enhet,
 )
 
 data class TilbakekrevingVedtakLagretDto(
     val id: Long,
     val fattetAv: String,
-    val enhet: String,
+    val enhet: Enhet,
     val dato: LocalDate,
 )

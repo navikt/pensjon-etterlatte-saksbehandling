@@ -14,7 +14,7 @@ interface Props {
   tidligsteAvdoede: IPdlPerson
 }
 
-export const BeregningsgrunnlagFlereAvdoede = ({ redigerbar, trygdetider, tidligsteAvdoede }: Props) => {
+export const BeregningsmetoderFlereAvdoede = ({ redigerbar, trygdetider, tidligsteAvdoede }: Props) => {
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
   const kunEnJuridiskForelder =

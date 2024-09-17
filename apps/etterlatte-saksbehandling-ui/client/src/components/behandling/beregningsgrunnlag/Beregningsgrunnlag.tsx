@@ -98,7 +98,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
 export default Beregningsgrunnlag
 
-export const tagForKunEnJuridiskForelder = (behandling: IBehandlingReducer) => {
+export const tagTekstForKunEnJuridiskForelder = (behandling: IBehandlingReducer) => {
   const datoTomKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
 
   return datoTomKunEnJuridiskForelder

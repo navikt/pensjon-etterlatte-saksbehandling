@@ -103,7 +103,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                navn={personopplysninger ? mapNavn(personopplysninger!!.avdoede!![0].id, personopplysninger) : ''}
+                navn={personopplysninger ? mapNavn(personopplysninger.avdoede[0].id, personopplysninger) : ''}
                 behandling={behandling}
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}

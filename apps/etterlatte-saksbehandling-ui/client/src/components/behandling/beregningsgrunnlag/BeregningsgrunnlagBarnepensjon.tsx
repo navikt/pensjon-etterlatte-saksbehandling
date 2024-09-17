@@ -41,7 +41,7 @@ import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { SakType } from '~shared/types/sak'
-import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
+import { BeregningsmetoderFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsmetoderFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 
@@ -164,13 +164,13 @@ const BeregningsgrunnlagBarnepensjon = () => {
               success: (trygdetider) => (
                 <>
                   {trygdetider.length > 1 && (
-                    <BeregningsgrunnlagFlereAvdoede
+                    <BeregningsmetoderFlereAvdoede
                       redigerbar={redigerbar}
                       trygdetider={trygdetider}
                       tidligsteAvdoede={tidligsteAvdoede}
                     />
                   )}
-                  {trygdetider.length == 1 && (
+                  {trygdetider.length === 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}
                       navn={mapNavn(trygdetider[0].ident, personopplysninger)}

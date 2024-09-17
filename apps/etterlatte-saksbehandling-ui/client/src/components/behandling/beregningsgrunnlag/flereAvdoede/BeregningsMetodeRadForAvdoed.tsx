@@ -45,7 +45,7 @@ import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { tagForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 
 interface Props {
   behandling: IBehandlingReducer
@@ -78,7 +78,7 @@ export const BeregningsMetodeRadForAvdoed = ({
     return `${formaterNavn(opplysning)} (${fnr})`
   }
 
-  const defaultFormdata = (
+  const defaultBeregningsMetodeFormData = (
     beregningsmetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   ): BeregningsmetodeForAvdoedForm => ({
     fom: beregningsmetode?.fom ?? new Date(),
@@ -99,7 +99,7 @@ export const BeregningsMetodeRadForAvdoed = ({
   const beregningsmetodeFormdataForAvdoed = (
     beregningsMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   ): BeregningsmetodeForAvdoedForm => {
-    return defaultFormdata(beregningsMetode)
+    return defaultBeregningsMetodeFormData(beregningsMetode)
   }
 
   const finnPeriodisertBeregningsmetodeForAvdoed = (
@@ -128,8 +128,18 @@ export const BeregningsMetodeRadForAvdoed = ({
     )
   }
 
-  const oppdaterBeregningsMetodeForAvdoed = (formdata: BeregningsmetodeForAvdoedForm) => {
-    const nyMetode = formdataToMetode(formdata)
+  const beregningsmetodeFormdataToMetode = (
+    formdata: BeregningsmetodeForAvdoedForm
+  ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> => {
+    return {
+      fom: formdata.fom,
+      tom: formdata.tom,
+      data: formdata.data,
+    }
+  }
+
+  const oppdaterBeregningsMetodeForAvdoed = (beregningsmetodeFormData: BeregningsmetodeForAvdoedForm) => {
+    const nyMetode = beregningsmetodeFormdataToMetode(beregningsmetodeFormData)
 
     lagre({
       ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
@@ -141,7 +151,7 @@ export const BeregningsMetodeRadForAvdoed = ({
       kunEnJuridiskForelder: erEnesteJuridiskeForelder
         ? periodisertBeregningsgrunnlagTilDto({
             fom: nyMetode.fom,
-            tom: formdata.datoTilKunEnJuridiskForelder,
+            tom: beregningsmetodeFormData.datoTilKunEnJuridiskForelder,
             data: {},
           })
         : undefined,
@@ -171,7 +181,7 @@ export const BeregningsMetodeRadForAvdoed = ({
 
   useEffect(() => {
     if (!beregningsMetodeForAvdoed) {
-      reset(defaultFormdata(undefined))
+      reset(defaultBeregningsMetodeFormData(undefined))
     }
   }, [behandling])
 
@@ -298,7 +308,7 @@ export const BeregningsMetodeRadForAvdoed = ({
         {mapNavn(trygdetid.ident)}{' '}
         {erEnesteJuridiskeForelder && (
           <Tag variant="alt1" size="small">
-            {tagForKunEnJuridiskForelder(behandling)}
+            {tagTekstForKunEnJuridiskForelder(behandling)}
           </Tag>
         )}
       </Table.DataCell>
@@ -351,14 +361,4 @@ interface BeregningsmetodeForAvdoedForm {
   tom?: Date
   data: BeregningsmetodeForAvdoed
   datoTilKunEnJuridiskForelder?: Date
-}
-
-const formdataToMetode = (
-  formdata: BeregningsmetodeForAvdoedForm
-): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> => {
-  return {
-    fom: formdata.fom,
-    tom: formdata.tom,
-    data: formdata.data,
-  }
 }

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -66,7 +67,11 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         erForeldreloes = true,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
+                frivilligSkattetrekk =
+                    brevutfall.frivilligSkattetrekk
+                        ?: throw InternfeilException(
+                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
+                        ),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =

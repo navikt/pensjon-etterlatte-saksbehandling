@@ -44,6 +44,7 @@ import { SakType } from '~shared/types/sak'
 import { BeregningsmetoderFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsmetoderFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
@@ -75,6 +76,10 @@ const BeregningsgrunnlagBarnepensjon = () => {
     innloggetSaksbehandler.skriveEnheter
   )
 
+  const harKunEnJuridiskForelder =
+    personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
+  console.log(`Render: harKunEnJuridiskForelder = ${harKunEnJuridiskForelder}`)
+
   if (behandling.kommerBarnetTilgode == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
@@ -102,15 +107,17 @@ const BeregningsgrunnlagBarnepensjon = () => {
     }
   }
 
-  const oppdaterBeregningsgrunnlag = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
+  const oppdaterBeregningsgrunnlag = (beregningsMetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
-      kunEnJuridiskForelder: periodisertBeregningsgrunnlagTilDto({
-        data: {},
-        fom: new Date(behandling.virkningstidspunkt!!.dato),
-        tom: beregningsMetode.datoTilKunEnJuridiskForelder,
-      }),
-      beregningsMetode: beregningsMetode,
+      beregningsMetode: beregningsMetodeForm,
+      kunEnJuridiskForelder: harKunEnJuridiskForelder
+        ? periodisertBeregningsgrunnlagTilDto({
+            data: {},
+            fom: new Date(behandling.virkningstidspunkt!!.dato),
+            tom: beregningsMetodeForm.datoTilKunEnJuridiskForelder,
+          })
+        : undefined,
     }
     lagreBeregningsgrunnlagRequest(
       {

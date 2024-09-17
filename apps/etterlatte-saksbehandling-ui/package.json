@@ -1,8 +1,7 @@
 {
   "license": "MIT",
   "scripts": {
-    "postinstall": "yarn --cwd server install && yarn --cwd client install",
-    "prepare": "cd ../../ && husky install .husky",
+    "prepare": "cd ../../ && husky .husky",
     "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BSD-3-Clause;ISC;BSD-2-Clause;Python-2.0;BlueOak-1.0.0;CC-BY-3.0;CC0-1.0\" --summary"
   },
   "devDependencies": {

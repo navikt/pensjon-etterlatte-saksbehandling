@@ -41,7 +41,6 @@ export const Avkorting = ({
   const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
   const toggleAvkortinGrunnlagNesteAar = useFeatureEnabledMedDefault('oms-aarsinntekt-for-to-aar', false)
-  console.log(toggleAvkortinGrunnlagNesteAar)
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 

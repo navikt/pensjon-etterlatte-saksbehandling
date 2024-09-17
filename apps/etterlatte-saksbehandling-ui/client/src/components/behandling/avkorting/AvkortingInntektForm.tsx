@@ -49,6 +49,12 @@ export const AvkortingInntektForm = ({
     return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.relevanteMaanederInnAar === 12 : false
   }
 
+  /*
+   * Hvis det finnes avkortingGrunnlag med fom samme som virkningstidspunkt fylles den i form med id for å kunne oppdatere.
+   * Hvis det er førstegangsbehandling og avkortingGrunnlag for neste år og det allerede finens avkortingGrunnlag fylles den i form med id for å kunne oppdatere.
+   * Hvis ikke så er det form uten id slik at det opprettes nytt avkortingGrunnlag. Finnes det tidligere avkortingGrunnlag i samme år
+   * vil beløp preutfylles.
+   */
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (avkortingGrunnlagFrontend?.fraVirk != null) {
       return avkortingGrunnlagFrontend.fraVirk
@@ -57,6 +63,17 @@ export const AvkortingInntektForm = ({
       const grunnlagNesteAar = avkortingGrunnlagFrontend?.historikk[0]
       if (grunnlagNesteAar !== undefined) {
         return grunnlagNesteAar
+      }
+    }
+    if (avkortingGrunnlagFrontend.historikk.length > 0) {
+      const nyligste = avkortingGrunnlagFrontend.historikk[0]
+      // Preutfyller uten id
+      return {
+        aarsinntekt: nyligste.aarsinntekt,
+        fratrekkInnAar: nyligste.fratrekkInnAar,
+        inntektUtland: nyligste.inntektUtland,
+        fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
+        spesifikasjon: '',
       }
     }
     return {

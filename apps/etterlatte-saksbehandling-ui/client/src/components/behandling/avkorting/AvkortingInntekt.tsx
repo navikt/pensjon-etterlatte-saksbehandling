@@ -45,7 +45,7 @@ export const AvkortingInntekt = ({
   }
 
   const knappTekst = () => {
-    if (avkortingGrunnlagFrontend?.fraVirk !== undefined) {
+    if (avkortingGrunnlagFrontend?.fraVirk != null) {
       return 'Rediger'
     }
     return erInnevaerendeAar ? 'Legg til' : 'Legg til for neste år'
@@ -137,9 +137,12 @@ export const AvkortingInntekt = ({
             </Table>
           </InntektAvkortingTabell>
         )}
-      {erInnevaerendeAar && avkortingGrunnlagFrontend && avkortingGrunnlagFrontend.historikk.length > 0 && (
-        <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      )}
+      {erInnevaerendeAar &&
+        avkortingGrunnlagFrontend &&
+        ((avkortingGrunnlagFrontend.fraVirk == null && avkortingGrunnlagFrontend.historikk.length > 1) ||
+          (avkortingGrunnlagFrontend.fraVirk != null && avkortingGrunnlagFrontend.historikk.length > 0)) && (
+          <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+        )}
       {erRedigerbar && visForm && (
         <AvkortingInntektForm
           behandling={behandling}

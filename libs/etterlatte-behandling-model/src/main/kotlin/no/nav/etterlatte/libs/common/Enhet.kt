@@ -1,7 +1,9 @@
 package no.nav.etterlatte.common
 
+import com.fasterxml.jackson.annotation.JsonValue
+
 enum class Enhet(
-    val enhetNr: String,
+    @JsonValue val enhetNr: String,
     val navn: String,
     val vanligSaksbehandlerEnhet: Boolean,
     val erSaksbehandlendeEnhet: Boolean,

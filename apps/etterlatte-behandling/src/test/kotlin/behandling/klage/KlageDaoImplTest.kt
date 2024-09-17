@@ -55,7 +55,7 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `lagreKlage oppdaterer status, innkommende klage og formkrav hvis klagen allerede eksisterer`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enhet.STEINKJER)
         val foersteMottattDato = LocalDate.now()
         val klage = Klage.ny(sak, InnkommendeKlage(foersteMottattDato, "", ""))
         klageDao.lagreKlage(klage)
@@ -103,8 +103,8 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enhet.STEINKJER)
+        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = Enhet.PORSGRUNN)
         val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
@@ -122,9 +122,9 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `hentKlager henter alle klager på en sak`() {
-        val sak1 = sakRepo.opprettSak(fnr = "Tom", type = SakType.BARNEPENSJON, enhet = "1337")
-        val sak2 = sakRepo.opprettSak(fnr = "Mary", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
-        val sak3 = sakRepo.opprettSak(fnr = "Jill", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val sak1 = sakRepo.opprettSak(fnr = "Tom", type = SakType.BARNEPENSJON, enhet = Enhet.STEINKJER)
+        val sak2 = sakRepo.opprettSak(fnr = "Mary", type = SakType.OMSTILLINGSSTOENAD, enhet = Enhet.AALESUND)
+        val sak3 = sakRepo.opprettSak(fnr = "Jill", type = SakType.OMSTILLINGSSTOENAD, enhet = Enhet.AALESUND)
         lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-1", null))
         lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-3", null))
         lagreKlage(sak2, InnkommendeKlage(LocalDate.now(), "JP-2", null))
@@ -137,7 +137,7 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `Lagre initielt utfall og hent det ut`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enhet.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enhet.AALESUND)
         val klage = Klage.ny(sak, null).copy(status = KlageStatus.FORMKRAV_OPPFYLT)
 
         klageDao.lagreKlage(klage)

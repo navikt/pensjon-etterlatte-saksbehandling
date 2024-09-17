@@ -168,7 +168,7 @@ internal class VilkaarsvurderingIntegrationTest(
     private fun opprettSakOgBehandling(saksbehandler: SaksbehandlerMedEnheterOgRoller): UUID {
         nyKontekstMedBrukerOgDatabase(saksbehandler, applicationContext.dataSource)
         val sakid =
-            inTransaction { applicationContext.sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id }
+            inTransaction { applicationContext.sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet).id }
         val opprettBehandlingMedPersongalleri =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

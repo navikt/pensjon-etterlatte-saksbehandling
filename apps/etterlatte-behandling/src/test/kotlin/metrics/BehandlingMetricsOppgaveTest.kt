@@ -117,16 +117,16 @@ internal class BehandlingMetricsOppgaveTest(
     }
 
     private fun opprettOppgaver() {
-        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.NY, "saksbehandler1"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.UNDER_BEHANDLING, "saksbehandler2"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FEILREGISTRERT, "saksbehandler1"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FERDIGSTILT, "saksbehandler3"))
         }
     }

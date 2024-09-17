@@ -68,7 +68,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 }
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
-            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN.enhetNr))
+            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN))
 
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
@@ -125,7 +125,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
             Assertions.assertEquals(Enhet.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
 
-            val steinkjer = ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
+            val steinkjer = ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER)
             coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
             client
                 .post("egenansatt") {
@@ -155,7 +155,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertEquals(sak.id, sakUtenSkjermingIgjen.id)
-            Assertions.assertEquals(steinkjer.enhetNr, sakUtenSkjermingIgjen.enhet)
+            Assertions.assertEquals(steinkjer.enhetNr.enhetNr, sakUtenSkjermingIgjen.enhet)
         }
     }
 
@@ -171,7 +171,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
-            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN.enhetNr))
+            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN))
 
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))

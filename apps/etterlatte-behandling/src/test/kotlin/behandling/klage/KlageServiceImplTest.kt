@@ -95,7 +95,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private val saksbehandler = simpleSaksbehandler(ident = saksbehandlerIdent)
     private val attestant = simpleAttestant(ident = attestantIdent)
     private val klagerFnr = GrunnlagTestData().gjenlevende.foedselsnummer.value
-    private val enhet = "1337"
+    private val enhet = Enhet.defaultEnhet
 
     companion object {
         @RegisterExtension

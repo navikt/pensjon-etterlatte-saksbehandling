@@ -90,7 +90,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(),
@@ -116,7 +116,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -164,7 +164,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til tilbakekreving med tilbakekrevingId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -220,7 +220,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet).id
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -260,7 +260,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.EGNE_ANSATTE.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.EGNE_ANSATTE).id
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),

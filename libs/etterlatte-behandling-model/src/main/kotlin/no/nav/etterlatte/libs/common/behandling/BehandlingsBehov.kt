@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -21,7 +22,7 @@ data class NyBehandlingRequest(
     val spraak: String,
     val kilde: Vedtaksloesning?,
     val pesysId: Long?,
-    val enhet: String?,
+    val enhet: Enhet?,
     val foreldreloes: Boolean = false,
     val ufoere: Boolean = false,
 ) {

@@ -27,6 +27,7 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -38,6 +39,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -135,7 +137,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enhet.PORSGRUNN))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
@@ -153,16 +155,18 @@ internal class SakRoutesTest {
         every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         withTestApplication { client ->
-            val response =
+            try {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4805"))
+                    setBody(EnhetRequest(enhet = Enhet.fraEnhetNr("-1234")))
                 }
-            assertEquals(400, response.status.value)
-            verify(exactly = 0) { sakService.finnSak(any()) }
-            verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
-            verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
+                fail()
+            } catch (e: UgyldigForespoerselException) {
+                verify(exactly = 0) { sakService.finnSak(any()) }
+                verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
+                verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
+            }
         }
     }
 
@@ -178,7 +182,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enhet.PORSGRUNN))
                 }
             assertEquals(400, response.status.value)
         }

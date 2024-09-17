@@ -38,7 +38,7 @@ class EgenAnsattService(
                 SakMedEnhet(
                     it.id,
                     if (skjermetHendelse.skjermet) {
-                        Enhet.EGNE_ANSATTE.enhetNr
+                        Enhet.EGNE_ANSATTE
                     } else {
                         brukerService
                             .finnEnhetForPersonOgTema(

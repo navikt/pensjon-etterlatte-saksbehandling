@@ -636,7 +636,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         saker.forEach {
             every { sakService.finnSak(it.id) } returns it
@@ -684,7 +684,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         every { sakService.finnSak(any()) } returns null
 
@@ -727,7 +727,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         saker.forEach {
             every { sakService.finnSak(it.id) } returns it

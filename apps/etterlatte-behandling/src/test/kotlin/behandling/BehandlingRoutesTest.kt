@@ -90,7 +90,7 @@ internal class BehandlingRoutesTest {
 
         val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
 
-        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND.enhetNr
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND
         val behandlingId = UUID.randomUUID()
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
             mockk<Behandling> {
@@ -134,7 +134,7 @@ internal class BehandlingRoutesTest {
 
         val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
 
-        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND.enhetNr
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
             mockk<Behandling> {
                 every { id } returns behandlingId

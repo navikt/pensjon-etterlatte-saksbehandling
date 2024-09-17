@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -44,7 +45,7 @@ class SakSkrivDao(
     fun opprettSak(
         fnr: String,
         type: SakType,
-        enhet: String,
+        enhet: Enhet,
     ): Sak =
         sakendringerDao.opprettSak("opprettSak") { connection ->
             with(connection) {
@@ -54,7 +55,7 @@ class SakSkrivDao(
                     )
                 statement.setString(1, type.name)
                 statement.setString(2, fnr)
-                statement.setString(3, enhet)
+                statement.setString(3, enhet.enhetNr)
                 statement.setTidspunkt(4, Tidspunkt.now())
                 requireNotNull(
                     statement
@@ -76,7 +77,7 @@ class SakSkrivDao(
                         """.trimIndent(),
                     )
                 saker.forEach { sak ->
-                    statement.setString(1, sak.enhet)
+                    statement.setString(1, sak.enhet.enhetNr)
                     statement.setLong(2, sak.id)
                     statement.executeUpdate()
                 }

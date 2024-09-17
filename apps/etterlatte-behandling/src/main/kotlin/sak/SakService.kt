@@ -53,13 +53,13 @@ interface SakService {
     fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String? = null,
+        overstyrendeEnhet: Enhet? = null,
     ): Sak
 
     fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String
+    ): Enhet
 
     fun finnSak(
         ident: String,
@@ -198,7 +198,7 @@ class SakServiceImpl(
     override fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhet?,
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
@@ -238,7 +238,7 @@ class SakServiceImpl(
     private fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhet?,
     ): Sak {
         var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
@@ -270,7 +270,7 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG_UTLAND)),
                     )
                 }
             }
@@ -278,7 +278,7 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG)),
                     )
                 }
             }
@@ -343,20 +343,20 @@ class SakServiceImpl(
     override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String {
+    ): Enhet {
         val sak = finnSakForPerson(fnr, type)
 
         return when (sak) {
             null -> sjekkEnhetFraNorg(fnr, type, null)
-            else -> sak.enhet
+            else -> sak.enhet.let { Enhet.fraEnhetNr(it) }
         }
     }
 
     private fun sjekkEnhetFraNorg(
         fnr: String,
         type: SakType,
-        enhet: String?,
-    ): String {
+        enhet: Enhet?,
+    ): Enhet {
         val enhetFraNorg = brukerService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
         if (enhet != null && enhet != enhetFraNorg) {
             logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
@@ -379,7 +379,7 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             dao.oppdaterEnheterPaaSaker(
-                listOf(SakMedEnhet(sakId, Enhet.EGNE_ANSATTE.enhetNr)),
+                listOf(SakMedEnhet(sakId, Enhet.EGNE_ANSATTE)),
             )
         }
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)

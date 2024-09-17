@@ -77,7 +77,7 @@ class BrukerServiceImpl(
             tilknytning.ukjent -> {
                 ArbeidsFordelingEnhet(
                     Enhet.defaultEnhet.navn,
-                    Enhet.defaultEnhet.enhetNr,
+                    Enhet.defaultEnhet,
                 )
             }
 
@@ -85,12 +85,12 @@ class BrukerServiceImpl(
                 if (tilknytning.land!! == "NO") {
                     ArbeidsFordelingEnhet(
                         Enhet.defaultEnhet.navn,
-                        Enhet.defaultEnhet.enhetNr,
+                        Enhet.defaultEnhet,
                     )
                 } else {
                     ArbeidsFordelingEnhet(
                         Enhet.UTLAND.navn,
-                        Enhet.UTLAND.enhetNr,
+                        Enhet.UTLAND,
                     )
                 }
             }
@@ -100,7 +100,7 @@ class BrukerServiceImpl(
                     null -> {
                         ArbeidsFordelingEnhet(
                             Enhet.UTLAND.navn,
-                            Enhet.UTLAND.enhetNr,
+                            Enhet.UTLAND,
                         )
                     }
                     else -> {

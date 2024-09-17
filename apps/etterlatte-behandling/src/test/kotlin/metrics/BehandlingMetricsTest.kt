@@ -110,7 +110,7 @@ internal class BehandlingMetricsTest(
     }
 
     private fun opprettBehandlinger() {
-        sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -127,7 +127,7 @@ internal class BehandlingMetricsTest(
             )
         }
 
-        sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -137,7 +137,7 @@ internal class BehandlingMetricsTest(
         }
 
         // Automatisk migrert fra pesys
-        sakRepo.opprettSak("111", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("111", SakType.BARNEPENSJON, Enhet.defaultEnhet).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -155,7 +155,7 @@ internal class BehandlingMetricsTest(
         }
 
         // Manuelt migrert fra pesys
-        sakRepo.opprettSak("222", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("222", SakType.BARNEPENSJON, Enhet.defaultEnhet).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,

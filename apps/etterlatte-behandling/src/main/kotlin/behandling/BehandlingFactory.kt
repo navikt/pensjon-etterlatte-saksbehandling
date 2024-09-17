@@ -78,14 +78,11 @@ class BehandlingFactory(
         val sak = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(soeker, request.sakType) }
 
         if (
-            sak.enhet != request.enhet &&
+            sak.enhet != request.enhet?.enhetNr &&
             sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr &&
             sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr
         ) {
             request.enhet?.let {
-                if (Enhet.entries.none { enhet -> enhet.enhetNr == it }) {
-                    throw UgyldigEnhetException()
-                }
                 inTransaction {
                     sakService.oppdaterEnhetForSaker(
                         listOf(

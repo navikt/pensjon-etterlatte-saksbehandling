@@ -34,7 +34,7 @@ class OmregningServiceTest(
                 SakendringerDao(connection) {
                     mockk()
                 },
-            ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhet.STEINKJER.enhetNr)
+            ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhet.STEINKJER)
 
         val service =
             OmregningService(

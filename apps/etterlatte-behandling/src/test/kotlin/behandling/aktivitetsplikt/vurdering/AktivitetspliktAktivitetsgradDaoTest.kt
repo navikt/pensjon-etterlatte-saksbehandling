@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -56,7 +57,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
     fun `skal lagre ned og hente opp en ny aktivitetsgrad for oppgave`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val aktivitetsgrad =
             LagreAktivitetspliktAktivitetsgrad(
@@ -80,7 +81,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
 
     @Test
     fun `Skal hente alle lagrede aktivitetsgrader på siste behandling hvis oppgave er eldre`() {
-        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
         val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().minus(2, ChronoUnit.HOURS))
         val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val kilde3 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().minus(3, ChronoUnit.DAYS))
@@ -178,7 +179,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
     @Test
     fun `skal lagre ned og hente opp en ny aktivitetsgrad for behandling`() {
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
         val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -210,7 +211,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         @Test
         fun `Oppdatere aktivitetsgrad`() {
             val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
             val opprettBehandling =
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -249,7 +250,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
     @Nested
     inner class SlettAktivitetsgrad {
         private val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
         private val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -296,7 +297,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
 
     @Nested
     inner class KopierAktivitetsgrad {
-        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet)
 
         val lagreAktivitetsgrad =
             LagreAktivitetspliktAktivitetsgrad(

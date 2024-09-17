@@ -71,7 +71,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa behandling`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
 
         val behandling: Foerstegangsbehandling =
             opprettBehandling(
@@ -89,7 +89,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa klage`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet)
 
         val klage =
             Klage
@@ -107,7 +107,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa tilbakekreving`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet)
 
         val tilbakekreving =
             tilbakekreving(sak1)

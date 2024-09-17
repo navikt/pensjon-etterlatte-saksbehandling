@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -58,7 +59,7 @@ interface OppgaveDao {
 
     fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhet,
     )
 
     fun fjernSaksbehandler(oppgaveId: UUID)
@@ -406,7 +407,7 @@ class OppgaveDaoImpl(
 
     override fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhet,
     ) {
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -419,7 +420,7 @@ class OppgaveDaoImpl(
                         """.trimIndent(),
                     )
 
-                statement.setString(1, enhet)
+                statement.setString(1, enhet.enhetNr)
                 statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()

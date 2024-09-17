@@ -68,9 +68,9 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Skal tilbakestille oppgaver under attestering`() {
-        val sakEn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
-        val sakTo = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
-        val sakTre = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
+        val sakEn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND)
+        val sakTo = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND)
+        val sakTre = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND)
 
         val sakerTilRegulering = listOf(sakEn.id, sakTo.id)
 
@@ -87,7 +87,7 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Setter forrige saksbehandler ved tilbakestilling`() {
-        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND)
         val oppgaveAttestert = lagOppgave(sakId = sak.id, status = Status.UNDER_BEHANDLING)
         oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(oppgaveAttestert.id, "", Status.ATTESTERING)
         oppgaveDao.settNySaksbehandler(oppgaveAttestert.id, "Ikke Ole")

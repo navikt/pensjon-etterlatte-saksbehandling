@@ -222,10 +222,10 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
         sakType: SakType,
-    ): String =
+    ): Enhet =
         when (gradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enhet.STRENGT_FORTROLIG.enhetNr
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enhet.STRENGT_FORTROLIG
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enhet.STRENGT_FORTROLIG_UTLAND
             AdressebeskyttelseGradering.FORTROLIG -> {
                 brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }

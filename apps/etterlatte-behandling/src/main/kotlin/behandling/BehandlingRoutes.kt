@@ -70,7 +70,7 @@ internal fun Route.behandlingRoutes(
 
         val gjeldendeEnhet = inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
 
-        kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
+        kunSkrivetilgang(enhetNr = gjeldendeEnhet.enhetNr) {
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
             call.respondText(behandling.id.toString())
         }

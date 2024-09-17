@@ -119,7 +119,7 @@ internal class EgenAnsattServiceTest(
         every { pdlTjenesterKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest("EYB", "0301"))
-        } returns listOf(ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr))
+        } returns listOf(ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER))
 
         every { featureToggleService.isEnabled(any(), any()) } returns false
     }
@@ -134,9 +134,9 @@ internal class EgenAnsattServiceTest(
         every { user.enheter() } returns listOf(Enhet.EGNE_ANSATTE.enhetNr)
 
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE)
         val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

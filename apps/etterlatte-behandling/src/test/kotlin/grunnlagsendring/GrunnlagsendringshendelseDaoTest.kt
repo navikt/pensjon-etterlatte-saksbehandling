@@ -75,7 +75,7 @@ internal class GrunnlagsendringshendelseDaoTest(
     @Test
     fun `skal lagre grunnlagsendringshendelse i database og hente ut hendelsen fra databasen`() {
         val uuid = UUID.randomUUID()
-        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val grunnlagsinformasjon = grunnlagsinformasjonDoedshendelse()
         val hendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -108,7 +108,7 @@ internal class GrunnlagsendringshendelseDaoTest(
         val uuidDoed = UUID.randomUUID()
         val uuidUtflytting = UUID.randomUUID()
         val uuidForelderBarn = UUID.randomUUID()
-        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val grunnlagsinfoDoed = grunnlagsinformasjonDoedshendelse()
         val samsvarDoed = samsvarDoedsdatoer(grunnlagsinfoDoed.doedsdato, grunnlagsinfoDoed.doedsdato)
         val grunnlagsinfoUtflytting = grunnlagsinformasjonUtflyttingshendelse()
@@ -156,7 +156,7 @@ internal class GrunnlagsendringshendelseDaoTest(
     @Test
     fun `skal kunne sette status historisk på en hendelse som er tilknyttet en revurdering`() {
         val hendelseId = UUID.randomUUID()
-        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
         val opprettBehandling =
             opprettBehandling(
@@ -188,7 +188,7 @@ internal class GrunnlagsendringshendelseDaoTest(
 
     @Test
     fun `hentGrunnlagsendringshendelserMedStatuserISak henter kun statuser som er angitt`() {
-        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         listOf(
             with(grunnlagsinformasjonDoedshendelse()) {
                 grunnlagsendringshendelseMedSamsvar(
@@ -260,7 +260,7 @@ internal class GrunnlagsendringshendelseDaoTest(
 
     @Test
     fun `oppdaterGrunnlagsendringStatus skal oppdatere grunnlagsendringshendelser`() {
-        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val id1 = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 8, 1)
 
@@ -295,7 +295,7 @@ internal class GrunnlagsendringshendelseDaoTest(
     @Test
     fun `settBehandlingIdForTattMedIBehandling skal sette referanse til behandling`() {
         val hendelseId = UUID.randomUUID()
-        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
         val opprettBehandling =
             opprettBehandling(
@@ -324,8 +324,8 @@ internal class GrunnlagsendringshendelseDaoTest(
 
     @Test
     fun `kobleGrunnlagsendringshendelserFraBehandlingId skal oppdatere riktige grunnlagsendringshendelser`() {
-        val sak1 = sakRepo.opprettSak("1", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
-        val sak2 = sakRepo.opprettSak("2", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("1", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
+        val sak2 = sakRepo.opprettSak("2", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
 
         val behandling1 =
             OpprettBehandling(
@@ -400,8 +400,8 @@ internal class GrunnlagsendringshendelseDaoTest(
     @Suppress("ktlint:standard:max-line-length")
     @Test
     fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status SJEKKET_AV_JOBB`() {
-        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
-        val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
+        val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON, Enhet.defaultEnhet).id
         val id1 = UUID.randomUUID()
         val id2 = UUID.randomUUID()
         val id3 = UUID.randomUUID()

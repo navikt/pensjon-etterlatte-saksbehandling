@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.common.Enhet
 
 data class ArbeidsFordelingRequest(
     val tema: String,
@@ -10,5 +11,5 @@ data class ArbeidsFordelingRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ArbeidsFordelingEnhet(
     val navn: String,
-    val enhetNr: String,
+    val enhetNr: Enhet,
 )

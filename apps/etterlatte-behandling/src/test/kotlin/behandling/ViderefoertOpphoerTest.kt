@@ -84,7 +84,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enhet.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -109,7 +109,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enhet.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -152,7 +152,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enhet.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -212,7 +212,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enhet.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)

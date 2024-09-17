@@ -1,6 +1,7 @@
 package no.nav.etterlatte.common
 
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 
 enum class Enhet(
     @JsonValue val enhetNr: String,
@@ -34,6 +35,11 @@ enum class Enhet(
 
         fun kjenteEnheter() = entries.map { it.enhetNr }.toSet()
 
-        fun fraEnhetNr(enhetNr: String): Enhet = entries.first { it.enhetNr == enhetNr }
+        fun fraEnhetNr(enhetNr: String): Enhet =
+            entries.firstOrNull { it.enhetNr == enhetNr }
+                ?: throw UgyldigForespoerselException(
+                    code = "ENHET IKKE GYLDIG",
+                    detail = "enhet $enhetNr er ikke i listen over gyldige enheter",
+                )
     }
 }

@@ -33,5 +33,7 @@ enum class Enhet(
         fun saksbehandlendeEnheter() = entries.filter { it.erSaksbehandlendeEnhet }.map { it.enhetNr }.toSet()
 
         fun kjenteEnheter() = entries.map { it.enhetNr }.toSet()
+
+        fun fraEnhetNr(enhetNr: String): Enhet = entries.first { it.enhetNr == enhetNr }
     }
 }

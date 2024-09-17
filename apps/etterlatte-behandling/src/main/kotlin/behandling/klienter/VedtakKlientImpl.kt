@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,7 +29,7 @@ interface VedtakKlient {
     suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long
 
     suspend fun fattVedtakTilbakekreving(
@@ -95,7 +96,7 @@ class VedtakKlientImpl(
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long {
         try {
             logger.info(

@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -259,7 +260,7 @@ class TilbakekrevingService(
                     vedtakKlient.lagreVedtakTilbakekreving(
                         tilbakekrevingBehandling = lagretTilbakekreving,
                         brukerTokenInfo = saksbehandler,
-                        enhet = lagretTilbakekreving.sak.enhet,
+                        enhet = lagretTilbakekreving.sak.enhet.let { Enhet.fraEnhetNr(it) },
                     )
 
                 logger.info("Lagret vedtak med vedtakId $vedtakId for tilbakekreving $tilbakekrevingId")

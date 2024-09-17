@@ -224,7 +224,7 @@ class VedtakKlientTest : VedtakKlient {
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhet,
     ): Long = 123L
 
     override suspend fun fattVedtakTilbakekreving(

@@ -84,7 +84,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private val saksbehandler = simpleSaksbehandler()
     private val attestant = simpleAttestant()
     private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
-    private val enhet = "123456"
+    private val enhet = Enhet.defaultEnhet
 
     @BeforeEach
     fun setUp() {
@@ -133,7 +133,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og koble mot eksisterende oppgave`() {
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
 
         val oppgaveFraBehandlingMedFeilutbetaling =
             inTransaction {
@@ -183,7 +183,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og lage ny oppgave hvis eksisterende ikke finnes`() {
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val behandlingId = UUID.randomUUID()
 
         val oppgaverFraReferanse =
@@ -211,7 +211,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og sette paa vent uten tildelt saksbehandler`() {
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
 
         service.endreTilbakekrevingOppgaveStatus(sak.id, paaVent = true)
@@ -227,7 +227,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal ikke kunne opprette tilbakekrevingsbehandling dersom det allerede finnes en`() {
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
 
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         tilbakekreving.status shouldBe TilbakekrevingStatus.OPPRETTET
@@ -243,7 +243,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
@@ -287,7 +287,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal oppdatere kravgrunnlag og perioder i tilbakekrevingsbehandling`() {
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
 
         coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
@@ -343,7 +343,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
@@ -365,7 +365,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
         }
 
@@ -395,13 +395,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns tilbakekrevingsvedtak(saksbehandler, enhet)
+        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns
+            tilbakekrevingsvedtak(saksbehandler, enhet.enhetNr)
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
         coEvery { brevApiKlient.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
@@ -429,10 +430,10 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
-            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
+            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet.enhetNr)
             brevApiKlient.ferdigstillVedtaksbrev(tilbakekreving.id, sak.id, attestant)
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
         }
@@ -467,7 +468,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
-        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet.enhetNr) }
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
@@ -496,7 +497,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         coVerify {
             vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet.enhetNr)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
             vedtakKlient.underkjennVedtakTilbakekreving(tilbakekreving.id, attestant)

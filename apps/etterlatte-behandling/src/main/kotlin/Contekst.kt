@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
@@ -66,25 +66,25 @@ class SaksbehandlerMedEnheterOgRoller(
 
     override fun name(): String = identifiedBy.hentTokenClaimsForIssuerName(Issuer.AZURE)!!.getClaimAsString(Claims.NAVident)
 
-    private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
+    private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enhet.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
     fun kanSeOppgaveBenken() =
         saksbehandlersEnheter().any { enhetNr ->
-            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }?.harTilgangTilOppgavebenken ?: false
+            Enhet.entries.firstOrNull { it.enhetNr == enhetNr }?.harTilgangTilOppgavebenken ?: false
         }
 
     fun enheterMedSkrivetilgang() = enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter())
 
     private fun enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter: Set<String>) =
-        saksbehandlersEnheter.filter { Enheter.saksbehandlendeEnheter().contains(it) }
+        saksbehandlersEnheter.filter { Enhet.saksbehandlendeEnheter().contains(it) }
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
     fun enheterMedLesetilgang(saksbehandlersEnheter: Set<String>) =
         if (harKjentEnhet(saksbehandlersEnheter)) {
             enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter).let { egenSkriveEnheter ->
                 when (egenSkriveEnheter.size) {
-                    0 -> Enheter.enheterForVanligSaksbehandlere()
-                    else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+                    0 -> Enhet.enheterForVanligSaksbehandlere()
+                    else -> Enhet.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
                 }
             }
         } else {

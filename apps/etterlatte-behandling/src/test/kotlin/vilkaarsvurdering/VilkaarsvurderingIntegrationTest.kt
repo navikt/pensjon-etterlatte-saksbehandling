@@ -22,7 +22,7 @@ import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -168,7 +168,7 @@ internal class VilkaarsvurderingIntegrationTest(
     private fun opprettSakOgBehandling(saksbehandler: SaksbehandlerMedEnheterOgRoller): UUID {
         nyKontekstMedBrukerOgDatabase(saksbehandler, applicationContext.dataSource)
         val sakid =
-            inTransaction { applicationContext.sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id }
+            inTransaction { applicationContext.sakSkrivDao.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id }
         val opprettBehandlingMedPersongalleri =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

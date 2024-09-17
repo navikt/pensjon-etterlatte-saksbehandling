@@ -16,7 +16,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -74,7 +74,7 @@ internal class BehandlingInfoRoutesTest {
 
         every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
-                SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
+                SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn),
             )
     }
 

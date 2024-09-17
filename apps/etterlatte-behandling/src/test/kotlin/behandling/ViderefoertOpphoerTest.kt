@@ -12,7 +12,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -84,7 +84,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enheter.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet.enhetNr,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -109,7 +109,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enheter.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet.enhetNr,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -152,7 +152,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enheter.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet.enhetNr,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
@@ -212,7 +212,7 @@ class ViderefoertOpphoerTest(
             SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() }).opprettSak(
                 SOEKER_FOEDSELSNUMMER.value,
                 SakType.BARNEPENSJON,
-                Enheter.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet.enhetNr,
             )
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)

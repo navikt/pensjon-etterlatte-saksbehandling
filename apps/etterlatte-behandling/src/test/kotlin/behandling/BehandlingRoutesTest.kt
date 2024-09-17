@@ -22,7 +22,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -88,9 +88,9 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
 
-        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND.enhetNr
         val behandlingId = UUID.randomUUID()
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
             mockk<Behandling> {
@@ -132,9 +132,9 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
 
-        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enhet.AALESUND.enhetNr
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
             mockk<Behandling> {
                 every { id } returns behandlingId
@@ -280,7 +280,7 @@ internal class BehandlingRoutesTest {
     ) {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
-                every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { enheterMedSkrivetilgang() } returns listOf(Enhet.defaultEnhet.enhetNr)
                 every { name() } returns this::class.java.simpleName
             }
 

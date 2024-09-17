@@ -17,7 +17,7 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -68,7 +68,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 }
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
-            } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN.enhetNr))
 
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
@@ -92,7 +92,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         it.body()
                     }
             Assertions.assertNotNull(sak.id)
-            Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
+            Assertions.assertEquals(Enhet.PORSGRUNN.enhetNr, sak.enhet)
 
             client
                 .post("egenansatt") {
@@ -123,9 +123,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
-            Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
+            Assertions.assertEquals(Enhet.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
 
-            val steinkjer = ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+            val steinkjer = ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
             coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
             client
                 .post("egenansatt") {
@@ -171,7 +171,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
-            } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+            } returns listOf(ArbeidsFordelingEnhet(Enhet.PORSGRUNN.navn, Enhet.PORSGRUNN.enhetNr))
 
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
@@ -195,7 +195,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         it.body()
                     }
             Assertions.assertNotNull(sak.id)
-            Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
+            Assertions.assertEquals(Enhet.PORSGRUNN.enhetNr, sak.enhet)
 
             val behandlingId =
                 client
@@ -262,7 +262,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
-            Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
+            Assertions.assertEquals(Enhet.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
         }
     }
 }

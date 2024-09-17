@@ -13,7 +13,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -52,9 +52,9 @@ class GosysOppgaveServiceImplTest {
                 no.nav.etterlatte.saksbehandler.Saksbehandler(
                     sbident,
                     "Ola Nordmann",
-                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    listOf(Enhet.PORSGRUNN.enhetNr),
                     false,
-                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    listOf(Enhet.PORSGRUNN.enhetNr),
                     true,
                 )
         }
@@ -93,7 +93,7 @@ class GosysOppgaveServiceImplTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
+        every { saksbehandler.enheter() } returns Enhet.enheterForVanligSaksbehandlere()
 
         nyKontekstMedBruker(saksbehandler)
 
@@ -109,7 +109,7 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
+        every { saksbehandler.enheter() } returns Enhet.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
 
         nyKontekstMedBruker(saksbehandler)
@@ -129,7 +129,7 @@ class GosysOppgaveServiceImplTest {
                             oppgavetype = "",
                             journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now(),
-                            tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
+                            tildeltEnhetsnr = Enhet.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
                             beskrivelse = "Beskrivelse av oppgaven",
                             status = "NY",
@@ -144,7 +144,7 @@ class GosysOppgaveServiceImplTest {
                             oppgavetype = "",
                             journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
-                            tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
+                            tildeltEnhetsnr = Enhet.PORSGRUNN.enhetNr,
                             tilordnetRessurs = "A123456",
                             beskrivelse = "Beskrivelse av oppgave med id 2",
                             status = "TIL_ATTESTERING",
@@ -159,7 +159,7 @@ class GosysOppgaveServiceImplTest {
                             oppgavetype = "",
                             journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
-                            tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
+                            tildeltEnhetsnr = Enhet.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
                             beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
                             status = "NY",
@@ -203,7 +203,7 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal kun returnere vikafossen enhetsnummer relaterte oppgaver for ad-rolle strengt fortrolige`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.enheter() } returns listOf(Enhet.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.name() } returns "ident"
 
         nyKontekstMedBruker(saksbehandler)
@@ -215,13 +215,13 @@ class GosysOppgaveServiceImplTest {
                 null,
                 any(),
                 any(),
-                Enheter.STRENGT_FORTROLIG.enhetNr,
+                Enhet.STRENGT_FORTROLIG.enhetNr,
                 null,
                 brukerTokenInfo,
             )
         } returns
             enhetsfiltrererGosysOppgaver(
-                Enheter.STRENGT_FORTROLIG.enhetNr,
+                Enhet.STRENGT_FORTROLIG.enhetNr,
                 listOf(
                     GosysApiOppgave(
                         id = 1,
@@ -231,7 +231,7 @@ class GosysOppgaveServiceImplTest {
                         oppgavetype = "",
                         journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now(),
-                        tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
+                        tildeltEnhetsnr = Enhet.PORSGRUNN.enhetNr,
                         tilordnetRessurs = null,
                         beskrivelse = "Beskrivelse av oppgaven",
                         status = "NY",
@@ -246,7 +246,7 @@ class GosysOppgaveServiceImplTest {
                         oppgavetype = "",
                         journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
-                        tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
+                        tildeltEnhetsnr = Enhet.PORSGRUNN.enhetNr,
                         tilordnetRessurs = "A123456",
                         beskrivelse = "Beskrivelse av oppgave med id 2",
                         status = "TIL_ATTESTERING",
@@ -261,7 +261,7 @@ class GosysOppgaveServiceImplTest {
                         oppgavetype = "",
                         journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
-                        tildeltEnhetsnr = Enheter.STRENGT_FORTROLIG.enhetNr,
+                        tildeltEnhetsnr = Enhet.STRENGT_FORTROLIG.enhetNr,
                         tilordnetRessurs = null,
                         beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
                         status = "NY",
@@ -281,7 +281,7 @@ class GosysOppgaveServiceImplTest {
                 null,
                 any(),
                 any(),
-                Enheter.STRENGT_FORTROLIG.enhetNr,
+                Enhet.STRENGT_FORTROLIG.enhetNr,
                 null,
                 brukerTokenInfo,
             )
@@ -391,7 +391,7 @@ class GosysOppgaveServiceImplTest {
         oppgavetype = oppgavetype,
         journalpostId = journalpostId,
         opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
-        tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
+        tildeltEnhetsnr = Enhet.STEINKJER.enhetNr,
         tilordnetRessurs = "A012345",
         beskrivelse = "Beskrivelse for oppgaven",
         status = "OPPRETTET",

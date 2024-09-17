@@ -27,7 +27,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.TestProdusent
@@ -101,7 +101,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { name() } returns "User"
-                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
                 every { saksbehandlerMedRoller } returns
                     mockk<SaksbehandlerMedRoller> {
                         every { harRolleAttestant() } returns true

@@ -18,7 +18,7 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -119,7 +119,7 @@ internal class EgenAnsattServiceTest(
         every { pdlTjenesterKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest("EYB", "0301"))
-        } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
+        } returns listOf(ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr))
 
         every { featureToggleService.isEnabled(any(), any()) } returns false
     }
@@ -131,12 +131,12 @@ internal class EgenAnsattServiceTest(
 
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
-        every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.EGNE_ANSATTE.enhetNr)
 
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE.enhetNr)
         val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enhet.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -89,7 +89,7 @@ class BehandlingFactoryTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
-            Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.AALESUND.enhetNr),
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null,
@@ -131,7 +131,7 @@ class BehandlingFactoryTest {
     @BeforeEach
     fun before() {
         every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         nyKontekstMedBruker(user)
     }
@@ -164,7 +164,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -193,7 +193,7 @@ class BehandlingFactoryTest {
                 listOf("Gjenlevende"),
             )
 
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
         every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
@@ -261,7 +261,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -347,7 +347,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -551,7 +551,7 @@ class BehandlingFactoryTest {
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -617,7 +617,7 @@ class BehandlingFactoryTest {
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -669,7 +669,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -746,7 +746,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -781,7 +781,7 @@ class BehandlingFactoryTest {
             revurdering(
                 sakId = 1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
             )
 
         val revurderingsBehandling =
@@ -824,7 +824,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -901,7 +901,7 @@ class BehandlingFactoryTest {
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
                 sistEndret = datoNaa,
@@ -937,7 +937,7 @@ class BehandlingFactoryTest {
             revurdering(
                 sakId = 1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
             )
 
         val revurderingsBehandling =
@@ -981,7 +981,7 @@ class BehandlingFactoryTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enhet.defaultEnhet.enhetNr)
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -1062,7 +1062,7 @@ class BehandlingFactoryTest {
     private fun sak(
         sakId: SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
-        enhet: String = Enheter.defaultEnhet.enhetNr,
+        enhet: String = Enhet.defaultEnhet.enhetNr,
     ): Sak =
         Sak(
             ident = "Soeker",

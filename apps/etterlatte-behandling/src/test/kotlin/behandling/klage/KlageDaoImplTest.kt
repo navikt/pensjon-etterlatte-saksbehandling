@@ -6,7 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -137,7 +137,7 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `Lagre initielt utfall og hent det ut`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enhet.AALESUND.enhetNr)
         val klage = Klage.ny(sak, null).copy(status = KlageStatus.FORMKRAV_OPPFYLT)
 
         klageDao.lagreKlage(klage)

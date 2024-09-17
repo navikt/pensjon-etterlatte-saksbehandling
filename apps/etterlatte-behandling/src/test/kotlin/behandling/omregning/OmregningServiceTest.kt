@@ -5,7 +5,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -34,7 +34,7 @@ class OmregningServiceTest(
                 SakendringerDao(connection) {
                     mockk()
                 },
-            ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
+            ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhet.STEINKJER.enhetNr)
 
         val service =
             OmregningService(

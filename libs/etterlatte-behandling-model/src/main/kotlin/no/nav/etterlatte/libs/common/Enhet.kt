@@ -1,6 +1,6 @@
 package no.nav.etterlatte.common
 
-enum class Enheter(
+enum class Enhet(
     val enhetNr: String,
     val navn: String,
     val vanligSaksbehandlerEnhet: Boolean,

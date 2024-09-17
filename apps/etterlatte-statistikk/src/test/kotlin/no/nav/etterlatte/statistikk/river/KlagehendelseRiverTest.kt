@@ -3,7 +3,7 @@ package no.nav.etterlatte.statistikk.river
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -50,7 +50,7 @@ internal class KlagehendelseRiverTest {
                                 UUID.randomUUID(),
                                 Klage(
                                     UUID.randomUUID(),
-                                    Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr),
+                                    Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.defaultEnhet.enhetNr),
                                     Tidspunkt.now(),
                                     KlageStatus.OPPRETTET,
                                     kabalResultat = null,

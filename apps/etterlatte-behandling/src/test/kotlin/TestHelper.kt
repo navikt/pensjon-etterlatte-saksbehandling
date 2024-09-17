@@ -17,7 +17,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.DatabaseContext
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -71,7 +71,7 @@ import javax.sql.DataSource
 
 private val user =
     mockk<SaksbehandlerMedEnheterOgRoller> {
-        every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { enheterMedSkrivetilgang() } returns listOf(Enhet.defaultEnhet.enhetNr)
     }
 
 fun mockedSakTilgangDao(): SakTilgangDao =
@@ -80,22 +80,22 @@ fun mockedSakTilgangDao(): SakTilgangDao =
             hentSakMedGraderingOgSkjerming(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaBehandling(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaOppgave(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaKlage(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.defaultEnhet.enhetNr)
     }
 
 fun lagContext(
@@ -175,7 +175,7 @@ fun mockSaksbehandler(
     harRolleAttestant: Boolean = false,
     harRolleStrengtFortrolig: Boolean = false,
     harRolleEgenAnsatt: Boolean = false,
-    enheter: List<String> = listOf(Enheter.defaultEnhet.enhetNr),
+    enheter: List<String> = listOf(Enhet.defaultEnhet.enhetNr),
 ): SaksbehandlerMedEnheterOgRoller =
     mockk<SaksbehandlerMedEnheterOgRoller> {
         every { saksbehandlerMedRoller } returns
@@ -229,7 +229,7 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: String = Enhet.defaultEnhet.enhetNr,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -268,7 +268,7 @@ fun revurdering(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: String = Enhet.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,

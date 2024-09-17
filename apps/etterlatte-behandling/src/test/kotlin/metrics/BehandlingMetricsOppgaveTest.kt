@@ -7,7 +7,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -79,8 +79,8 @@ internal class BehandlingMetricsOppgaveTest(
         fun `Metrikker for oppgaver enhet`() {
             val tag = "enhet"
             val metrikker = metrikker("etterlatte oppgaver")
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr))
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enhet.AALESUND.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enhet.PORSGRUNN.enhetNr))
         }
 
         @Test
@@ -110,23 +110,23 @@ internal class BehandlingMetricsOppgaveTest(
         fun `Metrikker for oppgaver totalt og per enhet`() {
             val metrikker = metrikker("etterlatte_oppgaver_saksbehandler")
             val tag = "enhet"
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr))
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enhet.AALESUND.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enhet.PORSGRUNN.enhetNr))
             assertEquals(3, hentVerdi(metrikker, tag, "Totalt"))
         }
     }
 
     private fun opprettOppgaver() {
-        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.NY, "saksbehandler1"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.UNDER_BEHANDLING, "saksbehandler2"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FEILREGISTRERT, "saksbehandler1"))
         }
-        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enhet.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FERDIGSTILT, "saksbehandler3"))
         }
     }

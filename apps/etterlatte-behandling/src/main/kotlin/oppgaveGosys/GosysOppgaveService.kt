@@ -6,7 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -135,7 +135,7 @@ class GosysOppgaveServiceImpl(
 
         val enheterSomSkalSoekesEtter =
             if (harRolleStrengtFortrolig) {
-                listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+                listOf(Enhet.STRENGT_FORTROLIG.enhetNr)
             } else {
                 hentEnheterForSaksbehandler(enhetsnr, brukerTokenInfo.ident())
             }

@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -71,21 +71,21 @@ internal class SaksbehandlerInfoDaoTest(
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
-            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.navn)),
+            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enhet.PORSGRUNN.enhetNr, Enhet.PORSGRUNN.navn)),
         )
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
-            sbaalesund.ident to listOf(SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.navn)),
+            sbaalesund.ident to listOf(SaksbehandlerEnhet(Enhet.AALESUND.enhetNr, Enhet.AALESUND.navn)),
         )
 
-        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.AALESUND.enhetNr)
+        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.AALESUND.enhetNr)
         Assertions.assertEquals(1, saksBehandlereMedAalesundEnhet.size)
         Assertions.assertEquals(sbaalesund.ident, saksBehandlereMedAalesundEnhet[0].ident)
 
-        val porsgrunn = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.PORSGRUNN.enhetNr)
+        val porsgrunn = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.PORSGRUNN.enhetNr)
         Assertions.assertEquals(1, porsgrunn.size)
         Assertions.assertEquals(sbporsgrunn.ident, porsgrunn[0].ident)
 
-        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
+        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enhet.STEINKJER.enhetNr)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)
     }
 
@@ -96,13 +96,13 @@ internal class SaksbehandlerInfoDaoTest(
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
-            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.navn)),
+            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enhet.PORSGRUNN.enhetNr, Enhet.PORSGRUNN.navn)),
         )
 
         val enheterAalesundSaksbehandler =
             listOf(
-                SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.navn),
-                SaksbehandlerEnhet(Enheter.AALESUND_UTLAND.enhetNr, Enheter.AALESUND_UTLAND.navn),
+                SaksbehandlerEnhet(Enhet.AALESUND.enhetNr, Enhet.AALESUND.navn),
+                SaksbehandlerEnhet(Enhet.AALESUND_UTLAND.enhetNr, Enhet.AALESUND_UTLAND.navn),
             )
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to enheterAalesundSaksbehandler)
 

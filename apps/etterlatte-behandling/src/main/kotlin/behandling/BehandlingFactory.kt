@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -79,11 +79,11 @@ class BehandlingFactory(
 
         if (
             sak.enhet != request.enhet &&
-            sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr &&
-            sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+            sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr &&
+            sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr
         ) {
             request.enhet?.let {
-                if (Enheter.entries.none { enhet -> enhet.enhetNr == it }) {
+                if (Enhet.entries.none { enhet -> enhet.enhetNr == it }) {
                     throw UgyldigEnhetException()
                 }
                 inTransaction {

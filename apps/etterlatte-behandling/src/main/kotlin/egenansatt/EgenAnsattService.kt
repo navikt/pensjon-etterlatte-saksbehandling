@@ -1,7 +1,7 @@
 package no.nav.etterlatte.egenansatt
 
 import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -38,7 +38,7 @@ class EgenAnsattService(
                 SakMedEnhet(
                     it.id,
                     if (skjermetHendelse.skjermet) {
-                        Enheter.EGNE_ANSATTE.enhetNr
+                        Enhet.EGNE_ANSATTE.enhetNr
                     } else {
                         brukerService
                             .finnEnhetForPersonOgTema(

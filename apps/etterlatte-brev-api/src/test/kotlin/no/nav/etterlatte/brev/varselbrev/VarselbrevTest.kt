@@ -22,7 +22,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -47,7 +47,7 @@ class VarselbrevTest(
 
     private val brevRepository = BrevRepository(datasource)
 
-    val sak = Sak("ident1", SakType.BARNEPENSJON, 1L, Enheter.STEINKJER.enhetNr)
+    val sak = Sak("ident1", SakType.BARNEPENSJON, 1L, Enhet.STEINKJER.enhetNr)
 
     @BeforeEach
     fun start() {

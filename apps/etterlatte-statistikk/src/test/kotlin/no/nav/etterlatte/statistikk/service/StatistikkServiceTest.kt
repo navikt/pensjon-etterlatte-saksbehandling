@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -207,7 +207,7 @@ class StatistikkServiceTest {
                 id = sakId,
                 adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
                 erSkjermet = false,
-                enhetNr = Enheter.defaultEnhet.enhetNr,
+                enhetNr = Enhet.defaultEnhet.enhetNr,
             )
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             StatistikkBehandling(
@@ -216,7 +216,7 @@ class StatistikkServiceTest {
                     Sak(
                         id = sakId,
                         sakType = SakType.BARNEPENSJON,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                         ident = "ident",
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -233,7 +233,7 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
                 kilde = Vedtaksloesning.GJENNY,
                 utlandstilknytning = null,
                 sistEndret = LocalDateTime.now(),
@@ -310,7 +310,7 @@ class StatistikkServiceTest {
                 sakId,
                 adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
                 erSkjermet = false,
-                enhetNr = Enheter.defaultEnhet.enhetNr,
+                enhetNr = Enhet.defaultEnhet.enhetNr,
             )
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
@@ -498,7 +498,7 @@ fun behandling(
     avdoed: List<String>? = null,
 ) = StatistikkBehandling(
     id = id,
-    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr),
+    sak = Sak(soeker, sakType, sakId, Enhet.defaultEnhet.enhetNr),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -516,7 +516,7 @@ fun behandling(
             "begrunnelse",
             saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
         ),
-    enhet = Enheter.defaultEnhet.enhetNr,
+    enhet = Enhet.defaultEnhet.enhetNr,
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,

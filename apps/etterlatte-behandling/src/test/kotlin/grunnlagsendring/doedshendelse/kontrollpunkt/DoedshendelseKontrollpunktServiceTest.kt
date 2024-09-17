@@ -12,7 +12,7 @@ import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.foerstegangsbehandling
@@ -143,7 +143,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -185,7 +185,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -261,7 +261,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         val sakIdd = 1L
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,

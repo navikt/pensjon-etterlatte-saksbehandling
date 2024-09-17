@@ -11,7 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -43,11 +43,11 @@ internal class RevurderingRoutesTest {
             }
         every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
-                SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
+                SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.name),
             )
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjerming(any())
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.defaultEnhet.enhetNr)
     }
 
     @AfterAll

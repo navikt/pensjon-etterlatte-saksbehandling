@@ -29,7 +29,7 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -78,7 +78,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         startServer()
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
@@ -95,7 +95,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak =
             inTransaction {
-                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
             }
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
@@ -637,7 +637,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         val sak =
             inTransaction {
-                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
             }
 
         assertThrows<RevurderingManglerIverksattBehandling> {

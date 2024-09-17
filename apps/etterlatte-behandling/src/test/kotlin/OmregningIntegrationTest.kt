@@ -10,7 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -48,7 +48,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {
             val sak =
-                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
 
             val behandling =
                 applicationContext.behandlingFactory

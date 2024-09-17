@@ -4,7 +4,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -50,11 +50,11 @@ class BrukerServiceImpl(
                         if (tilknytning.land!! == "NO") {
                             Navkontor(navn = "Ukjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
                         } else {
-                            Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
+                            Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enhet.UTLAND.enhetNr)
                         }
                     }
                     geografiskTilknytning == null -> {
-                        Navkontor(navn = "Utlandssak - ingen geografisk område", enhetNr = Enheter.UTLAND.enhetNr)
+                        Navkontor(navn = "Utlandssak - ingen geografisk område", enhetNr = Enhet.UTLAND.enhetNr)
                     }
                     else -> {
                         norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
@@ -76,21 +76,21 @@ class BrukerServiceImpl(
         return when {
             tilknytning.ukjent -> {
                 ArbeidsFordelingEnhet(
-                    Enheter.defaultEnhet.navn,
-                    Enheter.defaultEnhet.enhetNr,
+                    Enhet.defaultEnhet.navn,
+                    Enhet.defaultEnhet.enhetNr,
                 )
             }
 
             tilknytning.harBareLandTilknytning() -> {
                 if (tilknytning.land!! == "NO") {
                     ArbeidsFordelingEnhet(
-                        Enheter.defaultEnhet.navn,
-                        Enheter.defaultEnhet.enhetNr,
+                        Enhet.defaultEnhet.navn,
+                        Enhet.defaultEnhet.enhetNr,
                     )
                 } else {
                     ArbeidsFordelingEnhet(
-                        Enheter.UTLAND.navn,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.UTLAND.navn,
+                        Enhet.UTLAND.enhetNr,
                     )
                 }
             }
@@ -99,8 +99,8 @@ class BrukerServiceImpl(
                 when (geografiskTilknytning) {
                     null -> {
                         ArbeidsFordelingEnhet(
-                            Enheter.UTLAND.navn,
-                            Enheter.UTLAND.enhetNr,
+                            Enhet.UTLAND.navn,
+                            Enhet.UTLAND.enhetNr,
                         )
                     }
                     else -> {

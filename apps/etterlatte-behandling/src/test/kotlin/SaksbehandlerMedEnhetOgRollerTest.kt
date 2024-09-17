@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
@@ -18,7 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
-class SaksbehandlerMedEnheterOgRollerTest {
+class SaksbehandlerMedEnhetOgRollerTest {
     @ParameterizedTest(
         name = "{0}",
     )
@@ -65,40 +65,40 @@ class SaksbehandlerMedEnheterOgRollerTest {
             listOf(
                 Arguments.of(
                     "Vanlig saksbehandler",
-                    listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name)),
-                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    listOf(SaksbehandlerEnhet(Enhet.PORSGRUNN.enhetNr, Enhet.PORSGRUNN.name)),
+                    listOf(Enhet.PORSGRUNN.enhetNr),
                     listOf(
-                        Enheter.AALESUND.enhetNr,
-                        Enheter.STEINKJER.enhetNr,
-                        Enheter.AALESUND_UTLAND.enhetNr,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.AALESUND.enhetNr,
+                        Enhet.STEINKJER.enhetNr,
+                        Enhet.AALESUND_UTLAND.enhetNr,
+                        Enhet.UTLAND.enhetNr,
                     ),
                     true,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med utland",
                     listOf(
-                        SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.name),
-                        SaksbehandlerEnhet(Enheter.AALESUND_UTLAND.enhetNr, Enheter.AALESUND_UTLAND.name),
+                        SaksbehandlerEnhet(Enhet.AALESUND.enhetNr, Enhet.AALESUND.name),
+                        SaksbehandlerEnhet(Enhet.AALESUND_UTLAND.enhetNr, Enhet.AALESUND_UTLAND.name),
                     ),
-                    listOf(Enheter.AALESUND.enhetNr, Enheter.AALESUND_UTLAND.enhetNr),
+                    listOf(Enhet.AALESUND.enhetNr, Enhet.AALESUND_UTLAND.enhetNr),
                     listOf(
-                        Enheter.PORSGRUNN.enhetNr,
-                        Enheter.STEINKJER.enhetNr,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.PORSGRUNN.enhetNr,
+                        Enhet.STEINKJER.enhetNr,
+                        Enhet.UTLAND.enhetNr,
                     ),
                     true,
                 ),
                 Arguments.of(
                     "Kontaktsenter",
-                    listOf(SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn)),
+                    listOf(SaksbehandlerEnhet(Enhet.OEST_VIKEN.enhetNr, Enhet.OEST_VIKEN.navn)),
                     emptyList<String>(),
                     listOf(
-                        Enheter.AALESUND.enhetNr,
-                        Enheter.STEINKJER.enhetNr,
-                        Enheter.PORSGRUNN.enhetNr,
-                        Enheter.AALESUND_UTLAND.enhetNr,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.AALESUND.enhetNr,
+                        Enhet.STEINKJER.enhetNr,
+                        Enhet.PORSGRUNN.enhetNr,
+                        Enhet.AALESUND_UTLAND.enhetNr,
+                        Enhet.UTLAND.enhetNr,
                     ),
                     false,
                 ),
@@ -112,31 +112,31 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 Arguments.of(
                     "Vanlig saksbehandler med andre enheter enn bare de etterlatte kjenner til",
                     listOf(
-                        SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name),
+                        SaksbehandlerEnhet(Enhet.PORSGRUNN.enhetNr, Enhet.PORSGRUNN.name),
                         SaksbehandlerEnhet("12345", "En annen enhet"),
                     ),
-                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    listOf(Enhet.PORSGRUNN.enhetNr),
                     listOf(
-                        Enheter.AALESUND.enhetNr,
-                        Enheter.STEINKJER.enhetNr,
-                        Enheter.AALESUND_UTLAND.enhetNr,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.AALESUND.enhetNr,
+                        Enhet.STEINKJER.enhetNr,
+                        Enhet.AALESUND_UTLAND.enhetNr,
+                        Enhet.UTLAND.enhetNr,
                     ),
                     true,
                 ),
                 Arguments.of(
                     "Kontaktsenter med andre enheter enn bare de etterlatte kjenner til",
                     listOf(
-                        SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn),
+                        SaksbehandlerEnhet(Enhet.OEST_VIKEN.enhetNr, Enhet.OEST_VIKEN.navn),
                         SaksbehandlerEnhet("12345", "En annen enhet"),
                     ),
                     emptyList<String>(),
                     listOf(
-                        Enheter.AALESUND.enhetNr,
-                        Enheter.STEINKJER.enhetNr,
-                        Enheter.PORSGRUNN.enhetNr,
-                        Enheter.AALESUND_UTLAND.enhetNr,
-                        Enheter.UTLAND.enhetNr,
+                        Enhet.AALESUND.enhetNr,
+                        Enhet.STEINKJER.enhetNr,
+                        Enhet.PORSGRUNN.enhetNr,
+                        Enhet.AALESUND_UTLAND.enhetNr,
+                        Enhet.UTLAND.enhetNr,
                     ),
                     false,
                 ),

@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -71,7 +71,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa behandling`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
 
         val behandling: Foerstegangsbehandling =
             opprettBehandling(
@@ -89,7 +89,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa klage`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
 
         val klage =
             Klage
@@ -107,7 +107,7 @@ internal class VedtaksbehandlingDaoTest(
 
     @Test
     fun `erBehandlingRedigerbar skal sjekke status paa tilbakekreving`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
 
         val tilbakekreving =
             tilbakekreving(sak1)

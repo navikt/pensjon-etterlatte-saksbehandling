@@ -23,7 +23,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
@@ -485,7 +485,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
 
 class Norg2KlientTest : Norg2Klient {
     override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
-        listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
+        listOf(ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr))
 
     override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", "4808")
 }
@@ -527,8 +527,8 @@ class KrrklientTest : KrrKlient {
 class AxsysKlientTest : AxsysKlient {
     override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
         listOf(
-            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
+            SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn),
+            SaksbehandlerEnhet(Enhet.STEINKJER.enhetNr, Enhet.STEINKJER.navn),
         )
 
     override val serviceName: String

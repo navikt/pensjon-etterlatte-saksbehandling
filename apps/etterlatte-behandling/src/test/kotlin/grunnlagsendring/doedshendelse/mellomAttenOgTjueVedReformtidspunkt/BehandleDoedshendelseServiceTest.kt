@@ -9,7 +9,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -52,7 +52,7 @@ class BehandleDoedshendelseServiceTest {
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,
                     id = 1L,
-                    enhet = Enheter.AALESUND.enhetNr,
+                    enhet = Enhet.AALESUND.enhetNr,
                 )
         }
     private val doedshendelserProducer =

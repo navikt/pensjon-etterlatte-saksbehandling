@@ -28,7 +28,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -107,7 +107,7 @@ class JournalfoerBrevServiceTest {
                 any(),
                 any(),
             )
-        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enheter.UTLAND.enhetNr)
+        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enhet.UTLAND.enhetNr)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -175,7 +175,7 @@ class JournalfoerBrevServiceTest {
         val behandlingId = UUID.randomUUID()
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
 
-        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enhet.defaultEnhet.enhetNr)
 
         val forventetBrev =
             Brev(
@@ -289,7 +289,7 @@ class JournalfoerBrevServiceTest {
             )
         coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
-        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enhet.PORSGRUNN.enhetNr)
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)

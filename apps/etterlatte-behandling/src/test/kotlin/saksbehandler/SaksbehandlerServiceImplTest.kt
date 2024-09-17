@@ -14,7 +14,7 @@ import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -56,14 +56,14 @@ class SaksbehandlerServiceImplTest(
     @Test
     fun `Skal legge inn enheter og navn for ny ukjent saksbehandler`() {
         val nyidentSaksbehandler = "S12345"
-        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        val porsgrunn = SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
         coEvery {
             navansattKlient.hentSaksbehanderNavn(
                 nyidentSaksbehandler,
             )
         } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
@@ -71,7 +71,7 @@ class SaksbehandlerServiceImplTest(
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheterMedLesetilgang(any()) } returns listOf(Enhet.defaultEnhet.enhetNr)
         every { user.enheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
@@ -84,14 +84,14 @@ class SaksbehandlerServiceImplTest(
     @Test
     fun `Skal ikke legge inn enheter og navn for kjent saksbehandler`() {
         val nyidentSaksbehandler = "S12345"
-        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        val porsgrunn = SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
         coEvery {
             navansattKlient.hentSaksbehanderNavn(
                 nyidentSaksbehandler,
             )
         } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
@@ -99,7 +99,7 @@ class SaksbehandlerServiceImplTest(
                 mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheterMedLesetilgang(any()) } returns listOf(Enhet.defaultEnhet.enhetNr)
         every { user.enheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
@@ -114,7 +114,7 @@ class SaksbehandlerServiceImplTest(
     @Test
     fun `Enheter finnes ikke i database skal hente fra axsys`() {
         val ident = "ident"
-        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        val porsgrunn = SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(porsgrunn)
@@ -140,7 +140,7 @@ class SaksbehandlerServiceImplTest(
     @Test
     fun `Skal hente fra db, har navneinfo`() {
         val ident = "ident"
-        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        val porsgrunn = SaksbehandlerEnhet(Enhet.defaultEnhet.enhetNr, Enhet.defaultEnhet.navn)
         val enheterForSaksbehandlerIDb = Pair(ident, listOf(porsgrunn))
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))

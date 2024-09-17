@@ -21,7 +21,7 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -216,7 +216,7 @@ internal class SakRoutesTest {
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
-        every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheterMedSkrivetilgang() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         testApplication {
             val client =

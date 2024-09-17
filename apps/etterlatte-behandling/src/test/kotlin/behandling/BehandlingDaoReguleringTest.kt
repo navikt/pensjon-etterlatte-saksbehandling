@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -61,7 +61,7 @@ internal class BehandlingDaoReguleringTest(
     )
     @MethodSource("hentMigrerbareStatuses")
     fun `behandlinger som er beregnet maa beregnes paa nytt`(status: BehandlingStatus) {
-        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
         val opprettBehandling =
             opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id, status = status)
         behandlingRepo.opprettBehandling(opprettBehandling)
@@ -80,8 +80,8 @@ internal class BehandlingDaoReguleringTest(
 
     @Test
     fun `Kun behandlinger som er sendt inn skal tilbakestilles`() {
-        val relevantSak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        val ikkeRelevantSak = sakRepo.opprettSak("321", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val relevantSak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
+        val ikkeRelevantSak = sakRepo.opprettSak("321", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
         val sakOgBehandling: List<OpprettBehandling> =
             listOf(relevantSak, ikkeRelevantSak).map {
                 val opprettBehandling =
@@ -117,7 +117,7 @@ internal class BehandlingDaoReguleringTest(
     @ParameterizedTest(name = "behandling med status {0} skal fortsette aa ha samme status ved migrering")
     @MethodSource("hentStatuser")
     fun `irrelevante behandlinger skal ikke endre status ved migrering`(status: BehandlingStatus) {
-        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
         val opprettBehandling =
             opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id, status = status)
         behandlingRepo.opprettBehandling(opprettBehandling)

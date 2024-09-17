@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inTransaction
@@ -224,8 +224,8 @@ class GrunnlagsendringshendelseService(
         sakType: SakType,
     ): String =
         when (gradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enhet.STRENGT_FORTROLIG.enhetNr
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
                 brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }

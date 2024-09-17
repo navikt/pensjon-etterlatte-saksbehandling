@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
@@ -268,17 +268,17 @@ class SakServiceImpl(
     ) {
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
-                if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                if (sak.enhet != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr)),
                     )
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                if (sak.enhet != Enhet.STRENGT_FORTROLIG.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enhet.STRENGT_FORTROLIG.enhetNr)),
                     )
                 }
             }
@@ -295,7 +295,7 @@ class SakServiceImpl(
     }
 
     private fun SakMedGraderingOgSkjermet.gradertEnhetsnummerErIkkeAlene() {
-        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr &&
+        if (this.enhetNr == Enhet.STRENGT_FORTROLIG.enhetNr &&
             this.adressebeskyttelseGradering !in
             listOf(
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
@@ -310,14 +310,14 @@ class SakServiceImpl(
     private fun SakMedGraderingOgSkjermet.graderingerStemmer() {
         when (this.adressebeskyttelseGradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
-                if (this.enhetNr != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                if (this.enhetNr != Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
 
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                if (this.enhetNr != Enhet.STRENGT_FORTROLIG.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
@@ -329,12 +329,12 @@ class SakServiceImpl(
 
     private fun SakMedGraderingOgSkjermet.egenAnsattStemmer() {
         if (this.erSkjermet == true) {
-            if (this.enhetNr != Enheter.EGNE_ANSATTE.enhetNr) {
+            if (this.enhetNr != Enhet.EGNE_ANSATTE.enhetNr) {
                 logger.error("Sak har fått satt feil enhetsnummer basert på skjermingen, se sikkerlogg.")
                 sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering skjerming(egen ansatt)")
             }
         }
-        if (this.enhetNr == Enheter.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
+        if (this.enhetNr == Enhet.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
             logger.error("Sak mangler skjerming, se sikkerlogg.")
             sikkerLogg.info("Sakid: ${this.id} har fått satt feil skjerming(egen ansatt)")
         }
@@ -379,7 +379,7 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             dao.oppdaterEnheterPaaSaker(
-                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+                listOf(SakMedEnhet(sakId, Enhet.EGNE_ANSATTE.enhetNr)),
             )
         }
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
@@ -411,10 +411,10 @@ class SakServiceImpl(
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
             if (!bruker.harRolleStrengtFortrolig()) {
-                enheterSomSkalFiltreresBort.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG.enhetNr)
             }
             if (!bruker.harRolleEgenAnsatt()) {
-                enheterSomSkalFiltreresBort.add(Enheter.EGNE_ANSATTE.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE.enhetNr)
             }
         }
         return filterSakerForEnheter(enheterSomSkalFiltreresBort, this)

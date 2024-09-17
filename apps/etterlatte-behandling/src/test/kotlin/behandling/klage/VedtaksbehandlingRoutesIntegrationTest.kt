@@ -18,7 +18,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.DatabaseContext
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -72,7 +72,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
         Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao(), null))
     }
 
@@ -189,7 +189,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak =
             inTransaction {
-                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
             }
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =

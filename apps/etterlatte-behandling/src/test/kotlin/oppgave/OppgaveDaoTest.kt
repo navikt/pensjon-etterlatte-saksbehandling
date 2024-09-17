@@ -8,7 +8,7 @@ import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -67,13 +67,13 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `Skal filtrere på saksbehandlerident`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveForIdentFiltrering = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveForIdentFiltrering)
         val saksbehandlerIdent = "Z994762"
         oppgaveDao.settNySaksbehandler(oppgaveForIdentFiltrering.id, saksbehandlerIdent)
 
-        val oppgaveto = lagNyOppgave(sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr))
+        val oppgaveto = lagNyOppgave(sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr))
         oppgaveDao.opprettOppgave(oppgaveto)
         oppgaveDao.settNySaksbehandler(oppgaveto.id, "Z000000")
 
@@ -82,14 +82,14 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
             ),
         )
 
         val alleOppgavera =
             oppgaveDao.hentOppgaver(
-                listOf(Enheter.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND.enhetNr),
                 Status.entries.map { it.name },
                 null,
             )
@@ -98,7 +98,7 @@ internal class OppgaveDaoTest(
         val oppgaverKunForSaksbehandler =
             oppgaveDao.hentOppgaver(
                 listOf(
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
                 Status.entries.map { it.name },
                 saksbehandlerIdent,
@@ -109,7 +109,7 @@ internal class OppgaveDaoTest(
 
         val alleOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enheter.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND.enhetNr),
                 Status.entries.map { it.name },
                 null,
             )
@@ -118,7 +118,7 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `Skal filtrere på status`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.endreStatusPaaOppgave(oppgaveNy.id, Status.FEILREGISTRERT)
@@ -127,7 +127,7 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
             ),
         )
@@ -136,18 +136,18 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
             ),
         )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), listOf(Status.NY.name))
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), listOf(Status.NY.name))
         assertEquals(2, hentOppgaver.size)
     }
 
     @Test
     fun `Skal returnere alle statuser hvis status er tom eller satt til visAlle`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.endreStatusPaaOppgave(oppgaveNy.id, Status.FEILREGISTRERT)
@@ -156,7 +156,7 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
             ),
         )
@@ -165,21 +165,21 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.AALESUND.enhetNr,
+                    Enhet.AALESUND.enhetNr,
                 ),
             ),
         )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), emptyList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), emptyList())
         assertEquals(3, hentOppgaver.size)
 
-        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), listOf(VISALLE))
+        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(listOf(Enhet.AALESUND.enhetNr), listOf(VISALLE))
         assertEquals(3, hentOppgaverVisAlle.size)
     }
 
     @Test
     fun `Vanlig bruker kan kun se oppgaver med brukers enhet AALESUND ikke andre enheter som ikke er strengt fortrolig`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.opprettOppgave(
@@ -187,7 +187,7 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.STEINKJER.enhetNr,
+                    Enhet.STEINKJER.enhetNr,
                 ),
             ),
         )
@@ -196,14 +196,14 @@ internal class OppgaveDaoTest(
                 sakSkrivDao.opprettSak(
                     "fnr",
                     SakType.BARNEPENSJON,
-                    Enheter.PORSGRUNN.enhetNr,
+                    Enhet.PORSGRUNN.enhetNr,
                 ),
             ),
         )
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enheter.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentOppgaver.size)
@@ -211,7 +211,7 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `legg til oppgaver og hent oppgaver`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.opprettOppgave(lagNyOppgave(sakAalesund))
@@ -219,7 +219,7 @@ internal class OppgaveDaoTest(
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                listOf(Enheter.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
         assertEquals(3, hentOppgaver.size)
@@ -227,7 +227,7 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `kan tildelesaksbehandler`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
 
@@ -240,7 +240,7 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `Kan lege til & fjerne forrige saksbehandler`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
 
@@ -258,7 +258,7 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `kan sette oppgave paa vent`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveNy.id, "merknad", Status.PAA_VENT)
@@ -268,28 +268,28 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `kan endre enhet på oppgave`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
-        oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enheter.PORSGRUNN.enhetNr)
+        oppgaveDao.endreEnhetPaaOppgave(oppgaveNy.id, Enhet.PORSGRUNN.enhetNr)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(Enheter.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
+        assertEquals(Enhet.PORSGRUNN.enhetNr, hentetOppgave?.enhet)
     }
 
     @Test
     fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         sakSkrivDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        val sakutenbeskyttelse = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakutenbeskyttelse = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
         oppgaveDao.opprettOppgave(oppgaveUtenbeskyttelse)
 
         val hentetOppgave =
             oppgaveDao.hentOppgaver(
-                listOf(Enheter.AALESUND.enhetNr),
+                listOf(Enhet.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentetOppgave.size)
@@ -297,12 +297,12 @@ internal class OppgaveDaoTest(
 
     @Test
     fun `Skal kunne hente adressebeskyttede oppgaver fra finnOppgaverForStrengtFortroligOgStrengtFortroligUtland`() {
-        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         sakSkrivDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        val ikkeGradertSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val ikkeGradertSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val ikkeGradertOppgave = lagNyOppgave(ikkeGradertSak)
         oppgaveDao.opprettOppgave(ikkeGradertOppgave)
 

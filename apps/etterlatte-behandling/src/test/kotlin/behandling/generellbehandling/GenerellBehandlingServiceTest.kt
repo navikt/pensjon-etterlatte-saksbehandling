@@ -19,7 +19,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -128,7 +128,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan kun oppdatere hvis statusen er opprettet`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettFraType(
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
@@ -143,7 +143,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Finner kravpakke på sak`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val foerstegangsbehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -193,7 +193,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan hente behandlinger på sak`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettFraType(
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
@@ -213,7 +213,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun kanOppretteBehandlingOgFaarDaOgsaaEnOppgaveManuellOpprettelseUtenTildelingAvSaksbehandler() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettFraType(
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
@@ -239,7 +239,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun kanOppretteBehandlingOgFaarDaOgsaaEnOppgaveManuellOpprettelseMedTildelingAvSaksbehandler() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -289,7 +289,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan avbryte redigerbar behandling`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -312,7 +312,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan ikke avbryte fattet behandling`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -347,7 +347,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan sende til attestering(fatte)`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -395,7 +395,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Skal feile når dato sendt mangler på dokument`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -424,7 +424,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan ikke attestere med feil status på behandling`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -454,7 +454,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Skal feile når rina nummer er tomt`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -483,7 +483,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Skal feile hvis landkodelisten er tom`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -512,7 +512,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Skal feile når isokode 3 er feil lengde`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -541,7 +541,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan attestere behandling`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -606,7 +606,7 @@ internal class GenerellBehandlingServiceTest(
 
     @Test
     fun `Kan ikke attestere behandling hvis det er samme saksbehandler som behandlet`() {
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
@@ -666,7 +666,7 @@ internal class GenerellBehandlingServiceTest(
     fun `Kan underkjenne behandling som er fattet`() {
         every { saksbehandler.saksbehandlerMedRoller.harRolleAttestant() } returns true
 
-        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val behandling =
             service.opprettBehandling(GenerellBehandling.opprettUtland(sak.id, randomUUID()), SAKSBEHANDLER)
 

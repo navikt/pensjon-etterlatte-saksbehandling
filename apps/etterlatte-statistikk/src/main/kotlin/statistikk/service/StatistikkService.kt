@@ -1,7 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -66,7 +66,7 @@ class StatistikkService(
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
             val enhet = vedtak.attestasjon?.attesterendeEnhet
-            if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
+            if (enhet in listOf(Enhet.STRENGT_FORTROLIG.enhetNr, Enhet.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
                 return sakRad to null
             }
             val gradering = runBlocking { behandlingKlient.hentGraderingForSak(vedtak.sak.id) }

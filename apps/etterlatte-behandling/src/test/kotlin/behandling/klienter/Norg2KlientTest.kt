@@ -14,7 +14,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import org.junit.jupiter.api.Test
 
 class Norg2KlientTest {
@@ -55,7 +55,7 @@ class Norg2KlientTest {
 
         resultat.size shouldBeExactly 1
 
-        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
+        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr))
     }
 
     private fun mockHttpClient(jsonRespons: String): HttpClient {

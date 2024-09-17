@@ -19,7 +19,7 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -83,12 +83,12 @@ class TilgangsstyringTest {
                     "Sak med tilgang",
                     "/api/sak/1",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -96,12 +96,12 @@ class TilgangsstyringTest {
                     "Sak uten tilgang",
                     "/api/sak/1",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -109,7 +109,7 @@ class TilgangsstyringTest {
                     "Behandling med tilgang",
                     "/api/behandling/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -117,7 +117,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -125,7 +125,7 @@ class TilgangsstyringTest {
                     "Behandling uten tilgang",
                     "/api/behandling/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -133,7 +133,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -141,7 +141,7 @@ class TilgangsstyringTest {
                     "Oppgave med tilgang",
                     "/api/oppgave/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -152,7 +152,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -160,7 +160,7 @@ class TilgangsstyringTest {
                     "Oppgave uten tilgang",
                     "/api/oppgave/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -171,7 +171,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -179,7 +179,7 @@ class TilgangsstyringTest {
                     "Klage med tilgang",
                     "/api/klage/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -193,7 +193,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -201,7 +201,7 @@ class TilgangsstyringTest {
                     "Klage uten tilgang",
                     "/api/klage/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -215,7 +215,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(1, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -223,12 +223,12 @@ class TilgangsstyringTest {
                     "Overstyrt sak med tilgang",
                     "/api/annet/sak",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(2, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -236,12 +236,12 @@ class TilgangsstyringTest {
                     "Overstyrt sak uten tilgang",
                     "/api/annet/sak",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(2, null, null, Enhet.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -249,7 +249,7 @@ class TilgangsstyringTest {
                     "Overstyrt enhet med tilgang",
                     "/api/annet/enhet",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao>(),
                     200,
@@ -258,7 +258,7 @@ class TilgangsstyringTest {
                     "Overstyrt enhet uten tilgang",
                     "/api/annet/enhet",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { enheterMedSkrivetilgang() } returns listOf(Enhet.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao>(),
                     403,
@@ -333,7 +333,7 @@ class TilgangsstyringTest {
                                 }
                             }
                             get("/enhet") {
-                                kunSaksbehandlerMedSkrivetilgang(enhetNr = Enheter.PORSGRUNN.enhetNr) {
+                                kunSaksbehandlerMedSkrivetilgang(enhetNr = Enhet.PORSGRUNN.enhetNr) {
                                     call.respond("OK")
                                 }
                             }

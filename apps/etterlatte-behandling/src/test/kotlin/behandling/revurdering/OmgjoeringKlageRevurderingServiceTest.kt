@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -61,7 +61,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheter() } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         startServer()
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
@@ -78,7 +78,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak =
             inTransaction {
-                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
             }
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =

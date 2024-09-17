@@ -10,7 +10,7 @@ import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -78,7 +78,7 @@ internal class GyldighetsproevingServiceImplTest {
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
+                        enhet = Enhet.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -100,7 +100,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             user.enheter()
-        } returns listOf(Enheter.defaultEnhet.enhetNr)
+        } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         behandlingsService.hentFoerstegangsbehandling(id)
 
@@ -115,7 +115,7 @@ internal class GyldighetsproevingServiceImplTest {
         val behandling =
             Foerstegangsbehandling(
                 id = id,
-                sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.PORSGRUNN.enhetNr),
+                sak = Sak("", SakType.BARNEPENSJON, 1, Enhet.PORSGRUNN.enhetNr),
                 behandlingOpprettet = now,
                 sistEndret = now,
                 status = BehandlingStatus.OPPRETTET,
@@ -136,7 +136,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             user.enheter()
-        } returns listOf(Enheter.defaultEnhet.enhetNr)
+        } returns listOf(Enhet.defaultEnhet.enhetNr)
 
         val forventetResultat =
             GyldighetsResultat(
@@ -179,7 +179,7 @@ internal class GyldighetsproevingServiceImplTest {
     fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
         every {
             user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
+        } returns listOf(Enhet.PORSGRUNN.enhetNr)
 
         val id = UUID.randomUUID()
 
@@ -193,7 +193,7 @@ internal class GyldighetsproevingServiceImplTest {
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
                         id = 1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
+                        enhet = Enhet.PORSGRUNN.enhetNr,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

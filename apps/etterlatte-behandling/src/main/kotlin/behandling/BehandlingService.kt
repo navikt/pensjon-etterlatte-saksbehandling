@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
@@ -813,10 +813,10 @@ internal class BehandlingServiceImpl(
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
             if (!bruker.harRolleStrengtFortrolig()) {
-                enheterSomSkalFiltreresBort.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.STRENGT_FORTROLIG.enhetNr)
             }
             if (!bruker.harRolleEgenAnsatt()) {
-                enheterSomSkalFiltreresBort.add(Enheter.EGNE_ANSATTE.enhetNr)
+                enheterSomSkalFiltreresBort.add(Enhet.EGNE_ANSATTE.enhetNr)
             }
         }
 

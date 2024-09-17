@@ -3,7 +3,7 @@ package no.nav.etterlatte.gyldigsoeknad.journalfoering
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -63,7 +63,7 @@ class JournalfoerSoeknadService(
                 OpprettJournalpostRequest(
                     tittel = tittel,
                     tema = sakType.tema,
-                    journalfoerendeEnhet = Enheter.defaultEnhet.enhetNr,
+                    journalfoerendeEnhet = Enhet.defaultEnhet.enhetNr,
                     avsenderMottaker = null,
                     bruker = null,
                     eksternReferanseId = opprettEksternReferanseId(soeknadId, sakType),

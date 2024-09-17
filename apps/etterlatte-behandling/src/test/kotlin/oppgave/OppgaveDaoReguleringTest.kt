@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -68,9 +68,9 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Skal tilbakestille oppgaver under attestering`() {
-        val sakEn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val sakTo = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val sakTre = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakEn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
+        val sakTo = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
+        val sakTre = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
 
         val sakerTilRegulering = listOf(sakEn.id, sakTo.id)
 
@@ -87,7 +87,7 @@ internal class OppgaveDaoReguleringTest(
 
     @Test
     fun `Setter forrige saksbehandler ved tilbakestilling`() {
-        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enhet.AALESUND.enhetNr)
         val oppgaveAttestert = lagOppgave(sakId = sak.id, status = Status.UNDER_BEHANDLING)
         oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(oppgaveAttestert.id, "", Status.ATTESTERING)
         oppgaveDao.settNySaksbehandler(oppgaveAttestert.id, "Ikke Ole")

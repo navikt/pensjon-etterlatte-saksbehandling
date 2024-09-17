@@ -8,7 +8,7 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
@@ -172,7 +172,7 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 ident = doedshendelse.beroertFnr,
                 sakType = SakType.BARNEPENSJON,
                 id = 1L,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
             )
     }
 }

@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlag.GenerellKilde
 import no.nav.etterlatte.grunnlag.Personopplysning
@@ -106,9 +106,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                    enhet = Enhet.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE.enhetNr),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -130,9 +130,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG.enhetNr),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -154,9 +154,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                    enhet = Enhet.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.STRENGT_FORTROLIG.enhetNr),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -178,9 +178,9 @@ internal class BehandlingServiceImplTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                    enhet = Enhet.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.EGNE_ANSATTE.enhetNr),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -772,15 +772,15 @@ internal class BehandlingServiceImplTest {
 
     @Test
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
-        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enhet.PORSGRUNN.enhetNr)))
         every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
             listOf(
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
+                foerstegangsbehandling(sakId = 1, enhet = Enhet.PORSGRUNN.enhetNr),
             )
 
         val behandlinger = behandlingService.hentBehandlingerForSak(1)
@@ -795,7 +795,7 @@ internal class BehandlingServiceImplTest {
 
     @Test
     fun `kan oppdatere bodd eller arbeidet i utlandet`() {
-        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enhet.PORSGRUNN.enhetNr)))
 
         val uuid = UUID.randomUUID()
 
@@ -805,7 +805,7 @@ internal class BehandlingServiceImplTest {
             foerstegangsbehandling(
                 id = uuid,
                 sakId = 1,
-                enhet = Enheter.PORSGRUNN.enhetNr,
+                enhet = Enhet.PORSGRUNN.enhetNr,
             )
 
         every { behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs

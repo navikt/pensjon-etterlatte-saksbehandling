@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -110,7 +110,7 @@ internal class BehandlingMetricsTest(
     }
 
     private fun opprettBehandlinger() {
-        sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -127,7 +127,7 @@ internal class BehandlingMetricsTest(
             )
         }
 
-        sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enhet.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -137,7 +137,7 @@ internal class BehandlingMetricsTest(
         }
 
         // Automatisk migrert fra pesys
-        sakRepo.opprettSak("111", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("111", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -155,7 +155,7 @@ internal class BehandlingMetricsTest(
         }
 
         // Manuelt migrert fra pesys
-        sakRepo.opprettSak("222", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
+        sakRepo.opprettSak("222", SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,

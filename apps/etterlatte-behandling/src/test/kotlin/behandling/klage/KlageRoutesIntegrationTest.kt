@@ -24,7 +24,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -158,7 +158,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     .getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedStrengtFortrolig)
                     .body<Klage>()
             assertEquals(
-                klage.copy(sak = klage.sak.copy(enhet = Enheter.STRENGT_FORTROLIG.enhetNr)),
+                klage.copy(sak = klage.sak.copy(enhet = Enhet.STRENGT_FORTROLIG.enhetNr)),
                 hentetMedTilgang,
             )
         }

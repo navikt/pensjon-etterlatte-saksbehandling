@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -90,7 +90,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(),
@@ -116,7 +116,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -164,7 +164,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal sjekke tilganger til tilbakekreving med tilbakekrevingId for behandlingId`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr)
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -220,7 +220,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.defaultEnhet.enhetNr).id
 
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
@@ -260,7 +260,7 @@ internal class TilgangServiceTest(
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enhet.EGNE_ANSATTE.enhetNr).id
         val saksbehandlerMedStrengtfortrolig =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdStrengtFortroligClaim)),

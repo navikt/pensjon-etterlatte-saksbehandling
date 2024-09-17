@@ -25,7 +25,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
@@ -213,7 +213,7 @@ class AktivitetspliktServiceTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.NY,
-                    enhet = Enheter.defaultEnhet.enhetNr,
+                    enhet = Enhet.defaultEnhet.enhetNr,
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,
@@ -286,7 +286,7 @@ class AktivitetspliktServiceTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.NY,
-                    enhet = Enheter.defaultEnhet.enhetNr,
+                    enhet = Enhet.defaultEnhet.enhetNr,
                     sakId = sakId,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,

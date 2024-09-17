@@ -23,7 +23,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
@@ -43,7 +43,6 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -74,7 +73,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
-            Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, 1L, Enhet.AALESUND.enhetNr),
             OppgaveKilde.HENDELSE,
             OppgaveType.VURDER_KONSEKVENS,
             null,
@@ -114,7 +113,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `Sjekk at fnr matcher hendelse fnr og ikke sak ident i duplikatsjekk`() {
         val sakId = 1L
-        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enhet.STEINKJER.enhetNr)
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
                 gjelderPerson = KONTANT_FOT.value,
@@ -299,7 +298,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
@@ -323,10 +322,10 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(2L)
-        } returns Sak(fnr, SakType.BARNEPENSJON, 2L, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, 2L, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSak(3L)
-        } returns Sak(fnr, SakType.BARNEPENSJON, 3L, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(fnr, SakType.BARNEPENSJON, 3L, Enhet.defaultEnhet.enhetNr)
 
         val grunnlagsendringshendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -364,7 +363,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSak(sakId)
         } returns sak
@@ -418,7 +417,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        val sak = Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enhet.defaultEnhet.enhetNr)
         every {
             sakService.finnSak(sakId)
         } returns sak
@@ -469,7 +468,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
 
         val tomSivilstandhendelserBP =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
@@ -480,7 +479,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enhet.defaultEnhet.enhetNr)
 
         every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
             mockPerson()
@@ -529,7 +528,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
         every {
             sakService.finnSak(sakId)
-        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enhet.defaultEnhet.enhetNr)
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -624,7 +623,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     id = it,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN.enhetNr,
                 )
             }
         val fnr = "16508201382"
@@ -637,7 +636,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         saker.forEach {
             every { sakService.finnSak(it.id) } returns it
@@ -672,7 +671,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     id = it,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN.enhetNr,
                 )
             }
         val fnr = "16508201382"
@@ -685,7 +684,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         every { sakService.finnSak(any()) } returns null
 
@@ -715,7 +714,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     id = it,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    enhet = Enhet.PORSGRUNN.enhetNr,
                 )
             }
         val fnr = AVDOED2_FOEDSELSNUMMER.value
@@ -728,7 +727,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+        } returns ArbeidsFordelingEnhet(Enhet.STEINKJER.navn, Enhet.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         saker.forEach {
             every { sakService.finnSak(it.id) } returns it
@@ -771,7 +770,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 KONTANT_FOT.value,
                 SakType.BARNEPENSJON,
                 sakId,
-                Enheter.defaultEnhet.enhetNr,
+                Enhet.defaultEnhet.enhetNr,
             )
 
         every {

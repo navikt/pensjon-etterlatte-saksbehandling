@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,7 +43,7 @@ class DoedshendelseReminderServiceTest {
         val mockOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "behandling",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND.enhetNr),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
@@ -90,7 +90,7 @@ class DoedshendelseReminderServiceTest {
         val eksisterendeOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "vurder konsekvens",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId, Enhet.AALESUND.enhetNr),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.MANGLER_SOEKNAD,
                 null,

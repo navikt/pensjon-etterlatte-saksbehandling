@@ -11,7 +11,7 @@ import io.mockk.verify
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.Enhet
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
@@ -202,7 +202,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 ident = doedshendelse.beroertFnr,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 id = 1L,
-                enhet = Enheter.defaultEnhet.enhetNr,
+                enhet = Enhet.defaultEnhet.enhetNr,
             )
     }
 }

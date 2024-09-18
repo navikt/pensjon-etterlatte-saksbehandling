@@ -180,9 +180,25 @@ class BeregningsGrunnlagService(
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
-            ) ?: throw ManglerForrigeGrunnlag()
-        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
+            )
 
+        // hvis forrigeGrunnlag er null, kan årsaken være at tidligere behandling er manuelt overstyrt
+        if (forrigeGrunnlag == null) {
+            val overstyrtBeregningsGrunnlag =
+                beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
+                    forrigeIverksatteBehandlingId,
+                )
+            if (overstyrtBeregningsGrunnlag.isNotEmpty()) {
+                // i tilfelle hvor tidligere behandling er manuelt overstyrt  (mangler beregningsgrunnlag)
+                // kan vi returnere True ettersom vi ikke har noe å sammenligne med
+                return true
+            } else {
+                // i tilfelle hvor tidligere behandling ikke er overstyrt
+                throw ManglerForrigeGrunnlag()
+            }
+        }
+
+        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
         val soeskenjusteringErLiktFoerVirk =
             if (revurdering.sakType == SakType.BARNEPENSJON) {
                 erGrunnlagLiktFoerEnDato(

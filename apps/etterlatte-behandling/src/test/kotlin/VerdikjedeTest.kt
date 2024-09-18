@@ -230,13 +230,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
-                        mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
+                        mapOf("dato" to "2022-09-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
                     )
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val expected =
                         FastsettVirkningstidspunktResponse(
-                            YearMonth.of(2022, 2),
+                            YearMonth.of(2022, 9),
                             Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
                             "En begrunnelse",
                             null,

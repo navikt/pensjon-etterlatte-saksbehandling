@@ -27,6 +27,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
@@ -193,6 +194,11 @@ class GrunnlagKlientTest : GrunnlagKlient {
     ) {
         // NO-OP
     }
+
+    override suspend fun hentPersonopplysningerForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
 
     override val serviceName: String
         get() = TODO("Not yet implemented")

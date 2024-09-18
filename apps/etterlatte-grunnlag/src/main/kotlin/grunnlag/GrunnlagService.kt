@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -628,25 +627,11 @@ class LaastGrunnlagKanIkkeEndres(
             """,
     )
 
-data class PersonopplysningerResponse(
-    val innsender: Personopplysning?,
-    val soeker: Personopplysning?,
-    val avdoede: List<Personopplysning>,
-    val gjenlevende: List<Personopplysning>,
-    val annenForelder: AnnenForelder?,
-)
-
 data class Personopplysning(
     val opplysningType: Opplysningstype,
     val id: UUID,
     val kilde: GenerellKilde,
     val opplysning: Person,
-)
-
-data class GenerellKilde(
-    val type: String,
-    val tidspunkt: Tidspunkt,
-    val detalj: String? = null,
 )
 
 data class ForskjellMellomPersoner(

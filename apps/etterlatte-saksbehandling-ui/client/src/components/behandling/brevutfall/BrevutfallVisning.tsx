@@ -78,18 +78,10 @@ export const BrevutfallVisning = (props: {
               </HStack>
               {sakType == SakType.BARNEPENSJON && (
                 <>
-                  {brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav && (
+                  {brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav !== undefined && (
                     <VStack gap="2">
                       <Label>Er det krav i etterbetalingen?</Label>
                       <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
-                    </VStack>
-                  )}
-                  {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk && (
-                    <VStack gap="2">
-                      <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
-                      <BodyShort>
-                        {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk ? 'Ja' : 'Nei'}
-                      </BodyShort>
                     </VStack>
                   )}
                   {brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg && (
@@ -106,6 +98,13 @@ export const BrevutfallVisning = (props: {
               )}
             </>
           )}
+          {sakType == SakType.BARNEPENSJON &&
+            brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk !== undefined && (
+              <VStack gap="2">
+                <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+                <BodyShort>{brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
+              </VStack>
+            )}
         </VStack>
       )}
       {sakType == SakType.BARNEPENSJON && (

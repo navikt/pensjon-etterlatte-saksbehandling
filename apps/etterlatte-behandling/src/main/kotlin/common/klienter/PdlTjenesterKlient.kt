@@ -18,7 +18,10 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
@@ -52,6 +55,8 @@ interface PdlTjenesterKlient : Pingable {
     fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
 
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
+
+    suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId?
 }
 
 class PdlTjenesterKlientImpl(
@@ -152,6 +157,16 @@ class PdlTjenesterKlientImpl(
                     }.body<Map<String, String?>>()
             }
         return response
+    }
+
+    override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? {
+        val request = HentPdlIdentRequest(PersonIdent(foedselsnummer))
+
+        return client
+            .post("$url/aktoerid") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body<PdlIdentifikator.AktoerId?>()
     }
 }
 

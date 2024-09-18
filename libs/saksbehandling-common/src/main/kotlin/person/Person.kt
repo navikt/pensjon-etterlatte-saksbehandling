@@ -164,6 +164,11 @@ sealed class PdlIdentifikator {
     data class Npid(
         val npid: NavPersonIdent,
     ) : PdlIdentifikator()
+
+    @JsonTypeName("AKTORID")
+    data class AktoerId(
+        val aktoerId: String,
+    )
 }
 
 data class Utenlandsadresse(

@@ -57,7 +57,9 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.LocalDate
@@ -470,6 +472,69 @@ internal class BehandlingServiceImplTest {
             )
 
         gyldigVirkningstidspunkt shouldBe false
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("flereAvdoedeVirkningstidspunktTestdata")
+    fun `skal gi gyldig virkningstidspunkt med to avdoede hvis tidspunkt er foer siste doedsfall`(
+        beskrivelse: String,
+        virkningstidspunkt: Tidspunkt,
+        doedsdatoer: List<LocalDate>,
+        forventetGyldig: Boolean,
+    ) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                virkningstidspunkt = virkningstidspunkt,
+                doedsdato = doedsdatoer,
+                sakType = SakType.BARNEPENSJON,
+                soeknadMottatt = LocalDateTime.parse("2020-03-01T00:00:00"),
+            )
+
+        gyldigVirkningstidspunkt shouldBe forventetGyldig
+    }
+
+    /**
+     * Gitt virk og dødsdatoer, er virk gyldig eller ikke?
+     */
+    private fun flereAvdoedeVirkningstidspunktTestdata() =
+        listOf(
+            Arguments.of(
+                "Virk er før første dødsdato og er ugyldig",
+                Tidspunkt.parse("2019-08-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                false,
+            ),
+            Arguments.of(
+                "Virk er i samme måned som første dødsdato og er ugyldig",
+                Tidspunkt.parse("2019-10-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                false,
+            ),
+            Arguments.of(
+                "Virk er etter første dødsdato, før siste dødsdato og er gyldig",
+                Tidspunkt.parse("2019-11-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                true,
+            ),
+            Arguments.of(
+                "Virk er etter siste dødsdato og er gyldig",
+                Tidspunkt.parse("2020-02-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                true,
+            ),
+        )
+
+    @Test
+    fun `skal gi ugyldig virkningstidspunkt med to avdoede hvis tidspunkt er foer siste doedsfall`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.BARNEPENSJON,
+                virkningstidspunkt = Tidspunkt.parse("2019-11-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
+                doedsdato = listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
     }
 
     @Test

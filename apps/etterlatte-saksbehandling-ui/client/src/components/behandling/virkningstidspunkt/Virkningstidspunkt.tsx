@@ -68,18 +68,11 @@ const Virkningstidspunkt = (props: {
     // Denne siste fallbacken er altså tenkt for disse sakene
   }
 
-  function foersteDoedsdato() {
+  function foersteDoedsdato(): Date | undefined {
     const avdoede = usePersonopplysninger()?.avdoede
-    const foersteAvdoede =
-      avdoede &&
-      avdoede.reduce((prev, current) =>
-        current.opplysning.doedsdato && prev.opplysning.doedsdato
-          ? current.opplysning.doedsdato < prev.opplysning.doedsdato
-            ? current
-            : prev
-          : prev
-      )
-    return foersteAvdoede?.opplysning.doedsdato
+    return avdoede
+      ?.map((it) => it.opplysning.doedsdato)
+      .reduce((prev, current) => (prev && current && current < prev ? current : prev))
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({

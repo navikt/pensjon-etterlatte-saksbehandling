@@ -309,7 +309,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/personopplysninger?=sakType=$sakType",
+                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/personopplysninger?sakType=$sakType",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(

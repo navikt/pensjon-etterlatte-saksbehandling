@@ -54,7 +54,7 @@ class StatusPagesKonfigurasjon(
                 else -> {
                     val mappetFeil = UkjentInternfeilException("En feil har skjedd: ${cause::class.java.canonicalName}", cause)
                     call.application.log.loggInternfeilException(mappetFeil, call)
-                    call.respond(mappetFeil)
+                    call.respond(UkjentInternfeilException("En ukjent feil har skjedd.", mappetFeil))
                 }
             }
         }

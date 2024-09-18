@@ -106,7 +106,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 

@@ -179,7 +179,7 @@ interface BehandlingService {
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
     )
 
-    suspend fun hentDetaljertBehandling(
+    fun hentDetaljertBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling?
@@ -369,15 +369,16 @@ internal class BehandlingServiceImpl(
             it.toStatistikkBehandling(persongalleri)
         }
 
-    override suspend fun hentDetaljertBehandling(
+    override fun hentDetaljertBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling? =
-        inTransaction { hentBehandling(behandlingId) }?.let {
+        hentBehandling(behandlingId) ?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient
-                    .hentPersongalleri(behandlingId, brukerTokenInfo)
-                    ?.opplysning
+                runBlocking {
+                    grunnlagKlient
+                        .hentPersongalleri(behandlingId, brukerTokenInfo)
+                }?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)

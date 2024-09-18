@@ -31,3 +31,7 @@ export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), '
 
 export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
   format(new Date(dato), "dd.MM.yyyy 'kl.' HH:mm").toString()
+
+export const aarFraDatoString = (dato: string) => new Date(dato).getFullYear()
+
+export const maanedFraDatoString = (dato: string) => new Date(dato).getMonth()

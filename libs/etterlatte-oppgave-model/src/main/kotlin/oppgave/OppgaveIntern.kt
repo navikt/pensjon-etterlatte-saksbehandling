@@ -109,6 +109,7 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     JOURNALFOERING,
+    TILLEGGSINFORMASJON,
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
     MANGLER_SOEKNAD,
     AKTIVITETSPLIKT,

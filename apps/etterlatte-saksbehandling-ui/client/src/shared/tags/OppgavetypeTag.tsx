@@ -22,6 +22,8 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
       return <Tag variant="info">Tilbakekreving</Tag>
     case Oppgavetype.JOURNALFOERING:
       return <Tag variant="alt2">Journalføring</Tag>
+    case Oppgavetype.TILLEGGSINFORMASJON:
+      return <Tag variant="alt2">Tilleggsinformasjon</Tag>
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
       return <Tag variant="alt3-moderate">Gjenoppretting</Tag>
     case Oppgavetype.AKTIVITETSPLIKT:

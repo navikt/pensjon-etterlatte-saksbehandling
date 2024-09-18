@@ -199,13 +199,8 @@ class BehandlingFactory(
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {
-            val harBehandlingUnderbehandling =
-                request.alleBehandlingerISak.filter { behandling ->
-                    BehandlingStatus.underBehandling().find { it == behandling.status } != null
-                }
             val behandling =
                 opprettFoerstegangsbehandling(
-                    harBehandlingUnderbehandling,
                     request.sak,
                     mottattDato,
                     kilde,
@@ -277,7 +272,6 @@ class BehandlingFactory(
                 val nyFoerstegangsbehandling =
                     checkNotNull(
                         opprettFoerstegangsbehandling(
-                            behandlingerUnderBehandling = emptyList(),
                             sak = sak,
                             mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
                             kilde = Vedtaksloesning.GJENNY,
@@ -373,18 +367,12 @@ class BehandlingFactory(
     ) = sakService.finnGjeldendeEnhet(persongalleri.soeker, sakType)
 
     private fun opprettFoerstegangsbehandling(
-        behandlingerUnderBehandling: List<Behandling>,
         sak: Sak,
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
-    ): Behandling? {
-        behandlingerUnderBehandling.forEach {
-            behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-            oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
-        }
-
-        return OpprettBehandling(
+    ): Behandling? =
+        OpprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
@@ -400,7 +388,6 @@ class BehandlingFactory(
 
             behandlingDao.hentBehandling(opprettBehandling.id)
         }
-    }
 }
 
 data class OmgjoerBehandling(

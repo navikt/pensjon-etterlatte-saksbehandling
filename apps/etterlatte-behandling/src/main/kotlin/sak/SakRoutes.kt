@@ -86,6 +86,19 @@ internal fun Route.sakSystemRoutes(
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
+            get("/behandlinger") {
+                kunSystembruker {
+                    val sakMedBehandlinger =
+                        inTransaction {
+                            val sak = sakService.finnSak(sakId) ?: throw SakIkkeFunnetException("Fant ikke sak=$sakId")
+
+                            behandlingService.hentSakMedBehandlinger(listOf(sak))
+                        }
+
+                    call.respond(sakMedBehandlinger)
+                }
+            }
+
             get("/behandlinger/sisteIverksatte") {
                 logger.info("Henter siste iverksatte behandling for $sakId")
 

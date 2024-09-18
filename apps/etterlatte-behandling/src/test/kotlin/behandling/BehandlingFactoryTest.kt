@@ -439,10 +439,6 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
-        verify {
-            behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
-            oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
-        }
     }
 
     @Test

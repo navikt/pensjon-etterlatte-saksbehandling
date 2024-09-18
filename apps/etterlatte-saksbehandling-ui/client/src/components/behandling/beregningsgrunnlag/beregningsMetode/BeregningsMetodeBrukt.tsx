@@ -16,6 +16,7 @@ import { tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregni
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { AnnenForelderVurdering } from '~shared/types/grunnlag'
+import { SakType } from '~shared/types/sak'
 
 const defaultBeregningMetode: BeregningsMetodeBeregningsgrunnlag = {
   beregningsMetode: null,
@@ -93,7 +94,9 @@ export const BeregningsMetodeBrukt = ({
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell />
-              <Table.HeaderCell scope="col">Forelder</Table.HeaderCell>
+              <Table.HeaderCell scope="col">
+                {behandling.sakType === SakType.BARNEPENSJON ? 'Forelder' : 'Avdøde'}
+              </Table.HeaderCell>
               <Table.HeaderCell scope="col">Trygdetid i beregningen</Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>

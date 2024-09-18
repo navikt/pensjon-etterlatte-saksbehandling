@@ -182,7 +182,7 @@ class BeregningsGrunnlagService(
                 forrigeIverksatteBehandlingId,
             )
 
-        // hvis forrigeGrunnlag er null, kan årsaken være at tidligere behandling er manuelt overstyrt
+        // hvis forrigeGrunnlag er null, kan aarsaken være at tidligere behandling er manuelt overstyrt
         if (forrigeGrunnlag == null) {
             val overstyrtBeregningsGrunnlag =
                 beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
@@ -193,7 +193,7 @@ class BeregningsGrunnlagService(
                 // kan vi returnere True ettersom vi ikke har noe å sammenligne med
                 return true
             } else {
-                // i tilfelle hvor tidligere behandling ikke er overstyrt
+                // i tilfelle hvor tidligere behandling ikke er overstyrt beregnet
                 throw ManglerForrigeGrunnlag()
             }
         }

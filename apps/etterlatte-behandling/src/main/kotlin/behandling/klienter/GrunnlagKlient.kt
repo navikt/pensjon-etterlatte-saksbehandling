@@ -10,6 +10,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -100,6 +101,7 @@ interface GrunnlagKlient : Pingable {
     suspend fun hentPersonopplysningerForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): PersonopplysningerResponse
 }
 
@@ -298,6 +300,7 @@ class GrunnlagKlientImpl(
     override suspend fun hentPersonopplysningerForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): PersonopplysningerResponse {
         logger.info("Henter personopplysninger for behandling med id=$behandlingId")
 
@@ -306,7 +309,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/personopplysninger",
+                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/personopplysninger?=sakType=$sakType",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(

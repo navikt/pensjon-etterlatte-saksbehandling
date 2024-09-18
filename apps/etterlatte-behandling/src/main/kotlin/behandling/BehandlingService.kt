@@ -443,7 +443,7 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val foersteDoedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val foersteDoedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         if (foersteDoedsdato == null) {
@@ -512,8 +512,9 @@ internal class BehandlingServiceImpl(
     private suspend fun hentFoersteDoedsdato(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): LocalDate? {
-        val personopplysninger = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo)
+        val personopplysninger = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
         return personopplysninger.avdoede
             .mapNotNull { it.opplysning.doedsdato }
             .minOrNull()

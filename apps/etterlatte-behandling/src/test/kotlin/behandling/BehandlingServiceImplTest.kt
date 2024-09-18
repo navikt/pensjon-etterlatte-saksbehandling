@@ -963,7 +963,7 @@ internal class BehandlingServiceImplTest {
             }
 
         coEvery {
-            grunnlagKlientMock.hentPersonopplysningerForBehandling(behandling.id, TOKEN)
+            grunnlagKlientMock.hentPersonopplysningerForBehandling(behandling.id, TOKEN, sakType)
         } returns
             PersonopplysningerResponse(
                 avdoede =

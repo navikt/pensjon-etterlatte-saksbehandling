@@ -198,6 +198,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun hentPersonopplysningerForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
 
     override val serviceName: String

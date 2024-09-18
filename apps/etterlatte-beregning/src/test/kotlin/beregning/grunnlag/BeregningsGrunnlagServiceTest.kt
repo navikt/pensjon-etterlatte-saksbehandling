@@ -259,7 +259,7 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
-    fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrige beregningsgrunnlag mangler`() {
+    fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler`() {
         val sakId = 1337L
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
@@ -317,7 +317,7 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
-    fun `skal tillate endringer i beregningsgrunnlaget hvis forrige beregningsgrunnlag mangler pga overstyrt beregning`() {
+    fun `skal tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler pga overstyrt beregning`() {
         val sakId = 1337L
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
@@ -369,7 +369,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertTrue(lagret)
+            assertNotNull(lagret)
         }
 
         coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }

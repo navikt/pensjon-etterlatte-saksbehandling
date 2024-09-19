@@ -118,7 +118,7 @@ class VedtaksbrevService(
             logger.info("Ferdigstiller brev med id=${brev.id}")
 
             if (db.hentPdf(brev.id) == null) {
-                throw IllegalStateException("Kan ikke ferdigstille brev (id=${brev.id}) siden PDF er null!")
+                throw BrevManglerPDF(brev.id)
             } else {
                 db.settBrevFerdigstilt(brev.id)
             }
@@ -243,9 +243,15 @@ class UgyldigMottakerKanIkkeFerdigstilles(
         code = "UGYLDIG_MOTTAKER_BREV",
         detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id",
         meta =
-            mapOf(
-                "id" to id,
-            ),
+            mapOf("id" to id),
+    )
+
+class BrevManglerPDF(
+    id: BrevID,
+) : UgyldigForespoerselException(
+        code = "PDF_MANGLER",
+        detail = "Kan ikke ferdigstille brev siden PDF ikke er ferdig generert og lagret.",
+        meta = mapOf("id" to id),
     )
 
 class SaksbehandlerOgAttestantSammePerson(

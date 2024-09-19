@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -224,7 +225,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw BrevutfallMangler(behandlingId),
         )
     }
 
@@ -249,7 +250,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         BarnepensjonRevurderingRedigerbartUtfall.fra(
             etterbetaling.await(),
             utbetalingsinfo.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw BrevutfallMangler(behandlingId),
         )
     }
 
@@ -313,7 +314,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw BrevutfallMangler(behandlingId),
         )
     }
 
@@ -324,7 +325,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw BrevutfallMangler(behandlingId),
         )
     }
 }
+
+class BrevutfallMangler(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BREVUTFALL_MANGLER",
+        detail = "Brevutfall må være satt for behandling $behandlingId",
+    )

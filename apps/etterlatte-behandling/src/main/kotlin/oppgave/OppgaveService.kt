@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class OppgaveService(
@@ -230,6 +231,7 @@ class OppgaveService(
             hentOppgaverForReferanse(referanse)
                 .filter { it.type == type }
                 .filter { it.status in listOf(Status.UNDER_BEHANDLING, Status.UNDERKJENT) }
+        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
 
         if (oppgaver.isEmpty()) {
             throw ManglerOppgaveUnderBehandling("Ingen oppgave funnet for referanse: $referanse")
@@ -244,6 +246,8 @@ class OppgaveService(
 
         if (frist != null) {
             oppgaveDao.redigerFrist(oppgave.id, frist)
+        } else {
+            oppgaveDao.redigerFrist(oppgave.id, toDagerFremITid)
         }
 
         settSaksbehandlerSomForrigeSaksbehandlerOgFjern(oppgave.id)

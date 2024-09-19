@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -19,24 +20,33 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.time.LocalDateTime
 import java.util.UUID
 
+class FeiletVedOpprettBehandling(
+    sakId: SakId,
+) : UgyldigForespoerselException(
+        code = "FEILET_OPPRETTELSE_AV_BEHANDLING",
+        detail = "Feilet ved opprettelse av behandling for sakid $sakId",
+    )
+
 class BehandlingClient(
     private val sakOgBehandlingApp: HttpClient,
     private val url: String,
 ) {
     fun opprettBehandling(
-        sak: Long,
+        sakId: SakId,
         mottattDato: LocalDateTime,
         persongalleri: Persongalleri,
     ): UUID =
         runBlocking {
-            sakOgBehandlingApp
-                .post("$url/behandlinger/opprettbehandling") {
-                    contentType(ContentType.Application.Json)
-                    setBody(BehandlingsBehov(sak, persongalleri, mottattDato.toString()))
-                }.also { require(it.status.isSuccess()) }
-                .body<String>()
-        }.let {
-            UUID.fromString(it)
+            val response =
+                sakOgBehandlingApp
+                    .post("$url/behandlinger/opprettbehandling") {
+                        contentType(ContentType.Application.Json)
+                        setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
+                    }
+            if (!response.status.isSuccess()) {
+                throw FeiletVedOpprettBehandling(sakId)
+            }
+            UUID.fromString(response.body())
         }
 
     fun finnEllerOpprettSak(

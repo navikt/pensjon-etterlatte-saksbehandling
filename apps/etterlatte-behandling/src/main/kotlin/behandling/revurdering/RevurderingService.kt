@@ -201,6 +201,7 @@ class RevurderingService(
                 it,
                 leggInnGrunnlag = {
                     when (revurderingAarsak) {
+                        // TODO Omregning?
                         Revurderingaarsak.REGULERING ->
                             runBlocking {
                                 grunnlagService.laasTilGrunnlagIBehandling(
@@ -212,7 +213,15 @@ class RevurderingService(
                                     HardkodaSystembruker.opprettGrunnlag,
                                 )
                             }
-                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri, HardkodaSystembruker.opprettGrunnlag) }
+
+                        else ->
+                            runBlocking {
+                                grunnlagService.leggInnNyttGrunnlag(
+                                    it,
+                                    persongalleri,
+                                    HardkodaSystembruker.opprettGrunnlag,
+                                )
+                            }
                     }
                 },
                 sendMeldingForHendelse = {
@@ -224,7 +233,10 @@ class RevurderingService(
                 opprettOgTildelOppgave = {
                     if (paaGrunnAvOppgave != null) {
                         (
-                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(paaGrunnAvOppgave, it.id.toString())
+                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+                                paaGrunnAvOppgave,
+                                it.id.toString(),
+                            )
                         )
                     } else {
                         val oppgave =

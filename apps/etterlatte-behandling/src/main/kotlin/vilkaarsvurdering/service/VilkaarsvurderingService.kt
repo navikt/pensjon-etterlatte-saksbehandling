@@ -149,6 +149,7 @@ class VilkaarsvurderingService(
                 when {
                     behandling.revurderingsaarsak() == Revurderingaarsak.REGULERING ->
                         tidligereVilkaarsvurdering.vilkaar.kopier()
+
                     else ->
                         oppdaterVilkaar(
                             kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
@@ -173,7 +174,11 @@ class VilkaarsvurderingService(
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
             if (!kopierResultat ||
                 (
-                    behandling.revurderingsaarsak() != Revurderingaarsak.REGULERING &&
+                    !listOf(
+                        Revurderingaarsak.REGULERING,
+                        Revurderingaarsak.OMREGNING,
+                    ).contains(behandling.revurderingsaarsak()) &&
+                        //  TODO ??
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
@@ -252,7 +257,11 @@ class VilkaarsvurderingService(
                         logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
                         val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(behandling.sak.id)!!
                         VilkaarsvurderingMedBehandlingGrunnlagsversjon(
-                            kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo).vilkaarsvurdering,
+                            kopierVilkaarsvurdering(
+                                behandlingId,
+                                sisteIverksatteBehandling.id,
+                                brukerTokenInfo,
+                            ).vilkaarsvurdering,
                             grunnlag.metadata.versjon,
                         )
                     } else {

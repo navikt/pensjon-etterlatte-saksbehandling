@@ -6,11 +6,12 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingOgOppfoelging
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -32,32 +33,43 @@ class OmregningService(
 
     fun hentPersongalleri(id: UUID) = runBlocking { grunnlagService.hentPersongalleri(id) }
 
-    fun opprettOmregning(
+    suspend fun opprettOmregning(
         sakId: SakId,
         fraDato: LocalDate,
         revurderingAarsak: Revurderingaarsak,
         prosessType: Prosesstype,
         forrigeBehandling: Behandling,
-        persongalleri: Persongalleri,
         oppgavefrist: Tidspunkt?,
     ): RevurderingOgOppfoelging {
-        if (prosessType == Prosesstype.MANUELL) {
-            throw StoetterIkkeProsesstypeManuell()
+        val omregning =
+            inTransaction {
+                if (prosessType == Prosesstype.MANUELL) {
+                    throw StoetterIkkeProsesstypeManuell()
+                }
+
+                revurderingService.validerSakensTilstand(sakId, revurderingAarsak)
+                requireNotNull(
+                    revurderingService.opprettAutomatiskRevurdering(
+                        sakId = sakId,
+                        forrigeBehandling = forrigeBehandling,
+                        revurderingAarsak = revurderingAarsak,
+                        virkningstidspunkt = fraDato,
+                        kilde = Vedtaksloesning.GJENNY,
+                        persongalleri = hentPersongalleri(forrigeBehandling.id),
+                        frist = oppgavefrist,
+                    ),
+                ) { "Opprettelse av revurdering feilet for $sakId" }
+            }
+
+        return omregning.also {
+            retryOgPakkUt { it.leggInnGrunnlag() }
+            retryOgPakkUt {
+                inTransaction {
+                    it.opprettOgTildelOppgave()
+                }
+            }
+            retryOgPakkUt { it.sendMeldingForHendelse() }
         }
-
-        revurderingService.validerSakensTilstand(sakId, revurderingAarsak)
-
-        return requireNotNull(
-            revurderingService.opprettAutomatiskRevurdering(
-                sakId = sakId,
-                forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = revurderingAarsak,
-                virkningstidspunkt = fraDato,
-                kilde = Vedtaksloesning.GJENNY,
-                persongalleri = persongalleri,
-                frist = oppgavefrist,
-            ),
-        ) { "Opprettelse av revurdering feilet for $sakId" }
     }
 
     fun oppdaterKjoering(

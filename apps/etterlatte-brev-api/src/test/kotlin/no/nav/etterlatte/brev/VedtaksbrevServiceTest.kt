@@ -472,7 +472,7 @@ internal class VedtaksbrevServiceTest {
                 )
 
             runBlocking {
-                assertThrows<IllegalStateException> {
+                assertThrows<BrevManglerPDF> {
                     vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = ATTESTANT)
                 }
             }

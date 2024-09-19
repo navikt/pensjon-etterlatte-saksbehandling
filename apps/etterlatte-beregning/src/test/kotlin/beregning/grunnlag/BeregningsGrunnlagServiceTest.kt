@@ -259,6 +259,123 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
+    fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler`() {
+        val sakId = 1337L
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = emptyList(),
+            )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery {
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
+        } returns null
+
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns emptyList()
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
+        } returns grunnlagEndring
+
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        runBlocking {
+            assertThrows<ManglerForrigeGrunnlag> {
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning = emptyList(),
+                            institusjonsopphold = emptyList(),
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            }
+        }
+
+        coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+    }
+
+    @Test
+    fun `skal tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler pga overstyrt beregning`() {
+        val sakId = 1337L
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = emptyList(),
+            )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery {
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
+        } returns null
+
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns listOf(mockk<OverstyrBeregningGrunnlagDao>())
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
+        } returns grunnlagEndring
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        runBlocking {
+            val lagret =
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning = emptyList(),
+                            institusjonsopphold = emptyList(),
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            assertNotNull(lagret)
+        }
+
+        coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+    }
+
+    @Test
     fun `skal tillate endringer i beregningsgrunnlaget etter virk på revurdering`() {
         val sakId = 1337L
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)

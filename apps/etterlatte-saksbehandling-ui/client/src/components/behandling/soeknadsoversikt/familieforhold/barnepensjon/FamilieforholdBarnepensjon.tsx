@@ -23,6 +23,7 @@ export const FamilieforholdBarnepensjon = ({
   landListeResult,
   behandlingId,
 }: PropsFamilieforhold) => {
+  const enJuridiskForelderEnabled = useFeatureEnabledMedDefault('kun-en-registrert-juridisk-forelder', false)
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }
@@ -30,7 +31,6 @@ export const FamilieforholdBarnepensjon = ({
   const alleGjenlevende = personopplysninger.gjenlevende
   const alleAvdoede = personopplysninger.avdoede
   const familieforhold: Familieforhold = { avdoede: alleAvdoede, gjenlevende: alleGjenlevende, soeker: soeker }
-  const enJuridiskForelderEnabled = useFeatureEnabledMedDefault('kun-en-registrert-juridisk-forelder', false)
 
   return (
     <>

@@ -97,7 +97,7 @@ data class KnyttTilAnnenSakRequest(
     val bruker: Bruker,
     val fagsakId: String,
     val fagsaksystem: String,
-    val journalfoerendeEnhet: String,
+    val journalfoerendeEnhet: Enhetsnummer,
     val tema: String,
     val sakstype: Sakstype,
 )

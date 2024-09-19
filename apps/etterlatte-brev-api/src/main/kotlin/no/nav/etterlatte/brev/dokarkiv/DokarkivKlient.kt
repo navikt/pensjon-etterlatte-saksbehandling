@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import org.slf4j.LoggerFactory
@@ -59,7 +60,7 @@ class DokarkivKlient(
 
     internal suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        journalfoerendeEnhet: String,
+        journalfoerendeEnhet: Enhetsnummer,
     ): Boolean {
         val response =
             client.patch("$url/$journalpostId/ferdigstill") {
@@ -165,7 +166,7 @@ class DokarkivKlient(
 }
 
 data class FerdigstillJournalpostRequest(
-    val journalfoerendeEnhet: String,
+    val journalfoerendeEnhet: Enhetsnummer,
 )
 
 class KunneIkkeFerdigstilleJournalpost(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -21,7 +22,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -39,7 +40,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -65,7 +66,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -91,7 +92,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -117,7 +118,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -143,7 +144,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }
@@ -169,7 +170,7 @@ class SakTilgangDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer.nullable(getString("enhet")),
                 )
             }
         }

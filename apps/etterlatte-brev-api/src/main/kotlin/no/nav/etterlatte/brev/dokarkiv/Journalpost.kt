@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
@@ -9,7 +10,7 @@ interface OpprettJournalpost {
     val bruker: Bruker
     val dokumenter: List<JournalpostDokument>
     val eksternReferanseId: String
-    val journalfoerendeEnhet: String
+    val journalfoerendeEnhet: Enhetsnummer
     val journalposttype: JournalPostType
     val kanal: String?
     val sak: JournalpostSak
@@ -32,7 +33,7 @@ data class JournalpostRequest(
     override val bruker: Bruker,
     override val dokumenter: List<JournalpostDokument>,
     override val eksternReferanseId: String,
-    override val journalfoerendeEnhet: String,
+    override val journalfoerendeEnhet: Enhetsnummer,
     override val journalposttype: JournalPostType,
     override val kanal: String,
     override val sak: JournalpostSak,
@@ -64,7 +65,7 @@ data class OpprettNotatJournalpostRequest(
     override val bruker: Bruker,
     override val dokumenter: List<JournalpostDokument>,
     override val eksternReferanseId: String,
-    override val journalfoerendeEnhet: String,
+    override val journalfoerendeEnhet: Enhetsnummer,
     override val sak: JournalpostSak,
     override val tema: String,
     override val tittel: String,

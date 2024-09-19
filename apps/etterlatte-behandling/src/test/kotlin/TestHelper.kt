@@ -20,6 +20,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -175,7 +176,7 @@ fun mockSaksbehandler(
     harRolleAttestant: Boolean = false,
     harRolleStrengtFortrolig: Boolean = false,
     harRolleEgenAnsatt: Boolean = false,
-    enheter: List<String> = listOf(Enheter.defaultEnhet.enhetNr),
+    enheter: List<Enhetsnummer> = listOf(Enheter.defaultEnhet.enhetNr),
 ): SaksbehandlerMedEnheterOgRoller =
     mockk<SaksbehandlerMedEnheterOgRoller> {
         every { saksbehandlerMedRoller } returns
@@ -229,7 +230,7 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -268,7 +269,7 @@ fun revurdering(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,

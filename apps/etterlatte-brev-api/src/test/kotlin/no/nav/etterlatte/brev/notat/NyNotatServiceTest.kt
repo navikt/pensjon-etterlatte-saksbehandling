@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -68,7 +69,7 @@ internal class NyNotatServiceTest(
     fun `Hent og opprett notat for sak fungerer`() {
         val sakId = Random.nextLong()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
         assertEquals(0, nyNotatService.hentForSak(sakId).size)
 
@@ -101,7 +102,7 @@ internal class NyNotatServiceTest(
     fun `Oppdater tittel paa notat`() {
         val sakId = Random.nextLong()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
         val nyttNotat =
             runBlocking {
@@ -132,7 +133,7 @@ internal class NyNotatServiceTest(
     fun `Journalfoer notat`() {
         val sakId = Random.nextLong()
 
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
         coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
         coEvery { pdfGeneratorKlientMock.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()

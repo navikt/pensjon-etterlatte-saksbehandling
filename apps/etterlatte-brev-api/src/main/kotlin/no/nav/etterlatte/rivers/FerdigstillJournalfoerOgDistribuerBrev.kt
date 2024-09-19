@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -24,7 +25,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
         brevKode: Brevkoder,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
         brevId: BrevID,
     ): BrevID {
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")

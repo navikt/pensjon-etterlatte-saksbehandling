@@ -88,8 +88,8 @@ private fun samordningVedtak() =
         sak = VedtakSak(FNR_2, SakType.OMSTILLINGSSTOENAD, id = 15L),
         behandling = Behandling(BehandlingType.REVURDERING, id = UUID.randomUUID()),
         type = VedtakType.ENDRING,
-        vedtakFattet = VedtakFattet("SBH", "1014", Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
-        attestasjon = Attestasjon("SBH", "1014", Tidspunkt.now().minus(1, ChronoUnit.DAYS)),
+        vedtakFattet = VedtakFattet("SBH", ENHET_1, Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
+        attestasjon = Attestasjon("SBH", ENHET_1, Tidspunkt.now().minus(1, ChronoUnit.DAYS)),
         beregning = null,
         perioder = emptyList(),
     )

@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.toJson
@@ -37,7 +38,7 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
         brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
@@ -64,7 +65,7 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
         brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },

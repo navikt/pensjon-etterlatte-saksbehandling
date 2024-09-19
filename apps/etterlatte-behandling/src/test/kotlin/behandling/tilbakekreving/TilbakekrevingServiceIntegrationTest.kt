@@ -33,6 +33,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -84,7 +85,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private val saksbehandler = simpleSaksbehandler()
     private val attestant = simpleAttestant()
     private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
-    private val enhet = "123456"
+    private val enhet = Enheter.defaultEnhet.enhetNr
 
     @BeforeEach
     fun setUp() {
@@ -528,7 +529,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     private fun tilbakekrevingsvedtak(
         saksbehandler: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 1L,

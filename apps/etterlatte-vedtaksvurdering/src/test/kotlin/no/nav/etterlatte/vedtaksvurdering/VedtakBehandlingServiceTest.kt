@@ -319,7 +319,7 @@ internal class VedtakBehandlingServiceTest(
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = saksbehandler.ident,
-                        ansvarligEnhet = "",
+                        ansvarligEnhet = ENHET_1,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -1306,7 +1306,7 @@ internal class VedtakBehandlingServiceTest(
             val oppretta =
                 repository
                     .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, "0001", Tidspunkt.now())) }
+                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())) }
             Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
             val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
             Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)

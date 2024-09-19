@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -40,7 +41,7 @@ class BrukerServiceImpl(
 
         return when {
             tilknytning.ukjent -> {
-                Navkontor(navn = "Ukjent kontor", enhetNr = "ukjent enhetsnummer")
+                Navkontor(navn = "Ukjent kontor", enhetNr = Enhetsnummer.ukjent)
             }
 
             else -> {
@@ -48,7 +49,7 @@ class BrukerServiceImpl(
                 when {
                     tilknytning.harBareLandTilknytning() -> {
                         if (tilknytning.land!! == "NO") {
-                            Navkontor(navn = "Ukjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                            Navkontor(navn = "Ukjent kontor, men har Norge som landkode", enhetNr = Enhetsnummer.ukjent)
                         } else {
                             Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                         }

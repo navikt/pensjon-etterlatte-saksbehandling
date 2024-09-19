@@ -10,6 +10,7 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
@@ -38,7 +39,7 @@ data class GosysApiOppgave(
     val oppgavetype: String,
     val journalpostId: String?,
     val opprettetTidspunkt: Tidspunkt,
-    val tildeltEnhetsnr: String,
+    val tildeltEnhetsnr: Enhetsnummer,
     val tilordnetRessurs: String?,
     val beskrivelse: String?,
     val status: String,
@@ -61,7 +62,7 @@ interface GosysOppgaveKlient {
         aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String? = null,
+        enhetsnr: Enhetsnummer? = null,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver
@@ -119,7 +120,7 @@ class GosysOppgaveKlientImpl(
         aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {

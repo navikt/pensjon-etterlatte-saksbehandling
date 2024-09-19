@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.mottakerFraAdresse
 import no.nav.etterlatte.brev.model.tomMottaker
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -74,6 +75,6 @@ class AdresseService(
 
 data class AvsenderRequest(
     val saksbehandlerIdent: String,
-    val sakenhet: String,
+    val sakenhet: Enhetsnummer,
     val attestantIdent: String? = null,
 )

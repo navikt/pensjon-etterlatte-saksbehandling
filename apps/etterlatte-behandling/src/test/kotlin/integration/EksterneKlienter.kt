@@ -32,6 +32,7 @@ import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkResponse
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -224,24 +225,24 @@ class VedtakKlientTest : VedtakKlient {
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long = 123L
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long = 123L
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 123L,
             fattetAv = "saksbehandler",
-            enhet = "enhet",
+            enhet = Enheter.defaultEnhet.enhetNr,
             dato = LocalDate.now(),
         )
 
@@ -424,7 +425,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver = GosysOppgaver(0, emptyList())
@@ -460,7 +461,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             "",
             null,
             Tidspunkt.now(),
-            "4808",
+            Enheter.PORSGRUNN.enhetNr,
             null,
             "beskrivelse",
             "NY",
@@ -487,7 +488,7 @@ class Norg2KlientTest : Norg2Klient {
     override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
         listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
-    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", "4808")
+    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {

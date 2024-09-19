@@ -13,6 +13,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
@@ -222,7 +223,7 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
         sakType: SakType,
-    ): String =
+    ): Enhetsnummer =
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr

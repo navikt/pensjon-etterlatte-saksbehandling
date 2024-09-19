@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
@@ -52,7 +53,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
                     behandlingId = hentBehandling(packet),
-                    ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
+                    ansvarligEnhet = Enhetsnummer(packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()),
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
@@ -90,6 +91,6 @@ data class VedtakTilJournalfoering(
     val vedtakId: Long,
     val sak: VedtakSak,
     val behandlingId: UUID,
-    val ansvarligEnhet: String,
+    val ansvarligEnhet: Enhetsnummer,
     val saksbehandler: String,
 )

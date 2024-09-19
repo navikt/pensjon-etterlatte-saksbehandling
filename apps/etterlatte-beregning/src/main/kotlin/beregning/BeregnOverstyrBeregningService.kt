@@ -67,6 +67,7 @@ class BeregnOverstyrBeregningService(
             opprettOverstyrGrunnlag(
                 beregningsGrunnlag,
                 virkningstidspunkt.atDay(1),
+                behandling.opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth(),
             )
 
         return when (behandlingType) {
@@ -78,6 +79,7 @@ class BeregnOverstyrBeregningService(
                     beregningsGrunnlag = overstyrGrunnlag,
                     virkningstidspunkt = virkningstidspunkt,
                     overstyrBeregning = overstyrBeregning,
+                    opphoerFraOgMed = behandling.opphoerFraOgMed,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -94,6 +96,7 @@ class BeregnOverstyrBeregningService(
                             beregningsGrunnlag = overstyrGrunnlag,
                             virkningstidspunkt = virkningstidspunkt,
                             overstyrBeregning = overstyrBeregning,
+                            opphoerFraOgMed = behandling.opphoerFraOgMed,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
@@ -104,6 +107,7 @@ class BeregnOverstyrBeregningService(
                             beregningsGrunnlag = opprettOverstyrGrunnlagOpphoer(beregningsGrunnlag, virkningstidspunkt.atDay(1)),
                             virkningstidspunkt = virkningstidspunkt,
                             overstyrBeregning = overstyrBeregning,
+                            opphoerFraOgMed = behandling.opphoerFraOgMed,
                         )
                     }
                 }
@@ -114,6 +118,7 @@ class BeregnOverstyrBeregningService(
     private fun opprettOverstyrGrunnlag(
         beregningsGrunnlag: OverstyrBeregningGrunnlag,
         fom: LocalDate,
+        tom: LocalDate?,
     ) = PeriodisertOverstyrGrunnlag(
         overstyrGrunnlag =
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
@@ -126,7 +131,7 @@ class BeregnOverstyrBeregningService(
                         )
                     },
                 virkFom = fom,
-                tom = null,
+                tom = tom,
             ),
     )
 
@@ -155,6 +160,7 @@ class BeregnOverstyrBeregningService(
             kilde = beregningsGrunnlag.kilde,
         ),
         fom,
+        null,
     )
 
     private fun beregnOverstyr(
@@ -164,11 +170,12 @@ class BeregnOverstyrBeregningService(
         beregningsGrunnlag: PeriodisertOverstyrGrunnlag,
         virkningstidspunkt: YearMonth,
         overstyrBeregning: OverstyrBeregning,
+        opphoerFraOgMed: YearMonth?,
     ): Beregning {
         val resultat =
             beregnOverstyrRegel.eksekver(
                 grunnlag = beregningsGrunnlag,
-                periode = RegelPeriode(virkningstidspunkt.atDay(1)),
+                periode = RegelPeriode(virkningstidspunkt.atDay(1), opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth()),
             )
 
         val beregnetDato = Tidspunkt.now()

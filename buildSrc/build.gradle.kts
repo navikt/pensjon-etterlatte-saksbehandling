@@ -19,7 +19,7 @@ dependencies {
 
 tasks {
     withType<Wrapper> {
-        gradleVersion = "8.10"
+        gradleVersion = "8.10.1"
     }
     kotlin {
         compilerOptions {

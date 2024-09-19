@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.mockk.mockk
+import kotliquery.Session
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import java.sql.Connection
@@ -40,5 +41,10 @@ class ConnectionAutoclosingTest(
         } else {
             val activeTx = DatabaseContextTest(dataSource).activeTx()
             block(activeTx).also { activeTx.close() }
+        }
+
+    override fun <T> hentKotliquerySession(block: (session: Session) -> T): T =
+        hentConnection { connection: Connection ->
+            block(Session(kotliquery.Connection(connection)))
         }
 }

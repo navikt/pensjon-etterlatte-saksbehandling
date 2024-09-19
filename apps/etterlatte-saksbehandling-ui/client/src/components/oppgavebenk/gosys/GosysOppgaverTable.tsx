@@ -81,8 +81,8 @@ export const GosysOppgaverTable = ({ oppgaver, saksbehandlereIEnhet, setSorterin
           <Table.ColumnHeader scope="col" sortKey={SortKey.FNR} sortable>
             Fødselsnummer
           </Table.ColumnHeader>
-          <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
           <Table.HeaderCell scope="col">Tema</Table.HeaderCell>
+          <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
           <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
           <Table.HeaderCell scope="col">Status</Table.HeaderCell>
           <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>

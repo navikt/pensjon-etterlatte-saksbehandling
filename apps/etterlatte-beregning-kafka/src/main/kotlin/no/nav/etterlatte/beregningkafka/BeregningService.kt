@@ -53,7 +53,7 @@ class BeregningService(
 
     fun hentAvkorting(behandlingId: UUID) =
         runBlocking {
-            beregningApp.get("$url/api/beregning/avkorting/$behandlingId")
+            beregningApp.get("$url/api/beregning/avkorting/$behandlingId/ferdig")
         }
 
     suspend fun hentGrunnbeloep(): Grunnbeloep =

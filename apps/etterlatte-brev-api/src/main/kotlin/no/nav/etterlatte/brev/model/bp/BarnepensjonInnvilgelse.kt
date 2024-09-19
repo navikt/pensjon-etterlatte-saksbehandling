@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -25,6 +26,7 @@ data class BarnepensjonInnvilgelse(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
+    val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
@@ -52,16 +54,21 @@ data class BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
                     barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                erGjenoppretting = erGjenoppretting,
+                erMigrertYrkesskade = erMigrertYrkesskade,
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk =
+                    brevutfall.frivilligSkattetrekk
+                        ?: throw InternfeilException(
+                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
+                        ),
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                erGjenoppretting = erGjenoppretting,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

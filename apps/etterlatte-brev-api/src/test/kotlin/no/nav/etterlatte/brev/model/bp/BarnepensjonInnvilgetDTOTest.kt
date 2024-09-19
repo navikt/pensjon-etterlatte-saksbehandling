@@ -108,6 +108,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                             FeilutbetalingValg.NEI,
                             null,
                         ),
+                        frivilligSkattetrekk = true,
                         null,
                     ),
                 erGjenoppretting = false,

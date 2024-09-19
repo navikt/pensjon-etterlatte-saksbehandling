@@ -1,0 +1,7 @@
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-02-29' where id = '15814975-579c-47c8-bee5-fa4ca0bc5b03' and behandlings_id = '2b117db0-23c6-4617-a656-334cf24d1239' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-11-30' where id = '252f1bba-400a-429e-a8c5-db815b7b2d5e' and behandlings_id = '2d102af9-a02d-4e4d-bb17-bf0d354fc2e0' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-11-30' where id = '4f9fc39d-b049-4ff2-b9ae-97eeb16800fe' and behandlings_id = '32236123-621b-46d1-bfd7-11f971cd3642' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-08-31' where id = 'cd4fffc3-85d0-42ba-99db-6d279de19287' and behandlings_id = '56ffd095-1769-4ac7-a900-0c0a8e2c7885' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-08-31' where id = '0025d229-11a7-44fb-94f2-fb7be41549e7' and behandlings_id = 'aa0fba55-1237-4961-968d-42d385fa2c74' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-08-31' where id = '014d000c-5225-4ef1-9fb5-85e3f8fb5ca2' and behandlings_id = 'c2d12fd1-9efa-4703-93fe-fbfc0a0e43bf' and dato_til_og_med is null;
+UPDATE overstyr_beregningsgrunnlag SET dato_til_og_med = '2024-07-31' where id = '820fbb68-478e-4d2d-8195-78e1028af8c1' and behandlings_id = 'dfad57ca-bdc9-4764-8cf0-e23713a26e4c' and dato_til_og_med is null;

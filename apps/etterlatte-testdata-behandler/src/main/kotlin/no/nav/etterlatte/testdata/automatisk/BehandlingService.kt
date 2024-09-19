@@ -192,6 +192,7 @@ class BehandlingService(
                                 behandlingId = behandling,
                                 aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
                                 feilutbetaling = null,
+                                frivilligSkattetrekk = null,
                                 kilde = null,
                             ),
                     ),

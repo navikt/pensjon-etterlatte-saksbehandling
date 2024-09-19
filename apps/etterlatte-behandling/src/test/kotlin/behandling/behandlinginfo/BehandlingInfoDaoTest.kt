@@ -147,6 +147,7 @@ internal class BehandlingInfoDaoTest(
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
+            frivilligSkattetrekk = true,
         )
 
     private fun etterbetaling(behandlingId: UUID) =

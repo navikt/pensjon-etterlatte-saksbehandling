@@ -78,6 +78,16 @@ fun Route.personRoute(service: PersonService) {
         }
     }
 
+    route("aktoerid") {
+        post {
+            val ident = call.receive<HentPdlIdentRequest>()
+
+            val aktoerId = service.hentAktoerId(ident)
+
+            call.respond(aktoerId)
+        }
+    }
+
     route("geografisktilknytning") {
         post {
             val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()

@@ -84,7 +84,9 @@ data class Periode(
     val tom: YearMonth?,
 ) {
     init {
-        require(isNull(tom) || fom == tom || fom.isBefore(tom))
+        require(isNull(tom) || fom == tom || fom.isBefore(tom)) {
+            "Fom må vera før eller lik tom, men fom er $fom og tom er $tom"
+        }
     }
 }
 

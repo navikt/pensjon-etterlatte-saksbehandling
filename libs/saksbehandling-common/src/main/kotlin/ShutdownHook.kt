@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import org.slf4j.LoggerFactory
 import java.util.Timer
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -9,6 +10,8 @@ class ShutdownInProgressException(
 ) : Exception(detail, cause)
 
 val shuttingDown: AtomicBoolean = AtomicBoolean(false)
+
+val logger = LoggerFactory.getLogger("shutdownhookLogger")
 
 fun addShutdownHook(timers: Collection<Timer>) = addShutdownHook(*timers.toTypedArray())
 
@@ -21,6 +24,6 @@ fun addShutdownHook(vararg timer: Timer) {
             },
         )
     } catch (e: IllegalStateException) {
-        throw ShutdownInProgressException("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
+        logger.warn("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
     }
 }

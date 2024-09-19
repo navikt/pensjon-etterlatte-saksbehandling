@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig
 import no.nav.etterlatte.tilgangsstyring.AzureKey
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -33,7 +34,7 @@ abstract class BehandlingIntegrationTest {
         private val dbExtension = DatabaseExtension()
     }
 
-    protected val server: MockOAuth2Server = MockOAuth2Server()
+    protected val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
     protected val saksbehandlerIdent = "Saksbehandler01"
@@ -48,8 +49,9 @@ abstract class BehandlingIntegrationTest {
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
+        vilkvurderingdao: VilkaarsvurderingRepository? = null,
     ) {
-        server.start()
+        mockOAuth2Server.start()
         val props = dbExtension.properties()
 
         var systemEnv = Miljoevariabler.systemEnv()
@@ -134,7 +136,7 @@ abstract class BehandlingIntegrationTest {
 
     protected fun afterAll() {
         applicationContext.close()
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     protected fun HttpRequestBuilder.addAuthToken(token: String) {
@@ -142,7 +144,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerIdent,
             groups = listOf(azureAdAttestantClaim),
@@ -150,7 +152,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenAttestant: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = attestantIdent,
             groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
@@ -158,7 +160,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
@@ -171,7 +173,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerSkjermetIdent,
             groups =
@@ -183,7 +185,7 @@ abstract class BehandlingIntegrationTest {
         )
     }
 
-    protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
+    protected val systemBruker: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 }
 
 enum class TestEnvKey : EnvEnum {

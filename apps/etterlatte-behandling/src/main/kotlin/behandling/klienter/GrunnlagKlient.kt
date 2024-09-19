@@ -7,8 +7,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -95,6 +97,12 @@ interface GrunnlagKlient : Pingable {
         id: UUID,
         forrigeBehandling: UUID,
     )
+
+    suspend fun hentPersonopplysningerForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
+    ): PersonopplysningerResponse
 }
 
 class GrunnlagKlientException(
@@ -285,6 +293,27 @@ class GrunnlagKlientImpl(
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { _ -> },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
+
+    override suspend fun hentPersonopplysningerForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
+    ): PersonopplysningerResponse {
+        logger.info("Henter personopplysninger for behandling med id=$behandlingId")
+
+        return downstreamResourceClient
+            .get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/personopplysninger?sakType=$sakType",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response!!.let { objectMapper.readValue(it.toString()) } },
                 failure = { errorResponse -> throw errorResponse },
             )
     }

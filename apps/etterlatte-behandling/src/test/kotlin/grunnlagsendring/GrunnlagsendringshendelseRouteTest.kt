@@ -47,7 +47,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 

@@ -56,7 +56,6 @@ data class RelatertPerson(
 data class RedigertFamilieforhold(
     val avdoede: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList(),
-    val annenForelder: AnnenForelder?,
 )
 
 data class AnnenForelder(

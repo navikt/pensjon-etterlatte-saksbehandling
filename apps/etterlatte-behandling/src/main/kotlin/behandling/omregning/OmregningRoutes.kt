@@ -10,8 +10,6 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -35,25 +33,13 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
         post("manuell/{$SAKID_CALL_PARAMETER}") {
             logger.info("Manuell omregning av sak $sakId")
             val request = call.receive<ManuellOmregningDto>()
-            val omregning =
-                Omregningshendelse(
-                    sakId = sakId,
-                    fradato = request.fraDato,
-                    prosesstype = Prosesstype.AUTOMATISK,
-                    revurderingaarsak = Revurderingaarsak.OMREGNING,
-                )
-            kunSkrivetilgang(sakId = omregning.sakId) {
-                val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(omregning.sakId) }
-                val revurderingOgOppfoelging =
-                    omregningService.opprettOmregning(
-                        sakId = omregning.sakId,
-                        fraDato = omregning.fradato,
-                        revurderingAarsak = omregning.revurderingaarsak,
-                        prosessType = omregning.prosesstype,
-                        forrigeBehandling = forrigeBehandling,
-                        oppgavefrist = omregning.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
-                    )
-                // TODO send melding
+
+            // TODO nekte hvis åpen behandling?
+            // TODO nekte hvis overstyrt beregning?
+
+            kunSkrivetilgang(sakId = sakId) {
+                val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(sakId) }
+                omregningService.opprettOmregningManuelt(sakId, request.fraDato, forrigeBehandling)
                 call.respond(HttpStatusCode.OK)
             }
         }

@@ -42,6 +42,7 @@ class OmregningServiceTest(
                 grunnlagService = mockk(),
                 revurderingService = mockk(),
                 omregningDao = OmregningDao(connection),
+                rapid = mockk(),
             )
 
         val request =

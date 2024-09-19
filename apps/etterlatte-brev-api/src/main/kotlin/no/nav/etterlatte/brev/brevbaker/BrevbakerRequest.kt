@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.Brevbakerkode
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
@@ -39,7 +38,6 @@ data class BrevbakerRequest internal constructor(
                         avsender = avsender,
                         vergeNavn =
                             finnVergesNavn(
-                                brevKode,
                                 soekerOgEventuellVerge,
                                 sakType,
                             ),
@@ -48,20 +46,14 @@ data class BrevbakerRequest internal constructor(
             )
 
         private fun finnVergesNavn(
-            brevKode: Brevbakerkode,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,
-        ): String? {
-            val harVerge = harVerge(soekerOgEventuellVerge, sakType)
-            return if (erMigrering(brevKode) && harVerge) {
+        ): String? =
+            if (harVerge(soekerOgEventuellVerge, sakType)) {
                 soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge"
-            } else if (harVerge) {
-                soekerOgEventuellVerge.verge?.navn()
-                    ?: (soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge")
             } else {
                 null
             }
-        }
 
         private fun harVerge(
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
@@ -72,14 +64,6 @@ data class BrevbakerRequest internal constructor(
                 sakType == SakType.BARNEPENSJON && soekerOgEventuellVerge.soeker.under18 != false
             return soekerOgEventuellVerge.verge != null || skalHaForelderVerge
         }
-
-        private fun erMigrering(brevKode: Brevbakerkode): Boolean =
-            brevKode in
-                listOf(
-                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
-                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
-                )
     }
 }
 

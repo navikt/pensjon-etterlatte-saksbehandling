@@ -18,16 +18,16 @@ import org.junit.jupiter.api.Test
 
 class BrevbakerRequestTest {
     @Test
-    fun `skal sette verges navn naar den finnes`() {
+    fun `skal ikke sette verges navn men barnets navn ved verge`() {
         val request =
             brevbakerRequest(
                 soekerOgEventuellVerge =
                     SoekerOgEventuellVerge(
-                        Soeker("", "", "", Foedselsnummer("08498224343"), null, true, true),
+                        Soeker("Sverre", "Solli", "Sand", Foedselsnummer("08498224343"), null, true, true),
                         Vergemaal("Palle Poulsen", Folkeregisteridentifikator.of("09498230323")),
                     ),
             )
-        request.felles.vergeNavn shouldBe "Palle Poulsen"
+        request.felles.vergeNavn shouldBe "Sverre Solli Sand ved verge"
     }
 
     @Test

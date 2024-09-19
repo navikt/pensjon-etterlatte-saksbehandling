@@ -25,9 +25,9 @@ internal class AxsysKlientTest {
 
         val saksbehandlerEnheter =
             listOf(
-                SaksbehandlerEnhet(Enhetsnummer("1"), "navn1"),
-                SaksbehandlerEnhet(Enhetsnummer("2"), "navn2"),
-                SaksbehandlerEnhet(Enhetsnummer("3"), "navn3"),
+                SaksbehandlerEnhet(Enhetsnummer("1111"), "navn1"),
+                SaksbehandlerEnhet(Enhetsnummer("2222"), "navn2"),
+                SaksbehandlerEnhet(Enhetsnummer("3333"), "navn3"),
             )
 
         val klient =

@@ -5,6 +5,12 @@ import com.fasterxml.jackson.annotation.JsonValue
 data class Enhetsnummer(
     @JsonValue val enhetNr: String,
 ) {
+    init {
+        require(enhetNr.length == 4 && enhetNr.toIntOrNull() != null) {
+            "Enhetsnummer må være et firesifret tall, men var $enhetNr"
+        }
+    }
+
     companion object {
         val ukjent = Enhetsnummer("-001")
 

@@ -54,7 +54,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
         success: (soekeren) =>
           (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
             <Alert variant="info" size="small" inline>
-              Søker har verge
+              Brevet skal sendes til verge. Registrer riktig adresse.
             </Alert>
           ),
       })}

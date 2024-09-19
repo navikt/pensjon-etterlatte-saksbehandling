@@ -231,7 +231,6 @@ class OppgaveService(
             hentOppgaverForReferanse(referanse)
                 .filter { it.type == type }
                 .filter { it.status in listOf(Status.UNDER_BEHANDLING, Status.UNDERKJENT) }
-        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
 
         if (oppgaver.isEmpty()) {
             throw ManglerOppgaveUnderBehandling("Ingen oppgave funnet for referanse: $referanse")
@@ -247,6 +246,7 @@ class OppgaveService(
         if (frist != null) {
             oppgaveDao.redigerFrist(oppgave.id, frist)
         } else {
+            val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
             oppgaveDao.redigerFrist(oppgave.id, toDagerFremITid)
         }
 

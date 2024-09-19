@@ -3,7 +3,7 @@ import {
   AktivitetspliktOppfolging,
   IAktivitet,
   IAktivitetspliktVurdering,
-  IAktivitetspliktVurderingNy,
+  IPerodisertAktivitetspliktVurdering,
   IOpprettAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
@@ -56,7 +56,8 @@ export const slettAktivitetForSak = async (args: {
 
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> => apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
+}): Promise<ApiResponse<IPerodisertAktivitetspliktVurdering>> =>
+  apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
 
 export const hentAktivitspliktVurderingForOppgave = async (args: {
   sakId: number

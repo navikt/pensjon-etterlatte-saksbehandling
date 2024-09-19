@@ -34,7 +34,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
   }, [])
 
   return (
-    <Box padding="8" maxWidth="70rem">
+    <Box padding="8" maxWidth="90rem">
       <VStack gap="8">
         <VStack gap="4">
           <Heading size="medium">Aktivitetsplikt</Heading>

@@ -74,7 +74,7 @@ export interface IAktivitetspliktVurdering {
   unntak?: IAktivitetspliktUnntak
 }
 
-export interface IPerodisertAktivitetspliktVurdering {
+export interface IAktivitetspliktVurderingNy {
   aktivitet?: IAktivitetspliktAktivitetsgrad[]
   unntak?: IAktivitetspliktUnntak[]
 }

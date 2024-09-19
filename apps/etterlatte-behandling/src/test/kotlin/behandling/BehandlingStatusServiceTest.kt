@@ -147,7 +147,6 @@ internal class BehandlingStatusServiceTest {
                 behandlingId.toString(),
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 any<String>(),
-                null,
             )
         }
     }

@@ -65,7 +65,7 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns ""
+        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
 
         val melding =
             JsonMessage

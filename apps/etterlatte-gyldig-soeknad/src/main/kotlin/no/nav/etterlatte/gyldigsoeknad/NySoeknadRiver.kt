@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -16,6 +17,9 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -26,6 +30,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
@@ -71,7 +76,7 @@ internal class NySoeknadRiver(
                 logger.info("Søkeren på søknad=$soeknadId har ugyldig fødselsnummer – sendes til manuell behandling")
                 journalfoerSoeknadService.opprettJournalpostForUkjent(soeknadId, sakType, soeknad)?.also {
                     logger.info("Journalførte søknaden på ukjent bruker (journalpostId=${it.journalpostId})")
-                    context.publish(packet.oppdaterMed(null, it).toJson())
+                    context.publish(packet.oppdaterMed(null, false, it).toJson())
                 }
                 return
             }
@@ -84,12 +89,26 @@ internal class NySoeknadRiver(
             }
 
             val journalpostResponse = journalfoerSoeknadService.opprettJournalpost(soeknadId, sak, soeknad)
-
             if (journalpostResponse == null) {
                 logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
-                return
+                return // Avbryt behandling av søknad
+            }
+
+            val harBehandlingUnderArbeid =
+                behandlingKlient
+                    .hentSakMedBehandlinger(sak.id)
+                    .behandlinger
+                    .any { it.status in BehandlingStatus.underBehandling() }
+
+            if (harBehandlingUnderArbeid) {
+                /**
+                 * Opprett oppgave for tilleggsinformasjon
+                 * Sett fordelt til false slik at det ikke opprettes ny behandling.
+                 **/
+                opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
+                context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {
-                context.publish(packet.oppdaterMed(sak.id, journalpostResponse).toJson())
+                context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
             }
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
@@ -99,6 +118,28 @@ internal class NySoeknadRiver(
             logger.error("Uhåndtert feilsituasjon soeknadId: $soeknadId", e)
             throw e
         }
+    }
+
+    /**
+     * Oppretter en oppgave i stedet for ny behandling dersom det allerede finnes en pågående behandling.
+     * På denne måten unngår vi duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for
+     * å sende tilleggsinformasjon.
+     **/
+    private fun opprettOppgaveTilleggsinformasjon(
+        sakId: Long,
+        journalpostId: String,
+    ): UUID {
+        val nyOppgaveDto =
+            NyOppgaveDto(
+                oppgaveKilde = OppgaveKilde.BRUKERDIALOG,
+                oppgaveType = OppgaveType.TILLEGGSINFORMASJON,
+                merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                referanse = journalpostId,
+            )
+
+        return behandlingKlient
+            .opprettOppgave(sakId, nyOppgaveDto)
+            .also { logger.info("Opprettet ny oppgave ${OppgaveType.TILLEGGSINFORMASJON} for sak=$sakId") }
     }
 
     private fun finnEllerOpprettSak(
@@ -120,6 +161,7 @@ internal class NySoeknadRiver(
 
     private fun JsonMessage.oppdaterMed(
         sakId: SakId?,
+        soeknadFordelt: Boolean,
         journalpostResponse: OpprettJournalpostResponse,
     ): JsonMessage =
         this.apply {
@@ -129,7 +171,7 @@ internal class NySoeknadRiver(
                 this[GyldigSoeknadVurdert.sakIdKey] = sakId
             }
 
-            this[FordelerFordelt.soeknadFordeltKey] = sakId != null
+            this[FordelerFordelt.soeknadFordeltKey] = soeknadFordelt
             this[GyldigSoeknadVurdert.dokarkivReturKey] = journalpostResponse
         }
 

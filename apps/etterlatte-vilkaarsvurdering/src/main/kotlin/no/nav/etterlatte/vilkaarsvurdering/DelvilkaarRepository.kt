@@ -99,9 +99,9 @@ class DelvilkaarRepository {
         tx: TransactionalSession,
     ) = queryOf(
         statement = """
-            INSERT INTO vilkaarsvurdering.delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, 
+            INSERT INTO vilkaarsvurdering.delvilkaar(id, vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, 
                 ledd, bokstav, lenke, resultat) 
-            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :spoersmaal, :paragraf, :ledd, 
+            VALUES(uuid_generate_v4(), :vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :spoersmaal, :paragraf, :ledd, 
                 :bokstav, :lenke, :resultat)
         """,
         paramMap =

@@ -25,7 +25,6 @@ export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | unde
           <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
           <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
         </Table.Header>
-
         <Table.Body>
           {!!unntaker?.length ? (
             <>

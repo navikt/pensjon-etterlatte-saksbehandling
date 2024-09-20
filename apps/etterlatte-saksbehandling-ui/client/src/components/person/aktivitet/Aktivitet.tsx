@@ -61,57 +61,12 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
         {mapResult(hentAktivitetspliktVurderingForSakResult, {
           pending: <Spinner label="Henter vurderinger..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
-          success: (aktivitetspliktVurdering) => (
-            <>
-              {aktivitetspliktVurdering ? (
-                <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
-              ) : (
-                //   <VStack gap="4">
-                //     <Heading size="xsmall">Unntak</Heading>
-                //     <Table size="small">
-                //       <Table.Header>
-                //         <Table.Row>
-                //           <Table.HeaderCell scope="col">Unntak</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Sist endret</Table.HeaderCell>
-                //           <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-                //         </Table.Row>
-                //       </Table.Header>
-                //       <Table.Body>
-                //         {!!aktivitetspliktVurdering.unntak?.length ? (
-                //           <>
-                //             {aktivitetspliktVurdering.unntak.map((unntak) => (
-                //               <Table.Row key={unntak.id}>
-                //                 <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
-                //                 <Table.DataCell>
-                //                   <AktivitetspliktUnntakTypeTag unntak={unntak.unntak} />
-                //                 </Table.DataCell>
-                //                 <Table.DataCell>{unntak.fom ? formaterDato(unntak.fom) : '-'}</Table.DataCell>
-                //                 <Table.DataCell>{unntak.tom ? formaterDato(unntak.tom) : '-'}</Table.DataCell>
-                //                 <Table.DataCell>{unntak.beskrivelse ? unntak.beskrivelse : '-'}</Table.DataCell>
-                //                 <Table.DataCell>
-                //                   {unntak.endret && formaterDatoMedFallback(unntak.endret.tidspunkt, '-')}
-                //                 </Table.DataCell>
-                //                 <Table.DataCell>{unntak.endret.ident ? unntak.endret.ident : '-'}</Table.DataCell>
-                //               </Table.Row>
-                //             ))}
-                //           </>
-                //         ) : (
-                //           <Table.Row>
-                //             <Table.DataCell colSpan={7}>Finner ingen unntak</Table.DataCell>
-                //           </Table.Row>
-                //         )}
-                //       </Table.Body>
-                //     </Table>
-                //   </VStack>
-                // </VStack>
-                <BodyShort>Ingen vurdering</BodyShort>
-              )}
-            </>
-          ),
+          success: (aktivitetspliktVurdering) =>
+            aktivitetspliktVurdering ? (
+              <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
+            ) : (
+              <BodyShort>Ingen vurdering</BodyShort>
+            ),
         })}
       </VStack>
     </Box>

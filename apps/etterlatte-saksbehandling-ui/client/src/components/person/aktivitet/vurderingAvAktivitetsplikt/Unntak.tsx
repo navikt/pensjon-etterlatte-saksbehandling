@@ -1,8 +1,7 @@
 import React from 'react'
 import { IAktivitetspliktUnntak, tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { HandShakeHeartIcon } from '@navikt/aksel-icons'
-import { UnntakReadMore } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/components/UnntakReadMore'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
@@ -14,7 +13,12 @@ export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | unde
         <Heading size="small">Unntak</Heading>
       </HStack>
 
-      <UnntakReadMore />
+      <Box maxWidth="42.5rem">
+        <ReadMore header="Dette menes med unntak">
+          I oversikten over unntak ser du hvilke unntak som er satt på den gjenlevende. Det finnes både midlertidige og
+          varige unntak
+        </ReadMore>
+      </Box>
 
       <Table size="small">
         <Table.Header>

@@ -1,8 +1,7 @@
 import React from 'react'
 import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, Heading, HStack, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { ClockDashedIcon } from '@navikt/aksel-icons'
-import { AktivitetsgradReadMore } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/components/AktivitetsgradReadMore'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
 export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] | undefined }) => {
@@ -13,7 +12,14 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
         <Heading size="small">Aktivitetsgrad</Heading>
       </HStack>
 
-      <AktivitetsgradReadMore />
+      <Box maxWidth="42.5rem">
+        <ReadMore header="Dette menes med aktivitetsgrad">
+          I oversikten over aktivitetsgrad kan du se hvilken aktivitetsgrad brukeren har hatt. For å motta
+          omstillingsstønad stilles det ingen krav til aktivitet de første seks månedene etter dødsfall. Etter seks
+          måneder forventes det at du er i minst 50 % aktivitet, og etter ett år og fremover forventes det 100 %
+          aktivitet. Vær oppmerksom på at det finnes unntak.
+        </ReadMore>
+      </Box>
 
       <Table size="small">
         <Table.Header>

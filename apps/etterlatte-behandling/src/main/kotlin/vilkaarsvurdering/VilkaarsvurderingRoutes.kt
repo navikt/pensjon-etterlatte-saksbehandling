@@ -97,10 +97,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             } catch (_: VirkningstidspunktIkkeSattException) {
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
-            } catch (_: BehandlingstilstandException) {
+            } catch (e: BehandlingstilstandException) {
                 logger.error(
                     "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
                         "Statussjekk for behandling feilet",
+                    e,
                 )
                 call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
             }
@@ -170,6 +171,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.error(
                     "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
                         "Statussjekk for behandling feilet",
+                    e,
                 )
                 call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
             } catch (e: VilkaarsvurderingTilstandException) {
@@ -202,10 +204,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
-                } catch (_: BehandlingstilstandException) {
+                } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
                             "Statussjekk for behandling feilet",
+                        e,
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 } catch (e: VilkaarsvurderingTilstandException) {
@@ -224,10 +227,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             try {
                 inTransaction { vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo) }
                 call.respond(HttpStatusCode.OK)
-            } catch (_: BehandlingstilstandException) {
+            } catch (e: BehandlingstilstandException) {
                 logger.error(
                     "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
                         "Statussjekk feilet for behandling feilet",
+                    e,
                 )
                 call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
             }
@@ -257,10 +261,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             behandlingGrunnlagversjon,
                         ),
                     )
-                } catch (_: BehandlingstilstandException) {
+                } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
                             "Statussjekk for behandling feilet",
+                        e,
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 }
@@ -282,10 +287,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
-                } catch (_: BehandlingstilstandException) {
+                } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke slette vilkårsvurderingsresultat for behandling $behandlingId. " +
                             "Statussjekk feilet for behandling feilet",
+                        e,
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 }

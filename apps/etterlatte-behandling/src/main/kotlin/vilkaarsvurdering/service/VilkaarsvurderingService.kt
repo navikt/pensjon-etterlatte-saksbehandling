@@ -378,8 +378,8 @@ class VilkaarsvurderingService(
     ): T {
         try {
             behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo)
-        } catch (_: Exception) {
-            throw BehandlingstilstandException() // Denne er liksom vekk men catches i vv routes
+        } catch (e: Exception) {
+            throw BehandlingstilstandException(e) // Denne er liksom vekk men catches i vv routes
         }
         return block()
     }
@@ -412,7 +412,9 @@ class VilkaarsvurderingService(
     }
 }
 
-class BehandlingstilstandException : IllegalStateException()
+class BehandlingstilstandException(
+    e: Exception? = null,
+) : IllegalStateException(e)
 
 class VilkaarsvurderingTilstandException(
     message: String,

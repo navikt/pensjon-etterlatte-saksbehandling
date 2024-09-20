@@ -9,7 +9,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import org.slf4j.Logger
 
 class StatusPagesKonfigurasjon(
@@ -73,7 +73,19 @@ class StatusPagesKonfigurasjon(
         status(*statusCodes4xx) { call, code ->
             routeLogger.debug("Fikk kode {}", code)
             when (code) {
-                HttpStatusCode.NotFound -> call.respond(GenerellIkkeFunnetException())
+                HttpStatusCode.NotFound -> {
+                    call.application.log.warn(
+                        "Forespurt URI (${skjulAllePotensielleFnr(call.request.uri)}) " +
+                            "returnerte kode 404, ruten er enten ikke satt opp eller den returnerer 404 direkte.",
+                    )
+
+                    call.respond(
+                        IkkeFunnetException(
+                            code = "ROUTE_NOT_CONFIGURED",
+                            detail = "Du ba om en rute / url som ikke er konfigurert opp. Dobbeltsjekk forespørselen.",
+                        ),
+                    )
+                }
 
                 HttpStatusCode.BadRequest ->
                     call.respond(

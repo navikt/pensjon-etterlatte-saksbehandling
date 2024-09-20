@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -99,7 +100,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 onSuccess(behandlingId)
             } else {
                 logger.info("Har ikke tilgang til behandling")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -119,7 +120,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 onSuccess(sakId)
             } else {
                 logger.info("Har ikke tilgang til sak")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -146,7 +147,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
                 onSuccess(foedselsnummer)
             } else {
                 logger.info("Har ikke tilgang til person")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -174,7 +175,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess
 
         else -> {
             logger.debug("Endepunktet er ikke tilgjengeliggjort for saksbehandler, avviser forespørselen")
-            call.respond(HttpStatusCode.NotFound)
+            throw GenerellIkkeFunnetException()
         }
     }
 }

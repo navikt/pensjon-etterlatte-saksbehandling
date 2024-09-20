@@ -11,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -27,10 +28,10 @@ fun Route.beregning(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter beregning med behandlingId=$it")
-                when (val beregning = beregningService.hentBeregning(it, brukerTokenInfo)) {
-                    null -> call.response.status(HttpStatusCode.NotFound)
-                    else -> call.respond(beregning.toDTO())
-                }
+                val beregning =
+                    beregningService.hentBeregning(it, brukerTokenInfo)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(beregning.toDTO())
             }
         }
 

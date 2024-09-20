@@ -12,6 +12,8 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -87,12 +89,12 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
-                if (vedtak == null) {
-                    call.response.status(HttpStatusCode.NotFound)
-                } else {
-                    call.respond(vedtak.toDto())
-                }
+                val vedtak =
+                    vedtakService.hentVedtakMedBehandlingId(behandlingId) ?: throw IkkeFunnetException(
+                        "FANT_IKKE_VEDTAK",
+                        "Fant ikke vedtaket til behandlingen med id=$behandlingId",
+                    )
+                call.respond(vedtak.toDto())
             }
         }
 
@@ -251,13 +253,12 @@ fun Route.vedtaksvurderingRoute(
             post("/{vedtakId}") {
                 val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-                val vedtak = vedtakService.hentVedtak(vedtakId)
-                if (vedtak == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
+                val vedtak =
+                    vedtakService.hentVedtak(vedtakId)
+                        ?: throw GenerellIkkeFunnetException()
 
                 vedtakBehandlingService
-                    .samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                    .samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)
                     ?.let { samordnetVedtak ->
                         rapidService.sendToRapid(samordnetVedtak)
                         call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
@@ -292,12 +293,10 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
         get("/{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-            val vedtak = vedtakSamordningService.hentVedtak(vedtakId)
-            if (vedtak != null) {
-                call.respond(vedtak)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            val vedtak =
+                vedtakSamordningService.hentVedtak(vedtakId)
+                    ?: throw GenerellIkkeFunnetException()
+            call.respond(vedtak)
         }
     }
 }
@@ -403,6 +402,7 @@ private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
                 virkningstidspunkt = innhold.virkningstidspunkt,
                 opphoerFraOgMed = innhold.opphoerFraOgMed,
             )
+
         else -> dto
     }
 }

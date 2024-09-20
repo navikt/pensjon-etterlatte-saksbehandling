@@ -17,7 +17,7 @@ import java.util.UUID
 class AldersovergangService(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
-    suspend fun behandleOpphoerAldersovergang(
+    fun behandleOpphoerAldersovergang(
         behandlingId: UUID,
         loependeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

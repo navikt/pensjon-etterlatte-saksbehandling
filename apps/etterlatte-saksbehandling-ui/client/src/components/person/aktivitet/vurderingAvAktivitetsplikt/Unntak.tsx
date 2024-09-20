@@ -11,7 +11,7 @@ export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | unde
     <VStack gap="4">
       <HStack gap="4" align="center">
         <HandShakeHeartIcon fontSize="1.5rem" aria-hidden />
-        <Heading size="medium">Unntak</Heading>
+        <Heading size="small">Unntak</Heading>
       </HStack>
 
       <UnntakReadMore />

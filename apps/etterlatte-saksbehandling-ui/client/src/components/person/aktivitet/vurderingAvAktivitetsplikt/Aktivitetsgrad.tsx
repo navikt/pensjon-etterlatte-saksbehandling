@@ -10,7 +10,7 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
     <VStack gap="4">
       <HStack gap="4" align="center">
         <ClockDashedIcon fontSize="1.5rem" aria-hidden />
-        <Heading size="medium">Aktivitetsgrad</Heading>
+        <Heading size="small">Aktivitetsgrad</Heading>
       </HStack>
 
       <AktivitetsgradReadMore />

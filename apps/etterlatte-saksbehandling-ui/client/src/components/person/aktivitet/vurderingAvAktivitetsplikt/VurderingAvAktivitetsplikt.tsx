@@ -1,6 +1,6 @@
 import React from 'react'
 import { IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
-import { VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, VStack } from '@navikt/ds-react'
 import { Aktivitetsgrad } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Aktivitetsgrad'
 import { Unntak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Unntak'
 
@@ -11,6 +11,11 @@ export const VurderingAvAktivitetsplikt = ({
 }) => {
   return (
     <VStack gap="8">
+      <VStack gap="2">
+        <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
+        <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
+      </VStack>
+
       <Aktivitetsgrad aktiviteter={aktivitetspliktVurdering.aktivitet} />
       <Unntak unntaker={aktivitetspliktVurdering.unntak} />
     </VStack>

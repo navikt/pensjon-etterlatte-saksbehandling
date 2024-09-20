@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -190,7 +190,7 @@ export const NyAktivitet = ({
           <Button
             size="small"
             variant="secondary"
-            icon={<PencilIcon aria-hidden fontSize="1.5rem" />}
+            icon={<PlusIcon aria-hidden fontSize="1.5rem" />}
             loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
             onClick={(e) => {
               e.preventDefault()

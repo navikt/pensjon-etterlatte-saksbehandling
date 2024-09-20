@@ -1,5 +1,5 @@
-import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
-import { Alert, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
+import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon, TrashIcon } from '@navikt/aksel-icons'
+import { Alert, BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import {
   hentAktiviteterForBehandling,
   hentAktiviteterForSak,
@@ -10,20 +10,20 @@ import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { AktivitetspliktType, IAktivitet } from '~shared/types/Aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
-import styled from 'styled-components'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
-export const AktivitetspliktTidslinje = (props: {
+interface Props {
   behandling?: IDetaljertBehandling
   doedsdato: Date
   sakId?: number
-}) => {
-  const { behandling, doedsdato, sakId } = props
+}
+
+export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
   const [hentet, hent] = useApiCall(hentAktiviteterForBehandling)
   const [hentetForSak, hentForSak] = useApiCall(hentAktiviteterForSak)
   const [slettet, slett] = useApiCall(slettAktivitet)
@@ -74,16 +74,16 @@ export const AktivitetspliktTidslinje = (props: {
       ) : (
         <Timeline startDate={doedsdato} endDate={sluttdato}>
           <Timeline.Pin date={doedsdato}>
-            <p>Dødsdato: {formaterDato(doedsdato)}</p>
+            <BodyShort>Dødsdato: {formaterDato(doedsdato)}</BodyShort>
           </Timeline.Pin>
           <Timeline.Pin date={new Date()}>
-            <p>Dagens dato: {formaterDato(new Date())}</p>
+            <BodyShort>Dagens dato: {formaterDato(new Date())}</BodyShort>
           </Timeline.Pin>
           <Timeline.Pin date={seksMndEtterDoedsfall}>
-            <p>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</p>
+            <BodyShort>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</BodyShort>
           </Timeline.Pin>
           <Timeline.Pin date={tolvMndEtterDoedsfall}>
-            <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
+            <BodyShort>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</BodyShort>
           </Timeline.Pin>
 
           {aktivitetsTypeProps.map((props) => (
@@ -99,31 +99,46 @@ export const AktivitetspliktTidslinje = (props: {
                     icon={props.ikon}
                     statusLabel={props.beskrivelse}
                   >
-                    <p>
-                      <b>
-                        Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                        {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
-                      </b>
-                    </p>
-                    <p>{aktivitet.beskrivelse}</p>
-                    <p>
-                      <i>
-                        Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                        {aktivitet.opprettet.ident}
-                      </i>
-                      <br />
-                      <i>
-                        Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                        {aktivitet.endret.ident}
-                      </i>
-                    </p>
+                    <BodyShort weight="semibold">
+                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                    </BodyShort>
+                    <BodyShort>{aktivitet.beskrivelse}</BodyShort>
+                    <VStack>
+                      <BodyShort>
+                        <i>
+                          Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                          {aktivitet.opprettet.ident}
+                        </i>
+                      </BodyShort>
+                      <BodyShort>
+                        <i>
+                          Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                          {aktivitet.endret.ident}
+                        </i>
+                      </BodyShort>
+                    </VStack>
                     {isPending(slettet) || isPending(slettetForSak) ? (
                       <Spinner variant="neutral" label="Sletter" margin="1em" />
                     ) : (
-                      <>
-                        <SlettEndreWrapper onClick={() => fjernAktivitet(aktivitet.id)}>Slett</SlettEndreWrapper>
-                        <SlettEndreWrapper onClick={() => setRediger(aktivitet)}>Endre</SlettEndreWrapper>
-                      </>
+                      <HStack gap="2">
+                        <Button
+                          variant="secondary"
+                          size="xsmall"
+                          icon={<PencilIcon aria-hidden />}
+                          onClick={() => setRediger(aktivitet)}
+                        >
+                          Rediger
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="xsmall"
+                          icon={<TrashIcon aria-hidden />}
+                          onClick={() => fjernAktivitet(aktivitet.id)}
+                        >
+                          Slett
+                        </Button>
+                      </HStack>
                     )}
                     {isFailureHandler({
                       apiResult: slettet,
@@ -170,7 +185,7 @@ export const AktivitetspliktTidslinje = (props: {
 interface AktivitetstypeProps {
   type: AktivitetspliktType
   beskrivelse: string
-  ikon: JSX.Element
+  ikon: ReactNode
   status: 'success' | 'warning' | 'danger' | 'info' | 'neutral'
 }
 
@@ -213,15 +228,3 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
       }
   }
 }
-
-const SlettEndreWrapper = styled.div`
-  padding-right: 1em;
-  display: inline-flex;
-  float: left;
-  cursor: pointer;
-  color: #0067c5;
-
-  &:hover {
-    text-decoration-line: underline;
-  }
-`

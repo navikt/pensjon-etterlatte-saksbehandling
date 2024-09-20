@@ -66,7 +66,7 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
   SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE: 'Bruker har sykdom, redusert arbeidsevne, AAP',
   GRADERT_UFOERETRYGD: 'Gradert uføretrygd',
   MIDLERTIDIG_SYKDOM: 'Midlertidig sykdom',
-  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Bruker er født i 1963 eller tidligere og har lav inntekt',
+  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Nei, bruker er født i 1963 eller tidligere og har lav inntekt',
 }
 
 export interface IAktivitetspliktVurdering {

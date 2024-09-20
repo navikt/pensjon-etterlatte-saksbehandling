@@ -147,7 +147,6 @@ internal class BehandlingStatusServiceTest {
                 behandlingId.toString(),
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 any<String>(),
-                null,
             )
         }
     }
@@ -440,5 +439,6 @@ internal class BehandlingStatusServiceTest {
         aldersgruppe = null,
         feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),
         kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
+        frivilligSkattetrekk = true,
     )
 }

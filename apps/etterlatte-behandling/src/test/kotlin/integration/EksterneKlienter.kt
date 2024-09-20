@@ -27,6 +27,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
@@ -50,6 +51,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -192,6 +194,12 @@ class GrunnlagKlientTest : GrunnlagKlient {
     ) {
         // NO-OP
     }
+
+    override suspend fun hentPersonopplysningerForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
+    ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
 
     override val serviceName: String
         get() = TODO("Not yet implemented")
@@ -413,6 +421,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
@@ -633,6 +642,8 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT
+
+    override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? = PdlIdentifikator.AktoerId("0123456789")
 
     override val serviceName: String
         get() = "Pdl tjenester"

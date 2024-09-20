@@ -42,7 +42,7 @@ const Virkningstidspunkt = (props: {
   erBosattUtland: boolean
 }) => {
   const { behandling, erBosattUtland } = props
-  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
+
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
@@ -68,12 +68,21 @@ const Virkningstidspunkt = (props: {
     // Denne siste fallbacken er altså tenkt for disse sakene
   }
 
+  function foersteDoedsdato(): Date | undefined {
+    const avdoede = usePersonopplysninger()?.avdoede
+    const mappetAvdoede = avdoede?.map((it) => it.opplysning.doedsdato!!)
+
+    if (mappetAvdoede && mappetAvdoede.length > 0) {
+      return mappetAvdoede.reduce((accumulator, doedsdatoAvdoed) =>
+        doedsdatoAvdoed < accumulator ? doedsdatoAvdoed : accumulator
+      )
+    } else {
+      return undefined
+    }
+  }
+
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(
-      avdoede?.opplysning?.doedsdato,
-      getSoeknadMottattDato(),
-      behandling.sakType
-    ),
+    fromDate: hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType),
     toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

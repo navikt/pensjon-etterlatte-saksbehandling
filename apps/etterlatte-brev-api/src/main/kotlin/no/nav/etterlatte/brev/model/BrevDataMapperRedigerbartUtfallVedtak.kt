@@ -224,7 +224,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -249,7 +249,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         BarnepensjonRevurderingRedigerbartUtfall.fra(
             etterbetaling.await(),
             utbetalingsinfo.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -313,7 +313,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -324,7 +324,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 }

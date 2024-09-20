@@ -103,7 +103,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 
@@ -148,7 +148,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         val (sak, _) = opprettSakMedFoerstegangsbehandling("234")
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 

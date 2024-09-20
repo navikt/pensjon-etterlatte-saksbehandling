@@ -39,7 +39,7 @@ class BeregningKlientImpl(
     override suspend fun hentAvkortingForBehandling(behandlingId: UUID): Avkorting? =
         try {
             beregningHttpClient
-                .get("$beregningUrl/api/beregning/avkorting/$behandlingId")
+                .get("$beregningUrl/api/beregning/avkorting/$behandlingId/ferdig")
                 .body<AvkortingDto>()
                 .let { Avkorting.fraDTO(it) }
         } catch (e: Exception) {

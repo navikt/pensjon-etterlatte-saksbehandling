@@ -15,6 +15,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.isProd
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -52,9 +54,18 @@ class StatusPagesKonfigurasjon(
                 }
 
                 else -> {
-                    val mappetFeil = UkjentInternfeilException("En feil har skjedd: ${cause::class.java.canonicalName}", cause)
+                    val mappetFeil =
+                        UkjentInternfeilException(
+                            "En feil har skjedd: ${cause::class.java.canonicalName} Tidspunkt: ${Tidspunkt.now()}. Korrelasjonsid: ${getCorrelationId()}",
+                            cause,
+                        )
                     call.application.log.loggInternfeilException(mappetFeil, call)
-                    call.respond(mappetFeil)
+                    call.respond(
+                        UkjentInternfeilException(
+                            "En ukjent feil har skjedd. Tidspunkt: ${Tidspunkt.now()}. Korrelasjonsid: ${getCorrelationId()}",
+                            mappetFeil,
+                        ),
+                    )
                 }
             }
         }

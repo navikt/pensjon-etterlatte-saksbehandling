@@ -60,6 +60,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
   JOURNALFOERING: 'Journalføring',
+  TILLEGGSINFORMASJON: 'Tilleggsinformasjon',
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
   AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
   AKTIVITETSPLIKT_REVURDERING: 'Aktivitetsplikt revurdering',

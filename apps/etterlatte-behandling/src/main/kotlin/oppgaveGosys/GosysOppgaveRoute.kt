@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
@@ -34,6 +35,14 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
         get("/journalfoering/{journalpostId}") {
             call.respond(gosysService.hentJournalfoeringsoppgave(call.parameters["journalpostId"]!!, brukerTokenInfo))
+        }
+
+        post("/person") {
+            kunSaksbehandler {
+                val request = call.receive<FoedselsnummerDTO>()
+
+                call.respond(gosysService.hentOppgaverForPerson(request.foedselsnummer, brukerTokenInfo))
+            }
         }
 
         route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {

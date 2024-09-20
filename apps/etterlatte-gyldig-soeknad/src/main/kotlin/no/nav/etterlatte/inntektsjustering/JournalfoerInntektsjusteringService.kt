@@ -10,14 +10,14 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostDokument
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
-import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -26,7 +26,7 @@ import java.util.UUID
 
 class JournalfoerInntektsjusteringService(
     private val dokarkivKlient: DokarkivKlient,
-    private val pdfgenKlient: PdfGenerator,
+    private val pdfgenKlient: PdfGeneratorKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -92,7 +92,7 @@ class JournalfoerInntektsjusteringService(
         return runBlocking {
             retry {
                 pdfgenKlient.genererPdf(
-                    input =
+                    payload =
                         ArkiverInntektsjustering(
                             id = inntektsjustering.id,
                             sakId = sakId,
@@ -102,8 +102,8 @@ class JournalfoerInntektsjusteringService(
                             arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
                             naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
                             tidspunkt = inntektsjustering.formatertTidspunkt(),
-                        ).toJsonNode(),
-                    template = "inntektsjustering_nytt_aar_v1",
+                        ),
+                    mal = "inntektsjustering_nytt_aar_v1",
                 )
             }.let {
                 when (it) {
@@ -127,7 +127,7 @@ data class ArkiverInntektsjustering(
     val arbeidsinntektUtland: Int,
     val naeringsinntektUtland: Int,
     val tidspunkt: String,
-)
+) : PDFMal
 
 fun Inntektsjustering.formatertTidspunkt(): String {
     fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"

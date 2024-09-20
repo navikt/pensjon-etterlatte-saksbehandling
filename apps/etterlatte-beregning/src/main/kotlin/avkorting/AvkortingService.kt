@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -28,7 +29,7 @@ class AvkortingService(
     suspend fun hentAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AvkortingDto? {
+    ): AvkortingFrontend? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
@@ -48,7 +49,7 @@ class AvkortingService(
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
-                kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+                kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
@@ -74,7 +75,7 @@ class AvkortingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         lagreGrunnlag: AvkortingGrunnlagLagreDto,
-    ): AvkortingDto {
+    ): AvkortingFrontend {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
@@ -126,17 +127,18 @@ class AvkortingService(
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierOgReberegnAvkorting(behandling.id, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+        return kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
     }
 
     private suspend fun kopierOgReberegnAvkorting(
-        behandlingId: UUID,
+        behandling: DetaljertBehandling,
         sakId: SakId,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val kopiertAvkorting = forrigeAvkorting.kopierAvkorting()
-        return reberegnOgLagreAvkorting(behandlingId, sakId, kopiertAvkorting, brukerTokenInfo)
+        val opphoerFraOgMed = behandling.opphoerFraOgMed
+        val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
+        return reberegnOgLagreAvkorting(behandling.id, sakId, kopiertAvkorting, brukerTokenInfo)
     }
 
     private suspend fun reberegnOgLagreAvkorting(
@@ -163,15 +165,7 @@ class AvkortingService(
         avkorting: Avkorting,
         behandling: DetaljertBehandling,
         forrigeAvkorting: Avkorting? = null,
-    ): AvkortingDto {
-        // Forrige behandling er forrige iverksatte som da vil være seg selv eller nyere hvis status er iverksatte
-        val forrigeBehandling =
-            when (behandling.status) {
-                BehandlingStatus.IVERKSATT -> null
-                else -> forrigeAvkorting
-            }
-        return avkorting.toDto(behandling.virkningstidspunkt().dato, forrigeBehandling)
-    }
+    ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
     private suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,

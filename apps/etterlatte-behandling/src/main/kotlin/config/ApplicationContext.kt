@@ -155,7 +155,11 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkarsvurderingRepositorDaoWrapperClient
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -322,6 +326,14 @@ internal class ApplicationContext(
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
     val opprettDoedshendelseDao = OpprettDoedshendelseDao(autoClosingDatabase)
+    val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
+
+    val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
+        if (appIsInGCP()) {
+            VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
+        } else {
+            VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
+        }
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
@@ -578,11 +590,18 @@ internal class ApplicationContext(
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+    val gosysOppgaveService =
+        GosysOppgaveServiceImpl(
+            gosysOppgaveKlient,
+            oppgaveService,
+            saksbehandlerService,
+            saksbehandlerInfoDao,
+            pdlTjenesterKlient,
+        )
 
     val vilkaarsvurderingService =
         VilkaarsvurderingService(
-            VilkaarsvurderingRepository(vilkaarsvurderingKlientDaoImpl),
+            vilkaarsvurderingRepositoryWrapper,
             behandlingService,
             grunnlagKlientImpl,
             behandlingsStatusService,

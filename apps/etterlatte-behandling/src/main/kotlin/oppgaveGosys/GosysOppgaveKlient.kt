@@ -58,6 +58,7 @@ data class GosysEndreFristRequest(
 
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String? = null,
@@ -115,6 +116,7 @@ class GosysOppgaveKlientImpl(
     private val resourceUrl = config.getString("oppgave.resource.url")
 
     override suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
@@ -123,7 +125,7 @@ class GosysOppgaveKlientImpl(
     ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
-            val temaFilter = tema.map { "&tema=$it" }.joinToString(separator = "")
+            val temaFilter = tema.joinToString(separator = "") { "&tema=$it" }
             val filters =
                 "statuskategori=AAPEN"
                     .plus(temaFilter)
@@ -131,6 +133,7 @@ class GosysOppgaveKlientImpl(
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
                     .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
                     .plus(harTildeling?.let { "&tildeltRessurs=$it" } ?: "")
+                    .plus(aktoerId?.let { "&aktoerId=$it" } ?: "")
 
             return downstreamResourceClient
                 .get(

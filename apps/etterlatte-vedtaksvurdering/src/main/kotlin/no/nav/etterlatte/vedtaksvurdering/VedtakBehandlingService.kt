@@ -413,7 +413,7 @@ class VedtakBehandlingService(
         }
     }
 
-    suspend fun iverksattVedtak(
+    fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {

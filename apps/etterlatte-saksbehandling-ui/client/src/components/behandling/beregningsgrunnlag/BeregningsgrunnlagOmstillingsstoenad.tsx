@@ -15,8 +15,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import {
   Beregning,
-  BeregningsGrunnlagDto,
-  BeregningsMetodeBeregningsgrunnlag,
+  BeregningsMetodeBeregningsgrunnlagForm,
   LagreBeregningsGrunnlagDto,
   toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
@@ -31,9 +30,12 @@ import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/be
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { SakType } from '~shared/types/sak'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -65,13 +67,10 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     })
   }
 
-  const oppdaterBeregningsMetode = (
-    beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagDto | undefined
-  ) => {
+  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
-      ...toLagreBeregningsGrunnlagDto(beregningsgrunnlag),
-      beregningsMetode,
+      ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
+      beregningsMetode: beregningsMetode,
     }
     lagreBeregningsGrunnlagRequest(
       {
@@ -100,14 +99,17 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
         {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
-          success: (beregningsgrunnlag) => (
+          success: () => (
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                oppdaterBeregningsMetode={(beregningsMetode) =>
-                  oppdaterBeregningsMetode(beregningsMetode, behandling?.beregningsGrunnlag)
+                navn={
+                  personopplysninger
+                    ? mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
+                    : ''
                 }
-                eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
+                behandling={behandling}
+                oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
               <Box maxWidth="70rem">

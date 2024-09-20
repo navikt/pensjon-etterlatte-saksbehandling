@@ -202,6 +202,7 @@ internal class BehandlingInfoRoutesTest {
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
+            frivilligSkattetrekk = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
@@ -225,6 +226,7 @@ internal class BehandlingInfoRoutesTest {
                     behandlingId,
                     Aldersgruppe.UNDER_18,
                     Feilutbetaling(FeilutbetalingValg.NEI, null),
+                    frivilligSkattetrekk = true,
                     null,
                 ),
             etterbetaling =

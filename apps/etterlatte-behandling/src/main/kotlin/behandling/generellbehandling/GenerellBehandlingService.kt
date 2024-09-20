@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(
@@ -148,7 +147,6 @@ class GenerellBehandlingService(
         }
 
         val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(saksbehandler.ident)
-        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
         val merknad =
             "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}."
 
@@ -156,7 +154,6 @@ class GenerellBehandlingService(
             referanse = generellBehandling.id.toString(),
             type = OppgaveType.KRAVPAKKE_UTLAND,
             merknad = merknad,
-            frist = toDagerFremITid,
         )
 
         oppdaterBehandling(

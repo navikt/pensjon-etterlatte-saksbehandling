@@ -13,6 +13,7 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.util.UUID
 
 data class BarnepensjonEtterbetaling(
     val inneholderKrav: Boolean?,
@@ -236,4 +237,12 @@ class IngenStoetteForUkjentAvdoed :
     UgyldigForespoerselException(
         code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
         detail = "Brevløsningen støtter ikke ukjent avdød",
+    )
+
+class ManglerFrivilligSkattetrekk(
+    behandlingId: UUID?,
+) : UgyldigForespoerselException(
+        code = "BEHANDLING_MANGLER_FRIVILLIG_SKATTETREKK",
+        detail = "Behandling mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon. Du kan legge til dette i Valg av utfall i brev.",
+        meta = mapOf("behandlingId" to behandlingId.toString()),
     )

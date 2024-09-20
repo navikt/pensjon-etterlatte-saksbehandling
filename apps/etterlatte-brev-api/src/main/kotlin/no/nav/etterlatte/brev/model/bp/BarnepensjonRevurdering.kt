@@ -82,7 +82,7 @@ data class BarnepensjonRevurdering(
                 frivilligSkattetrekk =
                     brevutfall.frivilligSkattetrekk
                         ?: throw InternfeilException(
-                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
+                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon. Du kan legge til dette i Valg av utfall i brev.",
                         ),
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },

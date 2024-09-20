@@ -74,7 +74,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                 frivilligSkattetrekk =
                     brevutfall.frivilligSkattetrekk
                         ?: throw InternfeilException(
-                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
+                            "Behandling ${brevutfall.behandlingId} mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon. Du kan legge til dette i Valg av utfall i brev.",
                         ),
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =

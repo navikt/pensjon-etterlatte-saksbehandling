@@ -93,13 +93,14 @@ internal class OmregningHendelserBeregningRiver(
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
                 beregningService
-                    .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                    .kopierAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
             val forrigeAvkorting =
                 beregningService
                     .hentAvkorting(behandlingViOmregnerFra)
                     .takeIf { it.status == HttpStatusCode.OK }
-                    ?.body<AvkortingDto>() ?: throw IllegalStateException("Forrige behandling $behandlingViOmregnerFra mangler avkorting")
+                    ?.body<AvkortingDto>()
+                    ?: throw IllegalStateException("Forrige behandling $behandlingViOmregnerFra mangler avkorting")
             BeregningOgAvkorting(
                 beregning = beregning,
                 forrigeBeregning = forrigeBeregning,

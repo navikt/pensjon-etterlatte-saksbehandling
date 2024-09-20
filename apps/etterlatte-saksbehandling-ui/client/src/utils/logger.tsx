@@ -103,6 +103,5 @@ window.windowOpen = true
 export const setupOnUnloadEventhandler = () => {
   addEventListener('beforeunload', () => {
     window.windowOpen = false
-    console.log('beforeunload sets window.windowOpen to : ', window.windowOpen)
   })
 }

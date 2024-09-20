@@ -34,7 +34,7 @@ class DelvilkaarRepository {
     ) {
         queryOf(
             statement = """
-            UPDATE vilkaarsvurdering.delvilkaar
+            UPDATE delvilkaar
             SET resultat = :resultat
             WHERE vilkaar_id = :vilkaar_id AND vilkaar_type = :vilkaar_type
         """,
@@ -52,7 +52,7 @@ class DelvilkaarRepository {
         tx: TransactionalSession,
     ) = queryOf(
         statement = """
-            UPDATE vilkaarsvurdering.delvilkaar
+            UPDATE delvilkaar
             SET resultat = null
             WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat is not null
         """,
@@ -69,7 +69,7 @@ class DelvilkaarRepository {
     ) {
         queryOf(
             statement = """
-            UPDATE vilkaarsvurdering.delvilkaar
+            UPDATE delvilkaar
             SET resultat = :resultat
             WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true
         """,
@@ -99,7 +99,7 @@ class DelvilkaarRepository {
         tx: TransactionalSession,
     ) = queryOf(
         statement = """
-            INSERT INTO vilkaarsvurdering.delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, 
+            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, 
                 ledd, bokstav, lenke, resultat) 
             VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :spoersmaal, :paragraf, :ledd, 
                 :bokstav, :lenke, :resultat)
@@ -132,7 +132,7 @@ class DelvilkaarRepository {
     ) {
         queryOf(
             """
-            UPDATE vilkaarsvurdering.delvilkaar
+            UPDATE delvilkaar
             SET resultat = ${utfall?.name?.let { "'$it'" }}
             WHERE vilkaar_id = :vilkaar_id
         """,

@@ -5,6 +5,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -79,5 +80,16 @@ class JobbPollerIntegrationTest(
         jobbPoller.poll()
 
         verify(exactly = 0) { aldersovergangerService.execute(any()) }
+    }
+
+    @Test
+    fun `feil kastet under henting av saker for jobb skal resette jobbens status`() {
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
+
+        every { aldersovergangerService.execute(jobb) } throws InternfeilException("Whoops")
+        jobbPoller.poll()
+
+        verify(exactly = 1) { aldersovergangerService.execute(any()) }
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.NY
     }
 }

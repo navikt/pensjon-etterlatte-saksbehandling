@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -189,6 +190,36 @@ class HendelseDao(
                     "ny_info" to info,
                     "steg" to steg,
                 ),
+            ).let { query -> it.run(query.asUpdate) }
+        }
+    }
+
+    fun tilbakestillJobSomIkkeStartetSkikkelig(jobbId: Int) {
+        datasource.transaction {
+            val identifiserteOppgaver =
+                queryOf(
+                    """
+                    SELECT count(*)
+                    FROM hendelse 
+                    WHERE jobb_id = :jobbId
+                    """.trimIndent(),
+                    mapOf("jobbId" to jobbId),
+                ).let { query -> it.run(query.map { it.int(1) }.asSingle) }
+
+            if (identifiserteOppgaver != 0) {
+                throw InternfeilException(
+                    "Kan ikke tilbakestille jobb med id=$jobbId, siden det er $identifiserteOppgaver " +
+                        "som er laget for jobben allerede",
+                )
+            }
+
+            queryOf(
+                """
+                UPDATE jobb 
+                SET status = :statusNy
+                WHERE id = :id
+                """.trimIndent(),
+                mapOf("statusNy" to JobbStatus.NY.name, "id" to jobbId),
             ).let { query -> it.run(query.asUpdate) }
         }
     }

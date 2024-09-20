@@ -50,6 +50,10 @@ data class BarnepensjonInnvilgelse(
             erMigrertYrkesskade: Boolean,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+            val frivilligSkattetrekk =
+                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
+                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
+
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
@@ -59,8 +63,7 @@ data class BarnepensjonInnvilgelse(
                 erGjenoppretting = erGjenoppretting,
                 erMigrertYrkesskade = erMigrertYrkesskade,
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                frivilligSkattetrekk =
-                    brevutfall.frivilligSkattetrekk ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId),
+                frivilligSkattetrekk = frivilligSkattetrekk,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {

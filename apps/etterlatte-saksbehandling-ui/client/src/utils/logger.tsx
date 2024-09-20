@@ -93,14 +93,16 @@ export const setupWindowOnError = () => {
     return true
   })
 }
+
 /* eslint no-var: off */
 declare global {
   var windowOpen: boolean
 }
 
-windowOpen = true
+window.windowOpen = true
 export const setupOnUnloadEventhandler = () => {
   addEventListener('beforeunload', () => {
-    windowOpen = false
+    window.windowOpen = false
+    console.log('beforeunload sets window.windowOpen to : ', window.windowOpen)
   })
 }

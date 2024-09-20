@@ -9,4 +9,5 @@ data class Omregningshendelse(
     val prosesstype: Prosesstype,
     val revurderingaarsak: Revurderingaarsak = Revurderingaarsak.REGULERING,
     val oppgavefrist: LocalDate? = null,
+    val skalFatteAutomatisk: Boolean = true,
 )

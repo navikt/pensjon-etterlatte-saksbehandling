@@ -119,7 +119,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                                 Omregningshendelse(
                                     sakId,
                                     LocalDate.now(),
-                                    null,
                                     Prosesstype.AUTOMATISK,
                                 ),
                             )
@@ -156,7 +155,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 .post("/omregning") {
                     addAuthToken(this@OmregningIntegrationTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(Omregningshendelse(sak.id, LocalDate.now(), null, Prosesstype.AUTOMATISK))
+                    setBody(Omregningshendelse(sak.id, LocalDate.now(), Prosesstype.AUTOMATISK))
                 }.also {
                     Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
                 }

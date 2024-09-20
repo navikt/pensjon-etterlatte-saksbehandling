@@ -1,11 +1,16 @@
 package no.nav.etterlatte.regulering
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
@@ -50,8 +55,15 @@ internal class OpprettVedtakforespoerselRiver(
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = packet.behandlingId
 
+        val hendelsedata: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+        val skalFatte =
+            if (hendelsedata.revurderingaarsak == Revurderingaarsak.REGULERING) {
+                featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
+            } else {
+                hendelsedata.skalFatteAutomatisk
+            }
         val respons =
-            if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
+            if (skalFatte) {
                 vedtak.opprettVedtakOgFatt(packet.sakId, behandlingId)
             } else {
                 vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)

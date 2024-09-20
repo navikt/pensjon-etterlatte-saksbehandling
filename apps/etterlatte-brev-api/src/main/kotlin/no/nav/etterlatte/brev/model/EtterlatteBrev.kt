@@ -243,6 +243,6 @@ class ManglerFrivilligSkattetrekk(
     behandlingId: UUID?,
 ) : UgyldigForespoerselException(
         code = "BEHANDLING_MANGLER_FRIVILLIG_SKATTETREKK",
-        detail = "Behandling mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon",
+        detail = "Behandling mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon. Du kan legge til dette i Valg av utfall i brev.",
         meta = mapOf("behandlingId" to behandlingId.toString()),
     )

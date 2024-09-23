@@ -178,7 +178,7 @@ class VilkaarsvurderingService(
                         Revurderingaarsak.REGULERING,
                         Revurderingaarsak.OMREGNING,
                     ).contains(behandling.revurderingsaarsak()) &&
-                        //  TODO ??
+                        // TODO Hvis det skal være andre årsaker som skal tar automatisk må det være noe annet enn årsak som leder inn her?
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {

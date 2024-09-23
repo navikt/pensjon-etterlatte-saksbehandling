@@ -201,8 +201,10 @@ class RevurderingService(
                 it,
                 leggInnGrunnlag = {
                     when (revurderingAarsak) {
-                        // TODO Omregning?
-                        Revurderingaarsak.REGULERING ->
+                        // TODO Hvis det skal være andre årsaker som skal tar automatisk må det være noe annet enn årsak som leder inn her
+                        Revurderingaarsak.OMREGNING,
+                        Revurderingaarsak.REGULERING,
+                        ->
                             runBlocking {
                                 grunnlagService.laasTilGrunnlagIBehandling(
                                     it,

@@ -36,7 +36,7 @@ interface OppgaveDao {
 
     fun hentOppgaverForSak(
         sakId: SakId,
-        type: OppgaveType?,
+        typer: List<OppgaveType>,
     ): List<OppgaveIntern>
 
     fun hentOppgaver(
@@ -221,11 +221,10 @@ class OppgaveDaoImpl(
 
     override fun hentOppgaverForSak(
         sakId: SakId,
-        type: OppgaveType?,
+        typer: List<OppgaveType>,
     ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
-                val typer = if (type != null) listOf(type) else OppgaveType.entries
                 val statement =
                     prepareStatement(
                         """

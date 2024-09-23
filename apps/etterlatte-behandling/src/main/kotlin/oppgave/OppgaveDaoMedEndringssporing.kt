@@ -112,11 +112,11 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentOppgaverForSak(
         sakId: SakId,
-        type: OppgaveType?,
+        typer: List<OppgaveType>,
     ): List<OppgaveIntern> =
         oppgaveDao.hentOppgaverForSak(
             sakId,
-            type,
+            typer,
         )
 
     override fun hentOppgaver(

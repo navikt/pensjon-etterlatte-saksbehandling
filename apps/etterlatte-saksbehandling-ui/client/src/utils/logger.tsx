@@ -96,7 +96,9 @@ export const setupWindowOnError = () => {
 
 /* eslint no-var: off */
 declare global {
-  var windowOpen: boolean
+  interface Window {
+    windowOpen: boolean
+  }
 }
 
 window.windowOpen = true

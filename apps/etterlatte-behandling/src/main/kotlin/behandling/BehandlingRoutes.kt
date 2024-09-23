@@ -338,10 +338,17 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        post("/rediger-annen-forelder") {
+        put("/annen-forelder") {
             kunSkrivetilgang {
                 val annenForelder = call.receive<AnnenForelder>()
                 behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, annenForelder)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        delete("/annen-forelder") {
+            kunSkrivetilgang {
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, null)
                 call.respond(HttpStatusCode.OK)
             }
         }

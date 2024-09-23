@@ -67,11 +67,9 @@ export interface AnnenForelder {
 export enum AnnenForelderVurdering {
   KUN_EN_REGISTRERT_JURIDISK_FORELDER = 'KUN_EN_REGISTRERT_JURIDISK_FORELDER',
   FORELDER_UTEN_IDENT_I_PDL = 'FORELDER_UTEN_IDENT_I_PDL',
-  AVDOED_FORELDER_UTEN_IDENT_I_PDL = 'AVDOED_FORELDER_UTEN_IDENT_I_PDL',
 }
 
 export const teksterAnnenForelderVurdering: Record<AnnenForelderVurdering, string> = {
   KUN_EN_REGISTRERT_JURIDISK_FORELDER: 'Kun én registrert juridisk forelder',
   FORELDER_UTEN_IDENT_I_PDL: 'Forelder uten ident i PDL',
-  AVDOED_FORELDER_UTEN_IDENT_I_PDL: 'Avdød forelder uten ident i PDL',
 } as const

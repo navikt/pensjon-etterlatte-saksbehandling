@@ -1,5 +1,5 @@
-import { ExternalLinkIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
-import { BodyShort, Box, Button, Heading, Link, Radio, Textarea, TextField } from '@navikt/ds-react'
+import { FloppydiskIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { BodyShort, Box, Button, Heading, HStack, Radio, Textarea, TextField } from '@navikt/ds-react'
 import {
   AnnenForelder,
   AnnenForelderVurdering,
@@ -10,7 +10,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isPending } from '~shared/api/apiUtils'
-import { redigerAnnenForelder } from '~shared/api/behandling'
+import { redigerAnnenForelder, slettAnnenForelder } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { formaterDato } from '~utils/formatering/dato'
@@ -23,8 +23,25 @@ type Props = {
 export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props) => {
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
   const [redigerStatus, redigerAnnenForelderRequest] = useApiCall(redigerAnnenForelder)
+  const [slettStatus, slettAnnenForelderRequest] = useApiCall(slettAnnenForelder)
 
-  const lagreAnnenForelder = (annenForelder: AnnenForelder) => {
+  const {
+    register,
+    watch,
+    reset,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<AnnenForelder>({
+    defaultValues: personopplysninger?.annenForelder,
+  })
+
+  const onAvbryt = () => {
+    reset()
+    setRedigerModus(false)
+  }
+
+  const onLagreAnnenForelder = (annenForelder: AnnenForelder) => {
     redigerAnnenForelderRequest(
       {
         behandlingId: behandlingId,
@@ -36,15 +53,17 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
     )
   }
 
-  const {
-    register,
-    watch,
-    handleSubmit,
-    formState: { errors },
-    control,
-  } = useForm<AnnenForelder>({
-    defaultValues: personopplysninger?.annenForelder,
-  })
+  const onSlettAnnenForelder = () => {
+    slettAnnenForelderRequest(
+      {
+        behandlingId: behandlingId,
+      },
+      () => {
+        setTimeout(() => window.location.reload(), 2000)
+      }
+    )
+    setRedigerModus(false)
+  }
 
   return (
     <Box paddingBlock="5 0" maxWidth="25rem">
@@ -94,21 +113,34 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
             </>
           )}
           {personopplysninger.annenForelder && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="small"
-              icon={<PencilIcon aria-hidden />}
-              disabled={redigerModus}
-              onClick={() => setRedigerModus(true)}
-            >
-              Rediger
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="small"
+                icon={<PencilIcon aria-hidden />}
+                disabled={redigerModus}
+                onClick={() => setRedigerModus(true)}
+              >
+                Rediger
+              </Button>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="small"
+                icon={<TrashIcon aria-hidden />}
+                disabled={redigerModus}
+                loading={isPending(slettStatus)}
+                onClick={onSlettAnnenForelder}
+              >
+                Slett
+              </Button>
+            </>
           )}
         </>
       )}
       {redigerModus && (
-        <form onSubmit={handleSubmit(lagreAnnenForelder)}>
+        <form onSubmit={handleSubmit(onLagreAnnenForelder)}>
           <ControlledRadioGruppe
             name="vurdering"
             control={control}
@@ -137,33 +169,25 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
 
           {watch().vurdering === AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL && (
             <>
-              <TextField {...register('navn')} label="Navn" />
-              <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} />
+              <TextField {...register('navn', { shouldUnregister: true })} label="Navn" />
+              <ControlledDatoVelger name="foedselsdato" label="Fødselsdato" control={control} shouldUnregister={true} />
             </>
           )}
-          {watch().vurdering !== AnnenForelderVurdering.AVDOED_FORELDER_UTEN_IDENT_I_PDL && (
-            <Textarea
-              {...register('begrunnelse', {
-                required: { value: true, message: 'Må fylles ut' },
-              })}
-              label="Begrunnelse"
-              error={errors.begrunnelse?.message}
-            />
-          )}
-          {watch().vurdering === AnnenForelderVurdering.AVDOED_FORELDER_UTEN_IDENT_I_PDL && (
-            <>
-              <Link href="https://nav.no" target="_blank" rel="noopener noreferrer">
-                Følg rutine for å registrere avdød forelder
-                <ExternalLinkIcon title="" />
-              </Link>
-              <BodyShort>Når rutinen er fullført, må du oppdatere grunnlaget før saken kan behandles videre.</BodyShort>
-            </>
-          )}
-          <Box paddingBlock="1 0">
+          <Textarea
+            {...register('begrunnelse', {
+              required: { value: true, message: 'Må fylles ut' },
+            })}
+            label="Begrunnelse"
+            error={errors.begrunnelse?.message}
+          />
+          <HStack gap="4" paddingBlock="2 0">
             <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(redigerStatus)}>
               Lagre
             </Button>
-          </Box>
+            <Button size="small" variant="secondary" onClick={onAvbryt}>
+              Avbryt
+            </Button>
+          </HStack>
         </form>
       )}
     </Box>

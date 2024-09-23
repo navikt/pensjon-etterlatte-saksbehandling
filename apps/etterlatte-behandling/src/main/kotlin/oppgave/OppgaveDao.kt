@@ -225,16 +225,17 @@ class OppgaveDaoImpl(
     ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
+                val typer = if (type != null) listOf(type) else OppgaveType.entries
                 val statement =
                     prepareStatement(
                         """
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE o.sak_id = ? ${type?.name?.let { " and o.type = ?" } ?: ""}
+                        WHERE o.sak_id = ? and o.type = ANY(?)
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId)
-                type?.let { statement.setString(2, it.name) }
+                statement.setArray(2, createArrayOf("text", typer.map { t -> t.name }.toTypedArray()))
                 statement
                     .executeQuery()
                     .toList {

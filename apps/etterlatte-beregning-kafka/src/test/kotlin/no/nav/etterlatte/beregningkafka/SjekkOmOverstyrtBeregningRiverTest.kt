@@ -87,7 +87,7 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
             """
             {
               "system_read_count": 0,
-              "@event_name": "REGULERING:LOEPENDE_YTELSE_FUNNET",
+              "@event_name": "OMREGNING:LOEPENDE_YTELSE_FUNNET",
               "hendelse_data": {
                 "sakId": 1,
                 "fradato": "2023-02-08",
@@ -101,7 +101,7 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
             """
             {
               "system_read_count": 0,
-              "@event_name": "REGULERING:LOEPENDE_YTELSE_FUNNET",
+              "@event_name": "OMREGNING:LOEPENDE_YTELSE_FUNNET",
               "hendelse_data": {
                 "sakId": 1,
                 "fradato": "2023-02-08",

@@ -42,6 +42,7 @@ internal class OpprettVedtakforespoerselRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
 

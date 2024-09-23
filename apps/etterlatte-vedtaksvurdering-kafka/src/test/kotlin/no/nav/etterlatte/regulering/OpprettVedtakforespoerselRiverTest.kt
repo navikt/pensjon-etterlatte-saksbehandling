@@ -4,10 +4,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,6 +30,12 @@ internal class OpprettVedtakforespoerselRiverTest {
                 SAK_ID_KEY to sakId,
                 DATO_KEY to foersteMai2023,
                 BEHANDLING_ID_KEY to behandlingId,
+                HENDELSE_DATA_KEY to
+                    Omregningshendelse(
+                        sakId = sakId,
+                        fradato = foersteMai2023,
+                        Prosesstype.AUTOMATISK,
+                    ),
             ),
         )
 

@@ -65,10 +65,9 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
             }
         }
 
-        // TODO skrive im logging fra regulering spesifikt til "omregning"
         put("kjoering") {
             val request = call.receive<KjoeringRequest>()
-            logger.info("Motter hendelse om at regulering har status ${request.status.name} i sak ${request.sakId}")
+            logger.info("Motter hendelse om at omregning har status ${request.status.name} i sak ${request.sakId}")
             inTransaction {
                 omregningService.oppdaterKjoering(request, brukerTokenInfo)
             }

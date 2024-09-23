@@ -20,6 +20,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -148,7 +149,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), Enhetsnummer("4808"))
         val journalpostResponse = OpprettJournalpostResponse("123", true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
@@ -208,7 +209,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), Enhetsnummer("4808"))
         val journalpostResponse = OpprettJournalpostResponse("123", true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak

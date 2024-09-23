@@ -275,8 +275,8 @@ class BehandlingKlientImpl(
             response.isOk -> true
             else -> {
                 logger.error(
-                    "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.sakIdOgReferanse.referanse,
+                    "Kan ikke underkjenne oppgaver og commite vedtak av type ${vedtakEndringDTO.vedtakType} " +
+                        "for behandling ${vedtakEndringDTO.sakIdOgReferanse.referanse}",
                 )
                 throw response.error
             }
@@ -433,7 +433,10 @@ class BehandlingKlientImpl(
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet", e)
+            throw BehandlingKlientException(
+                "Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet",
+                e,
+            )
         }
     }
 }

@@ -213,14 +213,22 @@ class HendelseDao(
                 )
             }
 
-            queryOf(
-                """
-                UPDATE jobb 
-                SET status = :statusNy
-                WHERE id = :id
-                """.trimIndent(),
-                mapOf("statusNy" to JobbStatus.NY.name, "id" to jobbId),
-            ).let { query -> it.run(query.asUpdate) }
+            val antallOppdaterteRader =
+                queryOf(
+                    """
+                    UPDATE jobb 
+                    SET status = :statusNy
+                    WHERE id = :id
+                    """.trimIndent(),
+                    mapOf("statusNy" to JobbStatus.NY.name, "id" to jobbId),
+                ).let { query -> it.run(query.asUpdate) }
+
+            if (antallOppdaterteRader != 1) {
+                throw InternfeilException(
+                    "Prøvde å tilbakestille statusen til jobb med id=$jobbId, men oppdaterte i " +
+                        "stedet $antallOppdaterteRader.",
+                )
+            }
         }
     }
 

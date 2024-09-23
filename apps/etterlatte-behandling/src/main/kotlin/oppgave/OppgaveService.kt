@@ -435,7 +435,7 @@ class OppgaveService(
         sakId: SakId,
         enhetsID: String,
     ) {
-        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId, null)
         oppgaverForSak.forEach {
             if (it.erUnderBehandling()) {
                 oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
@@ -444,7 +444,10 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    fun hentOppgaverForSak(
+        sakId: SakId,
+        type: OppgaveType? = null,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId, type)
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 

@@ -344,7 +344,7 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns
+        every { oppgaveService.hentOppgaverForSak(sakId, any()) } returns
             listOf(
                 oppgave(UUID.randomUUID(), sakId, Status.FERDIGSTILT),
                 oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
@@ -362,7 +362,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
             oppgaveService.opprettOppgave(
                 referanse = sakId.toString(),
                 sakId = sakId,
@@ -392,7 +392,7 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(oppgave(oppgaveId, sakId))
+        every { oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING) } returns listOf(oppgave(oppgaveId, sakId))
         every { oppgaveService.endrePaaVent(any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
@@ -405,7 +405,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
             oppgaveService.endrePaaVent(PaaVent(oppgaveId, PaaVentAarsak.KRAVGRUNNLAG_SPERRET, "Venter på oppdatert kravgrunnlag", true))
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }

@@ -326,8 +326,8 @@ internal class BehandlingServiceImpl(
             if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                 val omgjoeringsoppgaveForKlage =
                     oppgaveService
-                        .hentOppgaverForSak(behandling.sak.id)
-                        .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
+                        .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
+                        .find { it.referanse == behandling.relatertBehandlingId }
                         ?: throw InternfeilException(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",

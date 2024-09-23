@@ -48,8 +48,8 @@ class DoedshendelseReminderService(
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
-            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
-            if (oppgaver.none { it.type == OppgaveType.MANGLER_SOEKNAD }) {
+            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
+            if (oppgaver.isEmpty()) {
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,

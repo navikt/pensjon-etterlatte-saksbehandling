@@ -64,7 +64,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            if (packet.sakId == 19629L) {
+            if (packet.sakId == 19629L && brevkode == Brevkoder.BP_INFORMASJON_DOEDSFALL) {
                 packet.setEventNameForHendelseType(EventNames.FEILA)
                 context.publish(packet.toJson())
             } else {

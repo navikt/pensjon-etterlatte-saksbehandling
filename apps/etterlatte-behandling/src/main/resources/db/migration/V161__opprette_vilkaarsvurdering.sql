@@ -64,7 +64,6 @@ ALTER TABLE ONLY vilkaarsvurdering.vilkaarsvurdering_kilde
 ALTER TABLE ONLY vilkaarsvurdering.vilkaarsvurdering
     ADD CONSTRAINT vilkaarsvurdering_v2_pkey PRIMARY KEY (id);
 
-
 CREATE INDEX delvilkaar_vilkaar_id_idx ON vilkaarsvurdering.delvilkaar USING btree (vilkaar_id);
 
 CREATE INDEX delvilkaar_vilkaar_type_idx ON vilkaarsvurdering.delvilkaar USING btree (vilkaar_type);

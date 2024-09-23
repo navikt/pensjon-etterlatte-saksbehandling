@@ -2,6 +2,7 @@ package no.nav.etterlatte.gyldigsoeknad.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -10,10 +11,12 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -72,14 +75,21 @@ class BehandlingClient(
             }.body<String>()
     }
 
+    fun hentSakMedBehandlinger(sakId: SakId): SakMedBehandlinger =
+        runBlocking {
+            sakOgBehandlingApp.get("$url/saker/$sakId/behandlinger").body()
+        }
+
     fun opprettOppgave(
         sakId: SakId,
         oppgave: NyOppgaveDto,
-    ) = runBlocking {
-        sakOgBehandlingApp
-            .post("$url/oppgaver/sak/$sakId/opprett") {
-                contentType(ContentType.Application.Json)
-                setBody(oppgave)
-            }.body<String>()
-    }
+    ): UUID =
+        runBlocking {
+            sakOgBehandlingApp
+                .post("$url/oppgaver/sak/$sakId/opprett") {
+                    contentType(ContentType.Application.Json)
+                    setBody(oppgave)
+                }.body<OppgaveIntern>()
+                .id
+        }
 }

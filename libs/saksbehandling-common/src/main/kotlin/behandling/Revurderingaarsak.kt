@@ -39,6 +39,7 @@ enum class Revurderingaarsak(
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    OMREGNING(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false), // TODO
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),

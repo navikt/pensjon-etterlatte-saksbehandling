@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -180,7 +181,7 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
         prosessType: Prosesstype = Prosesstype.MANUELL,
-    ): BehandlingOgOppgave? {
+    ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
 
         return if (request.harIverksattBehandling()) {
@@ -211,8 +212,13 @@ class BehandlingFactory(
                     kilde,
                     prosessType,
                 )
-                    ?: return null
-            runBlocking { grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri, HardkodaSystembruker.opprettGrunnlag) }
+            runBlocking {
+                grunnlagService.leggInnNyttGrunnlag(
+                    behandling,
+                    persongalleri,
+                    HardkodaSystembruker.opprettGrunnlag,
+                )
+            }
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
@@ -247,7 +253,8 @@ class BehandlingFactory(
             inTransaction {
                 val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
                 val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
-                val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+                val foerstegangsbehandlinger =
+                    behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
                 if (foerstegangsbehandlinger.isEmpty()) {
                     throw AvslagOmgjoering.IngenFoerstegangsbehandling()
                 }
@@ -270,7 +277,9 @@ class BehandlingFactory(
                 }
 
                 val sisteAvslaatteBehandling =
-                    behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.maxByOrNull { it.behandlingOpprettet }
+                    behandlingerISak
+                        .filter { it.status == BehandlingStatus.AVSLAG }
+                        .maxByOrNull { it.behandlingOpprettet }
 
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
@@ -378,7 +387,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
-    ): Behandling? {
+    ): Behandling {
         behandlingerUnderBehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
             oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
@@ -399,6 +408,10 @@ class BehandlingFactory(
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
             behandlingDao.hentBehandling(opprettBehandling.id)
+                ?: throw InternfeilException(
+                    "Behandlingen vi akkurat opprettet finnes ikke i databasen. Id burde være " +
+                        "${opprettBehandling.id}, i sak ${opprettBehandling.sakId}",
+                )
         }
     }
 }

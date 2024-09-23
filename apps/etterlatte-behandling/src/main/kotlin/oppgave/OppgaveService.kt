@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class OppgaveService(
@@ -224,7 +225,6 @@ class OppgaveService(
         referanse: String,
         type: OppgaveType,
         merknad: String?,
-        frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val oppgaver =
             hentOppgaverForReferanse(referanse)
@@ -242,9 +242,8 @@ class OppgaveService(
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, oppdatertMerknad, Status.ATTESTERING)
 
-        if (frist != null) {
-            oppgaveDao.redigerFrist(oppgave.id, frist)
-        }
+        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
+        oppgaveDao.redigerFrist(oppgave.id, toDagerFremITid)
 
         settSaksbehandlerSomForrigeSaksbehandlerOgFjern(oppgave.id)
 
@@ -627,6 +626,7 @@ class OppgaveService(
                         OppgaveType.TILBAKEKREVING,
                         OppgaveType.OMGJOERING,
                         OppgaveType.JOURNALFOERING,
+                        OppgaveType.TILLEGGSINFORMASJON,
                         OppgaveType.GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
                         OppgaveType.AKTIVITETSPLIKT,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,

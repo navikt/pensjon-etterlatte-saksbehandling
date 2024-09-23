@@ -355,21 +355,21 @@ class VilkaarsvurderingRepository(
 
     private object Queries {
         const val LAGRE_VILKAARSVURDERING = """
-            INSERT INTO vilkaarsvurdering.vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
+            INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
             VALUES(:id, :behandling_id, :virkningstidspunkt, :grunnlag_versjon)
         """
 
         const val LAGRE_VILKAARSVURDERING_KILDE = """
-            INSERT INTO vilkaarsvurdering.vilkaarsvurdering_kilde(vilkaarsvurdering_id, kopiert_fra_vilkaarsvurdering_id) VALUES(:id, :kopiert_fra)
+            INSERT INTO vilkaarsvurdering_kilde(vilkaarsvurdering_id, kopiert_fra_vilkaarsvurdering_id) VALUES(:id, :kopiert_fra)
         """
 
         const val LAGRE_VILKAAR = """
-            INSERT INTO vilkaarsvurdering.vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
+            INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
             VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
         """
 
         const val LAGRE_VILKAARSVURDERING_RESULTAT = """
-            UPDATE vilkaarsvurdering.vilkaarsvurdering
+            UPDATE vilkaarsvurdering
             SET virkningstidspunkt = :virkningstidspunkt, 
                 resultat_utfall = :resultat_utfall, 
                 resultat_kommentar = :resultat_kommentar, 
@@ -379,7 +379,7 @@ class VilkaarsvurderingRepository(
         """
 
         const val LAGRE_VILKAAR_RESULTAT = """
-            UPDATE vilkaarsvurdering.vilkaar
+            UPDATE vilkaar
             SET resultat_kommentar = :resultat_kommentar, resultat_tidspunkt = :resultat_tidspunkt, 
                 resultat_saksbehandler = :resultat_saksbehandler   
             WHERE id = :id
@@ -388,11 +388,11 @@ class VilkaarsvurderingRepository(
         const val HENT_VILKAARSVURDERING = """
             SELECT id, behandling_id, virkningstidspunkt, grunnlag_versjon, resultat_utfall, 
                 resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler 
-            FROM vilkaarsvurdering.vilkaarsvurdering WHERE behandling_id = :behandling_id
+            FROM vilkaarsvurdering WHERE behandling_id = :behandling_id
         """
 
         const val HENT_MIGRERT_YRKESSKADE = """
-            SELECT sak_id FROM vilkaarsvurdering.migrert_yrkesskade WHERE sak_id = :sak_id
+            SELECT sak_id FROM migrert_yrkesskade WHERE sak_id = :sak_id
         """
 
         const val HENT_VILKAAR = """
@@ -411,35 +411,35 @@ class VilkaarsvurderingRepository(
                    dv.bokstav,
                    dv.lenke,
                    dv.resultat
-            FROM vilkaarsvurdering.vilkaar v
-              JOIN vilkaarsvurdering.delvilkaar dv on dv.vilkaar_id = v.id
+            FROM vilkaar v
+              JOIN delvilkaar dv on dv.vilkaar_id = v.id
             WHERE v.vilkaarsvurdering_id = :vilkaarsvurdering_id
         """
 
         const val SLETT_VILKAARSVURDERING_RESULTAT = """
-            UPDATE vilkaarsvurdering.vilkaarsvurdering
+            UPDATE vilkaarsvurdering
             SET resultat_utfall = null, resultat_kommentar = null, resultat_tidspunkt = null, 
                 resultat_saksbehandler = null 
             WHERE id = :id
         """
 
         const val SLETT_VILKAAR_RESULTAT = """
-            UPDATE vilkaarsvurdering.vilkaar
+            UPDATE vilkaar
             SET resultat_kommentar = null, resultat_tidspunkt = null, resultat_saksbehandler = null   
             WHERE id = :id
         """
         const val SLETT_VILKAARSVURDERING_KILDE = """
-            DELETE FROM vilkaarsvurdering.vilkaarsvurdering_kilde
+            DELETE FROM vilkaarsvurdering_kilde
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
         """
 
         const val SLETT_VILKAARSVURDERING = """
-            DELETE FROM vilkaarsvurdering.vilkaarsvurdering
+            DELETE FROM vilkaarsvurdering
             WHERE id = :id
         """
 
         const val OPPDATER_GRUNNLAGSVERSJON = """
-            UPDATE vilkaarsvurdering.vilkaarsvurdering
+            UPDATE vilkaarsvurdering
             SET grunnlag_versjon = :grunnlag_versjon 
             WHERE id = :id
         """

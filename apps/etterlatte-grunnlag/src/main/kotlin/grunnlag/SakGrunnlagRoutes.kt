@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -24,10 +25,10 @@ fun Route.sakGrunnlagRoute(
     route("sak/{$SAKID_CALL_PARAMETER}") {
         get {
             withSakId(behandlingKlient) { sakId ->
-                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(opplysningsgrunnlag)
-                }
+                val opplysningsgrunnlag =
+                    grunnlagService.hentOpplysningsgrunnlagForSak(sakId)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(opplysningsgrunnlag)
             }
         }
 

@@ -30,7 +30,6 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -76,8 +75,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
   }
 
-  const viderefoertOpphoerEnabled = useFeatureEnabledMedDefault('viderefoer-opphoer', false)
-
   return (
     <>
       <Box paddingInline="16" paddingBlock="16 4">
@@ -120,7 +117,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             >
               {{ info: <GrunnlagForVirkningstidspunkt /> }}
             </Virkningstidspunkt>{' '}
-            {viderefoertOpphoerEnabled && <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />}
+            <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
         )}

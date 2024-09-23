@@ -148,19 +148,24 @@ private fun readResources(logger: Logger): List<String> {
 }
 
 fun validateMigrationScriptVersions(files: List<String>) {
-    val allMigrationVersions =
+    val migreringsVersjonstall =
         files
             .filter { item -> item.endsWith(".sql") }
             .map { it.substring(it.lastIndexOf("/") + 1) }
             .map {
                 val pos = it.indexOf("__")
                 if (pos < 0) {
-                    throw RuntimeException("Sql script mangler underscore, fil: $it")
+                    throw MangerDobbelUnderscore("Sql fil mangler underscore, fil: $it")
                 }
-                it.substring(0, pos)
+                val migreringsVersjonstallTmp = it.substring(0, pos)
+                if (!migreringsVersjonstallTmp.first().isUpperCase()) {
+                    throw SqlMaaHaaStorforbokstav("Sql fil mangler underscore, fil: $it")
+                } else {
+                    migreringsVersjonstallTmp
+                }
             }
 
-    val grupperte = allMigrationVersions.groupingBy { it }.eachCount()
+    val grupperte = migreringsVersjonstall.groupingBy { it }.eachCount()
     grupperte.forEach { (key, value) ->
         if (value > 1) {
             throw InvalidMigrationScriptVersion(key, value)
@@ -173,6 +178,14 @@ fun jdbcUrl(
     port: Int,
     databaseName: String,
 ): String = "jdbc:postgresql://$host:$port/$databaseName"
+
+class SqlMaaHaaStorforbokstav(
+    msg: String,
+) : RuntimeException(msg)
+
+class MangerDobbelUnderscore(
+    msg: String,
+) : RuntimeException(msg)
 
 class InvalidMigrationScriptVersion(
     versjon: String,

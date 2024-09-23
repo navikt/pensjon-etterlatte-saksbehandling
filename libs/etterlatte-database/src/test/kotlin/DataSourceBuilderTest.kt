@@ -1,4 +1,6 @@
 import no.nav.etterlatte.libs.database.InvalidMigrationScriptVersion
+import no.nav.etterlatte.libs.database.MangerDobbelUnderscore
+import no.nav.etterlatte.libs.database.SqlMaaHaaStorforbokstav
 import no.nav.etterlatte.libs.database.validateMigrationScriptVersions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,6 +20,24 @@ class DataSourceBuilderTest {
 
         assertThrows<InvalidMigrationScriptVersion> {
             validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd).flatten())
+        }
+    }
+
+    @Test
+    fun `Må ha dobbel underscore i migreringsfil`() {
+        val migrationScripts = listOf("V1_numerouno.sql", "V2__endreoppgavetabell.sql")
+
+        assertThrows<MangerDobbelUnderscore> {
+            validateMigrationScriptVersions(listOf(migrationScripts).flatten())
+        }
+    }
+
+    @Test
+    fun `Må ha stor forbokstav i migreringsfil`() {
+        val migrationScripts = listOf("v1_numerouno.sql", "V2__endreoppgavetabell.sql")
+
+        assertThrows<SqlMaaHaaStorforbokstav> {
+            validateMigrationScriptVersions(listOf(migrationScripts).flatten())
         }
     }
 }

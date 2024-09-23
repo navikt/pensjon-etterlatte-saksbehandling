@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.database.validateMigrationScriptVersions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class DataSourceBuilderTest {
+class DataSourceValidatorTest {
     @Test
     fun `Skal migrere unike versjoner i migrering og prod`() {
         val migrationScripts = listOf("V1__numerouno.sql", "V3__numerotres.sql")
@@ -34,7 +34,7 @@ class DataSourceBuilderTest {
 
     @Test
     fun `Må ha stor forbokstav i migreringsfil`() {
-        val migrationScripts = listOf("v1_numerouno.sql", "V2__endreoppgavetabell.sql")
+        val migrationScripts = listOf("v1__numerouno.sql", "V2__endreoppgavetabell.sql")
 
         assertThrows<SqlMaaHaaStorforbokstav> {
             validateMigrationScriptVersions(listOf(migrationScripts).flatten())

@@ -23,7 +23,7 @@ internal class RetryOgFeilhaandteringKtTest {
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
         ) {
             antallForsoek++
@@ -41,7 +41,7 @@ internal class RetryOgFeilhaandteringKtTest {
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
         ) {
             antallForsoek++
@@ -59,7 +59,7 @@ internal class RetryOgFeilhaandteringKtTest {
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.DOEDSHENDELSE,
         ) {
             antallForsoek++

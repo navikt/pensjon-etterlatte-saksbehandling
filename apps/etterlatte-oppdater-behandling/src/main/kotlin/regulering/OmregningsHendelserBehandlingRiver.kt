@@ -9,7 +9,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,7 +24,7 @@ internal class OmregningsHendelserBehandlingRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT) {
+        initialiserRiver(rapidsConnection, OmregningHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
@@ -42,7 +42,7 @@ internal class OmregningsHendelserBehandlingRiver(
         val (behandlingId, _, sakType) = behandlinger.opprettOmregning(hendelse)
         packet.behandlingId = behandlingId
         packet[SAK_TYPE] = sakType
-        packet.setEventNameForHendelseType(ReguleringHendelseType.BEHANDLING_OPPRETTA)
+        packet.setEventNameForHendelseType(OmregningHendelseType.BEHANDLING_OPPRETTA)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

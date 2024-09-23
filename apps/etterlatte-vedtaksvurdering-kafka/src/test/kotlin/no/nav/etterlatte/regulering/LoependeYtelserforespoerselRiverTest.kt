@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -68,7 +69,7 @@ internal class LoependeYtelserforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
         Assertions.assertEquals(
-            ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType(),
+            OmregningHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType(),
             sendtMelding.get(EVENT_NAME_KEY).asText(),
         )
         Assertions.assertEquals(

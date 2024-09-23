@@ -20,10 +20,10 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
@@ -47,7 +47,7 @@ internal class OmregningHendelserBeregningRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.TRYGDETID_KOPIERT) {
+        initialiserRiver(rapidsConnection, OmregningHendelseType.TRYGDETID_KOPIERT) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
@@ -72,7 +72,7 @@ internal class OmregningHendelserBeregningRiver(
             packet[BEREGNING_KEY] = beregning.beregning
             sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
-        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
+        packet.setEventNameForHendelseType(OmregningHendelseType.BEREGNA)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

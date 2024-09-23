@@ -5,7 +5,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -20,7 +20,7 @@ internal class KopierTrygdetidRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.VILKAARSVURDERT) {
+        initialiserRiver(rapidsConnection, OmregningHendelseType.VILKAARSVURDERT) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
         }
@@ -36,7 +36,7 @@ internal class KopierTrygdetidRiver(
         val behandlingId = packet.behandlingId
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-        packet.setEventNameForHendelseType(ReguleringHendelseType.TRYGDETID_KOPIERT)
+        packet.setEventNameForHendelseType(OmregningHendelseType.TRYGDETID_KOPIERT)
         context.publish(packet.toJson())
         logger.info("Trygdetid kopiert. Publiserte oppdatert omregningshendelse")
     }

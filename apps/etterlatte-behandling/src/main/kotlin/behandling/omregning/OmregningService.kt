@@ -28,7 +28,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import org.slf4j.Logger
@@ -134,7 +134,7 @@ class OmregningService(
             ).revurdering
 
         val correlationId = getCorrelationId()
-        val hendelseType = ReguleringHendelseType.BEHANDLING_OPPRETTA.lagEventnameForType()
+        val hendelseType = OmregningHendelseType.BEHANDLING_OPPRETTA.lagEventnameForType()
         rapid
             .publiser(
                 omregning.id.toString(),

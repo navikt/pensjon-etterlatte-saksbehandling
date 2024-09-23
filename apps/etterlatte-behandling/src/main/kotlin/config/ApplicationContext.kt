@@ -329,7 +329,7 @@ internal class ApplicationContext(
     val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        if (appIsInGCP()) {
+        if (isProd()) {
             VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
         } else {
             VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)

@@ -14,7 +14,7 @@ class SqlMaaHaaStorforbokstav(
     msg: String,
 ) : RuntimeException(msg)
 
-class MangerDobbelUnderscore(
+class ManglerDobbelUnderscore(
     msg: String,
 ) : RuntimeException(msg)
 
@@ -39,7 +39,7 @@ fun validateMigrationScriptVersions(files: List<String>) {
             .map {
                 val posisjonEtterDobbelUnderscore = it.indexOf("__")
                 if (posisjonEtterDobbelUnderscore < 0) {
-                    throw MangerDobbelUnderscore("Sql fil mangler underscore, fil: $it")
+                    throw ManglerDobbelUnderscore("Sql fil mangler underscore, fil: $it")
                 }
                 val migreringsVersjonstallTmp = it.substring(0, posisjonEtterDobbelUnderscore)
                 if (!migreringsVersjonstallTmp.first().isUpperCase()) {

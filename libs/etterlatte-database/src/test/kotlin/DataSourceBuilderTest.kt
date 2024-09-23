@@ -1,5 +1,5 @@
 import no.nav.etterlatte.libs.database.InvalidMigrationScriptVersion
-import no.nav.etterlatte.libs.database.MangerDobbelUnderscore
+import no.nav.etterlatte.libs.database.ManglerDobbelUnderscore
 import no.nav.etterlatte.libs.database.SqlMaaHaaStorforbokstav
 import no.nav.etterlatte.libs.database.validateMigrationScriptVersions
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ class DataSourceBuilderTest {
     fun `Må ha dobbel underscore i migreringsfil`() {
         val migrationScripts = listOf("V1_numerouno.sql", "V2__endreoppgavetabell.sql")
 
-        assertThrows<MangerDobbelUnderscore> {
+        assertThrows<ManglerDobbelUnderscore> {
             validateMigrationScriptVersions(listOf(migrationScripts).flatten())
         }
     }

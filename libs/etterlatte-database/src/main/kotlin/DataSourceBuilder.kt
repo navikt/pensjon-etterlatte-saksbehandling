@@ -148,16 +148,16 @@ private fun readResources(logger: Logger): List<String> {
 }
 
 fun validateMigrationScriptVersions(files: List<String>) {
-    val migreringsVersjonstall =
+    val migreringsVersjonstallPaaSqlFil =
         files
             .filter { item -> item.endsWith(".sql") }
             .map { it.substring(it.lastIndexOf("/") + 1) }
             .map {
-                val pos = it.indexOf("__")
-                if (pos < 0) {
+                val posisjonEtterDobbelUnderscore = it.indexOf("__")
+                if (posisjonEtterDobbelUnderscore < 0) {
                     throw MangerDobbelUnderscore("Sql fil mangler underscore, fil: $it")
                 }
-                val migreringsVersjonstallTmp = it.substring(0, pos)
+                val migreringsVersjonstallTmp = it.substring(0, posisjonEtterDobbelUnderscore)
                 if (!migreringsVersjonstallTmp.first().isUpperCase()) {
                     throw SqlMaaHaaStorforbokstav("Sql fil mangler underscore, fil: $it")
                 } else {
@@ -165,10 +165,10 @@ fun validateMigrationScriptVersions(files: List<String>) {
                 }
             }
 
-    val grupperte = migreringsVersjonstall.groupingBy { it }.eachCount()
-    grupperte.forEach { (key, value) ->
-        if (value > 1) {
-            throw InvalidMigrationScriptVersion(key, value)
+    val grupperte = migreringsVersjonstallPaaSqlFil.groupingBy { it }.eachCount()
+    grupperte.forEach { (versjonOgType, antallDistinkteMigreringerAvVersjonOgType) ->
+        if (antallDistinkteMigreringerAvVersjonOgType > 1) {
+            throw InvalidMigrationScriptVersion(versjonOgType, antallDistinkteMigreringerAvVersjonOgType)
         }
     }
 }

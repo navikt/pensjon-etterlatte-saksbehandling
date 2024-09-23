@@ -116,7 +116,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
-    if (shouldLogError) {
+    if (shouldLogError && window.windowOpen) {
       logger.generalError({ msg: `Fikk Rejection i kall mot backend: ${e}`, errorInfo: { url, method } })
     }
     return {

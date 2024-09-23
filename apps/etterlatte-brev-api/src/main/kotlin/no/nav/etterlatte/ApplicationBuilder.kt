@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
-import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
@@ -72,7 +71,8 @@ import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
-import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
@@ -196,7 +196,7 @@ class ApplicationBuilder {
             redigerbartVedleggHenter,
         )
     private val brevoppretter =
-        Brevoppretter(adresseService, db, behandlingService, innholdTilRedigerbartBrevHenter)
+        Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)

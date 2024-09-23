@@ -1,6 +1,11 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.vedtaksbrev
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -21,6 +26,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -53,13 +59,28 @@ class VedtaksbrevService(
         sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Brev =
-        brevoppretter.opprettVedtaksbrev(
-            sakId = sakId,
-            behandlingId = behandlingId,
-            brukerTokenInfo = brukerTokenInfo,
-            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-        ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
+    ): Brev {
+        require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
+            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
+        }
+
+        if (brukerTokenInfo is Saksbehandler) {
+            val kanRedigeres = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+            if (!kanRedigeres) {
+                throw KanIkkeOppretteVedtaksbrev(behandlingId)
+            }
+        }
+
+        return brevoppretter
+            .opprettBrev(
+                sakId = sakId,
+                behandlingId = behandlingId,
+                bruker = brukerTokenInfo,
+                brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
+                brevtype = Brevtype.VEDTAK,
+                brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
+            ).first
+    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -261,4 +282,12 @@ class SaksbehandlerOgAttestantSammePerson(
         code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
         detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
         meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
+    )
+
+class KanIkkeOppretteVedtaksbrev(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
+        detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
+        meta = mapOf("behandlingId" to behandlingId),
     )

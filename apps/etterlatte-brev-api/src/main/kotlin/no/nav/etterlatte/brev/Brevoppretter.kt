@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -135,19 +136,16 @@ class Brevoppretter(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String? =
-                when (verge) {
-                    is Vergemaal -> verge.foedselsnummer.value
-                    is UkjentVergemaal -> null
+            when (verge) {
+                is Vergemaal -> tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
+                is UkjentVergemaal -> tomMottaker()
 
-                    else ->
+                else ->
+                    adresseService.hentMottakerAdresse(
+                        sakType,
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
-                            ?: soeker.fnr.value
-                }
-            if (mottakerFnr != null) {
-                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
-            } else {
-                tomMottaker()
+                            ?: soeker.fnr.value,
+                    )
             }
         }
 

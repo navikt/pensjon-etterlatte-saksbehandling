@@ -749,7 +749,7 @@ internal class VedtaksvurderingRouteTest {
     private fun klage(): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak("ident", SakType.BARNEPENSJON, 1L, "einheit"),
+            Sak("ident", SakType.BARNEPENSJON, 1L, ENHET_1),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

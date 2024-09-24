@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.objectMapper
@@ -83,7 +84,7 @@ class SakRepository(
             vedtakLoependeFom = getDate("vedtak_loepende_fom")?.toLocalDate(),
             vedtakLoependeTom = getDate("vedtak_loepende_tom")?.toLocalDate(),
             saksbehandler = getString("saksbehandler"),
-            ansvarligEnhet = getString("ansvarlig_enhet"),
+            ansvarligEnhet = Enhetsnummer.nullable(getString("ansvarlig_enhet")),
             soeknadFormat = getString("soeknad_format")?.let { enumValueOf<SoeknadFormat>(it) },
             sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
             beregning = getString("beregning")?.let { objectMapper.readValue(it) },
@@ -157,7 +158,7 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setDate(18, sakRad.vedtakLoependeFom?.let { Date.valueOf(it) })
         setDate(19, sakRad.vedtakLoependeTom?.let { Date.valueOf(it) })
         setString(20, sakRad.saksbehandler)
-        setString(21, sakRad.ansvarligEnhet)
+        setString(21, sakRad.ansvarligEnhet?.enhetNr)
         setString(22, sakRad.soeknadFormat?.name)
         setString(23, sakRad.sakUtland?.name)
         setJsonb(24, sakRad.beregning)

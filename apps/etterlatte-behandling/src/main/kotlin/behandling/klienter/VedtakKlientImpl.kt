@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,19 +29,19 @@ interface VedtakKlient {
     suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long
 
     suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long
 
     suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto
 
     suspend fun underkjennVedtakTilbakekreving(
@@ -95,7 +96,7 @@ class VedtakKlientImpl(
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long {
         try {
             logger.info(
@@ -132,7 +133,7 @@ class VedtakKlientImpl(
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long {
         try {
             logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=$tilbakekrevingId til vedtak")
@@ -164,7 +165,7 @@ class VedtakKlientImpl(
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto {
         try {
             logger.info("Sender attesteringsinfo for tilbakekreving=$tilbakekrevingId til vedtak")

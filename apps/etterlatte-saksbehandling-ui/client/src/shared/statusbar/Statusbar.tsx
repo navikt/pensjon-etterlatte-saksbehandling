@@ -12,6 +12,7 @@ import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
 import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { VergemaalTag } from '~shared/tags/VergemaalTag'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -25,6 +26,7 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
         foedselsaar: person.foedselsaar,
         foedselsdato: person.foedselsdato,
         doedsdato: person.doedsdato,
+        vergemaal: person.vergemaal,
       },
     }}
   />
@@ -66,6 +68,8 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
 
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
+
+          <VergemaalTag vergemaal={person.vergemaal} />
         </HStack>
       </StatusbarBox>
     )

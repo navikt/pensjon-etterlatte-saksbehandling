@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming.regulering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -46,7 +47,7 @@ class VedtaksverifisererTest(
 ) {
     private val saksbehandler = "Saksbehandler1"
     private val attestant = "Attestant1"
-    private val enhet = "Enhet1"
+    private val enhet = Enhetsnummer("1234")
 
     private var teller = 0L
     private var vedtakTeller = 1L

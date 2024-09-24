@@ -52,7 +52,7 @@ internal class BrevServiceTest {
     private val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevDataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, behandlingService, innholdTilRedigerbartBrevHenter)
+        Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
 
     private val brevService =
         BrevService(

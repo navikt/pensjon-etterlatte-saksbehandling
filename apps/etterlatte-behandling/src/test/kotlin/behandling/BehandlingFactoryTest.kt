@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -112,6 +113,8 @@ class BehandlingFactoryTest {
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
             ),
+            mockk(),
+            mockk(),
         )
     private val behandlingFactory =
         BehandlingFactory(
@@ -504,9 +507,19 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
 
-        assertThrows<AvslagOmgjoering.HarAapenBehandling> { behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, false) }
+        assertThrows<AvslagOmgjoering.HarAapenBehandling> {
+            behandlingFactory.opprettOmgjoeringAvslag(
+                sak.id,
+                saksbehandler,
+                false,
+            )
+        }
 
         verify {
             sakServiceMock.finnSak(sak.id)
@@ -527,7 +540,11 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
         every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
@@ -547,7 +564,14 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
-        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
@@ -605,7 +629,11 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
 
@@ -613,7 +641,14 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
-        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
@@ -1062,7 +1097,7 @@ class BehandlingFactoryTest {
     private fun sak(
         sakId: SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
-        enhet: String = Enheter.defaultEnhet.enhetNr,
+        enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     ): Sak =
         Sak(
             ident = "Soeker",

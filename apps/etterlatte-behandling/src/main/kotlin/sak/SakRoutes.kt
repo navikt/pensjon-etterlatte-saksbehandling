@@ -18,6 +18,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
@@ -320,7 +321,7 @@ internal fun Route.sakWebRoutes(
 }
 
 data class EnhetRequest(
-    val enhet: String,
+    val enhet: Enhetsnummer,
 )
 
 data class SakerDto(

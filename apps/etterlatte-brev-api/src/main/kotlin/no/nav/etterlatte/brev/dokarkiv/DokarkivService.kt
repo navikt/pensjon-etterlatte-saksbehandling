@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 
 interface DokarkivService {
@@ -8,13 +9,13 @@ interface DokarkivService {
     suspend fun oppdater(
         journalpostId: String,
         forsoekFerdigstill: Boolean,
-        journalfoerendeEnhet: String?,
+        journalfoerendeEnhet: Enhetsnummer?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
 
     suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Boolean
 
     suspend fun feilregistrerSakstilknytning(journalpostId: String)
@@ -41,7 +42,7 @@ internal class DokarkivServiceImpl(
     override suspend fun oppdater(
         journalpostId: String,
         forsoekFerdigstill: Boolean,
-        journalfoerendeEnhet: String?,
+        journalfoerendeEnhet: Enhetsnummer?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse {
         // Hack for å unngå feil mot dokarkiv. Alle generelle saker i dokarkiv får fagsaksystem FS22, men vi kan ikke
@@ -56,7 +57,7 @@ internal class DokarkivServiceImpl(
         logger.info("Journalpost med id=$journalpostId oppdatert OK!")
 
         if (forsoekFerdigstill) {
-            if (journalfoerendeEnhet.isNullOrBlank()) {
+            if (journalfoerendeEnhet == null) {
                 logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
             } else {
                 val ferdigstilt = client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
@@ -69,7 +70,7 @@ internal class DokarkivServiceImpl(
 
     override suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        enhet: String,
+        enhet: Enhetsnummer,
     ) = client.ferdigstillJournalpost(journalpostId, enhet)
 
     override suspend fun feilregistrerSakstilknytning(journalpostId: String) {

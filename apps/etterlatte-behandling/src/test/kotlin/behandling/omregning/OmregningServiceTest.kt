@@ -39,8 +39,6 @@ class OmregningServiceTest(
         val service =
             OmregningService(
                 behandlingService = mockk(),
-                grunnlagService = mockk(),
-                revurderingService = mockk(),
                 omregningDao = OmregningDao(connection),
             )
 

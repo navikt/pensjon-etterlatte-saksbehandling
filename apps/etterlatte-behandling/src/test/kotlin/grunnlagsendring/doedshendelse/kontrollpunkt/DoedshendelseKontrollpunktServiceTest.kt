@@ -322,7 +322,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 ident = doedshendelseInternalBP.beroertFnr,
                 sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
                 id = 1L,
-                enhet = "0000",
+                enhet = Enheter.defaultEnhet.enhetNr,
             )
         val oppgaveIntern =
             mockk<OppgaveIntern> {

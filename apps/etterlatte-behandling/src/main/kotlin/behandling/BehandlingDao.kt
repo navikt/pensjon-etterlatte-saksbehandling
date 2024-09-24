@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -191,7 +192,7 @@ class BehandlingDao(
             id = rs.getLong("sak_id"),
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
-            enhet = rs.getString("enhet"),
+            enhet = Enhetsnummer(rs.getString("enhet")),
         )
 
     fun opprettBehandling(behandling: OpprettBehandling) =

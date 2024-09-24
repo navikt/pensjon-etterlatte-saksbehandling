@@ -837,8 +837,8 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
-        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
+        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
@@ -865,7 +865,7 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(

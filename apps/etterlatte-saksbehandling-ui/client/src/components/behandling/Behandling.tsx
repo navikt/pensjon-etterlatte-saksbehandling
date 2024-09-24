@@ -99,5 +99,6 @@ const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoeds
     foedselsaar: person.foedselsaar,
     foedselsdato: person.foedselsdato,
     doedsdato: person.doedsdato,
+    vergemaal: person.vergemaalEllerFremtidsfullmakt?.[0],
   }
 }

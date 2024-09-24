@@ -51,6 +51,11 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.vedtaksbrev.BrevManglerPDF
+import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
+import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -109,7 +114,6 @@ internal class VedtaksbrevServiceTest {
         Brevoppretter(
             adresseService,
             db,
-            behandlingService,
             innholdTilRedigerbartBrevHenter,
         )
 
@@ -147,7 +151,6 @@ internal class VedtaksbrevServiceTest {
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = simpleSaksbehandler()
         private val ATTESTANT = simpleAttestant()
@@ -729,7 +732,7 @@ internal class VedtaksbrevServiceTest {
     ): GenerellBrevData {
         val soeker = "12345612345"
         return GenerellBrevData(
-            sak = Sak(soeker, sakType, SAK_ID, "4808"),
+            sak = Sak(soeker, sakType, SAK_ID, Enheter.PORSGRUNN.enhetNr),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
@@ -743,7 +746,7 @@ internal class VedtaksbrevServiceTest {
                     1,
                     vedtakStatus,
                     vedtakType,
-                    PORSGRUNN,
+                    Enheter.PORSGRUNN.enhetNr,
                     SAKSBEHANDLER.ident(),
                     attestantIdent = null,
                     vedtaksdato = null,

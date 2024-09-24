@@ -11,6 +11,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -418,7 +419,7 @@ internal class BehandlingStatusServiceTest {
     ) = OppgaveIntern(
         id = oppgaveId,
         status = status,
-        enhet = "enhet",
+        enhet = Enheter.defaultEnhet.enhetNr,
         sakId = sakId,
         kilde = OppgaveKilde.TILBAKEKREVING,
         type = OppgaveType.TILBAKEKREVING,

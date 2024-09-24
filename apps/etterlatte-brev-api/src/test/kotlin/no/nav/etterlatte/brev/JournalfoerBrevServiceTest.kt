@@ -28,6 +28,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.ktor.token.systembruker
@@ -64,7 +65,7 @@ class JournalfoerBrevServiceTest {
     @Test
     fun `Journalfoering fungerer som forventet`() {
         val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.REDIGERBAR)
-        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
+        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
@@ -371,7 +372,7 @@ class JournalfoerBrevServiceTest {
             vedtakId = 1L,
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             behandlingId = UUID.randomUUID(),
-            ansvarligEnhet = "1234",
+            ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
             saksbehandler = "EY",
         )
 

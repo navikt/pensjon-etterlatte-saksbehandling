@@ -4,9 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingServiceImpl
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -20,19 +20,19 @@ internal class OmregningsHendelserBehandlingRiverTest {
 
     @Test
     fun `skal opprette omregning`() {
-        val omregningshendelseSlot = slot<Omregningshendelse>()
+        val revurderingRequestSlot = slot<AutomatiskRevurderingRequest>()
         val behandlingId = UUID.randomUUID()
         val behandlingViOmregnerFra = UUID.randomUUID()
 
-        val returnValue = OpprettOmregningResponse(behandlingId, behandlingViOmregnerFra, SakType.BARNEPENSJON)
+        val returnValue = AutomatiskRevurderingResponse(behandlingId, behandlingViOmregnerFra, SakType.BARNEPENSJON)
 
-        every { behandlingService.opprettOmregning(capture(omregningshendelseSlot)) }.returns(returnValue)
+        every { behandlingService.opprettAutomatiskRevurdering(capture(revurderingRequestSlot)) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
+        Assertions.assertEquals(1, revurderingRequestSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             behandlingId.toString(),

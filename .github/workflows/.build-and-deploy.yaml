@@ -96,6 +96,8 @@ jobs:
       - name: Generate SBOM, attest and sign image
         id: attest-sign
         uses: nais/attest-sign@v1
+        env:
+          ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           image_ref: ${{ env.IMAGE_WITH_DIGEST }}
   deploy-to-dev-gcp:

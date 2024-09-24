@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -287,7 +288,7 @@ internal class BrevdataFacadeImplTest {
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val ENHET = "0000"
+        private val ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER_IDENT = "Z1235"
         private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"

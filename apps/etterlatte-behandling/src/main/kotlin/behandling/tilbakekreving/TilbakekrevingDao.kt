@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -288,7 +289,7 @@ class TilbakekrevingDao(
                     id = getLong("sak_id"),
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
-                    enhet = getString("enhet"),
+                    enhet = Enhetsnummer(getString("enhet")),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),

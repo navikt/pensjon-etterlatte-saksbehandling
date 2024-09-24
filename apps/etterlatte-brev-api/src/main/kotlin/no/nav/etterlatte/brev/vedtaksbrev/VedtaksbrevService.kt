@@ -78,6 +78,7 @@ class VedtaksbrevService(
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
                 brevtype = Brevtype.VEDTAK,
+                validerMottaker = true,
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
             ).first
     }
@@ -120,7 +121,7 @@ class VedtaksbrevService(
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
         } else if (!brev.mottaker.erGyldig()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId)
         }
 
         val (saksbehandlerIdent, vedtakStatus) =
@@ -259,12 +260,12 @@ class VedtaksbrevKanIkkeSlettes(
     )
 
 class UgyldigMottakerKanIkkeFerdigstilles(
-    id: BrevID,
+    id: BrevID?,
+    sakId: SakId,
 ) : UgyldigForespoerselException(
         code = "UGYLDIG_MOTTAKER_BREV",
-        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id",
-        meta =
-            mapOf("id" to id),
+        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id, sakId: $sakId",
+        meta = id?.let { mapOf("id" to it) },
     )
 
 class BrevManglerPDF(

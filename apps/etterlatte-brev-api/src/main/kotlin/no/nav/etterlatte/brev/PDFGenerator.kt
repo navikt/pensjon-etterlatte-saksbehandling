@@ -46,7 +46,7 @@ class PDFGenerator(
         val brev = sjekkOmBrevKanEndres(id)
         if (!brev.mottaker.erGyldig()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId)
         }
 
         val pdf =

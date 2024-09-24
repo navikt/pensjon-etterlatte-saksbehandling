@@ -18,7 +18,9 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
@@ -26,6 +28,8 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -53,7 +57,21 @@ class VarselbrevTest(
     fun start() {
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakerAdresse(any(), any()) } returns tomMottaker(SOEKER_FOEDSELSNUMMER)
+                coEvery { it.hentMottakerAdresse(any(), any()) } returns
+                    Mottaker(
+                        navn = "Navn Navnesen",
+                        foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                        orgnummer = null,
+                        adresse =
+                            Adresse(
+                                adresseType = AdresseType.VEGADRESSE.name,
+                                adresselinje1 = "Adresse1",
+                                landkode = "NO",
+                                land = "Norge",
+                            ),
+                    )
+
+                tomMottaker(SOEKER_FOEDSELSNUMMER)
                 coEvery { it.hentAvsender(any()) } returns
                     Avsender(
                         kontor = "",

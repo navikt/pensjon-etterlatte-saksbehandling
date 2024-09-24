@@ -92,6 +92,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         bruker = brukerTokenInfo,
                         brevKodeMapping = { brevKode },
                         brevtype = brevKode.brevtype,
+                        validerMottaker = true,
                     ) {
                         when (brevKode) {
                             Brevkoder.BP_INFORMASJON_DOEDSFALL -> {

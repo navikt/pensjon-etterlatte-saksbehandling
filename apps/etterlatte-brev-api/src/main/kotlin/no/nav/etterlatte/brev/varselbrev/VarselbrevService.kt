@@ -42,6 +42,7 @@ internal class VarselbrevService(
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevkode },
                 brevtype = Brevtype.VARSEL,
+                validerMottaker = true,
             ) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
                     sakType,

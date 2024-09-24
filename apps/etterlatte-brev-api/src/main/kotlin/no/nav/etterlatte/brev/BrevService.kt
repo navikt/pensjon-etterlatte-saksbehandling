@@ -46,6 +46,7 @@ class BrevService(
                 bruker = bruker,
                 brevKodeMapping = { brevkode },
                 brevtype = brevkode.brevtype,
+                validerMottaker = false,
                 brevDataMapping = brevDataMapping,
             ).first
 
@@ -139,7 +140,7 @@ class BrevService(
 
         if (!brev.mottaker.erGyldig()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId)
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {

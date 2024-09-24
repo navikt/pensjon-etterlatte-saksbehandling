@@ -7,6 +7,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -43,6 +44,7 @@ internal class BehandlingMetricsTest(
 
     @BeforeAll
     fun beforeAll() {
+        Kontekst.set(null)
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
         behandlingRepo =
             BehandlingDao(

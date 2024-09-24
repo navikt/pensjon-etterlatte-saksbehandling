@@ -51,6 +51,10 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.vedtaksbrev.BrevManglerPDF
+import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
+import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -109,7 +113,6 @@ internal class VedtaksbrevServiceTest {
         Brevoppretter(
             adresseService,
             db,
-            behandlingService,
             innholdTilRedigerbartBrevHenter,
         )
 

@@ -118,7 +118,6 @@ class VarselbrevTest(
             Brevoppretter(
                 adresseService,
                 brevRepository,
-                behandlingService,
                 innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()

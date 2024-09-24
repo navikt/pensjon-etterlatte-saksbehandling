@@ -1,5 +1,6 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.journalfoer
 
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.AvsenderMottaker
 import no.nav.etterlatte.brev.dokarkiv.Bruker

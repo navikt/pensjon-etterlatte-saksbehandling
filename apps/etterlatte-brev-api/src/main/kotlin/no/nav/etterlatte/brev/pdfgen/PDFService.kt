@@ -1,8 +1,10 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.pdfgen
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.content.PartData
 import io.ktor.http.content.streamProvider
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold

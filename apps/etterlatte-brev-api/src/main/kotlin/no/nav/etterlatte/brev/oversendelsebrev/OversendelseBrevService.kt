@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.oversendelsebrev
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -26,6 +25,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.pdfgen.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData

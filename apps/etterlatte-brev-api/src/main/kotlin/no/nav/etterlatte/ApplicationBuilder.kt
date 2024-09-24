@@ -21,14 +21,8 @@ import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
-import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
-import no.nav.etterlatte.brev.JournalfoerBrevService
-import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.PDFService
-import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
@@ -49,6 +43,8 @@ import no.nav.etterlatte.brev.dokument.SafKlient
 import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.InnholdTilRedigerbartBrevHenter
+import no.nav.etterlatte.brev.hentinformasjon.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -60,6 +56,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingK
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.BehandlingVilkaarsvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.brev.journalfoer.JournalfoerBrevService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -67,6 +64,8 @@ import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
+import no.nav.etterlatte.brev.pdfgen.PDFGenerator
+import no.nav.etterlatte.brev.pdfgen.PDFService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
@@ -167,10 +166,8 @@ class ApplicationBuilder {
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
-
     private val brevDataMapperRedigerbartUtfallVedtak =
-        BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService)
+        BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService)
 
     private val brevDataMapperFerdigstilling =
         BrevDataMapperFerdigstillingVedtak(

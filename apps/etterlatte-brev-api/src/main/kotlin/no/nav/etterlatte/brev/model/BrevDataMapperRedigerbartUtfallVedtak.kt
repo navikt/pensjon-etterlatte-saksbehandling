@@ -3,12 +3,12 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
-import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.klage.AvvistKlageInnholdBrevData
@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -30,7 +31,6 @@ import java.util.UUID
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
-    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(brevDataRedigerbarRequest: BrevDataRedigerbarRequest) =
         with(brevDataRedigerbarRequest) {
@@ -94,17 +94,26 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 avdoede,
             )
         }
-        return migreringBrevDataService.opprettMigreringBrevdata(
-            brukerTokenInfo = brukerTokenInfo,
-            systemkilde = systemkilde,
-            virkningstidspunkt = virkningstidspunkt!!,
-            behandlingId = behandlingId,
-            sakType = sakType,
-            loependeIPesys = loependeIPesys,
-            utlandstilknytningType = utlandstilknytningType,
-            erForeldreloes = erForeldreloesUtenForeldreverge,
-            erSystembruker = erSystembruker,
-        )
+
+        if (systemkilde != Vedtaksloesning.PESYS) {
+            throw InternfeilException("Kan ikke opprette et migreringsbrev fra pesys hvis kilde ikke er pesys")
+        }
+        return coroutineScope {
+            val utbetalingsinfo =
+                beregningService.finnUtbetalingsinfo(
+                    behandlingId,
+                    virkningstidspunkt!!,
+                    brukerTokenInfo,
+                    sakType,
+                )
+            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(
+                utbetalingsinfo,
+                erForeldreloes,
+                loependeIPesys,
+                utlandstilknytningType,
+                erSystembruker,
+            )
+        }
     }
 
     private suspend fun brevData(

@@ -10,11 +10,11 @@ import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
-import no.nav.etterlatte.brev.JournalfoerBrevService
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
+import no.nav.etterlatte.brev.journalfoer.JournalfoerBrevService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.pdfgen.PDFGenerator
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey

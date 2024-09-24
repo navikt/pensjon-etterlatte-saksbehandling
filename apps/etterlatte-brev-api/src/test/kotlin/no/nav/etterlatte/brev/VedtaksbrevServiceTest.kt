@@ -30,6 +30,8 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.InnholdTilRedigerbartBrevHenter
+import no.nav.etterlatte.brev.hentinformasjon.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -51,6 +53,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.pdfgen.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.BrevManglerPDF
 import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
 import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson
@@ -99,7 +102,6 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
     private val brevKodeMappingVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -132,7 +134,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMappingVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService, migreringBrevDataService),
+            BrevDataMapperRedigerbartUtfallVedtak(behandlingService, beregningService),
             brevDataMapperFerdigstilling,
             behandlingService,
         )

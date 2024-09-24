@@ -1,5 +1,6 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.pdfgen
 
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak

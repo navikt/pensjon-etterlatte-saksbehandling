@@ -20,6 +20,8 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.journalfoer.FeilStatusForJournalfoering
+import no.nav.etterlatte.brev.journalfoer.JournalfoerBrevService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold

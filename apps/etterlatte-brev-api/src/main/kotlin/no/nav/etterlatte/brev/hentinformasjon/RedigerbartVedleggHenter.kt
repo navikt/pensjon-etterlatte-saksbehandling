@@ -1,7 +1,9 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.hentinformasjon
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest

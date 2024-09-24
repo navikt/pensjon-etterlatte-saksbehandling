@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -59,6 +60,7 @@ internal class BehandlingInfoDaoTest(
 
     @BeforeEach
     fun reset() {
+        Kontekst.set(null)
         dataSource.connection.use { it.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate() }
 
         val sak = opprettSakForTest()

@@ -78,7 +78,7 @@ class DoedshendelseReminderServiceTest {
     }
 
     @Test
-    fun `Skal ikke opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt og det allerede er opprettet`() {
+    fun `Skal ikke opprette oppgave hvis 4 mnd gammel BP hendelse ikke har soekt og det allerede er opprettet`() {
         val sakId = 1L
         val doedshendelseBP2mndGammel =
             DoedshendelseReminder(

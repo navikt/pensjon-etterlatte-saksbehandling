@@ -459,8 +459,6 @@ internal class ApplicationContext(
     val omregningService =
         OmregningService(
             behandlingService = behandlingService,
-            grunnlagService = grunnlagsService,
-            revurderingService = automatiskRevurderingService,
             omregningDao = omregningDao,
         )
 

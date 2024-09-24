@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
+import java.time.LocalTime
 
 class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
@@ -26,8 +27,10 @@ class AutomatiskRevurderingService(
         validerSakensTilstand(request.sakId, request.revurderingAarsak)
 
         val forrigeBehandling =
-            behandlingService.hentSisteIverksatte(request.sakId)
-                ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
+            inTransaction {
+                behandlingService.hentSisteIverksatte(request.sakId)
+                    ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
+            }
         val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
 
         val revurderingOgOppfoelging =
@@ -39,7 +42,7 @@ class AutomatiskRevurderingService(
                     virkningstidspunkt = request.fraDato,
                     kilde = Vedtaksloesning.GJENNY,
                     persongalleri = persongalleri,
-                    frist = request.oppgavefrist,
+                    frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
                 )
             }
 

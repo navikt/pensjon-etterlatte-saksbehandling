@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.JobbType
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -77,7 +76,7 @@ interface BehandlingService {
         loependeFom: YearMonth? = null,
     ): Saker
 
-    fun opprettOmregning(omregningshendelse: Omregningshendelse): AutomatiskRevurderingResponse
+    fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse
 
     fun opprettRevurderingAktivitetsplikt(
         sakId: SakId,
@@ -211,12 +210,12 @@ class BehandlingServiceImpl(
             }
         }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): AutomatiskRevurderingResponse =
+    override fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/omregning") {
+                .post("$url/automatisk-revurdering") {
                     contentType(ContentType.Application.Json)
-                    setBody(omregningshendelse)
+                    setBody(request)
                 }.body()
         }
 

@@ -8,8 +8,6 @@ import io.mockk.verify
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -42,22 +40,21 @@ class TidshendelseServiceTest {
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
 
-        val omregningshendelse =
-            Omregningshendelse(
+        val revurderingRequest =
+            AutomatiskRevurderingRequest(
                 sakId = sakId,
-                fradato = behandlingsmaaned.plusMonths(1).atDay(1),
-                prosesstype = Prosesstype.AUTOMATISK,
-                revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
+                fraDato = behandlingsmaaned.plusMonths(1).atDay(1),
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
                 oppgavefrist = frist,
             )
 
-        every { behandlingService.opprettOmregning(omregningshendelse) } returns
+        every { behandlingService.opprettAutomatiskRevurdering(revurderingRequest) } returns
             AutomatiskRevurderingResponse(behandlingId, forrigeBehandlingId, sakType = SakType.BARNEPENSJON)
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding)) shouldBe
             TidshendelseResult.OpprettetOmregning(behandlingId, forrigeBehandlingId)
 
-        verify { behandlingService.opprettOmregning(omregningshendelse) }
+        verify { behandlingService.opprettAutomatiskRevurdering(revurderingRequest) }
     }
 
     @Test
@@ -86,7 +83,7 @@ class TidshendelseServiceTest {
             )
         }
         verify(exactly = 0) {
-            behandlingService.opprettOmregning(any())
+            behandlingService.opprettAutomatiskRevurdering(any())
         }
     }
 
@@ -100,7 +97,7 @@ class TidshendelseServiceTest {
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
 
-        verify(exactly = 0) { behandlingService.opprettOmregning(any()) }
+        verify(exactly = 0) { behandlingService.opprettAutomatiskRevurdering(any()) }
         verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), any(), any()) }
     }
 
@@ -127,7 +124,7 @@ class TidshendelseServiceTest {
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = true)
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
 
-        verify(exactly = 0) { behandlingService.opprettOmregning(any()) }
+        verify(exactly = 0) { behandlingService.opprettAutomatiskRevurdering(any()) }
         verify(exactly = 0) { behandlingService.opprettOppgave(any(), any(), any(), any()) }
     }
 
@@ -136,13 +133,13 @@ class TidshendelseServiceTest {
         val hendelseId = UUID.randomUUID()
         val sakId = 37465L
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-        every { behandlingService.opprettOmregning(any()) } throws RuntimeException("Feil ved opprettelse av omregning")
+        every { behandlingService.opprettAutomatiskRevurdering(any()) } throws RuntimeException("Feil ved opprettelse av omregning")
         every { behandlingService.opprettOppgave(any(), any(), any(), any(), any()) } returns opprettetOppgaveId
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
 
-        verify { behandlingService.opprettOmregning(any()) }
+        verify { behandlingService.opprettAutomatiskRevurdering(any()) }
         verify {
             behandlingService.opprettOppgave(
                 sakId = sakId,

@@ -36,7 +36,6 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevtype: Brevtype,
-        validerMottaker: Boolean = true,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
         with(
@@ -61,7 +60,7 @@ class Brevoppretter(
                     brevtype = brevtype,
                     brevkoder = brevkode,
                 )
-            if (validerMottaker && !nyttBrev.mottaker.erGyldig()) {
+            if (!nyttBrev.mottaker.erGyldig()) {
                 sikkerlogger.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
                 throw UgyldigMottakerKanIkkeFerdigstilles(id = null, sakId = nyttBrev.sakId)
             }

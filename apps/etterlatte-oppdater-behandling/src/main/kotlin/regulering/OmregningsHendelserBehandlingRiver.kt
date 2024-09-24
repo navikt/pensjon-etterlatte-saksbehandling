@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.omregning.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY

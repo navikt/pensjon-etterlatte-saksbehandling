@@ -10,7 +10,6 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK
 import no.nav.etterlatte.libs.common.behandling.JobbType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.omregning.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK

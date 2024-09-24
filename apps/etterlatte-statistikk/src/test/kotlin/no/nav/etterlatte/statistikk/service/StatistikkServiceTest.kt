@@ -439,7 +439,7 @@ class StatistikkServiceTest {
                 beregningKlient = beregningKlient,
                 aktivitetspliktService = mockAktivitetspliktService,
             )
-        val brukteOmsIder = slot<List<Long>>()
+        val brukteOmsIder = slot<List<SakId>>()
 
         val statistikkMaaned = YearMonth.of(2024, Month.JULY)
         every { stoenadRepository.hentStoenadRaderInnenforMaaned(statistikkMaaned) } returns omsStoenadRad + bpStoenadRad

@@ -1041,7 +1041,7 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnEllerOpprettSakMedGrunnlag(any(), any()) } returns sak
-        every { sakServiceMock.finnSak(any<Long>()) } returns sak
+        every { sakServiceMock.finnSak(any<SakId>()) } returns sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()

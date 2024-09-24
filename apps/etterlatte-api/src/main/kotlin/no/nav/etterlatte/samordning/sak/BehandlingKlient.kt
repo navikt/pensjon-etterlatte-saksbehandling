@@ -26,7 +26,7 @@ class BehandlingKlient(
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
     private val behandlingUrl = "${config.getString("behandling.url")}/api"
 
-    suspend fun hentSakForPerson(ident: FoedselsnummerDTO): List<Long> {
+    suspend fun hentSakForPerson(ident: FoedselsnummerDTO): List<SakId> {
         logger.info("Henter saker for person: ${ident.foedselsnummer.maskerFnr()}")
         return try {
             httpClient
@@ -34,7 +34,7 @@ class BehandlingKlient(
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(ident.foedselsnummer))
-                }.body<List<Long>>()
+                }.body<List<SakId>>()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod en feil i kall til behandling sak for personer")
             when (e.response.status) {

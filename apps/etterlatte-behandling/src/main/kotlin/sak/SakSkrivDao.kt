@@ -86,7 +86,7 @@ class SakSkrivDao(
     }
 
     fun markerSakerMedSkjerming(
-        sakIder: List<Long>,
+        sakIder: List<SakId>,
         skjermet: Boolean,
     ) = sakendringerDao.lagreEndringerPaaSaker(sakIder, "markerSakerMedSkjerming") {
         with(it) {

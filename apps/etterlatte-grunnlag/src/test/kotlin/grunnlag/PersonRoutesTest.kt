@@ -25,6 +25,7 @@ import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -105,7 +106,7 @@ internal class PersonRoutesTest {
 
     @Test
     fun `Hent alle saker tilknyttet person`() {
-        val response: Set<Long> = setOf(1, 2, 3)
+        val response: Set<SakId> = setOf(1, 2, 3)
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
 
         testApplication {

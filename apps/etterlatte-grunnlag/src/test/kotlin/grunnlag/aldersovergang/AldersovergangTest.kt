@@ -102,19 +102,19 @@ class AldersovergangTest(
             val httpClient = createHttpClient(AldersovergangService(AldersovergangDao(dataSource)))
             with(httpClient.apiCall("api/grunnlag/doedsdato/2024-02")) {
                 assertEquals(HttpStatusCode.OK, this.status)
-                assertEquals(listOf(sakEn, sakTo), deserialize<List<Long>>(this.body<String>()))
+                assertEquals(listOf(sakEn, sakTo), deserialize<List<SakId>>(this.body<String>()))
             }
 
             // Ingen saker med doedsdato i januar 2024
             with(httpClient.apiCall("api/grunnlag/doedsdato/2024-01")) {
                 assertEquals(HttpStatusCode.OK, this.status)
-                assertEquals(emptyList<Long>(), deserialize<List<Long>>(this.body<String>()))
+                assertEquals(emptyList<SakId>(), deserialize<List<SakId>>(this.body<String>()))
             }
 
             // Ingen saker med doedsdato i mars 2024
             with(httpClient.apiCall("api/grunnlag/doedsdato/2024-03")) {
                 assertEquals(HttpStatusCode.OK, this.status)
-                assertEquals(emptyList<Long>(), deserialize<List<Long>>(this.body<String>()))
+                assertEquals(emptyList<SakId>(), deserialize<List<SakId>>(this.body<String>()))
             }
         }
     }

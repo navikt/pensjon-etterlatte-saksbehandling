@@ -1,10 +1,11 @@
 package no.nav.etterlatte.tidshendelser.regulering
 
 import io.kotest.matchers.collections.containsInOrder
+import kotliquery.TransactionalSession
 import no.nav.etterlatte.insert
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.DatabaseExtension
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao.Databasetabell
-import no.nav.etterlatte.tilDatabasetabell
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -58,8 +59,8 @@ class ReguleringDaoTest(
     private fun leggInnReguleringskonfigurasjon(
         dato: LocalDate,
         antall: Int,
-        spesifikkeSaker: List<Long>?,
-        ekskluderteSaker: List<Long>?,
+        spesifikkeSaker: List<SakId>?,
+        ekskluderteSaker: List<SakId>?,
         aktiv: Boolean = true,
     ) = dataSource.insert(
         tabellnavn = Databasetabell.TABELLNAVN,
@@ -74,3 +75,5 @@ class ReguleringDaoTest(
         },
     )
 }
+
+fun List<SakId>.tilDatabasetabell(tx: TransactionalSession) = tx.createArrayOf("bigint", this)

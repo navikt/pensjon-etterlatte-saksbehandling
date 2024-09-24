@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -45,7 +46,7 @@ internal class ReguleringsforespoerselRiverTest {
                 DATO_KEY to dato,
                 KJOERING to "Regulering2023",
                 ANTALL to 12000,
-                SPESIFIKKE_SAKER to listOf<Long>(),
+                SPESIFIKKE_SAKER to listOf<SakId>(),
             ),
         )
 
@@ -219,7 +220,7 @@ internal class ReguleringsforespoerselRiverTest {
                     DATO_KEY to LocalDate.now(),
                     KJOERING to "Regulering2023",
                     ANTALL to 10,
-                    SPESIFIKKE_SAKER to listOf<Long>(),
+                    SPESIFIKKE_SAKER to listOf<SakId>(),
                     SAK_TYPE to SakType.BARNEPENSJON.name,
                 ),
             )

@@ -42,8 +42,8 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -617,7 +617,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
-        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val sakIder: Set<SakId> = setOf(1, 2, 3, 4, 5, 6)
         val saker =
             sakIder.map {
                 Sak(
@@ -665,7 +665,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
-        val sakIder: Set<Long> = setOf(5, 6)
+        val sakIder: Set<SakId> = setOf(5, 6)
         val saker =
             sakIder.map {
                 Sak(
@@ -708,7 +708,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal kunne sette fortrolig og sette enhet`() {
-        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val sakIder: Set<SakId> = setOf(1, 2, 3, 4, 5, 6)
         val saker =
             sakIder.map {
                 Sak(

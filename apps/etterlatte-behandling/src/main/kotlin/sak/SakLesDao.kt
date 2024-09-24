@@ -29,7 +29,7 @@ class SakLesDao(
         )
     }
 
-    fun finnSakerMedGraderingOgSkjerming(sakIder: List<Long>): List<SakMedGradering> =
+    fun finnSakerMedGraderingOgSkjerming(sakIder: List<SakId>): List<SakMedGradering> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
@@ -49,8 +49,8 @@ class SakLesDao(
     fun hentSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
     ): List<Sak> =
@@ -171,7 +171,7 @@ class SakLesDao(
             }
         }
 
-    fun hentSakerMedIder(sakIder: List<Long>): List<Sak> =
+    fun hentSakerMedIder(sakIder: List<SakId>): List<Sak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

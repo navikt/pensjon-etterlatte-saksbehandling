@@ -144,7 +144,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-    override suspend fun hentAlleSakIder(fnr: String): Set<Long> = setOf(1L)
+    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> = setOf(1L)
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
         PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER)))

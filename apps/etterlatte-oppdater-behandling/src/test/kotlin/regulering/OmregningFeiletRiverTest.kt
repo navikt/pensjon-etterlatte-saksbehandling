@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
@@ -36,7 +37,7 @@ internal class OmregningFeiletRiverTest {
     @Test
     fun `Skal varsle behandling om at det er en feilet regulering i en sak`() {
         val kjoering = slot<String>()
-        val sakId = slot<Long>()
+        val sakId = slot<SakId>()
         val status = slot<KjoeringStatus>()
 
         val melding = genererReguleringMelding()

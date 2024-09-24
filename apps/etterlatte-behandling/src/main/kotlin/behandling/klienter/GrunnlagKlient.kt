@@ -57,7 +57,7 @@ interface GrunnlagKlient : Pingable {
 
     suspend fun hentGrunnlag(sakId: SakId): Grunnlag?
 
-    suspend fun hentAlleSakIder(fnr: String): Set<Long>
+    suspend fun hentAlleSakIder(fnr: String): Set<SakId>
 
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
 
@@ -406,7 +406,7 @@ class GrunnlagKlientImpl(
                 failure = { errorResponse -> throw errorResponse },
             )
 
-    override suspend fun hentAlleSakIder(fnr: String): Set<Long> =
+    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> =
         downstreamResourceClient
             .post(
                 resource =

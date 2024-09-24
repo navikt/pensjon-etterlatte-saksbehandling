@@ -25,6 +25,7 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -206,7 +207,7 @@ class BehandlingSakRoutesTest {
                 }
             response.status shouldBe HttpStatusCode.OK
             println(response.bodyAsText())
-            val sakliste: List<Long> = response.body()
+            val sakliste: List<SakId> = response.body()
 
             sakliste shouldBe sakIdListesvar
 

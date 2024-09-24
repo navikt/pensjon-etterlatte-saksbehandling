@@ -19,8 +19,8 @@ data class BehandlingOgSak(
 )
 
 data class HentSakerRequest(
-    val spesifikkeSaker: List<Long>,
-    val ekskluderteSaker: List<Long>,
+    val spesifikkeSaker: List<SakId>,
+    val ekskluderteSaker: List<SakId>,
     val sakType: SakType?,
     val loependeFom: YearMonth?,
 )

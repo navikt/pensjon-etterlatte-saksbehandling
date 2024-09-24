@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
@@ -424,7 +425,7 @@ internal class GrunnlagServiceTest {
 
     @Test
     fun `kan hente og mappe opplysningsgrunnlag`() {
-        every { opplysningDaoMock.finnNyesteGrunnlagForSak(any<Long>(), PERSONGALLERI_V1) } returns
+        every { opplysningDaoMock.finnNyesteGrunnlagForSak(any<SakId>(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -435,7 +436,7 @@ internal class GrunnlagServiceTest {
                 kilde = kilde,
             )
 
-        every { opplysningDaoMock.hentAlleGrunnlagForSak(any<Long>()) } returns
+        every { opplysningDaoMock.hentAlleGrunnlagForSak(any<SakId>()) } returns
             listOf(
                 lagGrunnlagHendelse(
                     1,

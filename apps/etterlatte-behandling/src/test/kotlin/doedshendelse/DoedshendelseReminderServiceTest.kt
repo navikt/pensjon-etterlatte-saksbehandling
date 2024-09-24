@@ -28,15 +28,16 @@ class DoedshendelseReminderServiceTest {
     private val dataSource = mockk<DataSource>()
 
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
+    private val antallMaaneder = 4L
 
     @Test
-    fun `Skal opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt`() {
+    fun `Skal opprette oppgave hvis 4 mnd gammel BP hendelse ikke har soekt`() {
         val sakId = 1L
         val doedshendelseBP2mndGammel =
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
+                endret = LocalDateTime.now().minusMonths(antallMaaneder).toNorskTidspunkt(),
                 sakId = sakId,
             )
 
@@ -83,7 +84,7 @@ class DoedshendelseReminderServiceTest {
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
+                endret = LocalDateTime.now().minusMonths(antallMaaneder).toNorskTidspunkt(),
                 sakId = sakId,
             )
 

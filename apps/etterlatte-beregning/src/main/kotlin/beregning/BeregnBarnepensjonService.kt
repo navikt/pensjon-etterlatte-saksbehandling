@@ -19,11 +19,13 @@ import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -65,6 +67,8 @@ class BeregnBarnepensjonService(
         val beregningsGrunnlag =
             beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
+
+        validerKunEnJuridiskForelder(behandling, beregningsGrunnlag, grunnlag)
 
         val trygdetidListe =
             try {
@@ -355,4 +359,50 @@ class BeregnBarnepensjonService(
                 } ?: emptyList(),
             ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },
     )
+
+    private fun validerKunEnJuridiskForelder(
+        behandling: DetaljertBehandling,
+        beregningsGrunnlag: BeregningsGrunnlag,
+        grunnlag: Grunnlag,
+    ) {
+        val harBeregningsgrunnlagMedKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder != null
+        val persongalleriHarKunEnJuridiskForelder =
+            grunnlag.hentAnnenForelder()?.vurdering == KUN_EN_REGISTRERT_JURIDISK_FORELDER
+
+        if (harBeregningsgrunnlagMedKunEnJuridisk && !persongalleriHarKunEnJuridiskForelder) {
+            throw BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(behandlingId = behandling.id)
+        }
+        if (persongalleriHarKunEnJuridiskForelder && !harBeregningsgrunnlagMedKunEnJuridisk) {
+            throw BPKunEnJuridiskForelderManglerIBeregningsgrunnlag(behandlingId = behandling.id)
+        }
+        val startdatoKunEnJuridisk = beregningsGrunnlag.kunEnJuridiskForelder?.fom
+        val virkningstidspunkt = behandling.virkningstidspunkt?.dato
+        if (startdatoKunEnJuridisk != null && startdatoKunEnJuridisk != virkningstidspunkt?.atDay(1)) {
+            throw BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt(behandlingId = behandling.id)
+        }
+    }
 }
+
+class BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_IKKE_VALGT",
+        detail = "Barnepensjon beregningsgrunnlag har dato for kun en juridisk forelder, men ikke persongalleriet",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
+
+class BPKunEnJuridiskForelderManglerIBeregningsgrunnlag(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MANGLER_I_BEREGNINGSGRUNNLAG",
+        detail = "Persongalleriet har kun en juridisk forelder angitt, men det mangler i beregningsgrunnlag",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
+
+class BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MAA_GJELDE_FRA_VIRKNINGSTIDSPUNKT",
+        detail = "Dato fom på kun en juridisk forelder i beregningsgrunnlaget må være lik virkningstispunkt",
+        meta = mapOf("behandlingId" to behandlingId),
+    )

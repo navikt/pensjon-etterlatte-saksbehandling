@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.grunnlag.GenerellKilde
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -33,6 +34,7 @@ data class GrunnlagTestData(
     val opplysningsmapGjenlevendeOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapSakOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val annenForelder: AnnenForelder? = null,
 ) {
     val soeker
         get() = personTestData(soekerTestopplysningerMap + opplysningsmapSoekerOverrides)
@@ -139,6 +141,7 @@ data class GrunnlagTestData(
             soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
             avdoed = avdoede.map { it.foedselsnummer.value },
             gjenlevende = listOf(gjenlevende.foedselsnummer.value),
+            annenForelder = annenForelder,
         )
 
     fun hentGrunnlagMedUkjentAvdoed(): Grunnlag =

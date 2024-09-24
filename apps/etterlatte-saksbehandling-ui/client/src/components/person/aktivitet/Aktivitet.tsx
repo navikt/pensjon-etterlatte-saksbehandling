@@ -36,54 +36,49 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
 
   return (
     <Box padding="8" maxWidth="70rem">
-      <VStack gap="8">
-        <VStack gap="4">
-          <Heading size="medium">Aktivitetsplikt</Heading>
+      {mapResult(hentAktivitetspliktVurderingForSakResult, {
+        pending: <Spinner label="Henter vurderinger..." />,
+        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
+        success: (aktivitetspliktVurdering) => (
+          <>
+            <VStack gap="8">
+              <VStack gap="4">
+                <Heading size="medium">Aktivitetsplikt</Heading>
 
-          <Label>Status på gjenlevende sin aktivitet</Label>
+                <Label>Status på gjenlevende sin aktivitet</Label>
+                {aktivitetspliktVurdering && (
+                  <div>
+                    <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
+                  </div>
+                )}
+                <Label>Gjenlevende sin tidslinje</Label>
 
-          {mapResult(hentAktivitetspliktVurderingForSakResult, {
-            pending: <Spinner label="Henter vurderinger..." />,
-            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
-            success: (aktivitetspliktVurdering) =>
-              aktivitetspliktVurdering && (
-                <div>
-                  <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
-                </div>
-              ),
-          })}
+                {isSuccess(sakResult) &&
+                  mapResult(familieOpplysningerResult, {
+                    pending: <Spinner label="Henter opplysninger om avdød" />,
+                    error: (error) => (
+                      <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>
+                    ),
+                    success: ({ avdoede }) => (
+                      <>
+                        {avdoede && (
+                          <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sakResult.data.sak.id} />
+                        )}
+                      </>
+                    ),
+                  })}
+              </VStack>
+              <hr style={{ width: '100%' }} />
 
-          <Label>Gjenlevende sin tidslinje</Label>
-
-          {isSuccess(sakResult) &&
-            mapResult(familieOpplysningerResult, {
-              pending: <Spinner label="Henter opplysninger om avdød" />,
-              error: (error) => (
-                <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>
-              ),
-              success: ({ avdoede }) => (
-                <>
-                  {avdoede && (
-                    <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sakResult.data.sak.id} />
-                  )}
-                </>
-              ),
-            })}
-        </VStack>
-
-        <hr style={{ width: '100%' }} />
-
-        {mapResult(hentAktivitetspliktVurderingForSakResult, {
-          pending: <Spinner label="Henter vurderinger..." />,
-          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
-          success: (aktivitetspliktVurdering) =>
-            aktivitetspliktVurdering ? (
-              <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
-            ) : (
-              <BodyShort>Ingen vurdering</BodyShort>
-            ),
-        })}
-      </VStack>
+              {aktivitetspliktVurdering ? (
+                <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
+              ) : (
+                <BodyShort>Ingen vurdering</BodyShort>
+              )}
+            </VStack>
+          </>
+        ),
+      })}
     </Box>
   )
 }

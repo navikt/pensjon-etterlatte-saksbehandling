@@ -78,6 +78,7 @@ class VedtaksbrevService(
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
                 brevtype = Brevtype.VEDTAK,
+                validerMottaker = true,
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
             ).first
     }

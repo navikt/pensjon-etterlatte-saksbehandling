@@ -46,6 +46,7 @@ class BrevService(
                 bruker = bruker,
                 brevKodeMapping = { brevkode },
                 brevtype = brevkode.brevtype,
+                validerMottaker = false,
                 brevDataMapping = brevDataMapping,
             ).first
 

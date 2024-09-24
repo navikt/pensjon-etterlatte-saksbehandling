@@ -1,7 +1,7 @@
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
-import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitspliktVurderingForSak } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
@@ -10,6 +10,7 @@ import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetsplikt'
+import { AktivitetspliktStatusTag } from '~shared/tags/AktivitetspliktStatusTag'
 
 const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -38,7 +39,21 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
       <VStack gap="8">
         <VStack gap="4">
           <Heading size="medium">Aktivitetsplikt</Heading>
-          <BodyShort>Gjenlevende sin tidslinje</BodyShort>
+
+          <Label>Status på gjenlevende sin aktivitet</Label>
+
+          {mapResult(hentAktivitetspliktVurderingForSakResult, {
+            pending: <Spinner label="Henter vurderinger..." />,
+            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
+            success: (aktivitetspliktVurdering) =>
+              aktivitetspliktVurdering && (
+                <div>
+                  <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
+                </div>
+              ),
+          })}
+
+          <Label>Gjenlevende sin tidslinje</Label>
 
           {isSuccess(sakResult) &&
             mapResult(familieOpplysningerResult, {

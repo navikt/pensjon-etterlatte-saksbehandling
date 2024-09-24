@@ -13,6 +13,8 @@ import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.Norg2Epost
 import no.nav.etterlatte.brev.adresse.Norg2Klient
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -26,8 +28,8 @@ internal class Norg2KlientTest {
     private val klient = mockHttpClient()
 
     companion object {
-        private const val PORSGRUNN = "0805"
-        private const val UKJENT = "1234"
+        private val PORSGRUNN = Enheter.PORSGRUNN.enhetNr
+        private val UKJENT = Enhetsnummer.ukjent
     }
 
     @Test
@@ -67,14 +69,14 @@ internal class Norg2KlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/enhet/$PORSGRUNN" -> respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
-                            "/enhet/$PORSGRUNN/kontaktinformasjon" ->
+                            "/enhet/${PORSGRUNN.enhetNr}" -> respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
+                            "/enhet/${PORSGRUNN.enhetNr}/kontaktinformasjon" ->
                                 respond(
                                     porsgrunnKontaktinfoJson,
                                     HttpStatusCode.OK,
                                     defaultHeaders,
                                 )
-                            "/enhet/$UKJENT" -> respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
+                            "/enhet/${UKJENT.enhetNr}" -> respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
                             else -> error("Unhandled ${request.url.fullPath}")
                         }
                     }

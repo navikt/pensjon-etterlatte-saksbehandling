@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -139,8 +140,8 @@ internal class JournalfoerVedtaksbrevRiverTest {
             status = VedtakStatus.ATTESTERT,
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             type = VedtakType.INNVILGELSE,
-            vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
-            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now()),
+            vedtakFattet = VedtakFattet("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),
+            attestasjon = Attestasjon("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.oppgave
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -20,7 +21,7 @@ data class OppgaveSaksbehandler(
 data class OppgaveIntern(
     val id: UUID,
     val status: Status,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val sakId: SakId,
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,

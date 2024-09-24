@@ -3,6 +3,7 @@ package no.nav.etterlatte.sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -23,7 +24,7 @@ class SakLesDao(
             sakType = enumValueOf(getString("sakType")),
             ident = getString("fnr"),
             id = getLong("id"),
-            enhet = getString("enhet"),
+            enhet = Enhetsnummer(getString("enhet")),
         )
     }
 
@@ -129,7 +130,7 @@ class SakLesDao(
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString("enhet"),
+                    enhetNr = Enhetsnummer(getString("enhet")),
                 )
             }
         }

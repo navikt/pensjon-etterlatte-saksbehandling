@@ -26,6 +26,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
@@ -80,14 +81,14 @@ internal class SakRoutesTest {
                 ident = "12345",
                 sakType = SakType.BARNEPENSJON,
                 id = 123455,
-                enhet = "birger",
+                enhet = Enheter.defaultEnhet.enhetNr,
             )
         every { oppgaveService.hentOppgaverForSak(any()) } returns
             listOf(
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
+                    enhet = Enheter.PORSGRUNN.enhetNr,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -102,7 +103,7 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
+                    enhet = Enheter.PORSGRUNN.enhetNr,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
@@ -117,7 +118,7 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.FERDIGSTILT,
-                    enhet = "4808",
+                    enhet = Enheter.PORSGRUNN.enhetNr,
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
@@ -135,7 +136,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
@@ -157,7 +158,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4805"))
+                    setBody(EnhetRequest(enhet = Enhetsnummer("4805")))
                 }
             assertEquals(400, response.status.value)
             verify(exactly = 0) { sakService.finnSak(any()) }
@@ -178,7 +179,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
                 }
             assertEquals(400, response.status.value)
         }

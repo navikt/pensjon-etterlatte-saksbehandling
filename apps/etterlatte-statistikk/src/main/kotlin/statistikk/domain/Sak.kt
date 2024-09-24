@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -68,7 +69,7 @@ data class SakRad(
     val resultat: String?,
     val resultatBegrunnelse: String?,
     val saksbehandler: String?,
-    val ansvarligEnhet: String?,
+    val ansvarligEnhet: Enhetsnummer?,
     val soeknadFormat: SoeknadFormat?,
     val sakUtland: SakUtland?,
     val behandlingMetode: BehandlingMetode?,

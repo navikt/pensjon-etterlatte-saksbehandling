@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -124,7 +125,7 @@ class TilbakekrevingInnholdDTOTest {
             perioder: List<TilbakekrevingPeriode> = listOf(tilbakekrevingperiode()),
             vurdering: TilbakekrevingVurdering = tilbakekrevingvurdering(),
         ) = GenerellBrevData(
-            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, 123L, "4808"),
+            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, 123L, Enheter.PORSGRUNN.enhetNr),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
@@ -138,7 +139,7 @@ class TilbakekrevingInnholdDTOTest {
                     1,
                     VedtakStatus.FATTET_VEDTAK,
                     VedtakType.TILBAKEKREVING,
-                    "4808",
+                    Enheter.PORSGRUNN.enhetNr,
                     "saksbehandler",
                     attestantIdent = null,
                     vedtaksdato = null,

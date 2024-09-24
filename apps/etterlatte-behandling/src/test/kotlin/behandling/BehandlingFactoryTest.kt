@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -1096,7 +1097,7 @@ class BehandlingFactoryTest {
     private fun sak(
         sakId: SakId = 1L,
         sakType: SakType = SakType.BARNEPENSJON,
-        enhet: String = Enheter.defaultEnhet.enhetNr,
+        enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     ): Sak =
         Sak(
             ident = "Soeker",

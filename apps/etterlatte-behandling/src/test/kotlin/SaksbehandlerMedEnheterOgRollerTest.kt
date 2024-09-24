@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
@@ -104,7 +105,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 ),
                 Arguments.of(
                     "Ukjent",
-                    listOf(SaksbehandlerEnhet("12345", "En annen enhet")),
+                    listOf(SaksbehandlerEnhet(Enhetsnummer("9876"), "En annen enhet")),
                     emptyList<String>(),
                     emptyList<String>(),
                     false,
@@ -113,7 +114,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                     "Vanlig saksbehandler med andre enheter enn bare de etterlatte kjenner til",
                     listOf(
                         SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name),
-                        SaksbehandlerEnhet("12345", "En annen enhet"),
+                        SaksbehandlerEnhet(Enhetsnummer("9876"), "En annen enhet"),
                     ),
                     listOf(Enheter.PORSGRUNN.enhetNr),
                     listOf(
@@ -128,7 +129,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                     "Kontaktsenter med andre enheter enn bare de etterlatte kjenner til",
                     listOf(
                         SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn),
-                        SaksbehandlerEnhet("12345", "En annen enhet"),
+                        SaksbehandlerEnhet(Enhetsnummer("9876"), "En annen enhet"),
                     ),
                     emptyList<String>(),
                     listOf(

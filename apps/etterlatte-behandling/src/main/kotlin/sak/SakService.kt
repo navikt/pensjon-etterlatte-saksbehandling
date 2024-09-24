@@ -13,6 +13,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -53,13 +54,13 @@ interface SakService {
     fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String? = null,
+        overstyrendeEnhet: Enhetsnummer? = null,
     ): Sak
 
     fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String
+    ): Enhetsnummer
 
     fun finnSak(
         ident: String,
@@ -99,7 +100,7 @@ interface SakService {
 }
 
 class ManglerTilgangTilEnhet(
-    enheter: List<String>,
+    enheter: List<Enhetsnummer>,
 ) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
@@ -198,7 +199,7 @@ class SakServiceImpl(
     override fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhetsnummer?,
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
@@ -238,7 +239,7 @@ class SakServiceImpl(
     private fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhetsnummer?,
     ): Sak {
         var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
@@ -343,7 +344,7 @@ class SakServiceImpl(
     override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String {
+    ): Enhetsnummer {
         val sak = finnSakForPerson(fnr, type)
 
         return when (sak) {
@@ -355,8 +356,8 @@ class SakServiceImpl(
     private fun sjekkEnhetFraNorg(
         fnr: String,
         type: SakType,
-        enhet: String?,
-    ): String {
+        enhet: Enhetsnummer?,
+    ): Enhetsnummer {
         val enhetFraNorg = brukerService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
         if (enhet != null && enhet != enhetFraNorg) {
             logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
@@ -406,7 +407,7 @@ class SakServiceImpl(
         }
 
     private fun List<Sak>.filterForEnheter(): List<Sak> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhetsnummer>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
@@ -421,7 +422,7 @@ class SakServiceImpl(
     }
 
     private fun filterSakerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhetsnummer>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
 }

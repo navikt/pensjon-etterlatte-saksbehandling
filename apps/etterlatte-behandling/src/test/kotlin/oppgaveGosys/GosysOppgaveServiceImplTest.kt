@@ -16,6 +16,7 @@ import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -193,7 +194,7 @@ class GosysOppgaveServiceImplTest {
     }
 
     fun enhetsfiltrererGosysOppgaver(
-        enhetsnr: String,
+        enhetsnr: Enhetsnummer,
         oppgaverFraGosys: List<GosysApiOppgave>,
     ): GosysOppgaver {
         val enhetsfiltrerteOppgaver = oppgaverFraGosys.filter { it.tildeltEnhetsnr == enhetsnr }

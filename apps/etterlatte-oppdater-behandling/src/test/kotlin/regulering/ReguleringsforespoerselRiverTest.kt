@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -48,6 +49,8 @@ internal class ReguleringsforespoerselRiverTest {
             ),
         )
 
+    private val porsgrunn = Enheter.PORSGRUNN.enhetNr
+
     @Test
     fun `kan ta imot reguleringsmelding og kalle paa behandling`() {
         val melding = genererReguleringMelding(foersteMai2023)
@@ -55,7 +58,7 @@ internal class ReguleringsforespoerselRiverTest {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, porsgrunn)),
                     )
             }
         val inspector =
@@ -75,9 +78,9 @@ internal class ReguleringsforespoerselRiverTest {
         every { vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, "4808"),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, porsgrunn),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, porsgrunn),
                 ),
             ) andThen Saker(listOf())
         val inspector =
@@ -112,9 +115,9 @@ internal class ReguleringsforespoerselRiverTest {
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, "4808"),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, porsgrunn),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, porsgrunn),
                 ),
             )
         val inspector =
@@ -138,7 +141,7 @@ internal class ReguleringsforespoerselRiverTest {
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, porsgrunn),
                 ),
             )
         val behandlingId1 = UUID.randomUUID()
@@ -166,7 +169,7 @@ internal class ReguleringsforespoerselRiverTest {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, porsgrunn)),
                     )
             }
         coEvery {
@@ -191,12 +194,12 @@ internal class ReguleringsforespoerselRiverTest {
         every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
             Saker(
                 (0..MAKS_BATCHSTOERRELSE).map {
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, it.toLong(), "4808")
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, it.toLong(), porsgrunn)
                 },
             ) andThen
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 4L, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 4L, porsgrunn),
                 ),
             ) andThen Saker(listOf())
         val inspector =

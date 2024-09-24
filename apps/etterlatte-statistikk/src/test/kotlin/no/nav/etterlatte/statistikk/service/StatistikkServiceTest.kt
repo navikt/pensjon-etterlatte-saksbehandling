@@ -11,6 +11,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -82,7 +83,7 @@ class StatistikkServiceTest {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
-        val enhet = "1111"
+        val enhet = Enhetsnummer("1111")
         coEvery { behandlingKlient.hentGraderingForSak(sakId) } returns
             SakMedGraderingOgSkjermet(
                 id = sakId,
@@ -142,8 +143,8 @@ class StatistikkServiceTest {
                     vedtak(
                         sakId = sakId,
                         behandlingId = behandlingId,
-                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
-                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        vedtakFattet = VedtakFattet("Saksbehandler", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
                 vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
@@ -157,7 +158,7 @@ class StatistikkServiceTest {
             registrertSak.sakUtland shouldBe null
             registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
-            registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
+            registrertSak.ansvarligEnhet shouldBe Enheter.defaultEnhet.enhetNr
             registrertSak.ansvarligBeslutter shouldBe "Attestant"
             registrertSak.saksbehandler shouldBe "Saksbehandler"
             registrertSak.beregning shouldBe mockBeregning
@@ -248,8 +249,8 @@ class StatistikkServiceTest {
                         sakId = sakId,
                         sakType = SakType.BARNEPENSJON,
                         behandlingId = behandlingId,
-                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
-                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        vedtakFattet = VedtakFattet("Saksbehandler", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
                         virk = virk,
                     ),
                 vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
@@ -314,11 +315,11 @@ class StatistikkServiceTest {
             )
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
-        val enhet = "1111"
+        val enhet = Enhetsnummer("1111")
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             StatistikkBehandling(
                 id = behandlingId,
-                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
+                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.defaultEnhet.enhetNr, ident = "ident"),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -348,8 +349,8 @@ class StatistikkServiceTest {
                         sakId = sakId,
                         sakType = SakType.OMSTILLINGSSTOENAD,
                         behandlingId = behandlingId,
-                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
-                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        vedtakFattet = VedtakFattet("Saksbehandler", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", Enheter.defaultEnhet.enhetNr, fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
                 vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
@@ -393,7 +394,7 @@ class StatistikkServiceTest {
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
         assertNull(registrertStatistikk.ansvarligBeslutter)
-        assertEquals("4808", registrertStatistikk.ansvarligEnhet)
+        assertEquals(Enheter.PORSGRUNN.enhetNr, registrertStatistikk.ansvarligEnhet)
         assertNull(registrertStatistikk.saksbehandler)
     }
 

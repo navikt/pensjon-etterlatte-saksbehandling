@@ -69,7 +69,7 @@ class VarselbrevTest(
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.spraak } returns Spraak.NN
-                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, "")
+                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
                             PersonerISak(

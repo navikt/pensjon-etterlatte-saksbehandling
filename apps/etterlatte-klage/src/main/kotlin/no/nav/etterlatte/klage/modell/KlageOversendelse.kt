@@ -1,6 +1,7 @@
 package no.nav.etterlatte.klage.modell
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -66,7 +67,7 @@ data class KabalOversendelse(
     val fagsak: KabalFagsak,
     val kildeReferanse: String,
     val hjemler: List<Hjemmel>,
-    val forrigeBehandlendeEnhet: String,
+    val forrigeBehandlendeEnhet: Enhetsnummer,
     val tilknyttedeJournalposter: List<KabalJournalpostref>,
     val brukersHenvendelseMottattNavDato: LocalDate,
     val innsendtTilNav: LocalDate,

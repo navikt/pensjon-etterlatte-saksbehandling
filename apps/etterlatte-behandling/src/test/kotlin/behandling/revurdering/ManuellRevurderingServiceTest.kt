@@ -859,7 +859,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                     Sak(
                                         sakType = SakType.BARNEPENSJON,
                                         id = 1L,
-                                        enhet = "",
+                                        enhet = Enheter.defaultEnhet.enhetNr,
                                         ident = "",
                                     )
                                 every { it.opphoerFraOgMed } returns YearMonth.now()

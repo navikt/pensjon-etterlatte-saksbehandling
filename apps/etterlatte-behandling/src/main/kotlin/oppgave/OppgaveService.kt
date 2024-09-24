@@ -10,6 +10,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -433,7 +434,7 @@ class OppgaveService(
 
     private fun endreEnhetForOppgaverTilknyttetSak(
         sakId: SakId,
-        enhetsID: String,
+        enhetsID: Enhetsnummer,
     ) {
         val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
         oppgaverForSak.forEach {

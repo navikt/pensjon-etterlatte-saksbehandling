@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import io.kotest.matchers.equals.shouldBeEqual
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -15,7 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource
 class KlageTest {
     @Test
     fun `oppdaterFormkrav sjekker at klagen har en status som kan oppdateres`() {
-        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
+        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = Enheter.defaultEnhet.enhetNr)
         val klage = Klage.ny(sak, null)
 
         val oppdatertKlage =
@@ -33,7 +34,7 @@ class KlageTest {
 
     @Test
     fun `oppdaterFormkrav setter riktig status på klagen basert på formkravene`() {
-        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
+        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = Enheter.defaultEnhet.enhetNr)
         val klage = Klage.ny(sak, null)
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
@@ -44,7 +45,7 @@ class KlageTest {
 
     @Test
     fun `oppdaterFormkrav setter status tilbake fra vurdert hvis formkrav oppdateres`() {
-        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
+        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = Enheter.defaultEnhet.enhetNr)
         val klage = Klage.ny(sak, null).copy(status = KlageStatus.UTFALL_VURDERT)
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
@@ -59,7 +60,7 @@ class KlageTest {
         klagenFramsattInnenFristNy: JaNei,
         forventerNullstiltUtfall: Boolean,
     ) {
-        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
+        val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = Enheter.defaultEnhet.enhetNr)
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("en saksbehandler")
         val klage =
             Klage

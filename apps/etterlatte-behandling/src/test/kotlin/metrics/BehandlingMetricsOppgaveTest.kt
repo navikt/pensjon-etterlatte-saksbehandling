@@ -79,8 +79,8 @@ internal class BehandlingMetricsOppgaveTest(
         fun `Metrikker for oppgaver enhet`() {
             val tag = "enhet"
             val metrikker = metrikker("etterlatte oppgaver")
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr))
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr.enhetNr))
         }
 
         @Test
@@ -110,8 +110,8 @@ internal class BehandlingMetricsOppgaveTest(
         fun `Metrikker for oppgaver totalt og per enhet`() {
             val metrikker = metrikker("etterlatte_oppgaver_saksbehandler")
             val tag = "enhet"
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr))
-            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr.enhetNr))
             assertEquals(3, hentVerdi(metrikker, tag, "Totalt"))
         }
     }

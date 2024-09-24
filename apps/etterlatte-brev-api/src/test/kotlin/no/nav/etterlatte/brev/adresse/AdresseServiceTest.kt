@@ -9,6 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterEach
@@ -71,7 +72,7 @@ internal class AdresseServiceTest {
             .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
 
         val sakId = Random.nextLong()
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "enhet")
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
         val faktiskAvsender =
             runBlocking {
@@ -113,7 +114,7 @@ internal class AdresseServiceTest {
     ) = SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
 
     companion object {
-        private const val ANSVARLIG_ENHET = "1234"
+        private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER = "Z123456"
         private const val ATTESTANT = "Z00002"
     }

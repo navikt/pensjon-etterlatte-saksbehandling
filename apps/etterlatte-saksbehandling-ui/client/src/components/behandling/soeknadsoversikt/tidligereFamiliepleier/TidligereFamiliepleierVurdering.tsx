@@ -112,7 +112,12 @@ export const TidligereFamiliepleierVurdering = ({
                   })}
                   error={errors.foedselsnummer?.message}
                 />
-                <ControlledDatoVelger name="opphoertPleieforhold" label="Pleieforholdet opphørte" control={control} />
+                <ControlledDatoVelger
+                  name="opphoertPleieforhold"
+                  label="Pleieforholdet opphørte"
+                  control={control}
+                  toDate={new Date()}
+                />
               </>
             )}
             <Textarea

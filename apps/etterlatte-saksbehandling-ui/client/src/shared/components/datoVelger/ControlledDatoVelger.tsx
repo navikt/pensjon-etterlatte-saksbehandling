@@ -15,6 +15,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   shouldUnregister = false,
   required = true,
   size = 'medium',
+  toDate,
 }: {
   name: Path<T>
   label: string
@@ -25,6 +26,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   shouldUnregister?: boolean
   required?: boolean
   size?: 'small' | 'medium'
+  toDate?: Date
 }): ReactNode => {
   const {
     field,
@@ -51,6 +53,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',
     defaultSelected: field.value ? new Date(field.value) : undefined,
+    toDate: toDate ?? undefined,
   } as UseDatepickerOptions)
 
   const handleBlur = () => {

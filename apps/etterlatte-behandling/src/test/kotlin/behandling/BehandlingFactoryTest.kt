@@ -112,6 +112,8 @@ class BehandlingFactoryTest {
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
             ),
+            mockk(),
+            mockk(),
         )
     private val behandlingFactory =
         BehandlingFactory(
@@ -504,9 +506,19 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
 
-        assertThrows<AvslagOmgjoering.HarAapenBehandling> { behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, false) }
+        assertThrows<AvslagOmgjoering.HarAapenBehandling> {
+            behandlingFactory.opprettOmgjoeringAvslag(
+                sak.id,
+                saksbehandler,
+                false,
+            )
+        }
 
         verify {
             sakServiceMock.finnSak(sak.id)
@@ -527,7 +539,11 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
         every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
@@ -547,7 +563,14 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
-        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,
@@ -605,7 +628,11 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnSak(sak.id) } returns sak
-        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns listOf(avslaattFoerstegangsbehandling, revurdering)
+        every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
+            listOf(
+                avslaattFoerstegangsbehandling,
+                revurdering,
+            )
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
 
@@ -613,7 +640,14 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
-        every { oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any()) } returns
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
             OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.PAA_VENT,

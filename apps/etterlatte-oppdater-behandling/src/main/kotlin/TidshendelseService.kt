@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_REVURDERING
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalTime

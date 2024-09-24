@@ -20,7 +20,8 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.junit.jupiter.api.AfterAll
@@ -125,7 +126,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                             )
                         }.let {
                             Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                            it.body<OpprettOmregningResponse>()
+                            it.body<AutomatiskRevurderingResponse>()
                         }
 
                 client

@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetsp
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -34,6 +33,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -76,7 +77,7 @@ interface BehandlingService {
         loependeFom: YearMonth? = null,
     ): Saker
 
-    fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
+    fun opprettOmregning(omregningshendelse: Omregningshendelse): AutomatiskRevurderingResponse
 
     fun opprettRevurderingAktivitetsplikt(
         sakId: SakId,
@@ -210,7 +211,7 @@ class BehandlingServiceImpl(
             }
         }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
+    override fun opprettOmregning(omregningshendelse: Omregningshendelse): AutomatiskRevurderingResponse =
         runBlocking {
             behandlingKlient
                 .post("$url/omregning") {

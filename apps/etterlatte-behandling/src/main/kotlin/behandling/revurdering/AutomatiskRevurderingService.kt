@@ -9,26 +9,20 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
-
-data class AutomatiskRevurderingRequest(
-    val sakId: SakId,
-    val fraDato: LocalDate,
-    val revurderingAarsak: Revurderingaarsak,
-    val oppgavefrist: Tidspunkt?,
-)
 
 class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagServiceImpl,
 ) {
-    suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): OpprettOmregningResponse {
+    suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
         validerSakensTilstand(request.sakId, request.revurderingAarsak)
 
         val forrigeBehandling =
@@ -57,7 +51,7 @@ class AutomatiskRevurderingService(
         }
         retryOgPakkUt { revurderingOgOppfoelging.sendMeldingForHendelse() }
 
-        return OpprettOmregningResponse(
+        return AutomatiskRevurderingResponse(
             behandlingId = revurderingOgOppfoelging.behandlingId(),
             forrigeBehandlingId = forrigeBehandling.id,
             sakType = revurderingOgOppfoelging.sakType(),

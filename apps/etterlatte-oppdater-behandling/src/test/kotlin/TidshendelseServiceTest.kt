@@ -12,8 +12,9 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -51,7 +52,7 @@ class TidshendelseServiceTest {
             )
 
         every { behandlingService.opprettOmregning(omregningshendelse) } returns
-            OpprettOmregningResponse(behandlingId, forrigeBehandlingId, sakType = SakType.BARNEPENSJON)
+            AutomatiskRevurderingResponse(behandlingId, forrigeBehandlingId, sakType = SakType.BARNEPENSJON)
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding)) shouldBe
             TidshendelseResult.OpprettetOmregning(behandlingId, forrigeBehandlingId)

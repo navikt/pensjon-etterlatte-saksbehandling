@@ -10,7 +10,7 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
+import no.nav.etterlatte.libs.common.omregning.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -50,7 +50,7 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                 retryOgPakkUt { revurderingOgOppfoelging.sendMeldingForHendelse() }
                 val behandlingId = revurderingOgOppfoelging.behandlingId()
                 val sakType = revurderingOgOppfoelging.sakType()
-                call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))
+                call.respond(AutomatiskRevurderingResponse(behandlingId, forrigeBehandling.id, sakType))
             }
         }
 

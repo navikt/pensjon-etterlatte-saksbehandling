@@ -1,6 +1,10 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
+import no.nav.etterlatte.libs.common.sak.SakId
+import java.time.LocalDate
+import java.util.UUID
 
 /*
 * En hendelseflyt som automatisk revurderer en sak.
@@ -18,6 +22,14 @@ enum class OmregningHendelseType : EventnameHendelseType {
 
     override fun lagEventnameForType(): String = "OMREGNING:${this.name}"
 }
+
+data class Omregningshendelse(
+    val sakId: SakId,
+    val fradato: LocalDate,
+    val revurderingaarsak: Revurderingaarsak,
+    val behandlingsid: UUID? = null,
+    val forrigeBehandlingsid: UUID? = null,
+)
 
 enum class ReguleringHendelseType : EventnameHendelseType {
     FINN_SAKER_TIL_REGULERING,

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.rapidsandrivers
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -85,6 +87,12 @@ var JsonMessage.aapneBehandlinger: List<UUID>
             .map { UUID.fromString(it) }
     set(name) {
         this[AAPNE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
+    }
+
+var JsonMessage.omregninshendelse: Omregningshendelse
+    get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY])
+    set(name) {
+        this[HENDELSE_DATA_KEY] = name
     }
 
 fun JsonNode.asUUID() = this.asText().toUUID()

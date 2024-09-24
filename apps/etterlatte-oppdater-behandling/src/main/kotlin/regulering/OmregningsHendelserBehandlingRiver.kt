@@ -1,9 +1,6 @@
 package no.nav.etterlatte.regulering
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -11,8 +8,10 @@ import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
+import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
+import no.nav.etterlatte.rapidsandrivers.omregninshendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -39,7 +38,7 @@ internal class OmregningsHendelserBehandlingRiver(
     ) {
         logger.info("Mottatt omregningshendelse")
 
-        val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+        val hendelse: Omregningshendelse = packet.omregninshendelse
         val (behandlingId, _, sakType) =
             behandlinger.opprettAutomatiskRevurdering(
                 AutomatiskRevurderingRequest(

@@ -119,11 +119,11 @@ export const TidligereFamiliepleierVurdering = ({
               </>
             )}
             <Textarea
-              label="Begrunnelse (valgfritt)"
+              label="Begrunnelse"
               minRows={3}
               autoComplete="off"
               {...register('begrunnelse', {
-                required: { value: false, message: '' },
+                required: { value: true, message: 'Du må skrive en begrunnelse' },
               })}
             />
             <HStack gap="3">

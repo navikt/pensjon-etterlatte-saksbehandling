@@ -14,6 +14,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.samordning.vedtak.getMeta
 import org.slf4j.LoggerFactory
@@ -44,7 +45,7 @@ class BehandlingKlient(
         }
     }
 
-    suspend fun hentSak(id: Long): Sak? {
+    suspend fun hentSak(id: SakId): Sak? {
         logger.info("Henter sak med id=$id")
 
         return try {

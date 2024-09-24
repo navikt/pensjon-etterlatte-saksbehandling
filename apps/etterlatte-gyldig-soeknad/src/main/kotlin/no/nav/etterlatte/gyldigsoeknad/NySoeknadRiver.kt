@@ -126,7 +126,7 @@ internal class NySoeknadRiver(
      * å sende tilleggsinformasjon.
      **/
     private fun opprettOppgaveTilleggsinformasjon(
-        sakId: Long,
+        sakId: SakId,
         journalpostId: String,
     ): UUID {
         val nyOppgaveDto =

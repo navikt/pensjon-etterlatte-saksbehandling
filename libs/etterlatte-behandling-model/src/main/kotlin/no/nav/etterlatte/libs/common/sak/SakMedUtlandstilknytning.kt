@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 data class SakMedUtlandstilknytning(
     val ident: String,
     val sakType: SakType,
-    val id: Long,
+    val id: SakId,
     val enhet: Enhetsnummer,
     val utlandstilknytning: Utlandstilknytning?,
 ) {

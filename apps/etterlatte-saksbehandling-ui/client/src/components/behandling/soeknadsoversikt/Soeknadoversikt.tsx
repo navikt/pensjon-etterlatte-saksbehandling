@@ -30,6 +30,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -116,9 +117,10 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland, erForeldreloes)}
             >
               {{ info: <GrunnlagForVirkningstidspunkt /> }}
-            </Virkningstidspunkt>{' '}
+            </Virkningstidspunkt>
             <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
+            <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />

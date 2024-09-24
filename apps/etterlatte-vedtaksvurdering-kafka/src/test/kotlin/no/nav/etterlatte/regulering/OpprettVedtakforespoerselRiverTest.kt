@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -24,7 +24,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
         JsonMessage.newMessage(
             mapOf(
-                ReguleringHendelseType.BEREGNA.lagParMedEventNameKey(),
+                OmregningHendelseType.BEREGNA.lagParMedEventNameKey(),
                 SAK_ID_KEY to sakId,
                 DATO_KEY to foersteMai2023,
                 BEHANDLING_ID_KEY to behandlingId,

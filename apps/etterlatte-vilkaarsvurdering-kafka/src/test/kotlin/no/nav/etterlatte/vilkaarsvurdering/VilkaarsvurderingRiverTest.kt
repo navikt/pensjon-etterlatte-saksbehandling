@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,7 +32,7 @@ internal class VilkaarsvurderingRiverTest {
             JsonMessage
                 .newMessage(
                     mapOf(
-                        ReguleringHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
+                        OmregningHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
                         SAK_ID_KEY to 1,
                         BEHANDLING_ID_KEY to behandlingId,
                         BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,
@@ -47,7 +47,10 @@ internal class VilkaarsvurderingRiverTest {
             )
         }
         with(testRapid.inspektør.message(0)) {
-            Assertions.assertEquals(ReguleringHendelseType.VILKAARSVURDERT.lagEventnameForType(), this[EVENT_NAME_KEY].asText())
+            Assertions.assertEquals(
+                OmregningHendelseType.VILKAARSVURDERT.lagEventnameForType(),
+                this[EVENT_NAME_KEY].asText(),
+            )
         }
     }
 }

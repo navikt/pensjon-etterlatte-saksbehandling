@@ -7,6 +7,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -44,7 +45,7 @@ class SjekkOmOverstyrtBeregningRiver(
                 else -> throw KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning()
             }
         }
-        packet.setEventNameForHendelseType(ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT)
+        packet.setEventNameForHendelseType(OmregningHendelseType.KLAR_FOR_OMREGNING)
         context.publish(packet.toJson())
         logger.info("Publiserte utført sjekk om sak har åpen behandling med overstyrt beregning")
     }

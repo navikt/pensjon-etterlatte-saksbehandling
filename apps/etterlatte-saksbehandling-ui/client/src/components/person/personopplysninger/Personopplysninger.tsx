@@ -66,6 +66,7 @@ export const Personopplysninger = ({
                           foreldreansvar={soeker?.familierelasjon?.ansvarligeForeldre}
                         />
                       )}
+                      <Vergemaal vergemaalEllerFremtidsfullmakt={soeker?.vergemaalEllerFremtidsfullmakt} />
                       {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                         <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
                       )}
@@ -79,7 +80,6 @@ export const Personopplysninger = ({
                           />
                           <Innflytting innflytting={soeker?.utland?.innflyttingTilNorge} landListe={landListe} />
                           <Utflytting utflytting={soeker?.utland?.utflyttingFraNorge} landListe={landListe} />
-                          <Vergemaal vergemaalEllerFremtidsfullmakt={soeker?.vergemaalEllerFremtidsfullmakt} />
                         </>
                       ))}
                     </>

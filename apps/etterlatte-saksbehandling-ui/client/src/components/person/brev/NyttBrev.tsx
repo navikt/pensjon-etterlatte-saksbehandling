@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
-import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -44,7 +44,7 @@ export default function NyttBrev() {
     <>
       {mapSuccess(brevStatus, (brev) => (
         <>
-          <StatusBarPersonHenter ident={brev.soekerFnr} />
+          <StatusBar ident={brev.soekerFnr} />
           <NavigerTilbakeMeny to="/person?fane=BREV" state={{ fnr: brev.soekerFnr }}>
             Tilbake til brevoversikt
           </NavigerTilbakeMeny>

@@ -62,5 +62,22 @@ query(
                 ...metadata
             }
         }
+        vergemaalEllerFremtidsfullmakt {
+            type
+            embete
+            vergeEllerFullmektig {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+            }
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
     }
 }

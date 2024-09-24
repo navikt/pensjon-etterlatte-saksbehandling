@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sikkerLogg
 import java.util.UUID
 
 class Brevoppretter(
@@ -28,8 +28,6 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
-    private val sikkerlogger = sikkerlogger()
-
     suspend fun opprettBrev(
         sakId: SakId,
         behandlingId: UUID?,
@@ -62,7 +60,7 @@ class Brevoppretter(
                     brevkoder = brevkode,
                 )
             if (validerMottaker && nyttBrev.mottaker.erGyldig().isNotEmpty()) {
-                sikkerlogger.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
+                sikkerLogg.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
                 throw UgyldigMottakerKanIkkeFerdigstilles(id = null, sakId = nyttBrev.sakId, nyttBrev.mottaker.erGyldig())
             }
             return Pair(db.opprettBrev(nyttBrev), enhet)

@@ -23,6 +23,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -147,6 +148,7 @@ internal class NyNotatServiceTest(
                 )
             }
         val payload = SlatePDFMal(nyNotatService.hentPayload(nyttNotat.id))
+        assertTrue(payload.toJsonNode().has("slate"), "OBS! Payload må ha feltet [Slate] for at PDFGEN skal virke.")
 
         runBlocking { nyNotatService.journalfoer(nyttNotat.id, saksbehandler) }
 

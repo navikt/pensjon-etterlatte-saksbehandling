@@ -16,7 +16,7 @@ export const Vergemaal = ({
       <Table>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader scope="col">Verge</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Fødselsnummer</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Omfang</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Type</Table.ColumnHeader>
@@ -36,11 +36,9 @@ export const Vergemaal = ({
                       <KopierbarVerdi value={verge.vergeEllerFullmektig.motpartsPersonident} iconPosition="right" />
                     )}
                   </Table.DataCell>
-                  <Table.DataCell>
-                    {!!verge.vergeEllerFullmektig.omfang && verge.vergeEllerFullmektig.omfang}
-                  </Table.DataCell>
+                  <Table.DataCell>{verge.vergeEllerFullmektig.omfang}</Table.DataCell>
                   <Table.DataCell>{!!verge.type && upperFirst(lowerCase(verge.type))}</Table.DataCell>
-                  <Table.DataCell>{!!verge.embete && verge.embete}</Table.DataCell>
+                  <Table.DataCell>{verge.embete}</Table.DataCell>
                 </Table.Row>
               ))}
             </>

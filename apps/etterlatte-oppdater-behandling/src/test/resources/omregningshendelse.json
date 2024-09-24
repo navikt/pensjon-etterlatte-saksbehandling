@@ -4,7 +4,6 @@
   "hendelse_data": {
     "sakId": 1,
     "fradato": "2023-02-08",
-    "aarsak": "GRUNNBELOEPREGULERING",
-    "prosesstype": "AUTOMATISK"
+    "revurderingaarsak": "REGULERING"
   }
 }

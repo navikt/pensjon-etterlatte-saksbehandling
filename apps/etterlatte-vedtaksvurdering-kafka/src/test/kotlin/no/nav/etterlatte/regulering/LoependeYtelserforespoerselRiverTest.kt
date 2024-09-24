@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
@@ -75,6 +76,7 @@ internal class LoependeYtelserforespoerselRiverTest {
             Omregningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
             ),
             objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java),
         )

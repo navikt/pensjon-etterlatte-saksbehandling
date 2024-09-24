@@ -2,6 +2,7 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -58,10 +59,14 @@ internal class LoependeYtelserforespoerselRiver(
         if (respons.underSamordning) {
             throw SakErUnderSamordning()
         }
+
+        // TODO denne er egentlig ikke nødvendig å legge til før neste River men gjøres her for å slippe
+        // å legge til behandling-model i beregning-kafka kun for denne klassen.
         packet[HENDELSE_DATA_KEY] =
             Omregningshendelse(
                 sakId = sakId,
                 fradato = respons.dato,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
             )
         respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
         if (respons.erLoepende) {

@@ -6,5 +6,5 @@ import java.time.LocalDate
 data class Omregningshendelse(
     val sakId: SakId,
     val fradato: LocalDate,
-    val revurderingaarsak: Revurderingaarsak = Revurderingaarsak.REGULERING,
+    val revurderingaarsak: Revurderingaarsak,
 )

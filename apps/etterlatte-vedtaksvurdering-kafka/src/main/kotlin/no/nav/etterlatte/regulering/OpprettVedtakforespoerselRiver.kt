@@ -40,7 +40,7 @@ internal class OpprettVedtakforespoerselRiver(
         }
     }
 
-    override fun kontekst() = Kontekst.REGULERING
+    override fun kontekst() = Kontekst.OMREGNING
 
     override fun haandterPakke(
         packet: JsonMessage,

@@ -1,6 +1,5 @@
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { Box, Button, Heading, HStack, Radio, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import React, { useState } from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import TidligereFamiliepleierVisning from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVisning'
@@ -78,27 +77,26 @@ export const TidligereFamiliepleierVurdering = ({
         <Heading level="3" size="small">
           Er gjenlevende tidligere familiepleier?
         </Heading>
-        <RadioGroupWrapper>
-          <ControlledRadioGruppe
-            name="svar"
-            legend=""
-            size="small"
-            control={control}
-            errorVedTomInput="Du må velge om gjenlevende er tidligere familiepleier"
-            radios={
-              <>
-                <Radio size="small" value={JaNei.JA}>
-                  Ja
-                </Radio>
-                <Radio size="small" value={JaNei.NEI}>
-                  Nei
-                </Radio>
-              </>
-            }
-          />
-        </RadioGroupWrapper>
+
         <Box width="15rem">
           <VStack gap="4">
+            <ControlledRadioGruppe
+              name="svar"
+              legend=""
+              size="small"
+              control={control}
+              errorVedTomInput="Du må velge om gjenlevende er tidligere familiepleier"
+              radios={
+                <HStack gap="4">
+                  <Radio size="small" value={JaNei.JA}>
+                    Ja
+                  </Radio>
+                  <Radio size="small" value={JaNei.NEI}>
+                    Nei
+                  </Radio>
+                </HStack>
+              }
+            />
             {svar === JaNei.JA && (
               <>
                 <TextField

@@ -24,6 +24,10 @@ class DoedshendelseReminderService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    companion object {
+        private val fireMaaneder = 4L
+    }
+
     fun setupKontekstAndRun(context: Context) {
         Kontekst.set(context)
         run()
@@ -64,8 +68,7 @@ class DoedshendelseReminderService(
 
     private fun hendelserErGamleNok(hendelser: List<DoedshendelseReminder>): List<DoedshendelseReminder> {
         val idag = LocalDateTime.now(norskTidssone)
-        val toMaaneder = 2L
-        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= toMaaneder }
+        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= fireMaaneder }
     }
 
     private fun hentAlleFerdigDoedsmeldingerMedBrevBp() = doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp()

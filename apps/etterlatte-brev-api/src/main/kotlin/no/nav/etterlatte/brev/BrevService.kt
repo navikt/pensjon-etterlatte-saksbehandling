@@ -137,9 +137,9 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (!brev.mottaker.erGyldig()) {
+        if (brev.mottaker.erGyldig().isNotEmpty()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {

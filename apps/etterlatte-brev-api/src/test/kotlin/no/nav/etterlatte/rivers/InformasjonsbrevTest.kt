@@ -66,7 +66,6 @@ class InformasjonsbrevTest(
                         any(),
                         any(),
                         any(),
-                        any(),
                     )
                 } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, "enhet1")
             }

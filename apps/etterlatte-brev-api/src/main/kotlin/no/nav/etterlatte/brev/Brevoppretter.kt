@@ -60,9 +60,9 @@ class Brevoppretter(
                     brevtype = brevtype,
                     brevkoder = brevkode,
                 )
-            if (!nyttBrev.mottaker.erGyldig()) {
+            if (nyttBrev.mottaker.erGyldig().isNotEmpty()) {
                 sikkerlogger.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
-                throw UgyldigMottakerKanIkkeFerdigstilles(id = null, sakId = nyttBrev.sakId)
+                throw UgyldigMottakerKanIkkeFerdigstilles(id = null, sakId = nyttBrev.sakId, nyttBrev.mottaker.erGyldig())
             }
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }

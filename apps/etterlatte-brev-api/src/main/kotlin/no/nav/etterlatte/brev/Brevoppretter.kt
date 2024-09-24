@@ -36,7 +36,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevtype: Brevtype,
-        validerMottaker: Boolean,
+        validerMottaker: Boolean = true,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, String> =
         with(

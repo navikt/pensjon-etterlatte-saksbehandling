@@ -105,7 +105,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
         )
 
-    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
+    open fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",

@@ -736,7 +736,7 @@ internal class BehandlingServiceImpl(
 
         try {
             behandling
-                .oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+                .oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet)
                 .also {
                     behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
                     behandlingDao.lagreStatus(it)

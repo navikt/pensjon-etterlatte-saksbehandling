@@ -14,7 +14,7 @@ export const tokenMiddleware = (scope: string) => async (req: Request, res: Resp
 
   if (!bearerToken) {
     const msg = 'Kunne ikke hente obo-token på grunn av manglende bearerToken'
-    logger.error(msg)
+    logger.warn(msg)
     return res.status(401).send(msg)
   }
 
@@ -25,7 +25,7 @@ export const tokenMiddleware = (scope: string) => async (req: Request, res: Resp
     })
     .catch((error) => {
       const msg = 'Kunne ikke hente obo-token'
-      logger.error(msg, error)
+      logger.warn(msg, error)
       return res.status(401).send(msg)
     })
 }

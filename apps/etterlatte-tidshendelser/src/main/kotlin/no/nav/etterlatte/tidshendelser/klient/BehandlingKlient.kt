@@ -40,5 +40,5 @@ class BehandlingKlient(
 }
 
 data class SakerDto(
-    val saker: Map<Long, Sak>,
+    val saker: Map<SakId, Sak>,
 )

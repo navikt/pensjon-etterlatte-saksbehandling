@@ -134,7 +134,7 @@ class SakServiceImpl(
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
-    override fun hentSakerMedIder(sakIder: List<SakId>): Map<Long, Sak> {
+    override fun hentSakerMedIder(sakIder: List<SakId>): Map<SakId, Sak> {
         val saker = lesDao.hentSakerMedIder(sakIder)
         return saker.associateBy { it.id }
     }

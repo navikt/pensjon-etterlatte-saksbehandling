@@ -32,7 +32,6 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
   }
 
   const onFileChange = (event: any) => {
-    console.log('event', event)
     const fil = event.target.files[0]
     if (!fil) {
       return

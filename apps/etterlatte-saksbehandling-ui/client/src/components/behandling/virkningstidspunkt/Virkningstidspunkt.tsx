@@ -150,7 +150,7 @@ const Virkningstidspunkt = (props: {
         </VStack>
 
         <Vurdering>
-          {!vurdert ? (
+          {props.redigerbar && !vurdert ? (
             <Button variant="secondary" onClick={() => setVurdert(true)}>
               Legg til vurdering
             </Button>

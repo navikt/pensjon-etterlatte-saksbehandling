@@ -44,7 +44,7 @@ enum class OmregningHendelseType : EventnameHendelseType {
 * Derimot er det ønskelig at feltene er immutable og non null etter de blir satt.
 * Av den grunn er det er feltene tilgjengeliggjort gjennom "hent-" og "endre-" metoder.
 */
-data class Omregningshendelse(
+data class OmregningData(
     val sakId: SakId,
     val fradato: LocalDate,
     val revurderingaarsak: Revurderingaarsak,
@@ -53,7 +53,7 @@ data class Omregningshendelse(
     private var forrigeBehandlingId: UUID? = null,
 ) {
     fun toPacket() =
-        OmregningshendelsePacket(
+        OmregningDataPacket(
             sakId,
             fradato,
             revurderingaarsak,
@@ -62,36 +62,35 @@ data class Omregningshendelse(
             forrigeBehandlingId,
         )
 
-    fun hentSakType(): SakType = sakType ?: throw OmregningshendelseHarFeilTilstand(Omregningshendelse::sakType.name)
+    fun hentSakType(): SakType = sakType ?: throw OmregningshendelseHarFeilTilstand(OmregningData::sakType.name)
 
     fun endreSakType(value: SakType) {
         if (sakType != null) {
-            throw OmregningshendelseSkalIkkeMuteres(Omregningshendelse::sakType.name)
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::sakType.name)
         }
         sakType = value
     }
 
-    fun hentBehandlingId() = behandlingId ?: throw OmregningshendelseHarFeilTilstand(Omregningshendelse::behandlingId.name)
+    fun hentBehandlingId() = behandlingId ?: throw OmregningshendelseHarFeilTilstand(OmregningData::behandlingId.name)
 
     fun endreBehandlingId(value: UUID) {
         if (behandlingId != null) {
-            throw OmregningshendelseSkalIkkeMuteres(Omregningshendelse::behandlingId.name)
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::behandlingId.name)
         }
         behandlingId = value
     }
 
-    fun hentForrigeBehandlingid() =
-        forrigeBehandlingId ?: throw OmregningshendelseHarFeilTilstand(Omregningshendelse::forrigeBehandlingId.name)
+    fun hentForrigeBehandlingid() = forrigeBehandlingId ?: throw OmregningshendelseHarFeilTilstand(OmregningData::forrigeBehandlingId.name)
 
     fun endreForrigeBehandlingid(value: UUID) {
         if (forrigeBehandlingId != null) {
-            throw OmregningshendelseSkalIkkeMuteres(Omregningshendelse::forrigeBehandlingId.name)
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::forrigeBehandlingId.name)
         }
         forrigeBehandlingId = value
     }
 }
 
-data class OmregningshendelsePacket(
+data class OmregningDataPacket(
     val sakId: SakId,
     val fradato: LocalDate,
     val revurderingaarsak: Revurderingaarsak,
@@ -106,16 +105,16 @@ data class OmregningshendelsePacket(
     }
 }
 
-var JsonMessage.omregninshendelse: Omregningshendelse
+var JsonMessage.omregningData: OmregningData
     get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY])
     set(name) {
         this[HENDELSE_DATA_KEY] = name.toPacket()
     }
 
-data class OmregningshendelseHarFeilTilstand(
-    val felt: String,
-) : IllegalStateException("Omregninghendelse krever på dette stadiet $felt")
+class OmregningshendelseHarFeilTilstand(
+    felt: String,
+) : IllegalStateException("${OmregningData::class.simpleName} krever på dette stadiet $felt")
 
-data class OmregningshendelseSkalIkkeMuteres(
-    val felt: String,
-) : IllegalStateException("${Omregningshendelse::class.simpleName}.$felt skal ikke kunne endres etter det er satt.")
+class OmregningshendelseSkalIkkeMuteres(
+    felt: String,
+) : IllegalStateException("${OmregningData::class.simpleName}.$felt skal ikke kunne endres etter det er satt.")

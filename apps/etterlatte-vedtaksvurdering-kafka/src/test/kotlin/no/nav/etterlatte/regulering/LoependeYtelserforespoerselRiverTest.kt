@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -74,8 +74,8 @@ internal class LoependeYtelserforespoerselRiverTest {
             .get(EVENT_NAME_KEY)
             .asText() shouldBe ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType()
 
-        objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java) shouldBe
-            Omregningshendelse(sakId, fraDato, Revurderingaarsak.REGULERING)
+        objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), OmregningData::class.java) shouldBe
+            OmregningData(sakId, fraDato, Revurderingaarsak.REGULERING)
     }
 
     @Test

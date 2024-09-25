@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.testdata.JsonMessage
 
 object EgendefinertMeldingFeature : TestDataFeature {
@@ -60,7 +60,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
                         if (hendelseType == "omregning") {
                             val jsonNode = objectMapper.readTree(json)
                             jsonNode.get(HENDELSE_DATA_KEY).let {
-                                val omregningshendelse: Omregningshendelse = objectMapper.treeToValue(it)
+                                val omregningData: OmregningData = objectMapper.treeToValue(it)
                             }
                         }
 

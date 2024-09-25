@@ -7,7 +7,7 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -60,7 +60,7 @@ internal class LoependeYtelserforespoerselRiver(
         }
 
         packet[HENDELSE_DATA_KEY] =
-            Omregningshendelse(
+            OmregningData(
                 sakId = sakId,
                 fradato = respons.dato,
                 revurderingaarsak = Revurderingaarsak.REGULERING,

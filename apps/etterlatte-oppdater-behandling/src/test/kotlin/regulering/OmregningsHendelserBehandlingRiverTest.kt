@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
@@ -38,7 +38,7 @@ internal class OmregningsHendelserBehandlingRiverTest {
         revurderingRequestSlot.captured.sakId shouldBe 1L
         inspector.inspektør.size shouldBe 2
         with(
-            deserialize<Omregningshendelse>(
+            deserialize<OmregningData>(
                 inspector.inspektør
                     .message(1)
                     .get(HENDELSE_DATA_KEY)

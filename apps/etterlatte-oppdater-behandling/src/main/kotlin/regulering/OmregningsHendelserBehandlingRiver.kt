@@ -7,9 +7,9 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
-import no.nav.etterlatte.rapidsandrivers.omregninshendelse
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -36,21 +36,21 @@ internal class OmregningsHendelserBehandlingRiver(
     ) {
         logger.info("Mottatt omregningshendelse")
 
-        val omregningshendelse: Omregningshendelse = packet.omregninshendelse
+        val omregningData: OmregningData = packet.omregningData
         val (behandlingId, forrigeBehandlingId, sakType) =
             behandlinger.opprettAutomatiskRevurdering(
                 AutomatiskRevurderingRequest(
-                    sakId = omregningshendelse.sakId,
-                    fraDato = omregningshendelse.fradato,
-                    revurderingAarsak = omregningshendelse.revurderingaarsak,
+                    sakId = omregningData.sakId,
+                    fraDato = omregningData.fradato,
+                    revurderingAarsak = omregningData.revurderingaarsak,
                 ),
             )
 
-        omregningshendelse.endreSakType(sakType)
-        omregningshendelse.endreBehandlingId(behandlingId)
+        omregningData.endreSakType(sakType)
+        omregningData.endreBehandlingId(behandlingId)
         // TODO spør Mads om dette blir feil for Regulering
-        omregningshendelse.endreForrigeBehandlingid(forrigeBehandlingId)
-        packet.omregninshendelse = omregningshendelse
+        omregningData.endreForrigeBehandlingid(forrigeBehandlingId)
+        packet.omregningData = omregningData
 
         packet.setEventNameForHendelseType(OmregningHendelseType.BEHANDLING_OPPRETTA)
         context.publish(packet.toJson())

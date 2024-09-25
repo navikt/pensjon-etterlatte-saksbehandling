@@ -1,5 +1,10 @@
 import React, { ReactNode } from 'react'
-import { AktivitetspliktVurderingType, IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
+import {
+  AktivitetspliktUnntakType,
+  AktivitetspliktVurderingType,
+  IAktivitetspliktUnntak,
+  IAktivitetspliktVurderingNy,
+} from '~shared/types/Aktivitetsplikt'
 import { Tag } from '@navikt/ds-react'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 
@@ -20,29 +25,34 @@ export const AktivitetspliktStatusTag = ({
     aktivitetspliktVurdering: IAktivitetspliktVurderingNy
   ): { aktivitetspliktStatus: AktivitetspliktStatus; dato?: Date | string } => {
     if (!!aktivitetspliktVurdering.unntak?.length) {
-      const unntak = [...aktivitetspliktVurdering.unntak].pop()
-      // TODO: sjekke om dette faktisk er riktig?
-      if (!!unntak?.tom) {
+      const gjeldendeUnntak: IAktivitetspliktUnntak = [...aktivitetspliktVurdering.unntak].reduce((a, b) => {
+        return new Date(a.fom) > new Date(b.fom) ? a : b
+      })
+
+      if (gjeldendeUnntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT) {
         return {
           aktivitetspliktStatus: AktivitetspliktStatus.VARIG_UNNTAK,
         }
       } else {
         return {
           aktivitetspliktStatus: AktivitetspliktStatus.UNNTAK,
-          dato: unntak?.tom,
+          dato: gjeldendeUnntak?.tom,
         }
       }
     } else if (!!aktivitetspliktVurdering.aktivitet?.length) {
-      const aktivitetskrav = [...aktivitetspliktVurdering.aktivitet].pop()
-      if (aktivitetskrav?.aktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50) {
+      const gjeldendeAktivitet = [...aktivitetspliktVurdering.aktivitet].reduce((a, b) => {
+        return new Date(a.fom) > new Date(b.fom) ? a : b
+      })
+
+      if (gjeldendeAktivitet?.aktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50) {
         return {
           aktivitetspliktStatus: AktivitetspliktStatus.IKKE_OPPFYLT,
-          dato: aktivitetskrav.fom,
+          dato: gjeldendeAktivitet.fom,
         }
       } else {
         return {
           aktivitetspliktStatus: AktivitetspliktStatus.OPPFYLT,
-          dato: aktivitetskrav?.fom,
+          dato: gjeldendeAktivitet?.fom,
         }
       }
     }

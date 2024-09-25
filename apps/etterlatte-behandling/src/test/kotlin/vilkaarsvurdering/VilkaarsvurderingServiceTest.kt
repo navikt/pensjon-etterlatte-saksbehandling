@@ -22,6 +22,8 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -110,7 +112,7 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
                 every { id } returns UUID.randomUUID()
-                every { sak.id } returns 1L
+                every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
@@ -162,7 +164,7 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
                 every { id } returns UUID.randomUUID()
-                every { sak.id } returns 1L
+                every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { virkningstidspunkt } returns
@@ -207,7 +209,7 @@ internal class VilkaarsvurderingServiceTest(
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
                 every { id } returns UUID.randomUUID()
-                every { sak.id } returns 2L
+                every { sak.id } returns sakId2
                 every { sak.sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
@@ -445,18 +447,17 @@ internal class VilkaarsvurderingServiceTest(
 
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
-        val sakId = 1L
         coEvery { behandlingService.hentBehandling(revurderingId) } returns
             mockk {
                 every { id } returns revurderingId
-                every { sak.id } returns sakId
+                every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.REVURDERING
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak() } returns Revurderingaarsak.REGULERING
             }
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId)
+        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
 
         val foerstegangsvilkaar =
             runBlocking {
@@ -500,18 +501,17 @@ internal class VilkaarsvurderingServiceTest(
 
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
-        val sakId = 1L
         coEvery { behandlingService.hentBehandling(revurderingId) } returns
             mockk {
                 every { id } returns revurderingId
-                every { sak.id } returns sakId
+                every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.REVURDERING
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak() } returns Revurderingaarsak.REGULERING
             }
 
-        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId)
+        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
 
         runBlocking {
             vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)
@@ -827,7 +827,7 @@ internal class VilkaarsvurderingServiceTest(
         revurderingaarsak: Revurderingaarsak? = null,
     ) = mockk<Behandling> {
         every { id } returns behandlingId
-        every { sak.id } returns 1L
+        every { sak.id } returns sakId1
         every { sak.sakType } returns SakType.BARNEPENSJON
         every { status } returns behandlingStatus
         every { type } returns behandlingstype

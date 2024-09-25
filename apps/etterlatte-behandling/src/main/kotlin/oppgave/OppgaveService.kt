@@ -521,7 +521,7 @@ class OppgaveService(
 
     fun opprettOppgaveBulk(
         referanse: String,
-        sakIds: List<Long>,
+        sakIds: List<SakId>,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,
@@ -612,7 +612,7 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver, request.grense)
 
-    fun tilbakestillOppgaverUnderAttestering(saker: List<Long>) {
+    fun tilbakestillOppgaverUnderAttestering(saker: List<SakId>) {
         val oppgaverTilAttestering =
             oppgaveDao
                 .hentOppgaverTilSaker(

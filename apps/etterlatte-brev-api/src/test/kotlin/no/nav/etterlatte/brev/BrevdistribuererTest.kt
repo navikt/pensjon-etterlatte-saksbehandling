@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -99,7 +100,7 @@ class BrevdistribuererTest {
         prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
-        sakId = Random.nextLong(10000),
+        sakId = randomSakId(),
         behandlingId = null,
         tittel = null,
         spraak = Spraak.NB,

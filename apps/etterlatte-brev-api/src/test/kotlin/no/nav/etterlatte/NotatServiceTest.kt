@@ -6,6 +6,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
@@ -40,7 +41,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @ExtendWith(GenerellDatabaseExtension::class)
 class NotatServiceTest(
@@ -66,7 +66,7 @@ class NotatServiceTest(
 
     @Test
     fun `Generer PDF for klageblankett (forhåndsvisning)`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val klage = klageForInnstilling(sakId)
 
         coEvery {
@@ -87,7 +87,7 @@ class NotatServiceTest(
 
     @Test
     fun `journalfoerNotatISak oppretter brev og innhold, og journalfører mot dokarkiv`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val klage = klageForInnstilling(sakId)
 
         coEvery {
@@ -121,7 +121,7 @@ class NotatServiceTest(
 
     @Test
     fun `hvis journalføring feiler settes brevet til slettet`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val klage = klageForInnstilling(sakId)
 
         coEvery {

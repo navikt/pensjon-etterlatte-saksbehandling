@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
@@ -201,7 +202,7 @@ class DoedshendelseKontrollpunktOMSServiceTest {
             Sak(
                 ident = doedshendelse.beroertFnr,
                 sakType = SakType.OMSTILLINGSSTOENAD,
-                id = 1L,
+                id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
     }

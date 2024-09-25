@@ -58,7 +58,7 @@ class TilbakekrevingDao(
                     WHERE t.sak_id = ?
                     """.trimIndent(),
                 )
-            statement.setObject(1, sakId)
+            statement.setLong(1, sakId)
             statement.executeQuery().toList { toTilbakekreving() }
         }
 
@@ -102,7 +102,7 @@ class TilbakekrevingDao(
                     ORDER BY t.opprettet DESC LIMIT 1
                     """.trimIndent(),
                 )
-            statement.setObject(1, sakId)
+            statement.setLong(1, sakId)
             statement.executeQuery().singleOrNull { toTilbakekreving() }
         }
 

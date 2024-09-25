@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
@@ -81,22 +82,22 @@ fun mockedSakTilgangDao(): SakTilgangDao =
             hentSakMedGraderingOgSkjerming(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaBehandling(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaOppgave(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaKlage(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
     }
 
 fun lagContext(
@@ -320,7 +321,7 @@ fun ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdato
 
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
-    sakId: SakId = 1,
+    sakId: SakId = sakId1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     gjelderPerson: String,

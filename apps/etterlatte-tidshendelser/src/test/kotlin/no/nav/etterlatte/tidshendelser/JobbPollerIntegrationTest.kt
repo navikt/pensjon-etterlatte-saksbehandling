@@ -5,6 +5,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
@@ -65,7 +66,7 @@ class JobbPollerIntegrationTest(
     fun `skal ikke ferdigstille jobb som har opprettet hendelser`() {
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
 
-        every { aldersovergangerService.execute(jobb) } returns listOf(1)
+        every { aldersovergangerService.execute(jobb) } returns listOf(sakId1)
 
         jobbPoller.poll()
 

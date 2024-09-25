@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,7 +38,7 @@ fun vedtak(
             ),
         ),
     ident: String = "12345678913",
-    sakId: SakId = 1,
+    sakId: SakId = sakId1,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
@@ -91,7 +93,7 @@ fun ugyldigVedtakTilUtbetaling(
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
-            id = 1,
+            id = sakId1,
             ident = "12345678913",
             sakType = saktype,
         ),
@@ -288,7 +290,7 @@ fun main() {
             vedtakId = 40,
             utbetalingsperioder = listOf(initiellUtbetalingsperiode),
             ident = "16018222837",
-            sakId = 15,
+            sakId = randomSakId(),
         )
     val vedtakEvent = attestertvedtakEvent(vedtak)
 

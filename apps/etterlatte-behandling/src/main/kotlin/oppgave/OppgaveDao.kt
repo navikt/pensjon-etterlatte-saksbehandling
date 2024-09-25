@@ -104,7 +104,7 @@ interface OppgaveDao {
     ): List<VentefristGaarUt>
 
     fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern>
 }
@@ -280,7 +280,7 @@ class OppgaveDaoImpl(
         }
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {

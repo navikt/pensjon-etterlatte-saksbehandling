@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -125,7 +126,7 @@ class TilbakekrevingInnholdDTOTest {
             perioder: List<TilbakekrevingPeriode> = listOf(tilbakekrevingperiode()),
             vurdering: TilbakekrevingVurdering = tilbakekrevingvurdering(),
         ) = GenerellBrevData(
-            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, 123L, Enheter.PORSGRUNN.enhetNr),
+            sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),

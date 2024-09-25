@@ -70,8 +70,8 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long> = listOf(),
-        ekskluderteSaker: List<Long> = listOf(),
+        spesifikkeSaker: List<SakId> = listOf(),
+        ekskluderteSaker: List<SakId> = listOf(),
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
     ): Saker
@@ -231,8 +231,8 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
     ): Saker =

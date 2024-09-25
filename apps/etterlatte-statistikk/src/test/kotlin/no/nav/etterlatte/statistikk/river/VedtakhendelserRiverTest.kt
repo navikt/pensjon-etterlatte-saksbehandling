@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.river
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -46,7 +47,7 @@ internal class VedtakhendelserRiverTest {
             beregningType = "",
             anvendtSats = "",
             behandlingId = UUID.randomUUID(),
-            sakId = 0,
+            sakId = randomSakId(),
             sakNummer = 0,
             tekniskTid = Tidspunkt.now(),
             sakYtelse = "",

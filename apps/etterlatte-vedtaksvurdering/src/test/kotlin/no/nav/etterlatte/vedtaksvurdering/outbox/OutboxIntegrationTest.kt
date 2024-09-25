@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering.outbox
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -41,7 +42,7 @@ class OutboxIntegrationTest(
                 opprettVedtak(
                     virkningstidspunkt = YearMonth.of(2024, Month.APRIL),
                     soeker = Folkeregisteridentifikator.of("08815997000"),
-                    sakId = 1011L,
+                    sakId = randomSakId(),
                     type = VedtakType.INNVILGELSE,
                     behandlingId = UUID.randomUUID(),
                     status = VedtakStatus.ATTESTERT,
@@ -53,7 +54,7 @@ class OutboxIntegrationTest(
                 opprettVedtak(
                     virkningstidspunkt = YearMonth.of(2024, Month.FEBRUARY),
                     soeker = Folkeregisteridentifikator.of("04417103428"),
-                    sakId = 2022L,
+                    sakId = randomSakId(),
                     type = VedtakType.INNVILGELSE,
                     behandlingId = UUID.randomUUID(),
                     status = VedtakStatus.ATTESTERT,
@@ -65,7 +66,7 @@ class OutboxIntegrationTest(
                 opprettVedtak(
                     virkningstidspunkt = YearMonth.of(2024, Month.MAY),
                     soeker = Folkeregisteridentifikator.of("04417103428"),
-                    sakId = 2022L,
+                    sakId = randomSakId(),
                     type = VedtakType.ENDRING,
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingId = UUID.randomUUID(),

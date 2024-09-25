@@ -9,6 +9,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -51,7 +52,7 @@ class BehandleDoedshendelseServiceTest {
                 Sak(
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,
-                    id = 1L,
+                    id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
                 )
         }

@@ -4,6 +4,7 @@ import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -116,7 +117,7 @@ class HendelseDao(
 
     fun opprettHendelserForSaker(
         jobbId: Int,
-        saksIDer: List<Long>,
+        saksIDer: List<SakId>,
         steg: Steg,
     ) {
         val values =

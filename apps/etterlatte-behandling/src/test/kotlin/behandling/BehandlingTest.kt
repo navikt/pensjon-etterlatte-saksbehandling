@@ -34,7 +34,7 @@ internal class BehandlingTest {
                 Sak(
                     ident = "",
                     sakType = SakType.BARNEPENSJON,
-                    id = 1,
+                    id = sakId1,
                     enhet = Enheter.defaultEnhet.enhetNr,
                 ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),

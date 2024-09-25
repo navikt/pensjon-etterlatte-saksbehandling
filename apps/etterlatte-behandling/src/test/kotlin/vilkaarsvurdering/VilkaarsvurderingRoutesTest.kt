@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServer
@@ -589,7 +590,7 @@ internal class VilkaarsvurderingRoutesTest(
                     every { id } returns revurderingBehandlingId
                 }
 
-            coEvery { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, 1L)
+            coEvery { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
 
             val response =
                 client.post("/api/vilkaarsvurdering/$revurderingBehandlingId/opprett") {
@@ -841,7 +842,7 @@ internal class VilkaarsvurderingRoutesTest(
     private fun behandling() =
         mockk<Behandling>().apply {
             every { id } returns UUID.randomUUID()
-            every { sak.id } returns 1L
+            every { sak.id } returns sakId1
             every { sak.sakType } returns SakType.BARNEPENSJON
             every { status } returns BehandlingStatus.OPPRETTET
             every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING

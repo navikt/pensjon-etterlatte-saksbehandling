@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -303,7 +304,7 @@ fun mockKonsistensavstemming(
 )
 
 fun oppdragForKonsistensavstemming(
-    sakId: SakId = 1,
+    sakId: SakId = sakId1,
     sakType: Saktype = Saktype.BARNEPENSJON,
     fnr: String = "123456",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>,

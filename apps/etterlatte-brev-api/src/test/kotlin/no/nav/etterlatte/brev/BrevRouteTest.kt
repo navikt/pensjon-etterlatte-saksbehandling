@@ -20,6 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -240,7 +241,7 @@ internal class BrevRouteTest {
     private fun opprettBrev(id: BrevID) =
         Brev(
             id = id,
-            sakId = 41,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

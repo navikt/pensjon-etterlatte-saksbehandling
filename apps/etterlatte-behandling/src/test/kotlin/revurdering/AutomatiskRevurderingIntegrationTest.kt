@@ -11,6 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldighetsresultatVurdering
 import no.nav.etterlatte.inTransaction
@@ -52,7 +53,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    private var sakId: SakId = 0L
+    private var sakId: SakId = randomSakId()
 
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {

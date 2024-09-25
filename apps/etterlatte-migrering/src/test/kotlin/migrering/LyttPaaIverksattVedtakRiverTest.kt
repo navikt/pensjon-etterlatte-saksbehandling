@@ -4,6 +4,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -32,7 +33,7 @@ class LyttPaaIverksattVedtakRiverTest(
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
-                            sakId = 321L,
+                            sakId = randomSakId(),
                         )
                 }
             TestRapid()
@@ -69,7 +70,7 @@ class LyttPaaIverksattVedtakRiverTest(
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
-                            sakId = 321L,
+                            sakId = randomSakId(),
                         )
                 }
             TestRapid()

@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotliquery.queryOf
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
@@ -61,7 +62,7 @@ class InformasjonsbrevTest(
             mockk<Brevoppretter>().also {
                 coEvery {
                     it.opprettBrev(
-                        saksnr,
+                        tilSakId(saksnr),
                         any(),
                         any(),
                         any(),

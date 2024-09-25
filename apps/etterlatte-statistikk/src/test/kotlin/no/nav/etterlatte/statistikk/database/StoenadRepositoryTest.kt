@@ -1,5 +1,10 @@
 package no.nav.etterlatte.statistikk.database
 
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -82,6 +87,7 @@ class StoenadRepositoryTest(
     @Test
     fun `lagreStoenadsrad lagrer alle felter til`() {
         val repo = StoenadRepository.using(dataSource)
+        val sak5 = tilSakId(5)
         repo.lagreStoenadsrad(
             StoenadRad(
                 id = -1,
@@ -93,7 +99,7 @@ class StoenadRepositoryTest(
                 beregningType = "FOLKETRYGD",
                 anvendtSats = "1G",
                 behandlingId = UUID.randomUUID(),
-                sakId = 5,
+                sakId = sak5,
                 sakNummer = 5,
                 tekniskTid = Tidspunkt.now(),
                 sakYtelse = "BP",
@@ -132,7 +138,7 @@ class StoenadRepositoryTest(
         repo.hentStoenadRader().also {
             assertEquals(1, it.size)
             val stoenadRad = it.first()
-            assertEquals(5, stoenadRad.sakId)
+            assertEquals(sak5, stoenadRad.sakId)
             assertEquals(
                 stoenadRad.fnrForeldre,
                 listOf("23427249697", "18458822782"),
@@ -149,6 +155,7 @@ class StoenadRepositoryTest(
     @Test
     fun `hentStoenadRader henter ut null for beregning riktig`() {
         val repo = StoenadRepository.using(dataSource)
+        val sak5 = tilSakId(5)
         repo.lagreStoenadsrad(
             StoenadRad(
                 id = -1,
@@ -160,7 +167,7 @@ class StoenadRepositoryTest(
                 beregningType = "FOLKETRYGD",
                 anvendtSats = "1G",
                 behandlingId = UUID.randomUUID(),
-                sakId = 5,
+                sakId = sak5,
                 sakNummer = 5,
                 tekniskTid = Tidspunkt.now(),
                 sakYtelse = "BP",
@@ -185,7 +192,7 @@ class StoenadRepositoryTest(
         repo.hentStoenadRader().also {
             assertEquals(1, it.size)
             val stoenadRad = it.first()
-            assertEquals(5, stoenadRad.sakId)
+            assertEquals(sak5, stoenadRad.sakId)
             assertEquals(
                 stoenadRad.fnrForeldre,
                 listOf("23427249697", "18458822782"),
@@ -204,7 +211,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 1L,
+                sakId = sakId1,
                 vedtakLoependeFom = maaned.plusMonths(1).atDay(1),
                 vedtakLoependeTom = null,
                 tekniskTid = tekniskTid,
@@ -213,7 +220,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 2L,
+                sakId = sakId2,
                 vedtakLoependeFom = maaned.minusMonths(5).atDay(1),
                 vedtakLoependeTom = maaned.minusMonths(1).atEndOfMonth(),
                 tekniskTid = tekniskTid,
@@ -222,7 +229,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 3L,
+                sakId = sakId3,
                 vedtakLoependeFom = maaned.atDay(1),
                 tekniskTid = tekniskTid,
             ),
@@ -230,7 +237,7 @@ class StoenadRepositoryTest(
 
         val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
         assertEquals(maanedsrader.size, 1)
-        assertEquals(maanedsrader[0].sakId, 3L)
+        assertEquals(maanedsrader[0].sakId, sakId3)
     }
 
     @Test
@@ -253,7 +260,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 1L,
+                sakId = sakId1,
                 vedtakLoependeFom = maaned.atDay(1),
                 vedtakLoependeTom = null,
                 tekniskTid = tekniskTidFoerMaaned,
@@ -262,7 +269,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 2L,
+                sakId = sakId2,
                 vedtakLoependeFom = maaned.minusMonths(5).atDay(1),
                 tekniskTid = tekniskTidInnenforMaaned,
             ),
@@ -270,7 +277,7 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 3L,
+                sakId = sakId3,
                 vedtakLoependeFom = maaned.atDay(1),
                 tekniskTid = tekniskTidEtterMaaned,
             ),
@@ -278,7 +285,7 @@ class StoenadRepositoryTest(
 
         val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
         assertEquals(maanedsrader.size, 2)
-        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L, 2L))
+        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(sakId1, sakId2))
     }
 
     @Test
@@ -294,14 +301,14 @@ class StoenadRepositoryTest(
 
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 1L,
+                sakId = sakId1,
                 vedtakLoependeFom = maaned.minusMonths(5).atDay(1),
                 tekniskTid = tekniskTidFoerMaaned,
             ),
         )
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 1L,
+                sakId = sakId1,
                 vedtakLoependeFom = maaned.atDay(1),
                 vedtakLoependeTom = null,
                 tekniskTid = tekniskTidFoerMaaned,
@@ -309,7 +316,7 @@ class StoenadRepositoryTest(
         )
         repo.lagreStoenadsrad(
             stoenadRad(
-                sakId = 1L,
+                sakId = sakId1,
                 vedtakLoependeFom = maaned.atDay(1),
                 tekniskTid = tekniskTidFoerMaaned,
             ),
@@ -317,7 +324,7 @@ class StoenadRepositoryTest(
 
         val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
         assertEquals(maanedsrader.size, 3)
-        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L))
+        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(sakId1))
     }
 
     @Test
@@ -336,7 +343,7 @@ class StoenadRepositoryTest(
                 beregningType = "Moro",
                 anvendtSats = "1",
                 behandlingId = UUID.randomUUID(),
-                sakId = 0,
+                sakId = randomSakId(),
                 sakNummer = 0,
                 tekniskTid = Tidspunkt.now(),
                 sakYtelse = "",
@@ -378,7 +385,7 @@ class StoenadRepositoryTest(
                     beregningType = "FOLKETRYGD",
                     anvendtSats = "1G",
                     behandlingId = UUID.randomUUID(),
-                    sakId = 5,
+                    sakId = tilSakId(5),
                     sakNummer = 5,
                     tekniskTid = Tidspunkt.now(),
                     sakYtelse = "BP",

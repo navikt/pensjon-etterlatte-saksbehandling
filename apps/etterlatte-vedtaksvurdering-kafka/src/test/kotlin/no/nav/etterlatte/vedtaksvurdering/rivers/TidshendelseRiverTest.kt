@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
@@ -31,7 +32,7 @@ class TidshendelseRiverTest {
 
     private val inspector = TestRapid().apply { TidshendelseRiver(this, vedtakService) }
 
-    private val sakId = 1234L
+    private val sakId = randomSakId()
     private val behandlingId = UUID.randomUUID()
     private val datoFom = LocalDate.of(2024, Month.FEBRUARY, 1)
     private val datoFomJanuar2024 = LocalDate.of(2024, Month.JANUARY, 1)

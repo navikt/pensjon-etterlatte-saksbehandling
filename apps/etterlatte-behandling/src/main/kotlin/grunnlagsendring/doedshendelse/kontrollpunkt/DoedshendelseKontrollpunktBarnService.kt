@@ -17,11 +17,15 @@ internal class DoedshendelseKontrollpunktBarnService(
         avdoed: PersonDTO,
         sak: Sak?,
         barn: PersonDTO,
-    ): List<DoedshendelseKontrollpunkt> =
-        listOfNotNull(
-            kontrollerBarnOgHarBP(sak),
-            kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
-        )
+        kontrollerSamtidigDoedsfall: Boolean = true,
+    ): List<DoedshendelseKontrollpunkt> {
+        val kontrollpunkt = mutableListOf<DoedshendelseKontrollpunkt>()
+        kontrollerBarnOgHarBP(sak)?.let { kontrollpunkt.add(it) }
+        if (kontrollerSamtidigDoedsfall) {
+            kontrollerSamtidigDoedsfall(avdoed, hendelse, barn)?.let { kontrollpunkt.add(it) }
+        }
+        return kontrollpunkt
+    }
 
     private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
         if (sak == null) {

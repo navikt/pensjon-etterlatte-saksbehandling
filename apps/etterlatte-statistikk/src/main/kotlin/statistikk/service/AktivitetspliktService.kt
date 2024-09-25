@@ -25,9 +25,9 @@ class AktivitetspliktService(
     ): StatistikkAktivitet? = aktivitetspliktRepo.hentAktivitetspliktForMaaned(sakId, sisteMaaned)
 
     fun mapAktivitetForSaker(
-        sakIds: List<Long>,
+        sakIds: List<SakId>,
         maaned: YearMonth,
-    ): Map<Long, AktivitetForMaaned> {
+    ): Map<SakId, AktivitetForMaaned> {
         val aktiviteter = aktivitetspliktRepo.hentAktivitetspliktForMaaneder(sakIds, maaned)
         return aktiviteter.associate { it.sakId to AktivitetForMaaned.mapFraStatistikkAktivitet(it, maaned) }
     }

@@ -9,6 +9,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
@@ -64,7 +66,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val brev =
             Brev(
                 1,
-                41,
+                randomSakId(),
                 BEHANDLING_ID,
                 "tittel",
                 Spraak.NB,
@@ -138,7 +140,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
             id = 1L,
             behandlingId = behandlingId,
             status = VedtakStatus.ATTESTERT,
-            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
+            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, sakId2),
             type = VedtakType.INNVILGELSE,
             vedtakFattet = VedtakFattet("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),
             attestasjon = Attestasjon("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),

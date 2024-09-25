@@ -77,7 +77,7 @@ interface GrunnlagService {
 
     fun laasVersjonForBehandling(behandlingId: UUID)
 
-    fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
+    fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId>
 
     fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
@@ -220,7 +220,7 @@ class RealGrunnlagService(
         return result
     }
 
-    override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> = opplysningDao.finnAlleSakerForPerson(fnr)
+    override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId> = opplysningDao.finnAlleSakerForPerson(fnr)
 
     override fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>? {
         val grunnlag = hentOpplysningsgrunnlagForSak(sakId) ?: return null

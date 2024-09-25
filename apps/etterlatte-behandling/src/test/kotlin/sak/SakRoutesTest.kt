@@ -21,6 +21,8 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
@@ -80,7 +82,7 @@ internal class SakRoutesTest {
             Sak(
                 ident = "12345",
                 sakType = SakType.BARNEPENSJON,
-                id = 123455,
+                id = randomSakId(),
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
         every { oppgaveService.hentOppgaverForSak(any()) } returns
@@ -89,7 +91,7 @@ internal class SakRoutesTest {
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
                     enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = 1,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
@@ -104,7 +106,7 @@ internal class SakRoutesTest {
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
                     enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = 1,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
                     saksbehandler = null,
@@ -119,7 +121,7 @@ internal class SakRoutesTest {
                     id = UUID.randomUUID(),
                     status = Status.FERDIGSTILT,
                     enhet = Enheter.PORSGRUNN.enhetNr,
-                    sakId = 1,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
@@ -188,7 +190,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
         val sakId = 1
-        coEvery { behandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
+        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
             val response =
@@ -203,7 +205,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
         val sakId = 1
-        coEvery { behandlingService.hentSisteIverksatte(1) } returns null
+        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns null
         withTestApplication { client ->
             val response =
                 client.get("/saker/$sakId/behandlinger/sisteIverksatte") {

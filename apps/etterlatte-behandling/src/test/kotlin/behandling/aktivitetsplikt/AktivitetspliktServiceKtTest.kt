@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.AfterEach
@@ -73,10 +74,10 @@ class AktivitetspliktServiceKtTest {
         every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingNyId) } returns vurderingNy.unntak
         every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingNyId) } returns vurderingNy.aktivitet
 
-        every { aktivitetspliktUnntakDao.hentNyesteUnntak(1L) } returns vurderingNy.unntak
-        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(1L) } returns vurderingNy.aktivitet
+        every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId1) } returns vurderingNy.unntak
+        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId1) } returns vurderingNy.aktivitet
 
-        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, 1L)
+        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId1)
 
         Assertions.assertEquals(samletVurdering, vurderingNy)
     }
@@ -132,10 +133,10 @@ class AktivitetspliktServiceKtTest {
         every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingNyId) } returns vurderingNy.unntak
         every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingNyId) } returns vurderingNy.aktivitet
 
-        every { aktivitetspliktUnntakDao.hentNyesteUnntak(1L) } returns vurderingGammel.unntak
-        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(1L) } returns vurderingNy.aktivitet
+        every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId1) } returns vurderingGammel.unntak
+        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId1) } returns vurderingNy.aktivitet
 
-        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, 1L)
+        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId1)
 
         Assertions.assertEquals(samletVurdering, vurderingNy)
     }
@@ -191,10 +192,10 @@ class AktivitetspliktServiceKtTest {
         every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingNyId) } returns vurderingNy.unntak
         every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingNyId) } returns vurderingNy.aktivitet
 
-        every { aktivitetspliktUnntakDao.hentNyesteUnntak(1L) } returns vurderingNy.unntak
-        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(1L) } returns vurderingGammel.aktivitet
+        every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId1) } returns vurderingNy.unntak
+        every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId1) } returns vurderingGammel.aktivitet
 
-        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, 1L)
+        val samletVurdering = hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId1)
 
         Assertions.assertEquals(samletVurdering, vurderingNy)
     }

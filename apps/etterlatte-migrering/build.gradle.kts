@@ -19,4 +19,5 @@ dependencies {
     implementation(libs.database.kotliquery)
     testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

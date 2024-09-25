@@ -43,10 +43,3 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-        maxParallelForks = 1
-    }
-}

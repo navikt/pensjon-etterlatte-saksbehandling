@@ -2,6 +2,7 @@ package no.nav.etterlatte.tilbakekreving
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -28,7 +29,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
 
     @Test
     fun `skal lagre og ferdigstille hendelse for mottatt kravgrunnlag`() {
-        val sakId = 1L
+        val sakId = sakId1
         val kravgrunnlag = "<kravgrunnlag>payload</kravgrunnlag>"
         val jmsTimestamp = Tidspunkt.now()
 
@@ -59,7 +60,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
 
     @Test
     fun `skal lagre og ferdigstille hendelse for mottatt kravOgVedtakStatus`() {
-        val sakId = 1L
+        val sakId = sakId1
         val melding = "payload"
         val jmsTimestamp = Tidspunkt.now()
 
@@ -90,7 +91,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
 
     @Test
     fun `skal lagre hendelse for sendt tilbakekrevingsvedtak`() {
-        val sakId = 1L
+        val sakId = sakId1
         val vedtakRequest = "request_payload"
 
         repository.lagreTilbakekrevingHendelse(sakId, vedtakRequest, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
@@ -108,7 +109,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
 
     @Test
     fun `skal lagre hendelse for tilbakekrevingsvedtak kvittering`() {
-        val sakId = 1L
+        val sakId = sakId1
         val vedtakResponse = "response_payload"
 
         repository.lagreTilbakekrevingHendelse(sakId, vedtakResponse, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING)
@@ -126,7 +127,7 @@ internal class TilbakekrevingHendelseRepositoryTest(
 
     @Test
     fun `skal hente siste hendelse for sak basert paa jms timestamp`() {
-        val sakId = 1L
+        val sakId = sakId1
         val kravgrunnlag = "<kravgrunnlag>payload</kravgrunnlag>"
         val jmsTimestampKravgrunnlag = Tidspunkt.now()
 

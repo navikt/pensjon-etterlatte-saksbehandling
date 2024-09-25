@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
@@ -37,7 +38,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -68,7 +69,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -97,7 +98,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),

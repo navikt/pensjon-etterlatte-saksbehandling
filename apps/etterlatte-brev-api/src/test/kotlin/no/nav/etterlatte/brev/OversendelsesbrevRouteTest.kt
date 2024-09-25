@@ -17,6 +17,7 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -105,7 +106,7 @@ internal class OversendelsesbrevRouteTest {
     private fun opprettBrev() =
         Brev(
             1,
-            41,
+            randomSakId(),
             BEHANDLING_ID,
             "tittel",
             Spraak.NB,

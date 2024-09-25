@@ -52,7 +52,7 @@ class OpprettDoedshendelseJob(
     }
 
     private fun run() {
-        withLogContext(correlationId = getCorrelationId(), kv = mapOf("migrering" to "true")) {
+        withLogContext(correlationId = getCorrelationId(), kv = mapOf("send_brev_18_20_aar_opprett" to "true")) {
             val dryRun = !featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)
             val listeOverAvdoede =
                 inTransaction {

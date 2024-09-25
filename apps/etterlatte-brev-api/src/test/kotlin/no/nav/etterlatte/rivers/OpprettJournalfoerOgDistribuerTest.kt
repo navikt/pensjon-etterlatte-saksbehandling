@@ -2,6 +2,8 @@ package no.nav.etterlatte.rivers
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
@@ -90,7 +92,7 @@ internal class OpprettJournalfoerOgDistribuer {
     private fun lagBrev(behandlingId: UUID?) =
         Brev(
             id = 2L,
-            sakId = 1L,
+            sakId = sakId1,
             behandlingId = behandlingId,
             tittel = "tittel",
             spraak = Spraak.NB,
@@ -118,7 +120,7 @@ internal class OpprettJournalfoerOgDistribuer {
                 VedtakSak(
                     ident = "Sak1",
                     sakType = SakType.BARNEPENSJON,
-                    id = 2L,
+                    id = sakId2,
                 ),
             behandlingId = behandlingId,
             type = VedtakType.INNVILGELSE,

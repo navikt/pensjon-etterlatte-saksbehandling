@@ -49,7 +49,7 @@ private const val EN_G_PER_MND = 10336
 class MaanedStatistikk(
     val maaned: YearMonth,
     stoenadRader: List<StoenadRad>,
-    aktiviteter: Map<Long, AktivitetForMaaned>,
+    aktiviteter: Map<SakId, AktivitetForMaaned>,
 ) {
     val rader: List<MaanedStoenadRad>
 

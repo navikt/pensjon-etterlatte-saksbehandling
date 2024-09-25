@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -24,7 +25,7 @@ class BeregningTest {
                 type = Beregningstype.BP,
                 beregningsperioder = listOf(),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(sakId = 0, versjon = 0),
+                grunnlagMetadata = Metadata(sakId = randomSakId(), versjon = 0),
                 overstyrBeregning = OverstyrBeregningDTO("Overstyrt i pesys", OverstyrtBeregningKategori.UKJENT_KATEGORI),
             )
         val statistikkBeregning = Beregning.fraBeregningDTO(dto)
@@ -82,7 +83,7 @@ class BeregningTest {
                         periode2,
                     ),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(sakId = 0, versjon = 0),
+                grunnlagMetadata = Metadata(sakId = randomSakId(), versjon = 0),
                 overstyrBeregning = null,
             )
 

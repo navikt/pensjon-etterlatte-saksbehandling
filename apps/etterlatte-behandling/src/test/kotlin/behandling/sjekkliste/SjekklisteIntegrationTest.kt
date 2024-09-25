@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -62,7 +63,7 @@ class SjekklisteIntegrationTest(
 
     @Test
     fun `Opprett sjekkliste for BP`() {
-        val behandling = foerstegangsbehandling(sakId = 33L)
+        val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
 
@@ -78,7 +79,7 @@ class SjekklisteIntegrationTest(
 
     @Test
     fun `Opprett sjekkliste for OMS`() {
-        val behandling = foerstegangsbehandling(sakId = 33L, sakType = SakType.OMSTILLINGSSTOENAD)
+        val behandling = foerstegangsbehandling(sakId = randomSakId(), sakType = SakType.OMSTILLINGSSTOENAD)
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
 
@@ -95,7 +96,7 @@ class SjekklisteIntegrationTest(
 
     @Test
     fun `Hent eksisterende sjekkliste`() {
-        val behandling = foerstegangsbehandling(sakId = 33L)
+        val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         sjekklisteService.opprettSjekkliste(behandling.id)
 
@@ -108,7 +109,7 @@ class SjekklisteIntegrationTest(
 
     @Test
     fun `Oppdatere sjekkliste i db`() {
-        val behandling = foerstegangsbehandling(sakId = 33L)
+        val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         sjekklisteService.opprettSjekkliste(behandling.id)
 
@@ -135,7 +136,7 @@ class SjekklisteIntegrationTest(
 
     @Test
     fun `Oppdatere et sjekkliste-element til avkrysset`() {
-        val behandling = foerstegangsbehandling(sakId = 33L)
+        val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
 

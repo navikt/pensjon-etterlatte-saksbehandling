@@ -14,6 +14,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.samordning.vedtak.getMeta
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ class BehandlingKlient(
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
     private val behandlingUrl = "${config.getString("behandling.url")}/api"
 
-    suspend fun hentSakForPerson(ident: FoedselsnummerDTO): List<Long> {
+    suspend fun hentSakForPerson(ident: FoedselsnummerDTO): List<SakId> {
         logger.info("Henter saker for person: ${ident.foedselsnummer.maskerFnr()}")
         return try {
             httpClient
@@ -33,7 +34,7 @@ class BehandlingKlient(
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(ident.foedselsnummer))
-                }.body<List<Long>>()
+                }.body<List<SakId>>()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod en feil i kall til behandling sak for personer")
             when (e.response.status) {
@@ -44,7 +45,7 @@ class BehandlingKlient(
         }
     }
 
-    suspend fun hentSak(id: Long): Sak? {
+    suspend fun hentSak(id: SakId): Sak? {
         logger.info("Henter sak med id=$id")
 
         return try {

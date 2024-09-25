@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -40,7 +41,7 @@ internal class VedtakServiceImplTest {
             }
         val vedtakService = VedtakServiceImpl(httpClientMock, "http://test")
         val dato = LocalDate.of(2023, 1, 1)
-        vedtakService.harLoependeYtelserFra(1, dato)
+        vedtakService.harLoependeYtelserFra(sakId1, dato)
 
         Assertions.assertEquals("/api/vedtak/loepende/1?dato=2023-01-01", request.encodedPathAndQuery)
     }

@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -330,7 +331,7 @@ internal class BeregningServiceTest {
     private fun mockBehandling(type: SakType): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { sakType } returns type
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))

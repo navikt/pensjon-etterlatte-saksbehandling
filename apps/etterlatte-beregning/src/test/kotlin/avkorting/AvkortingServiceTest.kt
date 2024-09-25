@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
@@ -114,7 +115,7 @@ internal class AvkortingServiceTest {
         @Test
         fun `Foerstegangsbehandling skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
             val behandlingId = UUID.randomUUID()
-            val sakId = 123L
+            val sakId = randomSakId()
             val behandling =
                 behandling(
                     id = behandlingId,
@@ -164,7 +165,7 @@ internal class AvkortingServiceTest {
                     id = behandlingId,
                     status = behandlingStatusEtterBeregnet,
                     behandlingType = BehandlingType.REVURDERING,
-                    sak = 123L,
+                    sak = randomSakId(),
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
@@ -197,7 +198,7 @@ internal class AvkortingServiceTest {
         @Test
         fun `Revurdering skal opprette ny avkorting ved aa kopiere tidligere hvis avkorting ikke finnes fra foer`() {
             val behandlingId = UUID.randomUUID()
-            val sakId = 123L
+            val sakId = randomSakId()
             val behandling =
                 behandling(
                     id = behandlingId,
@@ -253,7 +254,7 @@ internal class AvkortingServiceTest {
         @Test
         fun `Revurdering skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
             val behandlingId = UUID.randomUUID()
-            val sakId = 123L
+            val sakId = randomSakId()
             val behandlingBeregnetStatus = BehandlingStatus.BEREGNET
             val behandling =
                 behandling(
@@ -322,7 +323,7 @@ internal class AvkortingServiceTest {
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
             val behandlingId = UUID.randomUUID()
-            val sakId = 123L
+            val sakId = randomSakId()
             val behandling =
                 behandling(
                     id = behandlingId,
@@ -377,7 +378,7 @@ internal class AvkortingServiceTest {
         @Test
         fun `Lagre avkorting for revurdering henter og legger til avkorting fra forrige vedtak`() {
             val revurderingId = UUID.randomUUID()
-            val sakId = 123L
+            val sakId = randomSakId()
             val revurdering =
                 behandling(
                     id = revurderingId,

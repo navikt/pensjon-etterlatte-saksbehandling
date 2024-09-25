@@ -38,7 +38,7 @@ data class OpprettBehandling(
 data class BehandlingOpprettet(
     val timestamp: Tidspunkt,
     val id: UUID,
-    val sak: Long,
+    val sak: SakId,
 )
 
 fun OpprettBehandling.toBehandlingOpprettet() = BehandlingOpprettet(opprettet, id, sakId)

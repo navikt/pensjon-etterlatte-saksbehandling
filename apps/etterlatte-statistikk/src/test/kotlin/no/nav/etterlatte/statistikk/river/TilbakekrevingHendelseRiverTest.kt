@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.river
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -115,7 +116,7 @@ internal class TilbakekrevingHendelseRiverTest {
                         TILBAKEKREVING_STATISTIKK_RIVER_KEY to
                             StatistikkTilbakekrevingDto(
                                 UUID.randomUUID(),
-                                tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)),
+                                tilbakekreving(Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)),
                                 Tidspunkt.now(),
                                 null,
                             ),

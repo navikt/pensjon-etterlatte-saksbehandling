@@ -9,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -909,7 +910,7 @@ internal class BeregnBarnepensjonServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning

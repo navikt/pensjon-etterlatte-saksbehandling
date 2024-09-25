@@ -19,6 +19,8 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -88,7 +90,7 @@ class TilgangsstyringTest {
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -101,7 +103,7 @@ class TilgangsstyringTest {
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -117,7 +119,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -133,7 +135,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -152,7 +154,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -171,7 +173,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -193,7 +195,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -215,7 +217,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -227,8 +229,8 @@ class TilgangsstyringTest {
                     },
                     mockk<SakTilgangDao> {
                         every {
-                            hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                            hentSakMedGraderingOgSkjerming(sakId2)
+                        } returns SakMedGraderingOgSkjermet(sakId2, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -240,8 +242,8 @@ class TilgangsstyringTest {
                     },
                     mockk<SakTilgangDao> {
                         every {
-                            hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                            hentSakMedGraderingOgSkjerming(sakId2)
+                        } returns SakMedGraderingOgSkjermet(sakId2, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -328,7 +330,7 @@ class TilgangsstyringTest {
                         }
                         route("/annet") {
                             get("/sak") {
-                                kunSaksbehandlerMedSkrivetilgang(sakId = 2L) {
+                                kunSaksbehandlerMedSkrivetilgang(sakId = sakId2) {
                                     call.respond("OK")
                                 }
                             }

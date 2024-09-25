@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning
 
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
@@ -83,14 +85,14 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal ikke hente en overstyr beregning som ikke finnes`() {
-        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(0L)
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(randomSakId())
 
         assertTrue(overstyrBeregning == null)
     }
 
     @Test
     fun `skal ikke hente en overstyr beregning som har status ugyldig`() {
-        val sakId = 10L
+        val sakId = randomSakId()
         beregningRepository.opprettOverstyrBeregning(
             OverstyrBeregning(
                 sakId,
@@ -110,7 +112,7 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal kunne opprette en gyldig overstyr beregning etter en ugyldig`() {
-        val sakId = 10L
+        val sakId = randomSakId()
 
         beregningRepository.opprettOverstyrBeregning(
             OverstyrBeregning(
@@ -134,7 +136,7 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal lagre og hente en overstyr beregning`() {
-        val sakId = 1L
+        val sakId = sakId1
 
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
@@ -151,7 +153,7 @@ internal class BeregningRepositoryTest(
 
     @Test
     fun `skal lagre og hente en overstyr beregning og deretter kunne slette overstyrt beregning`() {
-        val sakId = 1L
+        val sakId = sakId1
         val opprettetOverstyrBeregning =
             beregningRepository.opprettOverstyrBeregning(
                 OverstyrBeregning(sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
@@ -183,7 +185,7 @@ internal class BeregningRepositoryTest(
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata =
             no.nav.etterlatte.libs.common.grunnlag
-                .Metadata(1, 1),
+                .Metadata(sakId1, 1),
         beregningsperioder =
             listOf(
                 Beregningsperiode(

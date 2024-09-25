@@ -3,6 +3,7 @@ package no.nav.etterlatte.regulering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
@@ -18,7 +19,7 @@ import java.util.UUID
 
 internal class OpprettVedtakforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
-    private val sakId = 1L
+    private val sakId = sakId1
 
     private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
         JsonMessage.newMessage(

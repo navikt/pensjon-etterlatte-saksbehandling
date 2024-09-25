@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -41,7 +42,7 @@ class AktivitetspliktKopierServiceTest {
     @Nested
     inner class KopierVurderingForSak {
         private val behandlingId = UUID.randomUUID()
-        private val sakId = 1L
+        private val sakId = sakId1
 
         @Test
         fun `Skal kopiere vurdering med unntak`() {
@@ -120,12 +121,12 @@ class AktivitetspliktKopierServiceTest {
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { sak } returns
                     mockk {
-                        every { id } returns 1L
+                        every { id } returns sakId1
                     }
             }
         val aktivitet =
             LagreAktivitetspliktAktivitet(
-                sakId = 1L,
+                sakId = sakId1,
                 type = AktivitetspliktAktivitetType.ARBEIDSTAKER,
                 fom = LocalDate.now(),
                 beskrivelse = "Beskrivelse",

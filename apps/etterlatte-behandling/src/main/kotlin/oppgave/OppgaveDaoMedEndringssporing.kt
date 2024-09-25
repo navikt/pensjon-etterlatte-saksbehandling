@@ -226,7 +226,7 @@ class OppgaveDaoMedEndringssporingImpl(
     ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver, grense)
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ) = oppgaveDao.hentOppgaverTilSaker(saker, oppgaveStatuser)
 

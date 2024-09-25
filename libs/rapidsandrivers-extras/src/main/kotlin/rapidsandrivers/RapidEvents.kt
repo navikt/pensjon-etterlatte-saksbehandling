@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
@@ -34,7 +35,7 @@ var JsonMessage.kjoering: String
         this[KJOERING] = value
     }
 
-var JsonMessage.saker: List<Long>
+var JsonMessage.saker: List<SakId>
     get() =
         this[SPESIFIKKE_SAKER]
             .asText()
@@ -43,7 +44,7 @@ var JsonMessage.saker: List<Long>
         this[SPESIFIKKE_SAKER] = name.tilSeparertString()
     }
 
-var JsonMessage.ekskluderteSaker: List<Long>
+var JsonMessage.ekskluderteSaker: List<SakId>
     get() =
         this[EKSKLUDERTE_SAKER]
             .asText()
@@ -58,4 +59,4 @@ fun String.tilSeparertListe() =
         .filter { it.isNotEmpty() }
         .map { it.toLong() }
 
-fun List<Long>.tilSeparertString() = this.joinToString(";") { it.toString() }
+fun List<SakId>.tilSeparertString() = this.joinToString(";") { it.toString() }

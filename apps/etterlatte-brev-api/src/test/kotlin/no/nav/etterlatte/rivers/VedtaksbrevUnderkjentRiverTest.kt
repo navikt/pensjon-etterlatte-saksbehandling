@@ -6,6 +6,8 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Brev
@@ -108,7 +110,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             id = 1L,
             behandlingId = behandlingsid,
             status = VedtakStatus.RETURNERT,
-            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
+            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, sakId2),
             type = VedtakType.INNVILGELSE,
             vedtakFattet = VedtakFattet("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),
             attestasjon = Attestasjon("Z00000", Enheter.defaultEnhet.enhetNr, Tidspunkt.now()),
@@ -125,7 +127,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
     private fun opprettBrev() =
         Brev(
             1,
-            41,
+            randomSakId(),
             UUID.randomUUID(),
             "tittel",
             Spraak.NB,

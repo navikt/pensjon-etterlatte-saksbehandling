@@ -100,7 +100,7 @@ class AktivitetspliktDao(
                         WHERE sak_id = ?
                         """.trimMargin(),
                     )
-                stmt.setObject(1, sakId)
+                stmt.setLong(1, sakId)
 
                 stmt.executeQuery().toList { toAktivitet() }
             }
@@ -243,7 +243,7 @@ class AktivitetspliktDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, aktivitetId)
-            stmt.setObject(2, sakId)
+            stmt.setLong(2, sakId)
 
             stmt.executeUpdate()
         }

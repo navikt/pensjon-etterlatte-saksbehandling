@@ -3,6 +3,7 @@ package no.nav.etterlatte.sanksjon
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
@@ -18,7 +19,7 @@ internal class SanksjonRepositoryTest(
     ds: DataSource,
 ) {
     private val sanksjonRepository = SanksjonRepository(ds)
-    private val sakId = 123L
+    private val sakId = randomSakId()
 
     @Test
     fun `skal returnere null hvis mangler sanksjon`() {

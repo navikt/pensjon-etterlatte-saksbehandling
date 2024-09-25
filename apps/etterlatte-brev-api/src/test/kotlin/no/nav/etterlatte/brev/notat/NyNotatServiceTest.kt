@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.NotatAlleredeJournalfoert
 import no.nav.etterlatte.brev.NyNotatService
@@ -35,7 +36,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
@@ -68,7 +68,7 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Hent og opprett notat for sak fungerer`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
@@ -101,7 +101,7 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Oppdater tittel paa notat`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
@@ -132,7 +132,7 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Journalfoer notat`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak

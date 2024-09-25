@@ -12,6 +12,8 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -53,14 +55,16 @@ class BehandleDoedshendelseJob(
     }
 
     private fun run() {
-        if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
-            val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
-            logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
+        withLogContext(correlationId = getCorrelationId(), kv = mapOf("send_brev_18_20_aar_behandle" to "true")) {
+            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
+                val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
+                logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
 
-            doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                inTransaction {
-                    logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
+                doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                    inTransaction {
+                        logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                        behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
+                    }
                 }
             }
         }

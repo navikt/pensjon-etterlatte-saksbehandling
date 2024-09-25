@@ -35,9 +35,9 @@ internal class VilkaarsvurderingRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val omregningshendelse = packet.omregningData
-        val behandlingId = omregningshendelse.hentBehandlingId()
-        val behandlingViOmregnerFra = omregningshendelse.hentForrigeBehandlingid()
+        val omregningData = packet.omregningData
+        val behandlingId = omregningData.hentBehandlingId()
+        val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
 
         vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
         packet.setEventNameForHendelseType(OmregningHendelseType.VILKAARSVURDERT)

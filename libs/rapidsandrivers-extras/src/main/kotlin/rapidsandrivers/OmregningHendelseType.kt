@@ -99,9 +99,11 @@ data class OmregningDataPacket(
     val forrigeBehandlingId: UUID?,
 ) {
     companion object KEYS {
-        const val SAKTYPE = "$HENDELSE_DATA_KEY.sakType"
-        const val BEHANDLING_ID = "$HENDELSE_DATA_KEY.behandlingId"
-        const val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.forrigeBehandlingId"
+        val SAK_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakId.name}"
+        val SAK_TYPE = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakType.name}"
+        val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
+        val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
+        val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
     }
 }
 

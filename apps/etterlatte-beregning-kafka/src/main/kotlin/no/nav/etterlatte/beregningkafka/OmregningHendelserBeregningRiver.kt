@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregningkafka
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
@@ -11,26 +10,21 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
-import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
-import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa
@@ -48,12 +42,12 @@ internal class OmregningHendelserBeregningRiver(
 
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.TRYGDETID_KOPIERT) {
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
-            validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
+            validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }
+            validate { it.requireKey(OmregningDataPacket.SAK_TYPE) }
+            validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }
     }
 
@@ -64,9 +58,10 @@ internal class OmregningHendelserBeregningRiver(
         context: MessageContext,
     ) {
         logger.info("Mottatt omregninghendelse")
-        val behandlingId = packet.behandlingId
-        val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
-        val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
+        val omregningData = packet.omregningData
+        val behandlingId = omregningData.hentBehandlingId()
+        val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
+        val sakType = omregningData.hentSakType()
         runBlocking {
             val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = beregning.beregning

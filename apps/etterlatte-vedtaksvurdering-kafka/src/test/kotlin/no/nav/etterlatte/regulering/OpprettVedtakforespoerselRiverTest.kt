@@ -3,14 +3,13 @@ package no.nav.etterlatte.regulering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -19,15 +18,19 @@ import java.util.UUID
 
 internal class OpprettVedtakforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
-    private val sakId = sakId1
+    private val sakId = 123L
 
     private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
         JsonMessage.newMessage(
             mapOf(
                 OmregningHendelseType.BEREGNA.lagParMedEventNameKey(),
-                SAK_ID_KEY to sakId,
-                DATO_KEY to foersteMai2023,
-                BEHANDLING_ID_KEY to behandlingId,
+                HENDELSE_DATA_KEY to
+                    OmregningData(
+                        sakId = sakId,
+                        fradato = foersteMai2023,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                        behandlingId = behandlingId,
+                    ).toPacket(),
             ),
         )
 

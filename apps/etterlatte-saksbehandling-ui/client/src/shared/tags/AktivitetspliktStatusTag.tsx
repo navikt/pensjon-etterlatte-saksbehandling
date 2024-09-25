@@ -84,7 +84,7 @@ export const AktivitetspliktStatusTag = ({
         </Tag>
       )
     case AktivitetspliktStatus.VARIG_UNNTAK:
-      return <Tag variant="info">Varig unntakt fra aktivitets(plikt/krav)</Tag>
+      return <Tag variant="info">Varig unntak fra aktivitetsplikt</Tag>
     case AktivitetspliktStatus.IKKE_VURDERT:
       return <Tag variant="neutral">Aktivitetskrav ikke vurdert</Tag>
     default:

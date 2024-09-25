@@ -8,7 +8,7 @@ import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTy
 import { hentNavnforIdent } from '~shared/api/user'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaverMedReferanse } from '~shared/api/oppgaver'
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
@@ -58,13 +58,10 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
           </HStack>
         </Box>
         <VStack gap="2" justify="space-between">
-          {mapApiResult(
-            oppgaveForBehandling,
-            <Spinner label="Henter oppgave med saksbehandler" />,
-            () => (
-              <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>
-            ),
-            (oppgaver) => {
+          {mapResult(oppgaveForBehandling, {
+            pending: <Spinner label="Henter oppgave med saksbehandler" />,
+            error: () => <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>,
+            success: (oppgaver) => {
               const oppgaveravbrutt = finnAvbrutteOppgaver(oppgaver)
               if (oppgaveravbrutt.length) {
                 const riktigOppgave = oppgaveravbrutt[0]
@@ -80,8 +77,8 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
               } else {
                 return <Detail>Ingen oppgave med status avbrutt funnet</Detail>
               }
-            }
-          )}
+            },
+          })}
           <div>
             <Label size="small">Kilde</Label>
             <Detail>{behandlingsInfo.kilde}</Detail>

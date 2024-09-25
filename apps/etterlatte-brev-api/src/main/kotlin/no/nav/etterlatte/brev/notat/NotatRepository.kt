@@ -34,7 +34,7 @@ class NotatRepository(
             it.run(
                 queryOf(
                     "SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE sak_id = ?",
-                    sakId,
+                    sakId.sakId,
                 ).map(tilNotat)
                     .asList,
             )
@@ -137,7 +137,7 @@ class NotatRepository(
                         VALUES (:sak_id, :tittel, :payload, :opprettet, :referanse)
                     """,
                         mapOf(
-                            "sak_id" to notat.sakId,
+                            "sak_id" to notat.sakId.sakId,
                             "tittel" to notat.tittel,
                             "payload" to notat.payload.toJson(),
                             "opprettet" to Tidspunkt.now().toTimestamp(),
@@ -204,7 +204,7 @@ class NotatRepository(
     private val tilNotat: Row.() -> Notat = {
         Notat(
             id = long("id"),
-            sakId = long("sak_id"),
+            sakId = SakId(long("sak_id")),
             referanse = stringOrNull("referanse"),
             journalpostId = stringOrNull("journalpost_id"),
             tittel = string("tittel"),

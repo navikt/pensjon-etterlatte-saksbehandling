@@ -41,7 +41,7 @@ class UtbetalingService(
             else -> {
                 val utbetalingMapper =
                     UtbetalingMapper(
-                        tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
+                        tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(SakId(vedtak.sak.id)),
                         vedtak = vedtak,
                     )
                 val utbetaling = utbetalingMapper.opprettUtbetaling()

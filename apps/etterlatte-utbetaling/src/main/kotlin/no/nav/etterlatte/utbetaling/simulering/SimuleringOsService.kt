@@ -10,6 +10,7 @@ import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeklassifikasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingMapper
@@ -47,7 +48,7 @@ class SimuleringOsService(
 
         val innhold = vedtak.innhold
         if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {
-            val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id)
+            val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(SakId(vedtak.sak.id.sakId))
             val utbetalingsvedtak =
                 Utbetalingsvedtak.fra(
                     vedtak = vedtak,

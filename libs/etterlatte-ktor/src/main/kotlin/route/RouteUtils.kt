@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.tilSakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -57,7 +58,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
 
 inline val PipelineContext<*, ApplicationCall>.sakId: SakId
     get() =
-        call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
+        call.parameters[SAKID_CALL_PARAMETER]?.tilSakId() ?: throw NullPointerException(
             "SakId er ikke i path params",
         )
 
@@ -112,7 +113,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: SakId) -> Unit,
-) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
+) = call.parameters[SAKID_CALL_PARAMETER]!!.tilSakId().let { sakId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, brukerTokenInfo as Saksbehandler)

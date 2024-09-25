@@ -50,7 +50,7 @@ class BehandlingKlientImpl(
     ): AktivitetspliktDto =
         try {
             behandlingHttpClient
-                .get("$behandlingUrl/api/sak/$sakId/aktivitetsplikt/statistikk/$behandlingId")
+                .get("$behandlingUrl/api/sak/${sakId.sakId}/aktivitetsplikt/statistikk/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente aktivitetspliktDto for sak $sakId fra Behandling", e)
@@ -59,7 +59,7 @@ class BehandlingKlientImpl(
     override suspend fun hentGraderingForSak(sakId: SakId): SakMedGraderingOgSkjermet =
         try {
             behandlingHttpClient
-                .get("$behandlingUrl/saker/$sakId/gradering")
+                .get("$behandlingUrl/saker/${sakId.sakId}/gradering")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente gradering for sak $sakId fra Behandling", e)

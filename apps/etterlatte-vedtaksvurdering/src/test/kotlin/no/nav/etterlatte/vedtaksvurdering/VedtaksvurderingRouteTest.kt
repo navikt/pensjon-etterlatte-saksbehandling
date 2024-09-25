@@ -375,7 +375,7 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal sjekke om sak har loepende vedtak`() {
-        val sakId = 1L
+        val sakId = sakId1
         val loependeYtelse = LoependeYtelse(erLoepende = true, underSamordning = false, LocalDate.now(), UUID.randomUUID())
 
         every { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
@@ -393,7 +393,7 @@ internal class VedtaksvurderingRouteTest {
 
             val hentetLoependeYtelse =
                 client
-                    .get("/api/vedtak/loepende/$sakId?dato=${loependeYtelse.dato}") {
+                    .get("/api/vedtak/loepende/${sakId.sakId}?dato=${loependeYtelse.dato}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $token")
                     }.let {

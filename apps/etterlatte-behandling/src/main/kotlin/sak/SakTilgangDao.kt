@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
@@ -17,7 +18,7 @@ class SakTilgangDao(
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("id"),
+                    id = SakId(getLong("id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -32,10 +33,10 @@ class SakTilgangDao(
     fun hentSakMedGraderingOgSkjerming(id: SakId): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
-            statement.setLong(1, id)
+            statement.setSakId(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("id"),
+                    id = SakId(getLong("id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -61,7 +62,7 @@ class SakTilgangDao(
             statement.setString(3, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("id"),
+                    id = SakId(getLong("id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -87,7 +88,7 @@ class SakTilgangDao(
             statement.setString(1, oppgaveId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -113,7 +114,7 @@ class SakTilgangDao(
             statement.setString(1, klageId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -139,7 +140,7 @@ class SakTilgangDao(
             statement.setString(1, generellbehandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -165,7 +166,7 @@ class SakTilgangDao(
             statement.setString(1, tilbakekrevingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)

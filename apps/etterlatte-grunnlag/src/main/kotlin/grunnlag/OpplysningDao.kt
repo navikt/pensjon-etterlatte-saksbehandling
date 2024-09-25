@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.firstOrNull
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -48,7 +49,7 @@ class OpplysningDao(
     private fun ResultSet.asGrunnlagshendelse(): GrunnlagHendelse =
         GrunnlagHendelse(
             opplysning = asBehandlingOpplysning(),
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             hendelseNummer = getLong("hendelsenummer"),
         )
 
@@ -62,7 +63,7 @@ class OpplysningDao(
                     WHERE hendelse.sak_id = ?
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, sakId)
+                    setSakId(1, sakId)
                 }.executeQuery()
                 .toList { asGrunnlagshendelse() }
         }
@@ -123,7 +124,7 @@ class OpplysningDao(
                     )
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, sakId)
+                    setSakId(1, sakId)
                 }.executeQuery()
                 .toList { asGrunnlagshendelse() }
         }
@@ -148,7 +149,7 @@ class OpplysningDao(
                     )
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, sakId)
+                    setSakId(1, sakId)
                     setString(2, opplysningType.name)
                 }.executeQuery()
                 .singleOrNull { asGrunnlagshendelse() }
@@ -191,11 +192,11 @@ class OpplysningDao(
                     """.trimMargin(),
                 ).apply {
                     setObject(1, behandlingsopplysning.id)
-                    setLong(2, sakId)
+                    setSakId(2, sakId)
                     setString(3, behandlingsopplysning.opplysning.serialize())
                     setString(4, behandlingsopplysning.kilde.toJson())
                     setString(5, behandlingsopplysning.opplysningType.name)
-                    setLong(6, sakId)
+                    setSakId(6, sakId)
                     if (fnr != null) setString(7, fnr.value) else setNull(7, VARCHAR)
                     behandlingsopplysning.periode?.fom?.let { setString(8, it.toString()) } ?: setNull(8, VARCHAR)
                     behandlingsopplysning.periode?.tom?.let { setString(9, it.toString()) } ?: setNull(9, VARCHAR)
@@ -218,7 +219,7 @@ class OpplysningDao(
                 """.trimIndent(),
             ).apply {
                 setObject(1, behandlingId)
-                setLong(2, sakId)
+                setSakId(2, sakId)
                 setLong(3, hendelsenummer)
                 setBoolean(4, false)
             }.executeUpdate()
@@ -263,7 +264,7 @@ class OpplysningDao(
                     setString(1, "%${fnr.value}%")
                     setString(2, fnr.value)
                 }.executeQuery()
-                .toList { getLong("sak_id") }
+                .toList { SakId(getLong("sak_id")) }
                 .toSet()
         }
 
@@ -276,7 +277,7 @@ class OpplysningDao(
                 .singleOrNull {
                     BehandlingGrunnlagVersjon(
                         getObject("behandling_id") as UUID,
-                        getLong("sak_id"),
+                        SakId(getLong("sak_id")),
                         getLong("hendelsenummer"),
                         getBoolean("laast"),
                     )

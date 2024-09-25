@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
@@ -107,7 +108,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         put("/oppgave-status") {
             kunSystembruker {
                 medBody<OppgaveStatusRequest> {
-                    val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                    val sakId = requireNotNull(call.parameters["sakId"]).toLong().let { SakId(it) }
                     service.endreTilbakekrevingOppgaveStatus(sakId, it.paaVent)
                     call.respond(HttpStatusCode.OK)
                 }
@@ -117,7 +118,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         put("/avbryt") {
             kunSystembruker {
                 medBody<AvbrytRequest> {
-                    val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                    val sakId = requireNotNull(call.parameters["sakId"]).toLong().let { SakId(it) }
                     service.avbrytTilbakekreving(sakId, it.merknad)
                     call.respond(HttpStatusCode.OK)
                 }

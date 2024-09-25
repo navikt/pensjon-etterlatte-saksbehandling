@@ -57,7 +57,7 @@ class TilbakekrevingHendelseRepository(
                 paramMap =
                     mapOf(
                         "id" to id,
-                        "sakId" to sakId,
+                        "sakId" to sakId.sakId,
                         "payload" to payload,
                         "type" to type.name,
                         "jmsTimestamp" to jmsTimestamp?.toTimestamp(),
@@ -91,7 +91,7 @@ class TilbakekrevingHendelseRepository(
                     """.trimIndent(),
                 paramMap =
                     mapOf(
-                        "sakId" to sakId,
+                        "sakId" to sakId.sakId,
                     ),
             ).let {
                 session.run(
@@ -100,7 +100,7 @@ class TilbakekrevingHendelseRepository(
                             TilbakekrevingHendelse(
                                 id = UUID.fromString(row.string("id")),
                                 opprettet = row.tidspunkt("opprettet"),
-                                sakId = row.long("sak_id"),
+                                sakId = SakId(row.long("sak_id")),
                                 payload = row.string("payload"),
                                 status = TilbakekrevingHendelseStatus.valueOf(row.string("status")),
                                 type = TilbakekrevingHendelseType.valueOf(row.string("type")),

@@ -73,7 +73,7 @@ class BeregningRepository(
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
-                paramMap = mapOf("sakId" to sakId),
+                paramMap = mapOf("sakId" to sakId.sakId),
             ).let { query ->
                 tx.run(query.map { toOverstyrBeregning(it) }.asSingle)
             }
@@ -85,7 +85,7 @@ class BeregningRepository(
                 statement = Queries.opprettOverstyrBeregning,
                 paramMap =
                     mapOf(
-                        "sakId" to overstyrBeregning.sakId,
+                        "sakId" to overstyrBeregning.sakId.sakId,
                         "beskrivelse" to overstyrBeregning.beskrivelse,
                         "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
                         "status" to overstyrBeregning.status.name,
@@ -108,7 +108,7 @@ class BeregningRepository(
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.updateOverstyrtberegning,
-                paramMap = mapOf("sakId" to sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
+                paramMap = mapOf("sakId" to sakId.sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
             ).let { query ->
                 tx.run(query.asUpdate)
             }
@@ -132,7 +132,7 @@ class BeregningRepository(
             "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
             "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
             "grunnbeloep" to beregningsperiode.grunnbelop,
-            "sakId" to beregning.grunnlagMetadata.sakId,
+            "sakId" to beregning.grunnlagMetadata.sakId.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
             "trygdetidForIdent" to beregningsperiode.trygdetidForIdent,
@@ -152,7 +152,7 @@ class BeregningRepository(
 private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
     with(row) {
         OverstyrBeregning(
-            sakId = long("sak_id"),
+            sakId = SakId(long("sak_id")),
             beskrivelse = string("beskrivelse"),
             tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
             kategori = OverstyrtBeregningKategori.valueOf(string("kategori")),
@@ -182,7 +182,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
             grunnbelop = int(BeregningsperiodeDatabaseColumns.Grunnbeloep.navn),
             grunnlagMetadata =
                 Metadata(
-                    sakId = long(BeregningsperiodeDatabaseColumns.SakId.navn),
+                    sakId = SakId(long(BeregningsperiodeDatabaseColumns.SakId.navn)),
                     versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn),
                 ),
             trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),

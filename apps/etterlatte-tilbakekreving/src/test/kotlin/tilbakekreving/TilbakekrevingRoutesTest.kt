@@ -116,7 +116,7 @@ internal class TilbakekrevingRoutesTest {
 
         testApplication {
             val response =
-                client.get("/api/tilbakekreving/$sakId/kravgrunnlag/$kravgrunnlagId") {
+                client.get("/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }

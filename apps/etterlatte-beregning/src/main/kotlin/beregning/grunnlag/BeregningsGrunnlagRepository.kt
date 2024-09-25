@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import org.postgresql.util.PGobject
@@ -100,7 +101,7 @@ class BeregningsGrunnlagRepository(
                                 "trygdetid_for_ident" to grunnlag.trygdetidForIdent,
                                 "prorata_broek_teller" to grunnlag.prorataBroekTeller,
                                 "prorata_broek_nevner" to grunnlag.prorataBroekNevner,
-                                "sak_id" to grunnlag.sakId,
+                                "sak_id" to grunnlag.sakId.sakId,
                                 "beskrivelse" to grunnlag.beskrivelse,
                                 "aarsak" to grunnlag.aarsak,
                                 "kilde" to grunnlag.kilde.toJson(),
@@ -278,7 +279,7 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =
         trygdetidForIdent = stringOrNull("trygdetid_for_ident"),
         prorataBroekTeller = this.longOrNull("prorata_broek_teller"),
         prorataBroekNevner = this.longOrNull("prorata_broek_nevner"),
-        sakId = this.long("sak_id"),
+        sakId = SakId(this.long("sak_id")),
         beskrivelse = this.string("beskrivelse"),
         aarsak = this.stringOrNull("aarsak"),
         kilde = objectMapper.readValue(this.string("kilde")),

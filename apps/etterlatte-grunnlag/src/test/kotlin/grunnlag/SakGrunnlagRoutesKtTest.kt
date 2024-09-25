@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakGrunnlagRoutesKtTest {
@@ -57,10 +56,10 @@ internal class SakGrunnlagRoutesKtTest {
 
     @Test
     fun `returnerer 401 uten gyldig token`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         testApplication {
-            val response = createHttpClient().get("api/grunnlag/sak/$sakId")
+            val response = createHttpClient().get("api/grunnlag/sak/${sakId.sakId}")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -70,14 +69,14 @@ internal class SakGrunnlagRoutesKtTest {
 
     @Test
     fun `returnerer 404 hvis grunnlag ikke finnes`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns null
         coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/$sakId") {
+                createHttpClient().get("api/grunnlag/sak/${sakId.sakId}") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
@@ -101,7 +100,7 @@ internal class SakGrunnlagRoutesKtTest {
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/$sakId") {
+                createHttpClient().get("api/grunnlag/sak/${sakId.sakId}") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")

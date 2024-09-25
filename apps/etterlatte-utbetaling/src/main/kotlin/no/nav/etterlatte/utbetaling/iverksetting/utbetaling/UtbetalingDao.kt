@@ -9,7 +9,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -303,7 +302,7 @@ class UtbetalingDao(
                     """,
                 paramMap =
                     mapOf(
-                        "sakId" to sakId.param(),
+                        "sakId" to sakId.value.param(),
                     ),
             ).let {
                 session.run(

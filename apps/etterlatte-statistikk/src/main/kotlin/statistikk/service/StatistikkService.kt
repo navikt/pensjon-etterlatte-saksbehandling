@@ -299,7 +299,7 @@ class StatistikkService(
             anvendtSats = "",
             behandlingId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
-            sakNummer = vedtak.sak.id,
+            sakNummer = vedtak.sak.id.sakId,
             tekniskTid = tekniskTid.toTidspunkt(),
             sakYtelse = vedtak.sak.sakType.toString(),
             versjon = "",

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -58,7 +59,7 @@ class TilbakekrevingDao(
                     WHERE t.sak_id = ?
                     """.trimIndent(),
                 )
-            statement.setLong(1, sakId)
+            statement.setSakId(1, sakId)
             statement.executeQuery().toList { toTilbakekreving() }
         }
 
@@ -102,7 +103,7 @@ class TilbakekrevingDao(
                     ORDER BY t.opprettet DESC LIMIT 1
                     """.trimIndent(),
                 )
-            statement.setLong(1, sakId)
+            statement.setSakId(1, sakId)
             statement.executeQuery().singleOrNull { toTilbakekreving() }
         }
 
@@ -189,7 +190,7 @@ class TilbakekrevingDao(
             )
         statement.setObject(1, tilbakekrevingBehandling.id)
         statement.setString(2, tilbakekrevingBehandling.status.name)
-        statement.setLong(3, tilbakekrevingBehandling.sak.id)
+        statement.setSakId(3, tilbakekrevingBehandling.sak.id)
         statement.setTidspunkt(4, tilbakekrevingBehandling.opprettet)
         with(tilbakekrevingBehandling.tilbakekreving) {
             statement.setJsonb(5, kravgrunnlag.toJsonNode())
@@ -286,7 +287,7 @@ class TilbakekrevingDao(
             id = getString("id").let { UUID.fromString(it) },
             sak =
                 Sak(
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = Enhetsnummer(getString("enhet")),

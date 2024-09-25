@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.toList
@@ -471,7 +472,7 @@ internal class GrunnlagDaoIntegrationTest(
                     .toList {
                         BehandlingGrunnlagVersjon(
                             getObject("behandling_id") as UUID,
-                            getLong("sak_id"),
+                            SakId(getLong("sak_id")),
                             getLong("hendelsenummer"),
                             getBoolean("laast"),
                         )

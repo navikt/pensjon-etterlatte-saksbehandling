@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.SamordningsnotatParametre
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -33,7 +34,7 @@ class SamordningsnotatRiver(
         context: MessageContext,
     ) {
         try {
-            val sakId = packet["sakId"].asLong()
+            val sakId = packet["sakId"].asLong().let { SakId(it) }
             val vedtakId = packet["vedtakId"].asLong()
             val samordningsmeldingId = packet["samordningsmeldingId"].asLong()
             val kommentar = packet["kommentar"].asText()

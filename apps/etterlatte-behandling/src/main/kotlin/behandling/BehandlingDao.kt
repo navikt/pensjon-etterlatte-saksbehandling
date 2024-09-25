@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -88,7 +89,7 @@ class BehandlingDao(
                         """.trimIndent(),
                     )
 
-                stmt.setLong(1, sakid)
+                stmt.setSakId(1, sakid)
                 stmt.executeQuery().behandlingsListe()
             }
         }
@@ -110,7 +111,7 @@ class BehandlingDao(
                         """.trimIndent(),
                     )
 
-                stmt.setLong(1, sakid)
+                stmt.setSakId(1, sakid)
                 stmt.setString(2, revurderingaarsak.name)
                 stmt.executeQuery().toList { asRevurdering(this) }
             }
@@ -132,7 +133,7 @@ class BehandlingDao(
                 stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
                 stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
-                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
+                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }
         }
 
@@ -150,7 +151,7 @@ class BehandlingDao(
                 stmt.setArray(1, createArrayOf("text", BehandlingStatus.underBehandling().toTypedArray()))
                 stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
-                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
+                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }
         }
 
@@ -189,7 +190,7 @@ class BehandlingDao(
 
     private fun mapSak(rs: ResultSet) =
         Sak(
-            id = rs.getLong("sak_id"),
+            id = SakId(rs.getLong("sak_id")),
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
             enhet = Enhetsnummer(rs.getString("enhet")),
@@ -211,7 +212,7 @@ class BehandlingDao(
 
                 with(behandling) {
                     stmt.setObject(1, id)
-                    stmt.setLong(2, sakId)
+                    stmt.setSakId(2, sakId)
                     stmt.setTidspunkt(3, opprettet)
                     stmt.setTidspunkt(4, opprettet)
                     stmt.setString(5, status.name)

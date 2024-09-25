@@ -225,7 +225,7 @@ class AvkortingRepository(
             mapOf(
                 "id" to aarsoppgjoer.id,
                 "behandling_id" to behandlingId,
-                "sak_id" to sakId,
+                "sak_id" to sakId.sakId,
                 "aar" to aarsoppgjoer.aar,
                 "innvilga_maaneder" to aarsoppgjoer.forventaInnvilgaMaaneder,
             ),

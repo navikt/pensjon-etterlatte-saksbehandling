@@ -61,7 +61,7 @@ class VilkaarsvurderingRepository(
             session.hent(
                 queryString = Queries.HENT_MIGRERT_YRKESSKADE,
                 params =
-                    mapOf("sak_id" to sakId),
+                    mapOf("sak_id" to sakId.sakId),
             ) {
                 true
             } ?: false

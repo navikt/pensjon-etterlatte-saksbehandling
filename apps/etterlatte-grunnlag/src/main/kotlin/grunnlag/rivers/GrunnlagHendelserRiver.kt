@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -50,7 +51,7 @@ class GrunnlagHendelserRiver(
         val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
         if (eventName == EventNames.NY_OPPLYSNING.eventname || opplysningType in OPPLYSNING_TYPER) {
-            val sakId = packet[SAK_ID_KEY].asLong()
+            val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
             val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 
             val opplysninger: List<Grunnlagsopplysning<JsonNode>> =

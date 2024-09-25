@@ -35,7 +35,7 @@ class BehandlingService(
         bruker: BrukerTokenInfo,
     ): Sak =
         retryOgPakkUt {
-            klient.get(Resource(clientId, "$url/saker/$sakId"), bruker).mapBoth(
+            klient.get(Resource(clientId, "$url/saker/${sakId.sakId}"), bruker).mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },
             )
@@ -151,7 +151,7 @@ class BehandlingService(
         val oppgaver: List<OppgaveIntern> =
             retryOgPakkUt {
                 klient
-                    .get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), bruker)
+                    .get(Resource(clientId, "$url/oppgaver/sak/${sakId.sakId}/oppgaver"), bruker)
                     .mapBoth(
                         success = { readValue(it) },
                         failure = { throw it },

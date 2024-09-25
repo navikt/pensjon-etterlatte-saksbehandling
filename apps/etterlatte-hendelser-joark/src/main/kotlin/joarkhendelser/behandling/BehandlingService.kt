@@ -2,6 +2,7 @@ package no.nav.etterlatte.joarkhendelser.behandling
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -44,7 +45,7 @@ class BehandlingService(
     private suspend fun hentEllerOpprettSak(
         ident: String,
         sakType: SakType,
-    ): Long {
+    ): SakId {
         logger.info("Bruker=${ident.maskerFnr()}")
 
         logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()}")

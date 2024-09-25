@@ -1,6 +1,6 @@
 import { Alert, Button, Heading, HStack, Link, Modal, VStack } from '@navikt/ds-react'
 import { useState } from 'react'
-import { DownloadIcon, UploadIcon } from '@navikt/aksel-icons'
+import { DownloadIcon, FileResetIcon, UploadIcon } from '@navikt/aksel-icons'
 import { opprettBrevFraPDF } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,8 +25,18 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
 
   const [lastOppStatus, lastOppBrev] = useApiCall(opprettBrevFraPDF)
 
+  const tilbakestill = () => {
+    setError(undefined)
+    setValgtFil(undefined)
+    setFilURL(undefined)
+  }
+
   const onFileChange = (event: any) => {
+    console.log('event', event)
     const fil = event.target.files[0]
+    if (!fil) {
+      return
+    }
 
     const filstoerrelseMegabytes = fil.size / (1024 * 1024)
 
@@ -106,14 +116,29 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
 
             <PdfVisning fileUrl={filURL} />
 
-            <HStack gap="4" justify="end">
-              <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
-                Avbryt
-              </Button>
+            <HStack justify="space-between">
+              <div>
+                {!!filURL && (
+                  <Button
+                    variant="secondary"
+                    onClick={tilbakestill}
+                    disabled={isPending(lastOppStatus)}
+                    icon={<FileResetIcon />}
+                  >
+                    Tilbakestill
+                  </Button>
+                )}
+              </div>
 
-              <Button onClick={lagre} disabled={!valgtFil} loading={isPending(lastOppStatus)}>
-                Lagre
-              </Button>
+              <HStack gap="4" justify="end">
+                <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
+                  Avbryt
+                </Button>
+
+                <Button onClick={lagre} disabled={!valgtFil} loading={isPending(lastOppStatus)}>
+                  Lagre
+                </Button>
+              </HStack>
             </HStack>
           </VStack>
         </Modal.Body>

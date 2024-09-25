@@ -8,7 +8,7 @@ import KravpakkeUtlandBehandling from '~components/generellbehandling/KravpakkeU
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
-import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { hentSak } from '~shared/api/sak'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -46,7 +46,7 @@ const GenerellBehandling = () => {
                 apiResult: hentSakStatus,
                 errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
               })}
-              {isSuccess(hentSakStatus) && <StatusBarPersonHenter ident={hentSakStatus.data.ident} />}
+              {isSuccess(hentSakStatus) && <StatusBar ident={hentSakStatus.data.ident} />}
               <KravpakkeUtlandBehandling
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
               />

@@ -3,8 +3,7 @@ import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
 import { BodyShort, Box, HelpText, HStack, Label, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
-import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
-import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
 import { useEffect } from 'react'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -14,34 +13,13 @@ import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { VergemaalTag } from '~shared/tags/VergemaalTag'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
-  <StatusBar
-    result={{
-      status: 'success',
-      data: {
-        foedselsnummer: person.foedselsnummer,
-        fornavn: person.fornavn,
-        mellomnavn: person.mellomnavn,
-        etternavn: person.etternavn,
-        foedselsaar: person.foedselsaar,
-        foedselsdato: person.foedselsdato,
-        doedsdato: person.doedsdato,
-        vergemaal: person.vergemaal,
-      },
-    }}
-  />
-)
+export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
+  const [result, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
 
-export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
-  const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
   useEffect(() => {
     ident && hentPerson(ident)
   }, [ident])
 
-  return <StatusBar result={personStatus} />
-}
-
-export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -110,7 +88,7 @@ const Alder = ({
 
 const PersonSkeleton = () => (
   <StatusbarBox>
-    <HStack gap="4">
+    <HStack gap="4" align="center">
       <Skeleton variant="circle" width="30px" height="30px" />
       <Skeleton variant="rounded" width="10rem" height="1rem" />
       <BodyShort>|</BodyShort>

@@ -56,6 +56,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [visBrevutfall, setVisBrevutfall] = useState(true)
 
+  const [avbruttUtenBrev, setAvbruttUtenBrev] = useState(false)
+
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
   const behandling = useBehandling()
@@ -96,6 +98,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
           })
+        } else {
+          if (behandling?.status === IBehandlingStatus.AVBRUTT) {
+            setAvbruttUtenBrev(true)
+          }
         }
       })
     }
@@ -129,6 +135,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {
     return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
+  }
+
+  if (avbruttUtenBrev) {
+    return <Alert variant="warning">Behandlingen er avbrutt og ingen brev finnes</Alert>
   }
 
   const kanSendeTilAttestering = (): boolean => {

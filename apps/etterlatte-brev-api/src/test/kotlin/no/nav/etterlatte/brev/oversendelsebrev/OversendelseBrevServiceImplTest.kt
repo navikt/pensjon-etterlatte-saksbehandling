@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -51,7 +52,7 @@ import javax.sql.DataSource
 class OversendelseBrevServiceImplTest(
     dataSource: DataSource,
 ) {
-    val sakId = 148L
+    val sakId = randomSakId()
     private val behandlingId = UUID.randomUUID()
     private val saksbehandler = simpleSaksbehandler()
     private val brevdataFacade = mockk<BrevdataFacade>()

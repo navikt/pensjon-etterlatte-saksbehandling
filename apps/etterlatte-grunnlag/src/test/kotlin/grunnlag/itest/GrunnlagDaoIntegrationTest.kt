@@ -6,6 +6,10 @@ import io.mockk.clearAllMocks
 import io.mockk.spyk
 import io.mockk.verify
 import lagGrunnlagsopplysning
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -81,26 +85,26 @@ internal class GrunnlagDaoIntegrationTest(
         lagGrunnlagsopplysning(
             opplysningstype = SOEKNAD_MOTTATT_DATO,
             verdi = objectMapper.valueToTree(SoeknadMottattDato(datoMottat)) as ObjectNode,
-        ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
-        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId1, it) }
+        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
         lagGrunnlagsopplysning(
             opplysningstype = SOEKNAD_MOTTATT_DATO,
             uuid = uuid,
-        ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
 
-        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
-        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(2).size)
+        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(sakId2).size)
+        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(sakId2).size)
         assertEquals(
             uuid,
             opplysningRepo
-                .finnHendelserIGrunnlag(2)
+                .finnHendelserIGrunnlag(sakId2)
                 .first()
                 .opplysning.id,
         )
         assertEquals(
             datoMottat,
             opplysningRepo
-                .finnHendelserIGrunnlag(1)
+                .finnHendelserIGrunnlag(sakId1)
                 .first()
                 .opplysning
                 .let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }
@@ -118,20 +122,20 @@ internal class GrunnlagDaoIntegrationTest(
             opplysningstype = Opplysningstype.NAVN,
             verdi = objectMapper.valueToTree("Per"),
             fnr = fnr,
-        ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it, fnr) }
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId1, it, fnr) }
 
-        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
+        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(sakId1).size)
         assertEquals(
             uuid,
             opplysningRepo
-                .finnHendelserIGrunnlag(1)
+                .finnHendelserIGrunnlag(sakId1)
                 .first()
                 .opplysning.id,
         )
         assertEquals(
             fnr,
             opplysningRepo
-                .finnHendelserIGrunnlag(1)
+                .finnHendelserIGrunnlag(sakId1)
                 .first()
                 .opplysning.fnr,
         )
@@ -139,9 +143,9 @@ internal class GrunnlagDaoIntegrationTest(
 
     @Test
     fun `skal liste alle nyeste opplysningene knyttet til en sak`() {
-        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
-        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
-        lagGrunnlagsopplysning(SOEKER_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId1, it) }
+        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
+        lagGrunnlagsopplysning(SOEKER_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
 
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
         assertEquals(2, opplysningRepo.finnHendelserIGrunnlag(2).size)
@@ -149,7 +153,7 @@ internal class GrunnlagDaoIntegrationTest(
 
     @Test
     fun `Hente nyeste grunnlag av type`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val type = SOEKER_PDL_V1
 
@@ -193,18 +197,19 @@ internal class GrunnlagDaoIntegrationTest(
     @Test
     fun `Skal hente opplysning fra nyeste hendelse basert paa SAK_ID og opplysningType`() {
         val uuid = UUID.randomUUID()
+        val sakId = randomSakId()
 
-        lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
-        lagGrunnlagsopplysning(AVDOED_PDL_V1, uuid = uuid).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
+        lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+        lagGrunnlagsopplysning(AVDOED_PDL_V1, uuid = uuid).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
 
-        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlagForSak(33, AVDOED_PDL_V1)?.opplysning?.id)
+        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlagForSak(sakId, AVDOED_PDL_V1)?.opplysning?.id)
         // Skal håndtere at opplysning ikke finnes
-        assertEquals(null, opplysningRepo.finnNyesteGrunnlagForSak(0L, AVDOED_PDL_V1))
+        assertEquals(null, opplysningRepo.finnNyesteGrunnlagForSak(randomSakId(), AVDOED_PDL_V1))
     }
 
     @Test
     fun `Skal hente opplysning fra nyeste hendelse basert paa BEHANDLING_ID og opplysningType`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
@@ -230,15 +235,15 @@ internal class GrunnlagDaoIntegrationTest(
     fun `Ny opplysning skal overskrive gammel, new way`() {
         val uuid = UUID.randomUUID()
 
-        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO, uuid = uuid).also {
             opplysningRepo.leggOpplysningTilGrunnlag(
-                2,
+                sakId2,
                 it,
             )
         }
 
-        opplysningRepo.finnHendelserIGrunnlag(2).also {
+        opplysningRepo.finnHendelserIGrunnlag(sakId2).also {
             assertEquals(1, it.size)
             assertEquals(uuid, it.first().opplysning.id)
         }
@@ -262,9 +267,9 @@ internal class GrunnlagDaoIntegrationTest(
                     ),
             )
 
-        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_FOEDSELSNUMMER)
-        val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
-        val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId1, opplysning, SOEKER_FOEDSELSNUMMER)
+        val expected = OpplysningDao.GrunnlagHendelse(opplysning, sakId1, 1).toJson()
+        val actual = opplysningRepo.hentAlleGrunnlagForSak(sakId1).first().toJson()
 
         assertEquals(expected, actual)
     }
@@ -289,7 +294,7 @@ internal class GrunnlagDaoIntegrationTest(
 
         val opplysning1 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri1.toJsonNode(), fnr = barnepensjonSoeker1)
-        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning1, barnepensjonSoeker1)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId1, opplysning1, barnepensjonSoeker1)
 
         val barnepensjonSoeker2 = SOEKER2_FOEDSELSNUMMER
         val persongalleri2 =
@@ -307,7 +312,7 @@ internal class GrunnlagDaoIntegrationTest(
 
         val opplysning2 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri2.toJsonNode(), fnr = barnepensjonSoeker2)
-        opplysningRepo.leggOpplysningTilGrunnlag(2, opplysning2, barnepensjonSoeker2)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId2, opplysning2, barnepensjonSoeker2)
 
         val persongalleri3 =
             Persongalleri(
@@ -318,7 +323,7 @@ internal class GrunnlagDaoIntegrationTest(
 
         val opplysning3 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri3.toJsonNode(), fnr = gjenlevendeFnr)
-        opplysningRepo.leggOpplysningTilGrunnlag(3, opplysning3, gjenlevendeFnr)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId3, opplysning3, gjenlevendeFnr)
 
         // gjenlevende skal finnes i 3 behandlingshendelser
         assertEquals(3, opplysningRepo.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr).size)
@@ -332,15 +337,15 @@ internal class GrunnlagDaoIntegrationTest(
         assertTrue(opplysningRepo.finnAllePersongalleriHvorPersonFinnes(HALVSOESKEN_ANNEN_FORELDER).isEmpty())
         assertTrue(opplysningRepo.finnAllePersongalleriHvorPersonFinnes(HALVSOESKEN_FOEDSELSNUMMER).isEmpty())
 
-        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning1, barnepensjonSoeker1) }
-        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(2, opplysning2, barnepensjonSoeker2) }
-        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(3, opplysning3, gjenlevendeFnr) }
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(sakId1, opplysning1, barnepensjonSoeker1) }
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, opplysning2, barnepensjonSoeker2) }
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(sakId3, opplysning3, gjenlevendeFnr) }
     }
 
     @Test
     fun `Uthenting av alle saker tilknyttet person fungerer`() {
         val grunnlagsopplysning1 = lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = AVDOED_FOEDSELSNUMMER)
-        opplysningRepo.leggOpplysningTilGrunnlag(1, grunnlagsopplysning1, AVDOED_FOEDSELSNUMMER)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId1, grunnlagsopplysning1, AVDOED_FOEDSELSNUMMER)
 
         val grunnlagsopplysning2 =
             lagGrunnlagsopplysning(
@@ -353,7 +358,7 @@ internal class GrunnlagDaoIntegrationTest(
                         avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                     ).toJsonNode(),
             )
-        opplysningRepo.leggOpplysningTilGrunnlag(2, grunnlagsopplysning2)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId2, grunnlagsopplysning2)
 
         val grunnlagsopplysning3 =
             lagGrunnlagsopplysning(
@@ -366,17 +371,18 @@ internal class GrunnlagDaoIntegrationTest(
                         avdoed = listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value),
                     ).toJsonNode(),
             )
-        opplysningRepo.leggOpplysningTilGrunnlag(3, grunnlagsopplysning3)
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId3, grunnlagsopplysning3)
 
         // mange dummy-opplysninger tilknyttet andre personer, skal ignoreres...
         listOf(SOEKER_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER, GJENLEVENDE_FOEDSELSNUMMER, HALVSOESKEN_FOEDSELSNUMMER).forEachIndexed {
                 i,
                 fnr,
             ->
-            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
-            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(INNSENDER_PDL_V1, fnr = fnr))
-            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))
-            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(PERSONGALLERI_V1, fnr = fnr))
+            val sakId = i.toLong()
+            opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(INNSENDER_PDL_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(PERSONGALLERI_V1, fnr = fnr))
         }
 
         val result = opplysningRepo.finnAlleSakerForPerson(AVDOED_FOEDSELSNUMMER)
@@ -387,7 +393,7 @@ internal class GrunnlagDaoIntegrationTest(
 
     @Test
     fun `Lagring av versjon for behandling`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         assertNull(opplysningRepo.hentBehandlingVersjon(behandlingId))
@@ -417,7 +423,7 @@ internal class GrunnlagDaoIntegrationTest(
 
     @Test
     fun `Hente grunnlag på behandling`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_PDL_V1))
@@ -448,7 +454,7 @@ internal class GrunnlagDaoIntegrationTest(
 
     @Test
     fun `Lagring av versjon på flere behandlinger på samme sak`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         val antall = 10
 

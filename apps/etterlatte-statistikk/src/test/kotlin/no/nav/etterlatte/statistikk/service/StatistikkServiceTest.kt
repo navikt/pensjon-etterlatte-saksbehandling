@@ -10,6 +10,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -81,7 +84,7 @@ class StatistikkServiceTest {
     @Test
     fun `mapper vedtakhendelse til baade sakRad og stoenadRad riktig`() {
         val behandlingId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val virkningstidspunkt = YearMonth.of(2023, 6)
         val enhet = Enhetsnummer("1111")
         coEvery { behandlingKlient.hentGraderingForSak(sakId) } returns
@@ -184,7 +187,7 @@ class StatistikkServiceTest {
     @Test
     fun `hopper over mapping av statistikk hvis det er en fortrolig sak`() {
         val behandlingId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val virk = YearMonth.of(2024, Month.MAY)
         val fattetTidspunkt = Tidspunkt.now()
 
@@ -262,7 +265,7 @@ class StatistikkServiceTest {
     @Test
     fun `mapper vedtakhendelse for omstillingsstoenad`() {
         val behandlingId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val virkningstidspunkt = YearMonth.of(2023, 6)
 
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
@@ -374,7 +377,7 @@ class StatistikkServiceTest {
     @Test
     fun `mapper behandlinghendelse riktig`() {
         val behandlingId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
@@ -425,11 +428,11 @@ class StatistikkServiceTest {
 
         val omsStoenadRad =
             omsSakId.map {
-                stoenadRad(sakId = it, sakYtelse = SakType.OMSTILLINGSSTOENAD.name)
+                stoenadRad(sakId = tilSakId(it), sakYtelse = SakType.OMSTILLINGSSTOENAD.name)
             }
         val bpStoenadRad =
             bpSakId.map {
-                stoenadRad(sakId = it, sakYtelse = SakType.BARNEPENSJON.name)
+                stoenadRad(sakId = tilSakId(it), sakYtelse = SakType.BARNEPENSJON.name)
             }
         val service =
             StatistikkService(
@@ -460,7 +463,7 @@ class StatistikkServiceTest {
 fun vedtak(
     vedtakId: Long = 0,
     virk: YearMonth = YearMonth.of(2022, 8),
-    sakId: SakId = 0,
+    sakId: SakId = randomSakId(),
     ident: String = "",
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
@@ -489,7 +492,7 @@ fun vedtak(
 
 fun behandling(
     id: UUID = UUID.randomUUID(),
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),

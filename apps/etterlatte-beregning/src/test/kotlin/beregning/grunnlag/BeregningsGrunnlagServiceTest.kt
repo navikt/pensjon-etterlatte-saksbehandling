@@ -11,6 +11,10 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
@@ -186,7 +190,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal ikke tillate endringer i beregningsgrunnlaget før virk på revurdering`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val virk = YearMonth.of(2023, JANUARY)
@@ -260,7 +264,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val revurdering =
@@ -318,7 +322,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler pga overstyrt beregning`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val revurdering =
@@ -377,7 +381,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal tillate endringer i beregningsgrunnlaget etter virk på revurdering`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val virk = YearMonth.of(2023, JANUARY)
@@ -696,7 +700,7 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 1",
                     aarsak = "ANNET",
                     kilde =
@@ -716,7 +720,7 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 2",
                     aarsak = "ANNET",
                     kilde =
@@ -762,7 +766,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery {
             behandlingKlient.hentBehandling(any(), any())
-        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, 3L)
+        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, sakId3)
 
         every {
             beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
@@ -1066,7 +1070,7 @@ internal class BeregningsGrunnlagServiceTest {
         type: SakType,
         uuid: UUID,
         behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        sakId: SakId = 1L,
+        sakId: SakId = sakId1,
         virkningstidspunktdato: YearMonth = REFORM_TIDSPUNKT_BP,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
@@ -1113,7 +1117,7 @@ internal class BeregningsGrunnlagServiceTest {
         trygdetidForIdent = "",
         prorataBroekTeller = null,
         prorataBroekNevner = null,
-        sakId = 123L,
+        sakId = tilSakId(123L),
         beskrivelse = beskrivelse,
         aarsak = "ANNET",
         kilde = Grunnlagsopplysning.Saksbehandler.create(""),

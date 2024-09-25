@@ -15,6 +15,8 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -144,10 +146,10 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> = setOf(1L)
+    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> = setOf(sakId1)
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
-        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER)))
+        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(sakId1, Saksrolle.SOEKER)))
 
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
@@ -407,7 +409,7 @@ class BrevApiKlientTest : BrevApiKlient {
                 ),
             journalpostId = null,
             bestillingId = null,
-            sakId = 0,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

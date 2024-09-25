@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
@@ -37,7 +38,10 @@ class OmstillingsstoenadAktivitetspliktTest {
     fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
         val behandlingsmaaned = YearMonth.of(2025, Month.MARCH)
         val jobb = hendelserJobb(JobbType.OMS_DOED_4MND, behandlingsmaaned)
-        val sakIder: List<SakId> = listOf(65, 22, 15)
+        val sak1 = tilSakId(65)
+        val sak2 = tilSakId(22)
+        val sak3 = tilSakId(15)
+        val sakIder: List<SakId> = listOf(sak1, sak2, sak3)
         val saker =
             sakIder
                 .map {
@@ -47,12 +51,12 @@ class OmstillingsstoenadAktivitetspliktTest {
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
-        every { hendelseDao.opprettHendelserForSaker(jobb.id, listOf(65, 22, 15), Steg.IDENTIFISERT_SAK) } returns Unit
+        every { hendelseDao.opprettHendelserForSaker(jobb.id, listOf(sak1, sak2, sak3), Steg.IDENTIFISERT_SAK) } returns Unit
 
         omstillingsstoenadService.execute(jobb)
 
         verify { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) }
-        verify { hendelseDao.opprettHendelserForSaker(jobb.id, listOf(65, 22, 15), Steg.IDENTIFISERT_SAK) }
+        verify { hendelseDao.opprettHendelserForSaker(jobb.id, listOf(sak1, sak2, sak3), Steg.IDENTIFISERT_SAK) }
     }
 
     private fun hendelserJobb(

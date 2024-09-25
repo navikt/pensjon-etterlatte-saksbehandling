@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
@@ -145,7 +146,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(
                             BehandlingsBehov(
-                                1,
+                                sakId1,
                                 Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
@@ -580,7 +581,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(
                             BehandlingsBehov(
-                                1,
+                                sakId1,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),

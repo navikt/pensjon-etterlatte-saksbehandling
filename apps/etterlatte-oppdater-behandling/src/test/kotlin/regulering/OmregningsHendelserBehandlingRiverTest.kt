@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingServiceImpl
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
@@ -32,7 +33,7 @@ internal class OmregningsHendelserBehandlingRiverTest {
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(1, revurderingRequestSlot.captured.sakId)
+        Assertions.assertEquals(sakId1, revurderingRequestSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             behandlingId.toString(),

@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
@@ -135,9 +136,10 @@ class DoedshendelseDaoTest(
                 endringstype = Endringstype.OPPRETTET,
             )
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        val randomSakId = randomSakId()
         val avbruttHendelse =
             doedshendelseInternal.tilAvbrutt(
-                sakId = 5L,
+                sakId = randomSakId,
                 kontrollpunkter = listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL),
             )
 
@@ -146,7 +148,7 @@ class DoedshendelseDaoTest(
         val ferdigeHendelser = doedshendelseDao.hentDoedshendelserMedStatus(listOf(FERDIG))
         ferdigeHendelser shouldContainExactly listOf(avbruttHendelse)
         with(ferdigeHendelser.first()) {
-            sakId shouldBe 5L
+            randomSakId shouldBe randomSakId
             status shouldBe FERDIG
             utfall shouldBe Utfall.AVBRUTT
             endret shouldBeGreaterThan opprettet
@@ -166,10 +168,11 @@ class DoedshendelseDaoTest(
             )
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
         val opprettetOppgaveId = UUID.randomUUID()
+        val randomSakId = randomSakId()
         val avbruttHendelse =
             doedshendelseInternal.tilBehandlet(
                 utfall = Utfall.OPPGAVE,
-                sakId = 5,
+                sakId = randomSakId,
                 oppgaveId = opprettetOppgaveId,
                 kontrollpunkter = emptyList(),
             )
@@ -179,7 +182,7 @@ class DoedshendelseDaoTest(
         val ferdigeHendelser = doedshendelseDao.hentDoedshendelserForPerson(doedshendelseInternal.avdoedFnr)
         ferdigeHendelser shouldContainExactly listOf(avbruttHendelse)
         with(ferdigeHendelser.first()) {
-            sakId shouldBe 5L
+            sakId shouldBe randomSakId
             status shouldBe FERDIG
             utfall shouldBe Utfall.OPPGAVE
             endret shouldBeGreaterThan opprettet
@@ -200,7 +203,7 @@ class DoedshendelseDaoTest(
                 endringstype = Endringstype.OPPRETTET,
             )
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        val sakId = 5L
+        val sakId = randomSakId()
         doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
         val brevId = 12345L
         val doedshendelseBrevDistribuert = DoedshendelseBrevDistribuert(sakId, brevId)

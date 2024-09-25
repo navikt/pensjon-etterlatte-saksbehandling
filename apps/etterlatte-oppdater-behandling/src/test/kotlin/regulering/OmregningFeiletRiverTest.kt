@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -49,7 +50,7 @@ internal class OmregningFeiletRiverTest {
         val sendteMeldinger = inspector.inspektør.size
         Assertions.assertEquals(0, sendteMeldinger)
         Assertions.assertEquals("Regulering2023", kjoering.captured)
-        Assertions.assertEquals(83, sakId.captured)
+        Assertions.assertEquals(tilSakId(83), sakId.captured)
         Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
     }
 }

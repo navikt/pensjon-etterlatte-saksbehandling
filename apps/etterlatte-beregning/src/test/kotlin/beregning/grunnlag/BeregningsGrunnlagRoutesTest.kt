@@ -17,6 +17,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -82,7 +84,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = 123,
+                sak = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -120,7 +122,7 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal hente beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val virkRevurdering =
             Virkningstidspunkt(
                 dato = REFORM_TIDSPUNKT_BP,
@@ -278,7 +280,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = 123,
+                sak = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -338,7 +340,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = 123,
+                sak = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -548,7 +550,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 1",
                     aarsak = "ANNET",
                     kilde =
@@ -567,7 +569,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = 10,
                     prorataBroekNevner = 20,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 2",
                     aarsak = "ANNET",
                     kilde =
@@ -616,13 +618,14 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal lagre overstyr beregning grunnlag`() {
         val behandlingId = randomUUID()
         val slot = slot<List<OverstyrBeregningGrunnlagDao>>()
+        val randomSakId = randomSakId()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = 222,
+                sak = randomSakId,
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -653,7 +656,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 222L,
+                    sakId = randomSakId,
                     beskrivelse = "test periode 1",
                     aarsak = "ANNET",
                     kilde =
@@ -672,7 +675,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 222L,
+                    sakId = randomSakId,
                     beskrivelse = "test periode 2",
                     aarsak = "ANNET",
                     kilde =
@@ -762,14 +765,14 @@ internal class BeregningsGrunnlagRoutesTest {
                             dao.datoTOM shouldBe LocalDate.now().minusYears(6L)
                             dao.utbetaltBeloep shouldBe 123L
                             dao.trygdetid shouldBe 10L
-                            dao.sakId shouldBe 222L
+                            dao.sakId shouldBe randomSakId
                         }
                         daoList.maxBy { it.datoFOM }.let { dao ->
                             dao.datoFOM shouldBe LocalDate.now().minusYears(6L)
                             dao.datoTOM shouldBe null
                             dao.utbetaltBeloep shouldBe 456L
                             dao.trygdetid shouldBe 20L
-                            dao.sakId shouldBe 222L
+                            dao.sakId shouldBe randomSakId
                         }
                     }
                 }

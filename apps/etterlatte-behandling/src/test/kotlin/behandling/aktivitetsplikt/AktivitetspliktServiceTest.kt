@@ -25,6 +25,8 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -128,7 +130,7 @@ class AktivitetspliktServiceTest {
 
         @Test
         fun `Skal kaste feil hvis sakId ikke stemmer overens med behandling`() {
-            val aktivitet = aktivitet.copy(sakId = 2)
+            val aktivitet = aktivitet.copy(sakId = sakId2)
 
             assertThrows<SakidTilhoererIkkeBehandlingException> {
                 service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
@@ -191,7 +193,7 @@ class AktivitetspliktServiceTest {
     @Nested
     inner class OpprettOgHentAktivitetsgrad {
         private val oppgaveId = UUID.randomUUID()
-        private val sakId = 1L
+        private val sakId = sakId1
 
         @Test
         fun `Skal opprette en ny aktivitetsgrad`() {
@@ -269,7 +271,7 @@ class AktivitetspliktServiceTest {
     @Nested
     inner class OpprettOgHentUnntakForOppgave {
         private val oppgaveId = UUID.randomUUID()
-        private val sakId = 1L
+        private val sakId = sakId1
 
         @Test
         fun `Skal opprette en nytt unntak`() {
@@ -354,7 +356,7 @@ class AktivitetspliktServiceTest {
     @Nested
     inner class OpprettOgHentUnntakForBehandling {
         private val behandlingId = UUID.randomUUID()
-        private val sakId = 1L
+        private val sakId = sakId1
 
         @Test
         fun `Skal opprette en nytt unntak`() {
@@ -496,7 +498,7 @@ class AktivitetspliktServiceTest {
     @Nested
     inner class OppdaterUnntakForBehandling {
         private val behandlingId = UUID.randomUUID()
-        private val sakId = 1L
+        private val sakId = sakId1
 
         @Test
         fun `Skal oppdatere unntak hvis id finnes`() {
@@ -628,7 +630,7 @@ class AktivitetspliktServiceTest {
 
     @Nested
     inner class OpprettRevurderingHvisKravIkkeOppfylt {
-        private val sakId = 1L
+        private val sakId = sakId1
         private val forrigeBehandling: Behandling =
             mockk {
                 every { id } returns UUID.randomUUID()
@@ -764,7 +766,7 @@ class AktivitetspliktServiceTest {
 
     @Nested
     inner class OpprettOppgaveHvisVarigUnntak {
-        private val sakId = 1L
+        private val sakId = sakId1
         private val frist = Tidspunkt.now()
         private val request =
             OpprettOppgaveForAktivitetspliktVarigUnntakDto(
@@ -831,12 +833,12 @@ class AktivitetspliktServiceTest {
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { sak } returns
                     mockk {
-                        every { id } returns 1L
+                        every { id } returns sakId1
                     }
             }
         val aktivitet =
             LagreAktivitetspliktAktivitet(
-                sakId = 1L,
+                sakId = sakId1,
                 type = AktivitetspliktAktivitetType.ARBEIDSTAKER,
                 fom = LocalDate.now(),
                 beskrivelse = "Beskrivelse",

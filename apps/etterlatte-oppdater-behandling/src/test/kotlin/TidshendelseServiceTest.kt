@@ -8,6 +8,8 @@ import io.mockk.verify
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -34,7 +36,7 @@ class TidshendelseServiceTest {
     @Test
     fun `skal opprette behandling og returnere dens id`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val frist = behandlingsmaaned.atEndOfMonth()
 
@@ -64,7 +66,7 @@ class TidshendelseServiceTest {
             tidshendelseService.haandterHendelse(
                 TidshendelsePacket(
                     lagMeldingForVurdertLoependeYtelse(
-                        sakId = 2,
+                        sakId = sakId2,
                         type = TidshendelserJobbType.OMS_DOED_4MND,
                         behandlingsmaaned = YearMonth.of(2024, 1),
                         behandlingId = behandlingId,
@@ -75,7 +77,7 @@ class TidshendelseServiceTest {
         opprettetOppgave.opprettetOppgaveId shouldBe opprettetOppgaveId
         verify {
             behandlingService.opprettOppgave(
-                sakId = 2,
+                sakId = sakId2,
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 referanse = behandlingId.toString(),
                 merknad = "Infobrev om aktivitetsplikt OMS etter 4 mnd",
@@ -89,7 +91,7 @@ class TidshendelseServiceTest {
 
     @Test
     fun `skal ikke opprette omregning eller oppgave hvis BP20 og yrkesskadefordel`() {
-        val sakId = 37465L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
 
         val melding = lagMeldingForVurdertLoependeYtelse(sakId, behandlingsmaaned, type = AO_BP20)
@@ -104,7 +106,7 @@ class TidshendelseServiceTest {
     @Test
     fun `OMS tre aar siden doedsfall, skal ikke opprette oppgave hvis rett uten tidsbegrensning`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 93L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, type = OMS_DOED_3AAR)
@@ -118,7 +120,7 @@ class TidshendelseServiceTest {
     @Test
     fun `skal ikke kalle tjeneste for aa opprette behandling hvis dry-run`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 37465L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = true)
@@ -131,7 +133,7 @@ class TidshendelseServiceTest {
     @Test
     fun `skal opprette oppgave hvis opprett omregning feiler`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 37465L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
         every { behandlingService.opprettAutomatiskRevurdering(any()) } throws RuntimeException("Feil ved opprettelse av omregning")
         every { behandlingService.opprettOppgave(any(), any(), any(), any(), any()) } returns opprettetOppgaveId

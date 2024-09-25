@@ -18,6 +18,9 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -80,7 +83,7 @@ internal class PersonRoutesTest {
             PersonMedSakerOgRoller(
                 SOEKER_FOEDSELSNUMMER.value,
                 listOf(
-                    SakidOgRolle(1, Saksrolle.SOEKER),
+                    SakidOgRolle(sakId1, Saksrolle.SOEKER),
                 ),
             )
         every { grunnlagService.hentSakerOgRoller(any()) } returns response
@@ -106,7 +109,7 @@ internal class PersonRoutesTest {
 
     @Test
     fun `Hent alle saker tilknyttet person`() {
-        val response: Set<SakId> = setOf(1, 2, 3)
+        val response: Set<SakId> = setOf(sakId1, sakId2, sakId3)
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
 
         testApplication {

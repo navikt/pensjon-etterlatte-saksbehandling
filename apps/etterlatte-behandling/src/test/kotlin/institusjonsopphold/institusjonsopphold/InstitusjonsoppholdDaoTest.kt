@@ -2,6 +2,7 @@ package institusjonsopphold.institusjonsopphold
 
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -28,7 +29,7 @@ internal class InstitusjonsoppholdDaoTest(
 
     @Test
     fun `kan legge til vurdering av institusjonsoppholdshendelse`() {
-        val sakId = 1L
+        val sakId = sakId1
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123123")
         val grunnlagshendelseId = UUID.randomUUID().toString()
         val institusjonsoppholdBegrunnelse =

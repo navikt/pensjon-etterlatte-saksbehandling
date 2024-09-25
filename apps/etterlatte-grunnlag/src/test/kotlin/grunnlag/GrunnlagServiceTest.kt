@@ -12,6 +12,9 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import mockPerson
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -77,7 +80,7 @@ internal class GrunnlagServiceTest {
     private val testData = GrunnlagTestData()
     private val persongalleri =
         lagGrunnlagHendelse(
-            sakId = 1,
+            sakId = sakId1,
             hendelseNummer = 4,
             opplysningType = PERSONGALLERI_V1,
             id = statiskUuid,
@@ -135,7 +138,7 @@ internal class GrunnlagServiceTest {
                 }
             return listOf(
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 1,
                     opplysningType = NAVN,
                     id = statiskUuid,
@@ -144,7 +147,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 2,
                     opplysningType = FOEDSELSDATO,
                     id = statiskUuid,
@@ -153,7 +156,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 3,
                     opplysningType = PERSONROLLE,
                     id = statiskUuid,
@@ -162,7 +165,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 5,
                     opplysningType = FOEDSELSNUMMER,
                     id = statiskUuid,
@@ -171,7 +174,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 4,
                     opplysningType = PERSONGALLERI_V1,
                     id = statiskUuid,
@@ -186,9 +189,9 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til søker`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
 
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -213,7 +216,7 @@ internal class GrunnlagServiceTest {
                     ),
                     listOf(testData.gjenlevende.foedselsnummer.value),
                 )
-            val sakId = 1L
+            val sakId = sakId1
             val grunnlagshendelser =
                 listOf(
                     OpplysningDao.GrunnlagHendelse(
@@ -270,9 +273,9 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til avdød`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoede.first().foedselsnummer, PersonRolle.AVDOED)
 
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -289,9 +292,9 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til gjenlevende`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.gjenlevende.foedselsnummer, PersonRolle.GJENLEVENDE)
 
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -307,9 +310,9 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til søsken`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.foedselsnummer, PersonRolle.BARN)
 
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -327,7 +330,7 @@ internal class GrunnlagServiceTest {
         private val grunnlagshendelser =
             listOf(
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 1,
                     opplysningType = FOEDELAND,
                     id = statiskUuid,
@@ -336,7 +339,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 2,
                     opplysningType = FOEDELAND,
                     id = statiskUuid,
@@ -348,20 +351,20 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `fjerner duplikater av samme opplysning for konstante opplysninger`() {
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
             assertEquals(
                 1,
                 grunnlagService
-                    .hentOpplysningsgrunnlagForSak(1)!!
+                    .hentOpplysningsgrunnlagForSak(sakId1)!!
                     .soeker.values.size,
             )
         }
 
         @Test
         fun `tar alltid seneste versjon av samme opplysning`() {
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
 
             assertEquals(
                 2,
@@ -402,14 +405,14 @@ internal class GrunnlagServiceTest {
                             attestering = null,
                             fnr = testData.soeker.foedselsnummer,
                         ),
-                    sakId = 1,
+                    sakId = sakId1,
                     hendelseNummer = 1,
                 ),
             )
 
-        every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+        every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns grunnlagshendelser
 
-        val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+        val actual = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
         val expected =
             Opplysning.Konstant(
                 uuid1,
@@ -427,7 +430,7 @@ internal class GrunnlagServiceTest {
     fun `kan hente og mappe opplysningsgrunnlag`() {
         every { opplysningDaoMock.finnNyesteGrunnlagForSak(any<SakId>(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
-                1,
+                sakId1,
                 1,
                 PERSONGALLERI_V1,
                 id = statiskUuid,
@@ -439,7 +442,7 @@ internal class GrunnlagServiceTest {
         every { opplysningDaoMock.hentAlleGrunnlagForSak(any<SakId>()) } returns
             listOf(
                 lagGrunnlagHendelse(
-                    1,
+                    sakId1,
                     2,
                     NAVN,
                     id = statiskUuid,
@@ -448,7 +451,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    1,
+                    sakId1,
                     2,
                     PERSONROLLE,
                     id = statiskUuid,
@@ -457,7 +460,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 ),
                 lagGrunnlagHendelse(
-                    1,
+                    sakId1,
                     3,
                     PERSONGALLERI_V1,
                     id = statiskUuid,
@@ -466,7 +469,7 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
 
         assertEquals(1, opplysningsgrunnlag.sak.size)
         assertEquals(2, opplysningsgrunnlag.soeker.size)
@@ -480,7 +483,7 @@ internal class GrunnlagServiceTest {
         private val barnepensjonSoeker1 = INNSENDER_FOEDSELSNUMMER
         private val grunnlaghendelse1 =
             lagGrunnlagHendelse(
-                sakId = 1,
+                sakId = sakId1,
                 hendelseNummer = 1,
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
@@ -500,7 +503,7 @@ internal class GrunnlagServiceTest {
         private val barnepensjonSoeker2 = SOEKER2_FOEDSELSNUMMER
         private val grunnlaghendelse2 =
             lagGrunnlagHendelse(
-                sakId = 2,
+                sakId = sakId2,
                 hendelseNummer = 2,
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
@@ -519,7 +522,7 @@ internal class GrunnlagServiceTest {
 
         private val grunnlaghendelse3 =
             lagGrunnlagHendelse(
-                sakId = 3,
+                sakId = sakId3,
                 hendelseNummer = 3,
                 opplysningType = PERSONGALLERI_V1,
                 verdi =
@@ -611,7 +614,7 @@ internal class GrunnlagServiceTest {
         fun `Kan mappe og hente innsender`() {
             val persongalleri =
                 lagGrunnlagHendelse(
-                    1,
+                    sakId1,
                     1,
                     PERSONGALLERI_V1,
                     id = statiskUuid,
@@ -624,10 +627,10 @@ internal class GrunnlagServiceTest {
                 )
             every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns persongalleri
             every { opplysningDaoMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns persongalleri
-            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId1) } returns
                 listOf(
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         2,
                         FOEDSELSNUMMER,
                         id = statiskUuid,
@@ -636,7 +639,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         3,
                         NAVN,
                         id = statiskUuid,
@@ -645,7 +648,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         4,
                         PERSONROLLE,
                         id = statiskUuid,
@@ -656,7 +659,7 @@ internal class GrunnlagServiceTest {
                     persongalleri,
                 )
 
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId1)!!
 
             assertEquals(1, opplysningsgrunnlag.sak.size)
             assertEquals(1, opplysningsgrunnlag.familie.size)
@@ -666,7 +669,7 @@ internal class GrunnlagServiceTest {
 
     @Test
     fun `Kan oppdatere grunnlag`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandlingId = UUID.randomUUID()
         val sakType = SakType.BARNEPENSJON
 
@@ -853,7 +856,7 @@ internal class GrunnlagServiceTest {
             } returns
                 listOf(
                     lagGrunnlagHendelse(
-                        sakId = 1,
+                        sakId = sakId1,
                         hendelseNummer = 1,
                         opplysningType = Opplysningstype.SOEKER_PDL_V1,
                         id = behandlingsid,
@@ -862,7 +865,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        sakId = 1,
+                        sakId = sakId1,
                         hendelseNummer = 2,
                         opplysningType = Opplysningstype.INNSENDER_PDL_V1,
                         id = behandlingsid,
@@ -871,7 +874,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        sakId = 1,
+                        sakId = sakId1,
                         hendelseNummer = 3,
                         opplysningType = Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
@@ -880,7 +883,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        sakId = 1,
+                        sakId = sakId1,
                         hendelseNummer = 4,
                         opplysningType = Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
@@ -889,7 +892,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        sakId = 1,
+                        sakId = sakId1,
                         hendelseNummer = 5,
                         opplysningType = PERSONGALLERI_V1,
                         id = behandlingsid,
@@ -930,7 +933,7 @@ internal class GrunnlagServiceTest {
             } returns
                 listOf(
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         1,
                         Opplysningstype.SOEKER_PDL_V1,
                         id = behandlingsid,
@@ -939,7 +942,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         2,
                         Opplysningstype.INNSENDER_PDL_V1,
                         id = behandlingsid,
@@ -948,7 +951,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         3,
                         Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
@@ -957,7 +960,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         4,
                         Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                         id = behandlingsid,
@@ -966,7 +969,7 @@ internal class GrunnlagServiceTest {
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
+                        sakId1,
                         5,
                         Opplysningstype.PERSONGALLERI_V1,
                         id = behandlingsid,

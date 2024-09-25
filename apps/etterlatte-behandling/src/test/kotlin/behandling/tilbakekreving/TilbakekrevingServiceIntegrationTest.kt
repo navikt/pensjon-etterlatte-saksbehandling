@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingUnderBehandlingFinnesAlleredeException
@@ -575,7 +576,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 ),
             journalpostId = null,
             bestillingId = null,
-            sakId = 0,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

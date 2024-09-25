@@ -6,6 +6,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
@@ -52,7 +55,7 @@ class AldersovergangerIntegrationTest(
         val behandlingsmaaned = YearMonth.of(2025, Month.MARCH)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP21, behandlingsmaaned)
 
-        val sakIder: List<SakId> = listOf(1, 2, 3)
+        val sakIder: List<SakId> = listOf(sakId1, sakId2, sakId3)
         val saker =
             sakIder
                 .map {
@@ -73,7 +76,7 @@ class AldersovergangerIntegrationTest(
     fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
         val behandlingsmaaned = YearMonth.of(2025, Month.MARCH)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP21, behandlingsmaaned)
-        val sakIder: List<SakId> = listOf(1, 2, 3)
+        val sakIder: List<SakId> = listOf(sakId1, sakId2, sakId3)
         val saker =
             sakIder
                 .map {

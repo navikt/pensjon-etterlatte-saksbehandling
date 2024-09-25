@@ -23,6 +23,10 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
@@ -74,7 +78,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
-            Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
             OppgaveKilde.HENDELSE,
             OppgaveType.VURDER_KONSEKVENS,
             null,
@@ -113,7 +117,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Sjekk at fnr matcher hendelse fnr og ikke sak ident i duplikatsjekk`() {
-        val sakId = 1L
+        val sakId = sakId1
         val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -179,7 +183,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal ignorere duplikate hendelser men ikke om det er 0 hendelser fra før av`() {
-        val sakId = 1L
+        val sakId = sakId1
         val adresse =
             Adresse(
                 type = AdresseType.VEGADRESSE,
@@ -233,7 +237,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal ignorere duplikate hendelser ulikt samsvar adresse`() {
-        val sakId = 1L
+        val sakId = sakId1
 
         val adresse =
             Adresse(
@@ -294,7 +298,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal opprette hendelser for hendelse - distinct på sakker og roller fra grunnlag`() {
-        val sakId = 1L
+        val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
         every {
@@ -304,6 +308,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+        val sak2 = sakId2
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -313,20 +318,20 @@ internal class GrunnlagsendringshendelseServiceTest {
                         SakidOgRolle(sakId, Saksrolle.GJENLEVENDE),
                         SakidOgRolle(sakId, Saksrolle.GJENLEVENDE),
                         SakidOgRolle(sakId, Saksrolle.SOESKEN),
-                        SakidOgRolle(2L, Saksrolle.AVDOED),
-                        SakidOgRolle(2L, Saksrolle.GJENLEVENDE),
-                        SakidOgRolle(2L, Saksrolle.SOEKER),
-                        SakidOgRolle(3L, Saksrolle.SOESKEN),
+                        SakidOgRolle(sak2, Saksrolle.AVDOED),
+                        SakidOgRolle(sak2, Saksrolle.GJENLEVENDE),
+                        SakidOgRolle(sak2, Saksrolle.SOEKER),
+                        SakidOgRolle(sakId3, Saksrolle.SOESKEN),
                     ),
                 ),
             )
 
         every {
-            sakService.finnSak(2L)
-        } returns Sak(fnr, SakType.BARNEPENSJON, 2L, Enheter.defaultEnhet.enhetNr)
+            sakService.finnSak(sak2)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sak2, Enheter.defaultEnhet.enhetNr)
         every {
-            sakService.finnSak(3L)
-        } returns Sak(fnr, SakType.BARNEPENSJON, 3L, Enheter.defaultEnhet.enhetNr)
+            sakService.finnSak(sakId3)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId3, Enheter.defaultEnhet.enhetNr)
 
         val grunnlagsendringshendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -355,7 +360,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     )
     fun `Gyldige hendelser for saktype BP`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
-        val sakId = 1L
+        val sakId = sakId1
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -409,7 +414,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     )
     fun `Gyldige hendelser for saktype OMS`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
-        val sakId = 1L
+        val sakId = sakId1
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -458,7 +463,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `Skal filtrere bort sivilstandshendelser for BP saker men ikke andre, OMS skal få de`() {
         val soekerFnr = KONTANT_FOT.value
-        val sakId = 1L
+        val sakId = sakId1
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
             .returns(
                 PersonMedSakerOgRoller(
@@ -511,7 +516,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal matche på hendelse fnr mot tidligere grl hendelser gjelder_person og ikke relatert sak sin ident men på egen`() {
-        val sakId = 1L
+        val sakId = sakId1
         val soekerFnr = KONTANT_FOT.value
         val gjenlevendeFnr = JOVIAL_LAMA.value
         val bostedAdresse =
@@ -581,7 +586,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse =
             Grunnlagsendringshendelse(
                 id = randomUUID(),
-                sakId = 1,
+                sakId = sakId1,
                 type = GrunnlagsendringsType.DOEDSFALL,
                 gjelderPerson = KONTANT_FOT.value,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -617,7 +622,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
-        val sakIder: Set<SakId> = setOf(1, 2, 3, 4, 5, 6)
+        val sakIder: Set<SakId> = setOf(sakId1, sakId2, sakId3, randomSakId(), randomSakId(), randomSakId())
         val saker =
             sakIder.map {
                 Sak(
@@ -665,7 +670,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
-        val sakIder: Set<SakId> = setOf(5, 6)
+        val sakIder: Set<SakId> = setOf(randomSakId(), randomSakId())
         val saker =
             sakIder.map {
                 Sak(
@@ -708,7 +713,15 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Skal kunne sette fortrolig og sette enhet`() {
-        val sakIder: Set<SakId> = setOf(1, 2, 3, 4, 5, 6)
+        val sakIder: Set<SakId> =
+            setOf(
+                sakId1,
+                sakId2,
+                sakId3,
+                randomSakId(),
+                randomSakId(),
+                randomSakId(),
+            )
         val saker =
             sakIder.map {
                 Sak(
@@ -754,7 +767,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `skal kunne opprette hendelser som følge av feilet regulering`() {
-        val sakId = 1L
+        val sakId = sakId1
         val lagretHendelse =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.GRUNNBELOEP,

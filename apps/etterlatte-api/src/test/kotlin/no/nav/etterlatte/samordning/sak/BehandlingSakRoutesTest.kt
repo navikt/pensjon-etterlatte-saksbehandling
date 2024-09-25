@@ -21,6 +21,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -177,7 +178,7 @@ class BehandlingSakRoutesTest {
         val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         applicationConfig = HoconApplicationConfig(conff)
         val requestFnr = FoedselsnummerDTO(fnr)
-        val sakIdListesvar = listOf(1L)
+        val sakIdListesvar = listOf(sakId1)
         coEvery { behandlingService.hentSakforPerson(requestFnr) } returns sakIdListesvar
         testApplication {
             environment { config = applicationConfig }

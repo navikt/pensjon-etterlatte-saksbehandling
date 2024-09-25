@@ -106,7 +106,7 @@ internal class BehandlingStatusServiceTest {
         ],
     )
     fun `Fattet vedtak til attestering`(status: BehandlingStatus) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -154,7 +154,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `iverksettNasjonal behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
         val behandlingId = behandling.id
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
@@ -176,7 +176,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `underkjent behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         val behandlingId = behandling.id
 
@@ -199,7 +199,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `iverksett utlandstilsnitt behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -242,7 +242,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `utlandstilsnitt avslag behandling ikke oppfylt vilkårsvurdering`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -291,7 +291,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `attestert vedtak som ikke er avslag skal ikke ha kravpakke(utland)`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -333,7 +333,7 @@ internal class BehandlingStatusServiceTest {
     @ParameterizedTest()
     @EnumSource(FeilutbetalingValg::class, names = ["JA_VARSEL", "JA_INGEN_TK"], mode = EnumSource.Mode.INCLUDE)
     fun `skal opprette tilbakekrevingsoppgave naar behandling med feilutbetaling blir iverksatt`(feilutbetalingValg: FeilutbetalingValg) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,
@@ -381,7 +381,7 @@ internal class BehandlingStatusServiceTest {
         feilutbetalingValg: FeilutbetalingValg,
     ) {
         val oppgaveId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,

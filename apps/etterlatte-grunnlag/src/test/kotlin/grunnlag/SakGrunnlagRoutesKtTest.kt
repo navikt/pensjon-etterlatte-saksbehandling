@@ -17,6 +17,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -92,7 +93,7 @@ internal class SakGrunnlagRoutesKtTest {
 
     @Test
     fun `Hent grunnlag for sak`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns testData

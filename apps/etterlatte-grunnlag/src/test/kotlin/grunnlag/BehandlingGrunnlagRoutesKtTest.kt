@@ -25,6 +25,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -51,7 +52,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingGrunnlagRoutesKtTest {
@@ -214,7 +214,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for lagring av nye saksopplysninger`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val opplysninger =
             listOf(
@@ -253,7 +253,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for oppretting av grunnlag`() {
-        val sakId = 12345L
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val persongalleri = GrunnlagTestData().hentPersonGalleri()
         val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
@@ -287,7 +287,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for oppdatering av grunnlag`() {
-        val sakId = 12345L
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         coEvery { grunnlagService.oppdaterGrunnlag(any(), any(), any()) } just Runs

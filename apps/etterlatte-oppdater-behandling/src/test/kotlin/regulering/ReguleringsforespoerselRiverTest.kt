@@ -5,6 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -59,7 +64,7 @@ internal class ReguleringsforespoerselRiverTest {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, porsgrunn)),
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn)),
                     )
             }
         val inspector =
@@ -79,9 +84,9 @@ internal class ReguleringsforespoerselRiverTest {
         every { vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, porsgrunn),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, porsgrunn),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId1, porsgrunn),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, sakId2, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId3, porsgrunn),
                 ),
             ) andThen Saker(listOf())
         val inspector =
@@ -113,12 +118,15 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+        val sak1 = randomSakId()
+        val sak2 = randomSakId()
+        val sak3 = randomSakId()
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, porsgrunn),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, porsgrunn),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sak1, porsgrunn),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, sak2, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sak3, porsgrunn),
                 ),
             )
         val inspector =
@@ -129,16 +137,16 @@ internal class ReguleringsforespoerselRiverTest {
         val melding2 = inspector.inspektør.message(1)
         val melding3 = inspector.inspektør.message(2)
 
-        Assertions.assertEquals(1000L, melding1.get(SAK_ID_KEY).asLong())
-        Assertions.assertEquals(1002L, melding2.get(SAK_ID_KEY).asLong())
-        Assertions.assertEquals(1003L, melding3.get(SAK_ID_KEY).asLong())
+        Assertions.assertEquals(sak1, melding1.get(SAK_ID_KEY).tilSakId())
+        Assertions.assertEquals(sak2, melding2.get(SAK_ID_KEY).tilSakId())
+        Assertions.assertEquals(sak3, melding3.get(SAK_ID_KEY).tilSakId())
     }
 
     @Test
     fun `ider fra tilbakestilte og aapne behandlinger sendes med i meldinga videre`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        val sakId = 1000L
+        val sakId = randomSakId()
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
@@ -170,7 +178,7 @@ internal class ReguleringsforespoerselRiverTest {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, porsgrunn)),
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn)),
                     )
             }
         coEvery {
@@ -195,12 +203,12 @@ internal class ReguleringsforespoerselRiverTest {
         every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
             Saker(
                 (0..MAKS_BATCHSTOERRELSE).map {
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, it.toLong(), porsgrunn)
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, tilSakId(it), porsgrunn)
                 },
             ) andThen
             Saker(
                 listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, 4L, porsgrunn),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn),
                 ),
             ) andThen Saker(listOf())
         val inspector =
@@ -248,7 +256,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == 3482L } })
+            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == randomSakId() } })
         }
     }
 }

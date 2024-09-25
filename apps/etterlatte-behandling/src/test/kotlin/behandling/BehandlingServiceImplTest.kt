@@ -67,7 +67,6 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingServiceImplTest {
@@ -101,17 +100,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler(harRolleEgenAnsatt = true))
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -125,17 +124,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler("ident", harRolleStrengtFortrolig = true))
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -149,17 +148,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -173,17 +172,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -197,13 +196,13 @@ internal class BehandlingServiceImplTest {
     fun `skal hente behandlinger i sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
-                revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
-                foerstegangsbehandling(sakId = 1),
+                revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.REGULERING),
+                foerstegangsbehandling(sakId = sakId1),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -217,11 +216,10 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val avbruttBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT)
-        val attestertBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
-        val iverksattBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val avbruttBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVBRUTT)
+        val attestertBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.ATTESTERT)
+        val iverksattBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.IVERKSATT)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
         every { behandlingDaoMock.hentBehandling(attestertBehandling.id) } returns attestertBehandling
@@ -261,8 +259,7 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling registrerer en avbruddshendelse`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -301,8 +298,7 @@ internal class BehandlingServiceImplTest {
             },
         )
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -333,8 +329,7 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling sender en kafka-melding`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -364,8 +359,7 @@ internal class BehandlingServiceImplTest {
     fun `avbryt behandling setter koblede grunnlagsendringshendelser tilbake til ingen kobling`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -757,33 +751,33 @@ internal class BehandlingServiceImplTest {
     fun `hentSenestIverksatteBehandling() returnerer seneste iverksatte behandlingen`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val behandling1 = foerstegangsbehandling(sakId = 1, status = BehandlingStatus.IVERKSATT)
+        val behandling1 = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.IVERKSATT)
         val behandling2 =
             revurdering(
-                sakId = 1,
+                sakId = sakId1,
                 status = BehandlingStatus.BEREGNET,
                 revurderingAarsak = Revurderingaarsak.REGULERING,
             )
 
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        assertEquals(behandling1, behandlingService.hentSisteIverksatte(1))
+        assertEquals(behandling1, behandlingService.hentSisteIverksatte(sakId1))
     }
 
     @Test
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
         nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.PORSGRUNN.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -804,7 +798,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = sakId1,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -831,8 +825,8 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
-        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
@@ -859,7 +853,7 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), Enheter.PORSGRUNN.enhetNr)
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(
@@ -884,7 +878,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
         every {
             behandlingDaoMock.hentBehandling(behandlingId)
-        } returns revurdering(sakId = 1L, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
+        } returns revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
         behandlingService.endreSkalSendeBrev(behandlingId, true)
         verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
@@ -894,7 +888,7 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandlingId = UUID.randomUUID()
         every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
-        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = 1L)
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
         assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
             behandlingService.endreSkalSendeBrev(behandlingId, true)
         }
@@ -1003,7 +997,7 @@ internal class BehandlingServiceImplTest {
         )
 
     companion object {
-        const val SAK_ID = 1L
+        val SAK_ID = sakId1
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
         val TOKEN = simpleSaksbehandler()
     }

@@ -34,7 +34,7 @@ internal class OppdaterInntektsjusteringBrevDistribuert(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BREV_KODE) }
             validate { it.interestedIn(KJOERING) }
-            validate { it.demandValue(BREV_KODE, Brevkoder.OMS_INNTEKTSJUSTERING.name) }
+            validate { it.demandValue(BREV_KODE, Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK.name) }
         }
     }
 

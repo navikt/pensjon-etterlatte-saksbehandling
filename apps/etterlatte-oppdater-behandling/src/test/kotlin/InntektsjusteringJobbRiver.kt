@@ -5,8 +5,8 @@ import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.inntektsjustering.InntektsjusteringVarselOmVedtakRiver
-import no.nav.etterlatte.inntektsjustering.skalHaVarselOmVedtak
+import no.nav.etterlatte.inntektsjustering.InntektsjusteringJobbRiver
+import no.nav.etterlatte.inntektsjustering.skalBehandlingOmregnes
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -26,32 +26,30 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class InntektsjusteringVarselOmVedtakRiver {
-    private val kjoering = "infobrev-inntektsjustering-2025"
+class InntektsjusteringJobbRiver {
+    private val kjoering = "inntektsjustering-jobb-2024"
     private val loependeFom = YearMonth.of(2024, 1)
 
     @Test
-    fun `skal ha varsel om vedtak`() {
+    fun `skal inkluderes i omregning`() {
         val behandlinger =
             listOf(
                 genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2023, 1)),
                 genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.ANNEN, YearMonth.of(2024, 1)),
                 genererBehandlingSammendrag(BehandlingStatus.AVBRUTT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)),
             )
-        val skalHaVarselOmVedtakResult = skalHaVarselOmVedtak(behandlinger, YearMonth.of(2024, 1))
-        skalHaVarselOmVedtakResult shouldBe true
+        skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe true
     }
 
     @Test
-    fun `skal IKKE ha varsel om vedtak`() {
+    fun `skal IKKE inkluderes i omregning`() {
         val behandlinger =
             listOf(genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)))
-        val skalHaVarselOmVedtakResult = skalHaVarselOmVedtak(behandlinger, YearMonth.of(2024, 1))
-        skalHaVarselOmVedtakResult shouldBe false
+        skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe false
     }
 
     @Test
-    fun `kan ta imot infobrevmelding og kalle paa behandling`() {
+    fun `teste start inntektsjustering jobb aktivert`() {
         val featureToggleService =
             mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
 
@@ -64,8 +62,8 @@ class InntektsjusteringVarselOmVedtakRiver {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringVarselOmVedtakRiver(this, behandlingServiceMock, featureToggleService) }
-        inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
+            TestRapid().apply { InntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
+        inspector.sendTestMessage(genererMelding(loependeFom))
 
         verify(exactly = 1) {
             behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
@@ -73,7 +71,7 @@ class InntektsjusteringVarselOmVedtakRiver {
     }
 
     @Test
-    fun `teste featureToggle deaktivert`() {
+    fun `teste start inntektsjustering jobb deaktivert`() {
         val featureToggleService =
             mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns false }
 
@@ -86,19 +84,19 @@ class InntektsjusteringVarselOmVedtakRiver {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringVarselOmVedtakRiver(this, behandlingServiceMock, featureToggleService) }
+            TestRapid().apply { InntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
 
-        inspector.sendTestMessage(genererInfobrevMelding(loependeFom))
+        inspector.sendTestMessage(genererMelding(loependeFom))
         verify(exactly = 0) {
             behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
         }
     }
 
-    private fun genererInfobrevMelding(loependeFom: YearMonth) =
+    private fun genererMelding(loependeFom: YearMonth) =
         JsonMessage
             .newMessage(
                 mapOf(
-                    InntektsjusteringHendelseType.SEND_INFOBREV.lagParMedEventNameKey(),
+                    InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB.lagParMedEventNameKey(),
                     KJOERING to kjoering,
                     ANTALL to 12000,
                     SPESIFIKKE_SAKER to listOf<Long>(),

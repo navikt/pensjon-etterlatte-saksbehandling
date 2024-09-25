@@ -1,18 +1,13 @@
 package no.nav.etterlatte.inntektsjustering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
-import no.nav.etterlatte.brev.BrevRequestHendelseType
-import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -25,7 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.antall
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.loependeFom
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.regulering.kjoerIBatch
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -34,7 +28,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
-internal class InntektsjusteringVarselOmVedtakRiver(
+internal class InntektsjusteringJobbRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
@@ -42,7 +36,7 @@ internal class InntektsjusteringVarselOmVedtakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.SEND_INFOBREV) {
+        initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB) {
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
             validate { it.requireKey(LOEPENDE_FOM) }
@@ -55,8 +49,8 @@ internal class InntektsjusteringVarselOmVedtakRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        if (!featureToggleService.isEnabled(InntektsjusterinFeatureToggle.START_INFOBREV_INNTEKTSJUSTERING, false)) {
-            logger.info("Utsending av informasjonsbrev er deaktivert ved funksjonsbryter. Avbryter forespørsel.")
+        if (!featureToggleService.isEnabled(InntektsjusterinFeatureToggle.START_INNTEKTSJUSTERING_JOBB, false)) {
+            logger.info("Inntektsjustering jobb er deaktivert. Avbryter forespørsel.")
             return
         }
 
@@ -82,12 +76,13 @@ internal class InntektsjusteringVarselOmVedtakRiver(
             },
             haandterSaker = { sakerSomSkalInformeres ->
                 sakerSomSkalInformeres.saker.forEach { sak ->
-                    logger.info("$kjoering: Klar til å opprette, journalføre og distribuere brev om vedtak for sakId ${sak.id}")
+
+                    logger.info("$kjoering: Klar til å opprette, journalføre og distribuere varsel og vedtak for sakId ${sak.id}")
                     behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
 
                     val sakMedBehandlinger = behandlingService.hentBehandlingerForSak(FoedselsnummerDTO(sak.ident))
-                    if (skalHaVarselOmVedtak(sakMedBehandlinger.behandlinger, loependeFom)) {
-                        opprettBrev(sak, packet, context)
+                    if (skalBehandlingOmregnes(sakMedBehandlinger.behandlinger, loependeFom)) {
+                        // TODO: START OMREGNING
                     } else {
                         behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT, kjoering)
                     }
@@ -97,29 +92,9 @@ internal class InntektsjusteringVarselOmVedtakRiver(
 
         logger.info("$kjoering: Ferdig")
     }
-
-    private fun opprettBrev(
-        sak: Sak,
-        packet: JsonMessage,
-        context: MessageContext,
-    ) {
-        packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
-        packet.sakId = sak.id
-        packet[BREVMAL_RIVER_KEY] = Brevkoder.OMS_INNTEKTSJUSTERING
-        context.publish(packet.toJson())
-    }
 }
 
-enum class InntektsjusterinFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    START_INFOBREV_INNTEKTSJUSTERING("start-infobrev-inntektsjustering"),
-    ;
-
-    override fun key() = key
-}
-
-fun skalHaVarselOmVedtak(
+fun skalBehandlingOmregnes(
     behandlinger: List<BehandlingSammendrag>,
     loependeFom: YearMonth,
 ): Boolean =
@@ -131,3 +106,12 @@ fun skalHaVarselOmVedtak(
                     it.virkningstidspunkt?.dato?.monthValue == 1
             )
     }
+
+enum class InntektsjusterinFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    START_INNTEKTSJUSTERING_JOBB("start-inntektsjustering-jobb"),
+    ;
+
+    override fun key() = key
+}

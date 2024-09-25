@@ -92,7 +92,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       hentBrev(behandlingId, (brev, statusCode) => {
         if (statusCode === 200) {
           setVedtaksbrev(brev)
-        } else if (statusCode === 204) {
+        } else if (statusCode === 204 && redigerbar) {
           opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
           })

@@ -10,6 +10,4 @@ val sakId3 = SakId(3L)
 
 fun randomSakId() = SakId(Random.nextLong(10, Int.MAX_VALUE.toLong()))
 
-fun tilSakId(int: Int) = SakId(int.toLong())
-
 fun JsonNode.tilSakId() = SakId(this.asLong())

@@ -203,7 +203,7 @@ internal class ReguleringsforespoerselRiverTest {
         every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
             Saker(
                 (0..MAKS_BATCHSTOERRELSE).map {
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, tilSakId(it), porsgrunn)
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, SakId(it.toLong()), porsgrunn)
                 },
             ) andThen
             Saker(

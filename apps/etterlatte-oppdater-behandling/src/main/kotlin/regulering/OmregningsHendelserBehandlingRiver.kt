@@ -9,8 +9,6 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.Omregningshendelse
-import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
-import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.omregninshendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -38,17 +36,22 @@ internal class OmregningsHendelserBehandlingRiver(
     ) {
         logger.info("Mottatt omregningshendelse")
 
-        val hendelse: Omregningshendelse = packet.omregninshendelse
-        val (behandlingId, _, sakType) =
+        val omregningshendelse: Omregningshendelse = packet.omregninshendelse
+        val (behandlingId, forrigeBehandlingId, sakType) =
             behandlinger.opprettAutomatiskRevurdering(
                 AutomatiskRevurderingRequest(
-                    sakId = hendelse.sakId,
-                    fraDato = hendelse.fradato,
-                    revurderingAarsak = hendelse.revurderingaarsak,
+                    sakId = omregningshendelse.sakId,
+                    fraDato = omregningshendelse.fradato,
+                    revurderingAarsak = omregningshendelse.revurderingaarsak,
                 ),
             )
-        packet.behandlingId = behandlingId
-        packet[SAK_TYPE] = sakType
+
+        omregningshendelse.endreSakType(sakType)
+        omregningshendelse.endreBehandlingId(behandlingId)
+        // TODO spør Mads om dette blir feil for Regulering
+        omregningshendelse.endreForrigeBehandlingid(forrigeBehandlingId)
+        packet.omregninshendelse = omregningshendelse
+
         packet.setEventNameForHendelseType(OmregningHendelseType.BEHANDLING_OPPRETTA)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")

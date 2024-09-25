@@ -1,5 +1,7 @@
 package no.nav.etterlatte.regulering
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -27,13 +29,13 @@ import java.util.UUID
 
 internal class LoependeYtelserforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
-    private val sakId = sakId1
+    private val sakId = 123L
 
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
                 ReguleringHendelseType.SAK_FUNNET.lagParMedEventNameKey(),
-                SAK_ID_KEY to 1,
+                SAK_ID_KEY to sakId,
                 DATO_KEY to dato,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "",
             ),
@@ -47,7 +49,7 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.harLoependeYtelserFra(sakId1, LocalDate.of(2023, 5, 1))
+            vedtakServiceMock.harLoependeYtelserFra(sakId, LocalDate.of(2023, 5, 1))
         }
     }
 
@@ -67,18 +69,13 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(
-            ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType(),
-            sendtMelding.get(EVENT_NAME_KEY).asText(),
-        )
-        Assertions.assertEquals(
-            Omregningshendelse(
-                sakId = sakId,
-                fradato = fraDato,
-                revurderingaarsak = Revurderingaarsak.REGULERING,
-            ),
-            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java),
-        )
+
+        sendtMelding
+            .get(EVENT_NAME_KEY)
+            .asText() shouldBe ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType()
+
+        objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java) shouldBe
+            Omregningshendelse(sakId, fraDato, Revurderingaarsak.REGULERING)
     }
 
     @Test
@@ -142,13 +139,10 @@ internal class LoependeYtelserforespoerselRiverTest {
         val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
-        Assertions.assertEquals(1, inspector.inspektør.size)
-        Assertions.assertTrue(
-            "SakErUnderSamordning" in
-                inspector.inspektør
-                    .message(0)
-                    .get(FEILMELDING_KEY)
-                    .textValue(),
-        )
+        inspector.inspektør.size shouldBe 1
+        inspector.inspektør
+            .message(0)
+            .get(FEILMELDING_KEY)
+            .textValue() shouldContain "SakErUnderSamordning"
     }
 }

@@ -1,18 +1,17 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningshendelsePacket
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.behandlingId
+import no.nav.etterlatte.rapidsandrivers.omregninshendelse
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 
 internal class VilkaarsvurderingRiver(
@@ -24,8 +23,9 @@ internal class VilkaarsvurderingRiver(
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.BEHANDLING_OPPRETTA) {
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(OmregningshendelsePacket.BEHANDLING_ID) }
+            validate { it.requireKey(OmregningshendelsePacket.FORRIGE_BEHANDLING_ID) }
         }
     }
 
@@ -35,8 +35,9 @@ internal class VilkaarsvurderingRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val behandlingId = packet.behandlingId
-        val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
+        val omregningshendelse = packet.omregninshendelse
+        val behandlingId = omregningshendelse.hentBehandlingId()
+        val behandlingViOmregnerFra = omregningshendelse.hentForrigeBehandlingid()
 
         vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
         packet.setEventNameForHendelseType(OmregningHendelseType.VILKAARSVURDERT)

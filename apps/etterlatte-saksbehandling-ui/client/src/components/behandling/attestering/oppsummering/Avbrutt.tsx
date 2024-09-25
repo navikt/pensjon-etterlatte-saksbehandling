@@ -11,7 +11,7 @@ import { hentOppgaverMedReferanse } from '~shared/api/oppgaver'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Oppgavestatus } from '~shared/types/oppgave'
+import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { formaterDato } from '~utils/formatering/dato'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
@@ -23,14 +23,20 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
     hentOppgaveForBehandling(behandlingsInfo.behandlingId)
   }, [])
 
+  const finnAvbrutteOppgaver = (oppgaver: OppgaveDTO[]) => {
+    return oppgaver.filter((oppgave) => oppgave.status === Oppgavestatus.AVBRUTT)
+  }
+
   useEffect(() => {
     if (isSuccess(oppgaveForBehandling)) {
-      const avbrutteOppgaver = oppgaveForBehandling.data.filter((oppgave) => oppgave.status === Oppgavestatus.AVBRUTT)
+      const avbrutteOppgaver = finnAvbrutteOppgaver(oppgaveForBehandling.data)
       if (avbrutteOppgaver.length) {
         const riktigOppgave = avbrutteOppgaver[0]
         if (!riktigOppgave.saksbehandler?.navn) {
           if (riktigOppgave.saksbehandler?.ident) {
             hentNavnForIdent(riktigOppgave.saksbehandler?.ident)
+          } else {
+            //Mangler ident error
           }
         }
       }
@@ -59,17 +65,15 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
               <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>
             ),
             (oppgaver) => {
-              const oppgaveravbrutt = oppgaver.filter((oppgave) => oppgave.status === Oppgavestatus.AVBRUTT)
+              const oppgaveravbrutt = finnAvbrutteOppgaver(oppgaver)
               if (oppgaveravbrutt.length) {
-                const foersteavbrutteoppgave = oppgaveravbrutt[0]
+                const riktigOppgave = oppgaveravbrutt[0]
                 const hentetNavn = isSuccess(saksbehandlerNavn) ? saksbehandlerNavn.data : undefined
                 return (
                   <div>
                     <Label size="small">Saksbehandler</Label>
                     <Detail>
-                      {hentetNavn ||
-                        foersteavbrutteoppgave.saksbehandler?.navn ||
-                        foersteavbrutteoppgave.saksbehandler?.ident}
+                      {hentetNavn || riktigOppgave.saksbehandler?.navn || riktigOppgave.saksbehandler?.ident}
                     </Detail>
                   </div>
                 )

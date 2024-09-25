@@ -87,22 +87,24 @@ class PDFService(
         return brev
     }
 
-    // Kombinere flere PDF`er til en PDF
-    fun kombinerPdfListe(pdfListe: List<Pdf>): Pdf {
-        val pdfMerger = PDFMergerUtility()
-        val finalPdf = Loader.loadPDF(pdfListe.first().bytes)
+    companion object {
+        // Kombinere flere PDF`er til en PDF
+        fun kombinerPdfListeTilEnPdf(pdfListe: List<Pdf>): Pdf {
+            val pdfMerger = PDFMergerUtility()
+            val finalPdf = Loader.loadPDF(pdfListe.first().bytes)
 
-        pdfListe.drop(1).forEach { pdf ->
-            val sourcePdf = Loader.loadPDF(pdf.bytes)
-            pdfMerger.appendDocument(finalPdf, sourcePdf)
-            sourcePdf.close()
+            pdfListe.drop(1).forEach { pdf ->
+                val sourcePdf = Loader.loadPDF(pdf.bytes)
+                pdfMerger.appendDocument(finalPdf, sourcePdf)
+                sourcePdf.close()
+            }
+
+            val out = ByteArrayOutputStream()
+            finalPdf.save(out)
+            finalPdf.close()
+
+            return Pdf(out.toByteArray())
         }
-
-        val out = ByteArrayOutputStream()
-        finalPdf.save(out)
-        finalPdf.close()
-
-        return Pdf(out.toByteArray())
     }
 }
 

@@ -28,8 +28,8 @@ export const Oversikt = ({
   const kommentarFraAttestant = attestering?.kommentar
   const oppgave = useSelectorOppgaveUnderBehandling()
 
-  const [res, hentNavnForIdent] = useApiCall(hentNavnforIdent)
-  const [attestant, hentNavnForAttestant] = useApiCall(hentNavnforIdent)
+  const [saksbehandlerNavn, hentNavnForIdent] = useApiCall(hentNavnforIdent)
+  const [attestantNavn, hentNavnForAttestant] = useApiCall(hentNavnforIdent)
 
   useEffect(() => {
     if (behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler) {
@@ -96,7 +96,7 @@ export const Oversikt = ({
           {behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler ? (
             <>
               {mapApiResult(
-                res,
+                saksbehandlerNavn,
                 <Spinner label="Henter saksbehandler" />,
                 () => (
                   <ApiErrorAlert>Kunne ikke hente saksbehandlende saksbehandler</ApiErrorAlert>
@@ -137,7 +137,7 @@ export const Oversikt = ({
           )}
           {attestering &&
             mapApiResult(
-              attestant,
+              attestantNavn,
               <Spinner visible={true} label="Henter attestant" />,
               () => <ApiErrorAlert>Kunne ikke hente attestant</ApiErrorAlert>,
               (attestantnavn) => (

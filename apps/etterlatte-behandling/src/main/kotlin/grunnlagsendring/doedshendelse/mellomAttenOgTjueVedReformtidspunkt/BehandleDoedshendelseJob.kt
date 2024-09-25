@@ -55,7 +55,7 @@ class BehandleDoedshendelseJob(
     }
 
     private fun run() {
-        withLogContext(correlationId = getCorrelationId(), kv = mapOf("migrering" to "true")) {
+        withLogContext(correlationId = getCorrelationId(), kv = mapOf("send_brev_18_20_aar_behandle" to "true")) {
             if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
                 val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
                 logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")

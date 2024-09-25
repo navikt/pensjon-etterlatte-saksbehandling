@@ -553,7 +553,7 @@ internal class ApplicationContext(
             doedshendelseDao,
             behandleDoedshendelseService = behandleDoedshendelseService,
             erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             featureToggleService = featureToggleService,

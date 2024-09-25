@@ -534,7 +534,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            interval = if (isProd()) Duration.of(15, ChronoUnit.MINUTES) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )
@@ -563,7 +563,7 @@ internal class ApplicationContext(
             behandleDoedshendelseService = behandleDoedshendelseService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            interval = if (isProd()) Duration.of(15, ChronoUnit.MINUTES) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             featureToggleService = featureToggleService,
             sakTilgangDao = sakTilgangDao,

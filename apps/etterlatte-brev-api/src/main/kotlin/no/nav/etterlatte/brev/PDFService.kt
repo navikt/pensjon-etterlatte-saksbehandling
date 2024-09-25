@@ -88,7 +88,7 @@ class PDFService(
     }
 
     companion object {
-        // Kombinere flere PDF`er til en PDF
+        // Kombinerer en liste med PDF-er til én enkelt PDF, og bevarer rekkefølgen fra listen.
         fun kombinerPdfListeTilEnPdf(pdfListe: List<Pdf>): Pdf {
             val pdfMerger = PDFMergerUtility()
             val finalPdf = Loader.loadPDF(pdfListe.first().bytes)

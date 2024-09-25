@@ -141,7 +141,7 @@ class PDFGenerator(
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
             .let {
-                // TODO: finne en bedre plass for dette
+                // TODO: finne en bedre plass for dette?
                 when (brev.brevkoder) {
                     Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
                         val vedtaksbrev =

@@ -56,7 +56,7 @@ export const TidligereFamiliepleierVurdering = ({
   const [lagreTidligereFamiliepleierStatus, lagreTidligereFamiliepleierRequest] =
     useApiCall(lagreTidligereFamiliepleier)
 
-  const [rediger, setRediger] = useState<boolean>(false)
+  const [rediger, setRediger] = useState<boolean>(tidligereFamiliepleier === null)
 
   const {
     register,
@@ -92,6 +92,7 @@ export const TidligereFamiliepleierVurdering = ({
   const avbryt = () => {
     reset(tidligereFamiliepleierValuesDefault(tidligereFamiliepleier))
     setRediger(false)
+    if (tidligereFamiliepleier === null) setVurdert(false)
   }
 
   const svar = watch('svar')

@@ -4,6 +4,10 @@ import io.kotest.matchers.shouldBe
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -49,25 +53,25 @@ class VedtakMetricsTest(
     }
 
     private fun opprettLoependeVedtak() {
-        vedtakRepo.opprettVedtak(opprettVedtak(sakId = 1, status = VedtakStatus.IVERKSATT))
-        vedtakRepo.opprettVedtak(opprettVedtak(sakId = 2, status = VedtakStatus.IVERKSATT))
+        vedtakRepo.opprettVedtak(opprettVedtak(sakId = sakId1, status = VedtakStatus.IVERKSATT))
+        vedtakRepo.opprettVedtak(opprettVedtak(sakId = sakId2, status = VedtakStatus.IVERKSATT))
         vedtakRepo.opprettVedtak(
             opprettVedtak(
-                sakId = 3,
+                sakId = sakId3,
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
             ),
         )
         vedtakRepo.opprettVedtak(
             opprettVedtak(
-                sakId = 4,
+                sakId = tilSakId(4),
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
             ),
         )
         vedtakRepo.opprettVedtak(
             opprettVedtak(
-                sakId = 4,
+                sakId = tilSakId(4),
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 type = VedtakType.OPPHOER,

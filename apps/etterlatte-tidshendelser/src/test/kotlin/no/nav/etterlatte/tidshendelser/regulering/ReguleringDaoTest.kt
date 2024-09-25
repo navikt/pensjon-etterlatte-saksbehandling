@@ -5,6 +5,7 @@ import kotliquery.TransactionalSession
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.insert
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.DatabaseExtension
@@ -26,7 +27,12 @@ class ReguleringDaoTest(
     fun lagreOgHentOppReguleringskonfigurasjon() {
         val dato = LocalDate.of(2024, Month.JUNE, 22)
         leggInnReguleringskonfigurasjon(dato, 10, listOf(sakId1, sakId2, sakId3), listOf(sakId2))
-        leggInnReguleringskonfigurasjon(dato, 20, listOf(sakId1, sakId2, sakId3, 4, 5), listOf(sakId1, sakId2, 4))
+        leggInnReguleringskonfigurasjon(
+            dato,
+            20,
+            listOf(sakId1, sakId2, sakId3, tilSakId(4), tilSakId(5)),
+            listOf(sakId1, sakId2, tilSakId(4)),
+        )
         val dao = ReguleringDao(datasource = dataSource)
         val konfigurasjon: Reguleringskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(20, konfigurasjon.antall)

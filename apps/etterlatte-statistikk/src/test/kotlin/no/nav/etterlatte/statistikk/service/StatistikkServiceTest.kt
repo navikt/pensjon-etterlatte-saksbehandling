@@ -455,8 +455,8 @@ class StatistikkServiceTest {
 
         service.produserStoenadStatistikkForMaaned(statistikkMaaned)
 
-        brukteOmsIder.captured.shouldContainAll(omsSakId.map { it })
-        brukteOmsIder.captured.shouldNotContainAnyOf(bpSakId.map { it })
+        brukteOmsIder.captured.shouldContainAll(omsSakId.map { tilSakId(it) })
+        brukteOmsIder.captured.shouldNotContainAnyOf(bpSakId.map { tilSakId(it) })
     }
 }
 

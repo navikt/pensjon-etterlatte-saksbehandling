@@ -59,7 +59,7 @@ class AldersovergangerIntegrationTest(
         val saker =
             sakIder
                 .map {
-                    val sakType = if (it != 3L) SakType.BARNEPENSJON else SakType.OMSTILLINGSSTOENAD
+                    val sakType = if (it != sakId3) SakType.BARNEPENSJON else SakType.OMSTILLINGSSTOENAD
                     sak(it, sakType)
                 }.associateBy { it.id }
 

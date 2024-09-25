@@ -41,7 +41,7 @@ class AktivitetspliktServiceIntegrationTest(
         aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto())
 
         val lagretAktivitet = aktivitetspliktService.hentAktivitet(sakId1, YearMonth.now())
-        lagretAktivitet?.sakId shouldBe 1L
+        lagretAktivitet?.sakId shouldBe sakId1
         lagretAktivitet?.harVarigUnntak shouldBe false
         lagretAktivitet?.aktivitetsgrad shouldBe emptyList()
 

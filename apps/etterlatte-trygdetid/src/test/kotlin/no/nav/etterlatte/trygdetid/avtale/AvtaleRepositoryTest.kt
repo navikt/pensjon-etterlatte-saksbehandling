@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid.avtale
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.trygdetid.DatabaseExtension
@@ -82,6 +83,6 @@ internal class AvtaleRepositoryTest(
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns 123L
+            every { sak } returns tilSakId(123L)
         }
 }

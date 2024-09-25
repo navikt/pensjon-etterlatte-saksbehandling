@@ -811,7 +811,7 @@ internal class BeregningsGrunnlagServiceTest {
                 dao.datoTOM shouldBe tom
                 dao.utbetaltBeloep shouldBe 12L
                 dao.trygdetid shouldBe 25L
-                dao.sakId shouldBe 3L
+                dao.sakId shouldBe sakId3
             }
 
             verify(exactly = 1) {

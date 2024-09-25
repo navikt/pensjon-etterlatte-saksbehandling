@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -147,8 +148,8 @@ internal class GrunnlagDaoIntegrationTest(
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
         lagGrunnlagsopplysning(SOEKER_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId2, it) }
 
-        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
-        assertEquals(2, opplysningRepo.finnHendelserIGrunnlag(2).size)
+        assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(sakId1).size)
+        assertEquals(2, opplysningRepo.finnHendelserIGrunnlag(sakId2).size)
     }
 
     @Test
@@ -378,7 +379,7 @@ internal class GrunnlagDaoIntegrationTest(
                 i,
                 fnr,
             ->
-            val sakId = i.toLong()
+            val sakId = tilSakId(i.toLong())
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(INNSENDER_PDL_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))

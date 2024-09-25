@@ -2,6 +2,7 @@ package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,7 +30,7 @@ class HendelseRiverTest(
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.now())
-        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(Random.nextLong(9999)), Steg.IDENTIFISERT_SAK)
+        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(randomSakId()), Steg.IDENTIFISERT_SAK)
         val hendelseId = hendelseDao.hentHendelserForJobb(jobb.id).first().id
 
         val melding =
@@ -57,7 +57,7 @@ class HendelseRiverTest(
     @Test
     fun `skal lese melding og ferdigstille hendelse`() {
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.now())
-        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(Random.nextLong(9999)), Steg.IDENTIFISERT_SAK)
+        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(randomSakId()), Steg.IDENTIFISERT_SAK)
         val hendelseId = hendelseDao.hentHendelserForJobb(jobb.id).first().id
 
         val melding =

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
@@ -71,7 +73,6 @@ internal class KonsistensavstemmingDataMapperTest {
 
     @Test
     fun `skal mappe konsistensavstememig for flere utbetalinger og flere utbetalingslinjer`() {
-        val sakId1 = 1L
         val oppdragslinjer1 =
             listOf(
                 oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2021, 1, 1)),
@@ -91,7 +92,6 @@ internal class KonsistensavstemmingDataMapperTest {
                     forrigeUtbetalingslinjeId = 1,
                 ),
             )
-        val sakId2 = 2L
         val oppdrag2 =
             oppdragForKonsistensavstemming(sakId = sakId2, oppdragslinjeForKonsistensavstemming = oppdragslinjer2)
 

@@ -114,7 +114,7 @@ internal class RapidTest(
         inspector.sendTestMessage(melding)
         val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(sakId1).first()
 
-        Assertions.assertEquals(grunnlagshendelse.sakId, 1)
+        Assertions.assertEquals(grunnlagshendelse.sakId, sakId1)
         Assertions.assertEquals(grunnlagshendelse.hendelseNummer, 1)
 
         with(grunnlagshendelse.opplysning) {

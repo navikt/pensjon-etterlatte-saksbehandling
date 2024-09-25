@@ -5,6 +5,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +31,8 @@ class JobbPollerIntegrationTest(
     private val reguleringService = mockk<ReguleringService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService)
+    private val jobbPoller =
+        JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService)
 
     @BeforeEach
     fun beforeEach() {
@@ -79,5 +81,36 @@ class JobbPollerIntegrationTest(
         jobbPoller.poll()
 
         verify(exactly = 0) { aldersovergangerService.execute(any()) }
+    }
+
+    @Test
+    fun `feil kastet under henting av saker for jobb skal resette jobbens status`() {
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
+
+        every { aldersovergangerService.execute(jobb) } throws InternfeilException("Whoops")
+        jobbPoller.poll()
+
+        verify(exactly = 1) { aldersovergangerService.execute(any()) }
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.NY
+    }
+
+    @Test
+    fun `feil kastet under henting av saker for jobb skal ikke resette status hvis hendelser er laget allerede`() {
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
+
+        // Denne er litt kunstig, siden dette vil i prinsippet skje i løpet av jobbPoller.poll().
+        // Men vi vil teste at tilbakestilling ikke skjer hvis vi ikke kan gjøre det trygt
+        hendelseDao.opprettHendelserForSaker(
+            jobbId = jobb.id,
+            saksIDer = listOf(1, 2, 3, 4),
+            steg = Steg.IDENTIFISERT_SAK,
+        )
+        every { aldersovergangerService.execute(jobb) } throws InternfeilException("Å nei")
+
+        jobbPoller.poll()
+        verify(exactly = 1) { aldersovergangerService.execute(any()) }
+
+        // Ikke tilbakestilt
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.STARTET
     }
 }

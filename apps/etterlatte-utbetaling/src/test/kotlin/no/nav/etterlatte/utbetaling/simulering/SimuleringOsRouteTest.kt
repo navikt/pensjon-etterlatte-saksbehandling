@@ -99,7 +99,9 @@ class SimuleringOsRouteTest {
             vedtak(
                 vedtakId = 1,
                 saktype = SakType.BARNEPENSJON,
-                sakId = SakId(sakId.value),
+                sakId =
+                    no.nav.etterlatte.libs.common.sak
+                        .SakId(sakId.value),
                 ident = SOEKER_FOEDSELSNUMMER.value,
                 virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),

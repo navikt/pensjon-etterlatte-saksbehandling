@@ -10,7 +10,6 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -380,7 +379,7 @@ internal class GrunnlagDaoIntegrationTest(
                 i,
                 fnr,
             ->
-            val sakId = tilSakId(i.toLong())
+            val sakId = SakId(i.toLong())
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(INNSENDER_PDL_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))

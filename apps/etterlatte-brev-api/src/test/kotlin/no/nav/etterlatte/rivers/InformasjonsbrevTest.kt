@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotliquery.queryOf
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
@@ -20,6 +19,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -62,7 +62,7 @@ class InformasjonsbrevTest(
             mockk<Brevoppretter>().also {
                 coEvery {
                     it.opprettBrev(
-                        tilSakId(saksnr),
+                        SakId(saksnr),
                         any(),
                         any(),
                         any(),

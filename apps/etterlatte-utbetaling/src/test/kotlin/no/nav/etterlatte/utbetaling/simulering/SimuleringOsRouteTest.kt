@@ -12,7 +12,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -100,7 +99,7 @@ class SimuleringOsRouteTest {
             vedtak(
                 vedtakId = 1,
                 saktype = SakType.BARNEPENSJON,
-                sakId = tilSakId(sakId.value),
+                sakId = SakId(sakId.value),
                 ident = SOEKER_FOEDSELSNUMMER.value,
                 virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),

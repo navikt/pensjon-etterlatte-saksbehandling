@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
@@ -1117,7 +1116,7 @@ internal class BeregningsGrunnlagServiceTest {
         trygdetidForIdent = "",
         prorataBroekTeller = null,
         prorataBroekNevner = null,
-        sakId = tilSakId(123L),
+        sakId = SakId(123L),
         beskrivelse = beskrivelse,
         aarsak = "ANNET",
         kilde = Grunnlagsopplysning.Saksbehandler.create(""),

@@ -12,7 +12,6 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.ktor.runServer
@@ -88,13 +87,13 @@ class AldersovergangTest(
 
     @Test
     fun `hent saker hvor seneste doedsdato-opplysning gjelder input-maaned`() {
-        val sakEn = tilSakId(1000L)
+        val sakEn = SakId(1000L)
         val fnrAvdoedEn = AVDOED_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
         opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.DOEDSDATO, TextNode("2024-02-11"), fnrAvdoedEn)
         opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo"), fnrAvdoedEn)
 
-        val sakTo = tilSakId(2000L)
+        val sakTo = SakId(2000L)
         val fnrAvdoedTo = AVDOED2_FOEDSELSNUMMER
         opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo igjen"), fnrAvdoedTo)
         opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-01-31"), fnrAvdoedTo)

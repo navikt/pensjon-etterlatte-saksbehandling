@@ -30,7 +30,7 @@ class BehandleDoedshendelseKontrollpunktService(
             listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
         } else {
             val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn, false)
-            val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
+            val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed, false)
             val fellesKontrollpunkter = fellesKontrollpunkter(barn)
 
             barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter

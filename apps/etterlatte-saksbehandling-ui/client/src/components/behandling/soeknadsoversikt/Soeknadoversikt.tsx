@@ -123,7 +123,9 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             </Virkningstidspunkt>
             <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
-            {toggleTidligereFamiliepleier && <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />}
+            {behandling.sakType == SakType.OMSTILLINGSSTOENAD && toggleTidligereFamiliepleier && (
+              <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
+            )}
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />

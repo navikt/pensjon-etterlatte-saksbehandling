@@ -1,12 +1,12 @@
-import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { BodyShort, Button, VStack } from '@navikt/ds-react'
 import { TidligereFamiliepleierVurdering } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVurdering'
 
-const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null) => {
-  if (boddEllerArbeidetUtlandet) {
+const statusIkon = (tidligereFamiliepleier: ITidligereFamiliepleier | null) => {
+  if (tidligereFamiliepleier) {
     return 'success'
   }
   return 'warning'
@@ -19,13 +19,13 @@ export const TidligereFamiliepleier = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState<boolean>(!!behandling.boddEllerArbeidetUtlandet)
+  const [vurdert, setVurdert] = useState<boolean>(!!behandling.tidligereFamiliepleier)
 
   return (
     <LovtekstMedLenke
       tittel="Tidligere familiepleier"
       hjemler={[]}
-      status={statusIkon(behandling.boddEllerArbeidetUtlandet)}
+      status={statusIkon(behandling.tidligereFamiliepleier)}
     >
       <Informasjon>
         <VStack gap="6">

@@ -3,6 +3,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  ITidligereFamiliepleier,
   IUtlandstilknytning,
   NyBehandlingRequest,
   ViderefoertOpphoer,
@@ -146,6 +147,21 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
     boddArbeidetAvtaleland: args.boddArbeidetAvtaleland,
     vurdereAvoededsTrygdeavtale: args.vurdereAvoededsTrygdeavtale,
     skalSendeKravpakke: args.skalSendeKravpakke,
+  })
+}
+
+export const lagreTidligereFamiliepleier = async (args: {
+  behandlingId: string
+  svar: boolean
+  foedselsnummer?: string
+  opphoertPleieforhold?: Date | null
+  begrunnelse: string
+}): Promise<ApiResponse<ITidligereFamiliepleier>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/tidligere-familiepleier`, {
+    svar: args.svar,
+    foedselsnummer: args.foedselsnummer,
+    opphoertPleieforhold: args.opphoertPleieforhold,
+    begrunnelse: args.begrunnelse,
   })
 }
 

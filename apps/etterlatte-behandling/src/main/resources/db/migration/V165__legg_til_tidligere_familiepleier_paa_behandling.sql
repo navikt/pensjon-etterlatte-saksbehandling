@@ -1,0 +1,1 @@
+ALTER TABLE behandling ADD COLUMN tidligere_familiepleier JSONB;

@@ -7,6 +7,12 @@ import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { fnrErGyldig } from '~utils/fnr'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreTidligereFamiliepleier } from '~shared/api/behandling'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { oppdaterBehandlingsstatus, oppdaterTidligereFamiliepleier } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 
 export interface TidligereFamiliepleierValues {
   svar: JaNei | null
@@ -22,6 +28,18 @@ export const TidligereFamiliepleierValuesDefault: TidligereFamiliepleierValues =
   begrunnelse: '',
 }
 
+const tidligereFamiliepleierValuesDefault = (tidligereFamiliepleier: ITidligereFamiliepleier | null) =>
+  tidligereFamiliepleier
+    ? {
+        svar: tidligereFamiliepleier.svar ? JaNei.JA : JaNei.NEI,
+        foedselsnummer: tidligereFamiliepleier.foedselsnummer ?? null,
+        opphoertPleieforhold: tidligereFamiliepleier.opphoertPleieforhold
+          ? new Date(tidligereFamiliepleier.opphoertPleieforhold)
+          : undefined,
+        begrunnelse: tidligereFamiliepleier.begrunnelse,
+      }
+    : TidligereFamiliepleierValuesDefault
+
 export const TidligereFamiliepleierVurdering = ({
   redigerbar,
   setVurdert,
@@ -31,9 +49,14 @@ export const TidligereFamiliepleierVurdering = ({
   setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
-  console.log(behandlingId)
+  const dispatch = useAppDispatch()
+  const tidligereFamiliepleier =
+    useAppSelector((state) => state.behandlingReducer.behandling?.tidligereFamiliepleier) ?? null
 
-  const [rediger, setRediger] = useState<boolean>(redigerbar ?? false)
+  const [lagreTidligereFamiliepleierStatus, lagreTidligereFamiliepleierRequest] =
+    useApiCall(lagreTidligereFamiliepleier)
+
+  const [rediger, setRediger] = useState<boolean>(false)
 
   const {
     register,
@@ -43,17 +66,31 @@ export const TidligereFamiliepleierVurdering = ({
     watch,
     reset,
   } = useForm<TidligereFamiliepleierValues>({
-    defaultValues: TidligereFamiliepleierValuesDefault,
+    defaultValues: tidligereFamiliepleierValuesDefault(tidligereFamiliepleier),
   })
 
   const lagre = (data: TidligereFamiliepleierValues) => {
-    console.log(data)
-    setVurdert(true)
-    setRediger(false)
+    const erTidligereFamiliepleier = data.svar === JaNei.JA
+
+    lagreTidligereFamiliepleierRequest(
+      {
+        behandlingId,
+        svar: erTidligereFamiliepleier,
+        foedselsnummer: erTidligereFamiliepleier ? data.foedselsnummer!! : undefined,
+        opphoertPleieforhold: erTidligereFamiliepleier ? data.opphoertPleieforhold!! : undefined,
+        begrunnelse: data.begrunnelse,
+      },
+      (response) => {
+        dispatch(oppdaterTidligereFamiliepleier(response))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+        setVurdert(true)
+        setRediger(false)
+      }
+    )
   }
 
   const avbryt = () => {
-    reset(TidligereFamiliepleierValuesDefault)
+    reset(tidligereFamiliepleierValuesDefault(tidligereFamiliepleier))
     setRediger(false)
   }
 
@@ -62,14 +99,18 @@ export const TidligereFamiliepleierVurdering = ({
   return (
     <VurderingsboksWrapper
       tittel="Er gjenlevende tidligere familiepleier?"
-      subtittelKomponent={<TidligereFamiliepleierVisning tidligereFamiliepleier={null} />}
+      subtittelKomponent={<TidligereFamiliepleierVisning tidligereFamiliepleier={tidligereFamiliepleier} />}
       redigerbar={redigerbar}
-      vurdering={{
-        saksbehandler: '123456',
-        tidspunkt: new Date(),
-      }}
-      kommentar={undefined}
-      defaultRediger={rediger}
+      vurdering={
+        tidligereFamiliepleier?.kilde
+          ? {
+              saksbehandler: tidligereFamiliepleier?.kilde.ident,
+              tidspunkt: new Date(tidligereFamiliepleier?.kilde.tidspunkt),
+            }
+          : undefined
+      }
+      kommentar={tidligereFamiliepleier?.begrunnelse}
+      defaultRediger={tidligereFamiliepleier === null}
       overstyrRediger={rediger}
       setOverstyrRediger={setRediger}
     >
@@ -136,6 +177,10 @@ export const TidligereFamiliepleierVurdering = ({
             </HStack>
           </VStack>
         </Box>
+        {isFailureHandler({
+          apiResult: lagreTidligereFamiliepleierStatus,
+          errorMessage: 'Kunne ikke lagre tidligere familiepleier',
+        })}
       </>
     </VurderingsboksWrapper>
   )

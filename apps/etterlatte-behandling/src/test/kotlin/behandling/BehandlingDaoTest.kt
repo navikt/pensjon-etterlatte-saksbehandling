@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -229,6 +230,41 @@ internal class BehandlingDaoTest(
             "navIdent",
             (lagretBehandling.boddEllerArbeidetUtlandet?.kilde as Grunnlagsopplysning.Saksbehandler).ident,
         )
+    }
+
+    @Test
+    fun `Skal legge til tidligere familiepleier i en opprettet behandling`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr).id
+
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val opprettetBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        behandlingRepo.lagreTidligereFamiliepleier(
+            opprettetBehandling.id,
+            TidligereFamiliepleier(
+                true,
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "123",
+                LocalDate.now(),
+                "Test",
+            ),
+        )
+
+        val lagretBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        assertEquals(true, lagretBehandling.tidligereFamiliepleier?.svar)
+        assertEquals("123", lagretBehandling.tidligereFamiliepleier?.foedselsnummer)
+        assertEquals("Test", lagretBehandling.tidligereFamiliepleier?.begrunnelse)
+        assertEquals("ident", (lagretBehandling.tidligereFamiliepleier?.kilde as Grunnlagsopplysning.Saksbehandler).ident)
     }
 
     @Test

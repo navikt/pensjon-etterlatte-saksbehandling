@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -166,7 +168,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `kan oppdater bodd eller arbeidet i utlandet`() {
+    fun `kan oppdatere bodd eller arbeidet i utlandet`() {
         coEvery {
             behandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
         } just runs
@@ -207,6 +209,24 @@ internal class BehandlingRoutesTest {
                         }
                         """.trimIndent(),
                     )
+                }
+
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan oppdatere tidligere familiepleier`() {
+        coEvery {
+            behandlingService.oppdaterTidligereFamiliepleier(any(), any())
+        } just runs
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/behandling/$behandlingId/tidligere-familiepleier") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(TidligereFamiliepleierRequest(true, "Test", LocalDate.now(), "test"))
                 }
 
             assertEquals(200, response.status.value)

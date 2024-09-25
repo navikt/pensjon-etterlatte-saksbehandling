@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -35,6 +36,7 @@ data class ManuellRevurdering(
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
+    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -51,6 +53,7 @@ data class ManuellRevurdering(
         begrunnelse = begrunnelse,
         relatertBehandlingId = relatertBehandlingId,
         opphoerFraOgMed = opphoerFraOgMed,
+        tidligereFamiliepleier = tidligereFamiliepleier,
     ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {

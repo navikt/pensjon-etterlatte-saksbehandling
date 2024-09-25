@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -34,6 +35,7 @@ data class Foerstegangsbehandling(
     override val kilde: Vedtaksloesning,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
+    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
@@ -67,6 +69,11 @@ data class Foerstegangsbehandling(
     override fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
+        }
+
+    override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
     override fun tilOpprettet(): Foerstegangsbehandling = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }

@@ -1,32 +1,29 @@
-import { BodyShort, Label, VStack } from '@navikt/ds-react'
+import React from 'react'
+import { BodyShort, Box, Label, VStack } from '@navikt/ds-react'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { TidligereFamiliepleierValues } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVurdering'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
+import { ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 
-const TidligereFamiliepleierVisning = (props: { tidligereFamiliepleier: TidligereFamiliepleierValues | null }) => {
+const TidligereFamiliepleierVisning = (props: { tidligereFamiliepleier: ITidligereFamiliepleier | null }) => {
   const { tidligereFamiliepleier } = props
   return (
     <>
       {tidligereFamiliepleier && tidligereFamiliepleier.svar ? (
-        <>
+        <Box paddingBlock="0 4">
           <VStack gap="4">
-            <Label as="p" size="small">
-              {JaNeiRec[tidligereFamiliepleier.svar ? JaNei.JA : JaNei.NEI]}
-            </Label>
+            <BodyShort size="small">{JaNeiRec[tidligereFamiliepleier.svar ? JaNei.JA : JaNei.NEI]}</BodyShort>
             <div>
-              <BodyShort spacing>Fødselsnummer for forpleiede</BodyShort>
-              <Label as="p" size="small">
-                {tidligereFamiliepleier.foedselsnummer}
-              </Label>
+              <Label>Fødselsnummer for forpleiede</Label>
+              <BodyShort size="small">{tidligereFamiliepleier.foedselsnummer}</BodyShort>
             </div>
             <div>
-              <BodyShort spacing>Pleieforholdet opphørte</BodyShort>
-              <Label as="p" size="small">
+              <Label>Pleieforholdet opphørte </Label>
+              <BodyShort size="small">
                 {formaterDatoMedFallback(tidligereFamiliepleier.opphoertPleieforhold!!, '-')}
-              </Label>
+              </BodyShort>
             </div>
           </VStack>
-        </>
+        </Box>
       ) : (
         <>
           <BodyShort size="small" spacing>

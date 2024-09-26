@@ -15,7 +15,7 @@ import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.migreringRoute
 import rapidsandrivers.initRogR
 
-fun main() = Server().run()
+fun main() = Server().run() // a
 
 internal class Server {
     private val dataSource = DataSourceBuilder.createDataSource(Miljoevariabler.systemEnv())

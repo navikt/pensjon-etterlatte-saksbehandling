@@ -34,6 +34,8 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
       return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
     case Oppgavetype.GENERELL_OPPGAVE:
       return <Tag variant="info">Generell oppgave</Tag>
+    case Oppgavetype.MANUELL_UTSENDING_BREV:
+      return <Tag variant="info">Manuell brevutsending</Tag>
     default:
       return <Tag variant="error-filled">Ukjent oppgave</Tag>
   }

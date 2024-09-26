@@ -34,6 +34,7 @@ import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
@@ -65,6 +66,7 @@ import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.notatRoute
+import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
@@ -128,10 +130,12 @@ class ApplicationBuilder {
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
+    private val oppgaveKlient = OppgaveKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
+    private val oppgaveService = OppgaveService(oppgaveKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val beregningService = BeregningService(beregningKlient)
@@ -280,6 +284,7 @@ class ApplicationBuilder {
             OpprettJournalfoerOgDistribuerRiver(
                 rapidsConnection,
                 grunnlagService,
+                oppgaveService,
                 brevoppretter,
                 ferdigstillJournalfoerOgDistribuerBrev,
             )

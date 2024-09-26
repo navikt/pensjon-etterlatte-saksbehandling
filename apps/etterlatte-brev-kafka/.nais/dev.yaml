@@ -1,0 +1,163 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-brev-api
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+  annotations:
+    reloader.stakater.com/match: "true"
+spec:
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - "https://etterlatte-brev-api.intern.dev.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  secureLogs:
+    enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-g1-small
+        databases:
+          - name: etterlatte-brev
+            envVarPrefix: DB
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: 5b6745de-b65d-40eb-a6f5-860c8b61c27f # 0000-GA-GJENNY_SAKSBEHANDLER
+          - id: 609a78e7-e0bd-491c-a63b-96a09ec62b9b # 0000-GA-GJENNY_LES
+          - id: 70cfce24-7865-4676-9fdc-b676e90bfc92 # 0000-GA-GJENNY_ATTESTERING
+          - id: e1007946-296f-450d-8fe2-8a365773ef6c # 0000-GA-GJENNY_UTVIDET
+          - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14 # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a #0000-GA-Fortrolig_Adresse
+          - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
+          - id: 753805ea-65a7-4855-bdc3-e6130348df9f # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: ea7411eb-8b48-41a0-bc56-7b521fbf0c25 # 0000-GA-PENSJON_NASJONAL_U_LOGG
+  kafka:
+    pool: nav-dev
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 512Mi
+  replicas:
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: BREVBAKER_URL
+      value: https://pensjon-brevbaker.intern.dev.nav.no
+    - name: BREVBAKER_SCOPE
+      value: api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default
+    - name: PDFGEN_URL
+      value: http://ey-pdfgen/api/v1/genpdf
+    - name: BRREG_URL
+      value: https://data.brreg.no
+    - name: NORG2_URL
+      value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
+    - name: SAF_BASE_URL
+      value: https://saf-q2.dev-fss-pub.nais.io
+    - name: SAF_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: DOKDIST_URL
+      value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
+    - name: DOKDIST_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
+    - name: NAVANSATT_URL
+      value: https://navansatt.dev-fss-pub.nais.io
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: REGOPPSLAG_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.regoppslag/.default
+    - name: REGOPPSLAG_URL
+      value: https://regoppslag.dev-fss-pub.nais.io
+    - name: NAVANSATT_OUTBOUND_SCOPE
+      value: api://dev-fss.teampensjon.navansatt/.default
+    - name: CLAMAV_ENDPOINT_URL
+      value: http://clamav.nais-system.svc.cluster.local
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VEDTAK_CLIENT_ID
+      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
+    - name: ETTERLATTE_VEDTAK_URL
+      value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
+    - name: ETTERLATTE_BEREGNING_CLIENT_ID
+      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+    - name: ETTERLATTE_BEREGNING_URL
+      value: http://etterlatte-beregning
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-trygdetid
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-grunnlag
+        - application: etterlatte-beregning
+        - application: etterlatte-behandling
+        - application: etterlatte-trygdetid
+        - application: ey-pdfgen
+        - application: clamav
+          namespace: nais-system
+      external:
+        - host: norg2.dev-fss-pub.nais.io
+        - host: saf-q2.dev-fss-pub.nais.io
+        - host: regoppslag.dev-fss-pub.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
+        - host: dokdistfordeling.dev-fss-pub.nais.io
+        - host: data.brreg.no
+        - host: navansatt.dev-fss-pub.nais.io
+        - host: pensjon-brevbaker.intern.dev.nav.no
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-behandling
+        - application: etterlatte-testdata-behandler
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
+          namespace: aura
+          cluster: dev-gcp

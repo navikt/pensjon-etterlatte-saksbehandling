@@ -165,3 +165,4 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
+        - application: etterlatte-brev-kafka

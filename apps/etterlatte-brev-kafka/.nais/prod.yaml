@@ -61,89 +61,15 @@ spec:
     max: 1
     min: 1
   env:
-    - name: BREVBAKER_URL
-      value: https://pensjon-brevbaker.intern.nav.no
-    - name: BREVBAKER_SCOPE
-      value: api://prod-gcp.pensjonsbrev.pensjon-brevbaker/.default
-    - name: PDFGEN_URL
-      value: http://ey-pdfgen/api/v1/genpdf
-    - name: BRREG_URL
-      value: https://data.brreg.no
-    - name: NORG2_URL
-      value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
-    - name: SAF_BASE_URL
-      value: https://saf.prod-fss-pub.nais.io
-    - name: SAF_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.saf/.default
-    - name: DOKARKIV_URL
-      value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
-    - name: DOKARKIV_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
-    - name: DOKDIST_URL
-      value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
-    - name: DOKDIST_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.saf/.default
-    - name: NAVANSATT_URL
-      value: https://navansatt.prod-fss-pub.nais.io
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.etterlatteytelser
-    - name: REGOPPSLAG_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.regoppslag/.default
-    - name: REGOPPSLAG_URL
-      value: https://regoppslag.prod-fss-pub.nais.io
-    - name: NAVANSATT_OUTBOUND_SCOPE
-      value: api://prod-fss.pensjondeployer.navansatt/.default
-    - name: CLAMAV_ENDPOINT_URL
-      value: http://clamav.nais-system.svc.cluster.local
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-grunnlag
-    - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag
-    - name: ETTERLATTE_BEREGNING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-beregning
-    - name: ETTERLATTE_BEREGNING_URL
-      value: http://etterlatte-beregning
-    - name: ETTERLATTE_BEHANDLING_URL
-      value: http://etterlatte-behandling
-    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-trygdetid
+    - name: BREV_API_URL
+      value: http://etterlatte-brev-api
+    - name: BREV_API_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-brev-api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-grunnlag
-        - application: etterlatte-beregning
-        - application: etterlatte-behandling
-        - application: etterlatte-trygdetid
-        - application: ey-pdfgen
-        - application: clamav
-          namespace: nais-system
+        - application: etterlatte-brev-api
       external:
-        - host: norg2.prod-fss-pub.nais.io
-        - host: saf.prod-fss-pub.nais.io
-        - host: regoppslag.prod-fss-pub.nais.io
-        - host: dokarkiv.prod-fss-pub.nais.io
-        - host: dokdistfordeling.prod-fss-pub.nais.io
-        - host: data.brreg.no
-        - host: navansatt.prod-fss-pub.nais.io
-        - host: pensjon-brevbaker.intern.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-    inbound:
-      rules:
-        - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-behandling

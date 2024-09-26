@@ -63,23 +63,39 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        runBlocking {
-            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+        // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
 
+        try {
             val (brevID, erDistribuert) =
-                opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+                runBlocking {
+                    opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+                }
 
             if (erDistribuert) {
                 packet.brevId = brevID
                 packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
                 context.publish(packet.toJson())
             } else {
-                oppgaveService.opprettOppgaveForFeiletBrev(packet.sakId, brevID, HardkodaSystembruker.river)
+                runBlocking {
+                    oppgaveService.opprettOppgaveForFeiletBrev(packet.sakId, brevID, HardkodaSystembruker.river)
+                }
 
                 packet.setEventNameForHendelseType(EventNames.FEILA)
                 context.publish(packet.toJson())
             }
+        } catch (e: Exception) {
+            logger.error(
+                "Vi klarte ikke opprette brevet med brevkode $brevkode for sak=${packet.sakId}, på grunn " +
+                    "av feil i oppretting av selve brevet. DETTE MÅ FØLGES OPP MANUELT. " +
+                    "Dette ble heller ikke håndtert ved at vi laget en oppgave til saksbehandler, siden vi " +
+                    "ikke har en brevId (opprettet ingenting), og da ville jeg ikke legge på noe junky data i " +
+                    "en flyt jeg ikke kjenner til. Dette er en håndtering enn så lenge som ikke tar ned brev-api.",
+                e,
+            )
+
+            packet.setEventNameForHendelseType(EventNames.FEILA)
+            context.publish(packet.toJson())
         }
     }
 
@@ -108,10 +124,15 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
                                 opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                             }
+
                             Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
+                                opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
+                                    sakId,
+                                    borIutland,
+                                )
                             }
+
                             Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettOmstillingsstoenadInformasjonDoedsfall(
@@ -119,9 +140,11 @@ class OpprettJournalfoerOgDistribuerRiver(
                                     borIutland,
                                 )
                             }
+
                             Brevkoder.OMS_INNTEKTSJUSTERING -> {
                                 OmstillingsstoenadInntektsjustering()
                             }
+
                             else -> ManueltBrevData()
                         }
                     }
@@ -191,7 +214,12 @@ class OpprettJournalfoerOgDistribuerRiver(
     )
 
     private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> =
-        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
+        grunnlagService
+            .hentPersonerISak(
+                grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river),
+                null,
+                null,
+            ).avdoede
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

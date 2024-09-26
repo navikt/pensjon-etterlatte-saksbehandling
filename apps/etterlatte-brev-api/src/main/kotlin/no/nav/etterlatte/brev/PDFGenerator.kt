@@ -148,7 +148,7 @@ class PDFGenerator(
                             brevbakerService.genererPdf(
                                 brev.id,
                                 BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbrue eller egen mal for vedtaksbrev
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
                                     OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
                                     avsender,
                                     generellBrevData.personerISak.soekerOgEventuellVerge(),

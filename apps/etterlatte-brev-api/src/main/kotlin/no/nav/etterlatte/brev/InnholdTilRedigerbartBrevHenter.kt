@@ -28,6 +28,64 @@ class InnholdTilRedigerbartBrevHenter(
     private val adresseService: AdresseService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
+    internal suspend fun hentInnDataForBrevMedData(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        brevKode: Brevkoder,
+        brevData: BrevDataRedigerbar,
+    ): OpprettBrevRequest {
+        val generellBrevData =
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, null, bruker) }
+        val kode = brevKode
+        return coroutineScope {
+            val innhold =
+                async {
+                    brevbaker.hentRedigerbarTekstFraBrevbakeren(
+                        BrevbakerRequest.fra(
+                            brevKode = kode.redigering,
+                            brevData = brevData,
+                            avsender =
+                                adresseService.hentAvsender(
+                                    opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                ),
+                            soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                            sakId = sakId,
+                            spraak = generellBrevData.spraak,
+                            sakType = generellBrevData.sak.sakType,
+                        ),
+                    )
+                }
+
+            val innholdVedlegg =
+                async {
+                    redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
+                        bruker,
+                        kode.brevtype,
+                        generellBrevData.sak.sakType,
+                        generellBrevData.forenkletVedtak?.type,
+                        generellBrevData.behandlingId,
+                        generellBrevData.revurderingsaarsak,
+                        generellBrevData.personerISak.soekerOgEventuellVerge(),
+                        generellBrevData.sak.id,
+                        generellBrevData.forenkletVedtak,
+                        generellBrevData.sak.enhet,
+                        generellBrevData.spraak,
+                    )
+                }
+
+            OpprettBrevRequest(
+                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
+                sakType = generellBrevData.sak.sakType,
+                enhet = generellBrevData.sak.enhet,
+                personerISak = generellBrevData.personerISak,
+                innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
+                innholdVedlegg = innholdVedlegg.await(),
+                brevkode = kode,
+            )
+        }
+    }
+
     internal suspend fun hentInnData(
         sakId: SakId,
         behandlingId: UUID?,

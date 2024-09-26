@@ -26,6 +26,49 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
+    suspend fun opprettBrevSomHarInnhold(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        brevKode: Brevkoder,
+        brevtype: Brevtype,
+        brevData: BrevDataRedigerbar,
+        validerMottaker: Boolean = true,
+    ): Pair<Brev, Enhetsnummer> {
+        with(
+            innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                brevData,
+            ),
+        ) {
+            val nyttBrev =
+                OpprettNyttBrev(
+                    sakId = sakId,
+                    behandlingId = behandlingId,
+                    prosessType = BrevProsessType.REDIGERBAR,
+                    soekerFnr = soekerFnr,
+                    mottaker = finnMottaker(sakType, personerISak),
+                    opprettet = Tidspunkt.now(),
+                    innhold = innhold,
+                    innholdVedlegg = innholdVedlegg,
+                    brevtype = brevtype,
+                    brevkoder = brevkode,
+                )
+            if (validerMottaker && nyttBrev.mottaker.erGyldig().isNotEmpty()) {
+                sikkerLogg.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
+                throw UgyldigMottakerKanIkkeFerdigstilles(
+                    id = null,
+                    sakId = nyttBrev.sakId,
+                    nyttBrev.mottaker.erGyldig(),
+                )
+            }
+            return Pair(db.opprettBrev(nyttBrev), enhet)
+        }
+    }
+
     suspend fun opprettBrev(
         sakId: SakId,
         behandlingId: UUID?,

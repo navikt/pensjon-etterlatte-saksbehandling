@@ -1,7 +1,7 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -148,14 +148,12 @@ const BeregningsgrunnlagBarnepensjon = () => {
     )
   }
 
-  const tidligsteAvdoede: IPdlPerson = requireNotNull(
+  const tidligsteAvdoede: IPdlPerson | null =
     personopplysninger?.avdoede
       .map((it) => it.opplysning)
       .reduce((previous, current) => {
         return current.doedsdato!! < previous.doedsdato!! ? current : previous
-      }) || null,
-    'Mangler avdøde for beregningsgrunnlag'
-  )
+      }) || null
 
   return (
     <>
@@ -169,13 +167,19 @@ const BeregningsgrunnlagBarnepensjon = () => {
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
-                  {trygdetider.length > 1 && (
-                    <BeregningsmetoderFlereAvdoede
-                      redigerbar={redigerbar}
-                      trygdetider={trygdetider}
-                      tidligsteAvdoede={tidligsteAvdoede}
-                    />
-                  )}
+                  {trygdetider.length > 1 &&
+                    (!!tidligsteAvdoede ? (
+                      <BeregningsmetoderFlereAvdoede
+                        redigerbar={redigerbar}
+                        trygdetider={trygdetider}
+                        tidligsteAvdoede={tidligsteAvdoede}
+                      />
+                    ) : (
+                      <ApiErrorAlert>
+                        Fant ikke avdøde i persongalleriet. For å beregne barnepensjonen riktig må det være en eller
+                        flere avdøde i persongalleriet.
+                      </ApiErrorAlert>
+                    ))}
                   {trygdetider.length === 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}

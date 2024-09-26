@@ -141,14 +141,14 @@ class PDFGenerator(
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
             .let {
-                // TODO: finne en bedre plass for dette?
+                // TODO: finne et bedre sted for dette?
                 when (brev.brevkoder) {
-                    Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
-                        val vedtaksbrev =
+                    Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK -> {
+                        val varselbrev =
                             brevbakerService.genererPdf(
                                 brev.id,
                                 BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK,
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
                                     OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data
                                     avsender,
                                     generellBrevData.personerISak.soekerOgEventuellVerge(),
@@ -157,7 +157,7 @@ class PDFGenerator(
                                     sak.sakType,
                                 ),
                             )
-                        PDFService.kombinerPdfListeTilEnPdf(listOf(it, vedtaksbrev))
+                        PDFService.kombinerPdfListeTilEnPdf(listOf(it, varselbrev))
                     }
                     else -> it
                 }

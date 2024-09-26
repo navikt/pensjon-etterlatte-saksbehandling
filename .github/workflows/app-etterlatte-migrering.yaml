@@ -12,37 +12,6 @@ on:
           - true
           - false
   push:
-    branches:
-      - main
-    paths:
-      - apps/etterlatte-migrering/**
-      - libs/saksbehandling-common/**
-      - libs/etterlatte-funksjonsbrytere/**
-      - libs/etterlatte-ktor/**
-      - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
-      - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-pdl-model/**
-      - libs/etterlatte-utbetaling-model/**
-      - libs/etterlatte-brev-model/**
-      - gradle/libs.versions.toml
-      - "!**/test/**"
-  pull_request:
-    branches:
-      - main
-    paths:
-      - apps/etterlatte-migrering/**
-      - "!apps/etterlatte-migrering/.nais/*"
-      - libs/saksbehandling-common/**
-      - libs/etterlatte-funksjonsbrytere/**
-      - libs/etterlatte-ktor/**
-      - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
-      - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-pdl-model/**
-      - libs/etterlatte-utbetaling-model/**
-      - libs/etterlatte-brev-model/**
-      - gradle/libs.versions.toml
 
 permissions:
   contents: write
@@ -50,11 +19,5 @@ permissions:
 
 jobs:
   test:
-    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/.test.yaml
-    secrets: inherit
-
-  build-and-deploy:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/.build-and-deploy.yaml
     secrets: inherit

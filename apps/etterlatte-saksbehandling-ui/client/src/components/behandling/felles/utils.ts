@@ -101,3 +101,7 @@ export const sisteBehandlingHendelse = (hendelser: IHendelse[]): IHendelse => {
 
   return hendelserSortert[hendelserSortert.length - 1]
 }
+
+export function hasValue<T>(value?: T | null): value is T {
+  return value !== undefined && value !== null
+}

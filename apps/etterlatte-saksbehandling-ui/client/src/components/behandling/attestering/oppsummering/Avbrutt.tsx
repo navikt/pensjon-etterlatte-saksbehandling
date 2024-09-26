@@ -90,10 +90,6 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
             <Label size="small">Virkningstidspunkt</Label>
             <Detail>{behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}</Detail>
           </div>
-          <div>
-            <Label size="small">Vedtaksdato</Label>
-            <Detail>{behandlingsInfo.datoAttestert ? formaterDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}</Detail>
-          </div>
         </HStack>
 
         <HStack gap="4" align="center">

@@ -212,10 +212,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         })}
 
         {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
-        {trygdetidIdMangler && behandling.status === IBehandlingStatus.AVBRUTT ? (
-          <ErrorMessage>Behandlingen har ingen trygdetid</ErrorMessage>
-        ) : (
-          <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>
+        {trygdetidIdMangler && (
+          <ErrorMessage>
+            {behandling.status === IBehandlingStatus.AVBRUTT
+              ? 'Behandlingen har ingen trygdetid'
+              : 'Finner ikke trygdetid - ID mangler'}
+          </ErrorMessage>
         )}
       </VStack>
     </Box>

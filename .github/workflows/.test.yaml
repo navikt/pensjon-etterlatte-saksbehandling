@@ -15,7 +15,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: gradle/build-logic/build
-          key: build-logic-${{ hashFiles('gradle/build-logic/src/**', 'gradle/build-logic/build.gradle.kts','gradle/build-logic/settings.gradle.kts') }}
+          key: build-logic-${{ hashFiles('../../gradle/build-logic/src/**', '../../gradle/build-logic/build.gradle.kts','../../gradle/build-logic/settings.gradle.kts') }}
       - name: Setup Java
         uses: actions/setup-java@v4
         with:

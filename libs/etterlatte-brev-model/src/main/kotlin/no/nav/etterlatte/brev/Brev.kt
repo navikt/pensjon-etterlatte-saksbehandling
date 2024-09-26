@@ -37,15 +37,23 @@ data class Adresse(
     val landkode: String,
     val land: String,
 ) {
-    fun erGyldig(): Boolean =
+    fun erGyldig(): List<String> =
         if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
-            false
+            listOf("Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank")
         } else if (adresseType == "NORSKPOSTADRESSE") {
-            !(postnummer.isNullOrBlank() || poststed.isNullOrBlank())
+            if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
+                listOf()
+            } else {
+                listOf("Postnummer eller poststed er null eller blank")
+            }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
-            !adresselinje1.isNullOrBlank()
+            if (!adresselinje1.isNullOrBlank()) {
+                listOf()
+            } else {
+                listOf("Adresselinje1 er null eller blank")
+            }
         } else {
-            true
+            listOf()
         }
 }
 
@@ -57,11 +65,11 @@ data class Mottaker(
     val adresse: Adresse,
     val tvingSentralPrint: Boolean = false,
 ) {
-    fun erGyldig(): Boolean =
+    fun erGyldig(): List<String> =
         if (navn.isBlank()) {
-            false
+            listOf("Navn er blank")
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
-            false
+            listOf("Fødselsnummer og orgnummer er null eller blank")
         } else {
             adresse.erGyldig()
         }

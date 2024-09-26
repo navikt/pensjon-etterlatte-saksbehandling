@@ -35,6 +35,7 @@ import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -150,7 +151,8 @@ internal class VilkaarsvurderingRoutesTest(
                 }
 
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
-            val vilkaar = vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_DOEDSFALL_FORELDER_2024 }
+            val vilkaar =
+                vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_DOEDSFALL_FORELDER_2024 }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
@@ -587,10 +589,15 @@ internal class VilkaarsvurderingRoutesTest(
             coEvery { behandlingService.hentBehandling(revurderingBehandlingId) } returns
                 behandling().apply {
                     every { type } returns BehandlingType.REVURDERING
+                    every { prosesstype } returns Prosesstype.MANUELL
                     every { id } returns revurderingBehandlingId
                 }
 
-            coEvery { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(behandlingId, sakId1)
+            coEvery { behandlingService.hentSisteIverksatte(any()) } returns
+                foerstegangsbehandling(
+                    behandlingId,
+                    sakId1,
+                )
 
             val response =
                 client.post("/api/vilkaarsvurdering/$revurderingBehandlingId/opprett") {
@@ -686,7 +693,13 @@ internal class VilkaarsvurderingRoutesTest(
         val behandlingServiceLocal = mockk<BehandlingService>()
         val behandlingStatusServiceLocal = mockk<BehandlingStatusService>()
         coEvery { behandlingServiceLocal.hentBehandling(any()) } returns behandling()
-        every { behandlingStatusServiceLocal.settVilkaarsvurdert(any(), any(), true) } throws BehandlingstilstandException()
+        every {
+            behandlingStatusServiceLocal.settVilkaarsvurdert(
+                any(),
+                any(),
+                true,
+            )
+        } throws BehandlingstilstandException()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -786,7 +799,13 @@ internal class VilkaarsvurderingRoutesTest(
                     kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024}",
                 )
 
-            every { behandlingStatusService.settVilkaarsvurdert(any(), any(), true) } throws BehandlingstilstandException()
+            every {
+                behandlingStatusService.settVilkaarsvurdert(
+                    any(),
+                    any(),
+                    true,
+                )
+            } throws BehandlingstilstandException()
             val response =
                 client.post("/api/vilkaarsvurdering/$behandlingId") {
                     header(HttpHeaders.Authorization, "Bearer $token")
@@ -812,7 +831,11 @@ internal class VilkaarsvurderingRoutesTest(
 
             runBlocking {
                 vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, sbBrukertokenInfo)
-                vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, sbBrukertokenInfo, vilkaarsvurderingResultat())
+                vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(
+                    behandlingId,
+                    sbBrukertokenInfo,
+                    vilkaarsvurderingResultat(),
+                )
             }
 
             val response =

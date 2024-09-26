@@ -23,6 +23,10 @@ class AutomatiskRevurderingService(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagServiceImpl,
 ) {
+    /*
+     * Denne tjenesten er tiltenkt automatiske jobber der det kan utføres mange samtidig.
+     * Det er derfor behov for retries rundt oppfølgingsmetoder.
+     */
     suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
         validerSakensTilstand(request.sakId, request.revurderingAarsak)
 

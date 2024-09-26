@@ -77,7 +77,7 @@ export const BrevutfallVisning = (props: {
                   <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                 </VStack>
               </HStack>
-              {sakType == SakType.BARNEPENSJON && (
+              {sakType === SakType.BARNEPENSJON && (
                 <>
                   {hasValue(brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav) && (
                     <VStack gap="2">
@@ -99,7 +99,7 @@ export const BrevutfallVisning = (props: {
               )}
             </>
           )}
-          {sakType == SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
+          {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
             <VStack gap="2">
               <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
@@ -107,7 +107,7 @@ export const BrevutfallVisning = (props: {
           )}
         </VStack>
       )}
-      {sakType == SakType.BARNEPENSJON && (
+      {sakType === SakType.BARNEPENSJON && (
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>

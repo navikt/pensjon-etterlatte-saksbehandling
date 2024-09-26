@@ -6,11 +6,12 @@ internal class DoedshendelseKontrollpunktAvdoedService {
     fun identifiser(
         avdoed: PersonDTO,
         kontrollerDNummer: Boolean = true,
+        kontrollerUtvandring: Boolean = true,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
             kontrollerDoedsdato(avdoed),
             if (kontrollerDNummer) kontrollerDNummer(avdoed) else null,
-            kontrollerUtvandring(avdoed),
+            if (kontrollerUtvandring) kontrollerUtvandring(avdoed) else null,
         )
 
     private fun kontrollerDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =

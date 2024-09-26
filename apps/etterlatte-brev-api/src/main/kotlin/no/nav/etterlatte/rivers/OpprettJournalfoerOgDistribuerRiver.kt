@@ -91,7 +91,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     ): Pair<BrevID, Boolean> {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
 
-        val brevOgData =
+        val (brev, enhetsnummer) =
             try {
                 retryOgPakkUt {
                     brevoppretter.opprettBrev(
@@ -135,28 +135,33 @@ class OpprettJournalfoerOgDistribuerRiver(
                 )
             }
 
-        if (brevOgData.first.mottaker
+        if (brev.mottaker
                 .erGyldig()
                 .isNotEmpty()
         ) {
-            return Pair(brevOgData.first.id, false)
+            return Pair(brev.id, false)
         }
 
-        val brevID =
-            ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
+        try {
+            val brevID =
+                ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
+                    brevKode,
+                    sakId,
+                    brukerTokenInfo,
+                    enhetsnummer,
+                    brev.id,
+                )
+            ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
                 brevKode,
                 sakId,
+                brevID,
                 brukerTokenInfo,
-                brevOgData.second,
-                brevOgData.first.id,
             )
-        ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
-            brevKode,
-            sakId,
-            brevID,
-            brukerTokenInfo,
-        )
-        return Pair(brevID, true)
+            return Pair(brevID, true)
+        } catch (e: Exception) {
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...")
+            return Pair(brev.id, false)
+        }
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

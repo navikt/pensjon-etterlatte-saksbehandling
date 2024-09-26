@@ -17,10 +17,11 @@ internal class DoedshendelseKontrollpunktBarnService(
         avdoed: PersonDTO,
         sak: Sak?,
         barn: PersonDTO,
+        kontrollerSamtidigDoedsfall: Boolean = true,
     ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
             kontrollerBarnOgHarBP(sak),
-            kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
+            if (kontrollerSamtidigDoedsfall) kontrollerSamtidigDoedsfall(avdoed, hendelse, barn) else null,
         )
 
     private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {

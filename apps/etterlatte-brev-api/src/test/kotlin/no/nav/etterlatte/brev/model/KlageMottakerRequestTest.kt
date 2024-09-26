@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -77,11 +78,11 @@ internal class KlageMottakerRequestTest {
         fun `Sjekk gyldighet av mottaker fungerer - felles uavhengig av land`() {
             val manglerNavn = Mottaker("", adresse = mockk())
 
-            manglerNavn.erGyldig() shouldBe false
+            manglerNavn.erGyldig() shouldNotBe emptyList<String>()
 
             val manglerFnrOgOrgnr = Mottaker("Navn Navnesen", foedselsnummer = null, orgnummer = null, adresse = mockk())
 
-            manglerFnrOgOrgnr.erGyldig() shouldBe false
+            manglerFnrOgOrgnr.erGyldig() shouldNotBe emptyList<String>()
 
             val manglerLand =
                 Mottaker(
@@ -90,7 +91,7 @@ internal class KlageMottakerRequestTest {
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "NO", land = ""),
                 )
 
-            manglerLand.erGyldig() shouldBe false
+            manglerLand.erGyldig() shouldNotBe emptyList<String>()
 
             val manglerLandkode =
                 Mottaker(
@@ -99,7 +100,7 @@ internal class KlageMottakerRequestTest {
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "", land = "Norge"),
                 )
 
-            manglerLandkode.erGyldig() shouldBe false
+            manglerLandkode.erGyldig() shouldNotBe emptyList<String>()
         }
 
         @Test
@@ -111,7 +112,7 @@ internal class KlageMottakerRequestTest {
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "1234", poststed = "", landkode = "NO", land = "Norge"),
                 )
 
-            manglerPoststed.erGyldig() shouldBe false
+            manglerPoststed.erGyldig() shouldNotBe emptyList<String>()
 
             val manglerPostnummer =
                 Mottaker(
@@ -120,7 +121,7 @@ internal class KlageMottakerRequestTest {
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "", poststed = "Oslo", landkode = "NO", land = "Norge"),
                 )
 
-            manglerPostnummer.erGyldig() shouldBe false
+            manglerPostnummer.erGyldig() shouldNotBe emptyList<String>()
         }
 
         @Test
@@ -140,7 +141,7 @@ internal class KlageMottakerRequestTest {
                         ),
                 )
 
-            manglerAdresselinje.erGyldig() shouldBe false
+            manglerAdresselinje.erGyldig() shouldNotBe emptyList<String>()
         }
     }
 }

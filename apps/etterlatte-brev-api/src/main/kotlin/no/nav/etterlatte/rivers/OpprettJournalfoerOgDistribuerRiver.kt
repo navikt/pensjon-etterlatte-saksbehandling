@@ -61,17 +61,23 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        runBlocking {
-            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            if (listOf(SakId(19629L), SakId(19630L)).contains(packet.sakId) && brevkode == Brevkoder.BP_INFORMASJON_DOEDSFALL) {
-                packet.setEventNameForHendelseType(EventNames.FEILA)
-                context.publish(packet.toJson())
-            } else {
-                packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-                packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-                context.publish(packet.toJson())
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+        // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev" else {
+        try {
+            runBlocking {
+                packet.brevId =
+                    opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
             }
+            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            context.publish(packet.toJson())
+        } catch (e: Exception) {
+            logger.error(
+                "Feila under automatisk håndtering av brev " +
+                    "for sak ${packet.sakId} og brevkode $brevkode. Dette må en utvikler manuelt følge opp.",
+                e,
+            )
+            packet.setEventNameForHendelseType(EventNames.FEILA)
+            context.publish(packet.toJson())
         }
     }
 
@@ -92,6 +98,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         bruker = brukerTokenInfo,
                         brevKodeMapping = { brevKode },
                         brevtype = brevKode.brevtype,
+                        validerMottaker = true,
                     ) {
                         when (brevKode) {
                             Brevkoder.BP_INFORMASJON_DOEDSFALL -> {

@@ -13,7 +13,7 @@ import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -62,7 +62,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
         <Heading spacing size="large" level="1">
           Trygdetid
         </Heading>
-        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
 
       <Trygdetid

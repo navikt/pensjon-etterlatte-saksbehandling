@@ -52,7 +52,7 @@ class DoedshendelseReminderServiceTest {
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
         every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns mockOppgave
-        every { oppgaveService.hentOppgaverForSak(sakId1) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns emptyList()
 
         val service =
             DoedshendelseReminderService(
@@ -64,7 +64,7 @@ class DoedshendelseReminderServiceTest {
 
         verify(exactly = 1) {
             behandlingService.hentBehandlingerForSak(sakId1)
-            oppgaveService.hentOppgaverForSak(sakId1)
+            oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD)
 
             oppgaveService.opprettOppgave(
                 doedshendelseBP.id.toString(),
@@ -97,7 +97,7 @@ class DoedshendelseReminderServiceTest {
             )
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
         every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
-        every { oppgaveService.hentOppgaverForSak(sakId1) } returns listOf(eksisterendeOppgave)
+        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns listOf(eksisterendeOppgave)
 
         val service =
             DoedshendelseReminderService(

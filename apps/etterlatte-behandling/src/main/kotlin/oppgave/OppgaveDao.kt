@@ -36,7 +36,10 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern>
+    fun hentOppgaverForSak(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern>
 
     fun hentOppgaver(
         enheter: List<Enhetsnummer>,
@@ -218,7 +221,10 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> =
+    override fun hentOppgaverForSak(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -226,10 +232,11 @@ class OppgaveDaoImpl(
                         """
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE o.sak_id = ?
+                        WHERE o.sak_id = ? and o.type = ANY(?)
                         """.trimIndent(),
                     )
                 statement.setSakId(1, sakId)
+                statement.setArray(2, createArrayOf("text", typer.map { t -> t.name }.toTypedArray()))
                 statement
                     .executeQuery()
                     .toList {

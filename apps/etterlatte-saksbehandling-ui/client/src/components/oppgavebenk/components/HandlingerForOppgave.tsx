@@ -11,6 +11,7 @@ import { GeneriskOppgaveModal } from '~components/oppgavebenk/oppgaveModal/Gener
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
+import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -139,6 +140,8 @@ export const HandlingerForOppgave = ({
       )
     case Oppgavetype.GENERELL_OPPGAVE:
       return <GeneriskOppgaveModal heading="Generell oppgave" oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+    case Oppgavetype.MANUELL_UTSENDING_BREV:
+      return <BrevOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (

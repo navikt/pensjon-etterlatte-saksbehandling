@@ -643,6 +643,7 @@ class OppgaveService(
                         OppgaveType.KRAVPAKKE_UTLAND,
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
+                        OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(
                                 "Tilbakestiller ikke oppgave av type ${it.type} " +

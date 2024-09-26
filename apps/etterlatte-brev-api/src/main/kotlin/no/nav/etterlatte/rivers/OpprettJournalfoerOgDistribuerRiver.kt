@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
+import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -41,6 +42,7 @@ class OpprettJournalfoerOgDistribuerRiverException(
 class OpprettJournalfoerOgDistribuerRiver(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService,
+    private val oppgaveService: OppgaveService,
     private val brevoppretter: Brevoppretter,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLogging() {
@@ -61,23 +63,28 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-        // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev" else {
-        try {
-            runBlocking {
-                packet.brevId =
+        runBlocking {
+            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
+
+            if (brevkode != Brevkoder.BP_INFORMASJON_DOEDSFALL) {
+                packet.setEventNameForHendelseType(EventNames.FEILA)
+                context.publish(packet.toJson())
+            } else {
+                val (brevID, erDistribuert) =
                     opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+
+                if (erDistribuert) {
+                    packet.brevId = brevID
+                    packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+                    context.publish(packet.toJson())
+                } else {
+                    oppgaveService.opprettOppgaveForFeiletBrev(packet.sakId, brevID, HardkodaSystembruker.river)
+
+                    packet.setEventNameForHendelseType(EventNames.FEILA)
+                    context.publish(packet.toJson())
+                }
             }
-            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-            context.publish(packet.toJson())
-        } catch (e: Exception) {
-            logger.error(
-                "Feila under automatisk håndtering av brev " +
-                    "for sak ${packet.sakId} og brevkode $brevkode. Dette må en utvikler manuelt følge opp.",
-                e,
-            )
-            packet.setEventNameForHendelseType(EventNames.FEILA)
-            context.publish(packet.toJson())
         }
     }
 
@@ -86,7 +93,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
         packet: JsonMessage,
-    ): BrevID {
+    ): Pair<BrevID, Boolean> {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
 
         val brevOgData =
@@ -133,6 +140,13 @@ class OpprettJournalfoerOgDistribuerRiver(
                 )
             }
 
+        if (brevOgData.first.mottaker
+                .erGyldig()
+                .isNotEmpty()
+        ) {
+            return Pair(brevOgData.first.id, false)
+        }
+
         val brevID =
             ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
                 brevKode,
@@ -147,7 +161,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             brevID,
             brukerTokenInfo,
         )
-        return brevID
+        return Pair(brevID, true)
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

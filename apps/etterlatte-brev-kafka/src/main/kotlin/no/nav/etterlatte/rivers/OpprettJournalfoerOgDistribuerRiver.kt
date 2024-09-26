@@ -1,13 +1,12 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
@@ -22,7 +21,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
-import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -39,10 +37,8 @@ class OpprettJournalfoerOgDistribuerRiverException(
 ) : InternfeilException(detail, cause)
 
 class OpprettJournalfoerOgDistribuerRiver(
+    private val brevapiKlient: BrevapiKlient,
     rapidsConnection: RapidsConnection,
-    private val grunnlagService: GrunnlagService,
-    private val brevoppretter: Brevoppretter,
-    private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -64,14 +60,9 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            if (listOf(19629L, 19630L).contains(packet.sakId) && brevkode == Brevkoder.BP_INFORMASJON_DOEDSFALL) {
-                packet.setEventNameForHendelseType(EventNames.FEILA)
-                context.publish(packet.toJson())
-            } else {
-                packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-                packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-                context.publish(packet.toJson())
-            }
+            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            context.publish(packet.toJson())
         }
     }
 
@@ -85,6 +76,7 @@ class OpprettJournalfoerOgDistribuerRiver(
 
         val brevOgData =
             try {
+                brevapiKlient.opprettBrev(sakId)
                 retryOgPakkUt {
                     brevoppretter.opprettBrev(
                         sakId = sakId,

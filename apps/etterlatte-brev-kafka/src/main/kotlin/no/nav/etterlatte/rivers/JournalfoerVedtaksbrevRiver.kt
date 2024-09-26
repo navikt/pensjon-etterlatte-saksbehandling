@@ -2,8 +2,8 @@ package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BrevHendelseType
-import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -24,7 +24,7 @@ import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiver(
     private val rapidsConnection: RapidsConnection,
-    private val journalfoerBrevService: JournalfoerBrevService,
+    private val brevapiKlient: BrevapiKlient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 

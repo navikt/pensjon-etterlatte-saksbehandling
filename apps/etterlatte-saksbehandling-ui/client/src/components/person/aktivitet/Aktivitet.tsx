@@ -46,10 +46,12 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                 <Heading size="medium">Aktivitetsplikt</Heading>
 
                 <Label>Status på gjenlevende sin aktivitet</Label>
-                {aktivitetspliktVurdering && (
+                {aktivitetspliktVurdering ? (
                   <div>
                     <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
                   </div>
+                ) : (
+                  <BodyShort>Ingen vurdering</BodyShort>
                 )}
                 <Label>Gjenlevende sin tidslinje</Label>
 

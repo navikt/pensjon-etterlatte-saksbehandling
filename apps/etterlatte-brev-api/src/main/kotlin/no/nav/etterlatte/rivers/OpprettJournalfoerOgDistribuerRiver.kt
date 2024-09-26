@@ -61,21 +61,21 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        runBlocking {
-            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            if (listOf(19629L, 19630L, 19689L).contains(packet.sakId) &&
-                brevkode in
-                listOf(Brevkoder.BP_INFORMASJON_DOEDSFALL, Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT)
-            ) {
-                logger.error("Feila under automatisk håndtering av brev ${packet.brevId} for sak ${packet.sakId} og brevkode $brevkode")
-                packet.setEventNameForHendelseType(EventNames.FEILA)
-                context.publish(packet.toJson())
-            } else {
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+        // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
+        if (listOf(19629L, 19630L, 19689L).contains(packet.sakId) &&
+            brevkode in
+            listOf(Brevkoder.BP_INFORMASJON_DOEDSFALL, Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT)
+        ) {
+            logger.error("Feila under automatisk håndtering av brev ${packet.brevId} for sak ${packet.sakId} og brevkode $brevkode")
+            packet.setEventNameForHendelseType(EventNames.FEILA)
+            context.publish(packet.toJson())
+        } else {
+            runBlocking {
                 packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
-                packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-                context.publish(packet.toJson())
             }
+            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            context.publish(packet.toJson())
         }
     }
 

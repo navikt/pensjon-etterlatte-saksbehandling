@@ -68,7 +68,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 brevkode in
                 listOf(Brevkoder.BP_INFORMASJON_DOEDSFALL, Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT)
             ) {
-                logger.error("Feila under automatisk håndtering av brev ${packet.brevId} for sak ${packet.sakId} og brevkode $brevkode")
+                logger.error("Feila under automatisk håndtering av brev for sak ${packet.sakId} og brevkode $brevkode")
                 packet.setEventNameForHendelseType(EventNames.FEILA)
                 context.publish(packet.toJson())
             } else {

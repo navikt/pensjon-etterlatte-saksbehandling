@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-brev-api
+  name: etterlatte-brev-kafka
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -10,8 +10,6 @@ metadata:
 spec:
   image: "{{image}}"
   port: 8080
-  ingresses:
-    - "https://etterlatte-brev-api.intern.dev.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive
@@ -31,13 +29,6 @@ spec:
         - id: loki
   secureLogs:
     enabled: true
-  gcp:
-    sqlInstances:
-      - type: POSTGRES_14
-        tier: db-g1-small
-        databases:
-          - name: etterlatte-brev
-            envVarPrefix: DB
   azure:
     application:
       enabled: true

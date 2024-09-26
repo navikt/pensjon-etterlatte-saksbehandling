@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -83,7 +84,9 @@ interface OppgaveDao {
     )
 
     fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     )
 
@@ -536,7 +539,9 @@ class OppgaveDaoImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
         connectionAutoclosing.hentConnection {
@@ -549,10 +554,10 @@ class OppgaveDaoImpl(
                         where id = ?::UUID
                         """.trimIndent(),
                     )
-                statement.setString(1, paavent.merknad)
+                statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
-                statement.setString(3, paavent.aarsak?.name)
-                statement.setObject(4, paavent.oppgaveId)
+                statement.setString(3, aarsak?.name)
+                statement.setObject(4, oppgaveId)
 
                 statement.executeUpdate()
             }

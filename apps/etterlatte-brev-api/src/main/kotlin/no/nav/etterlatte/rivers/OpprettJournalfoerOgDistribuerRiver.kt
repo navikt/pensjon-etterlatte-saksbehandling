@@ -67,23 +67,18 @@ class OpprettJournalfoerOgDistribuerRiver(
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
 
-            if (brevkode != Brevkoder.BP_INFORMASJON_DOEDSFALL) {
-                packet.setEventNameForHendelseType(EventNames.FEILA)
+            val (brevID, erDistribuert) =
+                opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+
+            if (erDistribuert) {
+                packet.brevId = brevID
+                packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
                 context.publish(packet.toJson())
             } else {
-                val (brevID, erDistribuert) =
-                    opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+                oppgaveService.opprettOppgaveForFeiletBrev(packet.sakId, brevID, HardkodaSystembruker.river)
 
-                if (erDistribuert) {
-                    packet.brevId = brevID
-                    packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-                    context.publish(packet.toJson())
-                } else {
-                    oppgaveService.opprettOppgaveForFeiletBrev(packet.sakId, brevID, HardkodaSystembruker.river)
-
-                    packet.setEventNameForHendelseType(EventNames.FEILA)
-                    context.publish(packet.toJson())
-                }
+                packet.setEventNameForHendelseType(EventNames.FEILA)
+                context.publish(packet.toJson())
             }
         }
     }

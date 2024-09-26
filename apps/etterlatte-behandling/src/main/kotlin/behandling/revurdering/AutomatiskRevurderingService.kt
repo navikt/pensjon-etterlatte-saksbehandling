@@ -1,8 +1,11 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -22,6 +25,7 @@ class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagServiceImpl,
+    private val vedtakKlient: VedtakKlient,
 ) {
     /*
      * Denne tjenesten er tiltenkt automatiske jobber der det kan utføres mange samtidig.
@@ -30,11 +34,25 @@ class AutomatiskRevurderingService(
     suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
         validerSakensTilstand(request.sakId, request.revurderingAarsak)
 
-        val forrigeBehandling =
-            inTransaction {
-                behandlingService.hentSisteIverksatte(request.sakId)
-                    ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
+        val brukerTokenInfo =
+            when (val appUser = Kontekst.get().AppUser) {
+                is SystemUser -> appUser.brukerTokenInfo
+                else -> throw KunSystembrukerException()
             }
+        val loepende =
+            vedtakKlient.sakHarLopendeVedtakPaaDato(
+                request.sakId,
+                request.fraDato,
+                brukerTokenInfo,
+            )
+
+        val forrigeBehandling =
+            loepende.sisteLoependeBehandlingId?.let {
+                inTransaction {
+                    behandlingService.hentBehandling(it)
+                }
+            } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
+
         val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
 
         val revurderingOgOppfoelging =
@@ -103,3 +121,5 @@ class AutomatiskRevurderingService(
         }
     }
 }
+
+class KunSystembrukerException : Exception("Hendelser kan kun utføres av systembruker")

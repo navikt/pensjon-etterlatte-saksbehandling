@@ -48,7 +48,6 @@ internal class OmregningsHendelserBehandlingRiver(
 
         omregningData.endreSakType(sakType)
         omregningData.endreBehandlingId(behandlingId)
-        // TODO spør Mads om dette blir feil for Regulering
         omregningData.endreForrigeBehandlingid(forrigeBehandlingId)
         packet.omregningData = omregningData
 

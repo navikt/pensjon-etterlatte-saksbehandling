@@ -75,7 +75,13 @@ import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
+import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
+import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.EnvEnum
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -253,6 +259,13 @@ class ApplicationBuilder {
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
+    val kafkaProdusent: KafkaProdusent<String, String> =
+        if (appIsInGCP()) {
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
+        } else {
+            TestProdusent()
+        }
+
     private val rapidsConnection =
         initRogR(
             applikasjonsnavn = "brev-api",
@@ -271,7 +284,7 @@ class ApplicationBuilder {
             val brevgenerering =
                 StartInformasjonsbrevgenereringRiver(
                     brevgenereringRepository,
-                    rapidsConnection,
+                    kafkaProdusent = kafkaProdusent,
                 )
             rapidsConnection.register(
                 object : RapidsConnection.StatusListener {

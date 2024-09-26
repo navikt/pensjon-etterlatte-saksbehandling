@@ -4,6 +4,7 @@ import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -14,18 +15,18 @@ import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
 
+// TODO: dette er ingen river
 class StartInformasjonsbrevgenereringRiver(
     private val repository: StartBrevgenereringRepository,
-    private val rapidsConnection: RapidsConnection,
     private val sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
     private val iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
+    private val kafkaProdusent: KafkaProdusent<String, String>,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -43,7 +44,7 @@ class StartInformasjonsbrevgenereringRiver(
             sleep(Duration.ofMinutes(1))
             logger.info("Starter informasjonsbrev-genereringa")
             brevAaOpprette.forEach {
-                rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
+                kafkaProdusent.publiser(noekkel = UUID.randomUUID().toString(), verdi = lagMelding(it))
                 sleep(Duration.ofSeconds(3))
             }
             logger.info("Informasjonsbrev-generering ferdig")

@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
@@ -28,30 +29,30 @@ class DoedshendelseReminderServiceTest {
     private val dataSource = mockk<DataSource>()
 
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
+    private val antallMaaneder = 4L
 
     @Test
     fun `Skal opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt`() {
-        val sakId = 1L
-        val doedshendelseBP2mndGammel =
+        val doedshendelseBP =
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
-                sakId = sakId,
+                endret = LocalDateTime.now().minusMonths(antallMaaneder).toNorskTidspunkt(),
+                sakId = sakId1,
             )
 
         val mockOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "behandling",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP2mndGammel)
-        every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
+        every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
+        every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns mockOppgave
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns emptyList()
 
         val service =
             DoedshendelseReminderService(
@@ -62,12 +63,12 @@ class DoedshendelseReminderServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) {
-            behandlingService.hentBehandlingerForSak(sakId)
-            oppgaveService.hentOppgaverForSak(sakId)
+            behandlingService.hentBehandlingerForSak(sakId1)
+            oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD)
 
             oppgaveService.opprettOppgave(
-                doedshendelseBP2mndGammel.id.toString(),
-                sakId,
+                doedshendelseBP.id.toString(),
+                sakId1,
                 OppgaveKilde.DOEDSHENDELSE,
                 OppgaveType.MANGLER_SOEKNAD,
                 any(),
@@ -78,26 +79,25 @@ class DoedshendelseReminderServiceTest {
 
     @Test
     fun `Skal ikke opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt og det allerede er opprettet`() {
-        val sakId = 1L
-        val doedshendelseBP2mndGammel =
+        val doedshendelseBP =
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
-                sakId = sakId,
+                endret = LocalDateTime.now().minusMonths(antallMaaneder).toNorskTidspunkt(),
+                sakId = sakId1,
             )
 
         val eksisterendeOppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 "vurder konsekvens",
-                Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.AALESUND.enhetNr),
+                Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.MANGLER_SOEKNAD,
                 null,
             )
-        every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP2mndGammel)
-        every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(eksisterendeOppgave)
+        every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
+        every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns listOf(eksisterendeOppgave)
 
         val service =
             DoedshendelseReminderService(
@@ -107,7 +107,7 @@ class DoedshendelseReminderServiceTest {
             )
         service.setupKontekstAndRun(kontekst)
 
-        verify { behandlingService.hentBehandlingerForSak(sakId) }
+        verify { behandlingService.hentBehandlingerForSak(sakId1) }
         verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 }

@@ -12,6 +12,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Avdoed
@@ -55,6 +56,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.BrevManglerPDF
 import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
 import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -148,9 +150,8 @@ internal class VedtaksbrevServiceTest {
     }
 
     private companion object {
-        private const val SAK_ID = 123L
+        private val SAK_ID = randomSakId()
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = simpleSaksbehandler()
         private val ATTESTANT = simpleAttestant()
@@ -245,7 +246,7 @@ internal class VedtaksbrevServiceTest {
             vedtakType: VedtakType,
             forventetProsessType: BrevProsessType,
         ) {
-            val sakId = Random.nextLong()
+            val sakId = randomSakId()
             val behandling = opprettGenerellBrevdata(sakType, vedtakType)
             val mottaker = opprettMottaker()
 
@@ -314,7 +315,7 @@ internal class VedtaksbrevServiceTest {
             forventetProsessType: BrevProsessType,
             vedtakType: VedtakType,
         ) {
-            val sakId = Random.nextLong()
+            val sakId = randomSakId()
             val behandling = opprettGenerellBrevdata(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
@@ -403,7 +404,7 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Behandling er i feil status - skal kaste feil`() {
-            val sakId = Random.nextLong()
+            val sakId = randomSakId()
             val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
             val mottaker = opprettMottaker()
 
@@ -709,7 +710,7 @@ internal class VedtaksbrevServiceTest {
         prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
-        sakId = Random.nextLong(10000),
+        sakId = randomSakId(),
         behandlingId = BEHANDLING_ID,
         tittel = "tittel",
         spraak = Spraak.NB,
@@ -732,7 +733,7 @@ internal class VedtaksbrevServiceTest {
     ): GenerellBrevData {
         val soeker = "12345612345"
         return GenerellBrevData(
-            sak = Sak(soeker, sakType, SAK_ID, "4808"),
+            sak = Sak(soeker, sakType, SAK_ID, Enheter.PORSGRUNN.enhetNr),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
@@ -746,7 +747,7 @@ internal class VedtaksbrevServiceTest {
                     1,
                     vedtakStatus,
                     vedtakType,
-                    PORSGRUNN,
+                    Enheter.PORSGRUNN.enhetNr,
                     SAKSBEHANDLER.ident(),
                     attestantIdent = null,
                     vedtaksdato = null,

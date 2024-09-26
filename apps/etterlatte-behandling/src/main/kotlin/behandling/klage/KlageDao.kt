@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.klage
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
@@ -136,7 +137,7 @@ class KlageDaoImpl(
                     ident = getString("fnr"),
                     sakType = enumValueOf(getString("saktype")),
                     id = getLong("sak_id"),
-                    enhet = getString("enhet"),
+                    enhet = Enhetsnummer(getString("enhet")),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),

@@ -122,8 +122,8 @@ class BehandlingFactory(
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
-                            .hentOppgaverForSak(sak.id)
-                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }
+                            .hentOppgaverForSak(sak.id, OppgaveType.GJENOPPRETTING_ALDERSOVERGANG)
+                            .find { !it.erAvsluttet() }
                             ?.let {
                                 oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }

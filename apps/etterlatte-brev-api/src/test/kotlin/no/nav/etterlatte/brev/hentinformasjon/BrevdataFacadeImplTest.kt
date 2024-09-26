@@ -9,6 +9,8 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -18,6 +20,7 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -117,7 +120,7 @@ internal class BrevdataFacadeImplTest {
                 .navn,
         )
         Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak?.type)
-        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak?.id)
+        Assertions.assertEquals(SAKSIDNUMMER, generellBrevData.forenkletVedtak?.id)
         Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak?.sakenhet)
         Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak?.saksbehandlerIdent)
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak?.attestantIdent)
@@ -157,7 +160,7 @@ internal class BrevdataFacadeImplTest {
         with(generellBrevData.forenkletVedtak!!) {
             type shouldBe VedtakType.TILBAKEKREVING
             sakenhet shouldBe ENHET
-            id shouldBe 123L
+            id shouldBe SAKSIDNUMMER
             saksbehandlerIdent shouldBe SAKSBEHANDLER_IDENT
             attestantIdent shouldBe ATTESTANT_IDENT
             this.tilbakekreving shouldBe tilbakekreving
@@ -193,7 +196,7 @@ internal class BrevdataFacadeImplTest {
         mockk<VedtakDto> {
             every { type } returns VedtakType.INNVILGELSE
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
-            every { id } returns 123L
+            every { id } returns SAKSIDNUMMER
             every { status } returns VedtakStatus.OPPRETTET
             every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
             every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
@@ -211,7 +214,7 @@ internal class BrevdataFacadeImplTest {
         mockk<VedtakDto> {
             every { type } returns VedtakType.TILBAKEKREVING
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
-            every { id } returns 123L
+            every { id } returns SAKSIDNUMMER
             every { status } returns VedtakStatus.OPPRETTET
             every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
             every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
@@ -264,7 +267,7 @@ internal class BrevdataFacadeImplTest {
     private fun lagBehandling() =
         DetaljertBehandling(
             id = UUID.randomUUID(),
-            sak = 1L,
+            sak = sakId1,
             sakType = SakType.BARNEPENSJON,
             soeker = "123",
             status = BehandlingStatus.OPPRETTET,
@@ -287,10 +290,11 @@ internal class BrevdataFacadeImplTest {
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
-        private const val ENHET = "0000"
+        private val ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER_IDENT = "Z1235"
         private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
-        private const val SAK_ID = 123L
+        private const val SAKSIDNUMMER = 123L
+        private val SAK_ID = tilSakId(SAKSIDNUMMER)
     }
 }

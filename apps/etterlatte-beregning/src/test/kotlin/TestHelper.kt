@@ -12,6 +12,7 @@ import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
@@ -56,6 +57,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
+val STANDARDSAK = randomSakId()
 
 const val MAKS_TRYGDETID: Int = 40
 
@@ -286,7 +288,7 @@ fun beregning(
     type = Beregningstype.OMS,
     beregningsperioder = beregninger,
     beregnetDato = Tidspunkt.now(),
-    grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
+    grunnlagMetadata = Metadata(sakId = STANDARDSAK, versjon = 1L),
     overstyrBeregning = overstyrBeregning,
 )
 
@@ -312,7 +314,7 @@ fun beregningsperiode(
 
 fun behandling(
     id: UUID = UUID.randomUUID(),
-    sak: Long = 123,
+    sak: SakId = STANDARDSAK,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
@@ -341,7 +343,7 @@ fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, nul
 fun sanksjon(
     id: UUID? = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
-    sakId: SakId = 123,
+    sakId: SakId = STANDARDSAK,
     fom: YearMonth = YearMonth.of(2024, 1),
     tom: YearMonth? = YearMonth.of(2024, 2),
     type: SanksjonType = SanksjonType.STANS,
@@ -360,7 +362,7 @@ fun sanksjon(
 
 fun lagreSanksjon(
     id: UUID? = null,
-    sakId: SakId = 123,
+    sakId: SakId = STANDARDSAK,
     fom: LocalDate = LocalDate.of(2024, 1, 1),
     tom: LocalDate? = LocalDate.of(2024, 2, 1),
     beskrivelse: String = "Ikke i jobb",

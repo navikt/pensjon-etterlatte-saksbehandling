@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -69,9 +70,9 @@ data class Utbetaling(
     val avstemmingsnoekkel: Tidspunkt,
     val stoenadsmottaker: Foedselsnummer,
     val saksbehandler: NavIdent,
-    val saksbehandlerEnhet: String? = null,
+    val saksbehandlerEnhet: Enhetsnummer? = null,
     val attestant: NavIdent,
-    val attestantEnhet: String? = null,
+    val attestantEnhet: Enhetsnummer? = null,
     val vedtak: Utbetalingsvedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Kvittering? = null,
@@ -109,9 +110,9 @@ data class UtbetalingForKonsistensavstemming(
     val avstemmingsnoekkel: Tidspunkt,
     val stoenadsmottaker: Foedselsnummer,
     val saksbehandler: NavIdent,
-    val saksbehandlerEnhet: String? = null,
+    val saksbehandlerEnhet: Enhetsnummer? = null,
     val attestant: NavIdent,
-    val attestantEnhet: String? = null,
+    val attestantEnhet: Enhetsnummer? = null,
     val utbetalingslinjer: List<Utbetalingslinje>,
     val utbetalingshendelser: List<Utbetalingshendelse>,
 )

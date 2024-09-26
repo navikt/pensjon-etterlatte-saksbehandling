@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -20,9 +21,9 @@ class Norg2Klient(
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofDays(1))
-            .build<String, Norg2Enhet>()
+            .build<Enhetsnummer, Norg2Enhet>()
 
-    suspend fun hentEnhet(enhet: String): Norg2Enhet {
+    suspend fun hentEnhet(enhet: Enhetsnummer): Norg2Enhet {
         return try {
             val enhetCache = cache.getIfPresent(enhet)
 
@@ -31,7 +32,7 @@ class Norg2Klient(
                 return enhetCache
             }
 
-            val response = klient.get("$apiUrl/enhet/$enhet")
+            val response = klient.get("$apiUrl/enhet/${enhet.enhetNr}")
 
             if (response.status.isSuccess()) {
                 logger.info("Hentet enhet fra Norg2 for enhet $enhet")
@@ -50,8 +51,8 @@ class Norg2Klient(
         }
     }
 
-    private suspend fun hentKontaktinformasjon(enhet: String): Norg2Kontaktinfo {
-        val response = klient.get("$apiUrl/enhet/$enhet/kontaktinformasjon")
+    private suspend fun hentKontaktinformasjon(enhet: Enhetsnummer): Norg2Kontaktinfo {
+        val response = klient.get("$apiUrl/enhet/${enhet.enhetNr}/kontaktinformasjon")
 
         return if (response.status == HttpStatusCode.OK) {
             response.body()
@@ -66,7 +67,7 @@ class Norg2Klient(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Norg2Enhet(
     val navn: String? = null,
-    val enhetNr: String? = null,
+    val enhetNr: Enhetsnummer? = null,
     val status: String? = null,
     val type: String? = null,
     var kontaktinfo: Norg2Kontaktinfo? = null,

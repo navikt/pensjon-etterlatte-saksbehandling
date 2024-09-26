@@ -7,13 +7,14 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.YearMonth
 
 class GrunnlagKlient(
     private val grunnlagHttpClient: HttpClient,
     private val grunnlagUrl: String,
 ) {
-    fun hentSaker(foedselsmaaned: YearMonth): List<Long> =
+    fun hentSaker(foedselsmaaned: YearMonth): List<SakId> =
         runBlocking {
             grunnlagHttpClient
                 .get("$grunnlagUrl/api/grunnlag/aldersovergang/$foedselsmaaned") {
@@ -22,7 +23,7 @@ class GrunnlagKlient(
                 }.body()
         }
 
-    fun hentSakerForDoedsfall(doedsfallsmaaned: YearMonth): List<Long> =
+    fun hentSakerForDoedsfall(doedsfallsmaaned: YearMonth): List<SakId> =
         runBlocking {
             grunnlagHttpClient
                 .get("$grunnlagUrl/api/grunnlag/doedsdato/$doedsfallsmaaned") {

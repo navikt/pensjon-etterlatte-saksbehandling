@@ -193,6 +193,8 @@ object PersonMapper {
                 }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+            val vergemaalEllerFremtidsfullmakt =
+                hentPerson.vergemaalEllerFremtidsfullmakt?.let { ppsKlient.avklarVergemaal(it) }
 
             PersonNavnFoedselsaar(
                 fornavn = navn.fornavn,
@@ -202,6 +204,7 @@ object PersonMapper {
                 foedselsdato = foedsel.foedselsdato,
                 foedselsaar = foedsel.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,
+                vergemaal = vergemaalEllerFremtidsfullmakt?.let(VergeMapper::mapVerge),
             )
         }
 

@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
@@ -51,7 +52,7 @@ class VarselbrevTest(
 
     private val brevRepository = BrevRepository(datasource)
 
-    val sak = Sak("ident1", SakType.BARNEPENSJON, 1L, Enheter.STEINKJER.enhetNr)
+    val sak = Sak("ident1", SakType.BARNEPENSJON, sakId1, Enheter.STEINKJER.enhetNr)
 
     @BeforeEach
     fun start() {
@@ -87,7 +88,7 @@ class VarselbrevTest(
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.spraak } returns Spraak.NN
-                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, "")
+                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
                             PersonerISak(

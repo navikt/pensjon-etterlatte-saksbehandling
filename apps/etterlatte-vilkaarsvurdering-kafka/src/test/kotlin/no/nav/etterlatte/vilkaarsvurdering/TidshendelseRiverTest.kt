@@ -6,6 +6,7 @@ import io.ktor.client.statement.HttpResponse
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -34,7 +35,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal sjekke yrkesskadefordel og angi property i melding lik true`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val behandlingIdPerReformtidspunkt = UUID.randomUUID().toString()
         val melding =
@@ -63,7 +64,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal ikke sjekke yrkesskadefordel da det ikke finnes en behandlingId for det i melding`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val behandlingIdPerReformtidspunkt = UUID.randomUUID().toString()
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
@@ -85,7 +86,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal sjekke status for vilkaar om rett uten tidsbegrensning`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val behandlingId = UUID.randomUUID().toString()
         val melding =
@@ -120,7 +121,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal opprette vilkaarsvurdering og opphoere pga aldersovergang`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val behandlingIdLoepende = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()

@@ -276,14 +276,21 @@ internal class ApplicationContext(
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingKlient: TilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL)),
+        TilbakekrevingKlientImpl(
+            tilbakekrevingHttpClient(config),
+            url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL),
+        ),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao = VilkaarsvurderingKlientDaoImpl(config, httpClient()),
+    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao =
+        VilkaarsvurderingKlientDaoImpl(
+            config,
+            httpClient(),
+        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -397,7 +404,8 @@ internal class ApplicationContext(
             klageBrevService = klageBrevService,
         )
 
-    val aktivitetspliktKopierService = AktivitetspliktKopierService(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao)
+    val aktivitetspliktKopierService =
+        AktivitetspliktKopierService(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao)
 
     val revurderingService =
         RevurderingService(
@@ -411,7 +419,8 @@ internal class ApplicationContext(
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
-    val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
+    val automatiskRevurderingService =
+        AutomatiskRevurderingService(revurderingService, behandlingService, grunnlagsService)
     val manuellRevurderingService =
         ManuellRevurderingService(
             revurderingService = revurderingService,
@@ -450,8 +459,6 @@ internal class ApplicationContext(
     val omregningService =
         OmregningService(
             behandlingService = behandlingService,
-            grunnlagService = grunnlagsService,
-            revurderingService = automatiskRevurderingService,
             omregningDao = omregningDao,
         )
 
@@ -480,7 +487,8 @@ internal class ApplicationContext(
             pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
-    val opprettDoedshendelseService = OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val opprettDoedshendelseService =
+        OpprettDoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =
@@ -496,7 +504,8 @@ internal class ApplicationContext(
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
         )
 
-    private val doedshendelseReminderJob = DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService)
+    private val doedshendelseReminderJob =
+        DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService)
     private val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
@@ -525,7 +534,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            interval = if (isProd()) Duration.of(15, ChronoUnit.MINUTES) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )
@@ -553,8 +562,8 @@ internal class ApplicationContext(
             doedshendelseDao,
             behandleDoedshendelseService = behandleDoedshendelseService,
             erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(15, ChronoUnit.MINUTES) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             featureToggleService = featureToggleService,
             sakTilgangDao = sakTilgangDao,
@@ -589,7 +598,8 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
-    val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,

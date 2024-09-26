@@ -6,6 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
@@ -31,7 +33,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class InntektsjusteringRiverTest {
@@ -46,7 +47,7 @@ internal class InntektsjusteringRiverTest {
 
     @Test
     fun `Skal journalføre inntektsjustering og opprette oppgave i Gjenny`() {
-        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),

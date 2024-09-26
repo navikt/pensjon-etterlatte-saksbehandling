@@ -44,7 +44,7 @@ interface TilgangService {
 }
 
 data class SakMedGradering(
-    val id: Long,
+    val id: SakId,
     val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
 )
 

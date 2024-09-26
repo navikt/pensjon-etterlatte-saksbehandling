@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -36,7 +37,7 @@ class Brevoppretter(
         brevtype: Brevtype,
         validerMottaker: Boolean,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
-    ): Pair<Brev, String> =
+    ): Pair<Brev, Enhetsnummer> =
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
                 sakId,

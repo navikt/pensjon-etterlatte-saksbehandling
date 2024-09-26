@@ -10,12 +10,13 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 
 class BehandlingKlient(
     private val behandlingHttpClient: HttpClient,
     private val behandlingUrl: String,
 ) {
-    fun hentSaker(sakIder: List<Long>): Map<Long, Sak> {
+    fun hentSaker(sakIder: List<SakId>): Map<SakId, Sak> {
         if (sakIder.isEmpty()) {
             return emptyMap()
         }
@@ -39,5 +40,5 @@ class BehandlingKlient(
 }
 
 data class SakerDto(
-    val saker: Map<Long, Sak>,
+    val saker: Map<SakId, Sak>,
 )

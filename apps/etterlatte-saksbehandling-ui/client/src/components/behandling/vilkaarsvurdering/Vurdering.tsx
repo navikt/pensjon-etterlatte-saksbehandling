@@ -148,7 +148,7 @@ export const Vurdering = ({
       {!vilkaar.vurdering && !aktivVurdering ? (
         <IkkeVurdert>
           <Heading size="small">Vilkåret er ikke vurdert</Heading>
-          <Button variant="secondary" size="small" onClick={() => setAktivVurdering(true)}>
+          <Button disabled={!redigerbar} variant="secondary" size="small" onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
         </IkkeVurdert>

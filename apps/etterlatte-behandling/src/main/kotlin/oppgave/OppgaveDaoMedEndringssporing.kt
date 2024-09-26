@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -110,10 +111,17 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
-    override fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    override fun hentOppgaverForSak(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern> =
+        oppgaveDao.hentOppgaverForSak(
+            sakId,
+            typer,
+        )
 
     override fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhetsnummer>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
@@ -144,7 +152,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhetsnummer,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreEnhetPaaOppgave(oppgaveId, enhet)
@@ -225,7 +233,7 @@ class OppgaveDaoMedEndringssporingImpl(
     ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver, grense)
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ) = oppgaveDao.hentOppgaverTilSaker(saker, oppgaveStatuser)
 

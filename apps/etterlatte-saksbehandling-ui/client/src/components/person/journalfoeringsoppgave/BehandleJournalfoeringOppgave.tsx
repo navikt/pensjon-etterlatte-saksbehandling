@@ -31,7 +31,7 @@ import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppga
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
-import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Box } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
@@ -83,7 +83,7 @@ export default function BehandleJournalfoeringOppgave() {
   return (
     <>
       <StickyToppMeny>
-        <StatusBarPersonHenter ident={oppgave?.fnr} />
+        <StatusBar ident={oppgave?.fnr} />
         <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
       </StickyToppMeny>
 

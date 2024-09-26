@@ -13,9 +13,11 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -193,7 +195,7 @@ class GosysOppgaveServiceImplTest {
     }
 
     fun enhetsfiltrererGosysOppgaver(
-        enhetsnr: String,
+        enhetsnr: Enhetsnummer,
         oppgaverFraGosys: List<GosysApiOppgave>,
     ): GosysOppgaver {
         val enhetsfiltrerteOppgaver = oppgaverFraGosys.filter { it.tildeltEnhetsnr == enhetsnr }
@@ -314,7 +316,7 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `Flytt oppgave til Gjenny`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
         val brukerTokenInfo = simpleSaksbehandler("Z123456")
 

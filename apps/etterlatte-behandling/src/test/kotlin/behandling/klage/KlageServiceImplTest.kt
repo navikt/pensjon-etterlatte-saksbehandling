@@ -15,6 +15,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -95,7 +96,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private val saksbehandler = simpleSaksbehandler(ident = saksbehandlerIdent)
     private val attestant = simpleAttestant(ident = attestantIdent)
     private val klagerFnr = GrunnlagTestData().gjenlevende.foedselsnummer.value
-    private val enhet = "1337"
+    private val enhet = Enheter.defaultEnhet.enhetNr
 
     companion object {
         @RegisterExtension
@@ -632,7 +633,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 ),
             journalpostId = null,
             bestillingId = null,
-            sakId = 0,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

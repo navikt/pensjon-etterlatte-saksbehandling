@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -9,6 +11,7 @@ import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragslinjeForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.toUUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
@@ -77,12 +80,12 @@ fun utbetalingsvedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "4819",
+            ansvarligEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "4819",
+            attesterendeEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
         ),
     pensjonTilUtbetaling = utbetalingsperioder,
 )
@@ -170,9 +173,9 @@ fun utbetalingKonsistensavstemming(
     avstemmingsnoekkel = avstemmingsnoekkel,
     stoenadsmottaker = Foedselsnummer("12345678903"),
     saksbehandler = NavIdent("12345678"),
-    saksbehandlerEnhet = "4819",
+    saksbehandlerEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
     attestant = NavIdent("87654321"),
-    attestantEnhet = "4819",
+    attestantEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
     utbetalingslinjer = utbetalingslinjer,
     utbetalingshendelser = utbetalingshendelser,
 )
@@ -221,9 +224,9 @@ fun utbetaling(
     avstemmingsnoekkel = avstemmingsnoekkel,
     stoenadsmottaker = Foedselsnummer("12345678903"),
     saksbehandler = NavIdent("12345678"),
-    saksbehandlerEnhet = "4819",
+    saksbehandlerEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
     attestant = NavIdent("87654321"),
-    attestantEnhet = "4819",
+    attestantEnhet = Enhetsnummer(OppdragDefaults.OPPDRAGSENHET.enhet),
     utbetalingslinjer = utbetalingslinjer,
     kvittering = kvittering,
     utbetalingshendelser = utbetalingshendelser,
@@ -301,7 +304,7 @@ fun mockKonsistensavstemming(
 )
 
 fun oppdragForKonsistensavstemming(
-    sakId: SakId = 1,
+    sakId: SakId = sakId1,
     sakType: Saktype = Saktype.BARNEPENSJON,
     fnr: String = "123456",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>,

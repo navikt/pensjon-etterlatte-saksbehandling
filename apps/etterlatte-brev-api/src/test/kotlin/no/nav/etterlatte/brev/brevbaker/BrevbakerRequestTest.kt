@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.brevbaker
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
@@ -76,7 +77,7 @@ class BrevbakerRequestTest {
         brevData: BrevData = mockk(),
         avsender: Avsender = Avsender("", Telefonnummer("123"), "", ""),
         soekerOgEventuellVerge: SoekerOgEventuellVerge = mockk(),
-        sakId: SakId = 2L,
+        sakId: SakId = randomSakId(),
         spraak: Spraak = Spraak.NB,
         sakType: SakType = SakType.BARNEPENSJON,
     ) = BrevbakerRequest.fra(

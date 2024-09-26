@@ -11,6 +11,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
@@ -85,11 +86,11 @@ private fun samordningVedtak() =
         fnr = FNR_2,
         status = VedtakStatus.IVERKSATT,
         virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
-        sak = VedtakSak(FNR_2, SakType.OMSTILLINGSSTOENAD, id = 15L),
+        sak = VedtakSak(FNR_2, SakType.OMSTILLINGSSTOENAD, id = randomSakId()),
         behandling = Behandling(BehandlingType.REVURDERING, id = UUID.randomUUID()),
         type = VedtakType.ENDRING,
-        vedtakFattet = VedtakFattet("SBH", "1014", Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
-        attestasjon = Attestasjon("SBH", "1014", Tidspunkt.now().minus(1, ChronoUnit.DAYS)),
+        vedtakFattet = VedtakFattet("SBH", ENHET_1, Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
+        attestasjon = Attestasjon("SBH", ENHET_1, Tidspunkt.now().minus(1, ChronoUnit.DAYS)),
         beregning = null,
         perioder = emptyList(),
     )

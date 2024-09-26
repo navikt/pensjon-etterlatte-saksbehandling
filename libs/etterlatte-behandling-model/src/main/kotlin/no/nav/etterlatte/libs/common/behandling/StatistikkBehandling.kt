@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,7 +26,7 @@ data class StatistikkBehandling(
     val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val kilde: Vedtaksloesning,
     val relatertBehandlingId: String?,
     val pesysId: Long?,

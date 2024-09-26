@@ -86,7 +86,7 @@ class AktivitetspliktRepo(
         }
 
     fun hentAktivitetspliktForMaaneder(
-        sakIder: List<Long>,
+        sakIder: List<SakId>,
         yearMonth: YearMonth,
     ): List<StatistikkAktivitet> =
         datasource.connection.use { connection ->

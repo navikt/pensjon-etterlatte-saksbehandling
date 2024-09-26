@@ -20,6 +20,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -326,8 +327,8 @@ internal class BehandlingServiceImpl(
             if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                 val omgjoeringsoppgaveForKlage =
                     oppgaveService
-                        .hentOppgaverForSak(behandling.sak.id)
-                        .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
+                        .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
+                        .find { it.referanse == behandling.relatertBehandlingId }
                         ?: throw InternfeilException(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
@@ -808,7 +809,7 @@ internal class BehandlingServiceImpl(
             ?: throw BehandlingNotFoundException(behandlingId)
 
     private fun List<Behandling>.filterForEnheter(): List<Behandling> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhetsnummer>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
@@ -824,7 +825,7 @@ internal class BehandlingServiceImpl(
     }
 
     private fun filterBehandlingerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhetsnummer>,
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
 

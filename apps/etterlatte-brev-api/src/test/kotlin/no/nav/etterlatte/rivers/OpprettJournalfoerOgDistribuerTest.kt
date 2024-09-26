@@ -2,6 +2,8 @@ package no.nav.etterlatte.rivers
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
@@ -14,6 +16,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -89,7 +92,7 @@ internal class OpprettJournalfoerOgDistribuer {
     private fun lagBrev(behandlingId: UUID?) =
         Brev(
             id = 2L,
-            sakId = 1L,
+            sakId = sakId1,
             behandlingId = behandlingId,
             tittel = "tittel",
             spraak = Spraak.NB,
@@ -117,20 +120,20 @@ internal class OpprettJournalfoerOgDistribuer {
                 VedtakSak(
                     ident = "Sak1",
                     sakType = SakType.BARNEPENSJON,
-                    id = 2L,
+                    id = sakId2,
                 ),
             behandlingId = behandlingId,
             type = VedtakType.INNVILGELSE,
             vedtakFattet =
                 VedtakFattet(
                     ansvarligSaksbehandler = "Peder Ås",
-                    ansvarligEnhet = "Lillevik",
+                    ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
                     tidspunkt = Tidspunkt.now(),
                 ),
             attestasjon =
                 Attestasjon(
                     attestant = "Lars Holm",
-                    attesterendeEnhet = "Lillevik",
+                    attesterendeEnhet = Enheter.defaultEnhet.enhetNr,
                     tidspunkt = Tidspunkt.now(),
                 ),
             innhold =

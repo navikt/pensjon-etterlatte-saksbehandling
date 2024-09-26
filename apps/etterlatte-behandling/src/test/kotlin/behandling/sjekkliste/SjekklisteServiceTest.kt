@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -32,7 +34,7 @@ class SjekklisteServiceTest {
     fun `ikke tilgang til aa opprette eller oppdatere sjekkliste hvis behandling ikke er i endre-tilstand`() {
         val behandlingId = UUID.randomUUID()
         every { behandlingService.hentBehandling(behandlingId) } returns
-            foerstegangsbehandling(id = behandlingId, sakId = 1L, status = BehandlingStatus.ATTESTERT)
+            foerstegangsbehandling(id = behandlingId, sakId = sakId1, status = BehandlingStatus.ATTESTERT)
 
         assertAll(
             {
@@ -58,7 +60,7 @@ class SjekklisteServiceTest {
     fun `ikke tilgang til aa endre data paa sjekkliste hvis behandling ikke er i endre-tilstand`() {
         val behandlingId = UUID.randomUUID()
         every { behandlingService.hentBehandling(behandlingId) } returns
-            foerstegangsbehandling(id = behandlingId, sakId = 33L, status = BehandlingStatus.ATTESTERT)
+            foerstegangsbehandling(id = behandlingId, sakId = randomSakId(), status = BehandlingStatus.ATTESTERT)
 
         assertThrows<SjekklisteIkkeTillattException> {
             sjekklisteService.oppdaterSjekklisteItem(
@@ -73,7 +75,7 @@ class SjekklisteServiceTest {
     fun `ikke tilgang til aa endre sjekkliste hvis vedtak er fattet, men oppgave er ikke tildelt aktuell saksbehandler`() {
         val behandlingId = UUID.randomUUID()
         every { behandlingService.hentBehandling(behandlingId) } returns
-            foerstegangsbehandling(id = behandlingId, sakId = 33L, status = BehandlingStatus.FATTET_VEDTAK)
+            foerstegangsbehandling(id = behandlingId, sakId = randomSakId(), status = BehandlingStatus.FATTET_VEDTAK)
         every { user.name() } returns "Sak B. Handlersen"
         every {
             oppgaveService.hentOppgaveUnderBehandling(behandlingId.toString())

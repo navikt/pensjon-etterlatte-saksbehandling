@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -50,7 +51,7 @@ internal class OmregningsHendelserTest {
                         ),
                     ),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(1234, 1),
+                grunnlagMetadata = Metadata(randomSakId(), 1),
                 overstyrBeregning = null,
             )
 

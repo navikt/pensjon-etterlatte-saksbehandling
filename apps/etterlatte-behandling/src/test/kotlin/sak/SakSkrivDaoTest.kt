@@ -14,6 +14,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.omregning.OmregningDao
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
@@ -170,7 +171,7 @@ internal class SakSkrivDaoTest(
         val hentetAlleSaker = sakLesDao.hentSakerMedIder(alleIder)
         val hentetKunSak1 = sakLesDao.hentSakerMedIder(listOf(sak1.id))
         val hentingIngenSaker = sakLesDao.hentSakerMedIder(emptyList())
-        val hentingUkjentSak = sakLesDao.hentSakerMedIder(listOf(alleIder.sum()))
+        val hentingUkjentSak = sakLesDao.hentSakerMedIder(listOf(randomSakId()))
 
         Assertions.assertEquals(alleSaker, hentetAlleSaker)
         Assertions.assertEquals(listOf(sak1), hentetKunSak1)

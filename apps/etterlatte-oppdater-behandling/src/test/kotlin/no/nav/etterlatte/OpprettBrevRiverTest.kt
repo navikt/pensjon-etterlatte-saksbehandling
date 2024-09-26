@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -25,7 +26,7 @@ class OpprettBrevRiverTest {
     fun `oppretter sak for fnr`() {
         val behandlingService =
             mockk<BehandlingService>().also {
-                coEvery { it.finnEllerOpprettSak(any(), any()) } returns mockk<Sak>().also { every { it.id } returns 1 }
+                coEvery { it.finnEllerOpprettSak(any(), any()) } returns mockk<Sak>().also { every { it.id } returns sakId1 }
             }
         val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         testRapid.sendTestMessage(
@@ -49,7 +50,7 @@ class OpprettBrevRiverTest {
     fun `henter sak for behandling`() {
         val behandlingService =
             mockk<BehandlingService>().also {
-                coEvery { it.hentBehandling(any()) } returns mockk<DetaljertBehandling>().also { every { it.sak } returns 1L }
+                coEvery { it.hentBehandling(any()) } returns mockk<DetaljertBehandling>().also { every { it.sak } returns sakId1 }
             }
         val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         val behandlingId = UUID.randomUUID()

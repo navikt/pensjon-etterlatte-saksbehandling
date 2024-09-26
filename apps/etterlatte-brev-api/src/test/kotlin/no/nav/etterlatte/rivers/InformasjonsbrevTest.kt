@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotliquery.queryOf
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
@@ -15,6 +16,7 @@ import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -60,14 +62,14 @@ class InformasjonsbrevTest(
             mockk<Brevoppretter>().also {
                 coEvery {
                     it.opprettBrev(
-                        saksnr,
+                        tilSakId(saksnr),
                         any(),
                         any(),
                         any(),
                         any(),
                         any(),
                     )
-                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, "enhet1")
+                } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, Enheter.defaultEnhet.enhetNr)
             }
         val pdfGenerator =
             mockk<PDFGenerator>().also {

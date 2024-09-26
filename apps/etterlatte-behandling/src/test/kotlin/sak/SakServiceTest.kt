@@ -25,6 +25,8 @@ import no.nav.etterlatte.behandling.IngenEnhetFunnetException
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -36,7 +38,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -94,7 +95,7 @@ internal class SakServiceTest {
             sakLesDao.finnSakMedGraderingOgSkjerming(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, false, Enheter.defaultEnhet.enhetNr)
     }
 
     @AfterEach
@@ -179,7 +180,7 @@ internal class SakServiceTest {
         every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
-                    id = 1,
+                    id = sakId1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
@@ -205,7 +206,7 @@ internal class SakServiceTest {
         every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
-                    id = 1,
+                    id = sakId1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
@@ -231,7 +232,7 @@ internal class SakServiceTest {
         every { sakLesDao.finnSaker(KONTANT_FOT.value) } returns
             listOf(
                 Sak(
-                    id = 1,
+                    id = sakId1,
                     ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
@@ -248,7 +249,7 @@ internal class SakServiceTest {
     @Test
     fun `finn OMS sak for ident sak sin ident`() {
         saksbehandlerKontekst()
-        val sakId: SakId = 1
+        val sakId = sakId1
         coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns PersonMedSakerOgRoller(KONTANT_FOT.value, emptyList())
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
@@ -271,7 +272,7 @@ internal class SakServiceTest {
     @Test
     fun `finn OMS sak for avdød i persongalleri på sak i finnSakerOmsOgHvisAvdoed`() {
         saksbehandlerKontekst()
-        val sakId: SakId = 1
+        val sakId = sakId1
         coEvery { grunnlagservice.hentAlleSakerForPerson(KONTANT_FOT.value) } returns
             PersonMedSakerOgRoller(
                 KONTANT_FOT.value,
@@ -343,14 +344,14 @@ internal class SakServiceTest {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns
             Sak(
-                id = 1,
+                id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
 
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
@@ -363,7 +364,7 @@ internal class SakServiceTest {
             Sak(
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                id = 1,
+                id = sakId1,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -397,7 +398,7 @@ internal class SakServiceTest {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns
             Sak(
-                id = 1,
+                id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
@@ -426,7 +427,7 @@ internal class SakServiceTest {
             Sak(
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                id = 1,
+                id = sakId1,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -463,14 +464,14 @@ internal class SakServiceTest {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         } returns
             Sak(
-                id = 1,
+                id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
-        every { sakSkrivDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+        every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
 
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
@@ -484,7 +485,7 @@ internal class SakServiceTest {
             Sak(
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
-                id = 1,
+                id = sakId1,
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
             )
 
@@ -532,7 +533,7 @@ internal class SakServiceTest {
                 Sak(
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
-                    id = Random.nextLong(),
+                    id = randomSakId(),
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
             )
@@ -554,7 +555,7 @@ internal class SakServiceTest {
             Sak(
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
-                id = Random.nextLong(),
+                id = randomSakId(),
                 enhet = Enheter.EGNE_ANSATTE.enhetNr,
             )
         every { sakLesDao.finnSaker(any()) } returns
@@ -580,7 +581,7 @@ internal class SakServiceTest {
                 Sak(
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
-                    id = Random.nextLong(),
+                    id = randomSakId(),
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
             )
@@ -602,7 +603,7 @@ internal class SakServiceTest {
             Sak(
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
-                id = Random.nextLong(),
+                id = randomSakId(),
                 enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
             )
         every { sakLesDao.finnSaker(any()) } returns
@@ -627,7 +628,7 @@ internal class SakServiceTest {
             Sak(
                 ident = ident,
                 sakType = SakType.BARNEPENSJON,
-                id = Random.nextLong(),
+                id = randomSakId(),
                 enhet = enhet.enhetNr,
             )
 

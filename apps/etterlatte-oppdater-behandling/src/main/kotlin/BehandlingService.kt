@@ -15,14 +15,12 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.JobbType
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -34,6 +32,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -70,13 +70,13 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long> = listOf(),
-        ekskluderteSaker: List<Long> = listOf(),
+        spesifikkeSaker: List<SakId> = listOf(),
+        ekskluderteSaker: List<SakId> = listOf(),
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
     ): Saker
 
-    fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
+    fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse
 
     fun opprettRevurderingAktivitetsplikt(
         sakId: SakId,
@@ -210,12 +210,12 @@ class BehandlingServiceImpl(
             }
         }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
+    override fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/omregning") {
+                .post("$url/automatisk-revurdering") {
                     contentType(ContentType.Application.Json)
-                    setBody(omregningshendelse)
+                    setBody(request)
                 }.body()
         }
 
@@ -231,8 +231,8 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
     ): Saker =

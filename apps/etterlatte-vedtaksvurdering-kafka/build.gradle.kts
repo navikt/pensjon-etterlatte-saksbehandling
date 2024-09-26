@@ -19,4 +19,5 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

@@ -14,6 +14,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -112,7 +113,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -221,7 +222,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal kopiere trygdetid hvis revurdering`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -282,7 +283,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det ikke er regulering`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -357,7 +358,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal ikke opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er automatisk regulering`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -407,7 +408,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er manuell regulering`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -508,7 +509,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette manglende trygdetid ved opprettelse naar det allerede finnes men ikke for alle avdoede`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
 
         val behandling =
             mockk<DetaljertBehandling>().apply {
@@ -990,7 +991,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `skal opprette ny trygdetid av kopi fra forrige behandling`() {
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandlingId = randomUUID()
         val forrigeBehandlingId = randomUUID()
         val forrigeTrygdetidGrunnlag = trygdetidGrunnlag()
@@ -1038,7 +1039,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `skal opprette manglende trygdetid av kopi fra forrige behandling`() {
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandlingId = randomUUID()
         val forrigeBehandlingId = randomUUID()
         val forrigeTrygdetidGrunnlag = trygdetidGrunnlag(begrunnelse = "Forrige")
@@ -1371,7 +1372,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal ikke opprette fremtidig grunnlag hvis man er for gammel`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
+        val sakId = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId

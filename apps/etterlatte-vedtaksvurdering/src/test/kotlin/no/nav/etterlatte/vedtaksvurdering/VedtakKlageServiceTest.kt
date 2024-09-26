@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
@@ -239,7 +240,7 @@ internal class VedtakKlageServiceTest(
     private fun klage(utfall: KlageUtfallMedData? = null): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak(FNR_1, SakType.BARNEPENSJON, 1L, ENHET_1),
+            Sak(FNR_1, SakType.BARNEPENSJON, sakId1, ENHET_1),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

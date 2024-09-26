@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -124,7 +125,7 @@ class InnholdTilRedigerbartBrevHenter(
 internal data class OpprettBrevRequest(
     val soekerFnr: String,
     val sakType: SakType,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val personerISak: PersonerISak,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,

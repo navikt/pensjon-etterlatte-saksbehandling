@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
 import no.nav.etterlatte.behandling.klienter.Enheter
 import no.nav.etterlatte.behandling.klienter.EnhetslisteResponse
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
@@ -27,9 +28,9 @@ class BrukerEnhetTilgangTest {
 
     private val saksbehandlerEnheter =
         listOf(
-            SaksbehandlerEnhet("id1", "navn1"),
-            SaksbehandlerEnhet("id2", "navn2"),
-            SaksbehandlerEnhet("id3", "navn3"),
+            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.STEINKJER.enhetNr, "navn1"),
+            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.PORSGRUNN.enhetNr, "navn2"),
+            SaksbehandlerEnhet(no.nav.etterlatte.common.Enheter.AALESUND.enhetNr, "navn3"),
         )
 
     private val testNavIdent = "ident1"
@@ -58,7 +59,7 @@ class BrukerEnhetTilgangTest {
 
     fun harTilgangTilEnhet(
         enheter: List<SaksbehandlerEnhet>,
-        enhetId: String,
+        enhetId: Enhetsnummer,
     ) = enheter.any { enhet -> enhet.enhetsNummer == enhetId }
 
     @Test
@@ -66,7 +67,8 @@ class BrukerEnhetTilgangTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), "id1")
+            val resultat =
+                harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), no.nav.etterlatte.common.Enheter.defaultEnhet.enhetNr)
 
             resultat shouldBe true
         }
@@ -77,7 +79,7 @@ class BrukerEnhetTilgangTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), "id4")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), Enhetsnummer("9867"))
 
             resultat shouldBe false
         }

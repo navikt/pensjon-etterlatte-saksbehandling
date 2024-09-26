@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
@@ -36,7 +38,7 @@ internal class OmregningFeiletRiverTest {
     @Test
     fun `Skal varsle behandling om at det er en feilet regulering i en sak`() {
         val kjoering = slot<String>()
-        val sakId = slot<Long>()
+        val sakId = slot<SakId>()
         val status = slot<KjoeringStatus>()
 
         val melding = genererReguleringMelding()
@@ -48,7 +50,7 @@ internal class OmregningFeiletRiverTest {
         val sendteMeldinger = inspector.inspektør.size
         Assertions.assertEquals(0, sendteMeldinger)
         Assertions.assertEquals("Regulering2023", kjoering.captured)
-        Assertions.assertEquals(83, sakId.captured)
+        Assertions.assertEquals(tilSakId(83), sakId.captured)
         Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
     }
 }

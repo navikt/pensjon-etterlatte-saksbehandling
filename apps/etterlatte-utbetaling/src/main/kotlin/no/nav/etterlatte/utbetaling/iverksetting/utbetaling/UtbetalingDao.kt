@@ -7,6 +7,7 @@ import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -60,9 +61,9 @@ class UtbetalingDao(
                             "endret" to utbetaling.endret.toTimestamp().param(),
                             "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
                             "saksbehandler" to utbetaling.saksbehandler.value.param(),
-                            "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
+                            "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet?.enhetNr.param(),
                             "attestant" to utbetaling.attestant.value.param(),
-                            "attestantEnhet" to utbetaling.attestantEnhet.param(),
+                            "attestantEnhet" to utbetaling.attestantEnhet?.enhetNr.param(),
                             "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
                             "saktype" to utbetaling.sakType.name.param(),
                         ),
@@ -379,9 +380,9 @@ class UtbetalingDao(
             avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
-            saksbehandlerEnhet = string("saksbehandler_enhet"),
+            saksbehandlerEnhet = Enhetsnummer.nullable(string("saksbehandler_enhet")),
             attestant = NavIdent(string("attestant")),
-            attestantEnhet = string("attestant_enhet"),
+            attestantEnhet = Enhetsnummer.nullable(string("attestant_enhet")),
             vedtak = string("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
             oppdrag = string("oppdrag").let(OppdragJaxb::toOppdrag),
             kvittering =
@@ -418,9 +419,9 @@ class UtbetalingDao(
             avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
-            saksbehandlerEnhet = string("saksbehandler_enhet"),
+            saksbehandlerEnhet = Enhetsnummer.nullable(string("saksbehandler_enhet")),
             attestant = NavIdent(string("attestant")),
-            attestantEnhet = string("attestant_enhet"),
+            attestantEnhet = Enhetsnummer.nullable(string("attestant_enhet")),
             utbetalingslinjer = utbetalingslinjer,
             utbetalingshendelser = utbetalingshendelser,
         )

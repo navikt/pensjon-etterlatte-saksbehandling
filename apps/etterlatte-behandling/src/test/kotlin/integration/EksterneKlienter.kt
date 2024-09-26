@@ -15,6 +15,8 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -32,6 +34,7 @@ import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkResponse
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -143,10 +146,10 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: SakId): Grunnlag? = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-    override suspend fun hentAlleSakIder(fnr: String): Set<Long> = setOf(1L)
+    override suspend fun hentAlleSakIder(fnr: String): Set<SakId> = setOf(sakId1)
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller =
-        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER)))
+        PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(sakId1, Saksrolle.SOEKER)))
 
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
@@ -224,24 +227,24 @@ class VedtakKlientTest : VedtakKlient {
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long = 123L
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long = 123L
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 123L,
             fattetAv = "saksbehandler",
-            enhet = "enhet",
+            enhet = Enheter.defaultEnhet.enhetNr,
             dato = LocalDate.now(),
         )
 
@@ -406,7 +409,7 @@ class BrevApiKlientTest : BrevApiKlient {
                 ),
             journalpostId = null,
             bestillingId = null,
-            sakId = 0,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,
@@ -424,7 +427,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver = GosysOppgaver(0, emptyList())
@@ -460,7 +463,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             "",
             null,
             Tidspunkt.now(),
-            "4808",
+            Enheter.PORSGRUNN.enhetNr,
             null,
             "beskrivelse",
             "NY",
@@ -487,7 +490,7 @@ class Norg2KlientTest : Norg2Klient {
     override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
         listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
-    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", "4808")
+    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {

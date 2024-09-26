@@ -20,6 +20,7 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -27,6 +28,8 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -230,7 +233,7 @@ internal class VedtaksbrevRouteTest {
     private fun opprettBrev() =
         Brev(
             1,
-            41,
+            randomSakId(),
             BEHANDLING_ID,
             "tittel",
             Spraak.NB,
@@ -260,6 +263,6 @@ internal class VedtaksbrevRouteTest {
     companion object {
         private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val SAK_ID = Random.nextLong(1000)
+        private val SAK_ID = randomSakId()
     }
 }

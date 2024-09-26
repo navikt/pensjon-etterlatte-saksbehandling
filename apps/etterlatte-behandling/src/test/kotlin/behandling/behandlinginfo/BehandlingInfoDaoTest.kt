@@ -5,10 +5,12 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -58,6 +60,7 @@ internal class BehandlingInfoDaoTest(
 
     @BeforeEach
     fun reset() {
+        Kontekst.set(null)
         dataSource.connection.use { it.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate() }
 
         val sak = opprettSakForTest()
@@ -165,7 +168,7 @@ internal class BehandlingInfoDaoTest(
         sakSkrivDao.opprettSak(
             fnr = "12345678910",
             type = SakType.BARNEPENSJON,
-            enhet = "1234",
+            enhet = Enheter.defaultEnhet.enhetNr,
         )
 
     private fun opprettBehandlingForTest(sak: Sak) =

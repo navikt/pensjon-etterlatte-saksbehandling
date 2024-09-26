@@ -9,6 +9,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -30,7 +31,7 @@ interface GosysOppgaveService {
     suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
@@ -108,9 +109,9 @@ class GosysOppgaveServiceImpl(
             }
 
     private fun hentEnheterForSaksbehandler(
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         ident: String,
-    ): List<String> {
+    ): List<Enhetsnummer> {
         val saksbehandler = inTransaction { saksbehandlerService.hentKomplettSaksbehandler(ident) }
         return if (saksbehandler.kanSeOppgaveliste) {
             if (enhetsnr == null) {
@@ -126,7 +127,7 @@ class GosysOppgaveServiceImpl(
     override suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {

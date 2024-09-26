@@ -34,11 +34,11 @@ internal class UtbetalingsvedtakTest {
               ],
               "vedtakFattet": {
                 "ansvarligSaksbehandler": "Z994985",
-                "ansvarligEnhet": "123"
+                "ansvarligEnhet": "1234"
               },
               "attestasjon": {
                 "attestant": "Z994985",
-                "attesterendeEnhet": "123"
+                "attesterendeEnhet": "1234"
               }
             }
             """.trimIndent()
@@ -74,11 +74,11 @@ internal class UtbetalingsvedtakTest {
               ],
               "vedtakFattet": {
                 "ansvarligSaksbehandler": "Z994985",
-                "ansvarligEnhet": "123"
+                "ansvarligEnhet": "1234"
               },
               "attestasjon": {
                 "attestant": "Z994985",
-                "attesterendeEnhet": "123"
+                "attesterendeEnhet": "1234"
               }
             }
             """.trimIndent()

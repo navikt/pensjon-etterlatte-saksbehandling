@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { setBehandling, resetBehandling, IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
+import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
@@ -14,11 +14,10 @@ import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSi
 import Spinner from '~shared/Spinner'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
-import { IPdlPerson, IPdlPersonNavnFoedsel } from '~shared/types/Person'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -68,7 +67,7 @@ export const Behandling = () => {
         return (
           <>
             <StickyToppMeny>
-              {soeker && <PdlPersonStatusBar person={personTilPersonNavnFoedselsAar(soeker)} />}
+              <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
             <GridContainer>
@@ -88,16 +87,4 @@ export const Behandling = () => {
       return null
     }
   )
-}
-
-const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoedsel => {
-  return {
-    foedselsnummer: person.foedselsnummer,
-    fornavn: person.fornavn,
-    mellomnavn: person.mellomnavn,
-    etternavn: person.etternavn,
-    foedselsaar: person.foedselsaar,
-    foedselsdato: person.foedselsdato,
-    doedsdato: person.doedsdato,
-  }
 }

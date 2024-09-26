@@ -9,14 +9,13 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK
 import no.nav.etterlatte.libs.common.behandling.JobbType
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_REVURDERING
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
@@ -50,7 +49,7 @@ class TidshendelseService(
         )
         if (skalLageOmregning(hendelse)) {
             try {
-                return behandlingService.opprettOmregning(omregningshendelse(hendelse)).let { response ->
+                return behandlingService.opprettAutomatiskRevurdering(revurderingRequest(hendelse)).let { response ->
                     TidshendelseResult.OpprettetOmregning(
                         response.behandlingId,
                         response.forrigeBehandlingId,
@@ -63,7 +62,13 @@ class TidshendelseService(
             }
         } else {
             return when (hendelse.jobbtype) {
-                OMS_DOED_4MND -> opprettOppgave(hendelse).let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
+                OMS_DOED_4MND ->
+                    opprettOppgave(hendelse).let { oppgaveId ->
+                        TidshendelseResult.OpprettetOppgave(
+                            oppgaveId,
+                        )
+                    }
+
                 OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
@@ -94,12 +99,11 @@ class TidshendelseService(
         return false
     }
 
-    private fun omregningshendelse(hendelse: TidshendelsePacket) =
-        Omregningshendelse(
+    private fun revurderingRequest(hendelse: TidshendelsePacket) =
+        AutomatiskRevurderingRequest(
             sakId = hendelse.sakId,
-            fradato = hendelse.behandlingsmaaned.plusMonths(1).atDay(1),
-            prosesstype = Prosesstype.AUTOMATISK,
-            revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
+            fraDato = hendelse.behandlingsmaaned.plusMonths(1).atDay(1),
+            revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
             oppgavefrist = hendelse.behandlingsmaaned.atEndOfMonth(),
         )
 
@@ -136,10 +140,12 @@ class TidshendelseService(
                 logger.info("Opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}, behandling=$response]")
                 TidshendelseResult.OpprettRevurderingForAktivitetsplikt(response.nyBehandlingId!!)
             }
+
             response.opprettetOppgave -> {
                 logger.info("Opprettet oppgave for aktivitetsplikt [sak=${hendelse.sakId}, oppgave=${response.oppgaveId}]")
                 TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
             }
+
             else -> {
                 logger.info("Det ble ikke opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}]")
                 TidshendelseResult.Skipped
@@ -161,6 +167,7 @@ class TidshendelseService(
                 logger.info("Opprettet oppgave for aktivitetsplikt [sak=${hendelse.sakId}, oppgave=${response.oppgaveId}]")
                 TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
             }
+
             else -> {
                 logger.info("Det ble ikke opprettet oppgave for aktivitetsplikt varig unntak [sak=${hendelse.sakId}]")
                 TidshendelseResult.Skipped

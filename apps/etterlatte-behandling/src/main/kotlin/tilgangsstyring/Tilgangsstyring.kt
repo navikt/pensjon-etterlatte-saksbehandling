@@ -18,6 +18,7 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -181,7 +182,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     sakId: SakId? = null,
-    enhetNr: String? = null,
+    enhetNr: Enhetsnummer? = null,
 ): Boolean {
     application.log.debug("Sjekker skrivetilgang")
     return when (val user = Kontekst.get().AppUser) {
@@ -202,7 +203,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
-private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: SakId? = null): String? {
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsnummer? {
     val sakTilgangDao = Kontekst.get().sakTilgangDao
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
@@ -228,7 +229,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Sa
 
 inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     sakId: SakId? = null,
-    enhetNr: String? = null,
+    enhetNr: Enhetsnummer? = null,
     onSuccess: () -> Unit,
 ) {
     application.log.debug("Sjekker skrivetilgang")
@@ -252,7 +253,7 @@ inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
     sakId: SakId? = null,
-    enhetNr: String? = null,
+    enhetNr: Enhetsnummer? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
     application.log.debug("Sjekker skrivetilgang")

@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AKTIVITETSPLIKT_DTO_RIVER_KEY
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
@@ -36,7 +37,7 @@ class AktivitetspliktHendelseRiverTest {
     fun `melding om aktivitet leses og lagres`() {
         val dto =
             AktivitetspliktDto(
-                sakId = 123,
+                sakId = tilSakId(123),
                 avdoedDoedsmaaned = YearMonth.of(2023, 12),
                 aktivitetsgrad =
                     listOf(

@@ -18,4 +18,5 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -23,7 +24,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             kunSaksbehandler {
                 val saksbehandler = call.request.queryParameters["saksbehandler"].takeUnless { it.isNullOrBlank() }
                 val tema = call.request.queryParameters["tema"].takeUnless { it.isNullOrBlank() }
-                val enhet = call.request.queryParameters["enhet"].takeUnless { it.isNullOrBlank() }
+                val enhet = Enhetsnummer.nullable(call.request.queryParameters["enhet"])
                 val harTildeling =
                     call.request.queryParameters["harTildeling"]
                         .takeUnless { it.isNullOrBlank() }

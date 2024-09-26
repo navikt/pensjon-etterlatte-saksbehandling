@@ -9,6 +9,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -48,7 +49,7 @@ class TilbakekrevingDaoTest(
             it.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""").executeUpdate()
             it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
         }
-        sak = sakSkrivDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
+        sak = sakSkrivDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.defaultEnhet.enhetNr)
     }
 
     @Test

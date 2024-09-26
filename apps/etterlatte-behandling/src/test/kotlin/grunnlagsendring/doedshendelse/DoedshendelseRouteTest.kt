@@ -19,6 +19,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -86,7 +87,7 @@ internal class DoedshendelseRouteTest(
             )
 
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        val sakId = 1L
+        val sakId = sakId1
         doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
         val brevId = 12314L
         withTestApplication { client ->
@@ -117,7 +118,7 @@ internal class DoedshendelseRouteTest(
             )
 
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        val sakId = 1L
+        val sakId = sakId1
         doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
         val brevId = 12314L
         withTestApplication { client ->

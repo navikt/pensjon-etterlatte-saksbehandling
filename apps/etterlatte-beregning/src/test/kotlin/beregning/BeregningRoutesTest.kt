@@ -14,6 +14,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -99,8 +100,8 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -149,7 +150,7 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
@@ -182,10 +183,10 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns
             OverstyrBeregning(
-                1L,
+                sakId1,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
@@ -217,8 +218,8 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -246,7 +247,7 @@ internal class BeregningRoutesTest {
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata =
             no.nav.etterlatte.libs.common.grunnlag
-                .Metadata(1, 1),
+                .Metadata(sakId1, 1),
         beregningsperioder =
             listOf(
                 Beregningsperiode(
@@ -267,7 +268,7 @@ internal class BeregningRoutesTest {
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
             every { opphoerFraOgMed } returns null

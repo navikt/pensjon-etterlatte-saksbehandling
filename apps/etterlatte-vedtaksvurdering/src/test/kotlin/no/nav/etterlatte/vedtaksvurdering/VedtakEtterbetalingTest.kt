@@ -161,7 +161,7 @@ class VedtakEtterbetalingTest {
         vedtakFattet =
             VedtakFattet(
                 "Z01",
-                "1234",
+                ENHET_1,
                 Tidspunkt.parse(fattetTidspunkt),
             ),
         utbetalingsperioder =

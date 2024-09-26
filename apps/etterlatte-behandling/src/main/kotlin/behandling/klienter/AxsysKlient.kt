@@ -8,6 +8,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
@@ -84,7 +85,7 @@ class HentEnhetException(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Enheter(
     // Enhetsnummer
-    val enhetId: String,
+    val enhetId: Enhetsnummer,
     // EYB EYO
     val temaer: ArrayList<String>?,
     val navn: String,

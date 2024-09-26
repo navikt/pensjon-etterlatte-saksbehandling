@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -40,7 +41,7 @@ interface OppgaveDao {
     ): List<OppgaveIntern>
 
     fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhetsnummer>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
@@ -61,7 +62,7 @@ interface OppgaveDao {
 
     fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhetsnummer,
     )
 
     fun fjernSaksbehandler(oppgaveId: UUID)
@@ -106,7 +107,7 @@ interface OppgaveDao {
     ): List<VentefristGaarUt>
 
     fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern>
 }
@@ -128,7 +129,7 @@ class OppgaveDaoImpl(
                     )
                 statement.setObject(1, oppgaveIntern.id)
                 statement.setString(2, oppgaveIntern.status.name)
-                statement.setString(3, oppgaveIntern.enhet)
+                statement.setString(3, oppgaveIntern.enhet.enhetNr)
                 statement.setLong(4, oppgaveIntern.sakId)
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
@@ -159,7 +160,7 @@ class OppgaveDaoImpl(
                 oppgaveListe.forEach { oppgaveIntern ->
                     statement.setObject(1, oppgaveIntern.id)
                     statement.setString(2, oppgaveIntern.status.name)
-                    statement.setString(3, oppgaveIntern.enhet)
+                    statement.setString(3, oppgaveIntern.enhet.enhetNr)
                     statement.setLong(4, oppgaveIntern.sakId)
                     statement.setString(5, oppgaveIntern.type.name)
                     statement.setString(6, oppgaveIntern.saksbehandler?.ident)
@@ -246,7 +247,7 @@ class OppgaveDaoImpl(
         }
 
     override fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhetsnummer>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> =
@@ -269,7 +270,7 @@ class OppgaveDaoImpl(
 
                 statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
                 statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setArray(3, createArrayOf("text", enheter.toTypedArray()))
+                statement.setArray(3, createArrayOf("text", enheter.map { it.enhetNr }.toTypedArray()))
                 statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
                 statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
                 statement.setBoolean(6, minOppgavelisteIdentFilter == null)
@@ -286,7 +287,7 @@ class OppgaveDaoImpl(
         }
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
@@ -413,7 +414,7 @@ class OppgaveDaoImpl(
 
     override fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhetsnummer,
     ) {
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -426,7 +427,7 @@ class OppgaveDaoImpl(
                         """.trimIndent(),
                     )
 
-                statement.setString(1, enhet)
+                statement.setString(1, enhet.enhetNr)
                 statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()
@@ -650,7 +651,7 @@ class OppgaveDaoImpl(
         OppgaveIntern(
             id = getObject("id") as UUID,
             status = Status.valueOf(getString("status")),
-            enhet = getString("enhet"),
+            enhet = Enhetsnummer(getString("enhet")),
             sakId = getLong("sak_id"),
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),

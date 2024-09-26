@@ -11,6 +11,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -391,7 +393,7 @@ fun vedtak(
         fnr = FNR,
         status = VedtakStatus.ATTESTERT,
         virkningstidspunkt = virkningstidspunkt,
-        sak = VedtakSak(ident = "123", sakstype, id = 1234L),
+        sak = VedtakSak(ident = "123", sakstype, id = randomSakId()),
         behandling = Behandling(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
@@ -405,7 +407,7 @@ fun beregning(trygdetid: Int = 40) =
         beregningId = UUID.randomUUID(),
         behandlingId = UUID.randomUUID(),
         type = Beregningstype.OMS,
-        grunnlagMetadata = Metadata(1, 1),
+        grunnlagMetadata = Metadata(sakId1, 1),
         beregnetDato = Tidspunkt.now(),
         beregningsperioder =
             listOf(

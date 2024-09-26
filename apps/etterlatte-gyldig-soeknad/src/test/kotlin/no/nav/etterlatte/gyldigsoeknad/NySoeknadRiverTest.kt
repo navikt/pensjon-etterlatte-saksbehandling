@@ -9,6 +9,9 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
@@ -19,6 +22,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -41,7 +45,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class NySoeknadRiverTest {
@@ -63,7 +66,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -80,7 +83,7 @@ internal class NySoeknadRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
             melding.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
 
         val request = slot<OpprettJournalpostRequest>()
@@ -105,7 +108,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Skal opprette sak og journalføre søknad`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -122,7 +125,7 @@ internal class NySoeknadRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
             melding.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
 
         val request = slot<OpprettJournalpostRequest>()
@@ -147,7 +150,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enhetsnummer("4808"))
         val journalpostResponse = OpprettJournalpostResponse("123", true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
@@ -171,7 +174,7 @@ internal class NySoeknadRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
             melding.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
 
         val request = slot<OpprettJournalpostRequest>()
@@ -207,7 +210,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Bruker har sendt søknad nummer 2`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enhetsnummer("4808"))
         val journalpostResponse = OpprettJournalpostResponse("123", true)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
@@ -231,7 +234,7 @@ internal class NySoeknadRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
             melding.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
 
         val request = slot<OpprettJournalpostRequest>()
@@ -267,7 +270,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `BARNEPENSJON - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
@@ -290,7 +293,7 @@ internal class NySoeknadRiverTest {
 
     @Test
     fun `OMSTILLINGSSTOENAD - Feil ved journalføring, skal ikke sende melding`() {
-        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
         coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()

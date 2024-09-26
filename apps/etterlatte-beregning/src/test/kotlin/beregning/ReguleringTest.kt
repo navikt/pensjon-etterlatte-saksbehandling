@@ -8,6 +8,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
@@ -222,7 +223,7 @@ class ReguleringTest {
         vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ) = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
-        every { sak } returns 1
+        every { sak } returns sakId1
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning

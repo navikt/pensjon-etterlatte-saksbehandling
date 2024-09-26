@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ internal class LagreIverksattVedtakRiverTest {
     @Test
     fun `skal lese utbetalingsmelding`() {
         val behandlingIdVal = UUID.fromString("45dc0f0e-dbd0-465c-880b-f20ddb8e3789")
-        val sakIdVal = 1234L
+        val sakIdVal = randomSakId()
         val vedtakIdVal = 1L
         val behandlingIdSlot = slot<UUID>()
         every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns

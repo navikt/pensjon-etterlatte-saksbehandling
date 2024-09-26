@@ -29,7 +29,9 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
   function successContents(soekerOpplysning: Grunnlagsopplysning<IPdlPerson, KildePdl>) {
     const vergeList = soekerOpplysning.opplysning.vergemaalEllerFremtidsfullmakt || []
     if (vergeList?.length == 0) {
-      return <Info label="Verge" tekst="Ingen verge registrert" undertekst={formaterKildePdl(soekerOpplysning.kilde)} />
+      return (
+        <Info label="Vergemål" tekst="Ingen verge registrert" undertekst={formaterKildePdl(soekerOpplysning.kilde)} />
+      )
     }
 
     const omfangMap = new Map([

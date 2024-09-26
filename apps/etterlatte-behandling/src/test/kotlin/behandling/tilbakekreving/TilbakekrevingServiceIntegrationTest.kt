@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingUnderBehandlingFinnesAlleredeException
@@ -33,6 +34,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -84,7 +86,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private val saksbehandler = simpleSaksbehandler()
     private val attestant = simpleAttestant()
     private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
-    private val enhet = "123456"
+    private val enhet = Enheter.defaultEnhet.enhetNr
 
     @BeforeEach
     fun setUp() {
@@ -528,7 +530,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     private fun tilbakekrevingsvedtak(
         saksbehandler: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto =
         TilbakekrevingVedtakLagretDto(
             id = 1L,
@@ -574,7 +576,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 ),
             journalpostId = null,
             bestillingId = null,
-            sakId = 0,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

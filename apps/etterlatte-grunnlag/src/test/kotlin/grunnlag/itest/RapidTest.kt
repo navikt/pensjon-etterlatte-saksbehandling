@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -111,9 +112,9 @@ internal class RapidTest(
         expectedOpplysning: Grunnlagsopplysning<JsonNode>,
     ) {
         inspector.sendTestMessage(melding)
-        val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(1).first()
+        val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(sakId1).first()
 
-        Assertions.assertEquals(grunnlagshendelse.sakId, 1)
+        Assertions.assertEquals(grunnlagshendelse.sakId, sakId1)
         Assertions.assertEquals(grunnlagshendelse.hendelseNummer, 1)
 
         with(grunnlagshendelse.opplysning) {

@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
@@ -27,7 +27,7 @@ import java.util.UUID
 
 internal class LoependeYtelserforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
-    private val sakId = 1L
+    private val sakId = sakId1
 
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
@@ -47,7 +47,7 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.harLoependeYtelserFra(1L, LocalDate.of(2023, 5, 1))
+            vedtakServiceMock.harLoependeYtelserFra(sakId1, LocalDate.of(2023, 5, 1))
         }
     }
 
@@ -75,7 +75,6 @@ internal class LoependeYtelserforespoerselRiverTest {
             Omregningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
-                prosesstype = Prosesstype.AUTOMATISK,
             ),
             objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java),
         )

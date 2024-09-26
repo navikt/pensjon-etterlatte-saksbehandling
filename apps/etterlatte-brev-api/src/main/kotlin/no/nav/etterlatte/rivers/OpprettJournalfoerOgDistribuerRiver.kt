@@ -72,7 +72,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             context.publish(packet.toJson())
         } catch (e: Exception) {
             logger.error(
-                "Feila under automatisk håndtering av brev ${packet.brevId} " +
+                "Feila under automatisk håndtering av brev " +
                     "for sak ${packet.sakId} og brevkode $brevkode. Dette må en utvikler manuelt følge opp.",
                 e,
             )
